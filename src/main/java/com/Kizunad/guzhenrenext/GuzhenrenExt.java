@@ -1,4 +1,4 @@
-package com.example.guzhenrenext;
+package com.Kizunad.guzhenrenext;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;

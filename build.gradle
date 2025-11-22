@@ -4,6 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.119'
+    id 'checkstyle'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -26,6 +27,11 @@ base {
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+checkstyle {
+    toolVersion = '10.12.4'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
 
 neoForge {
     version = project.neo_version
@@ -66,3 +72,24 @@ neoForge {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version   : project.minecraft_version,
+            minecraft_version_range: project.minecraft_version_range,
+            neo_version         : project.neo_version,
+            neo_version_range   : project.neo_version_range,
+            loader_version_range: project.loader_version_range,
+            mod_id              : project.mod_id,
+            mod_name            : project.mod_name,
+            mod_license         : project.mod_license,
+            mod_version         : project.mod_version,
+            mod_authors         : project.mod_authors,
+            mod_description     : project.mod_description
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
