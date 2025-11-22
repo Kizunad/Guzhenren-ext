@@ -11,3 +11,10 @@ displayURL="https://github.com/Kizunad/Guzhenren-ext"
 logoFile="logo.jpg"
 authors="${mod_authors}"
 description="${mod_description}"
+
+[[mods]]
+modId="customnpcs"
+version="1.0.0"
+displayName="Custom NPCs AI System"
+authors="Kizunad"
+description="Autonomous NPC AI system with Utility AI and memory"

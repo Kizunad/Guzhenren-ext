@@ -1,20 +1,51 @@
 # NPC 思维系统实施任务清单
 
-- [ ] **基础：NpcMind Capability** <!-- id: 0 -->
-    - [ ] 定义 `INpcMind` 接口（Sensors、Memory、Decision 访问） <!-- id: 1 -->
-    - [ ] 实现 `NpcMind` capability provider 和存储 <!-- id: 2 -->
-    - [ ] 将 Capability 附加到 `EntityGuzhenren`（或特定 NPC 实体） <!-- id: 3 -->
-- [ ] **记忆系统** <!-- id: 4 -->
-    - [ ] 创建 `MemoryModule`（短期 & 长期记忆） <!-- id: 5 -->
-    - [ ] 实现 `MemoryEntry`（Key-Value 带过期/重要性） <!-- id: 6 -->
-- [ ] **决策核心（Utility AI）** <!-- id: 7 -->
-    - [ ] 定义 `IGoal` 接口（getPriority、canRun、tick） <!-- id: 8 -->
-    - [ ] 实现 `GoalSelector`（评估器） <!-- id: 9 -->
-    - [ ] 创建基础目标： <!-- id: 10 -->
-        - [ ] `SurvivalGoal`（低血量时吃东西/治疗） <!-- id: 11 -->
-        - [ ] `IdleGoal`（无事可做时闲逛/观察） <!-- id: 12 -->
-- [ ] **执行层** <!-- id: 13 -->
-    - [ ] 将 `NpcMind` 决策桥接到原版 `GoalSelector` 或自定义 Action 系统 <!-- id: 14 -->
-- [ ] **集成与测试** <!-- id: 15 -->
-    - [ ] 创建调试物品/命令来检查 NPC Mind 状态 <!-- id: 16 -->
-    - [ ] 验证 NPC 根据状态变化切换目标 <!-- id: 17 -->
+- [x] **基础：NpcMind Capability** <!-- id: 0 -->
+    - [x] 定义 `INpcMind` 接口（Sensors、Memory、Decision 访问） <!-- id: 1 -->
+    - [x] 实现 `NpcMind` capability provider 和存储 <!-- id: 2 -->
+    - [x] 将 Capability 附加到 `EntityGuzhenren`（或特定 NPC 实体） <!-- id: 3 -->
+- [x] **记忆系统** <!-- id: 4 -->
+    - [x] 创建 `MemoryModule`（短期 & 长期记忆） <!-- id: 5 -->
+    - [x] 实现 `MemoryEntry`（Key-Value 带过期/重要性） <!-- id: 6 -->
+- [x] **决策核心（Utility AI）** <!-- id: 7 -->
+    - [x] 定义 `IGoal` 接口（getPriority、canRun、tick） <!-- id: 8 -->
+    - [x] 实现 `GoalSelector`（评估器） <!-- id: 9 -->
+    - [x] 创建基础目标： <!-- id: 10 -->
+        - [x] `SurvivalGoal`（低血量时吃东西/治疗） <!-- id: 11 -->
+        - [x] `IdleGoal`（无事可做时闲逛/观察） <!-- id: 12 -->
+- [x] **执行层** <!-- id: 13 -->
+    - [x] 将 `NpcMind` 决策桥接到原版 `GoalSelector` 或自定义 Action 系统 <!-- id: 14 -->
+- [x] **集成与测试平台** <!-- id: 15 -->
+    - [x] **调试命令系统** <!-- id: 16 -->
+        - [x] 创建 `MindDebugCommand` 类 <!-- id: 18 -->
+        - [x] 实现 `inspect` 子命令（显示当前目标、优先级、记忆） <!-- id: 19 -->
+        - [x] 注册命令到 `RegisterCommandsEvent` <!-- id: 20 -->
+    - [x] **测试物品** <!-- id: 23 -->
+        - [x] 创建 `MindInspectorItem` (customNPCs_test) <!-- id: 24 -->
+        - [x] 注册测试物品 <!-- id: 25 -->
+    - [x] **自动化测试 (GameTests)** <!-- id: 26 -->
+        - [x] 创建 `NpcMindGameTests` 类 <!-- id: 27 -->
+        - [x] 实现 `testIdleGoal` <!-- id: 28 -->
+        - [x] 实现 `testSurvivalGoal` <!-- id: 29 -->
+        - [x] 实现 `testMemoryExpiration` (记忆过期) <!-- id: 31 -->
+        - [x] 实现 `testMemoryPersistence` (记忆持久化) <!-- id: 32 -->
+        - [x] 运行 `runGameTestServer` 验证 <!-- id: 30 -->
+
+- [x] **感知系统 (Sensors)** <!-- id: 33 -->
+    - [x] 定义 `ISensor` 接口 <!-- id: 34 -->
+    - [x] 实现 `VisionSensor` (视觉传感器) <!-- id: 35 -->
+        - [x] 扫描周围实体 <!-- id: 36 -->
+        - [x] 视线检测 (Line of Sight) <!-- id: 37 -->
+    - [x] 集成传感器到 `NpcMind` 循环 <!-- id: 38 -->
+    - [x] 更新记忆模块以存储感知到的信息 <!-- id: 39 -->
+
+- [x] **感知系统测试** <!-- id: 40 -->
+    - [x] 创建 `SensorTests` 类 <!-- id: 41 -->
+    - [x] 实现 `testVisionSensor` (验证能发现周围实体) <!-- id: 42 -->
+    - [x] 验证记忆中是否正确存储了感知数据 <!-- id: 43 -->
+
+- [x] **反应式目标 (Reactive Goals)** <!-- id: 44 -->
+    - [x] 实现 `WatchClosestEntityGoal` (注视最近实体) <!-- id: 45 -->
+        - [x] 优先级：当有可见实体时提高 <!-- id: 46 -->
+        - [x] 行为：调用 `LookControl` 注视目标 <!-- id: 47 -->
+    - [x] 集成到 `NpcMindInitializer` <!-- id: 48 -->
