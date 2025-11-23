@@ -9,6 +9,7 @@ import net.minecraft.world.entity.monster.Zombie;
 /**
  * 目标系统测试逻辑
  */
+@SuppressWarnings("checkstyle:MagicNumber")
 public class GoalTests {
 
     public static void testIdleGoal(GameTestHelper helper) {

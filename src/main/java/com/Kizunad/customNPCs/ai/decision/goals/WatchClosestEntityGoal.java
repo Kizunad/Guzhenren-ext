@@ -18,6 +18,8 @@ public class WatchClosestEntityGoal implements IGoal {
 
     private static final float PRIORITY_ACTIVE = 0.6f; // 当有目标时的优先级（高于 Idle，低于 Survival）
     private static final float PRIORITY_INACTIVE = 0.0f; // 无目标时的优先级
+    private static final float LOOK_MAX_YAW = 30.0F; // 最大偏航角
+    private static final float LOOK_MAX_PITCH = 30.0F; // 最大俯仰角
     
     private String targetUUID;
     private boolean isRunning;
@@ -65,7 +67,7 @@ public class WatchClosestEntityGoal implements IGoal {
         
         if (target != null && entity instanceof net.minecraft.world.entity.Mob mob) {
             // 使用 LookControl 注视目标
-            mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
+            mob.getLookControl().setLookAt(target, LOOK_MAX_YAW, LOOK_MAX_PITCH);
         }
     }
 

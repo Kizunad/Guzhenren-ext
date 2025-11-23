@@ -49,3 +49,18 @@
         - [x] 优先级：当有可见实体时提高 <!-- id: 46 -->
         - [x] 行为：调用 `LookControl` 注视目标 <!-- id: 47 -->
     - [x] 集成到 `NpcMindInitializer` <!-- id: 48 -->
+
+- [x] **行为执行层 (Action & Execution)** <!--id:49-->
+    - [x] **核心接口** <!--id:50-->
+        - [x] 定义 `ActionStatus` 枚举 (RUNNING, SUCCESS, FAILURE) <!--id:51-->
+        - [x] 定义 `IAction` 接口 (tick, start, stop) <!--id:52-->
+    - [x] **执行器 (Executor)** <!--id:53-->
+        - [x] 实现 `ActionExecutor` (队列管理, 状态流转) <!--id:54-->
+        - [x] 集成到 `NpcMind` (添加 getActionExecutor, tick 调用) <!--id:55-->
+    - [x] **基础动作 (Basic Actions)** <!--id:56-->
+        - [x] 实现 `MoveToAction` (导航移动) <!--id:57-->
+        - [x] 实现 `LookAtAction` (注视目标) <!--id:58-->
+        - [x] 实现 `WaitAction` (延迟等待) <!--id:59-->
+    - [x] **验证与测试** <!--id:60-->
+        - [x] 创建 `TestPlanGoal` (提交动作序列测试) <!--id:61-->
+        - [x] 创建 `ActionTests` (GameTest 验证动作队列) <!--id:62-->

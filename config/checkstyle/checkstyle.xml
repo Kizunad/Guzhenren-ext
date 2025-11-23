@@ -13,6 +13,12 @@
         <property name="max" value="120"/>
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
+    
+    <!-- 忽略测试代码的某些检查 -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="MagicNumber"/>
+        <property name="files" value=".*[\\/]customNPCs_test[\\/].*\.java$"/>
+    </module>
 
     <module name="TreeWalker">
         <!-- Naming Conventions -->
@@ -51,7 +57,11 @@
         <module name="RightCurly"/>
 
         <!-- Coding -->
-        <module name="MagicNumber"/>
+        <module name="MagicNumber">
+            <property name="ignoreNumbers" value="-1, 0, 1, 2"/>
+            <property name="ignoreHashCodeMethod" value="true"/>
+            <property name="ignoreAnnotation" value="true"/>
+        </module>
         <module name="EmptyStatement"/>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>

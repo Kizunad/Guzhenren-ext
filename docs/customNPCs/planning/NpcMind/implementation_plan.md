@@ -1,54 +1,60 @@
-# 实施计划 - NPC 思维基础架构
+# 实施计划 - NPC 行为执行层 (Action & Execution)
 
 ## 目标描述
-初始化自主 NPC 的"大脑"。这包括创建一个 Capability 来存储 NPC 的心智状态（记忆、目标），并使用 Utility AI 方法实现核心的"感知-思考-行动"循环。
+构建 NPC 的行为执行层，将高层决策（Goals）与底层具体操作（Actions）解耦。
+引入 `ActionExecutor` 和原子 `IAction`，使 NPC 能够执行序列化的动作链（如：移动 -> 交互 -> 等待），为未来的复杂规划（GOAP）打下基础。
 
 ## 提议的修改
 
-### 核心 Capability
-#### [新建] `src/main/java/com/kiz/guzhenren_ext/capabilities/mind/INpcMind.java`
-- 定义 NPC 大脑的契约接口。
-- 方法：`getMemory()`、`getGoalSelector()`、`tick(ServerLevel, LivingEntity)`。
+### 1. 动作系统核心 (Action System)
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/actions/ActionStatus.java`
+- 枚举：`RUNNING`, `SUCCESS`, `FAILURE`。
 
-#### [新建] `src/main/java/com/kiz/guzhenren_ext/capabilities/mind/NpcMind.java`
-- `INpcMind` 的默认实现。
-- 存储 `MemoryModule` 和 `UtilityGoalSelector`。
-- 将状态序列化/反序列化到 NBT。
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/actions/IAction.java`
+- 原子动作接口。
+- `ActionStatus tick(INpcMind mind, LivingEntity entity)`: 执行动作逻辑。
+- `void start(INpcMind mind, LivingEntity entity)`: 初始化。
+- `void stop(INpcMind mind, LivingEntity entity)`: 清理。
+- `boolean canInterrupt()`: 是否可被中断。
 
-#### [新建] `src/main/java/com/kiz/guzhenren_ext/capabilities/mind/NpcMindProvider.java`
-- Capability provider，用于将 `NpcMind` 附加到实体。
+### 2. 执行器 (Executor)
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/executor/ActionExecutor.java`
+- 管理动作队列 (`Queue<IAction>`)。
+- `void startPlan(List<IAction> actions)`: 开始新的一组动作。
+- `void stopCurrentPlan()`: 停止当前动作。
+- `void tick(INpcMind mind, LivingEntity entity)`: 驱动当前动作，处理状态转换（完成 -> 下一个，失败 -> 清空）。
 
-### 记忆系统
-#### [新建] `src/main/java/com/kiz/guzhenren_ext/ai/memory/MemoryModule.java`
-- 管理短期和长期记忆条目。
-- 支持过期条目（例如："上次看到敌人的位置"10 秒后过期）。
+### 3. 基础动作实现 (Basic Actions)
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/actions/base/MoveToAction.java`
+- 移动到指定坐标或实体。
+- 使用原版 `PathNavigation`。
 
-### 决策核心（Utility AI）
-#### [新建] `src/main/java/com/kiz/guzhenren_ext/ai/decision/IGoal.java`
-- 目标接口。
-- `float getPriority(NpcMind mind)`：计算效用分数（0.0 - 1.0）。
-- `void start()`、`void tick()`、`void stop()`、`boolean isFinished()`。
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/actions/base/LookAtAction.java`
+- 注视指定坐标或实体。
 
-#### [新建] `src/main/java/com/kiz/guzhenren_ext/ai/decision/UtilityGoalSelector.java`
-- 管理已注册的 `IGoal` 列表。
-- `tick()`：定期重新评估优先级，如果发现更高优先级的目标则切换当前活动目标。
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/actions/base/WaitAction.java`
+- 等待指定 tick 数。
 
-### 事件注册
-#### [修改] `src/main/java/com/kiz/guzhenren_ext/events/ModEvents.java`（或类似文件）
-- 注册 `NpcMind` capability。
-- 将 capability 附加到 `EntityGuzhenren`（以及潜在的其他生物）。
+### 4. 集成到 NpcMind
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/capabilities/mind/INpcMind.java`
+- 添加 `getActionExecutor()` 方法。
+
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/capabilities/mind/NpcMind.java`
+- 实例化并持有 `ActionExecutor`。
+- 在 `tick()` 中调用 `executor.tick()`。
+
+### 5. 验证与测试
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/decision/goals/TestPlanGoal.java`
+- 一个测试用的 Goal，优先级手动控制。
+- `start()` 时提交一个动作序列：`[LookAt(Player), Wait(20), MoveTo(Player), Wait(20)]`。
 
 ## 验证计划
 
-### 自动测试
-- **单元测试 `UtilityGoalSelector`**：
-    - 创建一个虚拟的 `NpcMind`。
-    - 注册两个模拟目标：`GoalA`（优先级 0.5）和 `GoalB`（优先级 0.8）。
-    - 调用 `tick()` 并验证 `GoalB` 被选中。
-    - 将 `GoalB` 优先级改为 0.2，调用 `tick()`，验证 `GoalA` 被选中。
+### 自动化测试 (GameTests)
+- **`ActionTests` 类**：
+    - `testActionQueue`: 提交两个 `WaitAction`，验证是否按顺序执行。
+    - `testMoveAction`: 验证 NPC 是否移动到了目标点。
 
 ### 手动验证
-- **调试命令**：
-    - 创建命令 `/guzhenren mind <entity_uuid>` 来打印 NPC 的当前目标和记忆。
-    - 生成一个 NPC。
-    - 使用命令验证它有一个 Mind 和一个活动目标（例如"Idle"）。
+- 使用 `/mind debug` 查看当前正在执行的 Action。
+- 观察 NPC 是否按顺序执行动作链。

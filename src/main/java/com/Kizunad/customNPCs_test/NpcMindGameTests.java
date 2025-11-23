@@ -44,4 +44,29 @@ public class NpcMindGameTests {
     public void testWatchClosestEntityGoal(GameTestHelper helper) {
         com.Kizunad.customNPCs_test.tests.GoalTests.testWatchClosestEntityGoal(helper);
     }
+
+    @GameTest(template = EMPTY_TEMPLATE)
+    public void testActionQueue(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ActionTests.testActionQueue(helper);
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE)
+    public void testActionExecutorIdle(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ActionTests.testActionExecutorIdle(helper);
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE)
+    public void testWaitAction(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ActionTests.testWaitAction(helper);
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE)
+    public void testMoveToAction(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ActionTests.testMoveToAction(helper);
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE)
+    public void testMoveToEntity(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ActionTests.testMoveToEntity(helper);
+    }
 }

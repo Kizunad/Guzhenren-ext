@@ -37,7 +37,9 @@ public class NpcMindInitializer {
                 
                 // 注册基础目标
                 mind.getGoalSelector().registerGoal(new SurvivalGoal());
-                mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal());
+                mind.getGoalSelector().registerGoal(
+                    new com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal()
+                );
                 mind.getGoalSelector().registerGoal(new IdleGoal());
                 
                 System.out.println("[NpcMind] 为实体 " + entity.getName().getString() + " 初始化思维系统（含视觉传感器）");

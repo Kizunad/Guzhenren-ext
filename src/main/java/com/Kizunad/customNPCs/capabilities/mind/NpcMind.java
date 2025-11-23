@@ -16,11 +16,13 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     private final MemoryModule memory;
     private final UtilityGoalSelector goalSelector;
     private final com.Kizunad.customNPCs.ai.sensors.SensorManager sensorManager;
+    private final com.Kizunad.customNPCs.ai.executor.ActionExecutor actionExecutor;
     
     public NpcMind() {
         this.memory = new MemoryModule();
         this.goalSelector = new UtilityGoalSelector();
         this.sensorManager = new com.Kizunad.customNPCs.ai.sensors.SensorManager();
+        this.actionExecutor = new com.Kizunad.customNPCs.ai.executor.ActionExecutor();
     }
     
     @Override
@@ -39,6 +41,11 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     }
     
     @Override
+    public com.Kizunad.customNPCs.ai.executor.ActionExecutor getActionExecutor() {
+        return actionExecutor;
+    }
+    
+    @Override
     public void tick(ServerLevel level, LivingEntity entity) {
         // 1. 执行传感器（感知环境）
         sensorManager.tick(this, entity, level);
@@ -48,6 +55,9 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         
         // 3. 目标选择器执行
         goalSelector.tick(this, entity);
+        
+        // 4. 动作执行器执行
+        actionExecutor.tick(this, entity);
     }
     
     @Override

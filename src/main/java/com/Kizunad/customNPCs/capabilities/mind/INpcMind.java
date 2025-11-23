@@ -36,6 +36,12 @@ public interface INpcMind {
     com.Kizunad.customNPCs.ai.sensors.SensorManager getSensorManager();
     
     /**
+     * 获取动作执行器
+     * @return 动作执行器
+     */
+    com.Kizunad.customNPCs.ai.executor.ActionExecutor getActionExecutor();
+    
+    /**
      * 思考循环 - 每个游戏 tick 调用
      * <p>
      * 此方法执行：
