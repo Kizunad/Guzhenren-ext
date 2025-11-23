@@ -58,3 +58,48 @@
 ### 手动验证
 - 使用 `/mind debug` 查看当前正在执行的 Action。
 - 观察 NPC 是否按顺序执行动作链。
+
+### 6. 规划层 (Planner Layer - GOAP)
+为了让 NPC 能够自动组合动作以达成复杂目标（如：为了"炼丹"，需要先"收集材料"，再"寻找丹炉"），我们将实现简化版的 GOAP (Goal Oriented Action Planning)。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/planner/WorldState.java`
+- 描述世界状态的原子事实集合。
+- `Map<String, Object> states` (例如: "has_food": true, "is_safe": false)。
+- 支持 `match(WorldState other)`: 检查当前状态是否满足目标状态的要求。
+- 支持 `apply(WorldState effects)`: 应用动作产生的效果。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/planner/IGoapAction.java`
+- 扩展或包装 `IAction`。
+- `WorldState getPreconditions()`: 执行此动作需要满足的前置条件。
+- `WorldState getEffects()`: 执行此动作后产生的状态变化。
+- `float getCost()`: 动作代价（用于 A* 寻路权重）。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/planner/GoapPlanner.java`
+- 核心规划器。
+- `Queue<IAction> plan(WorldState start, WorldState goal, List<IGoapAction> availableActions)`。
+- 使用 A* 算法搜索从 `start` 到 `goal` 的动作路径。
+
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/ai/decision/IGoal.java`
+- 添加 `WorldState getDesiredState()`: 目标期望达成的最终状态。
+- 添加 `boolean isPlanBased()`: 标识此目标是否需要动态规划。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/decision/goals/PlanBasedGoal.java`
+- `IGoal` 的抽象基类，自动处理规划逻辑。
+- 在 `start()` 中调用 `GoapPlanner` 生成动作队列。
+- 将生成的队列提交给 `ActionExecutor` 执行。
+
+## 验证计划 (Planner)
+
+### 自动化测试
+- **`PlannerTests` 类**：
+    - `testSimplePlan`: 
+        - 初始状态: `has_apple=false`
+        - 目标状态: `has_apple=true`
+        - 动作: `GetAppleAction` (pre: none, eff: has_apple=true)
+        - 验证: 规划出 `[GetAppleAction]`。
+    - `testChainedPlan`:
+        - 初始: `has_wood=false`, `has_planks=false`
+        - 目标: `has_planks=true`
+        - 动作1: `ChopWood` (eff: has_wood=true)
+        - 动作2: `CraftPlanks` (pre: has_wood=true, eff: has_planks=true)
+        - 验证: 规划出 `[ChopWood, CraftPlanks]`。

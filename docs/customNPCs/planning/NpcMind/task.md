@@ -64,3 +64,15 @@
     - [x] **验证与测试** <!--id:60-->
         - [x] 创建 `TestPlanGoal` (提交动作序列测试) <!--id:61-->
         - [x] 创建 `ActionTests` (GameTest 验证动作队列) <!--id:62-->
+
+- [ ] **规划层 (Planner - GOAP)** <!-- id: 63 -->
+    - [ ] **核心数据结构** <!-- id: 64 -->
+        - [ ] 实现 `WorldState` (状态原子集合, match/apply 逻辑) <!-- id: 65 -->
+        - [ ] 定义 `IGoapAction` (Preconditions, Effects, Cost) <!-- id: 66 -->
+    - [ ] **规划算法** <!-- id: 67 -->
+        - [ ] 实现 `GoapPlanner` (A* 搜索算法) <!-- id: 68 -->
+    - [ ] **集成到决策系统** <!-- id: 69 -->
+        - [ ] 创建 `PlanBasedGoal` 基类 (自动调用规划器) <!-- id: 70 -->
+        - [ ] 更新 `NpcMind` 以提供当前 `WorldState` <!-- id: 71 -->
+    - [ ] **验证与测试** <!-- id: 72 -->
+        - [ ] 创建 `PlannerTests` (验证简单和链式规划) <!-- id: 73 -->

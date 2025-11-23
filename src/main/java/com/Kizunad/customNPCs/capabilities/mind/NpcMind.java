@@ -74,4 +74,33 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             memory.deserializeNBT(nbt.getCompound("memory"));
         }
     }
+    
+    @Override
+    public com.Kizunad.customNPCs.ai.planner.WorldState getCurrentWorldState(LivingEntity entity) {
+        com.Kizunad.customNPCs.ai.planner.WorldState state = 
+                new com.Kizunad.customNPCs.ai.planner.WorldState();
+        
+        // 从实体读取状态
+        state.setState("health_low", entity.getHealth() < entity.getMaxHealth() * 0.3f);
+        state.setState("health_critical", entity.getHealth() < entity.getMaxHealth() * 0.1f);
+        
+        // 从记忆读取状态
+        Object hasFood = memory.getMemory("has_food");
+        state.setState("has_food", hasFood != null ? hasFood : false);
+        state.setState("has_threat", memory.hasMemory("threat_detected"));
+        state.setState("is_safe", !memory.hasMemory("threat_detected"));
+        
+        // 从记忆读取自定义状态（供 GOAP 动作使用）
+        // 这些状态由 GOAP 动作在执行时写入记忆
+        Object hasApple = memory.getMemory("has_apple");
+        state.setState("has_apple", hasApple != null ? hasApple : false);
+        Object hasWood = memory.getMemory("has_wood");
+        state.setState("has_wood", hasWood != null ? hasWood : false);
+        Object hasPlanks = memory.getMemory("has_planks");
+        state.setState("has_planks", hasPlanks != null ? hasPlanks : false);
+
+        
+        return state;
+    }
 }
+

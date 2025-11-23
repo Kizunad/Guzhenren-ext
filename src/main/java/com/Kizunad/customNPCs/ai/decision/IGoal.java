@@ -61,4 +61,33 @@ public interface IGoal {
      * @return 目标名称
      */
     String getName();
+    
+    /**
+     * 获取目标期望达成的世界状态
+     * <p>
+     * 此方法用于基于 GOAP 规划的目标。
+     * 如果此目标不使用 GOAP，返回 null。
+     * 
+     * @param mind NPC 的思维
+     * @param entity NPC 实体
+     * @return 目标状态，如果不是基于规划的目标则返回 null
+     */
+    default com.Kizunad.customNPCs.ai.planner.WorldState getDesiredState(INpcMind mind, LivingEntity entity) {
+        return null;
+    }
+    
+    /**
+     * 获取可用的 GOAP 动作列表
+     * <p>
+     * 此方法用于基于 GOAP 规划的目标。
+     * 如果此目标不使用 GOAP，返回空列表。
+     * 
+     * @param mind NPC 的思维
+     * @param entity NPC 实体
+     * @return GOAP 动作列表，如果不是基于规划的目标则返回空列表
+     */
+    default java.util.List<com.Kizunad.customNPCs.ai.planner.IGoapAction> getAvailableActions(
+            INpcMind mind, LivingEntity entity) {
+        return java.util.Collections.emptyList();
+    }
 }

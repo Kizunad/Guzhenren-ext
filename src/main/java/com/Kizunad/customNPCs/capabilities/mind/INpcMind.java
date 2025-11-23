@@ -68,4 +68,15 @@ public interface INpcMind {
      * @param nbt NBT 数据
      */
     void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt);
+    
+    /**
+     * 获取当前世界状态（用于 GOAP 规划）
+     * <p>
+     * 此方法从 NPC 的记忆和实体状态中提取信息，构建当前世界状态。
+     * 世界状态用于 GOAP 规划器评估动作的前置条件和效果。
+     * 
+     * @param entity NPC 实体
+     * @return 当前世界状态
+     */
+    com.Kizunad.customNPCs.ai.planner.WorldState getCurrentWorldState(LivingEntity entity);
 }
