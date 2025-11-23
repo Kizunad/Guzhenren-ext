@@ -77,14 +77,14 @@
     - [x] **验证与测试** <!-- id: 72 -->
         - [x] 创建 `PlannerTests` (验证简单和链式规划) <!-- id: 73 -->
 
-- [/] **复杂场景集成测试** <!-- id: 74 -->
-    - [/] **新增动作与目标** <!-- id: 75 -->
-        - [ ] 实现 `PickUpItemAction` (拾取物品) <!-- id: 76 -->
-        - [ ] 实现 `DropItemAction` (丢弃物品) <!-- id: 77 -->
-        - [ ] 实现 `GatherItemGoal` (搜集物品目标) <!-- id: 78 -->
-    - [ ] **场景实现 (GameTests)** <!-- id: 79 -->
-        - [ ] 实现 `testTheGatherer` (搜寻者场景) <!-- id: 80 -->
-        - [ ] 实现 `testTheCourier` (搬运工场景) <!-- id: 81 -->
-    - [ ] **性能评估** <!-- id: 82 -->
-        - [ ] 实现 `testPerformanceStress` (压力测试) <!-- id: 83 -->
-        - [ ] 记录并分析性能数据 (Planning Time, Tick Lag) <!-- id: 84 -->
+- [x] **复杂场景集成测试** <!-- id: 74 -->
+    - [x] **新增动作与目标** <!-- id: 75 -->
+        - [x] 实现 `PickUpItemAction` (拾取物品) <!-- id: 76 -->
+        - [x] 实现 `DropItemAction` (丢弃物品) <!-- id: 77 -->
+        - [x] 实现 `GatherItemGoal` (搜集物品目标) <!-- id: 78 -->
+    - [x] **场景实现 (GameTests)** <!-- id: 79 -->
+        - [x] 实现 `testTheGatherer` (搜寻者场景) <!-- id: 80 -->
+        - [x] 实现 `testTheCourier` (搬运工场景) <!-- id: 81 -->
+    - [x] **性能评估** <!-- id: 82 -->
+        - [x] 实现 `testPerformanceStress` (压力测试) <!-- id: 83 -->
+        - [/] 记录并分析性能数据 (Planning Time, Tick Lag) <!-- id: 84 -->
