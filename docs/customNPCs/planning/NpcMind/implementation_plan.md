@@ -59,47 +59,55 @@
 - 使用 `/mind debug` 查看当前正在执行的 Action。
 - 观察 NPC 是否按顺序执行动作链。
 
-### 6. 规划层 (Planner Layer - GOAP)
-为了让 NPC 能够自动组合动作以达成复杂目标（如：为了"炼丹"，需要先"收集材料"，再"寻找丹炉"），我们将实现简化版的 GOAP (Goal Oriented Action Planning)。
 
-#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/planner/WorldState.java`
-- 描述世界状态的原子事实集合。
-- `Map<String, Object> states` (例如: "has_food": true, "is_safe": false)。
-- 支持 `match(WorldState other)`: 检查当前状态是否满足目标状态的要求。
-- 支持 `apply(WorldState effects)`: 应用动作产生的效果。
+### 7. 复杂场景集成测试 (Complex Integration Scenarios)
+为了验证感知、规划和执行系统的协同工作能力，以及评估性能，我们将构建以下综合测试场景。
+**注意：所有实现必须基于真实的 Minecraft 逻辑，严禁使用模拟或 Mock 数据。**
 
-#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/planner/IGoapAction.java`
-- 扩展或包装 `IAction`。
-- `WorldState getPreconditions()`: 执行此动作需要满足的前置条件。
-- `WorldState getEffects()`: 执行此动作后产生的状态变化。
-- `float getCost()`: 动作代价（用于 A* 寻路权重）。
+#### [NEW] `src/main/java/com/Kizunad/customNPCs_test/tests/ComplexScenarios.java`
 
-#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/planner/GoapPlanner.java`
-- 核心规划器。
-- `Queue<IAction> plan(WorldState start, WorldState goal, List<IGoapAction> availableActions)`。
-- 使用 A* 算法搜索从 `start` 到 `goal` 的动作路径。
+**场景 A: "搜寻者" (The Gatherer)**
+- **目标**: NPC 需要获得一个特定的物品（例如：木棍）。
+- **环境**: NPC 出生点无物品。在距离 10-15 格处放置一个掉落物 `ItemEntity`。
+- **测试流程**:
+    1.  **感知**: `VisionSensor` 扫描并发现掉落物，存入 `Memory`。
+    2.  **状态更新**: `NpcMind` 将记忆转换为 WorldState (`known_item_location: pos`).
+    3.  **规划**: `GoapPlanner` 生成计划: `[MoveToLocation, PickUpItem]`.
+    4.  **执行**: NPC 移动并拾取物品。
+- **前置需求**:
+    - **`PickUpItemAction` (GOAP Action)**:
+        - `Preconditions`: `at_location: item_pos`
+        - `Effects`: `has_item: true`
+        - **实现逻辑**: 检查距离 < 2.0，调用 `entity.take(itemEntity, count)` 动画，直接操作 `entity.getInventory().add(item)` (如果实体有背包) 或 `entity.setItemInHand(item)`。
+    - **`GatherItemGoal` (PlanBasedGoal)**:
+        - `DesiredState`: `has_item: true`
+        - 负责调用 Planner 并执行返回的 Action 队列。
 
-#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/ai/decision/IGoal.java`
-- 添加 `WorldState getDesiredState()`: 目标期望达成的最终状态。
-- 添加 `boolean isPlanBased()`: 标识此目标是否需要动态规划。
+**场景 B: "搬运工" (The Courier)**
+- **目标**: 将物品从 A 点搬运到 B 点。
+- **环境**: A 点有物品，B 点为空。
+- **测试流程**:
+    1.  **规划**: 初始状态 `has_item: false`, `item_at_target: false`. 目标 `item_at_target: true`.
+    2.  **计划生成**: `[MoveTo(A), PickUp, MoveTo(B), Drop]`.
+    3.  **执行**: 验证完整序列的执行。
+- **前置需求**:
+    - **`DropItemAction` (GOAP Action)**:
+        - `Preconditions`: `has_item: true`, `at_location: target_pos`
+        - `Effects`: `item_at_target: true`, `has_item: false`
+        - **实现逻辑**: 调用 `entity.spawnAtLocation(item)` 生成掉落物，从背包/手中移除物品。
 
-#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/decision/goals/PlanBasedGoal.java`
-- `IGoal` 的抽象基类，自动处理规划逻辑。
-- 在 `start()` 中调用 `GoapPlanner` 生成动作队列。
-- 将生成的队列提交给 `ActionExecutor` 执行。
+**场景 C: "压力测试" (Performance Stress Test)**
+- **目标**: 评估规划器和感知系统在复杂环境下的性能。
+- **环境**: 
+    - 放置 50 个干扰实体（村民/僵尸）。
+    - 放置 20 个掉落物。
+    - 迷宫地形（增加寻路成本）。
+- **指标**:
+    - **Planning Time**: `GoapPlanner.plan()` 的耗时 (ms).
+    - **Tick Lag**: `NpcMind.tick()` 对服务器 tick 的影响.
+    - **Memory Usage**: 记忆模块条目数量对性能的影响.
 
-## 验证计划 (Planner)
-
-### 自动化测试
-- **`PlannerTests` 类**：
-    - `testSimplePlan`: 
-        - 初始状态: `has_apple=false`
-        - 目标状态: `has_apple=true`
-        - 动作: `GetAppleAction` (pre: none, eff: has_apple=true)
-        - 验证: 规划出 `[GetAppleAction]`。
-    - `testChainedPlan`:
-        - 初始: `has_wood=false`, `has_planks=false`
-        - 目标: `has_planks=true`
-        - 动作1: `ChopWood` (eff: has_wood=true)
-        - 动作2: `CraftPlanks` (pre: has_wood=true, eff: has_planks=true)
-        - 验证: 规划出 `[ChopWood, CraftPlanks]`。
+## 性能评估计划
+1.  **基准测试**: 在空超平坦世界运行场景 A，记录基准耗时。
+2.  **压力测试**: 在场景 C 环境下运行场景 A，记录耗时增长。
+3.  **分析**: 如果规划耗时超过 50ms (1 tick)，则需要优化 (如：分帧规划、限制搜索深度)。

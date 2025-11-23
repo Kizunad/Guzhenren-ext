@@ -5,3 +5,10 @@ LibSourceCodes/
 .gradle/
 build/
 run/
+
+#Logs
+gametest_*
+
+#AI Develop
+.spec-workflow
+.agent
