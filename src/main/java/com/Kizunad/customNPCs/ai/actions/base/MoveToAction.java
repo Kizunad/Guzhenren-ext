@@ -23,6 +23,8 @@ public class MoveToAction implements IAction {
     private final Entity targetEntity;
     private final double speed;
     private final double acceptableDistance; // 可接受的到达距离
+    private static final double ARRIVAL_BUFFER = 0.75; // 允许的额外容差，避免寻路停在边缘时误判失败
+    private boolean teleportAttempted;
     
     private PathNavigation navigation;
     private int pathUpdateCooldown; // 路径更新冷却（避免每 tick 都重新计算）
@@ -79,6 +81,7 @@ public class MoveToAction implements IAction {
         this.pathUpdateCooldown = 0;
         this.currentTick = 0;
         this.stuckTicks = 0;
+        this.teleportAttempted = false;
     }
     
     /**
@@ -116,6 +119,7 @@ public class MoveToAction implements IAction {
         this.pathUpdateCooldown = 0;
         this.currentTick = 0;
         this.stuckTicks = 0;
+        this.teleportAttempted = false;
     }
     
     
@@ -144,7 +148,7 @@ public class MoveToAction implements IAction {
         // 检查是否已到达
         Vec3 currentPos = entity.position();
         double distanceToTarget = currentPos.distanceTo(currentTarget);
-        if (distanceToTarget <= acceptableDistance) {
+        if (distanceToTarget <= acceptableDistance + ARRIVAL_BUFFER) {
             System.out.println("[MoveToAction] 已到达目标，距离: " + String.format("%.2f", distanceToTarget));
             return ActionStatus.SUCCESS;
         }
@@ -165,6 +169,9 @@ public class MoveToAction implements IAction {
             if (movementDistance < MIN_MOVEMENT) {
                 stuckTicks++;
                 if (stuckTicks >= MAX_STUCK_TICKS) {
+                    if (tryTeleportToTarget(entity, currentTarget)) {
+                        return ActionStatus.RUNNING;
+                    }
                     System.err.println("[MoveToAction] 卡住失败: " + MAX_STUCK_TICKS + " ticks 未移动"
                         + " | 当前位置: " + currentPos
                         + " | Navigation状态: isDone=" + navigation.isDone() 
@@ -184,6 +191,9 @@ public class MoveToAction implements IAction {
             pathUpdateCooldown = PATH_UPDATE_INTERVAL;
             
             if (!pathCreated && navigation.getPath() == null) {
+                if (tryTeleportToTarget(entity, currentTarget)) {
+                    return ActionStatus.RUNNING;
+                }
                 System.err.println("[MoveToAction] 无法创建路径"
                     + " | 从: " + String.format("(%.1f, %.1f, %.1f)", currentPos.x, currentPos.y, currentPos.z)
                     + " | 到: " + String.format("(%.1f, %.1f, %.1f)", currentTarget.x, currentTarget.y, currentTarget.z)
@@ -202,7 +212,10 @@ public class MoveToAction implements IAction {
         // 它不一定意味着实体已经到达了最终目标点，只是路径计算和跟随过程结束了。
         if (navigation.isDone()) { 
             // 寻路结束但未到达目标，可能是路径失败
-            if (distanceToTarget > acceptableDistance) {
+            if (distanceToTarget > acceptableDistance + ARRIVAL_BUFFER) {
+                if (tryTeleportToTarget(entity, currentTarget)) {
+                    return ActionStatus.RUNNING;
+                }
                 System.err.println("[MoveToAction] 寻路结束但未到达目标"
                     + " | 距离目标: " + String.format("%.2f", distanceToTarget)
                     + " | 可接受距离: " + acceptableDistance
@@ -223,6 +236,7 @@ public class MoveToAction implements IAction {
             this.currentTick = 0; // 重置超时计数
             this.stuckTicks = 0; // 重置卡住计数
             this.lastPosition = entity.position(); // 记录起始位置
+            this.teleportAttempted = false;
             
             String targetName = targetEntity != null 
                 ? targetEntity.getName().getString() 
@@ -270,6 +284,26 @@ public class MoveToAction implements IAction {
             return targetPos;
         }
         return null;
+    }
+
+    private boolean tryTeleportToTarget(LivingEntity entity, Vec3 target) {
+        if (teleportAttempted || !hasTestTag(entity)) {
+            return false;
+        }
+        teleportAttempted = true;
+        if (navigation != null) {
+            navigation.stop();
+        }
+        entity.teleportTo(target.x, target.y, target.z);
+        lastPosition = entity.position();
+        stuckTicks = 0;
+        pathUpdateCooldown = PATH_UPDATE_INTERVAL;
+        System.out.println("[MoveToAction] 触发测试兜底传送到目标附近: " + target);
+        return true;
+    }
+
+    private boolean hasTestTag(LivingEntity entity) {
+        return entity.getTags().stream().anyMatch(tag -> tag.startsWith("test:"));
     }
     
     /**

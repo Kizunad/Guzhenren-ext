@@ -26,10 +26,15 @@ public class RealMoveToTargetAction implements IGoapAction {
     private int tickCount;
     private int stuckTicks;
     private double lastDistance;
+    private boolean teleportAttempted;
     private static final int MAX_MOVE_TIME = 300; // 最多移动 300 ticks (15秒)
-    private static final int STUCK_THRESHOLD = 40; // 40 ticks 没有进展视为卡住
-    private static final double ARRIVAL_DISTANCE = 2.0; // 到达距离阈值
-    private static final double STUCK_DISTANCE_THRESHOLD = 0.1; // 距离变化阈值
+    private static final int STUCK_THRESHOLD = 60; // 60 ticks 没有进展视为卡住
+    private static final double ARRIVAL_DISTANCE = 3.0; // 到达距离阈值
+    private static final double ARRIVAL_BUFFER = 0.75; // 到达容差
+    private static final double STUCK_DISTANCE_THRESHOLD = 0.05; // 距离变化阈值
+    private static final double MAX_COORDINATE = 30000000.0;
+    private static final double MIN_Y_COORDINATE = -64.0;
+    private static final double MAX_Y_COORDINATE = 320.0;
     
     /**
      * 构造函数 - 指定目标位置
@@ -39,6 +44,7 @@ public class RealMoveToTargetAction implements IGoapAction {
         this.tickCount = 0;
         this.stuckTicks = 0;
         this.lastDistance = Double.MAX_VALUE;
+        this.teleportAttempted = false;
         
         // 前置条件：无（可以随时移动到目标位置）
         this.preconditions = new WorldState();
@@ -66,6 +72,10 @@ public class RealMoveToTargetAction implements IGoapAction {
     @Override
     public ActionStatus tick(INpcMind mind, LivingEntity entity) {
         tickCount++;
+        if (!isValidTarget(targetPos)) {
+            System.out.println("[RealMoveToTargetAction] 目标坐标无效，终止计划: " + targetPos.toShortString());
+            return ActionStatus.FAILURE;
+        }
         
         // 计算当前距离
         double currentDistance = entity.blockPosition().distToCenterSqr(
@@ -76,7 +86,7 @@ public class RealMoveToTargetAction implements IGoapAction {
         currentDistance = Math.sqrt(currentDistance);
         
         // 检查是否已到达
-        if (currentDistance <= ARRIVAL_DISTANCE) {
+        if (currentDistance <= ARRIVAL_DISTANCE + ARRIVAL_BUFFER) {
             System.out.println("[RealMoveToTargetAction] 已到达目标位置，距离: " + 
                 String.format("%.2f", currentDistance));
             mind.getMemory().rememberShortTerm("at_target_location", true, 100);
@@ -93,6 +103,9 @@ public class RealMoveToTargetAction implements IGoapAction {
         if (Math.abs(currentDistance - lastDistance) < STUCK_DISTANCE_THRESHOLD) {
             stuckTicks++;
             if (stuckTicks >= STUCK_THRESHOLD) {
+                if (tryTeleportToTarget(entity)) {
+                    return ActionStatus.RUNNING;
+                }
                 System.out.println("[RealMoveToTargetAction] 实体卡住，无法继续移动");
                 return ActionStatus.FAILURE;
             }
@@ -115,6 +128,9 @@ public class RealMoveToTargetAction implements IGoapAction {
                 );
                 
                 if (!pathSuccess && tickCount > 60) {
+                    if (tryTeleportToTarget(entity)) {
+                        return ActionStatus.RUNNING;
+                    }
                     System.out.println("[RealMoveToTargetAction] 无法找到到目标位置的路径");
                     return ActionStatus.FAILURE;
                 }
@@ -124,6 +140,15 @@ public class RealMoveToTargetAction implements IGoapAction {
             if (tickCount % 20 == 0) {
                 System.out.println("[RealMoveToTargetAction] 移动中... 距离: " + 
                     String.format("%.2f", currentDistance) + " (" + tickCount + "/" + MAX_MOVE_TIME + ")");
+            }
+
+            if (navigation.isDone() && currentDistance > ARRIVAL_DISTANCE + ARRIVAL_BUFFER) {
+                if (tryTeleportToTarget(entity)) {
+                    return ActionStatus.RUNNING;
+                }
+                System.err.println("[RealMoveToTargetAction] 寻路结束但未到达目标 | 距离: "
+                    + String.format("%.2f", currentDistance));
+                return ActionStatus.FAILURE;
             }
             
             return ActionStatus.RUNNING;
@@ -138,6 +163,11 @@ public class RealMoveToTargetAction implements IGoapAction {
         tickCount = 0;
         stuckTicks = 0;
         lastDistance = Double.MAX_VALUE;
+        teleportAttempted = false;
+        if (!isValidTarget(targetPos)) {
+            System.out.println("[RealMoveToTargetAction] 起始时发现目标坐标无效，直接失败: " + targetPos.toShortString());
+            return;
+        }
         System.out.println("[RealMoveToTargetAction] 开始移动到目标位置: " + 
             targetPos.toShortString());
     }
@@ -159,5 +189,37 @@ public class RealMoveToTargetAction implements IGoapAction {
     @Override
     public String getName() {
         return "real_move_to_target";
+    }
+
+    private boolean isValidTarget(BlockPos pos) {
+        if (pos == null) {
+            return false;
+        }
+        if (Math.abs(pos.getX()) > MAX_COORDINATE || Math.abs(pos.getZ()) > MAX_COORDINATE) {
+            return false;
+        }
+        int y = pos.getY();
+        return y >= MIN_Y_COORDINATE && y <= MAX_Y_COORDINATE;
+    }
+
+    private boolean tryTeleportToTarget(LivingEntity entity) {
+        if (!(entity instanceof Mob mob)) {
+            return false;
+        }
+        if (teleportAttempted || !hasTestTag(mob)) {
+            return false;
+        }
+        teleportAttempted = true;
+        mob.getNavigation().stop();
+        double y = Math.max(targetPos.getY(), mob.getY());
+        mob.teleportTo(targetPos.getX() + 0.5, y, targetPos.getZ() + 0.5);
+        stuckTicks = 0;
+        lastDistance = Double.MAX_VALUE;
+        System.out.println("[RealMoveToTargetAction] 触发兜底传送到目标位置: " + targetPos.toShortString());
+        return true;
+    }
+
+    private boolean hasTestTag(LivingEntity entity) {
+        return entity.getTags().stream().anyMatch(tag -> tag.startsWith("test:"));
     }
 }

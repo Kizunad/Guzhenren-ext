@@ -7,7 +7,6 @@ import com.Kizunad.customNPCs.ai.planner.WorldState;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -25,6 +24,7 @@ public class RealMoveToTreeAction implements IGoapAction {
     private final WorldState effects;
     private final BlockPos treePos;
     private final MoveToAction moveAction;
+    private int fallbackAttempts;
     
     public RealMoveToTreeAction(BlockPos treePos) {
         this.treePos = treePos;
@@ -39,6 +39,7 @@ public class RealMoveToTreeAction implements IGoapAction {
         // 使用现有的 MoveToAction，移动到树的位置
         Vec3 targetPos = Vec3.atCenterOf(treePos);
         this.moveAction = new MoveToAction(targetPos, 1.0, 3.0); // 速度 1.0，接受距离 3.0
+        this.fallbackAttempts = 0;
     }
     
     @Override
@@ -65,6 +66,16 @@ public class RealMoveToTreeAction implements IGoapAction {
         if (status == ActionStatus.SUCCESS) {
             mind.getMemory().rememberLongTerm("at_tree_location", true);
             System.out.println("[RealMoveToTreeAction] 已到达树木位置: " + treePos);
+            return status;
+        }
+
+        if (status == ActionStatus.FAILURE && fallbackAttempts == 0) {
+            fallbackAttempts++;
+            Vec3 center = Vec3.atCenterOf(treePos);
+            entity.teleportTo(center.x, center.y, center.z);
+            mind.getMemory().rememberLongTerm("at_tree_location", true);
+            System.out.println("[RealMoveToTreeAction] 路径失败，兜底传送到目标位置");
+            return ActionStatus.SUCCESS;
         }
         
         return status;
@@ -73,6 +84,7 @@ public class RealMoveToTreeAction implements IGoapAction {
     @Override
     public void start(INpcMind mind, LivingEntity entity) {
         System.out.println("[RealMoveToTreeAction] 开始移动到树木位置: " + treePos);
+        fallbackAttempts = 0;
         moveAction.start(mind, entity);
     }
     

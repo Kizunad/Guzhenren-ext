@@ -177,52 +177,64 @@ public class PlannerTests {
     public static void testGoapIntegration(GameTestHelper helper) {
         // 在测试区域中放置一棵树
         net.minecraft.core.BlockPos treePos = new net.minecraft.core.BlockPos(5, 2, 5);
+        net.minecraft.core.BlockPos absoluteTreePos = helper.absolutePos(treePos);
         helper.setBlock(treePos, net.minecraft.world.level.block.Blocks.OAK_LOG);
         
-        // 生成一个僵尸
-        net.minecraft.world.entity.monster.Zombie zombie = helper.spawn(
-            net.minecraft.world.entity.EntityType.ZOMBIE, 2, 2, 2
-        );
+        // 使用工厂创建僵尸
+        net.minecraft.world.entity.monster.Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
         
         // 获取 NpcMind
-        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind = 
-            zombie.getData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND);
+        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         // 创建收集木板目标（真实版本）
         com.Kizunad.customNPCs_test.goap.GatherPlanksRealGoal gatherGoal = 
-            new com.Kizunad.customNPCs_test.goap.GatherPlanksRealGoal(0.9f, treePos);
+            new com.Kizunad.customNPCs_test.goap.GatherPlanksRealGoal(0.9f, absoluteTreePos);
         
         // 注册目标
         mind.getGoalSelector().registerGoal(gatherGoal);
         
         System.out.println("[GOAP Integration Test] 测试开始");
-        System.out.println("  目标: 获得木板");
-        System.out.println("  预期规划: [MoveToTree, BreakBlock, CollectItem, CraftPlanks]");
         
         // 等待目标完成（最多 200 ticks）
-        helper.succeedWhen(() -> {
-            // 检查目标是否完成
-            helper.assertTrue(gatherGoal.isFinished(mind, zombie), 
-                "目标应该已完成");
-            
-            // 检查最终状态
-            Object hasPlanks = mind.getMemory().getMemory("has_planks");
-            helper.assertTrue(hasPlanks != null && (Boolean) hasPlanks, 
-                "最终应该拥有木板");
-            
-            // 验证中间状态也被正确设置
-            helper.assertTrue(mind.getMemory().hasMemory("at_tree_location"), 
-                "应该到达过树木位置");
-            helper.assertTrue(mind.getMemory().hasMemory("tree_broken"), 
-                "应该破坏过树木");
-            helper.assertTrue(mind.getMemory().hasMemory("has_wood"), 
-                "应该收集过木头");
-            
-            System.out.println("[GOAP Integration Test] 测试成功！");
-            System.out.println("  ✓ 完整动作链执行成功");
-            System.out.println("  ✓ 所有中间状态正确");
-            System.out.println("  ✓ 最终目标达成");
-        });
+        final int[] debugTicks = {0};
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                debugTicks[0]++;
+                boolean finished = gatherGoal.isFinished(mind, zombie);
+                boolean hasPlanks = Boolean.TRUE.equals(mind.getMemory().getMemory("has_planks"));
+                boolean atTree = mind.getMemory().hasMemory("at_tree_location");
+                boolean treeBroken = mind.getMemory().hasMemory("tree_broken");
+                boolean hasWood = mind.getMemory().hasMemory("has_wood");
+
+                if (debugTicks[0] % 20 == 0) {
+                    System.out.println("[GOAP Integration Debug] tick=" + debugTicks[0]
+                        + " finished=" + finished
+                        + " hasPlanks=" + hasPlanks
+                        + " atTree=" + atTree
+                        + " treeBroken=" + treeBroken
+                        + " hasWood=" + hasWood);
+                }
+
+                // 检查目标是否完成
+                if (!finished) {
+                    return false;
+                }
+                
+                // 检查最终状态
+                if (!hasPlanks) {
+                    return false;
+                }
+                
+                // 验证中间状态也被正确设置
+                return atTree && treeBroken && hasWood;
+            },
+            200,
+            "GOAP集成测试失败：目标未完成或状态不正确"
+        );
     }
     
     /**
@@ -240,14 +252,14 @@ public class PlannerTests {
         
         helper.setBlock(relativeTreePos, net.minecraft.world.level.block.Blocks.OAK_LOG);
         
-        // 生成一个僵尸在起始位置
-        net.minecraft.world.entity.monster.Zombie zombie = helper.spawn(
-            net.minecraft.world.entity.EntityType.ZOMBIE, 2, 2, 2
-        );
+        // 使用工厂创建僵尸
+        net.minecraft.world.entity.monster.Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
         
         // 获取 NpcMind
-        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind = 
-            zombie.getData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND);
+        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         // 创建真实 API 收集木板目标 - 使用绝对坐标！
         com.Kizunad.customNPCs_test.goap.real.RealGatherPlanksGoal realGoal = 
@@ -257,47 +269,50 @@ public class PlannerTests {
         mind.getGoalSelector().registerGoal(realGoal);
         
         System.out.println("[Real API GOAP Test] 测试开始");
-        System.out.println("  Zombie位置: " + zombie.position());
-        System.out.println("  树木相对位置: " + relativeTreePos);
-        System.out.println("  树木绝对位置: " + absoluteTreePos);
-        System.out.println("  距离: " + zombie.position().distanceTo(
-            net.minecraft.world.phys.Vec3.atCenterOf(absoluteTreePos)));
-        System.out.println("  Zombie将会:");
-        System.out.println("    1. 使用 PathNavigation 移动到树木");
-        System.out.println("    2. 使用 level.destroyBlock() 破坏方块");
-        System.out.println("    3. 搜索并收集 ItemEntity");
-        System.out.println("    4. 制作木板");
         
         // 等待目标完成（最多 300 ticks，因为真实移动可能需要更长时间）
-        helper.succeedWhen(() -> {
-            // 检查目标是否完成
-            helper.assertTrue(realGoal.isFinished(mind, zombie), 
-                "目标应该已完成");
-            
-            // 检查最终状态
-            Object hasPlanks = mind.getMemory().getMemory("has_planks");
-            helper.assertTrue(hasPlanks != null && (Boolean) hasPlanks, 
-                "最终应该拥有木板");
-            
-            // 验证树木已被破坏
-            net.minecraft.world.level.block.state.BlockState blockState = 
-                helper.getBlockState(relativeTreePos);
-            helper.assertTrue(blockState.isAir(), 
-                "树木方块应该已被破坏");
-            
-            // 验证中间状态
-            helper.assertTrue(mind.getMemory().hasMemory("at_tree_location"), 
-                "应该到达过树木位置");
-            helper.assertTrue(mind.getMemory().hasMemory("tree_broken"), 
-                "应该破坏过树木");
-            helper.assertTrue(mind.getMemory().hasMemory("has_wood"), 
-                "应该收集过木头");
-            
-            System.out.println("[Real API GOAP Test] 测试成功！");
-            System.out.println("  ✓ Zombie 真实移动到树木位置");
-            System.out.println("  ✓ 真实破坏了方块");
-            System.out.println("  ✓ 真实收集了掉落物品");
-            System.out.println("  ✓ 完成了制作");
-        });
+        final int[] realDebugTicks = {0};
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                realDebugTicks[0]++;
+                boolean finished = realGoal.isFinished(mind, zombie);
+                boolean hasPlanks = Boolean.TRUE.equals(mind.getMemory().getMemory("has_planks"));
+                boolean atTree = mind.getMemory().hasMemory("at_tree_location");
+                boolean treeBroken = mind.getMemory().hasMemory("tree_broken");
+                boolean hasWood = mind.getMemory().hasMemory("has_wood");
+
+                if (realDebugTicks[0] % 20 == 0) {
+                    System.out.println("[Real API GOAP Debug] tick=" + realDebugTicks[0]
+                        + " finished=" + finished
+                        + " hasPlanks=" + hasPlanks
+                        + " atTree=" + atTree
+                        + " treeBroken=" + treeBroken
+                        + " hasWood=" + hasWood);
+                }
+
+                // 检查目标是否完成
+                if (!finished) {
+                    return false;
+                }
+                
+                // 检查最终状态
+                if (!hasPlanks) {
+                    return false;
+                }
+                
+                // 验证树木已被破坏
+                net.minecraft.world.level.block.state.BlockState blockState = 
+                    helper.getBlockState(relativeTreePos);
+                if (!blockState.isAir()) {
+                    return false;
+                }
+                
+                // 验证中间状态
+                return atTree && treeBroken && hasWood;
+            },
+            300,
+            "Real API GOAP测试失败：目标未完成或状态不正确"
+        );
     }
 }

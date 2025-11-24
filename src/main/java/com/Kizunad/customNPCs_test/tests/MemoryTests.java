@@ -18,11 +18,14 @@ public class MemoryTests {
     private static final int SPAWN_OFFSET = 4;
 
     public static void testMemoryExpiration(GameTestHelper helper) {
-        // 生成一个僵尸
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
+        // 使用工厂创建僵尸
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 获取 Mind
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick (关键：否则记忆不会过期)
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         // 添加一个短期记忆，持续 20 ticks (1秒)
         mind.getMemory().rememberShortTerm("test_memory", "value", SHORT_MEMORY_DURATION);
@@ -30,7 +33,7 @@ public class MemoryTests {
         // 验证记忆存在
         helper.assertTrue(mind.getMemory().hasMemory("test_memory"), "Memory should exist initially");
         
-        // 等待 30 ticks
+        // 等待 30 ticks (超过过期时间)
         helper.runAtTickTime(TICK_DELAY, () -> {
             // 验证记忆已过期
             helper.assertTrue(!mind.getMemory().hasMemory("test_memory"), 
@@ -40,9 +43,9 @@ public class MemoryTests {
     }
 
     public static void testMemoryPersistence(GameTestHelper helper) {
-        // 生成一个僵尸
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        // 使用工厂创建僵尸
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 添加长期记忆
         mind.getMemory().rememberLongTerm("long_term_key", "persistent_value");
@@ -53,8 +56,8 @@ public class MemoryTests {
         CompoundTag nbt = mind.serializeNBT(helper.getLevel().registryAccess());
         
         // 生成另一个僵尸（模拟重新加载后的实体）
-        Zombie newZombie = helper.spawn(EntityType.ZOMBIE, SPAWN_OFFSET, 2, 2);
-        INpcMind newMind = newZombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie newZombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(SPAWN_OFFSET, 2, 2), EntityType.ZOMBIE);
+        INpcMind newMind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, newZombie);
         
         // 模拟反序列化
         newMind.deserializeNBT(helper.getLevel().registryAccess(), nbt);

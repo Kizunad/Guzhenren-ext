@@ -6,6 +6,7 @@ import com.Kizunad.customNPCs.ai.planner.WorldState;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -28,7 +29,7 @@ public class RealPickUpItemAction implements IGoapAction {
     private final WorldState effects;
     private final ItemEntity targetItem;
     private int tickCount;
-    private static final int MAX_PICKUP_TIME = 40; // 最多等待 40 ticks
+    private static final int MAX_PICKUP_TIME = 80; // 最多等待 80 ticks，留出靠近距离的缓冲
     private static final double PICKUP_DISTANCE = 2.0; // 拾取距离阈值
     
     /**
@@ -76,6 +77,12 @@ public class RealPickUpItemAction implements IGoapAction {
         // 检查距离
         double distance = entity.position().distanceTo(targetItem.position());
         if (distance > PICKUP_DISTANCE) {
+            // 距离太远，尝试再靠近目标
+            if (entity instanceof Mob mob) {
+                if (tickCount % 5 == 0 || !mob.getNavigation().isInProgress()) {
+                    mob.getNavigation().moveTo(targetItem, 1.0);
+                }
+            }
             // 距离太远，继续等待或失败
             if (tickCount >= MAX_PICKUP_TIME) {
                 System.out.println("[RealPickUpItemAction] 超时：距离太远 (" + 

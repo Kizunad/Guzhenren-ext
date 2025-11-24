@@ -88,3 +88,13 @@
     - [x] **性能评估** <!-- id: 82 -->
         - [x] 实现 `testPerformanceStress` (压力测试) <!-- id: 83 -->
         - [/] 记录并分析性能数据 (Planning Time, Tick Lag) <!-- id: 84 -->
+
+- [ ] **通用基础架构完善 (Generic Infrastructure)** <!-- id: 85 -->
+    - [ ] **性格系统 (Personality)** <!-- id: 86 -->
+        - [ ] 实现 `PersonalityModule` (Traits 存储与计算) <!-- id: 87 -->
+        - [ ] 集成到 `UtilityGoalSelector` (影响优先级) <!-- id: 88 -->
+    - [ ] **通用感知 (Generic Sensors)** <!-- id: 89 -->
+        - [ ] 实现 `AuditorySensor` (听觉) <!-- id: 90 -->
+        - [x] 实现 `DamageSensor` (伤害感知) <!-- id: 91 -->
+    - [ ] **API 扩展性 (Registry)** <!-- id: 92 -->
+        - [ ] 实现 `NpcMindRegistry` (注册 Goal/Sensor/Action) <!-- id: 93 -->

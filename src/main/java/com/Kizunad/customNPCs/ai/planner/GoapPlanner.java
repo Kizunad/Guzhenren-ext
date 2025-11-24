@@ -63,6 +63,9 @@ public class GoapPlanner {
             // 取出 f(n) 最小的节点
             PlanNode currentNode = openSet.poll();
             
+            // DEBUG
+            System.out.println("Exploring node: " + currentNode.state + ", f=" + currentNode.getFScore());
+            
             // 如果当前状态满足目标，回溯生成计划
             if (currentNode.state.matches(goal)) {
                 return reconstructPlan(currentNode);
@@ -75,6 +78,8 @@ public class GoapPlanner {
             for (IGoapAction action : availableActions) {
                 // 检查前置条件是否满足
                 if (!currentNode.state.matches(action.getPreconditions())) {
+                    // DEBUG
+                    System.out.println("  Action " + action.getClass().getSimpleName() + " preconditions not met");
                     continue; // 前置条件不满足，跳过此动作
                 }
                 
@@ -83,6 +88,8 @@ public class GoapPlanner {
                 
                 // 如果新状态已访问过，跳过
                 if (closedSet.contains(newState)) {
+                    // DEBUG
+                    System.out.println("  Action " + action.getClass().getSimpleName() + " leads to closed state");
                     continue;
                 }
                 
@@ -110,6 +117,8 @@ public class GoapPlanner {
                 // 如果不在 openSet 中，添加
                 if (!inOpenSet) {
                     openSet.add(newNode);
+                    // DEBUG
+                    System.out.println("  Added new node via " + action.getClass().getSimpleName() + ", f=" + newNode.getFScore());
                 }
             }
         }

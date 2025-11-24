@@ -26,10 +26,14 @@ public class RealMoveToItemAction implements IGoapAction {
     private int tickCount;
     private int stuckTicks;
     private double lastDistance;
+    private boolean teleportAttempted;
     private static final int MAX_MOVE_TIME = 200; // 最多移动 200 ticks (10秒)
-    private static final int STUCK_THRESHOLD = 20; // 20 ticks 没有进展视为卡住
-    private static final double ARRIVAL_DISTANCE = 2.0; // 到达距离阈值
-    private static final double STUCK_DISTANCE_THRESHOLD = 0.1; // 距离变化阈值
+    private static final int STUCK_THRESHOLD = 60; // 60 ticks 没有进展视为卡住
+    private static final double ARRIVAL_DISTANCE = 2.6; // 到达距离阈值，留出拾取导航余量
+    private static final double STUCK_DISTANCE_THRESHOLD = 0.05; // 距离变化阈值
+    private static final double MAX_COORDINATE = 30000000.0; // 世界边界
+    private static final double MIN_Y_COORDINATE = -64.0;
+    private static final double MAX_Y_COORDINATE = 320.0;
     
     /**
      * 构造函数 - 指定目标物品
@@ -39,6 +43,7 @@ public class RealMoveToItemAction implements IGoapAction {
         this.tickCount = 0;
         this.stuckTicks = 0;
         this.lastDistance = Double.MAX_VALUE;
+        this.teleportAttempted = false;
         
         // 前置条件：物品可见
         this.preconditions = new WorldState();
@@ -75,6 +80,11 @@ public class RealMoveToItemAction implements IGoapAction {
         }
         
         // 检查当前距离
+        if (!isValidPosition(targetItem.position())) {
+            System.out.println("[RealMoveToItemAction] 目标坐标无效，终止计划: " + targetItem.position());
+            return ActionStatus.FAILURE;
+        }
+
         double currentDistance = entity.position().distanceTo(targetItem.position());
         
         // 检查是否已到达
@@ -95,6 +105,9 @@ public class RealMoveToItemAction implements IGoapAction {
         if (Math.abs(currentDistance - lastDistance) < STUCK_DISTANCE_THRESHOLD) {
             stuckTicks++;
             if (stuckTicks >= STUCK_THRESHOLD) {
+                if (tryTeleportToItem(entity)) {
+                    return ActionStatus.RUNNING;
+                }
                 System.out.println("[RealMoveToItemAction] 实体卡住，无法继续移动");
                 return ActionStatus.FAILURE;
             }
@@ -115,8 +128,11 @@ public class RealMoveToItemAction implements IGoapAction {
                     targetItem.getZ(), 
                     1.0 // 移动速度倍率
                 );
-                
+
                 if (!pathSuccess && tickCount > 40) {
+                    if (tryTeleportToItem(mob)) {
+                        return ActionStatus.RUNNING;
+                    }
                     System.out.println("[RealMoveToItemAction] 无法找到到物品的路径");
                     return ActionStatus.FAILURE;
                 }
@@ -140,6 +156,11 @@ public class RealMoveToItemAction implements IGoapAction {
         tickCount = 0;
         stuckTicks = 0;
         lastDistance = Double.MAX_VALUE;
+        teleportAttempted = false;
+        if (!isValidPosition(targetItem.position())) {
+            System.out.println("[RealMoveToItemAction] 起始时发现目标坐标无效，直接失败");
+            return;
+        }
         System.out.println("[RealMoveToItemAction] 开始移动到物品: " + 
             targetItem.getItem().getHoverName().getString() + 
             " 位置: " + targetItem.blockPosition().toShortString());
@@ -162,5 +183,30 @@ public class RealMoveToItemAction implements IGoapAction {
     @Override
     public String getName() {
         return "real_move_to_item";
+    }
+
+    private boolean isValidPosition(net.minecraft.world.phys.Vec3 pos) {
+        if (!Double.isFinite(pos.x) || !Double.isFinite(pos.y) || !Double.isFinite(pos.z)) {
+            return false;
+        }
+        if (Math.abs(pos.x) > MAX_COORDINATE || Math.abs(pos.z) > MAX_COORDINATE) {
+            return false;
+        }
+        return pos.y >= MIN_Y_COORDINATE && pos.y <= MAX_Y_COORDINATE;
+    }
+
+    private boolean tryTeleportToItem(LivingEntity entity) {
+        if (!(entity instanceof Mob mob) || teleportAttempted) {
+            return false;
+        }
+        teleportAttempted = true;
+        mob.getNavigation().stop();
+        net.minecraft.world.phys.Vec3 targetPos = targetItem.position();
+        double safeY = Math.max(targetPos.y, mob.getY());
+        mob.teleportTo(targetPos.x, safeY, targetPos.z);
+        stuckTicks = 0;
+        lastDistance = Double.MAX_VALUE;
+        System.out.println("[RealMoveToItemAction] 触发兜底传送到物品附近: " + targetPos);
+        return true;
     }
 }

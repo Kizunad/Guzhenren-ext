@@ -22,12 +22,17 @@ public class MoveToActionExtendedTests {
 
     // ==================== 基础功能测试 ====================
     
+    // ==================== 基础功能测试 ====================
+    
     /**
      * 测试近距离移动（< 5 格）
      */
     public static void testMoveToCoordinate_NearDistance(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 startPos = zombie.position();
         Vec3 targetPos = startPos.add(3, 0, 0); // 3格远
@@ -36,19 +41,27 @@ public class MoveToActionExtendedTests {
         TestPlanGoal testGoal = new TestPlanGoal(0.9f, actions);
         mind.getGoalSelector().registerGoal(testGoal);
         
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "移动应该完成");
-            double distanceMoved = zombie.position().distanceTo(startPos);
-            helper.assertTrue(distanceMoved > 1.0, "应该已移动至少 1 格，实际: " + distanceMoved);
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                if (!mind.getActionExecutor().isIdle()) return false;
+                double distanceMoved = zombie.position().distanceTo(startPos);
+                return distanceMoved > 1.0;
+            },
+            100,
+            "移动应该完成且有位移"
+        );
     }
 
     /**
      * 测试自定义接受距离参数
      */
     public static void testMoveToAction_CustomAcceptableDistance(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 startPos = zombie.position();
         Vec3 targetPos = startPos.add(10, 0, 0);
@@ -58,20 +71,27 @@ public class MoveToActionExtendedTests {
         TestPlanGoal testGoal = new TestPlanGoal(0.9f, actions);
         mind.getGoalSelector().registerGoal(testGoal);
         
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "移动应该完成");
-            // 只要移动了就算成功（可能在 8 格范围内停止）
-            double distanceMoved = zombie.position().distanceTo(startPos);
-            helper.assertTrue(distanceMoved > 0.5,  "应该有移动，实际: " + distanceMoved);
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                if (!mind.getActionExecutor().isIdle()) return false;
+                double distanceMoved = zombie.position().distanceTo(startPos);
+                return distanceMoved > 0.5;
+            },
+            100,
+            "移动应该完成且有位移"
+        );
     }
 
     /**
      * 测试已在接受范围内的情况
      */
     public static void testMoveToAction_AlreadyInRange(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 currentPos = zombie.position();
         Vec3 nearbyPos = currentPos.add(0.5, 0, 0); // 0.5 格远
@@ -82,10 +102,12 @@ public class MoveToActionExtendedTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 应该几乎立即完成
-        helper.runAtTickTime(5, () -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "应该立即完成");
-            helper.succeed();
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            10,
+            "应该立即完成"
+        );
     }
 
     // ==================== 失败场景测试 ====================
@@ -94,8 +116,11 @@ public class MoveToActionExtendedTests {
      * 测试无效坐标 - NaN
      */
     public static void testMoveToAction_InvalidCoordinates_NaN(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 invalidPos = new Vec3(Double.NaN, 0, 0);
         
@@ -104,18 +129,23 @@ public class MoveToActionExtendedTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 应该很快失败
-        helper.runAtTickTime(10, () -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "无效坐标应该导致失败");
-            helper.succeed();
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            20,
+            "无效坐标应该导致失败"
+        );
     }
 
     /**
      * 测试无效坐标 - 极值Y坐标
      */
     public static void testMoveToAction_InvalidCoordinates_ExtremeY(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 startPos = zombie.position();
         Vec3 extremeYPos = new Vec3(startPos.x, 1000, startPos.z); // Y=1000 超出范围
@@ -124,20 +154,28 @@ public class MoveToActionExtendedTests {
         TestPlanGoal testGoal = new TestPlanGoal(0.9f, actions);
         mind.getGoalSelector().registerGoal(testGoal);
         
-        helper.runAtTickTime(10, () -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "极值Y坐标应该导致失败");
-            helper.succeed();
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            20,
+            "极值Y坐标应该导致失败"
+        );
     }
 
     /**
      * 测试目标实体消失
      */
     public static void testMoveToAction_TargetEntityDespawned(GameTestHelper helper) {
-        Zombie mover = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        Zombie target = helper.spawn(EntityType.ZOMBIE, 8, 2, 2);
+        Zombie mover = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie target = com.Kizunad.customNPCs_test.utils.NpcTestHelper.spawnTaggedEntity(
+            helper,
+            EntityType.ZOMBIE,
+            new net.minecraft.core.BlockPos(8, 2, 2));
         
-        INpcMind mind = mover.getData(NpcMindAttachment.NPC_MIND);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, mover);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, mover);
         
         List<IAction> actions = List.of(new MoveToAction(target, 1.0));
         TestPlanGoal testGoal = new TestPlanGoal(0.9f, actions);
@@ -149,17 +187,23 @@ public class MoveToActionExtendedTests {
         });
         
         // 移除后应该失败
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "目标消失应该导致失败或完成");
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            40,
+            "目标消失应该导致失败或完成"
+        );
     }
 
     /**
      * 测试超时机制
      */
     public static void testMoveToAction_Timeout(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 farPos = zombie.position().add(100, 0, 0); // 很远的位置
         
@@ -169,9 +213,12 @@ public class MoveToActionExtendedTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 等待超时
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "应该因超时而失败");
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            40,
+            "应该因超时而失败"
+        );
     }
 
     // ==================== 边界条件测试 ====================
@@ -180,8 +227,11 @@ public class MoveToActionExtendedTests {
      * 测试当前位置即目标（0距离）
      */
     public static void testMoveToAction_SamePosition(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 currentPos = zombie.position();
         
@@ -190,18 +240,23 @@ public class MoveToActionExtendedTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 应该立即成功
-        helper.runAtTickTime(5, () -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "同位置应该立即完成");
-            helper.succeed();
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            10,
+            "同位置应该立即完成"
+        );
     }
 
     /**
      * 测试极近距离（< 0.5 格）
      */
     public static void testMoveToAction_ExtremelyClose(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 currentPos = zombie.position();
         Vec3 veryClose = currentPos.add(0.3, 0, 0); // 0.3 格
@@ -210,10 +265,12 @@ public class MoveToActionExtendedTests {
         TestPlanGoal testGoal = new TestPlanGoal(0.9f, actions);
         mind.getGoalSelector().registerGoal(testGoal);
         
-        helper.runAtTickTime(10, () -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "极近距离应该快速完成");
-            helper.succeed();
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            20,
+            "极近距离应该快速完成"
+        );
     }
 
     // ==================== 集成测试 ====================
@@ -222,8 +279,11 @@ public class MoveToActionExtendedTests {
      * 测试连续多次移动
      */
     public static void testMoveToAction_SequentialMoves(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         Vec3 start = zombie.position();
         Vec3 pos1 = start.add(3, 0, 0);
@@ -237,11 +297,15 @@ public class MoveToActionExtendedTests {
         TestPlanGoal testGoal = new TestPlanGoal(0.9f, actions);
         mind.getGoalSelector().registerGoal(testGoal);
         
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), "连续移动应该完成");
-            // 验证最终位置有移动
-            double totalDistance = zombie.position().distanceTo(start);
-            helper.assertTrue(totalDistance > 2.0, "总移动距离应该 > 2格，实际: " + totalDistance);
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                if (!mind.getActionExecutor().isIdle()) return false;
+                double totalDistance = zombie.position().distanceTo(start);
+                return totalDistance > 2.0;
+            },
+            100,
+            "连续移动应该完成且有位移"
+        );
     }
 }

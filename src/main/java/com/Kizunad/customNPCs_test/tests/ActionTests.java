@@ -23,11 +23,11 @@ public class ActionTests {
      * 测试动作队列按顺序执行
      */
     public static void testActionQueue(GameTestHelper helper) {
-        // 生成一个僵尸
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
+        // 使用工厂创建僵尸
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 获取 NpcMind
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 创建测试动作序列：等待20 ticks → 等待10 ticks
         List<IAction> actions = List.of(
@@ -39,19 +39,27 @@ public class ActionTests {
         TestPlanGoal testGoal = new TestPlanGoal(0.9f, actions);
         mind.getGoalSelector().registerGoal(testGoal);
         
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
+        
         // 等待所有动作完成
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), 
-                "所有动作应该已完成，执行器应该空闲");
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            40, // 20 + 10 + buffer
+            "所有动作应该已完成，执行器应该空闲"
+        );
     }
 
     /**
      * 测试执行器空闲状态
      */
     public static void testActionExecutorIdle(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         // 初始状态应该是空闲
         helper.assertTrue(mind.getActionExecutor().isIdle(), "初始状态应该空闲");
@@ -62,18 +70,23 @@ public class ActionTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 等待动作完成后执行器变回空闲
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), 
-                "动作完成后应该空闲");
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            20,
+            "动作完成后应该空闲"
+        );
     }
 
     /**
      * 测试单个 WaitAction 的正确性
      */
     public static void testWaitAction(GameTestHelper helper) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         // 提交一个等待 40 ticks 的动作
         List<IAction> actions = List.of(new WaitAction(40));
@@ -81,10 +94,12 @@ public class ActionTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 等待动作完成
-        helper.succeedWhen(() -> {
-            helper.assertTrue(mind.getActionExecutor().isIdle(), 
-                "40 ticks 后动作应该完成");
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> mind.getActionExecutor().isIdle(),
+            50,
+            "40 ticks 后动作应该完成"
+        );
     }
 
     /**
@@ -92,8 +107,11 @@ public class ActionTests {
      */
     public static void testMoveToAction(GameTestHelper helper) {
         // 生成一个僵尸在起始位置
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         // 记录起始位置
         Vec3 startPos = zombie.position();
@@ -111,17 +129,22 @@ public class ActionTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 等待移动完成（执行器空闲表示完成或失败）
-        helper.succeedWhen(() -> {
-            // 动作完成（成功或失败都会变成空闲）
-            helper.assertTrue(mind.getActionExecutor().isIdle(),
-                "移动动作应该已完成");
-            
-            // 检查是否已移动（如果动作成功的话应该移动了）
-            Vec3 currentPos = zombie.position();
-            double distanceMoved = currentPos.distanceTo(startPos);
-            helper.assertTrue(distanceMoved > 0.5,
-                "NPC 应该已移动，移动距离: " + distanceMoved);
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                // 动作完成（成功或失败都会变成空闲）
+                if (!mind.getActionExecutor().isIdle()) {
+                    return false;
+                }
+                
+                // 检查是否已移动（如果动作成功的话应该移动了）
+                Vec3 currentPos = zombie.position();
+                double distanceMoved = currentPos.distanceTo(startPos);
+                return distanceMoved > 0.5;
+            },
+            100,
+            "移动动作应该已完成且NPC应该已移动"
+        );
     }
 
     /**
@@ -129,10 +152,16 @@ public class ActionTests {
      */
     public static void testMoveToEntity(GameTestHelper helper) {
         // 生成观察者和目标
-        Zombie mover = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        Zombie target = helper.spawn(EntityType.ZOMBIE, 8, 2, 2);
+        Zombie mover = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie target = com.Kizunad.customNPCs_test.utils.NpcTestHelper.spawnTaggedEntity(
+            helper,
+            EntityType.ZOMBIE,
+            new net.minecraft.core.BlockPos(8, 2, 2));
         
-        INpcMind mind = mover.getData(NpcMindAttachment.NPC_MIND);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, mover);
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, mover);
         
         Vec3 startPos = mover.position();
         
@@ -145,16 +174,21 @@ public class ActionTests {
         mind.getGoalSelector().registerGoal(testGoal);
         
         // 等待移动完成
-        helper.succeedWhen(() -> {
-            // 动作完成
-            helper.assertTrue(mind.getActionExecutor().isIdle(),
-                "移动动作应该已完成");
-            
-            // 检查是否移动了
-            Vec3 currentPos = mover.position();
-            double distanceMoved = currentPos.distanceTo(startPos);
-            helper.assertTrue(distanceMoved > 0.5,
-                "NPC 应该已移动，移动距离: " + distanceMoved);
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                // 动作完成
+                if (!mind.getActionExecutor().isIdle()) {
+                    return false;
+                }
+                
+                // 检查是否移动了
+                Vec3 currentPos = mover.position();
+                double distanceMoved = currentPos.distanceTo(startPos);
+                return distanceMoved > 0.5;
+            },
+            100,
+            "移动动作应该已完成且NPC应该已移动"
+        );
     }
 }

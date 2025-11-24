@@ -46,12 +46,19 @@ public class VisionSensor implements ISensor {
         // 获取扫描范围
         Vec3 position = entity.position();
         AABB searchBox = new AABB(position, position).inflate(range);
+
+        // 如果实体带有测试标签，则只关注同标签的实体，避免跨测试干扰
+        String testTag = entity.getTags().stream()
+            .filter(tag -> tag.startsWith("test:"))
+            .findFirst()
+            .orElse(null);
         
         // 扫描范围内的所有生物
         List<LivingEntity> nearbyEntities = level.getEntitiesOfClass(
             LivingEntity.class,
             searchBox,
-            e -> e != entity && e.isAlive()
+            e -> e != entity && e.isAlive() &&
+                 (testTag == null || e.getTags().contains(testTag))
         );
         
         // 清除旧的视觉记忆
@@ -67,6 +74,14 @@ public class VisionSensor implements ISensor {
         List<LivingEntity> visibleEntities = nearbyEntities.stream()
             .filter(target -> hasLineOfSight(entity, target, level))
             .toList();
+            
+        // DEBUG
+        if (!visibleEntities.isEmpty()) {
+            System.out.println("[VisionSensor] Visible entities: " + visibleEntities.size());
+            for (LivingEntity e : visibleEntities) {
+                System.out.println("  - " + e.getType().getDescription().getString() + " at " + e.blockPosition().toShortString());
+            }
+        }
         
         // 存储可见实体数量
         mind.getMemory().rememberShortTerm("visible_entities_count", visibleEntities.size(), MEMORY_DURATION);

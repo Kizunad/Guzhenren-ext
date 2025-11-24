@@ -28,6 +28,7 @@ public abstract class PlanBasedGoal implements IGoal {
     private final GoapPlanner planner;
     private boolean started;
     private boolean planningFailed;
+    private boolean completed;
     
     /**
      * 创建基于规划的目标
@@ -36,6 +37,7 @@ public abstract class PlanBasedGoal implements IGoal {
         this.planner = new GoapPlanner();
         this.started = false;
         this.planningFailed = false;
+        this.completed = false;
     }
     
     @Override
@@ -60,9 +62,16 @@ public abstract class PlanBasedGoal implements IGoal {
     public void start(INpcMind mind, LivingEntity entity) {
         started = true;
         planningFailed = false;
+        completed = false;
         
         // 获取当前世界状态
         WorldState currentState = mind.getCurrentWorldState(entity);
+        
+        // 合并目标特定的当前状态
+        WorldState goalSpecificState = getCurrentState(mind, entity);
+        if (goalSpecificState != null) {
+            currentState = currentState.apply(goalSpecificState);
+        }
         
         // 获取目标状态
         WorldState goalState = getDesiredState(mind, entity);
@@ -110,9 +119,28 @@ public abstract class PlanBasedGoal implements IGoal {
         }
         
         // 当所有动作都执行完成后，目标完成
-        return started && mind.getActionExecutor().isIdle();
+        if (started && mind.getActionExecutor().isIdle()) {
+            completed = true;
+            return true;
+        }
+
+        return completed;
     }
     
+    /**
+     * 获取目标特定的当前状态
+     * <p>
+     * 子类可以重写此方法以提供额外的当前状态信息。
+     * 这些状态将合并到 mind.getCurrentWorldState() 返回的状态中。
+     * 
+     * @param mind NPC思维
+     * @param entity NPC实体
+     * @return 目标特定的当前状态，如果没有则返回 null
+     */
+    protected WorldState getCurrentState(INpcMind mind, LivingEntity entity) {
+        return null;
+    }
+
     /**
      * 检查规划是否失败
      * @return true 如果规划失败

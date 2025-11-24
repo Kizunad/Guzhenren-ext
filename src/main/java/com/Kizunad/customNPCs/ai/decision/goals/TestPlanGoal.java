@@ -18,6 +18,7 @@ public class TestPlanGoal implements IGoal {
     private final float priority;
     private final List<IAction> actionPlan;
     private boolean started;
+    private boolean completed;
     
     /**
      * 创建测试计划目标
@@ -28,6 +29,7 @@ public class TestPlanGoal implements IGoal {
         this.priority = priority;
         this.actionPlan = actionPlan;
         this.started = false;
+        this.completed = false;
     }
     
     @Override
@@ -37,7 +39,7 @@ public class TestPlanGoal implements IGoal {
     
     @Override
     public boolean canRun(INpcMind mind, LivingEntity entity) {
-        return true;
+        return !completed;
     }
     
     @Override
@@ -61,8 +63,11 @@ public class TestPlanGoal implements IGoal {
     
     @Override
     public boolean isFinished(INpcMind mind, LivingEntity entity) {
-        // 当所有动作都执行完成后，目标完成
-        return started && mind.getActionExecutor().isIdle();
+        if (started && mind.getActionExecutor().isIdle()) {
+            completed = true;
+            return true;
+        }
+        return false;
     }
     
     @Override

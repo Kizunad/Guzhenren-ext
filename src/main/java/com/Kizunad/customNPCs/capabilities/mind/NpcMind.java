@@ -47,6 +47,9 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     
     @Override
     public void tick(ServerLevel level, LivingEntity entity) {
+        // 绑定执行器上下文，防止跨实体/测试计划污染
+        actionExecutor.bindToEntity(entity);
+        
         // 1. 执行传感器（感知环境）
         sensorManager.tick(this, entity, level);
         
@@ -103,4 +106,3 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         return state;
     }
 }
-

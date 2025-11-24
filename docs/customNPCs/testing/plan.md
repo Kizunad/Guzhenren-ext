@@ -93,3 +93,8 @@
 ### Review Schedule
 - **Weekly**: Review test stability and flaky test rates.
 - **Monthly**: Assess progress on Framework Evolution (Phase 3).
+
+## TODO / 后续建议
+- [ ] 在规划阶段对移动类动作做坐标合法性预验证，记录非法坐标样本用于回溯。
+- [ ] 为 GoalSelector/ActionExecutor 增加测试标签断言的统计日志，验证跨测试隔离效果。
+- [ ] 增加多轮 GameTest 自动运行脚本，输出通过率均值/方差并接入 CI 报警。

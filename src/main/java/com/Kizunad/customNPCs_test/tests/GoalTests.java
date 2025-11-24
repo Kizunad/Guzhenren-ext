@@ -13,77 +13,91 @@ import net.minecraft.world.entity.monster.Zombie;
 public class GoalTests {
 
     public static void testIdleGoal(GameTestHelper helper) {
-        // 生成一个僵尸
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
+        // 使用工厂创建僵尸
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 验证它有 NpcMind
         helper.assertTrue(zombie.hasData(NpcMindAttachment.NPC_MIND), "Zombie should have NpcMind attachment");
         
-        // 手动注册目标（GameTest 中不会触发 EntityJoinLevelEvent）
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        // 手动注册目标
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.IdleGoal());
         mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal());
         
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
+        
         // 验证初始目标是 IdleGoal
-        helper.succeedWhen(() -> {
-            var currentGoal = mind.getGoalSelector().getCurrentGoal();
-            
-            helper.assertTrue(currentGoal != null, "Current goal should not be null");
-            helper.assertTrue(currentGoal.getName().equals("idle"), 
-                "Initial goal should be 'idle', but was '" + currentGoal.getName() + "'");
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                var currentGoal = mind.getGoalSelector().getCurrentGoal();
+                return currentGoal != null && currentGoal.getName().equals("idle");
+            },
+            20,
+            "Initial goal should be 'idle'"
+        );
     }
 
     public static void testSurvivalGoal(GameTestHelper helper) {
-        // 生成一个僵尸
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
+        // 使用工厂创建僵尸
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 手动注册目标
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.IdleGoal());
         mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal());
+        
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
         
         // 设置低血量 (1.0f < 30% of 20.0f)
         zombie.setHealth(1.0f);
         
         // 验证目标切换到 SurvivalGoal
-        helper.succeedWhen(() -> {
-            var currentGoal = mind.getGoalSelector().getCurrentGoal();
-            
-            helper.assertTrue(currentGoal != null, "Current goal should not be null");
-            helper.assertTrue(currentGoal.getName().equals("survival"), 
-                "Goal should switch to 'survival' when health is low, but was '" 
-                + (currentGoal == null ? "null" : currentGoal.getName()) + "'");
-        });
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                var currentGoal = mind.getGoalSelector().getCurrentGoal();
+                return currentGoal != null && currentGoal.getName().equals("survival");
+            },
+            20,
+            "Goal should switch to 'survival' when health is low"
+        );
     }
 
     public static void testWatchClosestEntityGoal(GameTestHelper helper) {
-        // 生成观察者
-        Zombie observer = helper.spawn(EntityType.ZOMBIE, 2, 2, 2);
-        INpcMind mind = observer.getData(NpcMindAttachment.NPC_MIND);
+        // 使用工厂创建观察者（带视觉传感器）
+        Zombie observer = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
+        INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, observer);
         
-        // 手动注册组件
-        mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.VisionSensor());
+        // 手动注册目标
         mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.IdleGoal());
         mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal());
         
-        // 生成目标（在视野内）
-        helper.spawn(EntityType.ZOMBIE, 5, 2, 2);
+        // 启动 Mind tick
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, observer);
         
-        // 等待传感器扫描并触发目标切换 (增加等待时间到 20 ticks)
-        helper.runAtTickTime(20, () -> {
-            // 调试：检查记忆是否已更新
-            helper.assertTrue(mind.getMemory().hasMemory("nearest_entity"), 
-                "Memory should contain 'nearest_entity' before goal switch");
+        // 生成目标（在视野内）
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.spawnTaggedEntity(
+            helper,
+            EntityType.ZOMBIE,
+            new net.minecraft.core.BlockPos(5, 2, 2));
+        
+        // 等待传感器扫描并触发目标切换
+        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+            helper,
+            () -> {
+                // 调试：检查记忆是否已更新
+                if (!mind.getMemory().hasMemory("nearest_entity")) {
+                    return false;
+                }
                 
-            var currentGoal = mind.getGoalSelector().getCurrentGoal();
-            
-            helper.assertTrue(currentGoal != null, "Current goal should not be null");
-            helper.assertTrue(currentGoal.getName().equals("watch_closest_entity"), 
-                "Goal should switch to 'watch_closest_entity' when entity is visible, but was '" 
-                + currentGoal.getName() + "'");
-            
-            helper.succeed();
-        });
+                var currentGoal = mind.getGoalSelector().getCurrentGoal();
+                return currentGoal != null && currentGoal.getName().equals("watch_closest_entity");
+            },
+            40, // 增加等待时间
+            "Goal should switch to 'watch_closest_entity' when entity is visible"
+        );
     }
 }

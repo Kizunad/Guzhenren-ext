@@ -110,4 +110,33 @@
 ## 性能评估计划
 1.  **基准测试**: 在空超平坦世界运行场景 A，记录基准耗时。
 2.  **压力测试**: 在场景 C 环境下运行场景 A，记录耗时增长。
-3.  **分析**: 如果规划耗时超过 50ms (1 tick)，则需要优化 (如：分帧规划、限制搜索深度)。
+
+### 8. 通用基础架构完善 (Generic Infrastructure)
+为了支持第三方模组扩展（如修仙模组），我们需要完善核心架构的通用性。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/personality/PersonalityModule.java`
+- **性格系统**:
+    - `Map<String, Float> traits`: 存储性格特征（如 "bravery": 0.8, "greed": 0.2）。
+    - `float modifyPriority(String goalType, float basePriority)`: 根据性格调整目标优先级。
+    - 集成到 `UtilityGoalSelector` 中。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/sensors/AuditorySensor.java`
+- **听觉感知**:
+    - 监听 `SoundEvent` 或游戏内事件。
+    - 产生 `MemoryEntry` (如 "heard_sound_location")。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/sensors/DamageSensor.java`
+- **伤害感知**:
+    - 监听 `LivingHurtEvent`。
+    - 记录攻击者信息 ("last_attacker")。
+
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/api/NpcMindRegistry.java`
+- **API 扩展性**:
+    - `registerGoalType(ResourceLocation id, Class<? extends IGoal> goalClass)`
+    - `registerSensorType(ResourceLocation id, Class<? extends ISensor> sensorClass)`
+    - `registerActionType(ResourceLocation id, Class<? extends IAction> actionClass)`
+    - 允许外部模组注册自己的 AI 组件。
+
+## 验证计划 (Infrastructure)
+- **PersonalityTests**: 验证不同性格的 NPC 对同一情况（如低血量）有不同反应。
+- **RegistryTests**: 验证能否成功注册并加载自定义 Goal/Sensor。

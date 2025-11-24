@@ -89,8 +89,30 @@ public class MemoryModule {
      * @param key 记忆键
      * @return 记忆值
      */
+    /**
+     * 获取记忆值（recall 的别名）
+     * @param key 记忆键
+     * @return 记忆值
+     */
     public Object getMemory(String key) {
         return recall(key);
+    }
+
+    /**
+     * 获取短期记忆值（带类型转换和默认值）
+     * @param key 记忆键
+     * @param type 值类型
+     * @param defaultValue 默认值
+     * @param <T> 类型
+     * @return 记忆值
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getShortTerm(String key, Class<T> type, T defaultValue) {
+        Object value = recall(key);
+        if (value != null && type.isInstance(value)) {
+            return (T) value;
+        }
+        return defaultValue;
     }
     
     /**

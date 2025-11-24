@@ -8,6 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 
 /**
  * 动作执行器 - 管理和执行动作队列
@@ -22,10 +23,67 @@ public class ActionExecutor {
     
     private final Queue<IAction> actionQueue;
     private IAction currentAction;
+    private UUID boundEntityId;
+    private String boundTestTag;
     
     public ActionExecutor() {
         this.actionQueue = new LinkedList<>();
         this.currentAction = null;
+        this.boundEntityId = null;
+        this.boundTestTag = null;
+    }
+
+    /**
+     * 将执行器绑定到当前实体上下文，防止不同测试/实体间的计划相互污染。
+     */
+    public void bindToEntity(LivingEntity entity) {
+        UUID entityId = entity.getUUID();
+        if (boundEntityId == null || !boundEntityId.equals(entityId)) {
+            // 新的实体上下文，重置执行器状态
+            stopCurrentPlan();
+            this.boundEntityId = entityId;
+            String testTag = extractTestTag(entity);
+            if (testTag != null) {
+                this.boundTestTag = testTag;
+            } else {
+                this.boundTestTag = null;
+            }
+            System.out.println("[ActionExecutor] 绑定到实体 " + entity.getName().getString()
+                + " (id=" + entity.getId() + ") 测试标签=" + this.boundTestTag);
+        } else if (boundTestTag == null) {
+            // 尝试收集当前实体的测试标签
+            String testTag = extractTestTag(entity);
+            if (testTag != null) {
+                this.boundTestTag = testTag;
+            }
+        }
+    }
+
+    private boolean isContextValid(LivingEntity entity) {
+        if (boundEntityId == null) {
+            return true;
+        }
+        if (!boundEntityId.equals(entity.getUUID())) {
+            System.err.println("[ActionExecutor] 上下文实体变化，丢弃计划");
+            stopCurrentPlan();
+            return false;
+        }
+        if (boundTestTag == null) {
+            return true;
+        }
+        boolean matches = entity.getTags().contains(boundTestTag);
+        if (!matches) {
+            System.err.println("[ActionExecutor] 检测到不同测试标签，丢弃计划，标签=" + boundTestTag);
+            stopCurrentPlan();
+        }
+        return matches;
+    }
+
+    private String extractTestTag(LivingEntity entity) {
+        return entity.getTags().stream()
+            .filter(tag -> tag.startsWith("test:"))
+            .findFirst()
+            .orElse(null);
     }
     
     /**
@@ -91,6 +149,9 @@ public class ActionExecutor {
      * @param entity NPC 实体
      */
     public void tick(INpcMind mind, LivingEntity entity) {
+        if (!isContextValid(entity)) {
+            return;
+        }
         // 如果没有当前动作，尝试从队列获取
         if (currentAction == null) {
             if (!actionQueue.isEmpty()) {
