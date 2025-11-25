@@ -24,13 +24,11 @@ public class ActionExecutor {
     private final Queue<IAction> actionQueue;
     private IAction currentAction;
     private UUID boundEntityId;
-    private String boundTestTag;
     
     public ActionExecutor() {
         this.actionQueue = new LinkedList<>();
         this.currentAction = null;
         this.boundEntityId = null;
-        this.boundTestTag = null;
     }
 
     /**
@@ -42,20 +40,8 @@ public class ActionExecutor {
             // 新的实体上下文，重置执行器状态
             stopCurrentPlan();
             this.boundEntityId = entityId;
-            String testTag = extractTestTag(entity);
-            if (testTag != null) {
-                this.boundTestTag = testTag;
-            } else {
-                this.boundTestTag = null;
-            }
             System.out.println("[ActionExecutor] 绑定到实体 " + entity.getName().getString()
-                + " (id=" + entity.getId() + ") 测试标签=" + this.boundTestTag);
-        } else if (boundTestTag == null) {
-            // 尝试收集当前实体的测试标签
-            String testTag = extractTestTag(entity);
-            if (testTag != null) {
-                this.boundTestTag = testTag;
-            }
+                + " (id=" + entity.getId() + ")");
         }
     }
 
@@ -68,22 +54,7 @@ public class ActionExecutor {
             stopCurrentPlan();
             return false;
         }
-        if (boundTestTag == null) {
-            return true;
-        }
-        boolean matches = entity.getTags().contains(boundTestTag);
-        if (!matches) {
-            System.err.println("[ActionExecutor] 检测到不同测试标签，丢弃计划，标签=" + boundTestTag);
-            stopCurrentPlan();
-        }
-        return matches;
-    }
-
-    private String extractTestTag(LivingEntity entity) {
-        return entity.getTags().stream()
-            .filter(tag -> tag.startsWith("test:"))
-            .findFirst()
-            .orElse(null);
+        return true;
     }
     
     /**

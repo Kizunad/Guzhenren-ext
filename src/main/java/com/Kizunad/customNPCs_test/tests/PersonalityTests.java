@@ -10,7 +10,7 @@ import com.Kizunad.customNPCs.capabilities.mind.NpcMind;
 import com.Kizunad.customNPCs_test.utils.TestEntityFactory;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.world.damagesource.DamageSource;
+
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Zombie;
@@ -35,8 +35,10 @@ public class PersonalityTests {
     @GameTest(template = "empty")
     public static void testPersonalityDrivenDecision(GameTestHelper helper) {
         // === 第一步：创建两个 NPC，配置不同性格 ===
-        var coward = TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(1, 64, 1), EntityType.ZOMBIE); // 胆小鬼
-        var warrior = TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(3, 64, 1), EntityType.ZOMBIE); // 战士
+        var coward = TestEntityFactory.createSimpleTestNPC(
+            helper, new net.minecraft.core.BlockPos(1, 64, 1), EntityType.ZOMBIE); // 胆小鬼
+        var warrior = TestEntityFactory.createSimpleTestNPC(
+            helper, new net.minecraft.core.BlockPos(3, 64, 1), EntityType.ZOMBIE); // 战士
         
         // 为 coward 配置性格：极度贪生（怕死）
         Map<DriveType, Float> cowardTraits = new EnumMap<>(DriveType.class);
@@ -143,7 +145,8 @@ public class PersonalityTests {
     /**
      * 模拟攻击事件（触发 DamageSensor）
      */
-    private static void simulateAttack(NpcMind mind, LivingEntity victim, LivingEntity attacker, GameTestHelper helper) {
+    private static void simulateAttack(NpcMind mind, LivingEntity victim,
+                                        LivingEntity attacker, GameTestHelper helper) {
         // 设置最后攻击者
         victim.setLastHurtByMob(attacker);
         

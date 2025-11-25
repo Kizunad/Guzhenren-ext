@@ -1,6 +1,7 @@
 package com.Kizunad.customNPCs_test.tests;
 
 import com.Kizunad.customNPCs.ai.sensors.AuditorySensor;
+import com.Kizunad.customNPCs_test.overrides.TestAuditorySensor;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs_test.utils.NpcTestHelper;
 import com.Kizunad.customNPCs_test.utils.TestEntityFactory;
@@ -12,6 +13,9 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.List;
 
 /**
@@ -33,12 +37,13 @@ public class AuditoryTests {
         
         // 替换为短距离听觉传感器（避免听到其他测试中的声音）
         mind.getSensorManager().removeSensor("auditory");
-        mind.getSensorManager().registerSensor(new AuditorySensor(10.0));
+        mind.getSensorManager().registerSensor(new TestAuditorySensor(10.0));
         
         // 创建移动中的目标
         Zombie target = TestEntityFactory.createTestZombie(helper, new BlockPos(4, 2, 2));
         // 给目标一个速度，让它产生移动声音
-        target.setDeltaMovement(new Vec3(0.1, 0, 0));
+        target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+        target.setDeltaMovement(new Vec3(0.2, 0, 0));
         
         // 驱动 Mind
         NpcTestHelper.tickMind(helper, observer);
@@ -75,7 +80,7 @@ public class AuditoryTests {
         
         // 替换为短距离听觉传感器
         mind.getSensorManager().removeSensor("auditory");
-        mind.getSensorManager().registerSensor(new AuditorySensor(3.0));
+        mind.getSensorManager().registerSensor(new TestAuditorySensor(3.0));
         
         // 驱动 Mind
         NpcTestHelper.tickMind(helper, observer);
@@ -93,7 +98,8 @@ public class AuditoryTests {
             
             // 验证没有记录最响亮声音信息
             if (mind.getMemory().hasMemory("loudest_sound_types")) {
-                throw new GameTestAssertException("Memory should not contain loudest_sound_types when no sounds are heard");
+                throw new GameTestAssertException(
+                    "Memory should not contain loudest_sound_types when no sounds are heard");
             }
         }, "Auditory sensor should detect 0 sounds");
     }
@@ -109,11 +115,12 @@ public class AuditoryTests {
         
         // 替换为短距离听觉传感器
         mind.getSensorManager().removeSensor("auditory");
-        mind.getSensorManager().registerSensor(new AuditorySensor(10.0));
+        mind.getSensorManager().registerSensor(new TestAuditorySensor(10.0));
         
         // 创建目标并让它既移动又受伤
         Zombie target = TestEntityFactory.createTestZombie(helper, new BlockPos(4, 2, 2));
-        target.setDeltaMovement(new Vec3(0.1, 0, 0)); // 移动
+        target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+        target.setDeltaMovement(new Vec3(0.2, 0, 0)); // 移动
         target.hurt(helper.getLevel().damageSources().generic(), 1.0f); // 受伤
         
         // 驱动 Mind
@@ -151,11 +158,12 @@ public class AuditoryTests {
         
         // 使用较大范围的听觉传感器
         mind.getSensorManager().removeSensor("auditory");
-        mind.getSensorManager().registerSensor(new AuditorySensor(20.0));
+        mind.getSensorManager().registerSensor(new TestAuditorySensor(20.0));
         
         // 创建近距离声音源
         Zombie nearTarget = TestEntityFactory.createTestZombie(helper, new BlockPos(6, 2, 5));
-        nearTarget.setDeltaMovement(new Vec3(0.1, 0, 0));
+        nearTarget.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+        nearTarget.setDeltaMovement(new Vec3(0.2, 0, 0));
         
         // 驱动 Mind
         NpcTestHelper.tickMind(helper, observer);
@@ -171,7 +179,8 @@ public class AuditoryTests {
         nearTarget.kill();
         helper.runAfterDelay(TICK_DELAY, () -> {
             Zombie farTarget = TestEntityFactory.createTestZombie(helper, new BlockPos(9, 2, 5));
-            farTarget.setDeltaMovement(new Vec3(0.1, 0, 0));
+            farTarget.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+            farTarget.setDeltaMovement(new Vec3(0.2, 0, 0));
             
             // 再次驱动 Mind
             NpcTestHelper.tickMind(helper, observer);
@@ -201,15 +210,17 @@ public class AuditoryTests {
         
         // 使用较大范围的听觉传感器
         mind.getSensorManager().removeSensor("auditory");
-        mind.getSensorManager().registerSensor(new AuditorySensor(20.0));
+        mind.getSensorManager().registerSensor(new TestAuditorySensor(20.0));
         
         // 创建近距离声音源（应该是最响亮的）
         Zombie nearTarget = TestEntityFactory.createTestZombie(helper, new BlockPos(6, 2, 5));
-        nearTarget.setDeltaMovement(new Vec3(0.1, 0, 0));
+        nearTarget.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+        nearTarget.setDeltaMovement(new Vec3(0.2, 0, 0));
         
         // 创建远距离声音源
         Zombie farTarget = TestEntityFactory.createTestZombie(helper, new BlockPos(9, 2, 5));
-        farTarget.setDeltaMovement(new Vec3(0.1, 0, 0));
+        farTarget.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+        farTarget.setDeltaMovement(new Vec3(0.2, 0, 0));
         
         // 驱动 Mind
         NpcTestHelper.tickMind(helper, observer);

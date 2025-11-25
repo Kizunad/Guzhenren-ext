@@ -18,8 +18,10 @@ public class SensorTests {
 
     @GameTest(template = "customnpcs:empty_3x3x3")
     public static void testVisionSensor(GameTestHelper helper) {
-        Zombie observer = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(1, 2, 1));
-        Zombie target = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(3, 2, 3));
+        Zombie observer = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createTestZombie(helper, new net.minecraft.core.BlockPos(1, 2, 1));
+        Zombie target = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createTestZombie(helper, new net.minecraft.core.BlockPos(3, 2, 3));
         
         INpcMind mind = NpcTestHelper.getMind(helper, observer);
         
@@ -39,7 +41,8 @@ public class SensorTests {
     @GameTest(template = "customnpcs:empty_3x3x3")
     public static void testVisionSensorNoEntities(GameTestHelper helper) {
         // 使用工厂创建观察者僵尸
-        Zombie observer = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
+        Zombie observer = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
         INpcMind mind = NpcTestHelper.getMind(helper, observer);
         
         // 替换为短距离视觉传感器（避免看到其他测试中的实体）
@@ -63,7 +66,8 @@ public class SensorTests {
 
             // 验证没有记录最近实体信息
             if (mind.getMemory().hasMemory("nearest_entity")) {
-                throw new GameTestAssertException("Memory should not contain nearest_entity when no entities are visible");
+                throw new GameTestAssertException(
+                    "Memory should not contain nearest_entity when no entities are visible");
             }
         }, "Vision sensor should detect 0 entities");
     }

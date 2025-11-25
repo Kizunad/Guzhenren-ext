@@ -47,18 +47,11 @@ public class VisionSensor implements ISensor {
         Vec3 position = entity.position();
         AABB searchBox = new AABB(position, position).inflate(range);
 
-        // 如果实体带有测试标签，则只关注同标签的实体，避免跨测试干扰
-        String testTag = entity.getTags().stream()
-            .filter(tag -> tag.startsWith("test:"))
-            .findFirst()
-            .orElse(null);
-        
         // 扫描范围内的所有生物
         List<LivingEntity> nearbyEntities = level.getEntitiesOfClass(
             LivingEntity.class,
             searchBox,
-            e -> e != entity && e.isAlive() &&
-                 (testTag == null || e.getTags().contains(testTag))
+            e -> isValidEntity(entity, e)
         );
         
         // 清除旧的视觉记忆
@@ -79,7 +72,8 @@ public class VisionSensor implements ISensor {
         if (!visibleEntities.isEmpty()) {
             System.out.println("[VisionSensor] Visible entities: " + visibleEntities.size());
             for (LivingEntity e : visibleEntities) {
-                System.out.println("  - " + e.getType().getDescription().getString() + " at " + e.blockPosition().toShortString());
+                System.out.println("  - " + e.getType().getDescription().getString()
+                    + " at " + e.blockPosition().toShortString());
             }
         }
         
@@ -116,6 +110,16 @@ public class VisionSensor implements ISensor {
     @Override
     public int getPriority() {
         return SENSOR_PRIORITY; // 视觉是重要的感知，高优先级
+    }
+
+    /**
+     * 检查实体是否是有效的感知目标
+     * @param observer 观察者
+     * @param target 目标
+     * @return 是否有效
+     */
+    protected boolean isValidEntity(LivingEntity observer, LivingEntity target) {
+        return target != observer && target.isAlive();
     }
     
     /**

@@ -1,7 +1,7 @@
 package com.Kizunad.customNPCs_test.tests;
 
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
-import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
@@ -19,7 +19,8 @@ public class MemoryTests {
 
     public static void testMemoryExpiration(GameTestHelper helper) {
         // 使用工厂创建僵尸
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 获取 Mind
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
@@ -44,7 +45,8 @@ public class MemoryTests {
 
     public static void testMemoryPersistence(GameTestHelper helper) {
         // 使用工厂创建僵尸
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 添加长期记忆
@@ -56,7 +58,8 @@ public class MemoryTests {
         CompoundTag nbt = mind.serializeNBT(helper.getLevel().registryAccess());
         
         // 生成另一个僵尸（模拟重新加载后的实体）
-        Zombie newZombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(SPAWN_OFFSET, 2, 2), EntityType.ZOMBIE);
+        Zombie newZombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(SPAWN_OFFSET, 2, 2), EntityType.ZOMBIE);
         INpcMind newMind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, newZombie);
         
         // 模拟反序列化

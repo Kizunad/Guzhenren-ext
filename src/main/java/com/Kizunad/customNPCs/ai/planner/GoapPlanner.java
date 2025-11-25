@@ -118,7 +118,8 @@ public class GoapPlanner {
                 if (!inOpenSet) {
                     openSet.add(newNode);
                     // DEBUG
-                    System.out.println("  Added new node via " + action.getClass().getSimpleName() + ", f=" + newNode.getFScore());
+                    System.out.println("  Added new node via " + action.getClass().getSimpleName()
+                        + ", f=" + newNode.getFScore());
                 }
             }
         }

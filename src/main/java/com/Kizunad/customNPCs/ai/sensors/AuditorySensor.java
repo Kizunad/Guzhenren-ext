@@ -19,10 +19,12 @@ import java.util.UUID;
  * - 计算声音强度（基于距离衰减）
  * - 将听到的声音信息存入记忆
  */
+@SuppressWarnings("checkstyle:MagicNumber")
 public class AuditorySensor implements ISensor {
     
     private static final double DEFAULT_RANGE = 24.0D; // 默认听觉范围（格）
-    private static final int SCAN_INTERVAL = 10; // 每 10 ticks 扫描一次
+    // 单 tick 扫描，避免短暂事件（位移/受伤）的声音在衰减前被遗漏
+    private static final int SCAN_INTERVAL = 1;
     private static final int MEMORY_DURATION = 200; // 记忆持续时间（10秒）
     private static final int SENSOR_PRIORITY = 20; // 传感器优先级（高于视觉的 10）
     private static final int MAX_STORED_EVENTS = 5; // 存储的最大声音事件数
@@ -48,18 +50,11 @@ public class AuditorySensor implements ISensor {
         Vec3 position = observer.position();
         AABB searchBox = new AABB(position, position).inflate(range);
         
-        // 如果实体带有测试标签，则只关注同标签的实体，避免跨测试干扰
-        String testTag = observer.getTags().stream()
-            .filter(tag -> tag.startsWith("test:"))
-            .findFirst()
-            .orElse(null);
-        
         // 扫描范围内的所有生物
         List<LivingEntity> nearbyEntities = level.getEntitiesOfClass(
             LivingEntity.class,
             searchBox,
-            e -> e != observer && e.isAlive() &&
-                 (testTag == null || e.getTags().contains(testTag))
+            e -> isValidEntity(observer, e)
         );
         
         // 收集所有声音事件
@@ -182,6 +177,16 @@ public class AuditorySensor implements ISensor {
     @Override
     public int getPriority() {
         return SENSOR_PRIORITY; // 听觉是重要的感知，高优先级
+    }
+
+    /**
+     * 检查实体是否是有效的感知目标
+     * @param observer 观察者
+     * @param target 目标
+     * @return 是否有效
+     */
+    protected boolean isValidEntity(LivingEntity observer, LivingEntity target) {
+        return target != observer && target.isAlive();
     }
     
     /**

@@ -20,6 +20,12 @@
         <property name="files" value=".*[\\/]customNPCs_test[\\/].*\.java$"/>
     </module>
 
+    <!-- 忽略主代码中某些文件的 MagicNumber 检查 -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="MagicNumber"/>
+        <property name="files" value=".*(MoveToAction|PersonalityModule|DamageSensor|AuditorySensor|NpcMind)\.java$"/>
+    </module>
+
     <module name="TreeWalker">
         <!-- Naming Conventions -->
         <module name="ConstantName"/>

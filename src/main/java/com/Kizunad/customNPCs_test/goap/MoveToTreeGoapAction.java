@@ -6,7 +6,7 @@ import com.Kizunad.customNPCs.ai.planner.WorldState;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.Blocks;
+
 
 /**
  * 移动到树木位置的 GOAP 动作

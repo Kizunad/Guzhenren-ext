@@ -77,53 +77,63 @@ public class NpcMindGameTests {
     // ==================== MoveToAction 扩展测试 ====================
     
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToCoordinate_NearDistance(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToCoordinate_NearDistance(helper);
+    public void testMoveToCoordinateNearDistance(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToCoordinateNearDistance(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_CustomAcceptableDistance(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_CustomAcceptableDistance(helper);
+    public void testMoveToActionCustomAcceptableDistance(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionCustomAcceptableDistance(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_AlreadyInRange(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_AlreadyInRange(helper);
+    public void testMoveToActionAlreadyInRange(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionAlreadyInRange(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_InvalidCoordinates_NaN(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_InvalidCoordinates_NaN(helper);
+    public void testMoveToActionInvalidCoordinatesNaN(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionInvalidCoordinatesNaN(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_InvalidCoordinates_ExtremeY(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_InvalidCoordinates_ExtremeY(helper);
+    public void testMoveToActionInvalidCoordinatesExtremeY(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionInvalidCoordinatesExtremeY(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_TargetEntityDespawned(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_TargetEntityDespawned(helper);
+    public void testMoveToActionTargetEntityDespawned(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionTargetEntityDespawned(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_Timeout(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_Timeout(helper);
+    public void testMoveToActionTimeout(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionTimeout(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_SamePosition(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_SamePosition(helper);
+    public void testMoveToActionSamePosition(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionSamePosition(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_ExtremelyClose(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_ExtremelyClose(helper);
+    public void testMoveToActionExtremelyClose(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionExtremelyClose(helper);
     }
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
-    public void testMoveToAction_SequentialMoves(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests.testMoveToAction_SequentialMoves(helper);
+    public void testMoveToActionSequentialMoves(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToActionExtendedTests
+            .testMoveToActionSequentialMoves(helper);
     }
     
     // ==================== GOAP 规划器测试 ====================

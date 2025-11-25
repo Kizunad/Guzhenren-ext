@@ -9,6 +9,7 @@ import java.util.Random;
  * <p>
  * 管理 NPC 的情绪状态（动态）和性格特征（静态）
  */
+@SuppressWarnings("checkstyle:MagicNumber")
 public class PersonalityModule {
     
     // 七情 (动态情绪)

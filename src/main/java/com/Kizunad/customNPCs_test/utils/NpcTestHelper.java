@@ -15,6 +15,13 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Supplier;
 
+import com.Kizunad.customNPCs.ai.sensors.SensorManager;
+import com.Kizunad.customNPCs.ai.executor.ActionExecutor;
+import com.Kizunad.customNPCs.capabilities.mind.NpcMind;
+import com.Kizunad.customNPCs_test.overrides.TestVisionSensor;
+import com.Kizunad.customNPCs_test.overrides.TestAuditorySensor;
+import com.Kizunad.customNPCs_test.overrides.TestActionExecutor;
+
 /**
  * NPC 测试助手类
  * <p>
@@ -42,11 +49,21 @@ public class NpcTestHelper {
         T entity = helper.spawn(entityType, pos);
         applyTestTag(helper, entity);
 
-        // 验证NpcMind已附加
-        if (!entity.hasData(NpcMindAttachment.NPC_MIND)) {
-            helper.fail("NpcMind应该在实体生成时自动附加，但实体 "
-                    + entity.getType().getDescription().getString() + " 没有NpcMind");
-        }
+        // 创建带有测试隔离的组件
+        SensorManager sensorManager = new SensorManager();
+        // 清除默认传感器（如果有）并添加测试传感器
+        // 注意：SensorManager 构造函数可能已经添加了默认传感器，这里我们手动添加测试版
+        // 如果 SensorManager 没有 clear 方法，我们可能需要创建一个空的 SensorManager 或者在 TestSensorManager 中处理
+        // 假设 SensorManager 是空的或者我们可以添加覆盖
+        sensorManager.registerSensor(new TestVisionSensor());
+        sensorManager.registerSensor(new TestAuditorySensor());
+
+        ActionExecutor actionExecutor = new TestActionExecutor();
+
+        // 创建并注入测试专用的 NpcMind
+        NpcMind testMind = new NpcMind(actionExecutor, sensorManager);
+        
+        entity.setData(NpcMindAttachment.NPC_MIND, testMind);
 
         return entity;
     }

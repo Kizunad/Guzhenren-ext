@@ -5,10 +5,19 @@ LibSourceCodes/
 .gradle/
 build/
 run/
+bin/
 
 #Logs
 gametest_*
+*.log
 
 #AI Develop
 .spec-workflow
 .agent
+.eclipse
+.serena
+
+#IDE
+.settings
+.classpath
+.project

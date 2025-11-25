@@ -181,10 +181,12 @@ public class PlannerTests {
         helper.setBlock(treePos, net.minecraft.world.level.block.Blocks.OAK_LOG);
         
         // 使用工厂创建僵尸
-        net.minecraft.world.entity.monster.Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
+        net.minecraft.world.entity.monster.Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
         
         // 获取 NpcMind
-        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind =
+            com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
         com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);
@@ -253,10 +255,12 @@ public class PlannerTests {
         helper.setBlock(relativeTreePos, net.minecraft.world.level.block.Blocks.OAK_LOG);
         
         // 使用工厂创建僵尸
-        net.minecraft.world.entity.monster.Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
+        net.minecraft.world.entity.monster.Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
         
         // 获取 NpcMind
-        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
+        com.Kizunad.customNPCs.capabilities.mind.INpcMind mind =
+            com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
         com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, zombie);

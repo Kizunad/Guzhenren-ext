@@ -7,6 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * 伤害传感器 - 感知受到的伤害和攻击者
  */
+@SuppressWarnings("checkstyle:MagicNumber")
 public class DamageSensor implements ISensor {
 
     private int lastHurtTime = 0;

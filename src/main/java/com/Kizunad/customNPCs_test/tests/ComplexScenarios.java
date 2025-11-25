@@ -1,9 +1,7 @@
 package com.Kizunad.customNPCs_test.tests;
 
 import com.Kizunad.customNPCs.ai.planner.GoapPlanner;
-import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
-import com.Kizunad.customNPCs.capabilities.mind.NpcMind;
-import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+
 import com.Kizunad.customNPCs_test.goap.CourierGoal;
 import com.Kizunad.customNPCs_test.goap.GatherItemGoal;
 import com.Kizunad.customNPCs_test.utils.TestBatches;
@@ -12,7 +10,7 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
+import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;

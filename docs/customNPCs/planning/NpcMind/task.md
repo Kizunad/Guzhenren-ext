@@ -105,7 +105,7 @@
             - [ ] 添加 `/mind personality` 命令 <!-- id: 98 -->
             - [x] 创建 `PersonalityTests` (验证性格差异) <!-- id: 99 -->
     - [ ] **通用感知 (Generic Sensors)** <!-- id: 89 -->
-        - [ ] 实现 `AuditorySensor` (听觉) <!-- id: 90 -->
+        - [x] 实现 `AuditorySensor` (听觉) <!-- id: 90 -->
         - [x] 实现 `DamageSensor` (伤害感知) <!-- id: 91 -->
     - [ ] **API 扩展性 (Registry)** <!-- id: 92 -->
         - [ ] 实现 `NpcMindRegistry` (注册 Goal/Sensor/Action) <!-- id: 93 -->

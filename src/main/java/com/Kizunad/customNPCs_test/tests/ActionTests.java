@@ -5,7 +5,7 @@ import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.actions.base.WaitAction;
 import com.Kizunad.customNPCs.ai.decision.goals.TestPlanGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
-import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
@@ -24,7 +24,8 @@ public class ActionTests {
      */
     public static void testActionQueue(GameTestHelper helper) {
         // 使用工厂创建僵尸
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 获取 NpcMind
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
@@ -55,7 +56,8 @@ public class ActionTests {
      * 测试执行器空闲状态
      */
     public static void testActionExecutorIdle(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -82,7 +84,8 @@ public class ActionTests {
      * 测试单个 WaitAction 的正确性
      */
     public static void testWaitAction(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -107,7 +110,8 @@ public class ActionTests {
      */
     public static void testMoveToAction(GameTestHelper helper) {
         // 生成一个僵尸在起始位置
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -152,7 +156,8 @@ public class ActionTests {
      */
     public static void testMoveToEntity(GameTestHelper helper) {
         // 生成观察者和目标
-        Zombie mover = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie mover = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         Zombie target = com.Kizunad.customNPCs_test.utils.NpcTestHelper.spawnTaggedEntity(
             helper,
             EntityType.ZOMBIE,

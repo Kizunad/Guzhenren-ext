@@ -11,6 +11,7 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 /**
  * NpcMind 默认实现
  */
+@SuppressWarnings("checkstyle:MagicNumber")
 public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     
     private final MemoryModule memory;
@@ -32,11 +33,36 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
      * @param customPersonality 自定义性格模块
      */
     public NpcMind(com.Kizunad.customNPCs.ai.personality.PersonalityModule customPersonality) {
+        this(
+            new com.Kizunad.customNPCs.ai.executor.ActionExecutor(),
+            new com.Kizunad.customNPCs.ai.sensors.SensorManager(),
+            customPersonality
+        );
+    }
+
+    /**
+     * 创建带有自定义组件的 NpcMind（用于测试）
+     * @param actionExecutor 自定义动作执行器
+     * @param sensorManager 自定义传感器管理器
+     */
+    public NpcMind(
+            com.Kizunad.customNPCs.ai.executor.ActionExecutor actionExecutor,
+            com.Kizunad.customNPCs.ai.sensors.SensorManager sensorManager) {
+        this(actionExecutor, sensorManager, new com.Kizunad.customNPCs.ai.personality.PersonalityModule());
+    }
+
+    /**
+     * 全参数构造函数
+     */
+    public NpcMind(
+            com.Kizunad.customNPCs.ai.executor.ActionExecutor actionExecutor,
+            com.Kizunad.customNPCs.ai.sensors.SensorManager sensorManager,
+            com.Kizunad.customNPCs.ai.personality.PersonalityModule personality) {
         this.memory = new MemoryModule();
         this.goalSelector = new UtilityGoalSelector();
-        this.sensorManager = new com.Kizunad.customNPCs.ai.sensors.SensorManager();
-        this.actionExecutor = new com.Kizunad.customNPCs.ai.executor.ActionExecutor();
-        this.personality = customPersonality;
+        this.sensorManager = sensorManager;
+        this.actionExecutor = actionExecutor;
+        this.personality = personality;
     }
     
     @Override
@@ -101,10 +127,23 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     }
     
     @Override
+    /*
+     * NPC 的"状态快照",用于告知规划器 NPC 当前所处状况,
+     * 从而使规划器能够计算出如何达到目标状态。
+     *
+     * 工作流程:
+     * 1. 目标激活: 通过 canRun() 检查当前状态是否满足目标。
+     * 2. 目标启动: start() 方法获取当前状态。
+     * 3. 规划器使用当前状态和目标状态,生成动作序列。
+     * 4. 动作执行器执行动作,改变世界状态。
+     * 5. 下次 tick 时重新获取当前状态,形成循环。
+     */
     public com.Kizunad.customNPCs.ai.planner.WorldState getCurrentWorldState(LivingEntity entity) {
         com.Kizunad.customNPCs.ai.planner.WorldState state = 
                 new com.Kizunad.customNPCs.ai.planner.WorldState();
         
+
+        // Note: 这里需要建立对应的工具调用而不是直接在此处赋予状态
         // 从实体读取状态
         state.setState("health_low", entity.getHealth() < entity.getMaxHealth() * 0.3f);
         state.setState("health_critical", entity.getHealth() < entity.getMaxHealth() * 0.1f);

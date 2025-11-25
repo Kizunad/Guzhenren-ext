@@ -1,11 +1,10 @@
 package com.Kizunad.customNPCs_test.tests;
 
-import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.decision.goals.TestPlanGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
-import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
@@ -27,8 +26,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试近距离移动（< 5 格）
      */
-    public static void testMoveToCoordinate_NearDistance(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToCoordinateNearDistance(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -44,7 +44,9 @@ public class MoveToActionExtendedTests {
         com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
             helper,
             () -> {
-                if (!mind.getActionExecutor().isIdle()) return false;
+                if (!mind.getActionExecutor().isIdle()) {
+                    return false;
+                }
                 double distanceMoved = zombie.position().distanceTo(startPos);
                 return distanceMoved > 1.0;
             },
@@ -56,8 +58,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试自定义接受距离参数
      */
-    public static void testMoveToAction_CustomAcceptableDistance(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionCustomAcceptableDistance(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -74,7 +77,9 @@ public class MoveToActionExtendedTests {
         com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
             helper,
             () -> {
-                if (!mind.getActionExecutor().isIdle()) return false;
+                if (!mind.getActionExecutor().isIdle()) {
+                    return false;
+                }
                 double distanceMoved = zombie.position().distanceTo(startPos);
                 return distanceMoved > 0.5;
             },
@@ -86,8 +91,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试已在接受范围内的情况
      */
-    public static void testMoveToAction_AlreadyInRange(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionAlreadyInRange(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -115,8 +121,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试无效坐标 - NaN
      */
-    public static void testMoveToAction_InvalidCoordinates_NaN(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionInvalidCoordinatesNaN(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -140,8 +147,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试无效坐标 - 极值Y坐标
      */
-    public static void testMoveToAction_InvalidCoordinates_ExtremeY(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionInvalidCoordinatesExtremeY(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -165,8 +173,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试目标实体消失
      */
-    public static void testMoveToAction_TargetEntityDespawned(GameTestHelper helper) {
-        Zombie mover = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionTargetEntityDespawned(GameTestHelper helper) {
+        Zombie mover = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         Zombie target = com.Kizunad.customNPCs_test.utils.NpcTestHelper.spawnTaggedEntity(
             helper,
             EntityType.ZOMBIE,
@@ -198,8 +207,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试超时机制
      */
-    public static void testMoveToAction_Timeout(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionTimeout(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -226,8 +236,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试当前位置即目标（0距离）
      */
-    public static void testMoveToAction_SamePosition(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionSamePosition(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -251,8 +262,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试极近距离（< 0.5 格）
      */
-    public static void testMoveToAction_ExtremelyClose(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionExtremelyClose(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -278,8 +290,9 @@ public class MoveToActionExtendedTests {
     /**
      * 测试连续多次移动
      */
-    public static void testMoveToAction_SequentialMoves(GameTestHelper helper) {
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+    public static void testMoveToActionSequentialMoves(GameTestHelper helper) {
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
         
         // 启动 Mind tick
@@ -300,7 +313,9 @@ public class MoveToActionExtendedTests {
         com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
             helper,
             () -> {
-                if (!mind.getActionExecutor().isIdle()) return false;
+                if (!mind.getActionExecutor().isIdle()) {
+                    return false;
+                }
                 double totalDistance = zombie.position().distanceTo(start);
                 return totalDistance > 2.0;
             },

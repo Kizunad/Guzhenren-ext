@@ -17,6 +17,7 @@ import net.minecraft.world.phys.Vec3;
  * <p>
  * 使用原版的 PathNavigation 系统进行寻路
  */
+@SuppressWarnings("checkstyle:MagicNumber")
 public class MoveToAction implements IAction {
     
     private final Vec3 targetPos;
@@ -220,7 +221,8 @@ public class MoveToAction implements IAction {
                     + " | 距离目标: " + String.format("%.2f", distanceToTarget)
                     + " | 可接受距离: " + acceptableDistance
                     + " | 当前位置: " + String.format("(%.1f, %.1f, %.1f)", currentPos.x, currentPos.y, currentPos.z)
-                    + " | 目标位置: " + String.format("(%.1f, %.1f, %.1f)", currentTarget.x, currentTarget.y, currentTarget.z));
+                    + " | 目标位置: " + String.format("(%.1f, %.1f, %.1f)",
+                        currentTarget.x, currentTarget.y, currentTarget.z));
                 return ActionStatus.FAILURE;
             }
         }

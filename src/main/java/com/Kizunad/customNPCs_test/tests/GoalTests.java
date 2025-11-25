@@ -14,7 +14,8 @@ public class GoalTests {
 
     public static void testIdleGoal(GameTestHelper helper) {
         // 使用工厂创建僵尸
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 验证它有 NpcMind
         helper.assertTrue(zombie.hasData(NpcMindAttachment.NPC_MIND), "Zombie should have NpcMind attachment");
@@ -41,7 +42,8 @@ public class GoalTests {
 
     public static void testSurvivalGoal(GameTestHelper helper) {
         // 使用工厂创建僵尸
-        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
+        Zombie zombie = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createSimpleTestNPC(helper, new net.minecraft.core.BlockPos(2, 2, 2), EntityType.ZOMBIE);
         
         // 手动注册目标
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, zombie);
@@ -68,7 +70,8 @@ public class GoalTests {
 
     public static void testWatchClosestEntityGoal(GameTestHelper helper) {
         // 使用工厂创建观察者（带视觉传感器）
-        Zombie observer = com.Kizunad.customNPCs_test.utils.TestEntityFactory.createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
+        Zombie observer = com.Kizunad.customNPCs_test.utils.TestEntityFactory
+            .createTestZombie(helper, new net.minecraft.core.BlockPos(2, 2, 2));
         INpcMind mind = com.Kizunad.customNPCs_test.utils.NpcTestHelper.getMind(helper, observer);
         
         // 手动注册目标
