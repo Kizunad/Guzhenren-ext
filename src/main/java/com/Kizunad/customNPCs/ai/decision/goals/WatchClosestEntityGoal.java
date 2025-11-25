@@ -2,11 +2,10 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-
-import java.util.UUID;
 
 /**
  * 注视最近实体目标
@@ -20,7 +19,7 @@ public class WatchClosestEntityGoal implements IGoal {
     private static final float PRIORITY_INACTIVE = 0.0f; // 无目标时的优先级
     private static final float LOOK_MAX_YAW = 30.0F; // 最大偏航角
     private static final float LOOK_MAX_PITCH = 30.0F; // 最大俯仰角
-    
+
     private String targetUUID;
     private boolean isRunning;
 
@@ -64,10 +63,15 @@ public class WatchClosestEntityGoal implements IGoal {
         if (entity.level() instanceof ServerLevel serverLevel) {
             target = serverLevel.getEntity(UUID.fromString(targetUUID));
         }
-        
-        if (target != null && entity instanceof net.minecraft.world.entity.Mob mob) {
+
+        if (
+            target != null &&
+            entity instanceof net.minecraft.world.entity.Mob mob
+        ) {
             // 使用 LookControl 注视目标
-            mob.getLookControl().setLookAt(target, LOOK_MAX_YAW, LOOK_MAX_PITCH);
+            mob
+                .getLookControl()
+                .setLookAt(target, LOOK_MAX_YAW, LOOK_MAX_PITCH);
         }
     }
 

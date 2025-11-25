@@ -1,12 +1,11 @@
 package com.Kizunad.customNPCs.ai.memory;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 /**
  * 记忆模块 - 管理 NPC 的短期和长期记忆
@@ -15,23 +14,23 @@ import java.util.concurrent.ConcurrentHashMap;
  * 长期记忆：持久化信息（如"宗门位置"、"对玩家的好感度"）
  */
 public class MemoryModule {
-    
+
     private final Map<String, MemoryEntry> shortTermMemory;
     private final Map<String, MemoryEntry> longTermMemory;
-    
+
     public MemoryModule() {
         this.shortTermMemory = new ConcurrentHashMap<>();
         this.longTermMemory = new HashMap<>();
     }
-    
+
     public Map<String, MemoryEntry> getShortTermMemory() {
         return shortTermMemory;
     }
-    
+
     public Map<String, MemoryEntry> getLongTermMemory() {
         return longTermMemory;
     }
-    
+
     /**
      * 存储短期记忆
      * @param key 记忆键
@@ -41,7 +40,7 @@ public class MemoryModule {
     public void rememberShortTerm(String key, Object value, int expiryTicks) {
         shortTermMemory.put(key, new MemoryEntry(value, expiryTicks));
     }
-    
+
     /**
      * 存储长期记忆
      * @param key 记忆键
@@ -50,7 +49,7 @@ public class MemoryModule {
     public void rememberLongTerm(String key, Object value) {
         longTermMemory.put(key, new MemoryEntry(value, -1)); // -1 表示永不过期
     }
-    
+
     /**
      * 获取记忆（先查短期，再查长期）
      * @param key 记忆键
@@ -66,12 +65,12 @@ public class MemoryModule {
         if (entry != null && !entry.isExpired()) {
             return entry.getValue();
         }
-        
+
         entry = longTermMemory.get(key);
         if (entry != null) {
             return entry.getValue();
         }
-        
+
         return null;
     }
 
@@ -114,7 +113,7 @@ public class MemoryModule {
         }
         return defaultValue;
     }
-    
+
     /**
      * 遗忘记忆
      * @param key 记忆键
@@ -123,33 +122,38 @@ public class MemoryModule {
         shortTermMemory.remove(key);
         longTermMemory.remove(key);
     }
-    
+
     /**
      * 更新记忆系统（清理过期条目）
      * 应该在每个 tick 调用
      */
     public void tick() {
-        shortTermMemory.entrySet().removeIf(entry -> {
-            entry.getValue().tick();
-            return entry.getValue().isExpired();
-        });
+        shortTermMemory
+            .entrySet()
+            .removeIf(entry -> {
+                entry.getValue().tick();
+                return entry.getValue().isExpired();
+            });
     }
-    
+
     /**
      * 序列化到 NBT
      */
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        
+
         ListTag shortTermList = new ListTag();
-        for (Map.Entry<String, MemoryEntry> entry : shortTermMemory.entrySet()) {
+        for (Map.Entry<
+            String,
+            MemoryEntry
+        > entry : shortTermMemory.entrySet()) {
             CompoundTag entryTag = new CompoundTag();
             entryTag.putString("key", entry.getKey());
             entryTag.merge(entry.getValue().serializeNBT());
             shortTermList.add(entryTag);
         }
         tag.put("shortTerm", shortTermList);
-        
+
         ListTag longTermList = new ListTag();
         for (Map.Entry<String, MemoryEntry> entry : longTermMemory.entrySet()) {
             CompoundTag entryTag = new CompoundTag();
@@ -158,17 +162,17 @@ public class MemoryModule {
             longTermList.add(entryTag);
         }
         tag.put("longTerm", longTermList);
-        
+
         return tag;
     }
-    
+
     /**
      * 从 NBT 反序列化
      */
     public void deserializeNBT(CompoundTag tag) {
         shortTermMemory.clear();
         longTermMemory.clear();
-        
+
         ListTag shortTermList = tag.getList("shortTerm", Tag.TAG_COMPOUND);
         for (int i = 0; i < shortTermList.size(); i++) {
             CompoundTag entryTag = shortTermList.getCompound(i);
@@ -176,7 +180,7 @@ public class MemoryModule {
             MemoryEntry entry = MemoryEntry.fromNBT(entryTag);
             shortTermMemory.put(key, entry);
         }
-        
+
         ListTag longTermList = tag.getList("longTerm", Tag.TAG_COMPOUND);
         for (int i = 0; i < longTermList.size(); i++) {
             CompoundTag entryTag = longTermList.getCompound(i);

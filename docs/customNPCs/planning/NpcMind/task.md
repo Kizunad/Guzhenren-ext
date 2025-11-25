@@ -109,3 +109,27 @@
         - [x] 实现 `DamageSensor` (伤害感知) <!-- id: 91 -->
     - [ ] **API 扩展性 (Registry)** <!-- id: 92 -->
         - [ ] 实现 `NpcMindRegistry` (注册 Goal/Sensor/Action) <!-- id: 93 -->
+
+- [ ] **架构完善与加固 (Architecture Refinement)** <!-- id: 100 -->
+    - [ ] **决策协调策略 (Coordination)** <!-- id: 101 -->
+        - [ ] 定义 GOAP 与 Utility 切换逻辑 (重规划、中断保护) <!-- id: 102 -->
+        - [ ] 解决决策与执行的同步问题 <!-- id: 103 -->
+    - [ ] **动作层标准化 (Action Standardization)** <!-- id: 104 -->
+        - [ ] 定义通用动作接口 (Interaction, Attack, UseItem) <!-- id: 105 -->
+        - [ ] 消除具体 Goal 中的重复动作逻辑 (DRY) <!-- id: 106 -->
+    - [ ] **传感器调度 (Sensor Scheduling)** <!-- id: 107 -->
+        - [ ] 定义采样频率与分层扫描策略 <!-- id: 108 -->
+        - [ ] 实现感知数据缓存与生命周期管理 <!-- id: 109 -->
+    - [ ] **并发与抢占控制 (Concurrency & Preemption)** <!-- id: 110 -->
+        - [ ] 实现 Utility 抢占阈值与滞后 (Hysteresis) <!-- id: 111 -->
+        - [ ] 添加目标冷却机制 (Cooldowns) <!-- id: 112 -->
+    - [ ] **数据持久化 (Persistence)** <!-- id: 113 -->
+        - [ ] 实现 Memory/Personality/Emotion 的 NBT 序列化与反序列化 <!-- id: 114 -->
+        - [ ] 验证重启后的状态一致性 <!-- id: 115 -->
+    - [ ] **可观测性与诊断 (Observability)** <!-- id: 116 -->
+        - [ ] 建立统一日志格式 (决策/规划/执行) 与开关 <!-- id: 117 -->
+    - [ ] **安全护栏 (Safety Guardrails)** <!-- id: 118 -->
+        - [ ] 实现危险区域规避与敌友识别 <!-- id: 119 -->
+    - [ ] **异常与回归测试 (Robustness Testing)** <!-- id: 120 -->
+        - [ ] 覆盖失败场景 (路径阻塞、目标消失、超时) <!-- id: 121 -->
+        - [ ] 添加性能回归断言 <!-- id: 122 -->

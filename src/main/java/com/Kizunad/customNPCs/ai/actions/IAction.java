@@ -15,7 +15,6 @@ import net.minecraft.world.entity.LivingEntity;
  * 3. stop() - 动作结束时调用一次（无论成功或失败）
  */
 public interface IAction {
-    
     /**
      * 执行动作逻辑 - 每个 tick 调用
      * @param mind NPC 的思维
@@ -23,36 +22,36 @@ public interface IAction {
      * @return 动作状态（RUNNING/SUCCESS/FAILURE）
      */
     ActionStatus tick(INpcMind mind, LivingEntity entity);
-    
+
     /**
      * 动作开始时调用 - 初始化动作状态
      * @param mind NPC 的思维
      * @param entity NPC 实体
      */
     void start(INpcMind mind, LivingEntity entity);
-    
+
     /**
      * 动作停止时调用 - 清理动作状态
      * @param mind NPC 的思维
      * @param entity NPC 实体
      */
     void stop(INpcMind mind, LivingEntity entity);
-    
+
     /**
      * 动作是否可被中断
      * <p>
      * 如果返回 true，则此动作可以被更高优先级的目标打断。
      * 如果返回 false，则必须等待动作完成（SUCCESS/FAILURE）。
-     * 
+     *
      * @return true 如果可被中断
      */
     boolean canInterrupt();
-    
+
     /**
      * 获取动作名称
      * <p>
      * 用于调试和日志输出
-     * 
+     *
      * @return 动作的唯一标识符
      */
     String getName();

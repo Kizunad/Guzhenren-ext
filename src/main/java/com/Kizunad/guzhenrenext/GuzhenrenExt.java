@@ -6,9 +6,8 @@ import net.neoforged.fml.common.Mod;
 
 @Mod(GuzhenrenExt.MODID)
 public class GuzhenrenExt {
+
     public static final String MODID = "guzhenrenext";
 
-    public GuzhenrenExt(IEventBus modEventBus, ModContainer modContainer) {
-        
-    }
+    public GuzhenrenExt(IEventBus modEventBus, ModContainer modContainer) {}
 }

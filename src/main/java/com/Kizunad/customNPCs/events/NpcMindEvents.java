@@ -10,7 +10,7 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  * NpcMind 事件处理器
  */
 public class NpcMindEvents {
-    
+
     /**
      * 在实体 tick 时，调用 NpcMind.tick()
      */
@@ -19,12 +19,12 @@ public class NpcMindEvents {
         if (!(event.getEntity() instanceof LivingEntity entity)) {
             return;
         }
-        
+
         // 只处理服务端
         if (entity.level().isClientSide()) {
             return;
         }
-        
+
         // 获取 NpcMind Data Attachment
         if (entity.hasData(NpcMindAttachment.NPC_MIND)) {
             var mind = entity.getData(NpcMindAttachment.NPC_MIND);

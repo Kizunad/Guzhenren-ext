@@ -11,7 +11,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
  */
 @EventBusSubscriber(modid = CustomNPCsMod.MODID)
 public class ModCommandEvents {
-    
+
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         MindDebugCommand.register(event.getDispatcher());

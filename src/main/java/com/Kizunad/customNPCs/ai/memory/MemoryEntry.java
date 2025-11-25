@@ -6,23 +6,23 @@ import net.minecraft.nbt.CompoundTag;
  * 记忆条目 - 存储单个记忆及其元数据
  */
 public class MemoryEntry {
-    
+
     private final Object value;
     private final int maxAge; // -1 表示永不过期
     private int age; // 当前年龄（tick）
-    
+
     public MemoryEntry(Object value, int maxAge) {
         this.value = value;
         this.maxAge = maxAge;
         this.age = 0;
     }
-    
+
     private MemoryEntry(Object value, int maxAge, int age) {
         this.value = value;
         this.maxAge = maxAge;
         this.age = age;
     }
-    
+
     /**
      * 每个 tick 调用
      */
@@ -31,21 +31,21 @@ public class MemoryEntry {
             age++;
         }
     }
-    
+
     /**
      * 是否已过期
      */
     public boolean isExpired() {
         return maxAge >= 0 && age >= maxAge;
     }
-    
+
     /**
      * 获取记忆值
      */
     public Object getValue() {
         return value;
     }
-    
+
     /**
      * 序列化到 NBT
      */
@@ -53,7 +53,7 @@ public class MemoryEntry {
         CompoundTag tag = new CompoundTag();
         tag.putInt("maxAge", maxAge);
         tag.putInt("age", age);
-        
+
         // 简单处理：只存储字符串和数字
         if (value instanceof String) {
             tag.putString("type", "string");
@@ -71,10 +71,10 @@ public class MemoryEntry {
             tag.putString("type", "unknown");
             tag.putString("value", value.toString());
         }
-        
+
         return tag;
     }
-    
+
     /**
      * 从 NBT 反序列化
      */
@@ -82,7 +82,7 @@ public class MemoryEntry {
         int maxAge = tag.getInt("maxAge");
         int age = tag.getInt("age");
         String type = tag.getString("type");
-        
+
         Object value;
         switch (type) {
             case "string" -> value = tag.getString("value");
@@ -91,7 +91,7 @@ public class MemoryEntry {
             case "boolean" -> value = tag.getBoolean("value");
             default -> value = tag.getString("value");
         }
-        
+
         return new MemoryEntry(value, maxAge, age);
     }
 }

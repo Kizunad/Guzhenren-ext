@@ -10,14 +10,14 @@ public enum ActionStatus {
      * 动作正在执行中
      */
     RUNNING,
-    
+
     /**
      * 动作成功完成
      */
     SUCCESS,
-    
+
     /**
      * 动作执行失败
      */
-    FAILURE
+    FAILURE,
 }
