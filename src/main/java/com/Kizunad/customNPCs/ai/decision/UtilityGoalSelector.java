@@ -86,9 +86,15 @@ public class UtilityGoalSelector {
                 continue;
             }
             
-            float priority = goal.getPriority(mind, entity);
-            if (priority > bestPriority) {
-                bestPriority = priority;
+            // 获取基础优先级
+            float basePriority = goal.getPriority(mind, entity);
+            
+            // 应用性格修正
+            float personalityModifier = mind.getPersonality().getModifierForGoal(goal.getName());
+            float finalPriority = basePriority * (1.0f + personalityModifier);
+            
+            if (finalPriority > bestPriority) {
+                bestPriority = finalPriority;
                 bestGoal = goal;
             }
         }

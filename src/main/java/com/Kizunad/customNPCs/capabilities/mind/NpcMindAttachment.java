@@ -24,7 +24,7 @@ public class NpcMindAttachment {
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<NpcMind>> NPC_MIND = 
         ATTACHMENT_TYPES.register(
             "npc_mind",
-            () -> AttachmentType.serializable(NpcMind::new).build()
+            () -> AttachmentType.<net.minecraft.nbt.CompoundTag, NpcMind>serializable(() -> new NpcMind()).build()
         );
     
     /**

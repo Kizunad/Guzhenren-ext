@@ -89,10 +89,21 @@
         - [x] 实现 `testPerformanceStress` (压力测试) <!-- id: 83 -->
         - [/] 记录并分析性能数据 (Planning Time, Tick Lag) <!-- id: 84 -->
 
-- [ ] **通用基础架构完善 (Generic Infrastructure)** <!-- id: 85 -->
-    - [ ] **性格系统 (Personality)** <!-- id: 86 -->
-        - [ ] 实现 `PersonalityModule` (Traits 存储与计算) <!-- id: 87 -->
-        - [ ] 集成到 `UtilityGoalSelector` (影响优先级) <!-- id: 88 -->
+- [x] **通用基础架构完善 (Generic Infrastructure)** <!-- id: 85 -->
+    - [/] **性格系统 (Personality - 七情六欲)** <!-- id: 86 -->
+        - [x] **核心枚举与数据** <!-- id: 87 -->
+            - [x] 定义 `EmotionType` (七情) <!-- id: 88 -->
+            - [x] 定义 `DriveType` (六欲) <!-- id: 89 -->
+            - [x] 实现 `PersonalityModule` (存储与计算) <!-- id: 90 -->
+        - [x] **集成到决策系统** <!-- id: 91 -->
+            - [x] 集成到 `NpcMind` (持有 PersonalityModule) <!-- id: 92 -->
+            - [x] 修改 `UtilityGoalSelector` (应用 Modifier) <!-- id: 93 -->
+        - [x] **情绪触发机制** <!-- id: 94 -->
+            - [x] 更新 `DamageSensor` (触发怒/惧) <!-- id: 95 -->
+            - [x] 创建情绪衰减逻辑 (tick decay) <!-- id: 96 -->
+        - [x] **调试与测试** <!-- id: 97 -->
+            - [ ] 添加 `/mind personality` 命令 <!-- id: 98 -->
+            - [x] 创建 `PersonalityTests` (验证性格差异) <!-- id: 99 -->
     - [ ] **通用感知 (Generic Sensors)** <!-- id: 89 -->
         - [ ] 实现 `AuditorySensor` (听觉) <!-- id: 90 -->
         - [x] 实现 `DamageSensor` (伤害感知) <!-- id: 91 -->

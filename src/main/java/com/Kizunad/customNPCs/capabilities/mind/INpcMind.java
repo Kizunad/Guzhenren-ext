@@ -70,6 +70,12 @@ public interface INpcMind {
     void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt);
     
     /**
+     * 获取性格模块
+     * @return NPC 的性格系统
+     */
+    com.Kizunad.customNPCs.ai.personality.PersonalityModule getPersonality();
+    
+    /**
      * 获取当前世界状态（用于 GOAP 规划）
      * <p>
      * 此方法从 NPC 的记忆和实体状态中提取信息，构建当前世界状态。

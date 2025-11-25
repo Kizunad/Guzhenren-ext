@@ -9,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
  */
 public class DamageSensor implements ISensor {
 
-    private long lastHurtTime = -1;
+    private int lastHurtTime = 0;
 
     @Override
     public String getName() {
@@ -18,12 +18,12 @@ public class DamageSensor implements ISensor {
 
     @Override
     public void sense(INpcMind mind, LivingEntity entity, ServerLevel level) {
-        // 检查是否受到伤害
-        long currentHurtTime = entity.getLastHurtTimestamp();
+        // 检查是否受到伤害（hurtTime > 0 表示刚受伤）
+        int hurtTime = entity.hurtTime;
         
-        // 如果受伤时间更新了，说明受到了新的伤害
-        if (currentHurtTime > lastHurtTime) {
-            lastHurtTime = currentHurtTime;
+        // 如果 hurtTime 大于之前记录的值，说明受到了新的伤害
+        if (hurtTime > lastHurtTime && hurtTime > 0) {
+            lastHurtTime = hurtTime;
             
             // 获取攻击者
             LivingEntity attacker = entity.getLastHurtByMob();
@@ -32,12 +32,36 @@ public class DamageSensor implements ISensor {
                 mind.getMemory().rememberLongTerm("last_attacker", attacker);
                 mind.getMemory().rememberShortTerm("under_attack", true, 200); // 10秒战斗状态
                 
-                // 更新世界状态（用于 GOAP）
-                // 注意：这里假设 mind 有方法可以直接更新 WorldState，或者通过 Memory 间接更新
-                // 目前我们主要通过 Memory，后续 NpcMind 会将 Memory 转换为 WorldState
+                // 触发情绪：怒（基础 +0.2）
+                mind.getPersonality().triggerEmotion(
+                    com.Kizunad.customNPCs.ai.personality.EmotionType.ANGER, 
+                    0.2f
+                );
                 
-                System.out.println("[DamageSensor] 感知到攻击者: " + attacker.getName().getString());
+                // 如果攻击者很强（血量差距大），触发惧
+                float healthRatio = entity.getHealth() / entity.getMaxHealth();
+                float attackerHealthRatio = attacker.getHealth() / attacker.getMaxHealth();
+                
+                if (attackerHealthRatio > healthRatio + 0.3f) {
+                    // 对手明显更强，触发恐惧
+                    mind.getPersonality().triggerEmotion(
+                        com.Kizunad.customNPCs.ai.personality.EmotionType.FEAR,
+                        0.3f
+                    );
+                } else {
+                    // 旗鼓相当或占优，减少恐惧（如果有的话）
+                    mind.getPersonality().triggerEmotion(
+                        com.Kizunad.customNPCs.ai.personality.EmotionType.FEAR,
+                        -0.1f
+                    );
+                }
+                
+                System.out.println("[DamageSensor] 感知到攻击者: " + attacker.getName().getString() + 
+                    ", 触发情绪变化");
             }
+        } else if (hurtTime == 0) {
+            // 重置计数器，准备检测下一次受伤
+            lastHurtTime = 0;
         }
     }
 

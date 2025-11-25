@@ -162,4 +162,11 @@ public class NpcMindGameTests {
     public void testRealApiGoapIntegration(GameTestHelper helper) {
         com.Kizunad.customNPCs_test.tests.PlannerTests.testRealApiGoapIntegration(helper);
     }
+    
+    // ==================== 性格系统测试 ====================
+    
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
+    public void testPersonalityDrivenDecision(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.PersonalityTests.testPersonalityDrivenDecision(helper);
+    }
 }

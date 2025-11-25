@@ -17,12 +17,26 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     private final UtilityGoalSelector goalSelector;
     private final com.Kizunad.customNPCs.ai.sensors.SensorManager sensorManager;
     private final com.Kizunad.customNPCs.ai.executor.ActionExecutor actionExecutor;
+    private final com.Kizunad.customNPCs.ai.personality.PersonalityModule personality;
     
     public NpcMind() {
         this.memory = new MemoryModule();
         this.goalSelector = new UtilityGoalSelector();
         this.sensorManager = new com.Kizunad.customNPCs.ai.sensors.SensorManager();
         this.actionExecutor = new com.Kizunad.customNPCs.ai.executor.ActionExecutor();
+        this.personality = new com.Kizunad.customNPCs.ai.personality.PersonalityModule();
+    }
+    
+    /**
+     * 创建带有自定义性格的 NpcMind（用于测试）
+     * @param customPersonality 自定义性格模块
+     */
+    public NpcMind(com.Kizunad.customNPCs.ai.personality.PersonalityModule customPersonality) {
+        this.memory = new MemoryModule();
+        this.goalSelector = new UtilityGoalSelector();
+        this.sensorManager = new com.Kizunad.customNPCs.ai.sensors.SensorManager();
+        this.actionExecutor = new com.Kizunad.customNPCs.ai.executor.ActionExecutor();
+        this.personality = customPersonality;
     }
     
     @Override
@@ -46,6 +60,11 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     }
     
     @Override
+    public com.Kizunad.customNPCs.ai.personality.PersonalityModule getPersonality() {
+        return personality;
+    }
+    
+    @Override
     public void tick(ServerLevel level, LivingEntity entity) {
         // 绑定执行器上下文，防止跨实体/测试计划污染
         actionExecutor.bindToEntity(entity);
@@ -56,10 +75,13 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         // 2. 更新记忆（清理过期条目）
         memory.tick();
         
-        // 3. 目标选择器执行
+        // 3. 更新性格（情绪衰减）
+        personality.tick();
+        
+        // 4. 目标选择器执行
         goalSelector.tick(this, entity);
         
-        // 4. 动作执行器执行
+        // 5. 动作执行器执行
         actionExecutor.tick(this, entity);
     }
     
