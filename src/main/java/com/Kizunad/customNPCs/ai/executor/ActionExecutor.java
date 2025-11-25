@@ -23,6 +23,7 @@ public class ActionExecutor {
     private final Queue<IAction> actionQueue;
     private IAction currentAction;
     private UUID boundEntityId;
+    private ActionStatus lastActionStatus = ActionStatus.RUNNING;
 
     public ActionExecutor() {
         this.actionQueue = new LinkedList<>();
@@ -149,6 +150,7 @@ public class ActionExecutor {
         // 根据状态处理
         switch (status) {
             case SUCCESS:
+                lastActionStatus = ActionStatus.SUCCESS;
                 System.out.println(
                     "[ActionExecutor] 动作成功完成: " + currentAction.getName()
                 );
@@ -157,6 +159,7 @@ public class ActionExecutor {
                 // 下一个 tick 会自动取出下一个动作
                 break;
             case FAILURE:
+                lastActionStatus = ActionStatus.FAILURE;
                 System.out.println(
                     "[ActionExecutor] 动作失败: " +
                         currentAction.getName() +
@@ -167,6 +170,7 @@ public class ActionExecutor {
                 actionQueue.clear(); // 整个计划失败
                 break;
             case RUNNING:
+                lastActionStatus = ActionStatus.RUNNING;
                 // 继续执行，无需操作
                 break;
         }
@@ -194,5 +198,16 @@ public class ActionExecutor {
      */
     public int getRemainingActionCount() {
         return actionQueue.size();
+    }
+
+    /**
+     * 获取最后一个动作的状态
+     * <p>
+     * 用于 PlanBasedGoal 检测动作失败并触发重规划
+     *
+     * @return 最后的动作状态
+     */
+    public ActionStatus getLastActionStatus() {
+        return lastActionStatus;
     }
 }

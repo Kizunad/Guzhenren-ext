@@ -139,4 +139,47 @@
 
 ## 验证计划 (Infrastructure)
 - **PersonalityTests**: 验证不同性格的 NPC 对同一情况（如低血量）有不同反应。
-- **RegistryTests**: 验证能否成功注册并加载自定义 Goal/Sensor。
+
+## Phase 2: 决策协调策略 (Decision Coordination - Option 2)
+
+### 1. 核心枚举与接口
+#### [NEW] `src/main/java/com/Kizunad/customNPCs/ai/sensors/SensorEventType.java`
+- 枚举：`INFO`, `IMPORTANT`, `CRITICAL`。
+
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/capabilities/mind/INpcMind.java`
+- 添加 `void triggerInterrupt(SensorEventType type)`。
+
+### 2. 中断机制实现
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/capabilities/mind/NpcMind.java`
+- 实现 `triggerInterrupt`:
+    - 记录上次中断时间（冷却检查）。
+    - 如果冷却结束且事件级别足够，调用 `goalSelector.forceReevaluate()`。
+
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/ai/decision/UtilityGoalSelector.java`
+- 修改 `reevaluate`:
+    - 增加 `SensorEventType` 参数（默认为 INFO）。
+    - 实现滞后逻辑：`if (bestScore > currentScore * (1.0 + threshold))`。
+    - `CRITICAL` 事件忽略滞后阈值。
+
+### 3. 执行前检查
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/ai/decision/goals/PlanBasedGoal.java`
+- 添加 `boolean validateNextAction(IAction action)`:
+    - 默认检查 `action.getPreconditions()` 是否与 `mind.getCurrentWorldState()` 匹配。
+
+#### [MODIFY] `src/main/java/com/Kizunad/customNPCs/ai/executor/ActionExecutor.java`
+- 在 `tick()` 中准备执行新动作前，调用 `currentGoal.validateNextAction(nextAction)`。
+- 如果返回 false，终止计划并报告 `FAILURE`。
+
+### 4. 验证计划 (Phase 2)
+#### [NEW] `src/main/java/com/Kizunad/customNPCs_test/tests/CoordinationTests.java`
+- **`testHysteresis`**:
+    - 设置两个 Goal，A (50分), B (52分)。
+    - 验证 NPC 仍然坚持执行 A (因为 52 < 50 * 1.1)。
+    - 将 B 提分到 60，验证 NPC 切换到 B。
+- **`testInterrupt`**:
+    - 模拟 `CRITICAL` 中断。
+    - 验证 `UtilityGoalSelector` 立即重新评估并忽略滞后。
+- **`testPreActionValidation`**:
+    - 提交计划 `[MoveTo(A), MoveTo(B)]`。
+    - 在移动到 A 途中，修改环境使 B 不可达。
+    - 验证 NPC 在完成 A 后停止，不执行 B。

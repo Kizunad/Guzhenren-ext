@@ -16,31 +16,30 @@ import net.minecraft.world.entity.LivingEntity;
  * - 思考循环（tick 方法）
  */
 public interface INpcMind {
-    
     /**
      * 获取记忆模块
      * @return NPC 的记忆系统
      */
     MemoryModule getMemory();
-    
+
     /**
      * 获取目标选择器
      * @return Utility AI 目标选择器
      */
     UtilityGoalSelector getGoalSelector();
-    
+
     /**
      * 获取传感器管理器
      * @return 传感器管理器
      */
     com.Kizunad.customNPCs.ai.sensors.SensorManager getSensorManager();
-    
+
     /**
      * 获取动作执行器
      * @return 动作执行器
      */
     com.Kizunad.customNPCs.ai.executor.ActionExecutor getActionExecutor();
-    
+
     /**
      * 思考循环 - 每个游戏 tick 调用
      * <p>
@@ -49,40 +48,61 @@ public interface INpcMind {
      * 2. 更新记忆（清理过期条目）
      * 3. 重新评估目标优先级
      * 4. 执行当前目标
-     * 
+     *
      * @param level 服务器世界
      * @param entity NPC 实体
      */
     void tick(ServerLevel level, LivingEntity entity);
-    
+
     /**
      * 序列化到 NBT
      * @param provider Holder lookup provider
      * @return NBT 数据
      */
     CompoundTag serializeNBT(HolderLookup.Provider provider);
-    
+
     /**
      * 从 NBT 反序列化
      * @param provider Holder lookup provider
      * @param nbt NBT 数据
      */
     void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt);
-    
+
     /**
      * 获取性格模块
      * @return NPC 的性格系统
      */
     com.Kizunad.customNPCs.ai.personality.PersonalityModule getPersonality();
-    
+
     /**
      * 获取当前世界状态（用于 GOAP 规划）
      * <p>
      * 此方法从 NPC 的记忆和实体状态中提取信息，构建当前世界状态。
      * 世界状态用于 GOAP 规划器评估动作的前置条件和效果。
-     * 
+     *
      * @param entity NPC 实体
      * @return 当前世界状态
      */
-    com.Kizunad.customNPCs.ai.planner.WorldState getCurrentWorldState(LivingEntity entity);
+    com.Kizunad.customNPCs.ai.planner.WorldState getCurrentWorldState(
+        LivingEntity entity
+    );
+
+    /**
+     * 触发中断,强制重新评估目标
+     * <p>
+     * 当传感器检测到重要或紧急事件时调用此方法,
+     * 使 NPC 能够立即响应而不是等待下一个评估周期 (20 ticks)。
+     * <p>
+     * 中断机制特性:
+     * - 立即调用 UtilityGoalSelector.forceReevaluate()
+     * - 受冷却机制限制,防止同一类型事件在短时间内重复触发
+     * - CRITICAL 级别事件会忽略滞后阈值,允许立即切换目标
+     *
+     * @param entity NPC 实体
+     * @param eventType 事件类型级别 (INFO, IMPORTANT, CRITICAL)
+     */
+    void triggerInterrupt(
+        LivingEntity entity,
+        com.Kizunad.customNPCs.ai.sensors.SensorEventType eventType
+    );
 }

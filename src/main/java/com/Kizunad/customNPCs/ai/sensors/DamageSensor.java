@@ -33,6 +33,7 @@ public class DamageSensor implements ISensor {
                 mind.getMemory().rememberLongTerm("last_attacker", attacker);
                 mind.getMemory().rememberShortTerm("under_attack", true, 200); // 10秒战斗状态
 
+                // FUTURE:情绪需要单独集成
                 // 触发情绪：怒（基础 +0.2）
                 mind
                     .getPersonality()
@@ -64,10 +65,16 @@ public class DamageSensor implements ISensor {
                         );
                 }
 
+                // 触发紧急中断,立即重新评估目标
+                mind.triggerInterrupt(
+                    entity,
+                    com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
+                );
+
                 System.out.println(
                     "[DamageSensor] 感知到攻击者: " +
                         attacker.getName().getString() +
-                        ", 触发情绪变化"
+                        ", 触发情绪变化和 CRITICAL 中断"
                 );
             }
         } else if (hurtTime == 0) {

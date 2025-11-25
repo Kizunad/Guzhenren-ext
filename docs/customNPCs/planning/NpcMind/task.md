@@ -111,9 +111,12 @@
         - [ ] 实现 `NpcMindRegistry` (注册 Goal/Sensor/Action) <!-- id: 93 -->
 
 - [ ] **架构完善与加固 (Architecture Refinement)** <!-- id: 100 -->
-    - [ ] **决策协调策略 (Coordination)** <!-- id: 101 -->
-        - [ ] 定义 GOAP 与 Utility 切换逻辑 (重规划、中断保护) <!-- id: 102 -->
-        - [ ] 解决决策与执行的同步问题 <!-- id: 103 -->
+    - [ ] **决策协调策略 (Coordination - Option 2)** <!-- id: 101 -->
+        - [ ] 定义 `SensorEventType` 枚举 (INFO, IMPORTANT, CRITICAL) <!-- id: 102 -->
+        - [ ] 更新 `NpcMind` 添加 `triggerInterrupt` 与冷却机制 <!-- id: 103 -->
+        - [ ] 更新 `ISensor` 及其实现以触发中断 <!-- id: 123 -->
+        - [ ] 更新 `UtilityGoalSelector` 实现滞后 (Hysteresis) <!-- id: 124 -->
+        - [ ] 更新 `PlanBasedGoal` 与 `ActionExecutor` 实现执行前检查 <!-- id: 125 -->
     - [ ] **动作层标准化 (Action Standardization)** <!-- id: 104 -->
         - [ ] 定义通用动作接口 (Interaction, Attack, UseItem) <!-- id: 105 -->
         - [ ] 消除具体 Goal 中的重复动作逻辑 (DRY) <!-- id: 106 -->

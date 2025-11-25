@@ -126,13 +126,17 @@ public class VisionSensor implements ISensor {
                         nearest.getType().toString(),
                         MEMORY_DURATION
                     );
+                float distance = entity.distanceTo(nearest);
                 mind
                     .getMemory()
                     .rememberShortTerm(
                         "nearest_entity_distance",
-                        entity.distanceTo(nearest),
+                        distance,
                         MEMORY_DURATION
                     );
+
+                // 触发中断:根据实体类型和距离判断
+                triggerInterruptIfNeeded(mind, entity, nearest, distance, level);
             }
         }
     }
@@ -189,5 +193,83 @@ public class VisionSensor implements ISensor {
 
         // 如果射线没有击中方块，说明视线畅通
         return result.getType() == HitResult.Type.MISS;
+    }
+
+    /**
+     * 根据检测到的实体触发适当的中断
+     * <p>
+     * 触发规则:
+     * - 玩家 (Player): IMPORTANT 级别
+     * - 敌对生物且距离 < 5格: CRITICAL 级别
+     * - 敌对生物且距离 >= 5格: IMPORTANT 级别
+     *
+     * @param mind NPC 思维
+     * @param observer 观察者实体
+     * @param target 检测到的目标实体
+     * @param distance 距离
+     * @param level 服务器世界
+     */
+    private void triggerInterruptIfNeeded(
+        INpcMind mind,
+        LivingEntity observer,
+        LivingEntity target,
+        float distance,
+        ServerLevel level
+    ) {
+        // 检测玩家
+        if (target instanceof net.minecraft.world.entity.player.Player) {
+            mind.triggerInterrupt(
+                observer,
+                com.Kizunad.customNPCs.ai.sensors.SensorEventType.IMPORTANT
+            );
+            System.out.println(
+                "[VisionSensor] 检测到玩家,触发 IMPORTANT 中断"
+            );
+            return;
+        }
+
+        // 检测敌对生物
+        if (isHostile(target, observer)) {
+            // 近距离敌对实体视为紧急威胁
+            if (distance < 5.0f) {
+                mind.triggerInterrupt(
+                    observer,
+                    com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
+                );
+                System.out.println(
+                    "[VisionSensor] 检测到近距离威胁 (" +
+                        target.getType().getDescription().getString() +
+                        " @ " +
+                        String.format("%.1f", distance) +
+                        "格),触发 CRITICAL 中断"
+                );
+            } else {
+                mind.triggerInterrupt(
+                    observer,
+                    com.Kizunad.customNPCs.ai.sensors.SensorEventType.IMPORTANT
+                );
+            }
+        }
+    }
+
+    /**
+     * 判断目标是否对观察者敌对
+     *
+     * @param target 目标实体
+     * @param observer 观察者
+     * @return 是否敌对
+     */
+    private boolean isHostile(LivingEntity target, LivingEntity observer) {
+        // 检查目标是否是怪物(Monster类型通常是敌对的)
+        if (target instanceof net.minecraft.world.entity.monster.Monster) {
+            return true;
+        }
+
+        // 检查目标最近伤害的实体是否是观察者
+        if (target.getLastHurtByMob() == observer) {
+            return true;
+        }
+
+        return false;
     }
 }

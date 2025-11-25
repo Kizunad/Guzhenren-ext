@@ -19,6 +19,7 @@ public class UtilityGoalSelector {
     private IGoal currentGoal;
     private int ticksSinceLastEvaluation;
     private static final int EVALUATION_INTERVAL = 20; // 每秒重新评估一次（20 ticks）
+    private static final float HYSTERESIS_THRESHOLD = 0.1f; // 10% 滞后阈值
 
     public UtilityGoalSelector() {
         this.goals = new ArrayList<>();
@@ -54,7 +55,7 @@ public class UtilityGoalSelector {
         // 定期重新评估目标
         if (ticksSinceLastEvaluation >= EVALUATION_INTERVAL) {
             ticksSinceLastEvaluation = 0;
-            reevaluate(mind, entity);
+            reevaluate(mind, entity, null); // 常规评估,无中断事件
         }
 
         // 执行当前目标
@@ -66,20 +67,31 @@ public class UtilityGoalSelector {
             ) {
                 currentGoal.stop(mind, entity);
                 currentGoal = null;
-                reevaluate(mind, entity); // 立即选择新目标
+                reevaluate(mind, entity, null); // 立即选择新目标
             } else {
                 currentGoal.tick(mind, entity);
             }
         } else {
             // 如果没有当前目标，立即选择一个
-            reevaluate(mind, entity);
+            reevaluate(mind, entity, null);
         }
     }
 
     /**
      * 重新评估所有目标并选择最高优先级的
+     * <p>
+     * 实施滞后 (Hysteresis) 机制:新目标的优先级必须显著高于当前目标才会切换,
+     * 防止优先级微小波动导致的频繁切换。
+     *
+     * @param mind NPC 思维
+     * @param entity NPC 实体
+     * @param interruptLevel 中断事件级别 (null 表示常规评估,非 null 表示中断触发)
      */
-    private void reevaluate(INpcMind mind, LivingEntity entity) {
+    private void reevaluate(
+        INpcMind mind,
+        LivingEntity entity,
+        com.Kizunad.customNPCs.ai.sensors.SensorEventType interruptLevel
+    ) {
         IGoal bestGoal = null;
         float bestPriority = 0.0f;
 
@@ -103,16 +115,74 @@ public class UtilityGoalSelector {
             }
         }
 
-        // 如果找到了更好的目标，切换
+        // 计算当前目标的优先级(用于滞后判断)
+        float currentPriority = 0.0f;
+        if (currentGoal != null) {
+            float basePriority = currentGoal.getPriority(mind, entity);
+            float personalityModifier = mind
+                .getPersonality()
+                .getModifierForGoal(currentGoal.getName());
+            currentPriority = basePriority * (1.0f + personalityModifier);
+        }
+
+        // 滞后判断:新目标必须显著优于当前目标
         if (bestGoal != currentGoal) {
-            if (currentGoal != null) {
-                currentGoal.stop(mind, entity);
+            // 动态阈值:紧急情况下更容易切换
+            float threshold = HYSTERESIS_THRESHOLD;
+            if (
+                interruptLevel ==
+                com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
+            ) {
+                threshold = 0.0f; // CRITICAL 事件立即响应,忽略滞后
             }
 
-            currentGoal = bestGoal;
+            // 只有当新目标优先级显著高于当前目标时才切换
+            if (bestPriority > currentPriority * (1.0f + threshold)) {
+                if (currentGoal != null) {
+                    System.out.println(
+                        "[UtilityGoalSelector] 切换目标: " +
+                            currentGoal.getName() +
+                            " (" +
+                            currentPriority +
+                            ") -> " +
+                            bestGoal.getName() +
+                            " (" +
+                            bestPriority +
+                            ") [中断: " +
+                            interruptLevel +
+                            "]"
+                    );
+                    currentGoal.stop(mind, entity);
+                } else {
+                    System.out.println(
+                        "[UtilityGoalSelector] 选择新目标: " +
+                            bestGoal.getName() +
+                            " (" +
+                            bestPriority +
+                            ")"
+                    );
+                }
 
-            if (currentGoal != null) {
-                currentGoal.start(mind, entity);
+                currentGoal = bestGoal;
+
+                if (currentGoal != null) {
+                    currentGoal.start(mind, entity);
+                }
+            } else {
+                // 优先级差距不足,保持当前目标
+                if (interruptLevel != null) {
+                    System.out.println(
+                        "[UtilityGoalSelector] 滞后阻止切换: 当前 " +
+                            currentGoal.getName() +
+                            " (" +
+                            currentPriority +
+                            ") vs 新 " +
+                            bestGoal.getName() +
+                            " (" +
+                            bestPriority +
+                            ")"
+                    );
+                }
             }
         }
     }
@@ -126,9 +196,17 @@ public class UtilityGoalSelector {
 
     /**
      * 强制重新评估（用于紧急情况，如受到攻击）
+     *
+     * @param mind NPC 思维
+     * @param entity NPC 实体
+     * @param eventType 触发中断的事件类型
      */
-    public void forceReevaluate(INpcMind mind, LivingEntity entity) {
+    public void forceReevaluate(
+        INpcMind mind,
+        LivingEntity entity,
+        com.Kizunad.customNPCs.ai.sensors.SensorEventType eventType
+    ) {
         ticksSinceLastEvaluation = 0;
-        reevaluate(mind, entity);
+        reevaluate(mind, entity, eventType);
     }
 }

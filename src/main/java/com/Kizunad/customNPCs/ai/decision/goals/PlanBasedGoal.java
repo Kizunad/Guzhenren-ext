@@ -29,6 +29,12 @@ public abstract class PlanBasedGoal implements IGoal {
     private boolean planningFailed;
     private boolean completed;
 
+    // 重规划支持
+    private int retryCount = 0;
+    private static final int MAX_RETRIES = 3; // 最多重试 3 次
+    private com.Kizunad.customNPCs.ai.actions.ActionStatus lastActionStatus =
+        null;
+
     /**
      * 创建基于规划的目标
      */
@@ -62,6 +68,10 @@ public abstract class PlanBasedGoal implements IGoal {
         started = true;
         planningFailed = false;
         completed = false;
+
+        // 重置重规划计数
+        retryCount = 0;
+        lastActionStatus = null;
 
         // 获取当前世界状态
         WorldState currentState = mind.getCurrentWorldState(entity);
@@ -107,8 +117,35 @@ public abstract class PlanBasedGoal implements IGoal {
 
     @Override
     public void tick(INpcMind mind, LivingEntity entity) {
-        // 目标本身不需要做任何事，动作由 ActionExecutor 执行
-        // 子类可以重写此方法以添加额外逻辑
+        // 检查执行器的最后一个动作状态
+        com.Kizunad.customNPCs.ai.actions.ActionStatus executorStatus = mind
+            .getActionExecutor()
+            .getLastActionStatus();
+
+        // 如果动作失败且尚未达到重试上限,尝试重规划
+        if (
+            executorStatus ==
+                com.Kizunad.customNPCs.ai.actions.ActionStatus.FAILURE &&
+            executorStatus != lastActionStatus
+        ) {
+            lastActionStatus = executorStatus;
+
+            if (retryCount < MAX_RETRIES) {
+                retryCount++;
+                if (!replan(mind, entity)) {
+                    // 重规划失败,标记目标失败
+                    planningFailed = true;
+                }
+            } else {
+                // 达到重试上限,标记失败
+                System.err.println(
+                    "[PlanBasedGoal] " +
+                        getName() +
+                        " 达到最大重试次数,目标失败"
+                );
+                planningFailed = true;
+            }
+        }
     }
 
     @Override
@@ -146,6 +183,54 @@ public abstract class PlanBasedGoal implements IGoal {
      */
     protected WorldState getCurrentState(INpcMind mind, LivingEntity entity) {
         return null;
+    }
+
+    /**
+     * 重新规划
+     * <p>
+     * 当动作执行失败时调用,尝试基于当前状态重新生成计划
+     *
+     * @param mind NPC 思维
+     * @param entity NPC 实体
+     * @return true 如果重规划成功
+     */
+    protected boolean replan(INpcMind mind, LivingEntity entity) {
+        System.out.println(
+            "[PlanBasedGoal] " +
+                getName() +
+                " 尝试重规划 (第 " +
+                (retryCount) +
+                " 次)"
+        );
+
+        // 获取最新的世界状态
+        WorldState currentState = mind.getCurrentWorldState(entity);
+        WorldState goalSpecificState = getCurrentState(mind, entity);
+        if (goalSpecificState != null) {
+            currentState = currentState.apply(goalSpecificState);
+        }
+
+        // 获取目标状态
+        WorldState goalState = getDesiredState(mind, entity);
+
+        // 重新规划
+        List<IAction> newPlan = planner.plan(
+            currentState,
+            goalState,
+            getAvailableActions(mind, entity)
+        );
+
+        if (newPlan != null && !newPlan.isEmpty()) {
+            // 重规划成功,提交新计划
+            mind.getActionExecutor().submitPlan(newPlan);
+            System.out.println(
+                "[PlanBasedGoal] 重规划成功,生成 " + newPlan.size() + " 个动作"
+            );
+            return true;
+        } else {
+            System.err.println("[PlanBasedGoal] 重规划失败");
+            return false;
+        }
     }
 
     /**

@@ -20,6 +20,12 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     private final com.Kizunad.customNPCs.ai.executor.ActionExecutor actionExecutor;
     private final com.Kizunad.customNPCs.ai.personality.PersonalityModule personality;
 
+    // 中断冷却机制
+    private long lastInterruptTick = 0;
+    private com.Kizunad.customNPCs.ai.sensors.SensorEventType lastInterruptType =
+        null;
+    private static final int INTERRUPT_COOLDOWN_TICKS = 10; // 0.5秒冷却 (10 ticks)
+
     public NpcMind() {
         this.memory = new MemoryModule();
         this.goalSelector = new UtilityGoalSelector();
@@ -185,5 +191,40 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         state.setState("has_planks", hasPlanks != null ? hasPlanks : false);
 
         return state;
+    }
+
+    @Override
+    public void triggerInterrupt(
+        LivingEntity entity,
+        com.Kizunad.customNPCs.ai.sensors.SensorEventType eventType
+    ) {
+        // 获取当前世界 tick (使用 entity 所在的 level)
+        long currentTick = entity.level().getGameTime();
+
+        // 冷却检查:
+        // 同一类型事件在冷却期内不重复触发
+        if (
+            lastInterruptType == eventType &&
+            currentTick - lastInterruptTick < INTERRUPT_COOLDOWN_TICKS
+        ) {
+            return;
+        }
+
+        // 记录中断
+        lastInterruptTick = currentTick;
+        lastInterruptType = eventType;
+
+        System.out.println(
+            "[NpcMind] " +
+                entity.getName().getString() +
+                " 触发中断: " +
+                eventType +
+                " (tick: " +
+                currentTick +
+                ")"
+        );
+
+        // 强制重新评估目标
+        goalSelector.forceReevaluate(this, entity, eventType);
     }
 }
