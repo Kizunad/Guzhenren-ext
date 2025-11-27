@@ -3,6 +3,8 @@ package com.Kizunad.customNPCs.ai.personality;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
 /**
  * 性格模块 - 基于七情六欲的 NPC 性格系统
@@ -175,6 +177,46 @@ public class PersonalityModule {
 
         // 限制修正范围
         return Math.max(-1.0f, Math.min(1.0f, modifier));
+    }
+
+    /**
+     * 序列化当前情绪与性格值
+     */
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+
+        CompoundTag emotionsTag = new CompoundTag();
+        for (EmotionType emotion : EmotionType.values()) {
+            emotionsTag.putFloat(emotion.getId(), emotions.get(emotion));
+        }
+        tag.put("emotions", emotionsTag);
+
+        CompoundTag drivesTag = new CompoundTag();
+        for (DriveType drive : DriveType.values()) {
+            drivesTag.putFloat(drive.getId(), drives.get(drive));
+        }
+        tag.put("drives", drivesTag);
+
+        return tag;
+    }
+
+    /**
+     * 从 NBT 恢复情绪与性格值
+     */
+    public void deserializeNBT(CompoundTag tag) {
+        if (tag.contains("emotions", Tag.TAG_COMPOUND)) {
+            CompoundTag emotionsTag = tag.getCompound("emotions");
+            for (EmotionType emotion : EmotionType.values()) {
+                emotions.put(emotion, emotionsTag.getFloat(emotion.getId()));
+            }
+        }
+
+        if (tag.contains("drives", Tag.TAG_COMPOUND)) {
+            CompoundTag drivesTag = tag.getCompound("drives");
+            for (DriveType drive : DriveType.values()) {
+                drives.put(drive, drivesTag.getFloat(drive.getId()));
+            }
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.Kizunad.customNPCs.ai.sensors;
 
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -29,8 +30,9 @@ public class DamageSensor implements ISensor {
             // 获取攻击者
             LivingEntity attacker = entity.getLastHurtByMob();
             if (attacker != null) {
-                // 记录攻击者到记忆中
-                mind.getMemory().rememberLongTerm("last_attacker", attacker);
+                // 记录攻击者到记忆中（使用 UUID 以便持久化）
+                UUID attackerUuid = attacker.getUUID();
+                mind.getMemory().rememberLongTerm("last_attacker", attackerUuid);
                 mind.getMemory().rememberShortTerm("under_attack", true, 200); // 10秒战斗状态
 
                 // FUTURE:情绪需要单独集成

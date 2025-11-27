@@ -126,9 +126,9 @@
     - [x] **并发与抢占控制 (Concurrency & Preemption)** <!-- id: 110 -->
         - [x] 实现 Utility 抢占阈值与滞后 (Hysteresis) <!-- id: 111 -->
         - [x] 添加目标冷却机制 (Cooldowns) <!-- id: 112 -->
-    - [ ] **数据持久化 (Persistence)** <!-- id: 113 -->
-        - [ ] 实现 Memory/Personality/Emotion 的 NBT 序列化与反序列化 <!-- id: 114 -->
-        - [ ] 验证重启后的状态一致性 <!-- id: 115 -->
+    - [x] **数据持久化 (Persistence)** <!-- id: 113 -->
+        - [x] 实现 Memory/Personality/Emotion 的 NBT 序列化与反序列化 <!-- id: 114 -->
+        - [x] 验证重启后的状态一致性 <!-- id: 115 -->
     - [ ] **可观测性与诊断 (Observability)** <!-- id: 116 -->
         - [ ] 建立统一日志格式 (决策/规划/执行) 与开关 <!-- id: 117 -->
     - [ ] **安全护栏 (Safety Guardrails)** <!-- id: 118 -->

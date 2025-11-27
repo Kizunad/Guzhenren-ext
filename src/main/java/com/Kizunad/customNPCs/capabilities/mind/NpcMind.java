@@ -133,6 +133,7 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.put("memory", memory.serializeNBT());
+        tag.put("personality", personality.serializeNBT());
         // 注意：目标选择器不需要序列化，因为目标是在代码中注册的
         return tag;
     }
@@ -144,6 +145,9 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     ) {
         if (nbt.contains("memory")) {
             memory.deserializeNBT(nbt.getCompound("memory"));
+        }
+        if (nbt.contains("personality")) {
+            personality.deserializeNBT(nbt.getCompound("personality"));
         }
     }
 
