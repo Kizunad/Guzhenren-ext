@@ -59,8 +59,17 @@ public class SurvivalGoal implements IGoal {
 
     @Override
     public void tick(INpcMind mind, LivingEntity entity) {
-        // FUTURE: 执行生存行为
-        // 简单演示：原地不动（实际应该寻找掩体或食物）
+        // 如果当前没有正在执行的动作，尝试使用物品（例如食物）
+        if (mind.getActionExecutor().isIdle()) {
+            // 简单示例：尝试使用手中的物品
+            // 实际逻辑应该更复杂：查找背包中的食物/药水，切换到主手，然后使用
+             if (entity instanceof net.minecraft.world.entity.Mob mob) {
+                 // 检查手中是否有食物
+                 if (mob.getMainHandItem().getFoodProperties(mob) != null) {
+                     mind.getActionExecutor().addAction(new com.Kizunad.customNPCs.ai.actions.common.UseItemAction(null)); // 使用当前物品
+                 }
+             }
+        }
     }
 
     @Override

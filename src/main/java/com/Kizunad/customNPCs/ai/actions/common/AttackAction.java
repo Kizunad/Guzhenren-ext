@@ -29,7 +29,7 @@ import java.util.UUID;
  * - maxAttempts: 最大攻击尝试次数
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class AttackAction extends AbstractStandardAction {
+public class AttackAction extends AbstractStandardAction implements com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AttackAction.class);
 
@@ -193,5 +193,15 @@ public class AttackAction extends AbstractStandardAction {
     public boolean canInterrupt() {
         // 攻击动作不可中断（优先级高）
         return false;
+    }
+
+    @Override
+    public UUID getTargetUuid() {
+        return targetUuid;
+    }
+
+    @Override
+    public boolean hasHit() {
+        return hasHit;
     }
 }

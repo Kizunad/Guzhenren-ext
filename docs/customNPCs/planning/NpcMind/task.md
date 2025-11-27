@@ -117,9 +117,9 @@
         - [x] 更新 `ISensor` 及其实现以触发中断 <!-- id: 123 -->
         - [x] 更新 `UtilityGoalSelector` 实现滞后 (Hysteresis) <!-- id: 124 -->
         - [x] 更新 `PlanBasedGoal` 与 `ActionExecutor` 实现执行前检查 <!-- id: 125 -->
-    - [ ] **动作层标准化 (Action Standardization)** <!-- id: 104 -->
-        - [ ] 定义通用动作接口 (Interaction, Attack, UseItem) <!-- id: 105 -->
-        - [ ] 消除具体 Goal 中的重复动作逻辑 (DRY) <!-- id: 106 -->
+    - [x] **动作层标准化 (Action Standardization)** <!-- id: 104 -->
+        - [x] 定义通用动作接口 (Interaction, Attack, UseItem) <!-- id: 105 -->
+        - [x] 消除具体 Goal 中的重复动作逻辑 (DRY) <!-- id: 106 -->
     - [ ] **传感器调度 (Sensor Scheduling)** <!-- id: 107 -->
         - [ ] 定义采样频率与分层扫描策略 <!-- id: 108 -->
         - [ ] 实现感知数据缓存与生命周期管理 <!-- id: 109 -->

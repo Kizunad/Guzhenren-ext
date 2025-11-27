@@ -68,10 +68,14 @@ public class WatchClosestEntityGoal implements IGoal {
             target != null &&
             entity instanceof net.minecraft.world.entity.Mob mob
         ) {
-            // 使用 LookControl 注视目标
-            mob
-                .getLookControl()
-                .setLookAt(target, LOOK_MAX_YAW, LOOK_MAX_PITCH);
+            // 使用 LookAtAction 注视目标
+            // 注意：WatchClosestEntityGoal 是一个持续性目标，它应该不断提交 LookAtAction 或者
+            // 如果 LookAtAction 是瞬时的，它可以在 tick 中提交。
+            // 但 LookAtAction 通常是持续一段时间的。
+            // 这里我们检查执行器是否空闲，如果空闲则提交一个新的 LookAtAction
+            if (mind.getActionExecutor().isIdle()) {
+                 mind.getActionExecutor().addAction(new com.Kizunad.customNPCs.ai.actions.base.LookAtAction(target, 20));
+            }
         }
     }
 

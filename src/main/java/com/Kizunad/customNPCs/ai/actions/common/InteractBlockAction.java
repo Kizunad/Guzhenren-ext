@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * - requirePlayer: 是否需要模拟玩家权限
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class InteractBlockAction extends AbstractStandardAction {
+public class InteractBlockAction extends AbstractStandardAction implements com.Kizunad.customNPCs.ai.actions.interfaces.IInteractAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InteractBlockAction.class);
 
@@ -223,5 +223,15 @@ public class InteractBlockAction extends AbstractStandardAction {
     @Override
     public String getName() {
         return "interact_block_" + blockPos.getX() + "_" + blockPos.getY() + "_" + blockPos.getZ();
+    }
+
+    @Override
+    public BlockPos getTargetPos() {
+        return blockPos;
+    }
+
+    @Override
+    public net.minecraft.world.InteractionHand getHand() {
+        return net.minecraft.world.InteractionHand.MAIN_HAND; // 默认主手
     }
 }

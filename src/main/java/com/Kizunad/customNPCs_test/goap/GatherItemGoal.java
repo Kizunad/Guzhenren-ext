@@ -89,10 +89,10 @@ public class GatherItemGoal extends PlanBasedGoal {
         List<IGoapAction> actions = new ArrayList<>();
         
         // 添加移动到物品的动作
-        actions.add(new RealMoveToItemAction(targetItem));
+        actions.add(new com.Kizunad.customNPCs.ai.actions.goap.GoapMoveToAction(targetItem, "at_item_location", 1.0f));
         
         // 添加拾取物品的动作
-        actions.add(new RealPickUpItemAction(targetItem));
+        actions.add(new com.Kizunad.customNPCs.ai.actions.goap.GoapPickUpItemAction(targetItem));
         
         return actions;
     }

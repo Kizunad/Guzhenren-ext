@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * - allowInterrupt: 是否允许中断
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class UseItemAction extends AbstractStandardAction {
+public class UseItemAction extends AbstractStandardAction implements com.Kizunad.customNPCs.ai.actions.interfaces.IUseItemAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UseItemAction.class);
 
@@ -69,6 +69,11 @@ public class UseItemAction extends AbstractStandardAction {
      * 使用计数器
      */
     private int useCounter;
+
+    /**
+     * 当前使用的物品栈
+     */
+    private ItemStack currentStack = ItemStack.EMPTY;
 
     /**
      * 创建使用物品动作（使用默认值）
@@ -121,7 +126,7 @@ public class UseItemAction extends AbstractStandardAction {
         }
 
         // 检查物品是否仍然存在
-        ItemStack currentStack = mob.getItemInHand(usingHand);
+        this.currentStack = mob.getItemInHand(usingHand);
         if (currentStack.isEmpty() || (targetItem != null && currentStack.getItem() != targetItem)) {
             LOGGER.warn("[UseItemAction] 物品被替换或耗尽");
             mob.stopUsingItem();
@@ -214,5 +219,15 @@ public class UseItemAction extends AbstractStandardAction {
     public boolean canInterrupt() {
         // 根据 allowInterrupt 参数决定是否可中断
         return allowInterrupt;
+    }
+
+    @Override
+    public ItemStack getItemStack() {
+        return currentStack;
+    }
+
+    @Override
+    public boolean isUsageComplete() {
+        return useCounter >= maxUseTicks; // 或者其他完成条件
     }
 }
