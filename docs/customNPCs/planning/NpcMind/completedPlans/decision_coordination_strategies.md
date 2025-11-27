@@ -31,9 +31,14 @@
 
 ---
 
-## 方案二：带中断的高频监控 (Interrupt-Driven Monitoring)
+## 方案二：带中断的高频监控 (Interrupt-Driven Monitoring) ✅ **已实施**
 
-**核心思想**: 引入“感知中断”和“高频检查”，使 NPC 能在计划执行过程中响应高优先级的环境变化。
+> **实施日期**: 2025-11-26  
+> **版本**: v1.0  
+> **测试状态**: ✅ 39个GameTest全部通过 (23.74秒)  
+> **架构文档**: [`decision_coordination_architecture.md`](file:///home/kiz/Code/java/Guzhenren-ext/docs/customNPCs/planning/NpcMind/decision_coordination_architecture.md)
+
+**核心思想**: 引入"感知中断"和"高频检查",使 NPC 能在计划执行过程中响应高优先级的环境变化。
 
 ### 机制设计
 1.  **感知中断 (Sensory Interrupts)**:
@@ -110,3 +115,53 @@ public void tick(INpcMind mind, LivingEntity entity) {
     }
 }
 ```
+---
+
+## 实施状态总结
+
+| 方案 | 状态 | 实施日期 | 核心组件 |
+|------|------|----------|----------|
+| 方案一 | ⚪ 未实施 | - | - |
+| **方案二** | ✅ **已完成** | 2025-11-26 | SensorEventType, NpcMind, UtilityGoalSelector, PlanBasedGoal, ActionExecutor, DamageSensor, VisionSensor |
+| 方案三 | ⚪ 未实施 | - | - |
+
+### 方案二实施细节
+
+**核心参数**:
+- 中断冷却: 10 ticks (0.5秒)
+- 滞后阈值: 10%
+- 重规划重试: 最多3次
+- 近距离威胁判定: < 5格
+
+**测试覆盖**:
+- ✅ InterruptMechanismTests (3个测试)
+- ✅ HysteresisTests (3个测试)
+- ✅ ReplanningTests (3个测试)
+- ✅ 总计39个GameTest,100%通过率
+
+**关键文件**:
+- [`SensorEventType.java`](file:///home/kiz/Code/java/Guzhenren-ext/src/main/java/com/Kizunad/customNPCs/ai/sensors/SensorEventType.java)
+- [`NpcMind.java`](file:///home/kiz/Code/java/Guzhenren-ext/src/main/java/com/Kizunad/customNPCs/capabilities/mind/NpcMind.java)
+- [`UtilityGoalSelector.java`](file:///home/kiz/Code/java/Guzhenren-ext/src/main/java/com/Kizunad/customNPCs/ai/decision/UtilityGoalSelector.java)
+- [`PlanBasedGoal.java`](file:///home/kiz/Code/java/Guzhenren-ext/src/main/java/com/Kizunad/customNPCs/ai/decision/goals/PlanBasedGoal.java)
+- [`ActionExecutor.java`](file:///home/kiz/Code/java/Guzhenren-ext/src/main/java/com/Kizunad/customNPCs/ai/executor/ActionExecutor.java)
+- [`DamageSensor.java`](file:///home/kiz/Code/java/Guzhenren-ext/src/main/java/com/Kizunad/customNPCs/ai/sensors/DamageSensor.java)
+- [`VisionSensor.java`](file:///home/kiz/Code/java/Guzhenren-ext/src/main/java/com/Kizunad/customNPCs/ai/sensors/VisionSensor.java)
+
+**详细设计文档**: [`strategy_option_2_detail.md`](file:///home/kiz/Code/java/Guzhenren-ext/docs/customNPCs/planning/NpcMind/strategy_option_2_detail.md)
+
+---
+
+## 推荐方案
+
+**当前推荐**: 方案二 (已实施并验证)
+
+方案二提供了最佳的反应性和稳定性平衡:
+- ✅ 快速响应突发事件(CRITICAL中断)
+- ✅ 防止决策抖动(滞后阈值)
+- ✅ 自动适应环境变化(重规划)
+- ✅ 决策-执行强同步(队列清理)
+
+**未来展望**:
+- 可选: 实施方案三的黑板架构,用于更复杂的多NPC协作场景
+- 可选: 添加调试命令支持运行时参数调整

@@ -1,5 +1,6 @@
 package com.Kizunad.customNPCs.capabilities.mind;
 
+import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.decision.UtilityGoalSelector;
 import com.Kizunad.customNPCs.ai.memory.MemoryModule;
 import net.minecraft.core.HolderLookup;
@@ -189,6 +190,70 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         state.setState("has_wood", hasWood != null ? hasWood : false);
         Object hasPlanks = memory.getMemory("has_planks");
         state.setState("has_planks", hasPlanks != null ? hasPlanks : false);
+
+        // === 新增: 标准动作相关状态键 ===
+        // 目标相关状态
+        Object targetVisible = memory.getMemory(WorldStateKeys.TARGET_VISIBLE);
+        state.setState(
+            WorldStateKeys.TARGET_VISIBLE,
+            targetVisible != null ? targetVisible : false
+        );
+        
+        Object targetInRange = memory.getMemory(WorldStateKeys.TARGET_IN_RANGE);
+        state.setState(
+            WorldStateKeys.TARGET_IN_RANGE,
+            targetInRange != null ? targetInRange : false
+        );
+        
+        Object targetDamaged = memory.getMemory(WorldStateKeys.TARGET_DAMAGED);
+        state.setState(
+            WorldStateKeys.TARGET_DAMAGED,
+            targetDamaged != null ? targetDamaged : false
+        );
+        
+        Object attackCooldown = memory.getMemory(WorldStateKeys.ATTACK_COOLDOWN_ACTIVE);
+        state.setState(
+            WorldStateKeys.ATTACK_COOLDOWN_ACTIVE,
+            attackCooldown != null ? attackCooldown : false
+        );
+
+        // 物品相关状态
+        Object itemUsable = memory.getMemory(WorldStateKeys.ITEM_USABLE);
+        state.setState(
+            WorldStateKeys.ITEM_USABLE,
+            itemUsable != null ? itemUsable : true // 默认为true
+        );
+        
+        Object itemUsed = memory.getMemory(WorldStateKeys.ITEM_USED);
+        state.setState(
+            WorldStateKeys.ITEM_USED,
+            itemUsed != null ? itemUsed : false
+        );
+        
+        Object hungerRestored = memory.getMemory(WorldStateKeys.HUNGER_RESTORED);
+        state.setState(
+            WorldStateKeys.HUNGER_RESTORED,
+            hungerRestored != null ? hungerRestored : false
+        );
+
+        // 方块相关状态
+        Object blockExists = memory.getMemory(WorldStateKeys.BLOCK_EXISTS);
+        state.setState(
+            WorldStateKeys.BLOCK_EXISTS,
+            blockExists != null ? blockExists : true // 默认为true
+        );
+        
+        Object blockInteracted = memory.getMemory(WorldStateKeys.BLOCK_INTERACTED);
+        state.setState(
+            WorldStateKeys.BLOCK_INTERACTED,
+            blockInteracted != null ? blockInteracted : false
+        );
+        
+        Object doorOpen = memory.getMemory(WorldStateKeys.DOOR_OPEN);
+        state.setState(
+            WorldStateKeys.DOOR_OPEN,
+            doorOpen != null ? doorOpen : false
+        );
 
         return state;
     }

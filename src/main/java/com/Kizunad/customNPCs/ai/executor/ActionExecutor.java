@@ -82,6 +82,9 @@ public class ActionExecutor {
         // 清空队列
         actionQueue.clear();
 
+        // 重置状态，避免上一计划的失败标记影响新计划
+        lastActionStatus = ActionStatus.RUNNING;
+
         // 添加新动作
         actionQueue.addAll(actions);
 
@@ -109,6 +112,7 @@ public class ActionExecutor {
             currentAction = null;
         }
         actionQueue.clear();
+        lastActionStatus = ActionStatus.RUNNING;
         System.out.println("[ActionExecutor] 当前计划已停止");
     }
 

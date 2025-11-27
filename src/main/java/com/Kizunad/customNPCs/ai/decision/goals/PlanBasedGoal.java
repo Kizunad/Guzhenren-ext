@@ -151,6 +151,10 @@ public abstract class PlanBasedGoal implements IGoal {
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
         System.out.println("[PlanBasedGoal] " + getName() + " 停止");
+        // 目标停止时，确保相关动作队列被清理，避免被其他目标继承
+        if (mind != null) {
+            mind.getActionExecutor().stopCurrentPlan();
+        }
         started = false;
         planningFailed = false;
     }

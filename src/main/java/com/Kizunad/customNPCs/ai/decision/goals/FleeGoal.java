@@ -1,0 +1,155 @@
+package com.Kizunad.customNPCs.ai.decision.goals;
+
+import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
+import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * 逃跑Goal - 当遇到危险且无法应对时逃跑
+ * <p>
+ * 使用标准动作: {@link MoveToAction}
+ * <p>
+ * 优先级: 极高（生存第一）
+ * 触发条件: 血量 < 30% 且附近有威胁
+ */
+public class FleeGoal implements IGoal {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FleeGoal.class);
+
+    private static final float DANGER_THRESHOLD = 0.3f; // 30%血量认为危险
+    private static final double FLEE_DISTANCE = 20.0; // 逃跑距离
+    private static final double THREAT_DETECTION_RANGE = 10.0; // 威胁检测范围
+    private static final int FLEE_MEMORY_DURATION = 100; // 5秒
+
+    private MoveToAction fleeAction = null;
+    private Vec3 safeLocation = null;
+
+    @Override
+    public float getPriority(INpcMind mind, LivingEntity entity) {
+        if (isInDanger(mind, entity)) {
+            float healthPercentage = entity.getHealth() / entity.getMaxHealth();
+            // 血量越低，优先级越高（但总是保持高优先级）
+            return 0.9f + (1.0f - healthPercentage) * 0.1f; // 0.9-1.0
+        }
+        return 0.0f;
+    }
+
+    @Override
+    public boolean canRun(INpcMind mind, LivingEntity entity) {
+        return isInDanger(mind, entity);
+    }
+
+    @Override
+    public void start(INpcMind mind, LivingEntity entity) {
+        mind.getMemory().rememberShortTerm(
+            "is_fleeing",
+            true,
+            FLEE_MEMORY_DURATION
+        );
+
+        LOGGER.info(
+            "[FleeGoal] {} 开始逃跑 | 血量: {}/{}",
+            entity.getName().getString(),
+            entity.getHealth(),
+            entity.getMaxHealth()
+        );
+    }
+
+    @Override
+    public void tick(INpcMind mind, LivingEntity entity) {
+        // 如果还没有逃跑动作或安全位置失效，重新计算
+        if (fleeAction == null || safeLocation == null) {
+            safeLocation = calculateSafeLocation(entity);
+            if (safeLocation != null) {
+                fleeAction = new MoveToAction(safeLocation, 1.5); // 快速移动
+                fleeAction.start(mind, entity);
+                LOGGER.debug(
+                    "[FleeGoal] 目标安全位置: ({}, {}, {})",
+                    safeLocation.x,
+                    safeLocation.y,
+                    safeLocation.z
+                );
+            }
+        }
+
+        // 执行逃跑动作
+        if (fleeAction != null) {
+            ActionStatus status = fleeAction.tick(mind, entity);
+            if (status == ActionStatus.SUCCESS) {
+                LOGGER.info("[FleeGoal] 已到达安全位置");
+                fleeAction = null;
+                safeLocation = null;
+            } else if (status == ActionStatus.FAILURE) {
+                LOGGER.warn("[FleeGoal] 逃跑失败，重新计算路径");
+                fleeAction = null;
+                safeLocation = null;
+            }
+        }
+    }
+
+    @Override
+    public void stop(INpcMind mind, LivingEntity entity) {
+        mind.getMemory().forget("is_fleeing");
+        
+        if (fleeAction != null) {
+            fleeAction.stop(mind, entity);
+            fleeAction = null;
+        }
+        safeLocation = null;
+
+        LOGGER.info("[FleeGoal] {} 停止逃跑", entity.getName().getString());
+    }
+
+    @Override
+    public boolean isFinished(INpcMind mind, LivingEntity entity) {
+        // 不再处于危险中或已到达安全位置
+        return !isInDanger(mind, entity) || (safeLocation != null 
+            && entity.position().distanceTo(safeLocation) < 2.0);
+    }
+
+    @Override
+    public String getName() {
+        return "flee";
+    }
+
+    /**
+     * 检查是否处于危险中
+     */
+    private boolean isInDanger(INpcMind mind, LivingEntity entity) {
+        // 血量低
+        boolean lowHealth = entity.getHealth() < entity.getMaxHealth() * DANGER_THRESHOLD;
+        
+        // 检查Memory中是否有威胁记录
+        boolean hasThreat = mind.getMemory().hasMemory("threat_detected");
+        
+        // 或者检查最近是否受到伤害
+        boolean recentlyHurt = entity.hurtTime > 0;
+        
+        return lowHealth && (hasThreat || recentlyHurt);
+    }
+
+    /**
+     * 计算安全位置（远离当前位置）
+     */
+    private Vec3 calculateSafeLocation(LivingEntity entity) {
+        Vec3 currentPos = entity.position();
+        
+        // 简单策略：随机选择一个远离当前位置的方向
+        // 未来可以改进为智能寻找掩体
+        double angle = Math.random() * 2 * Math.PI;
+        double dx = Math.cos(angle) * FLEE_DISTANCE;
+        double dz = Math.sin(angle) * FLEE_DISTANCE;
+        
+        return new Vec3(
+            currentPos.x + dx,
+            currentPos.y,
+            currentPos.z + dz
+        );
+    }
+}

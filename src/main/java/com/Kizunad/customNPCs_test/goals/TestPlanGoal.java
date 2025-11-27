@@ -1,6 +1,5 @@
 package com.Kizunad.customNPCs_test.goals;
 
-import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.decision.goals.PlanBasedGoal;
 import com.Kizunad.customNPCs.ai.planner.IGoapAction;
 import com.Kizunad.customNPCs.ai.planner.WorldState;

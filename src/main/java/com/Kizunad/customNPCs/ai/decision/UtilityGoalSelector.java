@@ -65,6 +65,8 @@ public class UtilityGoalSelector {
                 currentGoal.isFinished(mind, entity) ||
                 !currentGoal.canRun(mind, entity)
             ) {
+                // 当前目标无法继续时，终止其动作计划，避免旧计划残留
+                mind.getActionExecutor().stopCurrentPlan();
                 currentGoal.stop(mind, entity);
                 currentGoal = null;
                 reevaluate(mind, entity, null); // 立即选择新目标
@@ -152,6 +154,8 @@ public class UtilityGoalSelector {
                             interruptLevel +
                             "]"
                     );
+                    // 切换目标时清空旧计划，防止遗留动作继续执行
+                    mind.getActionExecutor().stopCurrentPlan();
                     currentGoal.stop(mind, entity);
                 } else {
                     System.out.println(
