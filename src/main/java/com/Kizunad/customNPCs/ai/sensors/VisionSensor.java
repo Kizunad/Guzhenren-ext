@@ -23,9 +23,13 @@ public class VisionSensor implements ISensor {
     private static final double DEFAULT_RANGE = 16.0D; // 默认视野范围（格）
     private static final int MEMORY_DURATION = 100; // 记忆持续时间（5秒）
     private static final int SENSOR_PRIORITY = 10; // 传感器优先级
+    private static final int SCAN_INTERVAL_THREAT = 2;
+    private static final int SCAN_INTERVAL_VISIBLE = 10;
+    private static final int SCAN_INTERVAL_HIDDEN = 20;
+    private static final float NEAR_THREAT_DISTANCE = 5.0f;
 
     private final double range;
-    private int currentScanInterval = 10; // 默认 10 ticks
+    private int currentScanInterval = SCAN_INTERVAL_VISIBLE; // 默认 10 ticks
 
     public VisionSensor() {
         this(DEFAULT_RANGE);
@@ -76,7 +80,7 @@ public class VisionSensor implements ISensor {
                     MEMORY_DURATION
                 );
             // 没有实体，降低扫描频率（省电模式）
-            setScanInterval(20);
+            setScanInterval(SCAN_INTERVAL_HIDDEN);
             return;
         }
 
@@ -93,11 +97,11 @@ public class VisionSensor implements ISensor {
 
         // 如果有可见实体，恢复正常扫描频率；检测到威胁则进一步提频
         if (hasThreat) {
-            setScanInterval(2); // 威胁模式：高频扫描 (0.1s)
+            setScanInterval(SCAN_INTERVAL_THREAT); // 威胁模式：高频扫描 (0.1s)
         } else if (hasVisible) {
-            setScanInterval(10); // 正常模式：中频扫描 (0.5s)
+            setScanInterval(SCAN_INTERVAL_VISIBLE); // 正常模式：中频扫描 (0.5s)
         } else {
-            setScanInterval(20); // 只有不可见实体（被遮挡），低频扫描
+            setScanInterval(SCAN_INTERVAL_HIDDEN); // 只有不可见实体（被遮挡），低频扫描
         }
 
         // DEBUG
@@ -251,7 +255,7 @@ public class VisionSensor implements ISensor {
         // 检测敌对生物
         if (isHostile(target, observer)) {
             // 近距离敌对实体视为紧急威胁
-            if (distance < 5.0f) {
+            if (distance < NEAR_THREAT_DISTANCE) {
                 mind.triggerInterrupt(
                     observer,
                     com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL

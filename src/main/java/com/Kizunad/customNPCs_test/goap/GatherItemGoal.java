@@ -4,8 +4,6 @@ import com.Kizunad.customNPCs.ai.decision.goals.PlanBasedGoal;
 import com.Kizunad.customNPCs.ai.planner.IGoapAction;
 import com.Kizunad.customNPCs.ai.planner.WorldState;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
-import com.Kizunad.customNPCs_test.goap.real.RealMoveToItemAction;
-import com.Kizunad.customNPCs_test.goap.real.RealPickUpItemAction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 

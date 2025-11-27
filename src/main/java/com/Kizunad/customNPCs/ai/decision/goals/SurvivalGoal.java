@@ -2,7 +2,9 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 
 /**
  * 生存目标 - 当血量低时优先级提升
@@ -63,12 +65,13 @@ public class SurvivalGoal implements IGoal {
         if (mind.getActionExecutor().isIdle()) {
             // 简单示例：尝试使用手中的物品
             // 实际逻辑应该更复杂：查找背包中的食物/药水，切换到主手，然后使用
-             if (entity instanceof net.minecraft.world.entity.Mob mob) {
-                 // 检查手中是否有食物
-                 if (mob.getMainHandItem().getFoodProperties(mob) != null) {
-                     mind.getActionExecutor().addAction(new com.Kizunad.customNPCs.ai.actions.common.UseItemAction(null)); // 使用当前物品
-                 }
-             }
+            if (entity instanceof Mob mob) {
+                // 检查手中是否有食物
+                if (mob.getMainHandItem().getFoodProperties(mob) != null) {
+                    // 使用当前物品恢复状态
+                    mind.getActionExecutor().addAction(new UseItemAction(null));
+                }
+            }
         }
     }
 

@@ -5,7 +5,6 @@ import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +25,9 @@ public class FleeGoal implements IGoal {
     private static final double FLEE_DISTANCE = 20.0; // 逃跑距离
     private static final double THREAT_DETECTION_RANGE = 10.0; // 威胁检测范围
     private static final int FLEE_MEMORY_DURATION = 100; // 5秒
+    private static final float BASE_PRIORITY = 0.9f;
+    private static final float PRIORITY_SCALE = 0.1f;
+    private static final double FLEE_SPEED = 1.5;
 
     private MoveToAction fleeAction = null;
     private Vec3 safeLocation = null;
@@ -35,7 +37,7 @@ public class FleeGoal implements IGoal {
         if (isInDanger(mind, entity)) {
             float healthPercentage = entity.getHealth() / entity.getMaxHealth();
             // 血量越低，优先级越高（但总是保持高优先级）
-            return 0.9f + (1.0f - healthPercentage) * 0.1f; // 0.9-1.0
+            return BASE_PRIORITY + (1.0f - healthPercentage) * PRIORITY_SCALE;
         }
         return 0.0f;
     }
@@ -67,7 +69,7 @@ public class FleeGoal implements IGoal {
         if (fleeAction == null || safeLocation == null) {
             safeLocation = calculateSafeLocation(entity);
             if (safeLocation != null) {
-                fleeAction = new MoveToAction(safeLocation, 1.5); // 快速移动
+                fleeAction = new MoveToAction(safeLocation, FLEE_SPEED); // 快速移动
                 fleeAction.start(mind, entity);
                 LOGGER.debug(
                     "[FleeGoal] 目标安全位置: ({}, {}, {})",

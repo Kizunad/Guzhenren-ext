@@ -177,33 +177,72 @@ public class MoveToAction implements IAction {
 
         // 每 20 ticks 打印一次位置信息
         if (currentTick % 20 == 0) {
-            System.out.println(
-                "[MoveToAction DEBUG] Tick " +
-                    currentTick +
-                    " | 当前位置: " +
-                    String.format(
-                        "(%.1f, %.1f, %.1f)",
-                        currentPos.x,
-                        currentPos.y,
-                        currentPos.z
-                    ) +
-                    " | 目标位置: " +
-                    String.format(
-                        "(%.1f, %.1f, %.1f)",
-                        currentTarget.x,
-                        currentTarget.y,
-                        currentTarget.z
-                    ) +
-                    " | 距离: " +
-                    String.format("%.2f", distanceToTarget) +
-                    " | Navigation.isDone: " +
-                    navigation.isDone() +
-                    " | hasPath: " +
-                    (navigation.getPath() != null)
-            );
+            logDebugInfo(currentPos, currentTarget, distanceToTarget);
         }
 
-        // 卡住检测
+        ActionStatus stuckStatus = handleStuck(
+            entity,
+            currentPos,
+            currentTarget
+        );
+        if (stuckStatus != null) {
+            return stuckStatus;
+        }
+
+        ActionStatus pathStatus = updatePath(
+            entity,
+            currentPos,
+            currentTarget,
+            distanceToTarget
+        );
+        if (pathStatus != null) {
+            return pathStatus;
+        }
+
+        return handlePathCompletion(
+            currentPos,
+            currentTarget,
+            distanceToTarget,
+            entity
+        );
+    }
+
+    private void logDebugInfo(
+        Vec3 currentPos,
+        Vec3 currentTarget,
+        double distanceToTarget
+    ) {
+        System.out.println(
+            "[MoveToAction DEBUG] Tick " +
+                currentTick +
+                " | 当前位置: " +
+                String.format(
+                    "(%.1f, %.1f, %.1f)",
+                    currentPos.x,
+                    currentPos.y,
+                    currentPos.z
+                ) +
+                " | 目标位置: " +
+                String.format(
+                    "(%.1f, %.1f, %.1f)",
+                    currentTarget.x,
+                    currentTarget.y,
+                    currentTarget.z
+                ) +
+                " | 距离: " +
+                String.format("%.2f", distanceToTarget) +
+                " | Navigation.isDone: " +
+                navigation.isDone() +
+                " | hasPath: " +
+                (navigation.getPath() != null)
+        );
+    }
+
+    private ActionStatus handleStuck(
+        LivingEntity entity,
+        Vec3 currentPos,
+        Vec3 currentTarget
+    ) {
         if (lastPosition != null) {
             double movementDistance = currentPos.distanceTo(lastPosition);
             if (movementDistance < MIN_MOVEMENT) {
@@ -230,52 +269,68 @@ public class MoveToAction implements IAction {
             }
         }
         lastPosition = currentPos;
+        return null;
+    }
 
-        // 更新路径（带冷却）
+    private ActionStatus updatePath(
+        LivingEntity entity,
+        Vec3 currentPos,
+        Vec3 currentTarget,
+        double distanceToTarget
+    ) {
         pathUpdateCooldown--;
-        if (pathUpdateCooldown <= 0) {
-            boolean pathCreated = navigation.moveTo(
-                currentTarget.x,
-                currentTarget.y,
-                currentTarget.z,
-                speed
-            );
-            pathUpdateCooldown = PATH_UPDATE_INTERVAL;
-
-            if (!pathCreated && navigation.getPath() == null) {
-                if (tryTeleportToTarget(entity, currentTarget)) {
-                    return ActionStatus.RUNNING;
-                }
-                System.err.println(
-                    "[MoveToAction] 无法创建路径" +
-                        " | 从: " +
-                        String.format(
-                            "(%.1f, %.1f, %.1f)",
-                            currentPos.x,
-                            currentPos.y,
-                            currentPos.z
-                        ) +
-                        " | 到: " +
-                        String.format(
-                            "(%.1f, %.1f, %.1f)",
-                            currentTarget.x,
-                            currentTarget.y,
-                            currentTarget.z
-                        ) +
-                        " | 距离: " +
-                        String.format("%.2f", distanceToTarget) +
-                        " | 实体在地面: " +
-                        entity.onGround()
-                );
-                return ActionStatus.FAILURE;
-            }
-
-            if (pathCreated && currentTick % 20 == 0) {
-                System.out.println("[MoveToAction DEBUG] 路径已创建/更新");
-            }
+        if (pathUpdateCooldown > 0) {
+            return null;
         }
 
-        // 检查寻路是否卡住
+        boolean pathCreated = navigation.moveTo(
+            currentTarget.x,
+            currentTarget.y,
+            currentTarget.z,
+            speed
+        );
+        pathUpdateCooldown = PATH_UPDATE_INTERVAL;
+
+        if (!pathCreated && navigation.getPath() == null) {
+            if (tryTeleportToTarget(entity, currentTarget)) {
+                return ActionStatus.RUNNING;
+            }
+            System.err.println(
+                "[MoveToAction] 无法创建路径" +
+                    " | 从: " +
+                    String.format(
+                        "(%.1f, %.1f, %.1f)",
+                        currentPos.x,
+                        currentPos.y,
+                        currentPos.z
+                    ) +
+                    " | 到: " +
+                    String.format(
+                        "(%.1f, %.1f, %.1f)",
+                        currentTarget.x,
+                        currentTarget.y,
+                        currentTarget.z
+                    ) +
+                    " | 距离: " +
+                    String.format("%.2f", distanceToTarget) +
+                    " | 实体在地面: " +
+                    entity.onGround()
+            );
+            return ActionStatus.FAILURE;
+        }
+
+        if (pathCreated && currentTick % 20 == 0) {
+            System.out.println("[MoveToAction DEBUG] 路径已创建/更新");
+        }
+        return null;
+    }
+
+    private ActionStatus handlePathCompletion(
+        Vec3 currentPos,
+        Vec3 currentTarget,
+        double distanceToTarget,
+        LivingEntity entity
+    ) {
         // navigation.isDone() 通常表示寻路器已经到达了路径的终点，或者无法继续寻路（例如，路径被阻挡或目标不可达）。
         // 它不一定意味着实体已经到达了最终目标点，只是路径计算和跟随过程结束了。
         if (navigation.isDone()) {
@@ -308,7 +363,6 @@ public class MoveToAction implements IAction {
                 return ActionStatus.FAILURE;
             }
         }
-
         return ActionStatus.RUNNING;
     }
 

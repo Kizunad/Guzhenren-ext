@@ -44,18 +44,16 @@ public class CourierGoal extends PlanBasedGoal {
     
     @Override
     public float getPriority(INpcMind mind, LivingEntity entity) {
-        // 如果源物品不存在，优先级为0
-        if (!sourceItem.isAlive()) {
-            return 0.0f;
+        if (sourceItem.isAlive() || hasCarriedItem(mind, entity)) {
+            return basePriority;
         }
         
-        return basePriority;
+        return 0.0f;
     }
     
     @Override
     public boolean canRun(INpcMind mind, LivingEntity entity) {
-        // 源物品必须存在
-        return sourceItem.isAlive();
+        return sourceItem.isAlive() || hasCarriedItem(mind, entity);
     }
     
     @Override
@@ -141,5 +139,13 @@ public class CourierGoal extends PlanBasedGoal {
     @Override
     public String getName() {
         return "courier";
+    }
+
+    private boolean hasCarriedItem(INpcMind mind, LivingEntity entity) {
+        boolean holdingItem = !entity
+            .getItemInHand(InteractionHand.MAIN_HAND)
+            .isEmpty();
+        boolean rememberedItem = mind.getMemory().hasMemory("has_item");
+        return holdingItem || rememberedItem;
     }
 }

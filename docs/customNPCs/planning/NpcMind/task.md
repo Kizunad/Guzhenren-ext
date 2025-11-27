@@ -120,12 +120,12 @@
     - [x] **动作层标准化 (Action Standardization)** <!-- id: 104 -->
         - [x] 定义通用动作接口 (Interaction, Attack, UseItem) <!-- id: 105 -->
         - [x] 消除具体 Goal 中的重复动作逻辑 (DRY) <!-- id: 106 -->
-    - [ ] **传感器调度 (Sensor Scheduling)** <!-- id: 107 -->
-        - [ ] 定义采样频率与分层扫描策略 <!-- id: 108 -->
-        - [ ] 实现感知数据缓存与生命周期管理 <!-- id: 109 -->
-    - [ ] **并发与抢占控制 (Concurrency & Preemption)** <!-- id: 110 -->
-        - [ ] 实现 Utility 抢占阈值与滞后 (Hysteresis) <!-- id: 111 -->
-        - [ ] 添加目标冷却机制 (Cooldowns) <!-- id: 112 -->
+    - [x] **传感器调度 (Sensor Scheduling)** <!-- id: 107 -->
+        - [x] 定义采样频率与分层扫描策略 <!-- id: 108 -->
+        - [x] 实现感知数据缓存与生命周期管理 <!-- id: 109 -->
+    - [x] **并发与抢占控制 (Concurrency & Preemption)** <!-- id: 110 -->
+        - [x] 实现 Utility 抢占阈值与滞后 (Hysteresis) <!-- id: 111 -->
+        - [x] 添加目标冷却机制 (Cooldowns) <!-- id: 112 -->
     - [ ] **数据持久化 (Persistence)** <!-- id: 113 -->
         - [ ] 实现 Memory/Personality/Emotion 的 NBT 序列化与反序列化 <!-- id: 114 -->
         - [ ] 验证重启后的状态一致性 <!-- id: 115 -->

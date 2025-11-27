@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -29,7 +30,7 @@ import java.util.UUID;
  * - maxAttempts: 最大攻击尝试次数
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class AttackAction extends AbstractStandardAction implements com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction {
+public class AttackAction extends AbstractStandardAction implements IAttackAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AttackAction.class);
 
@@ -72,7 +73,12 @@ public class AttackAction extends AbstractStandardAction implements com.Kizunad.
      * @param targetUuid 目标实体 UUID
      */
     public AttackAction(UUID targetUuid) {
-        this(targetUuid, CONFIG.getAttackRange(), CONFIG.getAttackCooldownTicks(), CONFIG.getMaxAttackAttemptTicks());
+        this(
+            targetUuid,
+            CONFIG.getAttackRange(),
+            CONFIG.getAttackCooldownTicks(),
+            CONFIG.getMaxAttackAttemptTicks()
+        );
     }
 
     /**

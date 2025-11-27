@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.actions.interfaces.IInteractAction;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,7 +32,9 @@ import org.slf4j.LoggerFactory;
  * - requirePlayer: 是否需要模拟玩家权限
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class InteractBlockAction extends AbstractStandardAction implements com.Kizunad.customNPCs.ai.actions.interfaces.IInteractAction {
+public class InteractBlockAction
+    extends AbstractStandardAction
+    implements IInteractAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InteractBlockAction.class);
 

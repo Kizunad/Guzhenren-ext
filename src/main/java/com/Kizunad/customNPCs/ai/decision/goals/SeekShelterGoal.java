@@ -8,7 +8,7 @@ import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -29,6 +29,8 @@ public class SeekShelterGoal implements IGoal {
     private static final int SHELTER_SEARCH_RADIUS = 20; // 搜索半径
     private static final int SHELTER_MEMORY_DURATION = 200; // 10秒
     private static final double ARRIVAL_DISTANCE = 2.0;
+    private static final float PRIORITY_DANGER = 0.5f;
+    private static final int VERTICAL_SEARCH_RADIUS = 5;
 
     private MoveToAction moveAction = null;
     private InteractBlockAction interactAction = null;
@@ -39,7 +41,7 @@ public class SeekShelterGoal implements IGoal {
     public float getPriority(INpcMind mind, LivingEntity entity) {
         if (isInDangerousEnvironment(entity)) {
             // 中等优先级
-            return 0.5f;
+            return PRIORITY_DANGER;
         }
         return 0.0f;
     }
@@ -179,7 +181,11 @@ public class SeekShelterGoal implements IGoal {
 
         // 搜索附近的方块
         for (int dx = -SHELTER_SEARCH_RADIUS; dx <= SHELTER_SEARCH_RADIUS; dx++) {
-            for (int dy = -5; dy <= 5; dy++) {
+            for (
+                int dy = -VERTICAL_SEARCH_RADIUS;
+                dy <= VERTICAL_SEARCH_RADIUS;
+                dy++
+            ) {
                 for (int dz = -SHELTER_SEARCH_RADIUS; dz <= SHELTER_SEARCH_RADIUS; dz++) {
                     BlockPos pos = entityPos.offset(dx, dy, dz);
                     

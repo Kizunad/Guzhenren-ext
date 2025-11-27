@@ -1,6 +1,7 @@
 package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.actions.base.LookAtAction;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
@@ -19,6 +20,7 @@ public class WatchClosestEntityGoal implements IGoal {
     private static final float PRIORITY_INACTIVE = 0.0f; // 无目标时的优先级
     private static final float LOOK_MAX_YAW = 30.0F; // 最大偏航角
     private static final float LOOK_MAX_PITCH = 30.0F; // 最大俯仰角
+    private static final int LOOK_ACTION_DURATION = 20;
 
     private String targetUUID;
     private boolean isRunning;
@@ -74,7 +76,9 @@ public class WatchClosestEntityGoal implements IGoal {
             // 但 LookAtAction 通常是持续一段时间的。
             // 这里我们检查执行器是否空闲，如果空闲则提交一个新的 LookAtAction
             if (mind.getActionExecutor().isIdle()) {
-                 mind.getActionExecutor().addAction(new com.Kizunad.customNPCs.ai.actions.base.LookAtAction(target, 20));
+                mind
+                    .getActionExecutor()
+                    .addAction(new LookAtAction(target, LOOK_ACTION_DURATION));
             }
         }
     }

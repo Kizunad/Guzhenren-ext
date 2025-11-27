@@ -25,6 +25,8 @@ public class DefendGoal implements IGoal {
 
     private static final int DEFEND_MEMORY_DURATION = 60; // 3秒记忆
     private static final double MIN_ATTACK_DAMAGE = 1.0; // 最小攻击力要求
+    private static final float PRIORITY_RECENT_HIT = 0.7f;
+    private static final float PRIORITY_MEMORY = 0.65f;
 
     private AttackAction attackAction = null;
     private UUID targetUuid = null;
@@ -34,12 +36,12 @@ public class DefendGoal implements IGoal {
         // 如果最近受到攻击且有反击能力
         if (entity.hurtTime > 0 && canDefend(entity)) {
             // 中高优先级，但低于逃跑
-            return 0.7f;
+            return PRIORITY_RECENT_HIT;
         }
         
         // 如果Memory中记录了攻击者
         if (mind.getMemory().hasMemory("last_attacker")) {
-            return 0.65f;
+            return PRIORITY_MEMORY;
         }
 
         return 0.0f;

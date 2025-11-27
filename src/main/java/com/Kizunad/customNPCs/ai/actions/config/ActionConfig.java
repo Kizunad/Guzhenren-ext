@@ -15,92 +15,108 @@ package com.Kizunad.customNPCs.ai.actions.config;
 public final class ActionConfig {
 
     private static final ActionConfig INSTANCE = new ActionConfig();
+    private static final int DEFAULT_TIMEOUT_TICKS = 300;
+    private static final int DEFAULT_MAX_RETRIES = 3;
+    private static final double DEFAULT_NAV_RANGE = 10.0;
+    private static final double DEFAULT_ATTACK_RANGE = 3.0;
+    private static final int DEFAULT_ATTACK_COOLDOWN_TICKS = 20;
+    private static final int DEFAULT_MAX_ATTACK_ATTEMPT_TICKS = 60;
+    private static final int DEFAULT_ITEM_USE_TICKS = 32;
+    private static final int DEFAULT_BOW_MAX_USE_TICKS = 72000;
+    private static final int DEFAULT_TIMEOUT_BUFFER_TICKS = 20;
+    private static final double DEFAULT_INTERACT_RANGE = 4.0;
+    private static final int DEFAULT_INTERACT_TIMEOUT_TICKS = 200;
+    private static final int DEFAULT_PATH_UPDATE_INTERVAL = 10;
+    private static final int DEFAULT_NAV_TIMEOUT = 300;
+    private static final int DEFAULT_RENAV_INTERVAL = 10;
+    private static final int DEFAULT_MAX_NAV_RETRIES = 5;
+    private static final int DEFAULT_LOG_INTERVAL_TICKS = 20;
 
     // ==================== 通用配置 ====================
     /**
      * 默认超时时长（ticks）
      */
-    private int defaultTimeoutTicks = 300;
+    private int defaultTimeoutTicks = DEFAULT_TIMEOUT_TICKS;
 
     /**
      * 默认最大重试次数
      */
-    private int defaultMaxRetries = 3;
+    private int defaultMaxRetries = DEFAULT_MAX_RETRIES;
 
     /**
      * 默认导航范围（blocks）
      */
-    private double defaultNavRange = 10.0;
+    private double defaultNavRange = DEFAULT_NAV_RANGE;
 
     // ==================== 攻击动作配置 ====================
     /**
      * 攻击距离（blocks）
      */
-    private double attackRange = 3.0;
+    private double attackRange = DEFAULT_ATTACK_RANGE;
 
     /**
      * 攻击冷却时长（ticks）
      */
-    private int attackCooldownTicks = 20;
+    private int attackCooldownTicks = DEFAULT_ATTACK_COOLDOWN_TICKS;
 
     /**
      * 最大攻击尝试时长（ticks）
      */
-    private int maxAttackAttemptTicks = 60;
+    private int maxAttackAttemptTicks = DEFAULT_MAX_ATTACK_ATTEMPT_TICKS;
 
     // ==================== 使用物品动作配置 ====================
     /**
      * 默认物品使用时长（ticks）
      */
-    private int defaultItemUseTicks = 32;
+    private int defaultItemUseTicks = DEFAULT_ITEM_USE_TICKS;
 
     /**
      * 弓的最大蓄力时长（ticks）
      */
-    private int bowMaxUseTicks = 72000;
+    private int bowMaxUseTicks = DEFAULT_BOW_MAX_USE_TICKS;
 
     /**
      * 超时缓冲（ticks）
      */
-    private int timeoutBufferTicks = 20;
+    private int timeoutBufferTicks = DEFAULT_TIMEOUT_BUFFER_TICKS;
 
     // ==================== 方块交互配置 ====================
     /**
      * 交互距离（blocks）
      */
-    private double interactRange = 4.0;
+    private double interactRange = DEFAULT_INTERACT_RANGE;
 
     /**
      * 交互超时时长（ticks）
      */
-    private int interactTimeoutTicks = 200;
+    private int interactTimeoutTicks = DEFAULT_INTERACT_TIMEOUT_TICKS;
 
     // ==================== 导航配置 ====================
     /**
      * 路径更新间隔（ticks）
      */
-    private int pathUpdateInterval = 10;
+    private int pathUpdateInterval = DEFAULT_PATH_UPDATE_INTERVAL;
 
     /**
      * 导航超时（ticks）
      */
-    private int navTimeout = 300;
+    private int navTimeout = DEFAULT_NAV_TIMEOUT;
 
     /**
      * 重新导航间隔（ticks）
      */
-    private int renavInterval = 10;
+    private int renavInterval = DEFAULT_RENAV_INTERVAL;
 
     /**
      * 最大导航重试次数
      */
-    private int maxNavRetries = 5;
+    private int maxNavRetries = DEFAULT_MAX_NAV_RETRIES;
 
     // ==================== 日志配置 ====================
     /**
      * 日志输出间隔（ticks）
      */
-    private int logIntervalTicks = 20;
+    private int logIntervalTicks = DEFAULT_LOG_INTERVAL_TICKS;
 
     /**
      * 是否启用调试日志
@@ -248,22 +264,22 @@ public final class ActionConfig {
      * 重置为默认值
      */
     public void resetToDefaults() {
-        this.defaultTimeoutTicks = 300;
-        this.defaultMaxRetries = 3;
-        this.defaultNavRange = 10.0;
-        this.attackRange = 3.0;
-        this.attackCooldownTicks = 20;
-        this.maxAttackAttemptTicks = 60;
-        this.defaultItemUseTicks = 32;
-        this.bowMaxUseTicks = 72000;
-        this.timeoutBufferTicks = 20;
-        this.interactRange = 4.0;
-        this.interactTimeoutTicks = 200;
-        this.pathUpdateInterval = 10;
-        this.navTimeout = 300;
-        this.renavInterval = 10;
-        this.maxNavRetries = 5;
-        this.logIntervalTicks = 20;
+        this.defaultTimeoutTicks = DEFAULT_TIMEOUT_TICKS;
+        this.defaultMaxRetries = DEFAULT_MAX_RETRIES;
+        this.defaultNavRange = DEFAULT_NAV_RANGE;
+        this.attackRange = DEFAULT_ATTACK_RANGE;
+        this.attackCooldownTicks = DEFAULT_ATTACK_COOLDOWN_TICKS;
+        this.maxAttackAttemptTicks = DEFAULT_MAX_ATTACK_ATTEMPT_TICKS;
+        this.defaultItemUseTicks = DEFAULT_ITEM_USE_TICKS;
+        this.bowMaxUseTicks = DEFAULT_BOW_MAX_USE_TICKS;
+        this.timeoutBufferTicks = DEFAULT_TIMEOUT_BUFFER_TICKS;
+        this.interactRange = DEFAULT_INTERACT_RANGE;
+        this.interactTimeoutTicks = DEFAULT_INTERACT_TIMEOUT_TICKS;
+        this.pathUpdateInterval = DEFAULT_PATH_UPDATE_INTERVAL;
+        this.navTimeout = DEFAULT_NAV_TIMEOUT;
+        this.renavInterval = DEFAULT_RENAV_INTERVAL;
+        this.maxNavRetries = DEFAULT_MAX_NAV_RETRIES;
+        this.logIntervalTicks = DEFAULT_LOG_INTERVAL_TICKS;
         this.debugLoggingEnabled = false;
     }
 

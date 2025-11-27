@@ -3,7 +3,6 @@ package com.Kizunad.customNPCs.ai.actions.interfaces;
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
 
 /**
  * Interface for actions that involve interacting with blocks or entities.

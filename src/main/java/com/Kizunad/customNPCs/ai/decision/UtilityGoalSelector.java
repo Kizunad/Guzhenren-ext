@@ -1,8 +1,12 @@
 package com.Kizunad.customNPCs.ai.decision;
 
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.customNPCs.ai.sensors.SensorEventType;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -16,14 +20,21 @@ import net.minecraft.world.entity.LivingEntity;
 public class UtilityGoalSelector {
 
     private final List<IGoal> goals;
+    private final Map<String, Integer> goalCooldowns;
     private IGoal currentGoal;
+    private int currentGoalActiveTicks;
     private int ticksSinceLastEvaluation;
     private static final int EVALUATION_INTERVAL = 20; // 每秒重新评估一次（20 ticks）
     private static final float HYSTERESIS_THRESHOLD = 0.1f; // 10% 滞后阈值
+    private static final float PREEMPTION_ADDITIONAL_THRESHOLD = 0.15f; // 早期抢占额外阈值
+    private static final int PREEMPTION_GRACE_TICKS = 15; // 刚切换后至少坚持 15 ticks
+    private static final int GOAL_COOLDOWN_TICKS = 40; // 目标切换后的冷却期
 
     public UtilityGoalSelector() {
         this.goals = new ArrayList<>();
+        this.goalCooldowns = new HashMap<>();
         this.currentGoal = null;
+        this.currentGoalActiveTicks = 0;
         this.ticksSinceLastEvaluation = 0;
     }
 
@@ -41,6 +52,7 @@ public class UtilityGoalSelector {
      */
     public void unregisterGoal(IGoal goal) {
         goals.remove(goal);
+        goalCooldowns.remove(goal.getName());
         if (currentGoal == goal) {
             currentGoal = null;
         }
@@ -51,6 +63,12 @@ public class UtilityGoalSelector {
      */
     public void tick(INpcMind mind, LivingEntity entity) {
         ticksSinceLastEvaluation++;
+        decayCooldowns();
+        if (currentGoal != null) {
+            currentGoalActiveTicks++;
+        } else {
+            currentGoalActiveTicks = 0;
+        }
 
         // 定期重新评估目标
         if (ticksSinceLastEvaluation >= EVALUATION_INTERVAL) {
@@ -68,7 +86,9 @@ public class UtilityGoalSelector {
                 // 当前目标无法继续时，终止其动作计划，避免旧计划残留
                 mind.getActionExecutor().stopCurrentPlan();
                 currentGoal.stop(mind, entity);
+                startCooldown(currentGoal);
                 currentGoal = null;
+                currentGoalActiveTicks = 0;
                 reevaluate(mind, entity, null); // 立即选择新目标
             } else {
                 currentGoal.tick(mind, entity);
@@ -92,12 +112,16 @@ public class UtilityGoalSelector {
     private void reevaluate(
         INpcMind mind,
         LivingEntity entity,
-        com.Kizunad.customNPCs.ai.sensors.SensorEventType interruptLevel
+        SensorEventType interruptLevel
     ) {
         IGoal bestGoal = null;
         float bestPriority = 0.0f;
 
         for (IGoal goal : goals) {
+            if (isOnCooldown(goal)) {
+                continue;
+            }
+
             if (!goal.canRun(mind, entity)) {
                 continue;
             }
@@ -129,14 +153,7 @@ public class UtilityGoalSelector {
 
         // 滞后判断:新目标必须显著优于当前目标
         if (bestGoal != currentGoal) {
-            // 动态阈值:紧急情况下更容易切换
-            float threshold = HYSTERESIS_THRESHOLD;
-            if (
-                interruptLevel ==
-                com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
-            ) {
-                threshold = 0.0f; // CRITICAL 事件立即响应,忽略滞后
-            }
+            float threshold = getSwitchThreshold(interruptLevel);
 
             // 只有当新目标优先级显著高于当前目标时才切换
             if (bestPriority > currentPriority * (1.0f + threshold)) {
@@ -157,6 +174,7 @@ public class UtilityGoalSelector {
                     // 切换目标时清空旧计划，防止遗留动作继续执行
                     mind.getActionExecutor().stopCurrentPlan();
                     currentGoal.stop(mind, entity);
+                    startCooldown(currentGoal);
                 } else {
                     System.out.println(
                         "[UtilityGoalSelector] 选择新目标: " +
@@ -168,6 +186,7 @@ public class UtilityGoalSelector {
                 }
 
                 currentGoal = bestGoal;
+                currentGoalActiveTicks = 0;
 
                 if (currentGoal != null) {
                     currentGoal.start(mind, entity);
@@ -208,9 +227,56 @@ public class UtilityGoalSelector {
     public void forceReevaluate(
         INpcMind mind,
         LivingEntity entity,
-        com.Kizunad.customNPCs.ai.sensors.SensorEventType eventType
+        SensorEventType eventType
     ) {
         ticksSinceLastEvaluation = 0;
         reevaluate(mind, entity, eventType);
+    }
+
+    private boolean isOnCooldown(IGoal goal) {
+        Integer cooldownTicks = goalCooldowns.get(goal.getName());
+        return cooldownTicks != null && cooldownTicks > 0;
+    }
+
+    private void startCooldown(IGoal goal) {
+        if (goal != null && goals.size() > 1) {
+            goalCooldowns.put(goal.getName(), GOAL_COOLDOWN_TICKS);
+        }
+    }
+
+    private void decayCooldowns() {
+        if (goalCooldowns.isEmpty()) {
+            return;
+        }
+        Iterator<Map.Entry<String, Integer>> iterator = goalCooldowns
+            .entrySet()
+            .iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Integer> entry = iterator.next();
+            int remaining = entry.getValue() - 1;
+            if (remaining <= 0) {
+                iterator.remove();
+            } else {
+                entry.setValue(remaining);
+            }
+        }
+    }
+
+    private float getSwitchThreshold(
+        SensorEventType interruptLevel
+    ) {
+        if (interruptLevel == SensorEventType.CRITICAL) {
+            return 0.0f; // CRITICAL 事件立即响应,忽略滞后与抢占阈值
+        }
+
+        if (
+            currentGoal != null &&
+            currentGoalActiveTicks < PREEMPTION_GRACE_TICKS
+        ) {
+            // 刚切换的目标享有额外的抢占保护，需要更高的优先级差距才会被替换
+            return HYSTERESIS_THRESHOLD + PREEMPTION_ADDITIONAL_THRESHOLD;
+        }
+
+        return HYSTERESIS_THRESHOLD;
     }
 }

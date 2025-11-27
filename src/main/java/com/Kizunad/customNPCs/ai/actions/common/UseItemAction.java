@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.actions.interfaces.IUseItemAction;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * - allowInterrupt: 是否允许中断
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class UseItemAction extends AbstractStandardAction implements com.Kizunad.customNPCs.ai.actions.interfaces.IUseItemAction {
+public class UseItemAction extends AbstractStandardAction implements IUseItemAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UseItemAction.class);
 
