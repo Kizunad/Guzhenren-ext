@@ -40,7 +40,24 @@ public interface ISensor {
      * @return 是否应该执行 sense()
      */
     default boolean shouldSense(long tickCount) {
-        return true; // 默认每 tick 都感知
+        int interval = Math.max(1, getScanInterval()); // 保护性下限，避免除零
+        return tickCount % interval == 0;
+    }
+
+    /**
+     * 获取扫描间隔（ticks）
+     * @return 扫描间隔
+     */
+    default int getScanInterval() {
+        return 1; // 默认每 tick 扫描
+    }
+
+    /**
+     * 设置扫描间隔
+     * @param ticks 间隔 ticks
+     */
+    default void setScanInterval(int ticks) {
+        // 默认实现为空，具体传感器可覆盖
     }
 
     /**

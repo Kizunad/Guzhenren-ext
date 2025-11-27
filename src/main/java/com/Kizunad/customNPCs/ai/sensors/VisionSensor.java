@@ -21,11 +21,11 @@ import net.minecraft.world.phys.Vec3;
 public class VisionSensor implements ISensor {
 
     private static final double DEFAULT_RANGE = 16.0D; // 默认视野范围（格）
-    private static final int SCAN_INTERVAL = 5; // 每 5 ticks 扫描一次
     private static final int MEMORY_DURATION = 100; // 记忆持续时间（5秒）
     private static final int SENSOR_PRIORITY = 10; // 传感器优先级
 
     private final double range;
+    private int currentScanInterval = 10; // 默认 10 ticks
 
     public VisionSensor() {
         this(DEFAULT_RANGE);
@@ -38,6 +38,16 @@ public class VisionSensor implements ISensor {
     @Override
     public String getName() {
         return "vision";
+    }
+
+    @Override
+    public int getScanInterval() {
+        return currentScanInterval;
+    }
+
+    @Override
+    public void setScanInterval(int ticks) {
+        this.currentScanInterval = Math.max(1, ticks);
     }
 
     @Override
@@ -65,6 +75,8 @@ public class VisionSensor implements ISensor {
                     0,
                     MEMORY_DURATION
                 );
+            // 没有实体，降低扫描频率（省电模式）
+            setScanInterval(20);
             return;
         }
 
@@ -73,6 +85,20 @@ public class VisionSensor implements ISensor {
             .stream()
             .filter(target -> hasLineOfSight(entity, target, level))
             .toList();
+
+        boolean hasVisible = !visibleEntities.isEmpty();
+        boolean hasThreat = visibleEntities
+            .stream()
+            .anyMatch(e -> isHostile(e, entity));
+
+        // 如果有可见实体，恢复正常扫描频率；检测到威胁则进一步提频
+        if (hasThreat) {
+            setScanInterval(2); // 威胁模式：高频扫描 (0.1s)
+        } else if (hasVisible) {
+            setScanInterval(10); // 正常模式：中频扫描 (0.5s)
+        } else {
+            setScanInterval(20); // 只有不可见实体（被遮挡），低频扫描
+        }
 
         // DEBUG
         if (!visibleEntities.isEmpty()) {
@@ -139,12 +165,6 @@ public class VisionSensor implements ISensor {
                 triggerInterruptIfNeeded(mind, entity, nearest, distance, level);
             }
         }
-    }
-
-    @Override
-    public boolean shouldSense(long tickCount) {
-        // 每 5 ticks 扫描一次以优化性能
-        return tickCount % SCAN_INTERVAL == 0;
     }
 
     @Override

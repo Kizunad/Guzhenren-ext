@@ -6,6 +6,7 @@ LibSourceCodes/
 build/
 run/
 bin/
+logs/
 
 #Logs
 gametest_*
