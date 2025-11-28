@@ -1,9 +1,7 @@
 package com.Kizunad.customNPCs_test.tests;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
-import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
-import com.Kizunad.customNPCs.ai.decision.goals.TestPlanGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs_test.utils.NpcTestHelper;
 import com.Kizunad.customNPCs_test.utils.TestEntityFactory;
@@ -14,7 +12,6 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
 
 /**
  * 异常与回归测试：覆盖失败路径、目标消失、超时场景。
