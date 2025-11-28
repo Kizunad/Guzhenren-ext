@@ -1,8 +1,9 @@
 package com.Kizunad.customNPCs.ai.sensors;
 
-import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
+import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -29,6 +30,16 @@ public class VisionSensor implements ISensor {
     private static final int SCAN_INTERVAL_VISIBLE = 10;
     private static final int SCAN_INTERVAL_HIDDEN = 20;
     private static final float NEAR_THREAT_DISTANCE = 5.0f;
+    private static final String MEMORY_VISIBLE_COUNT = "visible_entities_count";
+    private static final String MEMORY_NEAREST_ENTITY = "nearest_entity";
+    private static final String MEMORY_NEAREST_ENTITY_TYPE = "nearest_entity_type";
+    private static final String MEMORY_NEAREST_ENTITY_DISTANCE = "nearest_entity_distance";
+    private static final String MEMORY_HOSTILE_COUNT = "hostile_entities_count";
+    private static final String MEMORY_NEAREST_HOSTILE = "nearest_hostile";
+    private static final String MEMORY_NEAREST_HOSTILE_DISTANCE =
+        "nearest_hostile_distance";
+    private static final String MEMORY_ALLY_COUNT = "ally_entities_count";
+    private static final String MEMORY_NEAREST_ALLY = "nearest_ally";
 
     private final double range;
     private int currentScanInterval = SCAN_INTERVAL_VISIBLE; // 默认 10 ticks
@@ -58,120 +69,227 @@ public class VisionSensor implements ISensor {
 
     @Override
     public void sense(INpcMind mind, LivingEntity entity, ServerLevel level) {
-        // 获取扫描范围
         Vec3 position = entity.position();
         AABB searchBox = new AABB(position, position).inflate(range);
 
-        // 扫描范围内的所有生物
         List<LivingEntity> nearbyEntities = level.getEntitiesOfClass(
             LivingEntity.class,
             searchBox,
             e -> isValidEntity(entity, e)
         );
 
-        // 清除旧的视觉记忆
-        mind.getMemory().forget("visible_entities_count");
-        mind.getMemory().forget("nearest_entity");
+        mind.getMemory().forget(MEMORY_VISIBLE_COUNT);
+        mind.getMemory().forget(MEMORY_NEAREST_ENTITY);
 
         if (nearbyEntities.isEmpty()) {
-            mind
-                .getMemory()
-                .rememberShortTerm(
-                    "visible_entities_count",
-                    0,
-                    MEMORY_DURATION
-                );
-            // 没有实体，降低扫描频率（省电模式）
+            rememberVisibleCount(mind, 0);
             setScanInterval(SCAN_INTERVAL_HIDDEN);
             return;
         }
 
-        // 过滤：只保留在视线内的实体
-        List<LivingEntity> visibleEntities = nearbyEntities
+        List<LivingEntity> visibleEntities = findVisibleEntities(
+            entity,
+            nearbyEntities,
+            level
+        );
+        List<LivingEntity> hostiles = visibleEntities
             .stream()
-            .filter(target -> hasLineOfSight(entity, target, level))
+            .filter(target -> EntityRelationUtil.isHostileTo(entity, target))
+            .toList();
+        List<LivingEntity> allies = visibleEntities
+            .stream()
+            .filter(target -> EntityRelationUtil.isAlly(entity, target))
             .toList();
 
         boolean hasVisible = !visibleEntities.isEmpty();
-        boolean hasThreat = visibleEntities
-            .stream()
-            .anyMatch(e -> isHostile(e, entity));
+        boolean hasThreat = !hostiles.isEmpty();
 
-        // 如果有可见实体，恢复正常扫描频率；检测到威胁则进一步提频
-        if (hasThreat) {
-            setScanInterval(SCAN_INTERVAL_THREAT); // 威胁模式：高频扫描 (0.1s)
-        } else if (hasVisible) {
-            setScanInterval(SCAN_INTERVAL_VISIBLE); // 正常模式：中频扫描 (0.5s)
-        } else {
-            setScanInterval(SCAN_INTERVAL_HIDDEN); // 只有不可见实体（被遮挡），低频扫描
+        adjustScanInterval(hasThreat, hasVisible);
+        logVisibleDebug(visibleEntities);
+        rememberVisibleCount(mind, visibleEntities.size());
+
+        LivingEntity nearest = findNearest(entity, visibleEntities);
+        rememberNearest(mind, entity, nearest);
+
+        LivingEntity nearestHostile = updateHostiles(
+            mind,
+            entity,
+            hostiles
+        );
+        updateAllies(mind, entity, allies);
+
+        LivingEntity interruptTarget =
+            nearestHostile != null ? nearestHostile : nearest;
+        if (interruptTarget != null) {
+            float interruptDistance = entity.distanceTo(interruptTarget);
+            triggerInterruptIfNeeded(
+                mind,
+                entity,
+                interruptTarget,
+                interruptDistance,
+                level
+            );
         }
+    }
 
-        // DEBUG
-        if (!visibleEntities.isEmpty()) {
+    private List<LivingEntity> findVisibleEntities(
+        LivingEntity observer,
+        List<LivingEntity> nearbyEntities,
+        ServerLevel level
+    ) {
+        return nearbyEntities
+            .stream()
+            .filter(target -> hasLineOfSight(observer, target, level))
+            .toList();
+    }
+
+    private void adjustScanInterval(boolean hasThreat, boolean hasVisible) {
+        if (hasThreat) {
+            setScanInterval(SCAN_INTERVAL_THREAT);
+        } else if (hasVisible) {
+            setScanInterval(SCAN_INTERVAL_VISIBLE);
+        } else {
+            setScanInterval(SCAN_INTERVAL_HIDDEN);
+        }
+    }
+
+    private void logVisibleDebug(List<LivingEntity> visibleEntities) {
+        if (visibleEntities.isEmpty()) {
+            return;
+        }
+        MindLog.decision(
+            MindLogLevel.DEBUG,
+            "可见实体数量: {}",
+            visibleEntities.size()
+        );
+        for (LivingEntity visible : visibleEntities) {
             MindLog.decision(
                 MindLogLevel.DEBUG,
-                "可见实体数量: {}",
-                visibleEntities.size()
+                "  - {} at {}",
+                visible.getType().getDescription().getString(),
+                visible.blockPosition().toShortString()
             );
-            for (LivingEntity visible : visibleEntities) {
-                MindLog.decision(
-                    MindLogLevel.DEBUG,
-                    "  - {} at {}",
-                    visible.getType().getDescription().getString(),
-                    visible.blockPosition().toShortString()
-                );
-            }
         }
+    }
 
-        // 存储可见实体数量
+    private void rememberVisibleCount(INpcMind mind, int count) {
+        mind
+            .getMemory()
+            .rememberShortTerm(MEMORY_VISIBLE_COUNT, count, MEMORY_DURATION);
+    }
+
+    private LivingEntity findNearest(
+        LivingEntity observer,
+        List<LivingEntity> candidates
+    ) {
+        return candidates
+            .stream()
+            .min((a, b) ->
+                Double.compare(
+                    observer.distanceToSqr(a),
+                    observer.distanceToSqr(b)
+                )
+            )
+            .orElse(null);
+    }
+
+    private void rememberNearest(
+        INpcMind mind,
+        LivingEntity observer,
+        LivingEntity nearest
+    ) {
+        if (nearest == null) {
+            return;
+        }
         mind
             .getMemory()
             .rememberShortTerm(
-                "visible_entities_count",
-                visibleEntities.size(),
+                MEMORY_NEAREST_ENTITY,
+                nearest.getUUID().toString(),
                 MEMORY_DURATION
             );
+        mind
+            .getMemory()
+            .rememberShortTerm(
+                MEMORY_NEAREST_ENTITY_TYPE,
+                nearest.getType().toString(),
+                MEMORY_DURATION
+            );
+        mind
+            .getMemory()
+            .rememberShortTerm(
+                MEMORY_NEAREST_ENTITY_DISTANCE,
+                observer.distanceTo(nearest),
+                MEMORY_DURATION
+            );
+    }
 
-        if (!visibleEntities.isEmpty()) {
-            // 找到最近的实体
-            LivingEntity nearest = visibleEntities
-                .stream()
-                .min((a, b) ->
-                    Double.compare(
-                        entity.distanceToSqr(a),
-                        entity.distanceToSqr(b)
-                    )
-                )
-                .orElse(null);
+    private LivingEntity updateHostiles(
+        INpcMind mind,
+        LivingEntity observer,
+        List<LivingEntity> hostiles
+    ) {
+        mind
+            .getMemory()
+            .rememberShortTerm(
+                MEMORY_HOSTILE_COUNT,
+                hostiles.size(),
+                MEMORY_DURATION
+            );
+        LivingEntity nearestHostile = findNearest(observer, hostiles);
+        if (nearestHostile != null) {
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    MEMORY_NEAREST_HOSTILE,
+                    nearestHostile.getUUID(),
+                    MEMORY_DURATION
+                );
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    MEMORY_NEAREST_HOSTILE_DISTANCE,
+                    observer.distanceTo(nearestHostile),
+                    MEMORY_DURATION
+                );
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    "threat_detected",
+                    true,
+                    MEMORY_DURATION
+                );
+        } else {
+            mind.getMemory().forget(MEMORY_NEAREST_HOSTILE);
+            mind.getMemory().forget(MEMORY_NEAREST_HOSTILE_DISTANCE);
+            mind.getMemory().forget("threat_detected");
+        }
+        return nearestHostile;
+    }
 
-            if (nearest != null) {
-                // 存储最近实体的信息
-                mind
-                    .getMemory()
-                    .rememberShortTerm(
-                        "nearest_entity",
-                        nearest.getUUID().toString(),
-                        MEMORY_DURATION
-                    );
-                mind
-                    .getMemory()
-                    .rememberShortTerm(
-                        "nearest_entity_type",
-                        nearest.getType().toString(),
-                        MEMORY_DURATION
-                    );
-                float distance = entity.distanceTo(nearest);
-                mind
-                    .getMemory()
-                    .rememberShortTerm(
-                        "nearest_entity_distance",
-                        distance,
-                        MEMORY_DURATION
-                    );
-
-                // 触发中断:根据实体类型和距离判断
-                triggerInterruptIfNeeded(mind, entity, nearest, distance, level);
-            }
+    private void updateAllies(
+        INpcMind mind,
+        LivingEntity observer,
+        List<LivingEntity> allies
+    ) {
+        mind
+            .getMemory()
+            .rememberShortTerm(
+                MEMORY_ALLY_COUNT,
+                allies.size(),
+                MEMORY_DURATION
+            );
+        LivingEntity nearestAlly = findNearest(observer, allies);
+        if (nearestAlly != null) {
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    MEMORY_NEAREST_ALLY,
+                    nearestAlly.getUUID(),
+                    MEMORY_DURATION
+                );
+        } else {
+            mind.getMemory().forget(MEMORY_NEAREST_ALLY);
         }
     }
 
@@ -288,16 +406,6 @@ public class VisionSensor implements ISensor {
      * @return 是否敌对
      */
     private boolean isHostile(LivingEntity target, LivingEntity observer) {
-        // 检查目标是否是怪物(Monster类型通常是敌对的)
-        if (target instanceof net.minecraft.world.entity.monster.Monster) {
-            return true;
-        }
-
-        // 检查目标最近伤害的实体是否是观察者
-        if (target.getLastHurtByMob() == observer) {
-            return true;
-        }
-
-        return false;
+        return EntityRelationUtil.isHostileTo(observer, target);
     }
 }

@@ -185,8 +185,21 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         // 从记忆读取状态
         Object hasFood = memory.getMemory("has_food");
         state.setState("has_food", hasFood != null ? hasFood : false);
-        state.setState("has_threat", memory.hasMemory("threat_detected"));
-        state.setState("is_safe", !memory.hasMemory("threat_detected"));
+        boolean hazardNearby =
+            memory.hasMemory(WorldStateKeys.HAZARD_NEARBY) ||
+            Boolean.TRUE.equals(memory.getMemory("hazard_detected"));
+        Object hostileCount = memory.getMemory("hostile_entities_count");
+        boolean hasHostile = hostileCount instanceof Integer count && count > 0;
+        Object allyCount = memory.getMemory("ally_entities_count");
+        boolean hasAlly = allyCount instanceof Integer count && count > 0;
+        boolean hasThreat = memory.hasMemory("threat_detected") || hasHostile;
+        boolean inDanger = hasThreat || hazardNearby;
+        state.setState("has_threat", hasThreat);
+        state.setState("is_safe", !inDanger);
+        state.setState(WorldStateKeys.IN_DANGER, inDanger);
+        state.setState(WorldStateKeys.HAZARD_NEARBY, hazardNearby);
+        state.setState(WorldStateKeys.HOSTILE_NEARBY, hasHostile);
+        state.setState(WorldStateKeys.ALLY_NEARBY, hasAlly);
 
         // 从记忆读取自定义状态（供 GOAP 动作使用）
         // 这些状态由 GOAP 动作在执行时写入记忆

@@ -3,7 +3,9 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
+import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import java.util.UUID;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,8 +13,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.UUID;
 
 /**
  * 攻击动作 - 攻击指定目标实体
@@ -109,6 +109,17 @@ public class AttackAction extends AbstractStandardAction implements IAttackActio
         Entity targetEntity = resolveEntity(mob.level());
         if (targetEntity == null) {
             LOGGER.warn("[AttackAction] 目标实体 {} 不存在", targetUuid);
+            return ActionStatus.FAILURE;
+        }
+
+        if (
+            targetEntity instanceof LivingEntity livingTarget &&
+            EntityRelationUtil.isAlly(mob, livingTarget)
+        ) {
+            LOGGER.info(
+                "[AttackAction] 目标 {} 被识别为友方，放弃攻击",
+                targetEntity.getName().getString()
+            );
             return ActionStatus.FAILURE;
         }
 

@@ -28,6 +28,7 @@ public class FleeGoal implements IGoal {
     private static final float BASE_PRIORITY = 0.9f;
     private static final float PRIORITY_SCALE = 0.1f;
     private static final double FLEE_SPEED = 1.5;
+    private static final double MIN_DIRECTION_LENGTH_SQR = 0.0001d;
 
     private MoveToAction fleeAction = null;
     private Vec3 safeLocation = null;
@@ -67,7 +68,7 @@ public class FleeGoal implements IGoal {
     public void tick(INpcMind mind, LivingEntity entity) {
         // 如果还没有逃跑动作或安全位置失效，重新计算
         if (fleeAction == null || safeLocation == null) {
-            safeLocation = calculateSafeLocation(entity);
+            safeLocation = calculateSafeLocation(mind, entity);
             if (safeLocation != null) {
                 fleeAction = new MoveToAction(safeLocation, FLEE_SPEED); // 快速移动
                 fleeAction.start(mind, entity);
@@ -124,6 +125,10 @@ public class FleeGoal implements IGoal {
      * 检查是否处于危险中
      */
     private boolean isInDanger(INpcMind mind, LivingEntity entity) {
+        if (mind.getMemory().hasMemory("hazard_detected")) {
+            return true;
+        }
+
         // 血量低
         boolean lowHealth = entity.getHealth() < entity.getMaxHealth() * DANGER_THRESHOLD;
         
@@ -139,7 +144,18 @@ public class FleeGoal implements IGoal {
     /**
      * 计算安全位置（远离当前位置）
      */
-    private Vec3 calculateSafeLocation(LivingEntity entity) {
+    private Vec3 calculateSafeLocation(INpcMind mind, LivingEntity entity) {
+        Object hazardPos = mind.getMemory().getMemory("nearest_hazard_pos");
+        if (hazardPos instanceof net.minecraft.core.BlockPos pos) {
+            Vec3 away = entity.position().subtract(Vec3.atCenterOf(pos));
+            if (away.lengthSqr() > MIN_DIRECTION_LENGTH_SQR) {
+                Vec3 normalized = away.normalize();
+                return entity
+                    .position()
+                    .add(normalized.scale(FLEE_DISTANCE));
+            }
+        }
+
         Vec3 currentPos = entity.position();
         
         // 简单策略：随机选择一个远离当前位置的方向

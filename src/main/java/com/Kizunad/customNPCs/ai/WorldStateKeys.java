@@ -96,6 +96,21 @@ public final class WorldStateKeys {
     public static final String IN_DANGER = "in_danger";
 
     /**
+     * 是否附近存在环境危险
+     */
+    public static final String HAZARD_NEARBY = "hazard_nearby";
+
+    /**
+     * 是否有敌对单位
+     */
+    public static final String HOSTILE_NEARBY = "hostile_nearby";
+
+    /**
+     * 是否有友方单位
+     */
+    public static final String ALLY_NEARBY = "ally_nearby";
+
+    /**
      * 是否有食物
      */
     public static final String HAS_FOOD = "has_food";

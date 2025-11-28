@@ -38,6 +38,7 @@ public class NpcMindInitializer {
                 mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.VisionSensor());
                 mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.DamageSensor());
                 mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.AuditorySensor());
+                mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.SafetySensor());
                 
                 // 注册基础目标
                 mind.getGoalSelector().registerGoal(new SurvivalGoal());
