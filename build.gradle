@@ -42,6 +42,8 @@ sourceSets {
         resources {
             srcDir 'src/main/resources'
         }
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += output + compileClasspath
     }
     tinyUiTest {
         java {
@@ -69,6 +71,14 @@ tasks.register('tinyUiTest', Test) {
     classpath = sourceSets.tinyUiTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter(test)
+}
+
+tasks.register('tinyUiJar', Jar) {
+    description = 'Package tinyUI classes into a standalone jar.'
+    group = 'build'
+    from sourceSets.tinyUi.output
+    archiveClassifier = 'tinyui'
+    dependsOn tasks.named('tinyUiClasses')
 }
 
 dependencies {

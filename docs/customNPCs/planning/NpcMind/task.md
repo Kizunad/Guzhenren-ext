@@ -110,7 +110,7 @@
     - [ ] **API 扩展性 (Registry)** <!-- id: 92 -->
         - [ ] 实现 `NpcMindRegistry` (注册 Goal/Sensor/Action) <!-- id: 93 -->
 
-- [ ] **架构完善与加固 (Architecture Refinement)** <!-- id: 100 -->
+- [x] **架构完善与加固 (Architecture Refinement)** <!-- id: 100 -->
     - [x] **决策协调策略 (Coordination - Option 2)** <!-- id: 101 -->
         - [x] 定义 `SensorEventType` 枚举 (INFO, IMPORTANT, CRITICAL) <!-- id: 102 -->
         - [x] 更新 `NpcMind` 添加 `triggerInterrupt` 与冷却机制 <!-- id: 103 -->

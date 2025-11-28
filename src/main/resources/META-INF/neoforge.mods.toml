@@ -18,3 +18,10 @@ version="1.0.0"
 displayName="Custom NPCs AI System"
 authors="Kizunad"
 description="Autonomous NPC AI system with Utility AI and memory"
+
+[[mods]]
+modId="tinyui"
+version="${mod_version}"
+displayName="tinyUI Helper"
+authors="${mod_authors}"
+description="Standalone tinyUI helper and demo commands."
