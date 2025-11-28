@@ -1,6 +1,8 @@
 package com.Kizunad.customNPCs.ai.sensors;
 
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -199,13 +201,12 @@ public class AuditorySensor implements ISensor {
                 );
 
             // DEBUG
-            System.out.println(
-                "[AuditorySensor] 听到声音: " +
-                    String.join("+", loudest.soundTypes()) +
-                    " 来自 " +
-                    loudest.sourceEntityType() +
-                    " 强度: " +
-                    String.format("%.2f", loudest.intensity())
+            MindLog.decision(
+                MindLogLevel.DEBUG,
+                "听到声音: {} 来自 {} 强度: {}",
+                String.join("+", loudest.soundTypes()),
+                loudest.sourceEntityType(),
+                String.format("%.2f", loudest.intensity())
             );
         }
     }

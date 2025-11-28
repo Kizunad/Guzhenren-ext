@@ -1,6 +1,8 @@
 package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -32,8 +34,10 @@ public class IdleGoal implements IGoal {
     public void start(INpcMind mind, LivingEntity entity) {
         idleTicks = 0;
         mind.getMemory().rememberShortTerm("is_idle", true, -1);
-        System.out.println(
-            "[IdleGoal] NPC " + entity.getName().getString() + " 开始闲逛"
+        MindLog.decision(
+            MindLogLevel.INFO,
+            "NPC {} 开始闲逛",
+            entity.getName().getString()
         );
     }
 
@@ -48,12 +52,11 @@ public class IdleGoal implements IGoal {
 
         // 简单演示：每 100 ticks（5 秒）打印一次
         if (idleTicks % IDLE_TICK_INTERVAL == 0) {
-            System.out.println(
-                "[IdleGoal] NPC " +
-                    entity.getName().getString() +
-                    " 正在闲逛... (" +
-                    idleTicks +
-                    " ticks)"
+            MindLog.decision(
+                MindLogLevel.DEBUG,
+                "NPC {} 正在闲逛... ({} ticks)",
+                entity.getName().getString(),
+                idleTicks
             );
         }
     }
@@ -61,8 +64,10 @@ public class IdleGoal implements IGoal {
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
         mind.getMemory().forget("is_idle");
-        System.out.println(
-            "[IdleGoal] NPC " + entity.getName().getString() + " 停止闲逛"
+        MindLog.decision(
+            MindLogLevel.INFO,
+            "NPC {} 停止闲逛",
+            entity.getName().getString()
         );
     }
 

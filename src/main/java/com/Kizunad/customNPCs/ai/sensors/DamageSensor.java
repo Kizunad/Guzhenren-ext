@@ -1,6 +1,8 @@
 package com.Kizunad.customNPCs.ai.sensors;
 
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -73,10 +75,10 @@ public class DamageSensor implements ISensor {
                     com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
                 );
 
-                System.out.println(
-                    "[DamageSensor] 感知到攻击者: " +
-                        attacker.getName().getString() +
-                        ", 触发情绪变化和 CRITICAL 中断"
+                MindLog.decision(
+                    MindLogLevel.INFO,
+                    "感知到攻击者: {}，触发情绪变化和 CRITICAL 中断",
+                    attacker.getName().getString()
                 );
             }
         } else if (hurtTime == 0) {

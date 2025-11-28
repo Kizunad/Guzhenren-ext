@@ -1,6 +1,8 @@
 package com.Kizunad.customNPCs.ai.planner;
 
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -75,11 +77,11 @@ public class GoapPlanner {
             PlanNode currentNode = openSet.poll();
 
             // DEBUG
-            System.out.println(
-                "Exploring node: " +
-                    currentNode.state +
-                    ", f=" +
-                    currentNode.getFScore()
+            MindLog.planning(
+                MindLogLevel.DEBUG,
+                "探索节点: {} (f={})",
+                currentNode.state,
+                currentNode.getFScore()
             );
 
             // 如果当前状态满足目标，回溯生成计划
@@ -95,10 +97,10 @@ public class GoapPlanner {
                 // 检查前置条件是否满足
                 if (!currentNode.state.matches(action.getPreconditions())) {
                     // DEBUG
-                    System.out.println(
-                        "  Action " +
-                            action.getClass().getSimpleName() +
-                            " preconditions not met"
+                    MindLog.planning(
+                        MindLogLevel.DEBUG,
+                        "动作 {} 的前置条件不满足",
+                        action.getClass().getSimpleName()
                     );
                     continue; // 前置条件不满足，跳过此动作
                 }
@@ -111,10 +113,10 @@ public class GoapPlanner {
                 // 如果新状态已访问过，跳过
                 if (closedSet.contains(newState)) {
                     // DEBUG
-                    System.out.println(
-                        "  Action " +
-                            action.getClass().getSimpleName() +
-                            " leads to closed state"
+                    MindLog.planning(
+                        MindLogLevel.DEBUG,
+                        "动作 {} 的效果指向已访问状态",
+                        action.getClass().getSimpleName()
                     );
                     continue;
                 }
@@ -150,11 +152,11 @@ public class GoapPlanner {
                 if (!inOpenSet) {
                     openSet.add(newNode);
                     // DEBUG
-                    System.out.println(
-                        "  Added new node via " +
-                            action.getClass().getSimpleName() +
-                            ", f=" +
-                            newNode.getFScore()
+                    MindLog.planning(
+                        MindLogLevel.DEBUG,
+                        "添加新节点: {}，f={}",
+                        action.getClass().getSimpleName(),
+                        newNode.getFScore()
                     );
                 }
             }
@@ -162,12 +164,15 @@ public class GoapPlanner {
 
         // 规划失败
         if (iterations >= MAX_ITERATIONS) {
-            System.err.println(
-                "[GoapPlanner] 规划超过最大迭代次数 (" + MAX_ITERATIONS + ")"
+            MindLog.planning(
+                MindLogLevel.WARN,
+                "规划超过最大迭代次数 ({})",
+                MAX_ITERATIONS
             );
         } else {
-            System.err.println(
-                "[GoapPlanner] 无法找到从起始状态到目标状态的路径"
+            MindLog.planning(
+                MindLogLevel.WARN,
+                "无法找到从起始状态到目标状态的路径"
             );
         }
 
@@ -192,8 +197,10 @@ public class GoapPlanner {
         // 反转列表（因为是从目标回溯到起点）
         Collections.reverse(plan);
 
-        System.out.println(
-            "[GoapPlanner] 规划成功，生成 " + plan.size() + " 个动作"
+        MindLog.planning(
+            MindLogLevel.INFO,
+            "规划成功，生成 {} 个动作",
+            plan.size()
         );
         return plan;
     }

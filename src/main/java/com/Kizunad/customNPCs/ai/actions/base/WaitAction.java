@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.ai.actions.base;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -40,17 +42,20 @@ public class WaitAction implements IAction {
     @Override
     public void start(INpcMind mind, LivingEntity entity) {
         currentTicks = 0;
-        System.out.println("[WaitAction] 开始等待 " + targetTicks + " ticks");
+        MindLog.execution(
+            MindLogLevel.INFO,
+            "等待动作开始，目标 {} ticks",
+            targetTicks
+        );
     }
 
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
-        System.out.println(
-            "[WaitAction] 等待结束，已等待 " +
-                currentTicks +
-                "/" +
-                targetTicks +
-                " ticks"
+        MindLog.execution(
+            MindLogLevel.INFO,
+            "等待结束，已等待 {}/{} ticks",
+            currentTicks,
+            targetTicks
         );
     }
 

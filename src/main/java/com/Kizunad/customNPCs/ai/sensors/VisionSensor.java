@@ -1,6 +1,8 @@
 package com.Kizunad.customNPCs.ai.sensors;
 
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -106,15 +108,17 @@ public class VisionSensor implements ISensor {
 
         // DEBUG
         if (!visibleEntities.isEmpty()) {
-            System.out.println(
-                "[VisionSensor] Visible entities: " + visibleEntities.size()
+            MindLog.decision(
+                MindLogLevel.DEBUG,
+                "可见实体数量: {}",
+                visibleEntities.size()
             );
-            for (LivingEntity e : visibleEntities) {
-                System.out.println(
-                    "  - " +
-                        e.getType().getDescription().getString() +
-                        " at " +
-                        e.blockPosition().toShortString()
+            for (LivingEntity visible : visibleEntities) {
+                MindLog.decision(
+                    MindLogLevel.DEBUG,
+                    "  - {} at {}",
+                    visible.getType().getDescription().getString(),
+                    visible.blockPosition().toShortString()
                 );
             }
         }
@@ -246,8 +250,9 @@ public class VisionSensor implements ISensor {
                 observer,
                 com.Kizunad.customNPCs.ai.sensors.SensorEventType.IMPORTANT
             );
-            System.out.println(
-                "[VisionSensor] 检测到玩家,触发 IMPORTANT 中断"
+            MindLog.decision(
+                MindLogLevel.INFO,
+                "检测到玩家,触发 IMPORTANT 中断"
             );
             return;
         }
@@ -260,12 +265,11 @@ public class VisionSensor implements ISensor {
                     observer,
                     com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
                 );
-                System.out.println(
-                    "[VisionSensor] 检测到近距离威胁 (" +
-                        target.getType().getDescription().getString() +
-                        " @ " +
-                        String.format("%.1f", distance) +
-                        "格),触发 CRITICAL 中断"
+                MindLog.decision(
+                    MindLogLevel.INFO,
+                    "检测到近距离威胁 ({} @ {}格),触发 CRITICAL 中断",
+                    target.getType().getDescription().getString(),
+                    String.format("%.1f", distance)
                 );
             } else {
                 mind.triggerInterrupt(

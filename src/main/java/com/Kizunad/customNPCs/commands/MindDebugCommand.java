@@ -1,9 +1,13 @@
 package com.Kizunad.customNPCs.commands;
 
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import java.util.Arrays;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -39,6 +43,94 @@ public class MindDebugCommand {
                                 "target",
                                 EntityArgument.entity()
                             ).executes(MindDebugCommand::inspectTarget)
+                        )
+                )
+                .then(
+                    Commands.literal("log")
+                        .then(
+                            Commands.literal("decision")
+                                .then(
+                                    Commands
+                                        .argument(
+                                            "enabled",
+                                            BoolArgumentType.bool()
+                                        )
+                                        .executes(context ->
+                                            toggleLog(
+                                                context.getSource(),
+                                                MindLogCategory.DECISION,
+                                                BoolArgumentType.getBool(
+                                                    context,
+                                                    "enabled"
+                                                )
+                                            )
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("planning")
+                                .then(
+                                    Commands
+                                        .argument(
+                                            "enabled",
+                                            BoolArgumentType.bool()
+                                        )
+                                        .executes(context ->
+                                            toggleLog(
+                                                context.getSource(),
+                                                MindLogCategory.PLANNING,
+                                                BoolArgumentType.getBool(
+                                                    context,
+                                                    "enabled"
+                                                )
+                                            )
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("execution")
+                                .then(
+                                    Commands
+                                        .argument(
+                                            "enabled",
+                                            BoolArgumentType.bool()
+                                        )
+                                        .executes(context ->
+                                            toggleLog(
+                                                context.getSource(),
+                                                MindLogCategory.EXECUTION,
+                                                BoolArgumentType.getBool(
+                                                    context,
+                                                    "enabled"
+                                                )
+                                            )
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("all")
+                                .then(
+                                    Commands
+                                        .argument(
+                                            "enabled",
+                                            BoolArgumentType.bool()
+                                        )
+                                        .executes(context ->
+                                            toggleAllLogs(
+                                                context.getSource(),
+                                                BoolArgumentType.getBool(
+                                                    context,
+                                                    "enabled"
+                                                )
+                                            )
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("status")
+                                .executes(context ->
+                                    showLogStatus(context.getSource())
+                                )
                         )
                 )
         );
@@ -193,6 +285,57 @@ public class MindDebugCommand {
                 });
         }
 
+        return 1;
+    }
+
+    private static int toggleLog(
+        CommandSourceStack source,
+        MindLogCategory category,
+        boolean enabled
+    ) {
+        MindLog.setCategoryEnabled(category, enabled);
+        source.sendSuccess(
+            () ->
+                Component.literal(
+                    "[" +
+                        category.getDisplayName() +
+                        "] 日志已" +
+                        (enabled ? "启用" : "禁用")
+                ),
+            false
+        );
+        return 1;
+    }
+
+    private static int toggleAllLogs(
+        CommandSourceStack source,
+        boolean enabled
+    ) {
+        MindLog.setAllEnabled(enabled);
+        source.sendSuccess(
+            () ->
+                Component.literal(
+                    "所有 NpcMind 日志已" + (enabled ? "启用" : "禁用")
+                ),
+            false
+        );
+        return 1;
+    }
+
+    private static int showLogStatus(CommandSourceStack source) {
+        String status = Arrays
+            .stream(MindLogCategory.values())
+            .map(category ->
+                category.getDisplayName() +
+                "=" +
+                (MindLog.isEnabled(category) ? "on" : "off")
+            )
+            .reduce((left, right) -> left + ", " + right)
+            .orElse("无");
+        source.sendSuccess(
+            () -> Component.literal("日志状态: " + status),
+            false
+        );
         return 1;
     }
 }

@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.planner.GoapPlanner;
 import com.Kizunad.customNPCs.ai.planner.IGoapAction;
 import com.Kizunad.customNPCs.ai.planner.WorldState;
@@ -88,10 +90,29 @@ public abstract class PlanBasedGoal implements IGoal {
         // 获取可用动作
         List<IGoapAction> availableActions = getAvailableActions(mind, entity);
 
-        System.out.println("[PlanBasedGoal] " + getName() + " 开始规划");
-        System.out.println("  当前状态: " + currentState);
-        System.out.println("  目标状态: " + goalState);
-        System.out.println("  可用动作: " + availableActions.size() + " 个");
+        MindLog.planning(
+            MindLogLevel.INFO,
+            "{} 开始规划",
+            getName()
+        );
+        MindLog.planning(
+            MindLogLevel.DEBUG,
+            "{} 当前状态: {}",
+            getName(),
+            currentState
+        );
+        MindLog.planning(
+            MindLogLevel.DEBUG,
+            "{} 目标状态: {}",
+            getName(),
+            goalState
+        );
+        MindLog.planning(
+            MindLogLevel.DEBUG,
+            "{} 可用动作: {} 个",
+            getName(),
+            availableActions.size()
+        );
 
         // 调用规划器
         List<IAction> plan = planner.plan(
@@ -103,14 +124,19 @@ public abstract class PlanBasedGoal implements IGoal {
         if (plan != null && !plan.isEmpty()) {
             // 规划成功，提交动作序列
             mind.getActionExecutor().submitPlan(plan);
-            System.out.println(
-                "[PlanBasedGoal] 规划成功，生成 " + plan.size() + " 个动作"
+            MindLog.planning(
+                MindLogLevel.INFO,
+                "{} 规划成功，生成 {} 个动作",
+                getName(),
+                plan.size()
             );
         } else {
             // 规划失败
             planningFailed = true;
-            System.err.println(
-                "[PlanBasedGoal] " + getName() + " 规划失败，无法生成有效计划"
+            MindLog.planning(
+                MindLogLevel.WARN,
+                "{} 规划失败，无法生成有效计划",
+                getName()
             );
         }
     }
@@ -138,10 +164,10 @@ public abstract class PlanBasedGoal implements IGoal {
                 }
             } else {
                 // 达到重试上限,标记失败
-                System.err.println(
-                    "[PlanBasedGoal] " +
-                        getName() +
-                        " 达到最大重试次数,目标失败"
+                MindLog.planning(
+                    MindLogLevel.WARN,
+                    "{} 达到最大重试次数,目标失败",
+                    getName()
                 );
                 planningFailed = true;
             }
@@ -150,7 +176,7 @@ public abstract class PlanBasedGoal implements IGoal {
 
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
-        System.out.println("[PlanBasedGoal] " + getName() + " 停止");
+        MindLog.planning(MindLogLevel.INFO, "{} 停止", getName());
         // 目标停止时，确保相关动作队列被清理，避免被其他目标继承
         if (mind != null) {
             mind.getActionExecutor().stopCurrentPlan();
@@ -199,12 +225,11 @@ public abstract class PlanBasedGoal implements IGoal {
      * @return true 如果重规划成功
      */
     protected boolean replan(INpcMind mind, LivingEntity entity) {
-        System.out.println(
-            "[PlanBasedGoal] " +
-                getName() +
-                " 尝试重规划 (第 " +
-                (retryCount) +
-                " 次)"
+        MindLog.planning(
+            MindLogLevel.INFO,
+            "{} 尝试重规划 (第 {} 次)",
+            getName(),
+            retryCount
         );
 
         // 获取最新的世界状态
@@ -227,12 +252,18 @@ public abstract class PlanBasedGoal implements IGoal {
         if (newPlan != null && !newPlan.isEmpty()) {
             // 重规划成功,提交新计划
             mind.getActionExecutor().submitPlan(newPlan);
-            System.out.println(
-                "[PlanBasedGoal] 重规划成功,生成 " + newPlan.size() + " 个动作"
+            MindLog.planning(
+                MindLogLevel.INFO,
+                "重规划成功,生成 {} 个动作",
+                newPlan.size()
             );
             return true;
         } else {
-            System.err.println("[PlanBasedGoal] 重规划失败");
+            MindLog.planning(
+                MindLogLevel.WARN,
+                "{} 重规划失败",
+                getName()
+            );
             return false;
         }
     }

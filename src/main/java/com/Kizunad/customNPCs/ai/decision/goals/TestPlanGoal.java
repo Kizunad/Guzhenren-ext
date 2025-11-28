@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,8 +48,10 @@ public class TestPlanGoal implements IGoal {
         started = true;
         // 提交动作序列到执行器
         mind.getActionExecutor().submitPlan(actionPlan);
-        System.out.println(
-            "[TestPlanGoal] 开始执行，提交 " + actionPlan.size() + " 个动作"
+        MindLog.decision(
+            MindLogLevel.INFO,
+            "测试计划目标开始，提交 {} 个动作",
+            actionPlan.size()
         );
     }
 
@@ -58,7 +62,7 @@ public class TestPlanGoal implements IGoal {
 
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
-        System.out.println("[TestPlanGoal] 目标停止");
+        MindLog.decision(MindLogLevel.INFO, "测试计划目标停止");
         started = false;
     }
 

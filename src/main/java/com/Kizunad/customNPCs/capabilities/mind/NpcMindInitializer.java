@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.capabilities.mind;
 
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -43,8 +45,12 @@ public class NpcMindInitializer {
                     new com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal()
                 );
                 mind.getGoalSelector().registerGoal(new IdleGoal());
-                
-                System.out.println("[NpcMind] 为实体 " + entity.getName().getString() + " 初始化思维系统（含视觉传感器）");
+
+                MindLog.decision(
+                    MindLogLevel.INFO,
+                    "为实体 {} 初始化思维系统（含视觉传感器）",
+                    entity.getName().getString()
+                );
             }
         }
     }

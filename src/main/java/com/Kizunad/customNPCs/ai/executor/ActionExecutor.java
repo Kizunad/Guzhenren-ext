@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.ai.executor;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,12 +42,11 @@ public class ActionExecutor {
             // 新的实体上下文，重置执行器状态
             stopCurrentPlan();
             this.boundEntityId = entityId;
-            System.out.println(
-                "[ActionExecutor] 绑定到实体 " +
-                    entity.getName().getString() +
-                    " (id=" +
-                    entity.getId() +
-                    ")"
+            MindLog.execution(
+                MindLogLevel.DEBUG,
+                "绑定到实体 {} (id={})",
+                entity.getName().getString(),
+                entity.getId()
             );
         }
     }
@@ -55,7 +56,10 @@ public class ActionExecutor {
             return true;
         }
         if (!boundEntityId.equals(entity.getUUID())) {
-            System.err.println("[ActionExecutor] 上下文实体变化，丢弃计划");
+            MindLog.execution(
+                MindLogLevel.WARN,
+                "上下文实体变化，丢弃计划"
+            );
             stopCurrentPlan();
             return false;
         }
@@ -88,8 +92,10 @@ public class ActionExecutor {
         // 添加新动作
         actionQueue.addAll(actions);
 
-        System.out.println(
-            "[ActionExecutor] 提交新计划，包含 " + actions.size() + " 个动作"
+        MindLog.execution(
+            MindLogLevel.INFO,
+            "提交新计划，包含 {} 个动作",
+            actions.size()
         );
     }
 
@@ -113,7 +119,7 @@ public class ActionExecutor {
         }
         actionQueue.clear();
         lastActionStatus = ActionStatus.RUNNING;
-        System.out.println("[ActionExecutor] 当前计划已停止");
+        MindLog.execution(MindLogLevel.INFO, "当前计划已停止");
     }
 
     /**
@@ -139,8 +145,10 @@ public class ActionExecutor {
             if (!actionQueue.isEmpty()) {
                 currentAction = actionQueue.poll();
                 currentAction.start(mind, entity);
-                System.out.println(
-                    "[ActionExecutor] 开始执行动作: " + currentAction.getName()
+                MindLog.execution(
+                    MindLogLevel.INFO,
+                    "开始执行动作: {}",
+                    currentAction.getName()
                 );
             } else {
                 // 队列为空，无事可做
@@ -155,8 +163,10 @@ public class ActionExecutor {
         switch (status) {
             case SUCCESS:
                 lastActionStatus = ActionStatus.SUCCESS;
-                System.out.println(
-                    "[ActionExecutor] 动作成功完成: " + currentAction.getName()
+                MindLog.execution(
+                    MindLogLevel.INFO,
+                    "动作成功完成: {}",
+                    currentAction.getName()
                 );
                 currentAction.stop(mind, entity);
                 currentAction = null;
@@ -164,10 +174,10 @@ public class ActionExecutor {
                 break;
             case FAILURE:
                 lastActionStatus = ActionStatus.FAILURE;
-                System.out.println(
-                    "[ActionExecutor] 动作失败: " +
-                        currentAction.getName() +
-                        "，清空计划"
+                MindLog.execution(
+                    MindLogLevel.WARN,
+                    "动作失败: {}，清空计划",
+                    currentAction.getName()
                 );
                 currentAction.stop(mind, entity);
                 currentAction = null;

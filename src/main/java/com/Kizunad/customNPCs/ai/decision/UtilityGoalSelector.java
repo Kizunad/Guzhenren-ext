@@ -1,5 +1,7 @@
 package com.Kizunad.customNPCs.ai.decision;
 
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.ai.sensors.SensorEventType;
 import java.util.ArrayList;
@@ -158,30 +160,25 @@ public class UtilityGoalSelector {
             // 只有当新目标优先级显著高于当前目标时才切换
             if (bestPriority > currentPriority * (1.0f + threshold)) {
                 if (currentGoal != null) {
-                    System.out.println(
-                        "[UtilityGoalSelector] 切换目标: " +
-                            currentGoal.getName() +
-                            " (" +
-                            currentPriority +
-                            ") -> " +
-                            bestGoal.getName() +
-                            " (" +
-                            bestPriority +
-                            ") [中断: " +
-                            interruptLevel +
-                            "]"
+                    MindLog.decision(
+                        MindLogLevel.INFO,
+                        "切换目标: {} ({}) -> {} ({}) [中断: {}]",
+                        currentGoal.getName(),
+                        currentPriority,
+                        bestGoal.getName(),
+                        bestPriority,
+                        interruptLevel
                     );
                     // 切换目标时清空旧计划，防止遗留动作继续执行
                     mind.getActionExecutor().stopCurrentPlan();
                     currentGoal.stop(mind, entity);
                     startCooldown(currentGoal);
                 } else {
-                    System.out.println(
-                        "[UtilityGoalSelector] 选择新目标: " +
-                            bestGoal.getName() +
-                            " (" +
-                            bestPriority +
-                            ")"
+                    MindLog.decision(
+                        MindLogLevel.INFO,
+                        "选择新目标: {} ({})",
+                        bestGoal.getName(),
+                        bestPriority
                     );
                 }
 
@@ -194,16 +191,13 @@ public class UtilityGoalSelector {
             } else {
                 // 优先级差距不足,保持当前目标
                 if (interruptLevel != null) {
-                    System.out.println(
-                        "[UtilityGoalSelector] 滞后阻止切换: 当前 " +
-                            currentGoal.getName() +
-                            " (" +
-                            currentPriority +
-                            ") vs 新 " +
-                            bestGoal.getName() +
-                            " (" +
-                            bestPriority +
-                            ")"
+                    MindLog.decision(
+                        MindLogLevel.DEBUG,
+                        "滞后阻止切换: 当前 {} ({}) vs 新 {} ({})",
+                        currentGoal.getName(),
+                        currentPriority,
+                        bestGoal.getName(),
+                        bestPriority
                     );
                 }
             }

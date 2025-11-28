@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.ai.actions.base;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -84,12 +86,11 @@ public class LookAtAction implements IAction {
         String targetName = targetEntity != null
             ? targetEntity.getName().getString()
             : targetPos.toString();
-        System.out.println(
-            "[LookAtAction] 开始注视: " +
-                targetName +
-                "，持续 " +
-                duration +
-                " ticks"
+        MindLog.execution(
+            MindLogLevel.INFO,
+            "开始注视 {}，持续 {} ticks",
+            targetName,
+            duration
         );
     }
 
@@ -98,7 +99,11 @@ public class LookAtAction implements IAction {
         String targetName = targetEntity != null
             ? targetEntity.getName().getString()
             : (targetPos != null ? targetPos.toString() : "null");
-        System.out.println("[LookAtAction] 停止注视: " + targetName);
+        MindLog.execution(
+            MindLogLevel.INFO,
+            "停止注视 {}",
+            targetName
+        );
     }
 
     @Override

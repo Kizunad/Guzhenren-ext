@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.capabilities.mind;
 
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.decision.UtilityGoalSelector;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.memory.MemoryModule;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -283,14 +285,12 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         lastInterruptTick = currentTick;
         lastInterruptType = eventType;
 
-        System.out.println(
-            "[NpcMind] " +
-                entity.getName().getString() +
-                " 触发中断: " +
-                eventType +
-                " (tick: " +
-                currentTick +
-                ")"
+        MindLog.decision(
+            MindLogLevel.INFO,
+            "{} 触发中断: {} (tick: {})",
+            entity.getName().getString(),
+            eventType,
+            currentTick
         );
 
         // 强制重新评估目标

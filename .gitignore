@@ -17,6 +17,8 @@ gametest_*
 .agent
 .eclipse
 .serena
+agent_workflow.py
+agent_assignments.json
 
 #IDE
 .settings

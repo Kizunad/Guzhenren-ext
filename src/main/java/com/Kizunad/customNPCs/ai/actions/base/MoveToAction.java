@@ -2,6 +2,9 @@ package com.Kizunad.customNPCs.ai.actions.base;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -141,9 +144,10 @@ public class MoveToAction implements IAction {
     public ActionStatus tick(INpcMind mind, LivingEntity entity) {
         // 检查实体是否为 Mob（只有 Mob 才有 Navigation）
         if (!(entity instanceof net.minecraft.world.entity.Mob mob)) {
-            System.err.println(
-                "[MoveToAction] 实体不是 Mob 类型: " +
-                    entity.getClass().getSimpleName()
+            MindLog.execution(
+                MindLogLevel.WARN,
+                "实体不是 Mob 类型: {}",
+                entity.getClass().getSimpleName()
             );
             return ActionStatus.FAILURE;
         }
@@ -151,8 +155,10 @@ public class MoveToAction implements IAction {
         // 超时检测
         currentTick++;
         if (currentTick >= maxTicks) {
-            System.out.println(
-                "[MoveToAction] 超时失败，已执行 " + currentTick + " ticks"
+            MindLog.execution(
+                MindLogLevel.WARN,
+                "超时失败，已执行 {} ticks",
+                currentTick
             );
             return ActionStatus.FAILURE;
         }
@@ -160,7 +166,11 @@ public class MoveToAction implements IAction {
         // 获取目标位置
         Vec3 currentTarget = getCurrentTarget();
         if (currentTarget == null || !isValidTarget(currentTarget)) {
-            System.err.println("[MoveToAction] 目标无效: " + currentTarget);
+            MindLog.execution(
+                MindLogLevel.WARN,
+                "目标无效: {}",
+                currentTarget
+            );
             return ActionStatus.FAILURE;
         }
 
@@ -168,9 +178,10 @@ public class MoveToAction implements IAction {
         Vec3 currentPos = entity.position();
         double distanceToTarget = currentPos.distanceTo(currentTarget);
         if (distanceToTarget <= acceptableDistance + ARRIVAL_BUFFER) {
-            System.out.println(
-                "[MoveToAction] 已到达目标，距离: " +
-                    String.format("%.2f", distanceToTarget)
+            MindLog.execution(
+                MindLogLevel.INFO,
+                "已到达目标，距离: {}",
+                String.format("%.2f", distanceToTarget)
             );
             return ActionStatus.SUCCESS;
         }
@@ -212,29 +223,22 @@ public class MoveToAction implements IAction {
         Vec3 currentTarget,
         double distanceToTarget
     ) {
-        System.out.println(
-            "[MoveToAction DEBUG] Tick " +
-                currentTick +
-                " | 当前位置: " +
-                String.format(
-                    "(%.1f, %.1f, %.1f)",
-                    currentPos.x,
-                    currentPos.y,
-                    currentPos.z
-                ) +
-                " | 目标位置: " +
-                String.format(
-                    "(%.1f, %.1f, %.1f)",
-                    currentTarget.x,
-                    currentTarget.y,
-                    currentTarget.z
-                ) +
-                " | 距离: " +
-                String.format("%.2f", distanceToTarget) +
-                " | Navigation.isDone: " +
-                navigation.isDone() +
-                " | hasPath: " +
-                (navigation.getPath() != null)
+        if (!MindLog.isEnabled(MindLogCategory.EXECUTION)) {
+            return;
+        }
+        MindLog.execution(
+            MindLogLevel.DEBUG,
+            "Tick {} | 当前位置: ({}, {}, {}) | 目标位置: ({}, {}, {}) | 距离: {} | Navigation.isDone: {} | hasPath: {}",
+            currentTick,
+            String.format("%.1f", currentPos.x),
+            String.format("%.1f", currentPos.y),
+            String.format("%.1f", currentPos.z),
+            String.format("%.1f", currentTarget.x),
+            String.format("%.1f", currentTarget.y),
+            String.format("%.1f", currentTarget.z),
+            String.format("%.2f", distanceToTarget),
+            navigation.isDone(),
+            navigation.getPath() != null
         );
     }
 
@@ -251,16 +255,13 @@ public class MoveToAction implements IAction {
                     if (tryTeleportToTarget(entity, currentTarget)) {
                         return ActionStatus.RUNNING;
                     }
-                    System.err.println(
-                        "[MoveToAction] 卡住失败: " +
-                            MAX_STUCK_TICKS +
-                            " ticks 未移动" +
-                            " | 当前位置: " +
-                            currentPos +
-                            " | Navigation状态: isDone=" +
-                            navigation.isDone() +
-                            ", hasPath=" +
-                            (navigation.getPath() != null)
+                    MindLog.execution(
+                        MindLogLevel.WARN,
+                        "卡住失败: {} ticks 未移动 | 当前位置: {} | Navigation状态: isDone={} , hasPath={}",
+                        MAX_STUCK_TICKS,
+                        currentPos,
+                        navigation.isDone(),
+                        navigation.getPath() != null
                     );
                     return ActionStatus.FAILURE;
                 }
@@ -295,32 +296,26 @@ public class MoveToAction implements IAction {
             if (tryTeleportToTarget(entity, currentTarget)) {
                 return ActionStatus.RUNNING;
             }
-            System.err.println(
-                "[MoveToAction] 无法创建路径" +
-                    " | 从: " +
-                    String.format(
-                        "(%.1f, %.1f, %.1f)",
-                        currentPos.x,
-                        currentPos.y,
-                        currentPos.z
-                    ) +
-                    " | 到: " +
-                    String.format(
-                        "(%.1f, %.1f, %.1f)",
-                        currentTarget.x,
-                        currentTarget.y,
-                        currentTarget.z
-                    ) +
-                    " | 距离: " +
-                    String.format("%.2f", distanceToTarget) +
-                    " | 实体在地面: " +
-                    entity.onGround()
+            MindLog.execution(
+                MindLogLevel.WARN,
+                "无法创建路径 | 从: ({}, {}, {}) | 到: ({}, {}, {}) | 距离: {} | 实体在地面: {}",
+                String.format("%.1f", currentPos.x),
+                String.format("%.1f", currentPos.y),
+                String.format("%.1f", currentPos.z),
+                String.format("%.1f", currentTarget.x),
+                String.format("%.1f", currentTarget.y),
+                String.format("%.1f", currentTarget.z),
+                String.format("%.2f", distanceToTarget),
+                entity.onGround()
             );
             return ActionStatus.FAILURE;
         }
 
         if (pathCreated && currentTick % 20 == 0) {
-            System.out.println("[MoveToAction DEBUG] 路径已创建/更新");
+            MindLog.execution(
+                MindLogLevel.DEBUG,
+                "路径已创建/更新"
+            );
         }
         return null;
     }
@@ -339,26 +334,17 @@ public class MoveToAction implements IAction {
                 if (tryTeleportToTarget(entity, currentTarget)) {
                     return ActionStatus.RUNNING;
                 }
-                System.err.println(
-                    "[MoveToAction] 寻路结束但未到达目标" +
-                        " | 距离目标: " +
-                        String.format("%.2f", distanceToTarget) +
-                        " | 可接受距离: " +
-                        acceptableDistance +
-                        " | 当前位置: " +
-                        String.format(
-                            "(%.1f, %.1f, %.1f)",
-                            currentPos.x,
-                            currentPos.y,
-                            currentPos.z
-                        ) +
-                        " | 目标位置: " +
-                        String.format(
-                            "(%.1f, %.1f, %.1f)",
-                            currentTarget.x,
-                            currentTarget.y,
-                            currentTarget.z
-                        )
+                MindLog.execution(
+                    MindLogLevel.WARN,
+                    "寻路结束但未到达目标 | 距离目标: {} | 可接受距离: {} | 当前位置: ({}, {}, {}) | 目标位置: ({}, {}, {})",
+                    String.format("%.2f", distanceToTarget),
+                    acceptableDistance,
+                    String.format("%.1f", currentPos.x),
+                    String.format("%.1f", currentPos.y),
+                    String.format("%.1f", currentPos.z),
+                    String.format("%.1f", currentTarget.x),
+                    String.format("%.1f", currentTarget.y),
+                    String.format("%.1f", currentTarget.z)
                 );
                 return ActionStatus.FAILURE;
             }
@@ -379,8 +365,11 @@ public class MoveToAction implements IAction {
             String targetName = targetEntity != null
                 ? targetEntity.getName().getString()
                 : targetPos.toString();
-            System.out.println(
-                "[MoveToAction] 开始移动到: " + targetName + "，速度: " + speed
+            MindLog.execution(
+                MindLogLevel.INFO,
+                "开始移动到: {}，速度: {}",
+                targetName,
+                speed
             );
         }
     }
@@ -395,7 +384,11 @@ public class MoveToAction implements IAction {
         String targetName = targetEntity != null
             ? targetEntity.getName().getString()
             : (targetPos != null ? targetPos.toString() : "null");
-        System.out.println("[MoveToAction] 停止移动到: " + targetName);
+        MindLog.execution(
+            MindLogLevel.INFO,
+            "停止移动到: {}",
+            targetName
+        );
     }
 
     @Override
@@ -438,8 +431,10 @@ public class MoveToAction implements IAction {
         lastPosition = entity.position();
         stuckTicks = 0;
         pathUpdateCooldown = PATH_UPDATE_INTERVAL;
-        System.out.println(
-            "[MoveToAction] 触发测试兜底传送到目标附近: " + target
+        MindLog.execution(
+            MindLogLevel.WARN,
+            "触发测试兜底传送到目标附近: {}",
+            target
         );
         return true;
     }

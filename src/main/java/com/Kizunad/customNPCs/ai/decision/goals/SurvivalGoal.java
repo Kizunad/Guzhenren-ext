@@ -3,6 +3,8 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
+import com.Kizunad.customNPCs.ai.logging.MindLog;
+import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
@@ -51,11 +53,11 @@ public class SurvivalGoal implements IGoal {
         // - 寻找食物
         // - 寻找治疗物品
         // - 逃跑
-        System.out.println(
-            "[SurvivalGoal] NPC " +
-                entity.getName().getString() +
-                " 进入生存模式！血量: " +
-                entity.getHealth()
+        MindLog.decision(
+            MindLogLevel.INFO,
+            "NPC {} 进入生存模式，血量: {}",
+            entity.getName().getString(),
+            entity.getHealth()
         );
     }
 
@@ -78,10 +80,10 @@ public class SurvivalGoal implements IGoal {
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
         mind.getMemory().forget("in_survival_mode");
-        System.out.println(
-            "[SurvivalGoal] NPC " +
-                entity.getName().getString() +
-                " 退出生存模式"
+        MindLog.decision(
+            MindLogLevel.INFO,
+            "NPC {} 退出生存模式",
+            entity.getName().getString()
         );
     }
 
