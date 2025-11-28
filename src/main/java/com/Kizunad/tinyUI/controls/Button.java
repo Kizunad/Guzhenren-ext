@@ -5,29 +5,81 @@ import com.Kizunad.tinyUI.core.UIRenderContext;
 import com.Kizunad.tinyUI.theme.Theme;
 import java.util.Objects;
 
+/**
+ * 按钮控件 - 支持点击交互的基础 UI 组件。
+ * <p>
+ * 功能：
+ * <ul>
+ *   <li>显示文本标签</li>
+ *   <li>支持鼠标悬停、按下、释放交互</li>
+ *   <li>可自定义主题颜色</li>
+ *   <li>可设置点击回调函数</li>
+ * </ul>
+ * <p>
+ * 状态：
+ * <ul>
+ *   <li>正常 - 显示背景色</li>
+ *   <li>悬停 - 显示主题色</li>
+ *   <li>按下 - 显示强调色</li>
+ *   <li>禁用 - 显示背景色（不响应交互）</li>
+ * </ul>
+ *
+ * @see InteractiveElement
+ * @see Theme
+ */
 public class Button extends InteractiveElement {
 
+    /** 边框线条粗细（像素） */
     private static final int BORDER_THICKNESS = 1;
+    /** 文本内边距（像素） */
     private static final int CONTENT_PADDING = 4;
 
+    /** 按钮文本 */
     private String text;
+    /** 主题配置 */
     private Theme theme;
+    /** 点击回调函数 */
     private Runnable onClick;
+    /** 是否处于按下状态 */
     private boolean pressed;
 
+    /**
+     * 创建按钮。
+     *
+     * @param text 按钮文本（如果为 null 则使用空字符串）
+     * @param theme 主题配置（不能为 null）
+     * @throws NullPointerException 如果 theme 为 null
+     */
     public Button(final String text, final Theme theme) {
         this.text = Objects.requireNonNullElse(text, "");
         this.theme = Objects.requireNonNull(theme, "theme");
     }
 
+    /**
+     * 设置按钮文本。
+     *
+     * @param text 新的文本内容（如果为 null 则使用空字符串）
+     */
     public void setText(final String text) {
         this.text = Objects.requireNonNullElse(text, "");
     }
 
+    /**
+     * 设置按钮主题。
+     *
+     * @param theme 新的主题配置（不能为 null）
+     * @throws NullPointerException 如果 theme 为 null
+     */
     public void setTheme(final Theme theme) {
         this.theme = Objects.requireNonNull(theme, "theme");
     }
 
+    /**
+     * 设置点击回调函数。
+     * 当用户在按钮上按下并释放鼠标时，会调用此回调。
+     *
+     * @param onClick 点击回调函数（可以为 null）
+     */
     public void setOnClick(final Runnable onClick) {
         this.onClick = onClick;
     }
@@ -65,6 +117,12 @@ public class Button extends InteractiveElement {
         drawLabel(context);
     }
 
+    /**
+     * 根据按钮状态选择背景颜色。
+     *
+     * @param hovered 鼠标是否悬停在按钮上
+     * @return ARGB 格式的背景颜色
+     */
     protected int chooseBackground(final boolean hovered) {
         if (!isEnabled()) {
             return theme.getBackgroundColor();
@@ -78,18 +136,30 @@ public class Button extends InteractiveElement {
         return theme.getBackgroundColor();
     }
 
+    /**
+     * 绘制按钮边框。
+     * 使用主题的强调色绘制上、下、左、右四条边框线。
+     *
+     * @param context 渲染上下文
+     */
     private void drawBorder(final UIRenderContext context) {
         final int x = getAbsoluteX();
         final int y = getAbsoluteY();
         final int w = getWidth();
         final int h = getHeight();
         final int color = theme.getAccentColor();
-        context.drawRect(x, y, w, BORDER_THICKNESS, color);
-        context.drawRect(x, y + h - BORDER_THICKNESS, w, BORDER_THICKNESS, color);
-        context.drawRect(x, y, BORDER_THICKNESS, h, color);
-        context.drawRect(x + w - BORDER_THICKNESS, y, BORDER_THICKNESS, h, color);
+        context.drawRect(x, y, w, BORDER_THICKNESS, color); // 上边框
+        context.drawRect(x, y + h - BORDER_THICKNESS, w, BORDER_THICKNESS, color); // 下边框
+        context.drawRect(x, y, BORDER_THICKNESS, h, color); // 左边框
+        context.drawRect(x + w - BORDER_THICKNESS, y, BORDER_THICKNESS, h, color); // 右边框
     }
 
+    /**
+     * 绘制按钮文本标签。
+     * 文本位置会根据内边距进行偏移。
+     *
+     * @param context 渲染上下文
+     */
     private void drawLabel(final UIRenderContext context) {
         final int textX = getAbsoluteX() + CONTENT_PADDING;
         final int textY = getAbsoluteY() + CONTENT_PADDING;
