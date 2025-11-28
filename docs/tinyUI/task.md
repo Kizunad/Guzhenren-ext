@@ -1,17 +1,17 @@
 # tinyUI 任务清单
 
 ## P0 基础框架与输入
-- [ ] 建立包骨架与核心接口（core/input/layout/state/theme/controls/demo），提交空类/接口和基础文档注释。
-- [ ] 实现 UIElement/InteractiveElement 树结构，支持可见/启用、子节点管理、渲染入口。
-- [ ] 实现 InputRouter + FocusManager：鼠标/键盘命中测试、焦点切换、事件向子节点分发的顺序规则。
-- [ ] 实现 HotkeyManager：注册/注销、焦点优先再全局的冲突策略，支持组合键表示。
-- [ ] 单元测试：事件分发、焦点切换、热键匹配的纯逻辑测试。
+- [x] 建立包骨架与核心接口（core/input/layout/state/theme/controls/demo），提交空类/接口和基础文档注释。
+- [x] 实现 UIElement/InteractiveElement 树结构，支持可见/启用、子节点管理、渲染入口。
+- [x] 实现 InputRouter + FocusManager：鼠标/键盘命中测试、焦点切换、事件向子节点分发的顺序规则。
+- [x] 实现 HotkeyManager：注册/注销、焦点优先再全局的冲突策略，支持组合键表示。
+- [x] 单元测试：事件分发、焦点切换、热键匹配的纯逻辑测试。
 
 ## P0 布局
-- [ ] FlexLayout：单行/列，grow/shrink、gap、padding、对齐；计算输出子项矩形。
-- [ ] GridLayout：均分行列，基础放置；暂不支持跨行列。
-- [ ] Anchor/绝对定位工具：根据锚点+偏移计算矩形。
-- [ ] 单元测试：Flex/Grid/Anchor 布局输出坐标与尺寸。
+- [x] FlexLayout：单行/列，grow/shrink、gap、padding、对齐；计算输出子项矩形。
+- [x] GridLayout：均分行列，基础放置；暂不支持跨行列。
+- [x] Anchor/绝对定位工具：根据锚点+偏移计算矩形。
+- [x] 单元测试：Flex/Grid/Anchor 布局输出坐标与尺寸。
 
 ## P0 状态
 - [ ] ObservableValue/Subscription，支持多监听、取消订阅。
@@ -19,20 +19,20 @@
 - [ ] 单元测试：订阅触发顺序、取消订阅、绑定回调。
 
 ## P1 主题与资源
-- [ ] Theme 固定配置（色板、圆角、padding、字号）。
-- [ ] NinePatch 逻辑渲染参数解析；无资源时走纯色回退。
-- [ ] 单元测试：九宫格切片参数与尺寸计算。
+- [x] Theme 固定配置（色板、圆角、padding、字号）。
+- [x] NinePatch 逻辑渲染参数解析；无资源时走纯色回退。
+- [x] 单元测试：九宫格切片参数与尺寸计算。
 
 ## P1 控件首批
-- [ ] Button/ToggleButton：三态渲染，禁用态阻断事件。
-- [ ] Label：文本显示、对齐。
-- [ ] ScrollContainer：内容裁剪、滚轮/拖动、滚动边界。
-- [ ] 单元测试：按钮点击命中、禁用态、滚动边界。
+- [x] Button/ToggleButton：三态渲染，禁用态阻断事件。
+- [x] Label：文本显示、对齐。
+- [x] ScrollContainer：内容裁剪、滚轮/拖动、滚动边界。
+- [x] 单元测试：按钮点击命中、禁用态、滚动边界。
 
 ## P1 Tooltip/Modal
-- [ ] Tooltip 管理：延时显示、位置计算、跟随鼠标。
-- [ ] Modal/Overlay：阻塞点击、ESC 关闭、背景遮罩。
-- [ ] 单元测试：Tooltip 延时策略、Modal 拦截事件。
+- [x] Tooltip 管理：延时显示、位置计算、跟随鼠标。
+- [x] Modal/Overlay：阻塞点击、ESC 关闭、背景遮罩。
+- [x] 单元测试：Tooltip 延时策略、Modal 拦截事件。
 
 ## P2 TextInput & 快捷键配置
 - [ ] TextInput：文本编辑、光标移动、选中，基础快捷键（Ctrl+A/C/V 钩子可占位）。

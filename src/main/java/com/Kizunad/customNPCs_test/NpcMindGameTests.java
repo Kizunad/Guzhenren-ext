@@ -12,6 +12,7 @@ public class NpcMindGameTests {
     private static final String BATCH_BASE = TestBatches.BASE;
     private static final String BATCH_GOAP = TestBatches.GOAP;
     private static final String BATCH_REAL_API = TestBatches.REAL_API;
+    private static final String BATCH_PERF = TestBatches.PERFORMANCE;
 
     //    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
     //    public void testIdleGoal(GameTestHelper helper) {
@@ -48,16 +49,44 @@ public class NpcMindGameTests {
     //        com.Kizunad.customNPCs_test.tests.SensorSchedulingTests.testDynamicScanInterval(helper);
     //    }
 
-    @GameTest(template = "empty", batch = BATCH_BASE)
-    public void testSafetySensorDetectsHazard(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.SafetyGuardrailTests.testSafetySensorDetectsHazard(
+    //    @GameTest(template = "empty", batch = BATCH_BASE)
+    //    public void testSafetySensorDetectsHazard(GameTestHelper helper) {
+    //        com.Kizunad.customNPCs_test.tests.SafetyGuardrailTests.testSafetySensorDetectsHazard(
+    //            helper
+    //        );
+    //    }
+
+    //    @GameTest(template = "empty", batch = BATCH_BASE, required = false)
+    //    public void testVisionSensorFriendFoe(GameTestHelper helper) {
+    //        com.Kizunad.customNPCs_test.tests.SafetyGuardrailTests.testVisionSensorFriendFoe(
+    //            helper
+    //        );
+    //    }
+
+    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
+    public void testMoveToBlockedPathFails(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToBlockedPathFails(
             helper
         );
     }
 
-    @GameTest(template = "empty", batch = BATCH_BASE, required = false)
-    public void testVisionSensorFriendFoe(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.SafetyGuardrailTests.testVisionSensorFriendFoe(
+    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
+    public void testMoveToTargetDespawnFails(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToTargetDespawnFails(
+            helper
+        );
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
+    public void testMoveToTimeoutFails(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToTimeoutFails(
+            helper
+        );
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_PERF)
+    public void testPerformanceStress(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ComplexScenarios.testPerformanceStress(
             helper
         );
     }

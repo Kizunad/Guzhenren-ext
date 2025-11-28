@@ -32,6 +32,8 @@ import java.util.Objects;
  */
 public final class ModalOverlay extends InteractiveElement {
 
+    /** 默认关闭键（GLFW_KEY_ESCAPE），-1 可用于禁用。 */
+    private static final int DEFAULT_CLOSE_KEY = 256;
     /** 默认遮罩层透明度（ARGB 格式，0x88 = 约 53% 不透明度） */
     private static final int DEFAULT_ALPHA = 0x88000000;
 
@@ -41,8 +43,8 @@ public final class ModalOverlay extends InteractiveElement {
     private UIElement content;
     /** 关闭回调函数 */
     private Runnable onClose;
-    /** 关闭按键码（-1 表示不设置快捷键） */
-    private int closeKeyCode = -1;
+    /** 关闭按键码（默认 ESC，-1 表示不设置快捷键） */
+    private int closeKeyCode = DEFAULT_CLOSE_KEY;
 
     /**
      * 创建模态遮罩层。

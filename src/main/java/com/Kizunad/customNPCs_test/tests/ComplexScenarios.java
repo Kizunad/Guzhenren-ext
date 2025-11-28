@@ -296,18 +296,18 @@ public class ComplexScenarios {
                     System.out.println("  干扰实体数: 50");
                     System.out.println("  掉落物数: 20");
                     
-                    // 性能基准检查
-                    if (planningTimeMs > 50) {
-                        System.out.println("  ⚠ 警告: 规划耗时超过50ms，可能需要优化");
-                    } else {
-                        System.out.println("  ✓ 规划性能良好");
+                    // 性能回归断言
+                    boolean planningTooSlow = planningTimeMs > 50;
+                    boolean tickTooSlow = avgTickTimeMs > 5;
+                    if (planningTooSlow || tickTooSlow) {
+                        helper.fail(
+                            "性能回归: 规划=" + planningTimeMs + "ms(阈值<=50ms), " +
+                                "Tick=" + avgTickTimeMs + "ms(阈值<=5ms)"
+                        );
+                        return;
                     }
-                    
-                    if (avgTickTimeMs > 5) {
-                        System.out.println("  ⚠ 警告: 平均Tick耗时超过5ms，可能影响性能");
-                    } else {
-                        System.out.println("  ✓ Tick性能良好");
-                    }
+                    System.out.println("  ✓ 规划性能良好");
+                    System.out.println("  ✓ Tick性能良好");
                     
                     System.out.println("[testPerformanceStress] ===== 测试完成！=====\n");
                     

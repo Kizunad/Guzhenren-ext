@@ -33,6 +33,53 @@ checkstyle {
     configFile = file('config/checkstyle/checkstyle.xml')
 }
 
+sourceSets {
+    tinyUi {
+        java {
+            srcDir 'src/main/java'
+            include 'com/Kizunad/tinyUI/**'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    tinyUiTest {
+        java {
+            srcDir 'src/test/java'
+            include 'com/Kizunad/tinyUI/**'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+        compileClasspath += sourceSets.tinyUi.output + configurations.testCompileClasspath
+        runtimeClasspath += output + compileClasspath + configurations.testRuntimeClasspath
+    }
+}
+
+configurations {
+    tinyUiImplementation.extendsFrom implementation
+    tinyUiTestImplementation.extendsFrom testImplementation
+    tinyUiTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+tasks.register('tinyUiTest', Test) {
+    description = 'Run tinyUI tests without compiling non-tinyUI sources.'
+    group = 'verification'
+    testClassesDirs = sourceSets.tinyUiTest.output.classesDirs
+    classpath = sourceSets.tinyUiTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter(test)
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
 neoForge {
     version = project.neo_version
 
