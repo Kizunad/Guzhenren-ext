@@ -1,7 +1,6 @@
 package com.Kizunad.customNPCs.capabilities.mind;
 
-import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
-import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
+import com.Kizunad.customNPCs.ai.NpcMindRegistry;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,24 +31,13 @@ public class NpcMindInitializer {
         if (entity.hasData(NpcMindAttachment.NPC_MIND)) {
             var mind = entity.getData(NpcMindAttachment.NPC_MIND);
             
-            // 只在第一次加入时注册（避免重复注册）
-            if (mind.getGoalSelector().getCurrentGoal() == null) {
-                // 注册传感器
-                mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.VisionSensor());
-                mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.DamageSensor());
-                mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.AuditorySensor());
-                mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.SafetySensor());
-                
-                // 注册基础目标
-                mind.getGoalSelector().registerGoal(new SurvivalGoal());
-                mind.getGoalSelector().registerGoal(
-                    new com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal()
-                );
-                mind.getGoalSelector().registerGoal(new IdleGoal());
+            // 基于注册表进行一次性初始化，避免重复注册
+            boolean initialized = NpcMindRegistry.initializeMind(mind);
 
+            if (initialized) {
                 MindLog.decision(
                     MindLogLevel.INFO,
-                    "为实体 {} 初始化思维系统（含视觉传感器）",
+                    "为实体 {} 初始化思维系统（含默认传感器/目标）",
                     entity.getName().getString()
                 );
             }

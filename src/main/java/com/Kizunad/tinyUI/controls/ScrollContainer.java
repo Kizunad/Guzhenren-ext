@@ -27,6 +27,14 @@ public final class ScrollContainer extends InteractiveElement {
     private static final int SCROLL_STEP = 12;
     /** 边框线条粗细（像素） */
     private static final int BORDER_THICKNESS = 1;
+    /** 滚动条宽度 */
+    private static final int SCROLLBAR_WIDTH = 6;
+    /** 滚动条滑块颜色 */
+    private static final int SCROLLBAR_COLOR = 0xFF888888;
+    /** 滚动条背景颜色 */
+    private static final int SCROLLBAR_BG_COLOR = 0xFF333333;
+    /** 最小滑块高度 */
+    private static final int MIN_HANDLE_HEIGHT = 10;
 
     /** 主题配置 */
     private final Theme theme;
@@ -74,11 +82,39 @@ public final class ScrollContainer extends InteractiveElement {
     }
 
     @Override
+    public boolean onMouseDrag(final double mouseX, final double mouseY, final int button,
+                               final double dragX, final double dragY) {
+        if (!isEnabledAndVisible() || content == null) {
+            return false;
+        }
+        final int maxScroll = Math.max(0, content.getHeight() - getHeight());
+        if (maxScroll <= 0) {
+            return false;
+        }
+
+        final int viewportH = getHeight() - BORDER_THICKNESS * 2;
+        final int contentH = content.getHeight();
+        int handleH = (int) ((float) viewportH / contentH * viewportH);
+        handleH = Math.max(MIN_HANDLE_HEIGHT, Math.min(viewportH, handleH));
+
+        final double trackLen = viewportH - handleH;
+        if (trackLen <= 0) {
+            return false;
+        }
+
+        final double scrollPerPixel = (double) maxScroll / trackLen;
+        scrollY = clamp(scrollY + (int) (dragY * scrollPerPixel), 0, maxScroll);
+        applyScroll();
+        return true;
+    }
+
+    @Override
     protected void onRender(final UIRenderContext context, final double mouseX, final double mouseY,
                             final float partialTicks) {
         context.drawRect(getAbsoluteX(), getAbsoluteY(), getWidth(), getHeight(),
                 theme.getBackgroundColor());
         drawBorder(context);
+        drawScrollbar(context);
     }
 
     /**
@@ -97,6 +133,32 @@ public final class ScrollContainer extends InteractiveElement {
         context.drawRect(x, y + h - BORDER_THICKNESS, w, BORDER_THICKNESS, color); // 下边框
         context.drawRect(x, y, BORDER_THICKNESS, h, color); // 左边框
         context.drawRect(x + w - BORDER_THICKNESS, y, BORDER_THICKNESS, h, color); // 右边框
+    }
+
+    /**
+     * 绘制滚动条。
+     *
+     * @param context 渲染上下文
+     */
+    private void drawScrollbar(final UIRenderContext context) {
+        if (content == null || content.getHeight() <= getHeight()) {
+            return;
+        }
+        final int x = getAbsoluteX() + getWidth() - SCROLLBAR_WIDTH - BORDER_THICKNESS;
+        final int y = getAbsoluteY() + BORDER_THICKNESS;
+        final int h = getHeight() - BORDER_THICKNESS * 2;
+
+        // Draw track
+        context.drawRect(x, y, SCROLLBAR_WIDTH, h, SCROLLBAR_BG_COLOR);
+
+        // Draw handle
+        final int maxScroll = content.getHeight() - getHeight();
+        int handleH = (int) ((float) h / content.getHeight() * h);
+        handleH = Math.max(MIN_HANDLE_HEIGHT, Math.min(h, handleH));
+
+        final int handleY = (int) ((float) scrollY / maxScroll * (h - handleH));
+
+        context.drawRect(x, y + handleY, SCROLLBAR_WIDTH, handleH, SCROLLBAR_COLOR);
     }
 
     /**

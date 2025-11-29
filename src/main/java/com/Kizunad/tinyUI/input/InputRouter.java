@@ -114,6 +114,23 @@ public final class InputRouter {
     }
 
     /**
+     * 路由鼠标拖拽事件。
+     * 发送给当前焦点元素（通常是刚被点击的元素）。
+     *
+     * @param mouseX 鼠标 X 坐标
+     * @param mouseY 鼠标 Y 坐标
+     * @param button 鼠标按钮
+     * @param dragX X 轴拖拽增量
+     * @param dragY Y 轴拖拽增量
+     * @return true 如果事件被处理，false 否则
+     */
+    public boolean mouseDrag(final double mouseX, final double mouseY, final int button,
+                             final double dragX, final double dragY) {
+        final Optional<InteractiveElement> focused = focusManager.getFocused();
+        return focused.isPresent() && focused.get().onMouseDrag(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    /**
      * 路由按键事件。
      * 先尝试发送给当前焦点元素，如果未处理再尝试触发热键。
      *

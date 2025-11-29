@@ -47,6 +47,11 @@ public abstract class InteractiveElement extends UIElement {
         return false;
     }
 
+    public boolean onMouseDrag(final double mouseX, final double mouseY, final int button,
+                               final double dragX, final double dragY) {
+        return false;
+    }
+
     public boolean onKeyPressed(final int keyCode, final int scanCode, final int modifiers) {
         return false;
     }

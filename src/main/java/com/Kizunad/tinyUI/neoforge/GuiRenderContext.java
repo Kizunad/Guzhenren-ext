@@ -40,10 +40,12 @@ public final class GuiRenderContext implements UIRenderContext {
         graphics.drawString(font, text, x, y, argbColor, false);
     }
 
+    private static final int FALLBACK_COLOR = 0xCC1E1E1E;
+
     @Override
     public void drawNinePatch(final NinePatch patch, final int x, final int y, final int width,
                               final int height) {
         // 极简回退：无纹理资源时改用纯色填充。
-        graphics.fill(x, y, x + width, y + height, 0xCC1E1E1E);
+        graphics.fill(x, y, x + width, y + height, FALLBACK_COLOR);
     }
 }

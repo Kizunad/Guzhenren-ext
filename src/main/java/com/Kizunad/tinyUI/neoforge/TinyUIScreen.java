@@ -61,6 +61,15 @@ public class TinyUIScreen extends Screen {
     }
 
     @Override
+    public boolean mouseDragged(final double mouseX, final double mouseY, final int button,
+                                final double dragX, final double dragY) {
+        if (inputRouter.mouseDrag(mouseX, mouseY, button, dragX, dragY)) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
     public boolean mouseScrolled(final double mouseX, final double mouseY, final double deltaX,
                                  final double deltaY) {
         if (inputRouter.mouseScroll(mouseX, mouseY, deltaY)) {

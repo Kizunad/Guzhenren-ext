@@ -2,8 +2,8 @@ package com.Kizunad.customNPCs.ai.decision;
 
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
-import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.ai.sensors.SensorEventType;
+import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -212,6 +212,31 @@ public class UtilityGoalSelector {
     }
 
     /**
+     * 判断是否已注册指定名称的目标
+     * @param name 目标名称
+     * @return true 表示已注册
+     */
+    public boolean containsGoal(String name) {
+        if (name == null) {
+            return false;
+        }
+        for (IGoal goal : goals) {
+            if (name.equals(goal.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是否已存在任何目标（用于避免重复初始化）
+     * @return true 表示已有目标
+     */
+    public boolean hasRegisteredGoals() {
+        return !goals.isEmpty();
+    }
+
+    /**
      * 强制重新评估（用于紧急情况，如受到攻击）
      *
      * @param mind NPC 思维
@@ -256,9 +281,7 @@ public class UtilityGoalSelector {
         }
     }
 
-    private float getSwitchThreshold(
-        SensorEventType interruptLevel
-    ) {
+    private float getSwitchThreshold(SensorEventType interruptLevel) {
         if (interruptLevel == SensorEventType.CRITICAL) {
             return 0.0f; // CRITICAL 事件立即响应,忽略滞后与抢占阈值
         }
