@@ -1,20 +1,37 @@
 package com.Kizunad.customNPCs.commands;
 
+import com.Kizunad.customNPCs.ai.NpcMindRegistry;
+import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.actions.base.LookAtAction;
+import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
+import com.Kizunad.customNPCs.ai.actions.base.WaitAction;
+import com.Kizunad.customNPCs.ai.actions.common.AttackAction;
+import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.PlanBasedGoal;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.Arrays;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -28,12 +45,23 @@ import net.minecraft.world.phys.Vec3;
 public class MindDebugCommand {
 
     private static final double RAYTRACE_DISTANCE = 20.0D;
+    private static final String TEST_ENTITY_TAG = "customnpcs_test_entity";
+    private static final String TEST_CONTEXT_TAG = "test:command";
+    private static final String TEST_ENTITY_NAME = "TestEntity";
 
     public static void register(
         CommandDispatcher<CommandSourceStack> dispatcher
     ) {
+        registerRoot(dispatcher, "npc_mind");
+        registerRoot(dispatcher, "mind");
+    }
+
+    private static void registerRoot(
+        CommandDispatcher<CommandSourceStack> dispatcher,
+        String literal
+    ) {
         dispatcher.register(
-            Commands.literal("npc_mind")
+            Commands.literal(literal)
                 .requires(source -> source.hasPermission(2)) // 需要 OP 权限
                 .then(
                     Commands.literal("inspect")
@@ -43,6 +71,162 @@ public class MindDebugCommand {
                                 "target",
                                 EntityArgument.entity()
                             ).executes(MindDebugCommand::inspectTarget)
+                        )
+                )
+                .then(
+                    Commands.literal("spawn_test_entity")
+                        .executes(context ->
+                            spawnTestEntity(context.getSource())
+                        )
+                )
+                .then(
+                    Commands.literal("action")
+                        .then(
+                            Commands.literal("move_to")
+                                .then(
+                                    Commands.argument(
+                                        "npc",
+                                        EntityArgument.entity()
+                                    )
+                                        .then(
+                                            Commands.argument(
+                                                "target",
+                                                EntityArgument.entity()
+                                            )
+                                                .executes(MindDebugCommand::runMoveTo)
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("look_at")
+                                .then(
+                                    Commands.argument(
+                                        "npc",
+                                        EntityArgument.entity()
+                                    )
+                                        .then(
+                                            Commands.argument(
+                                                "target",
+                                                EntityArgument.entity()
+                                            )
+                                                .then(
+                                                    Commands
+                                                        .argument(
+                                                            "duration",
+                                                            IntegerArgumentType
+                                                                .integer(1, 400)
+                                                        )
+                                                        .executes(
+                                                            MindDebugCommand::runLookAtWithDuration
+                                                        )
+                                                )
+                                                .executes(
+                                                    MindDebugCommand::runLookAt
+                                                )
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("attack")
+                                .then(
+                                    Commands.argument(
+                                        "npc",
+                                        EntityArgument.entity()
+                                    )
+                                        .then(
+                                            Commands.argument(
+                                                "target",
+                                                EntityArgument.entity()
+                                            )
+                                                .executes(MindDebugCommand::runAttack)
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("wait")
+                                .then(
+                                    Commands.argument(
+                                        "npc",
+                                        EntityArgument.entity()
+                                    )
+                                        .then(
+                                            Commands.argument(
+                                                "ticks",
+                                                IntegerArgumentType.integer(1, 2000)
+                                            )
+                                                .executes(MindDebugCommand::runWait)
+                                        )
+                                )
+                        )
+                )
+                .then(
+                    Commands.literal("goal")
+                        .then(
+                            Commands.literal("force")
+                                .then(
+                                    Commands.argument(
+                                        "goal",
+                                        StringArgumentType.word()
+                                    )
+                                        .then(
+                                            Commands.argument(
+                                                "npc",
+                                                EntityArgument.entity()
+                                            )
+                                                .executes(MindDebugCommand::forceGoal)
+                                        )
+                                )
+                        )
+                )
+                .then(
+                    Commands.literal("plan")
+                        .then(
+                            Commands.literal("run")
+                                .then(
+                                    Commands.argument(
+                                        "goal",
+                                        StringArgumentType.word()
+                                    )
+                                        .then(
+                                            Commands.argument(
+                                                "npc",
+                                                EntityArgument.entity()
+                                            )
+                                                .executes(
+                                                    MindDebugCommand::runPlanGoal
+                                            )
+                                    )
+                                )
+                        )
+                        .then(
+                            Commands.literal("pickup")
+                                .then(
+                                    Commands.argument(
+                                        "npc",
+                                        EntityArgument.entity()
+                                    )
+                                        .then(
+                                            Commands.argument(
+                                                "item",
+                                                EntityArgument.entity()
+                                            )
+                                                .then(
+                                                    Commands
+                                                        .argument(
+                                                            "priority",
+                                                            DoubleArgumentType.doubleArg(
+                                                                0.0
+                                                            )
+                                                        )
+                                                        .executes(
+                                                            MindDebugCommand::runPickupPlanWithPriority
+                                                        )
+                                                )
+                                                .executes(
+                                                    MindDebugCommand::runPickupPlan
+                                                )
+                                        )
+                                )
                         )
                 )
                 .then(
@@ -198,6 +382,335 @@ public class MindDebugCommand {
         }
     }
 
+    private static int spawnTestEntity(CommandSourceStack source) {
+        Entity executor = source.getEntity();
+        if (executor == null) {
+            source.sendFailure(Component.literal("需要由实体执行该命令"));
+            return 0;
+        }
+        ServerLevel level = source.getLevel();
+        Zombie zombie = new Zombie(level);
+
+        Vec3 pos = executor.position();
+        zombie.moveTo(pos.x(), pos.y(), pos.z(), executor.getYRot(), 0.0F);
+        zombie.setCustomName(Component.literal(TEST_ENTITY_NAME));
+        zombie.setCustomNameVisible(true);
+        zombie.addTag(TEST_ENTITY_TAG);
+        zombie.addTag(TEST_CONTEXT_TAG);
+        zombie.setPersistenceRequired();
+
+        ItemStack head = new ItemStack(Items.LEATHER_HELMET);
+        zombie.setItemSlot(EquipmentSlot.HEAD, head);
+
+        level.addFreshEntity(zombie);
+
+        if (!zombie.hasData(NpcMindAttachment.NPC_MIND)) {
+            zombie.setData(
+                NpcMindAttachment.NPC_MIND,
+                new com.Kizunad.customNPCs.capabilities.mind.NpcMind()
+            );
+        }
+        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        NpcMindRegistry.initializeMind(mind);
+
+        source.sendSuccess(
+            () ->
+                Component.literal(
+                    "生成测试实体: " + zombie.getUUID() + " 标签: " + TEST_ENTITY_TAG
+                ),
+            false
+        );
+        return 1;
+    }
+
+    private static int runMoveTo(CommandContext<CommandSourceStack> context) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        Entity target = getEntity(context, "target");
+        if (npc == null || target == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        IAction action = new MoveToAction(target, 1.0);
+        mind.getActionExecutor().addAction(action);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已向 " +
+                        npc.getName().getString() +
+                        " 提交 MoveToAction -> " +
+                        target.getName().getString()
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int runLookAt(CommandContext<CommandSourceStack> context) {
+        return runLookAtInternal(context, 40);
+    }
+
+    private static int runLookAtWithDuration(
+        CommandContext<CommandSourceStack> context
+    ) {
+        int duration = IntegerArgumentType.getInteger(context, "duration");
+        return runLookAtInternal(context, duration);
+    }
+
+    private static int runLookAtInternal(
+        CommandContext<CommandSourceStack> context,
+        int duration
+    ) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        Entity target = getEntity(context, "target");
+        if (npc == null || target == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        IAction action = new LookAtAction(target, duration);
+        mind.getActionExecutor().addAction(action);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已向 " +
+                        npc.getName().getString() +
+                        " 提交 LookAtAction(" +
+                        duration +
+                        "t) -> " +
+                        target.getName().getString()
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int runAttack(CommandContext<CommandSourceStack> context) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        Entity target = getEntity(context, "target");
+        if (npc == null || target == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        IAction action = new AttackAction(target.getUUID());
+        mind.getActionExecutor().addAction(action);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已向 " +
+                        npc.getName().getString() +
+                        " 提交 AttackAction -> " +
+                        target.getName().getString()
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int runWait(CommandContext<CommandSourceStack> context) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        if (npc == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        int ticks = IntegerArgumentType.getInteger(context, "ticks");
+        IAction action = new WaitAction(ticks);
+        mind.getActionExecutor().addAction(action);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已向 " +
+                        npc.getName().getString() +
+                        " 提交 WaitAction(" +
+                        ticks +
+                        "t)"
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int forceGoal(CommandContext<CommandSourceStack> context) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        if (npc == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        String goalName = StringArgumentType.getString(context, "goal");
+        if ("pick_up_item".equals(goalName)) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal(
+                        "pick_up_item 需要指定 item 实体，请使用 /mind plan pickup <npc> <item> [priority]"
+                    )
+                );
+            return 0;
+        }
+        IGoal goal = NpcMindRegistry.createGoal(goalName);
+        if (goal == null) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal("未知目标: " + goalName)
+                );
+            return 0;
+        }
+
+        // 确保注册
+        if (!mind.getGoalSelector().containsGoal(goal.getName())) {
+            mind.getGoalSelector().registerGoal(goal);
+        }
+
+        mind.getGoalSelector().forceSwitchTo(mind, npc, goal);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "强制切换 " +
+                        npc.getName().getString() +
+                        " 的目标为: " +
+                        goal.getName()
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int runPickupPlan(
+        CommandContext<CommandSourceStack> context
+    ) {
+        return runPickupPlanInternal(context, 1.0F, false);
+    }
+
+    private static int runPickupPlanWithPriority(
+        CommandContext<CommandSourceStack> context
+    ) {
+        double priority = DoubleArgumentType.getDouble(context, "priority");
+        return runPickupPlanInternal(context, (float) priority, true);
+    }
+
+    private static int runPickupPlanInternal(
+        CommandContext<CommandSourceStack> context,
+        float priority,
+        boolean hasPriorityArg
+    ) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        if (npc == null) {
+            return 0;
+        }
+        Entity targetEntity = getEntity(context, "item");
+        if (!(targetEntity instanceof ItemEntity itemEntity)) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal("item 需要是掉落实体(ItemEntity)")
+                );
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+
+        var goal = new com.Kizunad.customNPCs.ai.decision.goals.PickUpItemGoal(
+            itemEntity,
+            priority
+        );
+        mind.getGoalSelector().registerGoal(goal);
+        mind.getGoalSelector().forceSwitchTo(mind, npc, goal);
+
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已为 " +
+                        npc.getName().getString() +
+                        " 启动拾取计划 pick_up_item -> " +
+                        itemEntity.getDisplayName().getString() +
+                        " 优先级 " +
+                        priority +
+                        (hasPriorityArg ? "" : " (默认)")
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int runPlanGoal(
+        CommandContext<CommandSourceStack> context
+    ) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        if (npc == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        String goalName = StringArgumentType.getString(context, "goal");
+        IGoal goal = NpcMindRegistry.createGoal(goalName);
+        if (goal == null) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal("未知目标: " + goalName)
+                );
+            return 0;
+        }
+        if (!(goal instanceof PlanBasedGoal planGoal)) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal("目标不是 PlanBasedGoal: " + goalName)
+                );
+            return 0;
+        }
+
+        if (!mind.getGoalSelector().containsGoal(goal.getName())) {
+            mind.getGoalSelector().registerGoal(goal);
+        }
+
+        mind.getActionExecutor().stopCurrentPlan();
+        planGoal.start(mind, npc);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已启动计划目标: " +
+                        goal.getName() +
+                        " -> " +
+                        npc.getName().getString()
+                    ),
+                false
+            );
+        return 1;
+    }
+
     private static int printMindInfo(CommandSourceStack source, Entity entity) {
         if (!(entity instanceof LivingEntity livingEntity)) {
             source.sendFailure(
@@ -337,5 +850,63 @@ public class MindDebugCommand {
             false
         );
         return 1;
+    }
+
+    private static LivingEntity getLivingEntity(
+        CommandContext<CommandSourceStack> context,
+        String name
+    ) {
+        try {
+            Entity entity = EntityArgument.getEntity(context, name);
+            if (entity instanceof LivingEntity living) {
+                return living;
+            }
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal(name + " 不是生物实体")
+                );
+            return null;
+        } catch (Exception e) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal("解析实体失败: " + e.getMessage())
+                );
+            return null;
+        }
+    }
+
+    private static Entity getEntity(
+        CommandContext<CommandSourceStack> context,
+        String name
+    ) {
+        try {
+            return EntityArgument.getEntity(context, name);
+        } catch (Exception e) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal("解析实体失败: " + e.getMessage())
+                );
+            return null;
+        }
+    }
+
+    private static INpcMind getMindOrReport(
+        CommandContext<CommandSourceStack> context,
+        LivingEntity npc
+    ) {
+        if (!npc.hasData(NpcMindAttachment.NPC_MIND)) {
+            context
+                .getSource()
+                .sendFailure(
+                    Component.literal(
+                        npc.getName().getString() + " 没有 NpcMind"
+                    )
+                );
+            return null;
+        }
+        return npc.getData(NpcMindAttachment.NPC_MIND);
     }
 }

@@ -5,6 +5,7 @@ import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -189,6 +190,14 @@ public class MoveToAction implements IAction {
         // 每 20 ticks 打印一次位置信息
         if (currentTick % 20 == 0) {
             logDebugInfo(currentPos, currentTarget, distanceToTarget);
+        }
+
+        double horizontalSpeed = mob.getDeltaMovement().horizontalDistance();
+        if (horizontalSpeed > 0.01f) {
+            float exhaustion = mob.isSprinting()
+                ? NpcStatusConfig.getInstance().getSprintExhaustion()
+                : NpcStatusConfig.getInstance().getWalkExhaustion();
+            mind.getStatus().addExhaustion(exhaustion);
         }
 
         ActionStatus stuckStatus = handleStuck(

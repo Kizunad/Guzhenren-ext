@@ -115,6 +115,9 @@ public final class DemoRegistry {
         return Optional.ofNullable(supplier.get());
     }
 
+    private static final int DEMO_ID_COMPLEX = 5;
+    private static final int DEMO_ID_COMPLEX_CONTAINER = 6;
+
     public Map<Integer, String> getDemoNames() {
         final Map<Integer, String> names = new HashMap<>();
         names.put(DEMO_ID_LAYOUT, "Layout + Buttons");
@@ -122,6 +125,8 @@ public final class DemoRegistry {
         names.put(DEMO_ID_SLOT, "Slot Grid");
         names.put(DEMO_ID_SETTINGS, "Settings Panel");
         names.put(DEMO_ID_SHOP, "Shop Interface");
+        names.put(DEMO_ID_COMPLEX, "Complex Layout");
+        names.put(DEMO_ID_COMPLEX_CONTAINER, "Complex Layout (Container)");
         return Collections.unmodifiableMap(names);
     }
 
@@ -131,14 +136,19 @@ public final class DemoRegistry {
         demos.put(DEMO_ID_SLOT, () -> buildSlotGridDemo(theme));
         demos.put(DEMO_ID_SETTINGS, () -> buildSettingsDemo(theme));
         demos.put(DEMO_ID_SHOP, () -> buildShopDemo(theme));
+        demos.put(DEMO_ID_COMPLEX, () -> ComplexLayoutDemo.build(theme));
     }
 
     private static UIRoot buildLayoutDemo(final Theme theme) {
         final UIRoot root = new UIRoot();
         root.setViewport(LAYOUT_DEMO_W, LAYOUT_DEMO_H);
-        final FlexLayout layout = new FlexLayout(FlexLayout.Direction.ROW, LAYOUT_DEMO_GAP, LAYOUT_DEMO_GAP);
+        final FlexLayout layout = new FlexLayout(
+            FlexLayout.Direction.ROW,
+            LAYOUT_DEMO_GAP,
+            LAYOUT_DEMO_GAP
+        );
 
-        final UIElement container = new UIElement() { };
+        final UIElement container = new UIElement() {};
         container.setFrame(0, 0, LAYOUT_DEMO_W, LAYOUT_DEMO_H);
         root.addChild(container);
 
@@ -149,7 +159,8 @@ public final class DemoRegistry {
         container.addChild(center);
         container.addChild(right);
 
-        final Map<UIElement, com.Kizunad.tinyUI.layout.FlexParams> params = new HashMap<>();
+        final Map<UIElement, com.Kizunad.tinyUI.layout.FlexParams> params =
+            new HashMap<>();
         params.put(left, new com.Kizunad.tinyUI.layout.FlexParams(1, 1, 0));
         params.put(center, new com.Kizunad.tinyUI.layout.FlexParams(1, 1, 0));
         params.put(right, new com.Kizunad.tinyUI.layout.FlexParams(1, 1, 0));
@@ -161,22 +172,42 @@ public final class DemoRegistry {
         final UIRoot root = new UIRoot();
         root.setViewport(HOTKEY_DEMO_W, HOTKEY_DEMO_H);
 
-        final UIElement container = new UIElement() { };
+        final UIElement container = new UIElement() {};
         container.setFrame(0, 0, HOTKEY_DEMO_W, HOTKEY_DEMO_H);
         root.addChild(container);
 
         final Label title = new Label("Hotkey Capture", theme);
-        title.setFrame(HOTKEY_TITLE_X, HOTKEY_TITLE_Y, HOTKEY_TITLE_W, HOTKEY_TITLE_H);
+        title.setFrame(
+            HOTKEY_TITLE_X,
+            HOTKEY_TITLE_Y,
+            HOTKEY_TITLE_W,
+            HOTKEY_TITLE_H
+        );
 
         final HotkeyCapture capture = new HotkeyCapture(theme);
-        capture.setFrame(HOTKEY_CAPTURE_X, HOTKEY_CAPTURE_Y, HOTKEY_CAPTURE_W, HOTKEY_CAPTURE_H);
+        capture.setFrame(
+            HOTKEY_CAPTURE_X,
+            HOTKEY_CAPTURE_Y,
+            HOTKEY_CAPTURE_W,
+            HOTKEY_CAPTURE_H
+        );
 
         final TextInput nameInput = new TextInput(theme);
-        nameInput.setFrame(HOTKEY_INPUT_X, HOTKEY_INPUT_Y, HOTKEY_INPUT_W, HOTKEY_INPUT_H);
+        nameInput.setFrame(
+            HOTKEY_INPUT_X,
+            HOTKEY_INPUT_Y,
+            HOTKEY_INPUT_W,
+            HOTKEY_INPUT_H
+        );
         nameInput.setText("Action name");
 
         final Button save = new Button("Save", theme);
-        save.setFrame(HOTKEY_SAVE_X, HOTKEY_SAVE_Y, HOTKEY_SAVE_W, HOTKEY_SAVE_H);
+        save.setFrame(
+            HOTKEY_SAVE_X,
+            HOTKEY_SAVE_Y,
+            HOTKEY_SAVE_W,
+            HOTKEY_SAVE_H
+        );
 
         container.addChild(title);
         container.addChild(capture);
@@ -193,11 +224,16 @@ public final class DemoRegistry {
         scroll.setFrame(0, 0, SLOT_DEMO_W, SLOT_DEMO_H);
         root.addChild(scroll);
 
-        final UIElement gridContainer = new UIElement() { };
+        final UIElement gridContainer = new UIElement() {};
         gridContainer.setFrame(0, 0, SLOT_DEMO_W, SLOT_DEMO_CONTENT_H);
         scroll.setContent(gridContainer);
 
-        final GridLayout gridLayout = new GridLayout(SLOT_GRID_COLS, 0, SLOT_GRID_GAP_X, SLOT_GRID_GAP_Y);
+        final GridLayout gridLayout = new GridLayout(
+            SLOT_GRID_COLS,
+            0,
+            SLOT_GRID_GAP_X,
+            SLOT_GRID_GAP_Y
+        );
         for (int i = 0; i < SLOT_COUNT; i++) {
             final Button slot = new Button("S" + i, theme);
             slot.setFrame(0, 0, SLOT_SIZE, SLOT_SIZE);
@@ -215,11 +251,15 @@ public final class DemoRegistry {
         scroll.setFrame(0, 0, SETTINGS_VIEWPORT_W, SETTINGS_VIEWPORT_H);
         root.addChild(scroll);
 
-        final UIElement content = new UIElement() { };
+        final UIElement content = new UIElement() {};
         content.setFrame(0, 0, SETTINGS_VIEWPORT_W, SETTINGS_CONTENT_H); // Larger height for scrolling
         scroll.setContent(content);
 
-        final FlexLayout layout = new FlexLayout(FlexLayout.Direction.COLUMN, SETTINGS_GAP, SETTINGS_GAP);
+        final FlexLayout layout = new FlexLayout(
+            FlexLayout.Direction.COLUMN,
+            SETTINGS_GAP,
+            SETTINGS_GAP
+        );
 
         // Title
         final Label title = new Label("Settings", theme);
@@ -238,13 +278,16 @@ public final class DemoRegistry {
 
         // Graphics Setting
         final com.Kizunad.tinyUI.controls.ToggleButton graphicsToggle =
-                new com.Kizunad.tinyUI.controls.ToggleButton("Fancy Graphics", theme);
+            new com.Kizunad.tinyUI.controls.ToggleButton(
+                "Fancy Graphics",
+                theme
+            );
         graphicsToggle.setFrame(0, 0, SETTINGS_ITEM_W, SETTINGS_ITEM_H_LARGE);
         content.addChild(graphicsToggle);
 
         // Audio Setting
         final com.Kizunad.tinyUI.controls.ToggleButton audioToggle =
-                new com.Kizunad.tinyUI.controls.ToggleButton("Mute Music", theme);
+            new com.Kizunad.tinyUI.controls.ToggleButton("Mute Music", theme);
         audioToggle.setFrame(0, 0, SETTINGS_ITEM_W, SETTINGS_ITEM_H_LARGE);
         content.addChild(audioToggle);
 
@@ -254,12 +297,25 @@ public final class DemoRegistry {
         content.addChild(saveBtn);
 
         // Layout params
-        final Map<UIElement, com.Kizunad.tinyUI.layout.FlexParams> params = new HashMap<>();
+        final Map<UIElement, com.Kizunad.tinyUI.layout.FlexParams> params =
+            new HashMap<>();
         params.put(title, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
-        params.put(volumeLabel, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
-        params.put(volumeInput, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
-        params.put(graphicsToggle, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
-        params.put(audioToggle, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
+        params.put(
+            volumeLabel,
+            new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0)
+        );
+        params.put(
+            volumeInput,
+            new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0)
+        );
+        params.put(
+            graphicsToggle,
+            new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0)
+        );
+        params.put(
+            audioToggle,
+            new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0)
+        );
         params.put(saveBtn, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
 
         layout.layout(content, params);
@@ -271,39 +327,109 @@ public final class DemoRegistry {
         final UIRoot root = new UIRoot();
         root.setViewport(SHOP_VIEWPORT_W, SHOP_VIEWPORT_H);
 
-        // Split view: Left Grid, Right Details
-        final FlexLayout mainLayout = new FlexLayout(FlexLayout.Direction.ROW, 5, 5);
-        final UIElement mainContainer = new UIElement() { };
+        final UIElement mainContainer = new UIElement() {};
         mainContainer.setFrame(0, 0, SHOP_VIEWPORT_W, SHOP_VIEWPORT_H);
         root.addChild(mainContainer);
 
-        // Right: Details Pane
-        final UIElement detailsPane = new UIElement() { };
-        detailsPane.setFrame(0, 0, SHOP_DETAILS_W, SHOP_VIEWPORT_H);
+        // Create details pane
+        final UIElement detailsPane = createDetailsPane(theme);
         mainContainer.addChild(detailsPane);
 
-        final FlexLayout detailsLayout = new FlexLayout(FlexLayout.Direction.COLUMN, 5, 5);
-        
+        // Create item grid
+        final ScrollContainer gridScroll = createItemGrid(theme, detailsPane);
+        mainContainer.addChild(gridScroll);
+
+        // Layout main container
+        layoutMainContainer(mainContainer, gridScroll, detailsPane);
+
+        // Create and add modal
+        final com.Kizunad.tinyUI.controls.ModalOverlay modal =
+            createShopModal(theme, detailsPane);
+        root.addChild(modal);
+
+        return root;
+    }
+
+    /**
+     * 创建商店详情面板。
+     *
+     * @param theme UI主题
+     * @return 详情面板元素
+     */
+    private static UIElement createDetailsPane(final Theme theme) {
+        final UIElement detailsPane = new UIElement() {};
+        detailsPane.setFrame(0, 0, SHOP_DETAILS_W, SHOP_VIEWPORT_H);
+
+        final FlexLayout detailsLayout = new FlexLayout(
+            FlexLayout.Direction.COLUMN,
+            5,
+            5
+        );
+
         final Label itemName = new Label("Selected: None", theme);
-        itemName.setFrame(0, 0, SHOP_DETAILS_CONTENT_W, SHOP_DETAILS_ITEM_NAME_H);
+        itemName.setFrame(
+            0,
+            0,
+            SHOP_DETAILS_CONTENT_W,
+            SHOP_DETAILS_ITEM_NAME_H
+        );
         detailsPane.addChild(itemName);
 
         final Label itemDesc = new Label("Description...", theme);
-        itemDesc.setFrame(0, 0, SHOP_DETAILS_CONTENT_W, SHOP_DETAILS_ITEM_DESC_H);
+        itemDesc.setFrame(
+            0,
+            0,
+            SHOP_DETAILS_CONTENT_W,
+            SHOP_DETAILS_ITEM_DESC_H
+        );
         detailsPane.addChild(itemDesc);
 
         final Button buyBtn = new Button("Buy", theme);
         buyBtn.setFrame(0, 0, SHOP_BTN_W, SHOP_BTN_H);
         detailsPane.addChild(buyBtn);
 
-        // Left: Item Grid
+        // Layout Details Pane
+        final Map<
+            UIElement,
+            com.Kizunad.tinyUI.layout.FlexParams
+        > detailsParams = new HashMap<>();
+        detailsParams.put(
+            itemName,
+            new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0)
+        );
+        detailsParams.put(
+            itemDesc,
+            new com.Kizunad.tinyUI.layout.FlexParams(1, 1, 0)
+        );
+        detailsParams.put(
+            buyBtn,
+            new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0)
+        );
+        detailsLayout.layout(detailsPane, detailsParams);
+
+        return detailsPane;
+    }
+
+    /**
+     * 创建商店物品网格。
+     *
+     * @param theme UI主题
+     * @param detailsPane 详情面板（用于更新选中物品信息）
+     * @return 物品网格滚动容器
+     */
+    private static ScrollContainer createItemGrid(
+        final Theme theme,
+        final UIElement detailsPane
+    ) {
         final ScrollContainer gridScroll = new ScrollContainer(theme);
         gridScroll.setFrame(0, 0, SHOP_GRID_W, SHOP_VIEWPORT_H);
-        mainContainer.addChild(gridScroll);
 
-        final UIElement gridContent = new UIElement() { };
+        final UIElement gridContent = new UIElement() {};
         gridContent.setFrame(0, 0, SHOP_GRID_W, SHOP_GRID_CONTENT_H);
         gridScroll.setContent(gridContent);
+
+        final Label itemName = (Label) detailsPane.getChildren().get(0);
+        final Label itemDesc = (Label) detailsPane.getChildren().get(1);
 
         final GridLayout gridLayout = new GridLayout(3, 0, 5, 5);
         for (int i = 0; i < SHOP_ITEM_COUNT; i++) {
@@ -312,71 +438,158 @@ public final class DemoRegistry {
             item.setFrame(0, 0, SHOP_ITEM_SIZE, SHOP_ITEM_SIZE);
             item.setOnClick(() -> {
                 itemName.setText("Selected: Item " + index);
-                itemDesc.setText("Description for Item " + index + "\nPrice: "
-                        + (index + 1) * SHOP_ITEM_PRICE_MULTIPLIER + " Gold");
+                itemDesc.setText(
+                    "Description for Item " +
+                        index +
+                        "\nPrice: " +
+                        (index + 1) * SHOP_ITEM_PRICE_MULTIPLIER +
+                        " Gold"
+                );
             });
             gridContent.addChild(item);
         }
         gridLayout.layout(gridContent, null);
 
-        // Layout Main Container
-        final Map<UIElement, com.Kizunad.tinyUI.layout.FlexParams> mainParams = new HashMap<>();
-        mainParams.put(gridScroll, new com.Kizunad.tinyUI.layout.FlexParams(2, 1, 0)); // Grow 2
-        mainParams.put(detailsPane, new com.Kizunad.tinyUI.layout.FlexParams(1, 1, 0)); // Grow 1
+        return gridScroll;
+    }
+
+    /**
+     * 布局主容器。
+     *
+     * @param mainContainer 主容器
+     * @param gridScroll 物品网格滚动容器
+     * @param detailsPane 详情面板
+     */
+    private static void layoutMainContainer(
+        final UIElement mainContainer,
+        final ScrollContainer gridScroll,
+        final UIElement detailsPane
+    ) {
+        final FlexLayout mainLayout = new FlexLayout(
+            FlexLayout.Direction.ROW,
+            5,
+            5
+        );
+
+        final Map<UIElement, com.Kizunad.tinyUI.layout.FlexParams> mainParams =
+            new HashMap<>();
+        mainParams.put(
+            gridScroll,
+            new com.Kizunad.tinyUI.layout.FlexParams(2, 1, 0)
+        );
+        mainParams.put(
+            detailsPane,
+            new com.Kizunad.tinyUI.layout.FlexParams(1, 1, 0)
+        );
         mainLayout.layout(mainContainer, mainParams);
+    }
 
-        // Layout Details Pane
-        final Map<UIElement, com.Kizunad.tinyUI.layout.FlexParams> detailsParams = new HashMap<>();
-        detailsParams.put(itemName, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
-        detailsParams.put(itemDesc, new com.Kizunad.tinyUI.layout.FlexParams(1, 1, 0));
-        detailsParams.put(buyBtn, new com.Kizunad.tinyUI.layout.FlexParams(0, 0, 0));
-        detailsLayout.layout(detailsPane, detailsParams);
-
-        // Modal Logic
-        final com.Kizunad.tinyUI.controls.ModalOverlay modal = new com.Kizunad.tinyUI.controls.ModalOverlay(theme);
+    /**
+     * 创建商店模态对话框。
+     *
+     * @param theme UI主题
+     * @param detailsPane 详情面板（用于更新购买状态）
+     * @return 模态对话框
+     */
+    private static com.Kizunad.tinyUI.controls.ModalOverlay createShopModal(
+        final Theme theme,
+        final UIElement detailsPane
+    ) {
+        final com.Kizunad.tinyUI.controls.ModalOverlay modal =
+            new com.Kizunad.tinyUI.controls.ModalOverlay(theme);
         modal.setFrame(0, 0, SHOP_VIEWPORT_W, SHOP_VIEWPORT_H);
         modal.setVisible(false);
-        root.addChild(modal); // Add on top
 
-        // Modal Content
-        // We can't easily layer inside setContent unless we have a Panel.
-        // Let's just use the modal overlay's ability to block input and show a simple "Dialog" structure.
-        // For this demo, let's make the content a simple interactive element that draws a box.
-        
-        final com.Kizunad.tinyUI.core.InteractiveElement dialog = new com.Kizunad.tinyUI.core.InteractiveElement() {
-            @Override
-            protected void onRender(com.Kizunad.tinyUI.core.UIRenderContext context,
-                                    double mouseX, double mouseY, float partialTicks) {
-                context.drawRect(getAbsoluteX(), getAbsoluteY(), getWidth(), getHeight(), SHOP_DIALOG_BG_COLOR);
-                context.drawRect(getAbsoluteX(), getAbsoluteY(), getWidth(), 2, theme.getAccentColor());
-                super.onRender(context, mouseX, mouseY, partialTicks);
-            }
-        };
-        dialog.setFrame(SHOP_DIALOG_X, SHOP_DIALOG_Y, SHOP_DIALOG_W, SHOP_DIALOG_H);
-        
+        final com.Kizunad.tinyUI.core.InteractiveElement dialog =
+            createModalDialog(theme, modal, detailsPane);
+        modal.setContent(dialog);
+
+        final Button buyBtn = (Button) detailsPane.getChildren().get(2);
+        buyBtn.setOnClick(() -> modal.setVisible(true));
+
+        return modal;
+    }
+
+    /**
+     * 创建模态对话框内容。
+     *
+     * @param theme UI主题
+     * @param modal 模态覆盖层
+     * @param detailsPane 详情面板（用于更新购买状态）
+     * @return 对话框元素
+     */
+    private static com.Kizunad.tinyUI.core.InteractiveElement createModalDialog(
+        final Theme theme,
+        final com.Kizunad.tinyUI.controls.ModalOverlay modal,
+        final UIElement detailsPane
+    ) {
+        final com.Kizunad.tinyUI.core.InteractiveElement dialog =
+            new com.Kizunad.tinyUI.core.InteractiveElement() {
+                @Override
+                protected void onRender(
+                    com.Kizunad.tinyUI.core.UIRenderContext context,
+                    double mouseX,
+                    double mouseY,
+                    float partialTicks
+                ) {
+                    context.drawRect(
+                        getAbsoluteX(),
+                        getAbsoluteY(),
+                        getWidth(),
+                        getHeight(),
+                        SHOP_DIALOG_BG_COLOR
+                    );
+                    context.drawRect(
+                        getAbsoluteX(),
+                        getAbsoluteY(),
+                        getWidth(),
+                        2,
+                        theme.getAccentColor()
+                    );
+                    super.onRender(context, mouseX, mouseY, partialTicks);
+                }
+            };
+        dialog.setFrame(
+            SHOP_DIALOG_X,
+            SHOP_DIALOG_Y,
+            SHOP_DIALOG_W,
+            SHOP_DIALOG_H
+        );
+
         final Label msg = new Label("Confirm Purchase?", theme);
-        msg.setFrame(SHOP_DIALOG_MSG_X, SHOP_DIALOG_MSG_Y, SHOP_DIALOG_MSG_W, SHOP_DIALOG_MSG_H);
+        msg.setFrame(
+            SHOP_DIALOG_MSG_X,
+            SHOP_DIALOG_MSG_Y,
+            SHOP_DIALOG_MSG_W,
+            SHOP_DIALOG_MSG_H
+        );
         dialog.addChild(msg);
-        
+
+        final Label itemName = (Label) detailsPane.getChildren().get(0);
+
         final Button yesBtn = new Button("Yes", theme);
-        yesBtn.setFrame(SHOP_DIALOG_MSG_X, SHOP_DIALOG_BTN_Y, SHOP_DIALOG_BTN_W, SHOP_DIALOG_BTN_H);
+        yesBtn.setFrame(
+            SHOP_DIALOG_MSG_X,
+            SHOP_DIALOG_BTN_Y,
+            SHOP_DIALOG_BTN_W,
+            SHOP_DIALOG_BTN_H
+        );
         yesBtn.setOnClick(() -> {
             modal.setVisible(false);
             itemName.setText("Purchased!");
         });
         dialog.addChild(yesBtn);
-        
+
         final Button noBtn = new Button("No", theme);
-        noBtn.setFrame(SHOP_DIALOG_BTN_NO_X, SHOP_DIALOG_BTN_Y, SHOP_DIALOG_BTN_W, SHOP_DIALOG_BTN_H);
+        noBtn.setFrame(
+            SHOP_DIALOG_BTN_NO_X,
+            SHOP_DIALOG_BTN_Y,
+            SHOP_DIALOG_BTN_W,
+            SHOP_DIALOG_BTN_H
+        );
         noBtn.setOnClick(() -> modal.setVisible(false));
         dialog.addChild(noBtn);
-        
-        modal.setContent(dialog);
 
-        buyBtn.setOnClick(() -> {
-            modal.setVisible(true);
-        });
-
-        return root;
+        return dialog;
     }
 }

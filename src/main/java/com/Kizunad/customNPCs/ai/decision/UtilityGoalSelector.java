@@ -205,36 +205,30 @@ public class UtilityGoalSelector {
     }
 
     /**
-     * 获取当前活动目标
+     * 调试用途：强制切换到指定目标，跳过优先级与滞后判断。
+     * 会停止当前计划并立即调用目标的 start。
+     *
+     * @param mind NPC 思维
+     * @param entity 实体
+     * @param goal 目标实例
      */
-    public IGoal getCurrentGoal() {
-        return currentGoal;
+    public void forceSwitchTo(
+        INpcMind mind,
+        LivingEntity entity,
+        IGoal goal
+    ) {
+        if (currentGoal != null) {
+            mind.getActionExecutor().stopCurrentPlan();
+            currentGoal.stop(mind, entity);
+            startCooldown(currentGoal);
+        }
+        currentGoal = goal;
+        currentGoalActiveTicks = 0;
+        if (currentGoal != null) {
+            currentGoal.start(mind, entity);
+        }
     }
 
-    /**
-     * 判断是否已注册指定名称的目标
-     * @param name 目标名称
-     * @return true 表示已注册
-     */
-    public boolean containsGoal(String name) {
-        if (name == null) {
-            return false;
-        }
-        for (IGoal goal : goals) {
-            if (name.equals(goal.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 是否已存在任何目标（用于避免重复初始化）
-     * @return true 表示已有目标
-     */
-    public boolean hasRegisteredGoals() {
-        return !goals.isEmpty();
-    }
 
     /**
      * 强制重新评估（用于紧急情况，如受到攻击）
@@ -295,5 +289,37 @@ public class UtilityGoalSelector {
         }
 
         return HYSTERESIS_THRESHOLD;
+    }
+
+    /**
+     * 获取当前活动目标
+     */
+    public IGoal getCurrentGoal() {
+        return currentGoal;
+    }
+
+    /**
+     * 判断是否已注册指定名称的目标
+     * @param name 目标名称
+     * @return true 表示已注册
+     */
+    public boolean containsGoal(String name) {
+        if (name == null) {
+            return false;
+        }
+        for (IGoal goal : goals) {
+            if (name.equals(goal.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是否已存在任何目标（用于避免重复初始化）
+     * @return true 表示已有目标
+     */
+    public boolean hasRegisteredGoals() {
+        return !goals.isEmpty();
     }
 }

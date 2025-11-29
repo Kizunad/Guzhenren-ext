@@ -1,5 +1,7 @@
 package com.Kizunad.tinyUI.neoforge;
 
+import com.Kizunad.tinyUI.demo.ComplexLayoutMenu;
+import com.Kizunad.tinyUI.demo.ComplexLayoutScreen;
 import com.Kizunad.tinyUI.demo.DemoRegistry;
 import com.Kizunad.tinyUI.theme.Theme;
 import com.mojang.brigadier.CommandDispatcher;
@@ -28,6 +30,25 @@ public final class TinyUIDemoCommand {
 
     private static int openDemo(final int id) {
         final Minecraft mc = Minecraft.getInstance();
+        
+        // Special case: Demo 6 is the Complex Layout with real containers
+        if (id == 6) {
+            if (mc.player == null) {
+                return 0;
+            }
+            // Create menu with 63 custom slots (7 rows of 9)
+            ComplexLayoutMenu menu = new ComplexLayoutMenu(0, mc.player.getInventory(), 63);
+            ComplexLayoutScreen screen = new ComplexLayoutScreen(
+                menu, 
+                mc.player.getInventory(), 
+                Component.literal("Complex Layout"), 
+                Theme.vanilla()
+            );
+            mc.setScreen(screen);
+            return 1;
+        }
+        
+        // Regular UIRoot demos
         final DemoRegistry demos = new DemoRegistry(Theme.vanilla());
         return demos.create(id)
                 .map(root -> {

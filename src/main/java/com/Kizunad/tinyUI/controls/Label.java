@@ -92,7 +92,15 @@ public final class Label extends UIElement {
         } else if (horizontalAlign == HorizontalAlign.RIGHT) {
             drawX = getAbsoluteX() + width - DEFAULT_PADDING;
         }
-        final int drawY = getAbsoluteY() + DEFAULT_PADDING;
-        context.drawText(text, drawX, drawY, color);
+        
+        // Support multi-line text by splitting on \n
+        String[] lines = text.split("\n");
+        int drawY = getAbsoluteY() + DEFAULT_PADDING;
+        int lineHeight = 12; // Standard font height + small spacing
+        
+        for (String line : lines) {
+            context.drawText(line, drawX, drawY, color);
+            drawY += lineHeight;
+        }
     }
 }

@@ -11,6 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class ButtonTest {
 
     private static final int SIZE = 20;
+    private static final int MOUSE_X_INSIDE = 5;
+    private static final int MOUSE_Y_INSIDE = 5;
+    private static final int MOUSE_X_OUTSIDE = 25;
+    private static final int MOUSE_Y_OUTSIDE = 25;
 
     @Test
     void clickInsideTriggersCallbackOnRelease() {
@@ -20,8 +24,8 @@ final class ButtonTest {
         final AtomicInteger clicks = new AtomicInteger();
         button.setOnClick(clicks::incrementAndGet);
 
-        assertTrue(button.onMouseClick(5, 5, 0));
-        assertTrue(button.onMouseRelease(5, 5, 0));
+        assertTrue(button.onMouseClick(MOUSE_X_INSIDE, MOUSE_Y_INSIDE, 0));
+        assertTrue(button.onMouseRelease(MOUSE_X_INSIDE, MOUSE_Y_INSIDE, 0));
         assertEquals(1, clicks.get());
     }
 
@@ -32,8 +36,8 @@ final class ButtonTest {
         final AtomicInteger clicks = new AtomicInteger();
         button.setOnClick(clicks::incrementAndGet);
 
-        assertTrue(button.onMouseClick(5, 5, 0));
-        assertFalse(button.onMouseRelease(25, 25, 0));
+        assertTrue(button.onMouseClick(MOUSE_X_INSIDE, MOUSE_Y_INSIDE, 0));
+        assertFalse(button.onMouseRelease(MOUSE_X_OUTSIDE, MOUSE_Y_OUTSIDE, 0));
         assertEquals(0, clicks.get());
     }
 
@@ -45,8 +49,8 @@ final class ButtonTest {
         final AtomicInteger clicks = new AtomicInteger();
         button.setOnClick(clicks::incrementAndGet);
 
-        assertFalse(button.onMouseClick(5, 5, 0));
-        assertFalse(button.onMouseRelease(5, 5, 0));
+        assertFalse(button.onMouseClick(MOUSE_X_INSIDE, MOUSE_Y_INSIDE, 0));
+        assertFalse(button.onMouseRelease(MOUSE_X_INSIDE, MOUSE_Y_INSIDE, 0));
         assertEquals(0, clicks.get());
     }
 }

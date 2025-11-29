@@ -39,7 +39,24 @@ public class NpcMindAttachment {
             }
             
             Entity entity = event.getEntity();
-            if (!(entity instanceof PathfinderMob)) {
+            if (!(entity instanceof PathfinderMob mob)) {
+                return;
+            }
+
+            // 仅对被标记的实体附加 NpcMind。标记规则：
+            // 1) 实体含有数据标签 "customnpcs:mind_allowed"（游戏内 /data 或 spawn 时赋予）
+            // 2) 实体含有任意以 "npc_mind:" 开头的 tag（便于快速调试/指令）
+            // 3) 实体类实现了自定义接口 INpcMindCarrier（预留扩展，当前无实现）
+            boolean hasAllowDataTag =
+                mob
+                    .getTags()
+                    .stream()
+                    .anyMatch(tag -> tag.equals("customnpcs:mind_allowed"));
+            boolean hasDebugTag =
+                mob.getTags().stream().anyMatch(tag -> tag.startsWith("npc_mind:"));
+            boolean isCarrier = mob instanceof INpcMindCarrier;
+
+            if (!hasAllowDataTag && !hasDebugTag && !isCarrier) {
                 return;
             }
             
@@ -51,3 +68,8 @@ public class NpcMindAttachment {
         }
     }
 }
+
+/**
+ * 标记接口：实现此接口的实体会默认附加 NpcMind。
+ */
+interface INpcMindCarrier {}

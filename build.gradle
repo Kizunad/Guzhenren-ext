@@ -76,9 +76,95 @@ tasks.register('tinyUiTest', Test) {
 tasks.register('tinyUiJar', Jar) {
     description = 'Package tinyUI classes into a standalone jar.'
     group = 'build'
-    from sourceSets.tinyUi.output
+    from(sourceSets.tinyUi.output) {
+        exclude 'META-INF/neoforge.mods.toml' // 将在任务内写入专用 toml
+    }
     archiveClassifier = 'tinyui'
     dependsOn tasks.named('tinyUiClasses')
+    dependsOn tasks.named('processResources')
+
+    // tinyui jar 不需要 customnpcs 代码/资源
+    exclude 'com/Kizunad/customNPCs/**'
+    exclude 'assets/customnpcs/**'
+    exclude 'data/customnpcs/**'
+
+    // 写入只包含 tinyui 的 mods.toml
+    def processedToml = layout.buildDirectory.file("resources/main/META-INF/neoforge.mods.toml")
+    def tinyTomlContent = providers.provider {
+        def toml = processedToml.get().asFile.text
+        def parts = toml.split('\\[\\[mods\\]\\]')
+        if (parts.size() < 2) {
+            throw new GradleException("neoforge.mods.toml 格式异常，未找到 [[mods]] 块")
+        }
+        def header = parts[0]
+        def blocks = parts[1..-1]
+        def tinyBlock = blocks.find { it.contains('modId="tinyui"') }
+        if (tinyBlock == null) {
+            throw new GradleException("未找到 tinyui 的 mods 声明")
+        }
+        return header + '[[mods]]' + tinyBlock
+    }
+    def tinyTomlFile = layout.buildDirectory.file("tmp/tinyui/neoforge.mods.toml")
+    inputs.property("tinyuiToml", tinyTomlContent)
+    from(tinyTomlFile) {
+        into 'META-INF'
+        rename { 'neoforge.mods.toml' }
+    }
+    doFirst {
+        def f = tinyTomlFile.get().asFile
+        f.parentFile.mkdirs()
+        f.text = tinyTomlContent.get()
+    }
+}
+
+tasks.register('customNpcsJar', Jar) {
+    description = 'Package CustomNPCs classes into a standalone jar.'
+    group = 'build'
+    // 保留 mod 必要的元数据/资源, 仅打包 CustomNPCs 代码
+    from(sourceSets.main.output) {
+        include 'com/Kizunad/customNPCs/**'
+        include 'META-INF/**'
+        include 'assets/**'
+        include 'data/**'
+        include 'pack.mcmeta'
+        exclude 'META-INF/neoforge.mods.toml' // 将在任务内写入专用 toml
+    }
+    archiveClassifier = 'customnpcs'
+    dependsOn tasks.named('classes')
+    dependsOn tasks.named('processResources')
+
+    // customnpcs jar 不需要 tinyui 代码/资源
+    exclude 'com/Kizunad/tinyUI/**'
+    exclude 'assets/tinyui/**'
+    exclude 'data/tinyui/**'
+
+    // 写入只包含 customnpcs 的 mods.toml
+    def processedToml = layout.buildDirectory.file("resources/main/META-INF/neoforge.mods.toml")
+    def customTomlContent = providers.provider {
+        def toml = processedToml.get().asFile.text
+        def parts = toml.split('\\[\\[mods\\]\\]')
+        if (parts.size() < 2) {
+            throw new GradleException("neoforge.mods.toml 格式异常，未找到 [[mods]] 块")
+        }
+        def header = parts[0]
+        def blocks = parts[1..-1]
+        def customBlock = blocks.find { it.contains('modId="customnpcs"') }
+        if (customBlock == null) {
+            throw new GradleException("未找到 customnpcs 的 mods 声明")
+        }
+        return header + '[[mods]]' + customBlock
+    }
+    def customTomlFile = layout.buildDirectory.file("tmp/customnpcs/neoforge.mods.toml")
+    inputs.property("customnpcsToml", customTomlContent)
+    from(customTomlFile) {
+        into 'META-INF'
+        rename { 'neoforge.mods.toml' }
+    }
+    doFirst {
+        def f = customTomlFile.get().asFile
+        f.parentFile.mkdirs()
+        f.text = customTomlContent.get()
+    }
 }
 
 dependencies {

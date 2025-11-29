@@ -31,6 +31,7 @@ public final class ActionConfig {
     private static final int DEFAULT_RENAV_INTERVAL = 10;
     private static final int DEFAULT_MAX_NAV_RETRIES = 5;
     private static final int DEFAULT_LOG_INTERVAL_TICKS = 20;
+    private static final double DEFAULT_ARMOR_DESIRE_WEIGHT = 1.0;
 
     // ==================== 通用配置 ====================
     /**
@@ -124,6 +125,11 @@ public final class ActionConfig {
     private boolean debugLoggingEnabled = false;
 
     /**
+     * GOAP 装备盔甲意愿权重（越高越倾向于优化装备）
+     */
+    private double armorDesireWeight = DEFAULT_ARMOR_DESIRE_WEIGHT;
+
+    /**
      * 私有构造函数（单例模式）
      */
     private ActionConfig() {
@@ -208,6 +214,10 @@ public final class ActionConfig {
         return debugLoggingEnabled;
     }
 
+    public double getArmorDesireWeight() {
+        return armorDesireWeight;
+    }
+
     // ==================== Setter 方法（用于运行时调整） ====================
 
     /**
@@ -261,6 +271,14 @@ public final class ActionConfig {
     }
 
     /**
+     * 调整装备盔甲的意愿权重。
+     */
+    public ActionConfig setArmorDesireWeight(double weight) {
+        this.armorDesireWeight = weight;
+        return this;
+    }
+
+    /**
      * 重置为默认值
      */
     public void resetToDefaults() {
@@ -281,6 +299,7 @@ public final class ActionConfig {
         this.maxNavRetries = DEFAULT_MAX_NAV_RETRIES;
         this.logIntervalTicks = DEFAULT_LOG_INTERVAL_TICKS;
         this.debugLoggingEnabled = false;
+        this.armorDesireWeight = DEFAULT_ARMOR_DESIRE_WEIGHT;
     }
 
     @Override

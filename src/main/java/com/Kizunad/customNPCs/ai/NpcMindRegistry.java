@@ -2,7 +2,9 @@ package com.Kizunad.customNPCs.ai;
 
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.EquipArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal;
 import com.Kizunad.customNPCs.ai.sensors.AuditorySensor;
@@ -43,6 +45,8 @@ public final class NpcMindRegistry {
         registerGoal("survival", SurvivalGoal::new);
         registerGoal("watch_closest_entity", WatchClosestEntityGoal::new);
         registerGoal("idle", IdleGoal::new);
+        registerGoal("equip_armor", EquipArmorGoal::new);
+        registerGoal("satiate", SatiateGoal::new);
 
         registerSensor("vision", VisionSensor::new);
         registerSensor("damage", DamageSensor::new);

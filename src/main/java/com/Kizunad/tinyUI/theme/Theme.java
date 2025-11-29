@@ -72,4 +72,13 @@ public final class Theme {
     public int getFontSize() {
         return fontSize;
     }
+
+    public int getFieldBackgroundColor() {
+        // Slightly darker than background for fields
+        return backgroundColor & 0xFEFEFEFE; 
+    }
+
+    public int getBorderColor() {
+        return 0xFF3F3F46; // Default border color
+    }
 }

@@ -58,6 +58,21 @@ public final class WorldStateKeys {
      */
     public static final String HUNGER_RESTORED = "hunger_restored";
 
+    /**
+     * 饥饿百分比（0~1）
+     */
+    public static final String HUNGER_PERCENT = "hunger_percent";
+
+    /**
+     * 是否饥饿（低于高饱食阈值）
+     */
+    public static final String IS_HUNGRY = "is_hungry";
+
+    /**
+     * 饥饿是否达到危急阈值
+     */
+    public static final String HUNGER_CRITICAL = "hunger_critical";
+
     // ==================== 方块相关 ====================
     /**
      * 是否在指定方块附近（格式：at_block_<x>_<y>_<z>）
@@ -78,6 +93,22 @@ public final class WorldStateKeys {
      * 门是否打开
      */
     public static final String DOOR_OPEN = "door_open";
+
+    // ==================== 装备相关 ====================
+    /**
+     * 背包中是否存在更优的盔甲
+     */
+    public static final String ARMOR_BETTER_AVAILABLE = "armor_better_available";
+
+    /**
+     * 当前盔甲是否已最佳化
+     */
+    public static final String ARMOR_OPTIMIZED = "armor_optimized";
+
+    /**
+     * 当前盔甲综合评分
+     */
+    public static final String ARMOR_SCORE = "armor_score";
 
     // ==================== 状态相关 ====================
     /**

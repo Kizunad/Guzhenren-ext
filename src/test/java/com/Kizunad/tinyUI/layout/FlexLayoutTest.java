@@ -14,6 +14,13 @@ final class FlexLayoutTest {
     private static final int GAP = 2;
     private static final int PADDING = 2;
     private static final int CHILD_BASIS = 10;
+    private static final int EXPECTED_C1_X = 2;
+    private static final int EXPECTED_C1_WIDTH = 41;
+    private static final int EXPECTED_C2_X = 45;
+    private static final int EXPECTED_C2_WIDTH = 41;
+    private static final int EXPECTED_C3_X = 88;
+    private static final int EXPECTED_C3_WIDTH = 10;
+    private static final int EXPECTED_CROSS_HEIGHT = 16;
 
     @Test
     void rowLayoutDistributesGrowSpace() {
@@ -37,14 +44,14 @@ final class FlexLayoutTest {
 
         // availableMain = 100 - 2*2 - 2*(3-1) = 92, bases sum = 30, remaining = 62
         // grow1 items get floor(62/2)=31 each -> 41 width, last remains 10
-        assertEquals(2, c1.getX());
-        assertEquals(41, c1.getWidth());
-        assertEquals(45, c2.getX());
-        assertEquals(41, c2.getWidth());
-        assertEquals(88, c3.getX());
-        assertEquals(10, c3.getWidth());
+        assertEquals(EXPECTED_C1_X, c1.getX());
+        assertEquals(EXPECTED_C1_WIDTH, c1.getWidth());
+        assertEquals(EXPECTED_C2_X, c2.getX());
+        assertEquals(EXPECTED_C2_WIDTH, c2.getWidth());
+        assertEquals(EXPECTED_C3_X, c3.getX());
+        assertEquals(EXPECTED_C3_WIDTH, c3.getWidth());
 
-        final int expectedHeight = 16; // availableCross = 20 - 2*2
+        final int expectedHeight = EXPECTED_CROSS_HEIGHT; // availableCross = 20 - 2*2
         assertEquals(expectedHeight, c1.getHeight());
         assertEquals(expectedHeight, c2.getHeight());
         assertEquals(expectedHeight, c3.getHeight());

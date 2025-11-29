@@ -1,5 +1,7 @@
 LibSourceCodes/
+tool/
 
+build_n_move.sh
 
 #Java
 .gradle/

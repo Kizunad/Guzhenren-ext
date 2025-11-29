@@ -1,5 +1,6 @@
 package com.Kizunad.customNPCs.ai.executor;
 
+import com.Kizunad.customNPCs.ai.actions.ActionResult;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
@@ -26,6 +27,7 @@ public class ActionExecutor {
     private IAction currentAction;
     private UUID boundEntityId;
     private ActionStatus lastActionStatus = ActionStatus.RUNNING;
+    private String lastActionReason = "";
 
     public ActionExecutor() {
         this.actionQueue = new LinkedList<>();
@@ -157,7 +159,9 @@ public class ActionExecutor {
         }
 
         // 执行当前动作
-        ActionStatus status = currentAction.tick(mind, entity);
+        ActionResult result = currentAction.tickWithReason(mind, entity);
+        ActionStatus status = result.status();
+        lastActionReason = result.reason();
 
         // 根据状态处理
         switch (status) {
@@ -174,11 +178,20 @@ public class ActionExecutor {
                 break;
             case FAILURE:
                 lastActionStatus = ActionStatus.FAILURE;
-                MindLog.execution(
-                    MindLogLevel.WARN,
-                    "动作失败: {}，清空计划",
-                    currentAction.getName()
-                );
+                if (lastActionReason != null && !lastActionReason.isEmpty()) {
+                    MindLog.execution(
+                        MindLogLevel.WARN,
+                        "动作失败: {}，原因: {}，清空计划",
+                        currentAction.getName(),
+                        lastActionReason
+                    );
+                } else {
+                    MindLog.execution(
+                        MindLogLevel.WARN,
+                        "动作失败: {}，清空计划",
+                        currentAction.getName()
+                    );
+                }
                 currentAction.stop(mind, entity);
                 currentAction = null;
                 actionQueue.clear(); // 整个计划失败
@@ -223,5 +236,13 @@ public class ActionExecutor {
      */
     public ActionStatus getLastActionStatus() {
         return lastActionStatus;
+    }
+
+    /**
+     * 获取最后一个动作的原因（若实现提供）。
+     * @return 原因描述，可能为空字符串
+     */
+    public String getLastActionReason() {
+        return lastActionReason;
     }
 }

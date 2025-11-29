@@ -1,4 +1,9 @@
-# NPC 思维系统实施任务清单
+- [x] 状态总结：当前清单全部完成（覆盖基础/感知/规划/测试全链路）。
+- [ ] 预期任务：NpcStatus 饥饿/饱和模型与进食链路（Satiate/AcquireFood）。
+- [ ] 预期任务：进食动作可中断且战斗优先的冲突处理策略落地。
+- [ ] 预期任务：装备扩展（武器/工具评分与自动装备）。
+- [ ] 预期任务：威胁响应（撤退/格挡/远程攻击策略细化）。
+- [ ] 预期任务：性格/意愿调参与调试命令完善。
 
 - [x] **基础：NpcMind Capability** <!-- id: 0 -->
     - [x] 定义 `INpcMind` 接口（Sensors、Memory、Decision 访问） <!-- id: 1 -->
@@ -87,10 +92,10 @@
         - [x] 实现 `testTheCourier` (搬运工场景) <!-- id: 81 -->
     - [x] **性能评估** <!-- id: 82 -->
         - [x] 实现 `testPerformanceStress` (压力测试) <!-- id: 83 -->
-        - [/] 记录并分析性能数据 (Planning Time, Tick Lag) <!-- id: 84 -->
+        - [x] 记录并分析性能数据 (Planning Time, Tick Lag) <!-- id: 84 -->
 
 - [x] **通用基础架构完善 (Generic Infrastructure)** <!-- id: 85 -->
-    - [/] **性格系统 (Personality - 七情六欲)** <!-- id: 86 -->
+    - [x] **性格系统 (Personality - 七情六欲)** <!-- id: 86 -->
         - [x] **核心枚举与数据** <!-- id: 87 -->
             - [x] 定义 `EmotionType` (七情) <!-- id: 88 -->
             - [x] 定义 `DriveType` (六欲) <!-- id: 89 -->
@@ -102,13 +107,13 @@
             - [x] 更新 `DamageSensor` (触发怒/惧) <!-- id: 95 -->
             - [x] 创建情绪衰减逻辑 (tick decay) <!-- id: 96 -->
         - [x] **调试与测试** <!-- id: 97 -->
-            - [ ] 添加 `/mind personality` 命令 <!-- id: 98 -->
+            - [x] 添加 `/mind personality` 命令 <!-- id: 98 -->
             - [x] 创建 `PersonalityTests` (验证性格差异) <!-- id: 99 -->
-    - [ ] **通用感知 (Generic Sensors)** <!-- id: 89 -->
+    - [x] **通用感知 (Generic Sensors)** <!-- id: 89 -->
         - [x] 实现 `AuditorySensor` (听觉) <!-- id: 90 -->
         - [x] 实现 `DamageSensor` (伤害感知) <!-- id: 91 -->
-    - [ ] **API 扩展性 (Registry)** <!-- id: 92 -->
-        - [ ] 实现 `NpcMindRegistry` (注册 Goal/Sensor/Action) <!-- id: 93 -->
+    - [x] **API 扩展性 (Registry)** <!-- id: 92 -->
+        - [x] 实现 `NpcMindRegistry` (注册 Goal/Sensor/Action) <!-- id: 93 -->
 
 - [x] **架构完善与加固 (Architecture Refinement)** <!-- id: 100 -->
     - [x] **决策协调策略 (Coordination - Option 2)** <!-- id: 101 -->
@@ -136,3 +141,13 @@
     - [x] **异常与回归测试 (Robustness Testing)** <!-- id: 120 -->
         - [x] 覆盖失败场景 (路径阻塞、目标消失、超时) <!-- id: 121 -->
         - [x] 添加性能回归断言 <!-- id: 122 -->
+
+- [ ] **NpcStatus 饥饿/饱和与进食链路** <!-- backlog-hunger -->
+    - [ ] 引入 `NpcStatus` 组件（hunger/saturation/exhaustion，NBT 序列化，配置阈值）。
+    - [ ] 在 `NpcMind` tick 读取 `NpcStatus` 并映射到 `WorldStateKeys`（如 hunger_percent、is_hungry、hunger_critical、hunger_restored）。
+    - [ ] 扩展 `WorldStateKeys` 添加饥饿相关键。
+    - [ ] `EatFromInventoryAction`：从 `NpcInventory` 取食物，可中断，保留 `FoodProperties` 效果。
+    - [ ] `GoapEatAction`/`SatiateGoal`：饥饿阈值触发，战斗/危险时不触发或立刻停止。
+    - [ ] `AcquireFoodGoal`（可选）：无食物且饥饿时触发，复用拾取动作获取食物。
+    - [ ] 生命回复/饥饿伤害：饥饿高时小幅回血，饥饿为 0 时掉血（可配置）。
+    - [ ] GameTest：验证饥饿衰减→进食→回复生效，不饿时不消耗食物，战斗中不进食。

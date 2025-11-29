@@ -13,11 +13,13 @@ final class HotkeyCaptureTest {
 
     private static final int KEY_CODE = 70;
     private static final int MODS = KeyStroke.CONTROL | KeyStroke.SHIFT;
+    private static final int WIDTH = 50;
+    private static final int HEIGHT = 20;
 
     @Test
     void capturesKeyStrokeAndInvokesCallback() {
         final HotkeyCapture capture = new HotkeyCapture(Theme.vanilla());
-        capture.setFrame(0, 0, 50, 20);
+        capture.setFrame(0, 0, WIDTH, HEIGHT);
         final AtomicReference<KeyStroke> last = new AtomicReference<>();
         capture.setOnCapture(last::set);
 

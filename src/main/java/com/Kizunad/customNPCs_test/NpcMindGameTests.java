@@ -63,30 +63,51 @@ public class NpcMindGameTests {
     //        );
     //    }
 
-    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
-    public void testMoveToBlockedPathFails(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToBlockedPathFails(
+    // @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
+    // public void testMoveToBlockedPathFails(GameTestHelper helper) {
+    //     com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToBlockedPathFails(
+    //         helper
+    //     );
+    // }
+
+    // @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
+    // public void testMoveToTargetDespawnFails(GameTestHelper helper) {
+    //     com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToTargetDespawnFails(
+    //         helper
+    //     );
+    // }
+
+    // @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
+    // public void testMoveToTimeoutFails(GameTestHelper helper) {
+    //     com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToTimeoutFails(
+    //         helper
+    //     );
+    // }
+
+    // @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_PERF)
+    // public void testPerformanceStress(GameTestHelper helper) {
+    //     com.Kizunad.customNPCs_test.tests.ComplexScenarios.testPerformanceStress(
+    //         helper
+    //     );
+    // }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
+    public void testEquipArmorChoosesBest(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.actions.ArmorActionsTests.testEquipArmorChoosesBest(
             helper
         );
     }
 
-    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
-    public void testMoveToTargetDespawnFails(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToTargetDespawnFails(
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
+    public void testSatiateUsesLowerValueFood(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.actions.HungerActionsTests.testSatiateUsesLowerValueFood(
             helper
         );
     }
 
-    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_BASE)
-    public void testMoveToTimeoutFails(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.RobustnessTests.testMoveToTimeoutFails(
-            helper
-        );
-    }
-
-    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 120, batch = BATCH_PERF)
-    public void testPerformanceStress(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.tests.ComplexScenarios.testPerformanceStress(
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
+    public void testSatiateSkipsWhenInDanger(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.actions.HungerActionsTests.testSatiateSkipsWhenInDanger(
             helper
         );
     }

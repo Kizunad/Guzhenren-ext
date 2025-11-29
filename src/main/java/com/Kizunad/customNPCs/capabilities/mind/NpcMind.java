@@ -2,13 +2,17 @@ package com.Kizunad.customNPCs.capabilities.mind;
 
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.decision.UtilityGoalSelector;
+import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.memory.MemoryModule;
+import com.Kizunad.customNPCs.ai.util.ArmorEvaluationUtil;
+import com.Kizunad.customNPCs.ai.status.NpcStatus;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
 /**
@@ -22,6 +26,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     private final com.Kizunad.customNPCs.ai.sensors.SensorManager sensorManager;
     private final com.Kizunad.customNPCs.ai.executor.ActionExecutor actionExecutor;
     private final com.Kizunad.customNPCs.ai.personality.PersonalityModule personality;
+    private final NpcInventory inventory;
+    private final NpcStatus status;
 
     // 中断冷却机制
     private long lastInterruptTick = 0;
@@ -38,6 +44,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             new com.Kizunad.customNPCs.ai.executor.ActionExecutor();
         this.personality =
             new com.Kizunad.customNPCs.ai.personality.PersonalityModule();
+        this.inventory = new NpcInventory();
+        this.status = new NpcStatus();
     }
 
     /**
@@ -83,6 +91,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         this.sensorManager = sensorManager;
         this.actionExecutor = actionExecutor;
         this.personality = personality;
+        this.inventory = new NpcInventory();
+        this.status = new NpcStatus();
     }
 
     @Override
@@ -111,6 +121,16 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     }
 
     @Override
+    public NpcInventory getInventory() {
+        return inventory;
+    }
+
+    @Override
+    public NpcStatus getStatus() {
+        return status;
+    }
+
+    @Override
     public void tick(ServerLevel level, LivingEntity entity) {
         // 绑定执行器上下文，防止跨实体/测试计划污染
         actionExecutor.bindToEntity(entity);
@@ -124,6 +144,9 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         // 3. 更新性格（情绪衰减）
         personality.tick();
 
+        // 3.5 更新状态（饥饿/饱和/回血/掉血）
+        status.tick(level, entity);
+
         // 4. 目标选择器执行
         goalSelector.tick(this, entity);
 
@@ -136,6 +159,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         CompoundTag tag = new CompoundTag();
         tag.put("memory", memory.serializeNBT());
         tag.put("personality", personality.serializeNBT());
+        tag.put("inventory", inventory.serializeNBT(provider));
+        tag.put("status", status.serializeNBT(provider));
         // 注意：目标选择器不需要序列化，因为目标是在代码中注册的
         return tag;
     }
@@ -150,6 +175,12 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("personality")) {
             personality.deserializeNBT(nbt.getCompound("personality"));
+        }
+        if (nbt.contains("inventory")) {
+            inventory.deserializeNBT(provider, nbt.getCompound("inventory"));
+        }
+        if (nbt.contains("status")) {
+            status.deserializeNBT(provider, nbt.getCompound("status"));
         }
     }
 
@@ -183,8 +214,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         );
 
         // 从记忆读取状态
-        Object hasFood = memory.getMemory("has_food");
-        state.setState("has_food", hasFood != null ? hasFood : false);
+        boolean hasFood = inventoryHasFood(entity);
+        state.setState(WorldStateKeys.HAS_FOOD, hasFood);
         boolean hazardNearby =
             memory.hasMemory(WorldStateKeys.HAZARD_NEARBY) ||
             Boolean.TRUE.equals(memory.getMemory("hazard_detected"));
@@ -255,6 +286,20 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             hungerRestored != null ? hungerRestored : false
         );
 
+        // 饥饿/饱和状态（来自 NpcStatus）
+        state.setState(
+            WorldStateKeys.HUNGER_PERCENT,
+            status.getHungerPercent()
+        );
+        state.setState(
+            WorldStateKeys.IS_HUNGRY,
+            status.isHungry()
+        );
+        state.setState(
+            WorldStateKeys.HUNGER_CRITICAL,
+            status.isCritical()
+        );
+
         // 方块相关状态
         Object blockExists = memory.getMemory(WorldStateKeys.BLOCK_EXISTS);
         state.setState(
@@ -272,6 +317,25 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         state.setState(
             WorldStateKeys.DOOR_OPEN,
             doorOpen != null ? doorOpen : false
+        );
+
+        // 装备/背包相关状态
+        boolean armorUpgradeAvailable = ArmorEvaluationUtil.hasBetterArmor(
+            inventory,
+            entity
+        );
+        state.setState(
+            WorldStateKeys.ARMOR_BETTER_AVAILABLE,
+            armorUpgradeAvailable
+        );
+        state.setState(
+            WorldStateKeys.ARMOR_SCORE,
+            ArmorEvaluationUtil.totalEquippedScore(entity)
+        );
+        Object armorOptimized = memory.getMemory(WorldStateKeys.ARMOR_OPTIMIZED);
+        state.setState(
+            WorldStateKeys.ARMOR_OPTIMIZED,
+            armorOptimized != null ? armorOptimized : false
         );
 
         return state;
@@ -308,5 +372,15 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
 
         // 强制重新评估目标
         goalSelector.forceReevaluate(this, entity, eventType);
+    }
+
+    private boolean inventoryHasFood(LivingEntity entity) {
+        for (int i = 0; i < inventory.size(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.isEmpty() && stack.getFoodProperties(entity) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

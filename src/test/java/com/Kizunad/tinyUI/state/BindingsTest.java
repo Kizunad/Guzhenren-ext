@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class BindingsTest {
 
+    private static final int TEST_VALUE = 3;
+
     @Test
     void bindCallsConsumerImmediatelyAndOnUpdate() {
         final ObservableValue<String> value = new ObservableValue<>("a");
@@ -45,8 +47,8 @@ final class BindingsTest {
         assertTrue(invalidated.get(), "cancel should trigger invalidation");
 
         invalidated.set(false);
-        value.set(3);
-        assertTrue(invalidated.get() == false, "no invalidation after cancel on further updates");
+        value.set(TEST_VALUE);
+        assertTrue(!invalidated.get(), "no invalidation after cancel on further updates");
         assertEquals(Integer.valueOf(2), last.get(), "consumer should not update after cancel");
     }
 }

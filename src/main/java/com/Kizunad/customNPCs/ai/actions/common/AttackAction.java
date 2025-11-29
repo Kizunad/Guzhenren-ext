@@ -4,6 +4,7 @@ import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
+import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.world.InteractionHand;
@@ -158,7 +159,7 @@ public class AttackAction extends AbstractStandardAction implements IAttackActio
         }
 
         // 执行攻击
-        performAttack(mob, targetEntity);
+        performAttack(mind, mob, targetEntity);
 
         // 设置冷却
         cooldownCounter = cooldownTicks;
@@ -174,13 +175,18 @@ public class AttackAction extends AbstractStandardAction implements IAttackActio
      * @param mob 攻击者
      * @param target 目标
      */
-    private void performAttack(Mob mob, Entity target) {
+    private void performAttack(INpcMind mind, Mob mob, Entity target) {
         // 播放挥手动画
         mob.swing(InteractionHand.MAIN_HAND);
 
         // 造成伤害
         if (target instanceof LivingEntity livingTarget) {
             mob.doHurtTarget(livingTarget);
+            mind
+                .getStatus()
+                .addExhaustion(
+                    NpcStatusConfig.getInstance().getAttackExhaustion()
+                );
             LOGGER.debug(
                 "[AttackAction] 攻击 {} | 剩余生命值: {}",
                 target.getName().getString(),

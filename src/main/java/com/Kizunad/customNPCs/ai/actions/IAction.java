@@ -24,6 +24,18 @@ public interface IAction {
     ActionStatus tick(INpcMind mind, LivingEntity entity);
 
     /**
+     * 执行动作逻辑，返回包含原因的结果。
+     * 默认实现沿用 {@link #tick(INpcMind, LivingEntity)}，可在子类中重写以提供更丰富的失败/成功原因。
+     *
+     * @param mind NPC 的思维
+     * @param entity NPC 实体
+     * @return 动作结果（含状态与原因）
+     */
+    default ActionResult tickWithReason(INpcMind mind, LivingEntity entity) {
+        return new ActionResult(tick(mind, entity));
+    }
+
+    /**
      * 动作开始时调用 - 初始化动作状态
      * @param mind NPC 的思维
      * @param entity NPC 实体

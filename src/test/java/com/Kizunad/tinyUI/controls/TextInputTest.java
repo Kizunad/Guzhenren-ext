@@ -12,6 +12,8 @@ final class TextInputTest {
 
     private static final int WIDTH = 100;
     private static final int HEIGHT = 20;
+    private static final int CLICK_X = 20;
+    private static final int CLICK_Y = 5;
 
     @Test
     void typingAddsCharactersAndBackspaceRemoves() {
@@ -47,7 +49,7 @@ final class TextInputTest {
         input.setFrame(0, 0, WIDTH, HEIGHT);
         input.setText("abcd");
 
-        assertTrue(input.onMouseClick(20, 5, 0));
+        assertTrue(input.onMouseClick(CLICK_X, CLICK_Y, 0));
         // With char width 6 and padding 3 -> (20-3)/6 = 2
         assertTrue(input.onCharTyped('x', 0));
         assertEquals("abxcd", input.getText());

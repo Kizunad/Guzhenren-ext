@@ -3,11 +3,13 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IInteractAction;
+import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +21,7 @@ public class PickUpItemAction extends AbstractStandardAction implements IInterac
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PickUpItemAction.class);
     private final ItemEntity targetItem;
+    private String lastReason = "";
 
     public PickUpItemAction(ItemEntity targetItem) {
         super("PickUpItemAction", targetItem.getUUID());
@@ -27,33 +30,54 @@ public class PickUpItemAction extends AbstractStandardAction implements IInterac
 
     @Override
     protected ActionStatus tickInternal(INpcMind mind, Mob mob) {
+        lastReason = "";
         if (!targetItem.isAlive()) {
             LOGGER.warn("[PickUpItemAction] Target item is no longer alive.");
+            lastReason = "target_missing";
             return ActionStatus.FAILURE;
         }
 
-        // Check if item is picked up (e.g. in inventory)
-        if (!targetItem.isAlive()) {
-             return ActionStatus.SUCCESS;
-        }
-        
+        NpcInventory inventory = mind != null ? mind.getInventory() : null;
+
         // Check distance
         if (mob.getBoundingBox().intersects(targetItem.getBoundingBox().inflate(1.0))) {
             // Execute pickup
             net.minecraft.world.item.ItemStack itemStack = targetItem.getItem().copy();
             mob.take(targetItem, itemStack.getCount());
-            mob.setItemInHand(InteractionHand.MAIN_HAND, itemStack);
+
+            boolean stored = false;
+            ItemStack remaining = itemStack;
+            if (inventory != null) {
+                remaining = inventory.addItem(itemStack);
+                stored = remaining.isEmpty();
+            }
+
+            if (!stored && mob.getMainHandItem().isEmpty()) {
+                mob.setItemInHand(InteractionHand.MAIN_HAND, remaining);
+                remaining = ItemStack.EMPTY;
+                stored = true;
+            }
+
+            if (!remaining.isEmpty()) {
+                mob.spawnAtLocation(remaining);
+                LOGGER.warn(
+                    "[PickUpItemAction] 背包与主手已满，已将剩余物品掉落"
+                );
+            }
+
             targetItem.discard();
-            LOGGER.info("[PickUpItemAction] Picked up item: {}", itemStack.getHoverName().getString());
-            return ActionStatus.SUCCESS;
+            LOGGER.info(
+                "[PickUpItemAction] Picked up item: {} (stored: {})",
+                itemStack.getHoverName().getString(),
+                stored
+            );
+            return stored ? ActionStatus.SUCCESS : ActionStatus.FAILURE;
         } else {
-            // Too far, return RUNNING (assuming movement is handled elsewhere or we wait)
-            // Ideally, this action should also handle movement if it's a "PickUp" action, 
-            // but often we separate MoveTo and PickUp.
-            // If we want it to be robust, we can try to move closer if needed, 
-            // similar to InteractBlockAction.
-            mob.getNavigation().moveTo(targetItem, 1.0);
-            return ActionStatus.RUNNING;
+            LOGGER.warn(
+                "[PickUpItemAction] Target too far to pick up directly"
+            );
+            lastReason = "too_far";
+            return ActionStatus.FAILURE;
         }
     }
 
@@ -70,5 +94,20 @@ public class PickUpItemAction extends AbstractStandardAction implements IInterac
     @Override
     public boolean canInterrupt() {
         return true;
+    }
+
+    @Override
+    public com.Kizunad.customNPCs.ai.actions.ActionResult tickWithReason(
+        INpcMind mind,
+        net.minecraft.world.entity.LivingEntity entity
+    ) {
+        ActionStatus status = tick(mind, entity);
+        return new com.Kizunad.customNPCs.ai.actions.ActionResult(status, lastReason);
+    }
+
+    @Override
+    protected void onStart(INpcMind mind, net.minecraft.world.entity.LivingEntity entity) {
+        super.onStart(mind, entity);
+        lastReason = "";
     }
 }

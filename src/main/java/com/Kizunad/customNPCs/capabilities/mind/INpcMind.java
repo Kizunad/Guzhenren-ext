@@ -75,6 +75,18 @@ public interface INpcMind {
     com.Kizunad.customNPCs.ai.personality.PersonalityModule getPersonality();
 
     /**
+     * 获取 NPC 自有背包。
+     * @return 背包实例
+     */
+    com.Kizunad.customNPCs.ai.inventory.NpcInventory getInventory();
+
+    /**
+     * 获取 NPC 状态（饥饿/饱和/耗竭等）。
+     * @return 状态组件
+     */
+    com.Kizunad.customNPCs.ai.status.NpcStatus getStatus();
+
+    /**
      * 获取当前世界状态（用于 GOAP 规划）
      * <p>
      * 此方法从 NPC 的记忆和实体状态中提取信息，构建当前世界状态。

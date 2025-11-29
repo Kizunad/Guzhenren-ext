@@ -29,6 +29,6 @@ final class ObservableValueTest {
 
         sub.cancel();
         value.set(2);
-        assertTrue(called.get() == false, "listener should not be called after cancel");
+        assertTrue(!called.get(), "listener should not be called after cancel");
     }
 }
