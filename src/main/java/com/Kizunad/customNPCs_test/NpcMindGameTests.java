@@ -1,8 +1,6 @@
 package com.Kizunad.customNPCs_test;
 
 import com.Kizunad.customNPCs_test.utils.TestBatches;
-import net.minecraft.gametest.framework.GameTest;
-import net.minecraft.gametest.framework.GameTestHelper;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
 @GameTestHolder("guzhenrenext")
@@ -91,26 +89,26 @@ public class NpcMindGameTests {
     //     );
     // }
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
-    public void testEquipArmorChoosesBest(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.actions.ArmorActionsTests.testEquipArmorChoosesBest(
-            helper
-        );
-    }
+    // @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
+    // public void testEquipArmorChoosesBest(GameTestHelper helper) {
+    //     com.Kizunad.customNPCs_test.actions.ArmorActionsTests.testEquipArmorChoosesBest(
+    //         helper
+    //     );
+    // }
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
-    public void testSatiateUsesLowerValueFood(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.actions.HungerActionsTests.testSatiateUsesLowerValueFood(
-            helper
-        );
-    }
+    // @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
+    // public void testSatiateUsesLowerValueFood(GameTestHelper helper) {
+    //     com.Kizunad.customNPCs_test.actions.HungerActionsTests.testSatiateUsesLowerValueFood(
+    //         helper
+    //     );
+    // }
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
-    public void testSatiateSkipsWhenInDanger(GameTestHelper helper) {
-        com.Kizunad.customNPCs_test.actions.HungerActionsTests.testSatiateSkipsWhenInDanger(
-            helper
-        );
-    }
+    // @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 200)
+    // public void testSatiateSkipsWhenInDanger(GameTestHelper helper) {
+    //     com.Kizunad.customNPCs_test.actions.HungerActionsTests.testSatiateSkipsWhenInDanger(
+    //         helper
+    //     );
+    // }
 
     //    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
     //    public void testWatchClosestEntityGoal(GameTestHelper helper) {

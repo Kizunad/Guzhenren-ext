@@ -27,3 +27,4 @@ agent_assignments.json
 .classpath
 .project
 .zedignore
+.zed/

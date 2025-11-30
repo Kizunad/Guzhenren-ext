@@ -135,11 +135,19 @@ public class SafetySensor implements ISensor {
                     true,
                     MEMORY_DURATION
                 );
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    WorldStateKeys.IN_DANGER,
+                    true,
+                    MEMORY_DURATION
+                );
         } else {
             mind.getMemory().forget("hazard_detected");
             mind.getMemory().forget("nearest_hazard_pos");
             mind.getMemory().forget("nearest_hazard_distance");
             mind.getMemory().forget(WorldStateKeys.HAZARD_NEARBY);
+            mind.getMemory().forget(WorldStateKeys.IN_DANGER);
         }
     }
 

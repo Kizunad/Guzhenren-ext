@@ -6,13 +6,15 @@ import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.memory.MemoryModule;
-import com.Kizunad.customNPCs.ai.util.ArmorEvaluationUtil;
 import com.Kizunad.customNPCs.ai.status.NpcStatus;
+import com.Kizunad.customNPCs.ai.util.ArmorEvaluationUtil;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
 /**
@@ -241,31 +243,7 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         Object hasPlanks = memory.getMemory("has_planks");
         state.setState("has_planks", hasPlanks != null ? hasPlanks : false);
 
-        // === 新增: 标准动作相关状态键 ===
-        // 目标相关状态
-        Object targetVisible = memory.getMemory(WorldStateKeys.TARGET_VISIBLE);
-        state.setState(
-            WorldStateKeys.TARGET_VISIBLE,
-            targetVisible != null ? targetVisible : false
-        );
-        
-        Object targetInRange = memory.getMemory(WorldStateKeys.TARGET_IN_RANGE);
-        state.setState(
-            WorldStateKeys.TARGET_IN_RANGE,
-            targetInRange != null ? targetInRange : false
-        );
-        
-        Object targetDamaged = memory.getMemory(WorldStateKeys.TARGET_DAMAGED);
-        state.setState(
-            WorldStateKeys.TARGET_DAMAGED,
-            targetDamaged != null ? targetDamaged : false
-        );
-        
-        Object attackCooldown = memory.getMemory(WorldStateKeys.ATTACK_COOLDOWN_ACTIVE);
-        state.setState(
-            WorldStateKeys.ATTACK_COOLDOWN_ACTIVE,
-            attackCooldown != null ? attackCooldown : false
-        );
+        populateTargetStates(state);
 
         // 物品相关状态
         Object itemUsable = memory.getMemory(WorldStateKeys.ITEM_USABLE);
@@ -273,14 +251,16 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             WorldStateKeys.ITEM_USABLE,
             itemUsable != null ? itemUsable : true // 默认为true
         );
-        
+
         Object itemUsed = memory.getMemory(WorldStateKeys.ITEM_USED);
         state.setState(
             WorldStateKeys.ITEM_USED,
             itemUsed != null ? itemUsed : false
         );
-        
-        Object hungerRestored = memory.getMemory(WorldStateKeys.HUNGER_RESTORED);
+
+        Object hungerRestored = memory.getMemory(
+            WorldStateKeys.HUNGER_RESTORED
+        );
         state.setState(
             WorldStateKeys.HUNGER_RESTORED,
             hungerRestored != null ? hungerRestored : false
@@ -291,14 +271,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             WorldStateKeys.HUNGER_PERCENT,
             status.getHungerPercent()
         );
-        state.setState(
-            WorldStateKeys.IS_HUNGRY,
-            status.isHungry()
-        );
-        state.setState(
-            WorldStateKeys.HUNGER_CRITICAL,
-            status.isCritical()
-        );
+        state.setState(WorldStateKeys.IS_HUNGRY, status.isHungry());
+        state.setState(WorldStateKeys.HUNGER_CRITICAL, status.isCritical());
 
         // 方块相关状态
         Object blockExists = memory.getMemory(WorldStateKeys.BLOCK_EXISTS);
@@ -306,13 +280,15 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             WorldStateKeys.BLOCK_EXISTS,
             blockExists != null ? blockExists : true // 默认为true
         );
-        
-        Object blockInteracted = memory.getMemory(WorldStateKeys.BLOCK_INTERACTED);
+
+        Object blockInteracted = memory.getMemory(
+            WorldStateKeys.BLOCK_INTERACTED
+        );
         state.setState(
             WorldStateKeys.BLOCK_INTERACTED,
             blockInteracted != null ? blockInteracted : false
         );
-        
+
         Object doorOpen = memory.getMemory(WorldStateKeys.DOOR_OPEN);
         state.setState(
             WorldStateKeys.DOOR_OPEN,
@@ -332,11 +308,20 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             WorldStateKeys.ARMOR_SCORE,
             ArmorEvaluationUtil.totalEquippedScore(entity)
         );
-        Object armorOptimized = memory.getMemory(WorldStateKeys.ARMOR_OPTIMIZED);
+        Object armorOptimized = memory.getMemory(
+            WorldStateKeys.ARMOR_OPTIMIZED
+        );
         state.setState(
             WorldStateKeys.ARMOR_OPTIMIZED,
             armorOptimized != null ? armorOptimized : false
         );
+
+        // 武器/防御能力
+        state.setState(
+            WorldStateKeys.HAS_RANGED_WEAPON,
+            hasRangedWeapon(entity)
+        );
+        state.setState(WorldStateKeys.CAN_BLOCK, canBlock(entity));
 
         return state;
     }
@@ -382,5 +367,87 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             }
         }
         return false;
+    }
+
+    /**
+     * 将与目标实体相关的状态从 NPC 的记忆（memory）中填充到给定的世界状态（WorldState）对象中。
+     *
+     * 此方法用于 AI 规划器的目标世界状态初始化。具体填充以下状态键：
+     * <ul>
+     * <li>{@code WorldStateKeys.TARGET_VISIBLE}：目标实体当前对 NPC 是否可见，默认 {@code false}</li>
+     * <li>{@code WorldStateKeys.TARGET_IN_RANGE}：目标实体是否在攻击/交互范围内，默认 {@code false}</li>
+     * <li>{@code WorldStateKeys.TARGET_DAMAGED}：目标实体是否受伤/低血量，默认 {@code false}</li>
+     * <li>{@code WorldStateKeys.DISTANCE_TO_TARGET}：到目标实体的当前距离（double 值），默认 {@code -1.0d}</li>
+     * <li>{@code WorldStateKeys.ATTACK_COOLDOWN_ACTIVE}：攻击冷却是否当前激活，默认 {@code false}</li>
+     * </ul>
+     *
+     * @param state 要填充的世界状态对象
+     */
+    private void populateTargetStates(
+        com.Kizunad.customNPCs.ai.planner.WorldState state
+    ) {
+        // 获取目标实体当前对 NPC 是否可见
+        Object targetVisible = memory.getMemory(WorldStateKeys.TARGET_VISIBLE);
+        state.setState(
+            WorldStateKeys.TARGET_VISIBLE,
+            targetVisible != null ? targetVisible : false
+        );
+
+        // 获取目标实体是否在攻击/交互范围内
+        Object targetInRange = memory.getMemory(WorldStateKeys.TARGET_IN_RANGE);
+        state.setState(
+            WorldStateKeys.TARGET_IN_RANGE,
+            targetInRange != null ? targetInRange : false
+        );
+
+        // 获取目标实体是否受伤/低血量
+        Object targetDamaged = memory.getMemory(WorldStateKeys.TARGET_DAMAGED);
+        state.setState(
+            WorldStateKeys.TARGET_DAMAGED,
+            targetDamaged != null ? targetDamaged : false
+        );
+
+        // 获取到目标实体的当前距离（double 值）
+        Object targetDistance = memory.getMemory(
+            WorldStateKeys.DISTANCE_TO_TARGET
+        );
+        state.setState(
+            WorldStateKeys.DISTANCE_TO_TARGET,
+            targetDistance != null ? targetDistance : -1.0d
+        );
+
+        // 获取攻击冷却是否当前激活
+        Object attackCooldown = memory.getMemory(
+            WorldStateKeys.ATTACK_COOLDOWN_ACTIVE
+        );
+        state.setState(
+            WorldStateKeys.ATTACK_COOLDOWN_ACTIVE,
+            attackCooldown != null ? attackCooldown : false
+        );
+    }
+
+    public void setLastInterruptTick(long lastInterruptTick) {
+        this.lastInterruptTick = lastInterruptTick;
+    }
+
+    public void setLastInterruptType(
+        com.Kizunad.customNPCs.ai.sensors.SensorEventType lastInterruptType
+    ) {
+        this.lastInterruptType = lastInterruptType;
+    }
+
+    private boolean hasRangedWeapon(LivingEntity entity) {
+        ItemStack main = entity.getMainHandItem();
+        ItemStack off = entity.getOffhandItem();
+        return (
+            main.getItem() instanceof ProjectileWeaponItem ||
+            off.getItem() instanceof ProjectileWeaponItem
+        );
+    }
+
+    private boolean canBlock(LivingEntity entity) {
+        ItemStack main = entity.getMainHandItem();
+        ItemStack off = entity.getOffhandItem();
+        return main.is(Items.SHIELD) || off.is(Items.SHIELD);
     }
 }

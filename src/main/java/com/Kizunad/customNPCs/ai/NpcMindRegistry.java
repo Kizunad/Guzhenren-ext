@@ -1,10 +1,15 @@
 package com.Kizunad.customNPCs.ai;
 
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
+import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.DefendGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipArmorGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.SeekShelterGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal;
 import com.Kizunad.customNPCs.ai.sensors.AuditorySensor;
@@ -47,11 +52,17 @@ public final class NpcMindRegistry {
         registerGoal("idle", IdleGoal::new);
         registerGoal("equip_armor", EquipArmorGoal::new);
         registerGoal("satiate", SatiateGoal::new);
+        registerGoal("flee", FleeGoal::new);
+        registerGoal("defend", DefendGoal::new);
+        registerGoal("seek_shelter", SeekShelterGoal::new);
 
         registerSensor("vision", VisionSensor::new);
         registerSensor("damage", DamageSensor::new);
         registerSensor("auditory", AuditorySensor::new);
         registerSensor("safety", SafetySensor::new);
+
+        registerAction("block_with_shield", BlockWithShieldAction::new);
+        registerAction("ranged_attack", () -> new RangedAttackItemAction(null));
     }
 
     /**

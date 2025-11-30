@@ -1,8 +1,10 @@
 package com.Kizunad.customNPCs.ai.sensors;
 
-import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.memory.MemoryModule;
+import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,10 +15,12 @@ import net.minecraft.world.entity.LivingEntity;
 @SuppressWarnings("checkstyle:MagicNumber")
 public class DamageSensor implements ISensor {
 
-    private int lastHurtTime = 0;
-    private static final int CRITICAL_WINDOW_TICKS = 10;
-    private static final int IMPORTANT_WINDOW_TICKS = 25;
-    private static final int INFO_WINDOW_TICKS = 25;
+    private int lastHurtTime = 0; // 最后一次受伤时间
+    private static final int MEMORY_DURATION = 120; // 记忆持续时间（单位：tick）
+    private static final float CLOSE_COMBAT_RANGE = 5.0f; // 近战距离阈值
+    private static final int CRITICAL_WINDOW_TICKS = 10; // 关键窗口（单位：tick）
+    private static final int IMPORTANT_WINDOW_TICKS = 25; // 重要窗口（单位：tick）
+    private static final int INFO_WINDOW_TICKS = 25; // 信息窗口（单位：tick）
     private final InterruptThrottle interruptThrottle = new InterruptThrottle(
         CRITICAL_WINDOW_TICKS,
         IMPORTANT_WINDOW_TICKS,
@@ -42,8 +46,13 @@ public class DamageSensor implements ISensor {
             if (attacker != null) {
                 // 记录攻击者到记忆中（使用 UUID 以便持久化）
                 UUID attackerUuid = attacker.getUUID();
-                mind.getMemory().rememberLongTerm("last_attacker", attackerUuid);
+                mind
+                    .getMemory()
+                    .rememberLongTerm("last_attacker", attackerUuid);
                 mind.getMemory().rememberShortTerm("under_attack", true, 200); // 10秒战斗状态
+                double attackerDistance = entity.distanceTo(attacker);
+                // 汇总威胁状态写入，避免内联重复逻辑
+                rememberThreat(mind, attackerUuid, attackerDistance);
 
                 // FUTURE:情绪需要单独集成
                 // 触发情绪：怒（基础 +0.2）
@@ -109,5 +118,47 @@ public class DamageSensor implements ISensor {
     @Override
     public int getPriority() {
         return 100; // 高优先级，受伤反应通常是最紧急的
+    }
+
+    /**
+     * 汇总威胁相关记忆写入，保持 CRITICAL 受击时的状态一致性。
+     * @param mind 当前思维实例
+     * @param threatId 攻击者 UUID
+     * @param distance 到攻击者的距离
+     */
+    private void rememberThreat(INpcMind mind, UUID threatId, double distance) {
+        MemoryModule memory = mind.getMemory();
+        memory.rememberShortTerm(
+            WorldStateKeys.DISTANCE_TO_TARGET,
+            distance,
+            MEMORY_DURATION
+        );
+        memory.rememberShortTerm(
+            WorldStateKeys.TARGET_IN_RANGE,
+            distance <= CLOSE_COMBAT_RANGE,
+            MEMORY_DURATION
+        );
+        // 受击视为已暴露威胁：即便未直视，也将可见标记为 true 以强制决策抢占
+        memory.rememberShortTerm(
+            WorldStateKeys.TARGET_VISIBLE,
+            true,
+            MEMORY_DURATION
+        );
+        memory.rememberShortTerm(
+            WorldStateKeys.HOSTILE_NEARBY,
+            true,
+            MEMORY_DURATION
+        );
+        memory.rememberShortTerm(
+            WorldStateKeys.IN_DANGER,
+            true,
+            MEMORY_DURATION
+        );
+        memory.rememberShortTerm("threat_detected", true, MEMORY_DURATION);
+        memory.rememberShortTerm(
+            "current_threat_id",
+            threatId,
+            MEMORY_DURATION
+        );
     }
 }

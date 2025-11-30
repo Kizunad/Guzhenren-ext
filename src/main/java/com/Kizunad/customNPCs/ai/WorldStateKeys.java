@@ -33,6 +33,21 @@ public final class WorldStateKeys {
     public static final String TARGET_DAMAGED = "target_damaged";
 
     /**
+     * 目标距离（double，单位：格）
+     */
+    public static final String DISTANCE_TO_TARGET = "distance_to_target";
+
+    /**
+     * 是否有可用远程武器
+     */
+    public static final String HAS_RANGED_WEAPON = "has_ranged_weapon";
+
+    /**
+     * 是否可以格挡（持盾或可格挡物品）
+     */
+    public static final String CAN_BLOCK = "can_block";
+
+    /**
      * 攻击冷却是否激活
      */
     public static final String ATTACK_COOLDOWN_ACTIVE = "attack_cooldown_active";
@@ -115,11 +130,6 @@ public final class WorldStateKeys {
      * 生命值百分比（格式：health_percent）
      */
     public static final String HEALTH_PERCENT = "health_percent";
-
-    /**
-     * 到目标的距离（格式：distance_to_target）
-     */
-    public static final String DISTANCE_TO_TARGET = "distance_to_target";
 
     /**
      * 是否处于危险中
