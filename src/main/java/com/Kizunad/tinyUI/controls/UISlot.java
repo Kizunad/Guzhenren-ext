@@ -16,6 +16,7 @@ import java.util.Objects;
 public class UISlot extends InteractiveElement {
 
     private static final int DEFAULT_SLOT_SIZE = 18;
+    private static final int SLOT_BG_PADDING = 0;
 
     private final int slotIndex;
     private final Theme theme;
@@ -40,18 +41,33 @@ public class UISlot extends InteractiveElement {
     }
 
     @Override
-    protected void onRender(UIRenderContext context, double mouseX, double mouseY, float partialTicks) {
+    protected void onRender(
+        UIRenderContext context,
+        double mouseX,
+        double mouseY,
+        float partialTicks
+    ) {
         if (drawBackground) {
-            // 绘制一个简单的槽位背景，风格与主题一致
-            context.drawRect(getAbsoluteX(), getAbsoluteY(), getWidth(), getHeight(), theme.getFieldBackgroundColor());
+            // 绘制与 Slot 同尺寸的背景，确保与原版高亮对齐
+            final int bgX = getAbsoluteX() + SLOT_BG_PADDING;
+            final int bgY = getAbsoluteY() + SLOT_BG_PADDING;
+            final int bgW = getWidth() - SLOT_BG_PADDING * 2;
+            final int bgH = getHeight() - SLOT_BG_PADDING * 2;
+            context.drawRect(
+                bgX,
+                bgY,
+                bgW,
+                bgH,
+                theme.getFieldBackgroundColor()
+            );
             // 边框
             int borderColor = theme.getBorderColor();
-            context.drawRect(getAbsoluteX(), getAbsoluteY(), getWidth(), 1, borderColor);
-            context.drawRect(getAbsoluteX(), getAbsoluteY() + getHeight() - 1, getWidth(), 1, borderColor);
-            context.drawRect(getAbsoluteX(), getAbsoluteY(), 1, getHeight(), borderColor);
-            context.drawRect(getAbsoluteX() + getWidth() - 1, getAbsoluteY(), 1, getHeight(), borderColor);
+            context.drawRect(bgX, bgY, bgW, 1, borderColor);
+            context.drawRect(bgX, bgY + bgH - 1, bgW, 1, borderColor);
+            context.drawRect(bgX, bgY, 1, bgH, borderColor);
+            context.drawRect(bgX + bgW - 1, bgY, 1, bgH, borderColor);
         }
-        
+
         // 注意：我们不在这里绘制物品，物品由 ContainerScreen 统一绘制
     }
 }

@@ -23,7 +23,9 @@ public abstract class UIElement {
     public final void addChild(final UIElement child) {
         Objects.requireNonNull(child, "child");
         if (child == this) {
-            throw new IllegalArgumentException("element cannot be its own child");
+            throw new IllegalArgumentException(
+                "element cannot be its own child"
+            );
         }
         if (child.parent != null) {
             child.parent.removeChild(child);
@@ -59,7 +61,24 @@ public abstract class UIElement {
         return parent;
     }
 
-    public final void setFrame(final int x, final int y, final int width, final int height) {
+    /**
+     * Sets the frame (position and dimensions) of this {@link UIElement}.
+     *
+     * <p>The {@code width} and {@code height} parameters are clamped to a minimum of 0
+     * using {@link Math#max(int, int)} to prevent negative dimensions.</p>
+     * <p>Calling this method also triggers a layout update via {@link #requestLayout()}.</p>
+     *
+     * @param x the x-coordinate (horizontal position) of the top-left corner of the element
+     * @param y the y-coordinate (vertical position) of the top-left corner of the element
+     * @param width the desired width of the element
+     * @param height the desired height of the element
+     */
+    public final void setFrame(
+        final int x,
+        final int y,
+        final int width,
+        final int height
+    ) {
         this.x = x;
         this.y = y;
         this.width = Math.max(0, width);
@@ -117,8 +136,12 @@ public abstract class UIElement {
         return px >= ax && py >= ay && px < ax + width && py < ay + height;
     }
 
-    public final void render(final UIRenderContext context, final double mouseX, final double mouseY,
-                             final float partialTicks) {
+    public final void render(
+        final UIRenderContext context,
+        final double mouseX,
+        final double mouseY,
+        final float partialTicks
+    ) {
         if (!isVisible()) {
             return;
         }
@@ -128,8 +151,12 @@ public abstract class UIElement {
         }
     }
 
-    protected void onRender(final UIRenderContext context, final double mouseX, final double mouseY,
-                            final float partialTicks) {
+    protected void onRender(
+        final UIRenderContext context,
+        final double mouseX,
+        final double mouseY,
+        final float partialTicks
+    ) {
         // 默认无绘制，交由子类实现。
     }
 
