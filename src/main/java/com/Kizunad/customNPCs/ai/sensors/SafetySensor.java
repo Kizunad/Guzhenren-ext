@@ -24,6 +24,14 @@ public class SafetySensor implements ISensor {
     private static final double SCAN_RADIUS = 2.5d;
     private static final double CRITICAL_DISTANCE = 1.5d;
     private static final int SENSOR_PRIORITY = 90;
+    private static final int CRITICAL_WINDOW_TICKS = 10;
+    private static final int IMPORTANT_WINDOW_TICKS = 25;
+    private static final int INFO_WINDOW_TICKS = 25;
+    private final InterruptThrottle interruptThrottle = new InterruptThrottle(
+        CRITICAL_WINDOW_TICKS,
+        IMPORTANT_WINDOW_TICKS,
+        INFO_WINDOW_TICKS
+    );
 
     @Override
     public String getName() {
@@ -58,13 +66,24 @@ public class SafetySensor implements ISensor {
 
         updateMemory(mind, hasHazard, nearestHazard, nearestDistanceSqr);
 
+        if (!hasHazard) {
+            return;
+        }
+
+        int distanceBucket =
+            nearestDistanceSqr <= CRITICAL_DISTANCE * CRITICAL_DISTANCE ? 0 : 1;
+        SensorEventType eventType =
+            distanceBucket == 0 ? SensorEventType.CRITICAL : SensorEventType.IMPORTANT;
+
         if (
-            hasHazard &&
-            nearestDistanceSqr <= CRITICAL_DISTANCE * CRITICAL_DISTANCE
+            interruptThrottle.allowInterrupt(
+                null,
+                eventType,
+                distanceBucket,
+                level.getGameTime()
+            )
         ) {
-            mind.triggerInterrupt(entity, SensorEventType.CRITICAL);
-        } else if (hasHazard) {
-            mind.triggerInterrupt(entity, SensorEventType.IMPORTANT);
+            mind.triggerInterrupt(entity, eventType);
         }
     }
 

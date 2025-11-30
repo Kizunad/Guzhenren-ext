@@ -1,8 +1,8 @@
 - [x] 状态总结：当前清单全部完成（覆盖基础/感知/规划/测试全链路）。
+- [ ] 预期任务：威胁响应（撤退/格挡/远程攻击策略细化）。
 - [ ] 预期任务：NpcStatus 饥饿/饱和模型与进食链路（Satiate/AcquireFood）。
 - [ ] 预期任务：进食动作可中断且战斗优先的冲突处理策略落地。
 - [ ] 预期任务：装备扩展（武器/工具评分与自动装备）。
-- [ ] 预期任务：威胁响应（撤退/格挡/远程攻击策略细化）。
 - [ ] 预期任务：性格/意愿调参与调试命令完善。
 
 - [x] **基础：NpcMind Capability** <!-- id: 0 -->    
@@ -142,6 +142,11 @@
         - [x] 覆盖失败场景 (路径阻塞、目标消失、超时) <!-- id: 121 -->
         - [x] 添加性能回归断言 <!-- id: 122 -->
 
+- [ ] **威胁响应策略细化 (Threat Response)** <!-- backlog-threat-response -->
+    - [ ] 触发：传感器写入威胁状态（可见/距离/UUID/危害），CRITICAL/IMPORTANT 分级调用 `triggerInterrupt`，forceReevaluate 调整滞后；清理旧威胁记忆。
+    - [ ] 过程：目标注册与选择（`FleeGoal`/`DefendGoal`/`SeekShelterGoal`），`FleeGoal` 反向安全点与计划清理；`BlockAction` 持续举盾；`RangedAttackAction` 维持距离窗；近战回退；中断/切换时 `stopCurrentPlan`。
+    - [ ] 结束：撤退达安全距离或威胁解除即完成；忘记临时威胁记忆，重置举盾/扫描间隔；为撤退/防御设置短冷却防振荡；GameTest 覆盖撤退/格挡/远程命中与回退并更新 `ThreatResponsePlan.md`。
+
 - [ ] **NpcStatus 饥饿/饱和与进食链路** <!-- backlog-hunger -->
     - [ ] 引入 `NpcStatus` 组件（hunger/saturation/exhaustion，NBT 序列化，配置阈值）。
     - [ ] 在 `NpcMind` tick 读取 `NpcStatus` 并映射到 `WorldStateKeys`（如 hunger_percent、is_hungry、hunger_critical、hunger_restored）。
@@ -151,5 +156,3 @@
     - [ ] `AcquireFoodGoal`（可选）：无食物且饥饿时触发，复用拾取动作获取食物。
     - [ ] 生命回复/饥饿伤害：饥饿高时小幅回血，饥饿为 0 时掉血（可配置）。
     - [ ] GameTest：验证饥饿衰减→进食→回复生效，不饿时不消耗食物，战斗中不进食。
-
-- [ ] 预期任务：威胁响应（撤退/格挡/远程攻击策略细化），详见 `ThreatResponsePlan.md`

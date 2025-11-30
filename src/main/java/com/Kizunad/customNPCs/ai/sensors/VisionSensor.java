@@ -5,6 +5,7 @@ import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.List;
+import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,6 +31,8 @@ public class VisionSensor implements ISensor {
     private static final int SCAN_INTERVAL_VISIBLE = 10;
     private static final int SCAN_INTERVAL_HIDDEN = 20;
     private static final float NEAR_THREAT_DISTANCE = 5.0f;
+    private static final int CRITICAL_DEDUP_WINDOW = 10;
+    private static final int IMPORTANT_DEDUP_WINDOW = 25;
     private static final String MEMORY_VISIBLE_COUNT = "visible_entities_count";
     private static final String MEMORY_NEAREST_ENTITY = "nearest_entity";
     private static final String MEMORY_NEAREST_ENTITY_TYPE = "nearest_entity_type";
@@ -43,6 +46,12 @@ public class VisionSensor implements ISensor {
 
     private final double range;
     private int currentScanInterval = SCAN_INTERVAL_VISIBLE; // 默认 10 ticks
+    private final InterruptThrottle interruptThrottle =
+        new InterruptThrottle(
+            CRITICAL_DEDUP_WINDOW,
+            IMPORTANT_DEDUP_WINDOW,
+            IMPORTANT_DEDUP_WINDOW
+        );
 
     public VisionSensor() {
         this(DEFAULT_RANGE);
@@ -362,40 +371,55 @@ public class VisionSensor implements ISensor {
         float distance,
         ServerLevel level
     ) {
+        int distanceBucket = getDistanceBucket(distance);
+        long gameTime = level.getGameTime();
+        UUID targetId = target.getUUID();
+
+        SensorEventType eventType = null;
+
         // 检测玩家
         if (target instanceof net.minecraft.world.entity.player.Player) {
-            mind.triggerInterrupt(
-                observer,
-                com.Kizunad.customNPCs.ai.sensors.SensorEventType.IMPORTANT
-            );
-            MindLog.decision(
-                MindLogLevel.INFO,
-                "检测到玩家,触发 IMPORTANT 中断"
-            );
-            return;
+            eventType = SensorEventType.IMPORTANT;
         }
 
         // 检测敌对生物
-        if (isHostile(target, observer)) {
-            // 近距离敌对实体视为紧急威胁
-            if (distance < NEAR_THREAT_DISTANCE) {
-                mind.triggerInterrupt(
-                    observer,
-                    com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
-                );
-                MindLog.decision(
-                    MindLogLevel.INFO,
-                    "检测到近距离威胁 ({} @ {}格),触发 CRITICAL 中断",
-                    target.getType().getDescription().getString(),
-                    String.format("%.1f", distance)
-                );
-            } else {
-                mind.triggerInterrupt(
-                    observer,
-                    com.Kizunad.customNPCs.ai.sensors.SensorEventType.IMPORTANT
-                );
-            }
+        if (eventType == null && isHostile(target, observer)) {
+            eventType =
+                distance < NEAR_THREAT_DISTANCE
+                    ? SensorEventType.CRITICAL
+                    : SensorEventType.IMPORTANT;
         }
+
+        if (eventType == null) {
+            return;
+        }
+
+        if (
+            !interruptThrottle.allowInterrupt(
+                targetId,
+                eventType,
+                distanceBucket,
+                gameTime
+            )
+        ) {
+            return;
+        }
+
+        mind.triggerInterrupt(observer, eventType);
+
+        MindLog.decision(
+            MindLogLevel.INFO,
+            "检测到目标 {}@{} (bucket {}),触发 {} 中断",
+            target.getType().getDescription().getString(),
+            String.format("%.1f", distance),
+            distanceBucket,
+            eventType
+        );
+
+    }
+
+    private int getDistanceBucket(float distance) {
+        return distance < NEAR_THREAT_DISTANCE ? 0 : 1;
     }
 
     /**

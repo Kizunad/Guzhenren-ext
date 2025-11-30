@@ -14,6 +14,14 @@ import net.minecraft.world.entity.LivingEntity;
 public class DamageSensor implements ISensor {
 
     private int lastHurtTime = 0;
+    private static final int CRITICAL_WINDOW_TICKS = 10;
+    private static final int IMPORTANT_WINDOW_TICKS = 25;
+    private static final int INFO_WINDOW_TICKS = 25;
+    private final InterruptThrottle interruptThrottle = new InterruptThrottle(
+        CRITICAL_WINDOW_TICKS,
+        IMPORTANT_WINDOW_TICKS,
+        INFO_WINDOW_TICKS
+    );
 
     @Override
     public String getName() {
@@ -69,11 +77,17 @@ public class DamageSensor implements ISensor {
                         );
                 }
 
-                // 触发紧急中断,立即重新评估目标
-                mind.triggerInterrupt(
-                    entity,
-                    com.Kizunad.customNPCs.ai.sensors.SensorEventType.CRITICAL
-                );
+                // 触发紧急中断,立即重新评估目标（带节流，防止同一攻击者抖动）
+                if (
+                    interruptThrottle.allowInterrupt(
+                        attackerUuid,
+                        SensorEventType.CRITICAL,
+                        0,
+                        level.getGameTime()
+                    )
+                ) {
+                    mind.triggerInterrupt(entity, SensorEventType.CRITICAL);
+                }
 
                 MindLog.decision(
                     MindLogLevel.INFO,
