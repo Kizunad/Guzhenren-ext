@@ -10,19 +10,39 @@ import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * 进食目标：饥饿时规划进食，战斗/危险时不触发。
+ * 进食目标:饥饿时规划进食,战斗/危险时不触发。
+ * <p>
+ * 该目标会在NPC饥饿时触发,使用GOAP系统规划进食行为。
+ * 在危险情况下(战斗或有可见敌人)会被抑制。
+ * </p>
  */
 public class SatiateGoal extends PlanBasedGoal {
 
+    /** 基础优先级,用于计算进食目标的最低优先级 */
+    private static final double BASE_PRIORITY = 0.3;
+
+    /** 进食动作实例 */
     private final GoapEatAction eatAction = new GoapEatAction();
 
+    /**
+     * 计算进食目标的优先级。
+     * <p>
+     * 优先级计算公式: BASE_PRIORITY + (1.0 - hungerPercent)
+     * 饥饿度越低(越饿),优先级越高。
+     * 在危险情况下优先级为0。
+     * </p>
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     * @return 优先级值,范围[0.0, 1.3]
+     */
     @Override
     public float getPriority(INpcMind mind, LivingEntity entity) {
         double hungerPercent = mind.getStatus().getHungerPercent();
         if (!mind.getStatus().isHungry() || isInDanger(mind, entity)) {
             return 0.0f;
         }
-        return (float) (0.3 + (1.0 - hungerPercent));
+        return (float) (BASE_PRIORITY + (1.0 - hungerPercent));
     }
 
     @Override

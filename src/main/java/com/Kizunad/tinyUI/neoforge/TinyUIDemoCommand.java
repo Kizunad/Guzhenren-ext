@@ -3,6 +3,7 @@ package com.Kizunad.tinyUI.neoforge;
 import com.Kizunad.tinyUI.demo.ComplexLayoutMenu;
 import com.Kizunad.tinyUI.demo.ComplexLayoutScreen;
 import com.Kizunad.tinyUI.demo.DemoRegistry;
+import com.Kizunad.tinyUI.demo.SimpleContainerScreen;
 import com.Kizunad.tinyUI.theme.Theme;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -15,6 +16,11 @@ import net.minecraft.network.chat.Component;
  * 客户端命令：/tinyui demo <id> 打开 tinyUI 示例界面。
  */
 public final class TinyUIDemoCommand {
+
+    private static final int DEMO_ID_COMPLEX_CONTAINER = 6;
+    private static final int DEMO_ID_SIMPLE_CONTAINER = 7;
+    private static final int DEFAULT_CUSTOM_SLOT_COUNT = 63;
+    private static final int SIMPLE_CONTAINER_SLOT_COUNT = 27;
 
     private TinyUIDemoCommand() {
     }
@@ -32,16 +38,39 @@ public final class TinyUIDemoCommand {
         final Minecraft mc = Minecraft.getInstance();
         
         // Special case: Demo 6 is the Complex Layout with real containers
-        if (id == 6) {
+        if (id == DEMO_ID_COMPLEX_CONTAINER) {
             if (mc.player == null) {
                 return 0;
             }
             // Create menu with 63 custom slots (7 rows of 9)
-            ComplexLayoutMenu menu = new ComplexLayoutMenu(0, mc.player.getInventory(), 63);
+            ComplexLayoutMenu menu = new ComplexLayoutMenu(
+                0,
+                mc.player.getInventory(),
+                DEFAULT_CUSTOM_SLOT_COUNT
+            );
             ComplexLayoutScreen screen = new ComplexLayoutScreen(
                 menu, 
                 mc.player.getInventory(), 
                 Component.literal("Complex Layout"), 
+                Theme.vanilla()
+            );
+            mc.setScreen(screen);
+            return 1;
+        }
+        // Demo 7: 简化容器布局（3x9 + 玩家背包）
+        if (id == DEMO_ID_SIMPLE_CONTAINER) {
+            if (mc.player == null) {
+                return 0;
+            }
+            ComplexLayoutMenu menu = new ComplexLayoutMenu(
+                0,
+                mc.player.getInventory(),
+                SIMPLE_CONTAINER_SLOT_COUNT
+            );
+            SimpleContainerScreen screen = new SimpleContainerScreen(
+                menu,
+                mc.player.getInventory(),
+                Component.literal("Simple Container Demo"),
                 Theme.vanilla()
             );
             mc.setScreen(screen);

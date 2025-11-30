@@ -17,18 +17,57 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 回复Goal - 当血量低时，寻找高回复度物品（药水/金苹果等）进行治疗。
+ * 回复Goal - 当血量低时,寻找高回复度物品(药水/金苹果等)进行治疗。
+ * <p>
+ * 该目标会在NPC血量低于阈值时触发,自动寻找并使用背包中的治疗物品。
+ * 支持药水、金苹果和具有回复效果的食物。
+ * </p>
  */
 public class HealGoal implements IGoal {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HealGoal.class);
 
-    private static final float HEAL_THRESHOLD = 0.5f; // 50% 血量触发
-    private static final float HEALTHY_THRESHOLD = 0.8f; // 80% 血量认为已恢复
-    private static final int HEALING_MEMORY_DURATION = 200; // 10秒
+    /** 触发治疗的血量阈值(50%) */
+    private static final float HEAL_THRESHOLD = 0.5f;
+    
+    /** 认为已恢复健康的血量阈值(80%) */
+    private static final float HEALTHY_THRESHOLD = 0.8f;
+    
+    /** 治疗记忆持续时间(tick) */
+    private static final int HEALING_MEMORY_DURATION = 200;
 
+    /** 主手槽位标识 */
     private static final int MAIN_HAND_SLOT = -1;
+    
+    /** 副手槽位标识 */
     private static final int OFF_HAND_SLOT = -2;
+    
+    /** 瞬间治疗效果基础分数 */
+    private static final int INSTANT_HEAL_BASE_SCORE = 10;
+    
+    /** 瞬间治疗效果等级加成 */
+    private static final int INSTANT_HEAL_AMPLIFIER_BONUS = 5;
+    
+    /** 再生效果基础分数 */
+    private static final int REGENERATION_BASE_SCORE = 6;
+    
+    /** 再生效果等级加成 */
+    private static final int REGENERATION_AMPLIFIER_BONUS = 2;
+    
+    /** 再生效果持续时间转换因子(tick转分数) */
+    private static final double REGENERATION_DURATION_FACTOR = 40.0;
+    
+    /** 未知药水默认分数 */
+    private static final int UNKNOWN_POTION_SCORE = 4;
+    
+    /** 金苹果治疗分数 */
+    private static final int GOLDEN_APPLE_SCORE = 12;
+    
+    /** 附魔金苹果治疗分数 */
+    private static final int ENCHANTED_GOLDEN_APPLE_SCORE = 20;
+    
+    /** 食物再生效果基础分数 */
+    private static final int FOOD_REGENERATION_BASE_SCORE = 4;
 
     private UseItemAction currentAction = null;
     private ItemStack previousMainHand = ItemStack.EMPTY;
@@ -36,6 +75,17 @@ public class HealGoal implements IGoal {
     private int sourceSlot = -1;
     private ItemStack sourceStack = ItemStack.EMPTY;
 
+    /**
+     * 计算治疗目标的优先级。
+     * <p>
+     * 优先级与血量成反比:血量越低,优先级越高。
+     * 如果血量高于阈值或没有可用的治疗物品,优先级为0。
+     * </p>
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     * @return 优先级值,范围[0.0, 1.0]
+     */
     @Override
     public float getPriority(INpcMind mind, LivingEntity entity) {
         float healthPercentage = entity.getHealth() / entity.getMaxHealth();
@@ -49,12 +99,26 @@ public class HealGoal implements IGoal {
         return 1.0f - healthPercentage;
     }
 
+    /**
+     * 检查治疗目标是否可以运行。
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     * @return 如果血量低于阈值且有可用治疗物品,返回true
+     */
     @Override
     public boolean canRun(INpcMind mind, LivingEntity entity) {
         return entity.getHealth() < entity.getMaxHealth() * HEAL_THRESHOLD
             && findHealingItem(mind, entity) != null;
     }
 
+    /**
+     * 开始执行治疗目标。
+     * 在短期记忆中记录正在治疗的状态。
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     */
     @Override
     public void start(INpcMind mind, LivingEntity entity) {
         mind.getMemory().rememberShortTerm(
@@ -71,6 +135,16 @@ public class HealGoal implements IGoal {
         );
     }
 
+    /**
+     * 每tick执行一次的治疗逻辑。
+     * <p>
+     * 如果尚未开始使用物品,则寻找最佳治疗物品并开始使用。
+     * 如果正在使用物品,则继续执行使用动作直到成功或失败。
+     * </p>
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     */
     @Override
     public void tick(INpcMind mind, LivingEntity entity) {
         if (currentAction == null) {
@@ -99,6 +173,13 @@ public class HealGoal implements IGoal {
         }
     }
 
+    /**
+     * 停止执行治疗目标。
+     * 清除治疗记忆,停止当前动作,并恢复物品状态。
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     */
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
         mind.getMemory().forget("is_healing");
@@ -117,6 +198,13 @@ public class HealGoal implements IGoal {
         );
     }
 
+    /**
+     * 检查治疗目标是否已完成。
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     * @return 如果血量已恢复到健康阈值或没有可用治疗物品,返回true
+     */
     @Override
     public boolean isFinished(INpcMind mind, LivingEntity entity) {
         boolean healthRestored = entity.getHealth() >= entity.getMaxHealth() * HEALTHY_THRESHOLD;
@@ -125,11 +213,27 @@ public class HealGoal implements IGoal {
         return healthRestored || noHealingItem;
     }
 
+    /**
+     * 获取目标名称。
+     *
+     * @return 目标名称"heal"
+     */
     @Override
     public String getName() {
         return "heal";
     }
 
+    /**
+     * 寻找最佳治疗物品。
+     * <p>
+     * 搜索主手、副手和背包中的所有物品,
+     * 根据治疗分数选择最佳的治疗物品。
+     * </p>
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     * @return 最佳治疗物品候选,如果没有找到返回null
+     */
     private HealingCandidate findHealingItem(INpcMind mind, LivingEntity entity) {
         if (!(entity instanceof Mob mob)) {
             return null;
@@ -166,6 +270,19 @@ public class HealGoal implements IGoal {
         return best;
     }
 
+    /**
+     * 计算物品的治疗分数。
+     * <p>
+     * 根据物品类型和效果计算治疗价值:
+     * - 药水:根据瞬间治疗和再生效果计算
+     * - 金苹果:固定高分
+     * - 食物:根据再生效果计算
+     * </p>
+     *
+     * @param stack 物品堆
+     * @param entity NPC实体
+     * @return 治疗分数,分数越高表示治疗效果越好
+     */
     private double healingScore(ItemStack stack, LivingEntity entity) {
         Item item = stack.getItem();
         if (item == Items.POTION || item == Items.SPLASH_POTION || item == Items.LINGERING_POTION) {
@@ -174,31 +291,37 @@ public class HealGoal implements IGoal {
             if (contents != null) {
                 for (var effect : contents.getAllEffects()) {
                     if (effect.getEffect().equals(net.minecraft.world.effect.MobEffects.HEAL)) {
-                        score += 10 + effect.getAmplifier() * 5;
+                        score += INSTANT_HEAL_BASE_SCORE 
+                            + effect.getAmplifier() * INSTANT_HEAL_AMPLIFIER_BONUS;
                     }
                     if (effect.getEffect().equals(net.minecraft.world.effect.MobEffects.REGENERATION)) {
-                        score += 6 + effect.getAmplifier() * 2 + effect.getDuration() / 40.0;
+                        score += REGENERATION_BASE_SCORE 
+                            + effect.getAmplifier() * REGENERATION_AMPLIFIER_BONUS 
+                            + effect.getDuration() / REGENERATION_DURATION_FACTOR;
                     }
                 }
             } else {
-                score = 4; // 兜底认为是正面治疗类药水
+                score = UNKNOWN_POTION_SCORE; // 兜底认为是正面治疗类药水
             }
             return score;
         }
 
         if (item == Items.GOLDEN_APPLE) {
-            return 12;
+            return GOLDEN_APPLE_SCORE;
         }
         if (item == Items.ENCHANTED_GOLDEN_APPLE) {
-            return 20;
+            return ENCHANTED_GOLDEN_APPLE_SCORE;
         }
 
         var food = stack.getFoodProperties(entity);
         if (food != null) {
             double score = 0;
             for (var pair : food.effects()) {
-                if (pair.effect() != null && pair.effect().getEffect().equals(net.minecraft.world.effect.MobEffects.REGENERATION)) {
-                    score += 4 + pair.effect().getDuration() / 40.0;
+                if (pair.effect() != null 
+                    && pair.effect().getEffect().equals(
+                        net.minecraft.world.effect.MobEffects.REGENERATION)) {
+                    score += FOOD_REGENERATION_BASE_SCORE 
+                        + pair.effect().getDuration() / REGENERATION_DURATION_FACTOR;
                 }
             }
             return score;
@@ -206,6 +329,16 @@ public class HealGoal implements IGoal {
         return 0;
     }
 
+    /**
+     * 准备使用治疗物品。
+     * <p>
+     * 保存当前手持物品状态,并将治疗物品移动到主手。
+     * </p>
+     *
+     * @param candidate 选中的治疗物品候选
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     */
     private void prepareItem(HealingCandidate candidate, INpcMind mind, LivingEntity entity) {
         previousMainHand = entity.getMainHandItem().copy();
         previousOffHand = entity.getOffhandItem().copy();
@@ -223,6 +356,15 @@ public class HealGoal implements IGoal {
         }
     }
 
+    /**
+     * 使用物品后的清理工作。
+     * <p>
+     * 将主手中剩余的物品放回背包,并恢复之前的手持物品状态。
+     * </p>
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     */
     private void cleanupAfterUse(INpcMind mind, LivingEntity entity) {
         ItemStack hand = entity.getItemInHand(InteractionHand.MAIN_HAND);
         if (!hand.isEmpty()) {
@@ -235,6 +377,15 @@ public class HealGoal implements IGoal {
         entity.setItemInHand(InteractionHand.OFF_HAND, previousOffHand);
     }
 
+    /**
+     * 回滚物品状态。
+     * <p>
+     * 在使用失败或中断时,恢复所有物品到原始状态。
+     * </p>
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     */
     private void rollback(INpcMind mind, LivingEntity entity) {
         ItemStack hand = entity.getItemInHand(InteractionHand.MAIN_HAND);
         if (!hand.isEmpty()) {
@@ -253,6 +404,13 @@ public class HealGoal implements IGoal {
         }
     }
 
+    /**
+     * 比较两个治疗物品候选,返回分数更高的一个。
+     *
+     * @param a 候选A
+     * @param b 候选B
+     * @return 分数更高的候选,如果其中一个为null则返回另一个
+     */
     private HealingCandidate better(HealingCandidate a, HealingCandidate b) {
         if (a == null) {
             return b;
@@ -263,5 +421,12 @@ public class HealGoal implements IGoal {
         return b.score() > a.score() ? b : a;
     }
 
+    /**
+     * 治疗物品候选记录。
+     *
+     * @param stack 物品堆
+     * @param slot 物品所在槽位(-1=主手, -2=副手, >=0=背包槽位)
+     * @param score 治疗分数
+     */
     private record HealingCandidate(ItemStack stack, int slot, double score) {}
 }

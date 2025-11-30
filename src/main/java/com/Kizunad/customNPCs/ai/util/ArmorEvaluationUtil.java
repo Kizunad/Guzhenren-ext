@@ -9,15 +9,46 @@ import net.minecraft.world.item.ItemStack;
 /**
  * 盔甲评分与择优工具。
  * <p>
- * 评分因素：
+ * 评分因素:
  * - 防御值、韧性
  * - 击退抗性
- * - 附魔总值（正向）与诅咒（负向）
- * - 耐久比例（轻权重）
+ * - 附魔总值(正向)与诅咒(负向)
+ * - 耐久比例(轻权重)
+ * </p>
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public final class ArmorEvaluationUtil {
 
+    /** 默认防御值权重 */
+    private static final double DEFAULT_ARMOR_WEIGHT = 1.0;
+    
+    /** 默认韧性权重 */
+    private static final double DEFAULT_TOUGHNESS_WEIGHT = 0.65;
+    
+    /** 默认击退抗性权重 */
+    private static final double DEFAULT_KNOCKBACK_WEIGHT = 10.0;
+    
+    /** 默认附魔权重 */
+    private static final double DEFAULT_ENCHANT_WEIGHT = 0.35;
+    
+    /** 默认诅咒惩罚权重 */
+    private static final double DEFAULT_CURSE_PENALTY_WEIGHT = 2.0;
+    
+    /** 默认耐久度权重 */
+    private static final double DEFAULT_DURABILITY_WEIGHT = 0.1;
+    
+    /** 盔甲改进度最小阈值,用于浮点数比较 */
+    private static final double IMPROVEMENT_THRESHOLD = 1.0e-3;
+
+    /**
+     * 盔甲评估偏好配置。
+     *
+     * @param armorWeight 防御值权重
+     * @param toughnessWeight 韧性权重
+     * @param knockbackWeight 击退抗性权重
+     * @param enchantWeight 附魔权重
+     * @param cursePenaltyWeight 诅咒惩罚权重
+     * @param durabilityWeight 耐久度权重
+     */
     public record ArmorPreference(
         double armorWeight,
         double toughnessWeight,
@@ -26,11 +57,33 @@ public final class ArmorEvaluationUtil {
         double cursePenaltyWeight,
         double durabilityWeight
     ) {
+        /**
+         * 获取默认盔甲偏好配置。
+         *
+         * @return 默认配置
+         */
         public static ArmorPreference defaults() {
-            return new ArmorPreference(1.0, 0.65, 10.0, 0.35, 2.0, 0.1);
+            return new ArmorPreference(
+                DEFAULT_ARMOR_WEIGHT,
+                DEFAULT_TOUGHNESS_WEIGHT,
+                DEFAULT_KNOCKBACK_WEIGHT,
+                DEFAULT_ENCHANT_WEIGHT,
+                DEFAULT_CURSE_PENALTY_WEIGHT,
+                DEFAULT_DURABILITY_WEIGHT
+            );
         }
     }
 
+    /**
+     * 盔甲升级方案记录。
+     *
+     * @param inventorySlot 背包槽位索引
+     * @param slot 装备槽位
+     * @param stack 盔甲物品堆
+     * @param improvement 改进度(新盔甲分数 - 当前盔甲分数)
+     * @param targetScore 目标盔甲分数
+     * @param currentScore 当前盔甲分数
+     */
     public record ArmorUpgrade(
         int inventorySlot,
         EquipmentSlot slot,
@@ -118,7 +171,7 @@ public final class ArmorEvaluationUtil {
                     preference
                 );
                 double improvement = candidateScore - currentScore;
-                if (improvement > bestImprovement + 1.0e-3) {
+                if (improvement > bestImprovement + IMPROVEMENT_THRESHOLD) {
                     bestImprovement = improvement;
                     best = new ArmorUpgrade(
                         i,

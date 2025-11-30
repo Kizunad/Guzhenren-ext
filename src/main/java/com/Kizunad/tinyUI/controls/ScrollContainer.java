@@ -66,24 +66,38 @@ public final class ScrollContainer extends InteractiveElement {
         this.content = content;
         if (content != null) {
             addChild(content);
-            applyScroll();
+            // 等待容器完成布局后再同步宽度，避免父容器宽度为 0 时把子元素压缩到一起
+            requestLayout();
         }
     }
 
     @Override
-    public boolean onMouseScroll(final double mouseX, final double mouseY, final double delta) {
-        if (!isEnabledAndVisible() || content == null || !isPointInside(mouseX, mouseY)) {
+    public boolean onMouseScroll(
+        final double mouseX,
+        final double mouseY,
+        final double delta
+    ) {
+        if (
+            !isEnabledAndVisible() ||
+            content == null ||
+            !isPointInside(mouseX, mouseY)
+        ) {
             return false;
         }
         final int maxScroll = Math.max(0, content.getHeight() - getHeight());
         scrollY = clamp(scrollY - (int) (delta * SCROLL_STEP), 0, maxScroll);
-        applyScroll();
+        applyScrollIfReady();
         return true;
     }
 
     @Override
-    public boolean onMouseDrag(final double mouseX, final double mouseY, final int button,
-                               final double dragX, final double dragY) {
+    public boolean onMouseDrag(
+        final double mouseX,
+        final double mouseY,
+        final int button,
+        final double dragX,
+        final double dragY
+    ) {
         if (!isEnabledAndVisible() || content == null) {
             return false;
         }
@@ -94,7 +108,7 @@ public final class ScrollContainer extends InteractiveElement {
 
         final int viewportH = getHeight() - BORDER_THICKNESS * 2;
         final int contentH = content.getHeight();
-        int handleH = (int) ((float) viewportH / contentH * viewportH);
+        int handleH = (int) (((float) viewportH / contentH) * viewportH);
         handleH = Math.max(MIN_HANDLE_HEIGHT, Math.min(viewportH, handleH));
 
         final double trackLen = viewportH - handleH;
@@ -104,15 +118,24 @@ public final class ScrollContainer extends InteractiveElement {
 
         final double scrollPerPixel = (double) maxScroll / trackLen;
         scrollY = clamp(scrollY + (int) (dragY * scrollPerPixel), 0, maxScroll);
-        applyScroll();
+        applyScrollIfReady();
         return true;
     }
 
     @Override
-    protected void onRender(final UIRenderContext context, final double mouseX, final double mouseY,
-                            final float partialTicks) {
-        context.drawRect(getAbsoluteX(), getAbsoluteY(), getWidth(), getHeight(),
-                theme.getBackgroundColor());
+    protected void onRender(
+        final UIRenderContext context,
+        final double mouseX,
+        final double mouseY,
+        final float partialTicks
+    ) {
+        context.drawRect(
+            getAbsoluteX(),
+            getAbsoluteY(),
+            getWidth(),
+            getHeight(),
+            theme.getBackgroundColor()
+        );
         drawBorder(context);
         drawScrollbar(context);
     }
@@ -130,9 +153,21 @@ public final class ScrollContainer extends InteractiveElement {
         final int h = getHeight();
         final int color = theme.getAccentColor();
         context.drawRect(x, y, w, BORDER_THICKNESS, color); // 上边框
-        context.drawRect(x, y + h - BORDER_THICKNESS, w, BORDER_THICKNESS, color); // 下边框
+        context.drawRect(
+            x,
+            y + h - BORDER_THICKNESS,
+            w,
+            BORDER_THICKNESS,
+            color
+        ); // 下边框
         context.drawRect(x, y, BORDER_THICKNESS, h, color); // 左边框
-        context.drawRect(x + w - BORDER_THICKNESS, y, BORDER_THICKNESS, h, color); // 右边框
+        context.drawRect(
+            x + w - BORDER_THICKNESS,
+            y,
+            BORDER_THICKNESS,
+            h,
+            color
+        ); // 右边框
     }
 
     /**
@@ -144,7 +179,8 @@ public final class ScrollContainer extends InteractiveElement {
         if (content == null || content.getHeight() <= getHeight()) {
             return;
         }
-        final int x = getAbsoluteX() + getWidth() - SCROLLBAR_WIDTH - BORDER_THICKNESS;
+        final int x =
+            getAbsoluteX() + getWidth() - SCROLLBAR_WIDTH - BORDER_THICKNESS;
         final int y = getAbsoluteY() + BORDER_THICKNESS;
         final int h = getHeight() - BORDER_THICKNESS * 2;
 
@@ -153,24 +189,42 @@ public final class ScrollContainer extends InteractiveElement {
 
         // Draw handle
         final int maxScroll = content.getHeight() - getHeight();
-        int handleH = (int) ((float) h / content.getHeight() * h);
+        int handleH = (int) (((float) h / content.getHeight()) * h);
         handleH = Math.max(MIN_HANDLE_HEIGHT, Math.min(h, handleH));
 
-        final int handleY = (int) ((float) scrollY / maxScroll * (h - handleH));
+        final int handleY = (int) (((float) scrollY / maxScroll) *
+            (h - handleH));
 
-        context.drawRect(x, y + handleY, SCROLLBAR_WIDTH, handleH, SCROLLBAR_COLOR);
+        context.drawRect(
+            x,
+            y + handleY,
+            SCROLLBAR_WIDTH,
+            handleH,
+            SCROLLBAR_COLOR
+        );
     }
 
     /**
      * 应用滚动位置到内容元素。
      * 通过设置内容的 Y 坐标为负值来实现滚动效果。
      */
-    private void applyScroll() {
+    private void applyScrollIfReady() {
         if (content == null) {
             return;
         }
-        content.setFrame(0, -scrollY, getWidth(), content.getHeight());
+        if (getWidth() <= 0) {
+            // 父容器尚未布局出有效宽度时跳过，避免将内容宽度强制写成 0
+            return;
+        }
+        // 保持内容自身布局宽度，避免被 viewport 宽度压缩导致网格重叠
+        content.setFrame(0, -scrollY, content.getWidth(), content.getHeight());
         content.onLayoutUpdated();
+    }
+
+    @Override
+    public void onLayoutUpdated() {
+        super.onLayoutUpdated();
+        applyScrollIfReady();
     }
 
     /**

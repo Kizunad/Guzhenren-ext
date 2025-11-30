@@ -5,7 +5,7 @@
 - [ ] 预期任务：威胁响应（撤退/格挡/远程攻击策略细化）。
 - [ ] 预期任务：性格/意愿调参与调试命令完善。
 
-- [x] **基础：NpcMind Capability** <!-- id: 0 -->
+- [x] **基础：NpcMind Capability** <!-- id: 0 -->    
     - [x] 定义 `INpcMind` 接口（Sensors、Memory、Decision 访问） <!-- id: 1 -->
     - [x] 实现 `NpcMind` capability provider 和存储 <!-- id: 2 -->
     - [x] 将 Capability 附加到 `EntityGuzhenren`（或特定 NPC 实体） <!-- id: 3 -->
@@ -151,3 +151,5 @@
     - [ ] `AcquireFoodGoal`（可选）：无食物且饥饿时触发，复用拾取动作获取食物。
     - [ ] 生命回复/饥饿伤害：饥饿高时小幅回血，饥饿为 0 时掉血（可配置）。
     - [ ] GameTest：验证饥饿衰减→进食→回复生效，不饿时不消耗食物，战斗中不进食。
+
+- [ ] 预期任务：威胁响应（撤退/格挡/远程攻击策略细化），详见 `ThreatResponsePlan.md`

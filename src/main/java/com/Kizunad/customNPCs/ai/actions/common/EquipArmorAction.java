@@ -14,18 +14,33 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 装备背包中更优盔甲的动作。
+ * <p>
+ * 该动作会从背包中寻找更优的盔甲并自动装备,
+ * 将旧盔甲放回背包或丢弃(如果背包已满)。
+ * </p>
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class EquipArmorAction extends AbstractStandardAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipArmorAction.class);
 
+    /** 盔甲优化状态的短期记忆持续时间(tick) */
+    private static final int ARMOR_MEMORY_DURATION = 200;
+
+    /** 盔甲偏好设置 */
     private final ArmorEvaluationUtil.ArmorPreference preference;
 
+    /**
+     * 使用默认偏好创建装备盔甲动作。
+     */
     public EquipArmorAction() {
         this(ArmorEvaluationUtil.ArmorPreference.defaults());
     }
 
+    /**
+     * 使用指定偏好创建装备盔甲动作。
+     *
+     * @param preference 盔甲评估偏好
+     */
     public EquipArmorAction(ArmorEvaluationUtil.ArmorPreference preference) {
         super("EquipArmorAction");
         this.preference = preference;
@@ -94,7 +109,7 @@ public class EquipArmorAction extends AbstractStandardAction {
             .rememberShortTerm(
                 WorldStateKeys.ARMOR_BETTER_AVAILABLE,
                 false,
-                200
+                ARMOR_MEMORY_DURATION
             );
 
         LOGGER.info(

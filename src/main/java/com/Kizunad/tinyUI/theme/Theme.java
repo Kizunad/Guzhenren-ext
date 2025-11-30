@@ -75,10 +75,13 @@ public final class Theme {
 
     public int getFieldBackgroundColor() {
         // Slightly darker than background for fields
-        return backgroundColor & 0xFEFEFEFE; 
+        return backgroundColor & FIELD_MASK; 
     }
 
     public int getBorderColor() {
-        return 0xFF3F3F46; // Default border color
+        return DEFAULT_BORDER_COLOR; 
     }
+
+    private static final int FIELD_MASK = 0xFEFEFEFE;
+    private static final int DEFAULT_BORDER_COLOR = 0xFF3F3F46;
 }

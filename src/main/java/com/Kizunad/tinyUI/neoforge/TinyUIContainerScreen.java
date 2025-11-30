@@ -201,7 +201,8 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu> ext
     protected void slotClicked(@Nullable Slot slot, int slotId, int button, ClickType type) {
         // 安全检查：确保当前 Screen 的 Menu 与玩家当前的 ContainerMenu 一致
         // 防止因 Menu 切换导致 Screen 残留（或 Client-side Demo）引发的 IndexOutOfBoundsException
-        if (this.minecraft != null && this.minecraft.player != null 
+        if (shouldEnforceMenuBinding()
+            && this.minecraft != null && this.minecraft.player != null
             && this.minecraft.player.containerMenu != this.menu) {
             return;
         }
@@ -219,7 +220,45 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu> ext
         }
         // 使用校正后的索引调用原版逻辑，确保 slot/index 成对一致
         Slot resolvedSlot = this.menu.slots.get(resolvedId);
+
+        if (!shouldEnforceMenuBinding()) {
+            handleClientOnlyClick(resolvedId, resolvedSlot, button, type);
+            return;
+        }
         super.slotClicked(resolvedSlot, resolvedId, button, type);
+    }
+
+    private void handleClientOnlyClick(int resolvedId, Slot resolvedSlot, int button, ClickType type) {
+        if (this.minecraft == null || this.minecraft.player == null) {
+            return;
+        }
+        switch (type) {
+            case QUICK_MOVE:
+                this.menu.quickMoveStack(this.minecraft.player, resolvedId);
+                break;
+            case PICKUP:
+            case THROW:
+            case CLONE:
+            case SWAP:
+            case PICKUP_ALL:
+            case QUICK_CRAFT:
+            default:
+                this.menu.clicked(resolvedId, button, type, this.minecraft.player);
+                break;
+        }
+        this.menu.broadcastChanges();
+        // 手动标记屏幕需要重绘，保持与原版行为一致
+        resolvedSlot.setChanged();
+    }
+
+    /**
+     * 是否强制要求玩家当前的 ContainerMenu 与本 Screen 的 menu 一致。
+     * 默认开启安全检查；客户端 Demo 场景可覆写为 false 以允许本地交互。
+     *
+     * @return true 进行强制校验；false 则跳过（请确保 Slot 数量/索引匹配）
+     */
+    protected boolean shouldEnforceMenuBinding() {
+        return true;
     }
 
     @Override

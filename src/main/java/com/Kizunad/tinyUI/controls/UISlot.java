@@ -1,7 +1,6 @@
 package com.Kizunad.tinyUI.controls;
 
 import com.Kizunad.tinyUI.core.InteractiveElement;
-import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRenderContext;
 import com.Kizunad.tinyUI.theme.Theme;
 import java.util.Objects;
@@ -16,6 +15,8 @@ import java.util.Objects;
  */
 public class UISlot extends InteractiveElement {
 
+    private static final int DEFAULT_SLOT_SIZE = 18;
+
     private final int slotIndex;
     private final Theme theme;
     private boolean drawBackground = true;
@@ -27,8 +28,7 @@ public class UISlot extends InteractiveElement {
     public UISlot(int slotIndex, Theme theme) {
         this.slotIndex = slotIndex;
         this.theme = Objects.requireNonNull(theme);
-        // 标准 Slot 大小通常是 18x18
-        setFrame(0, 0, 18, 18);
+        setFrame(0, 0, DEFAULT_SLOT_SIZE, DEFAULT_SLOT_SIZE);
     }
 
     public int getSlotIndex() {

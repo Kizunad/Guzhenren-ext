@@ -1,15 +1,14 @@
 package com.Kizunad.tinyUI.demo;
 
+import com.Kizunad.tinyUI.controls.ContainerUI;
+import com.Kizunad.tinyUI.controls.InventoryUI;
 import com.Kizunad.tinyUI.controls.Label;
-import com.Kizunad.tinyUI.controls.ScrollContainer;
-import com.Kizunad.tinyUI.controls.UISlot;
 import com.Kizunad.tinyUI.core.InteractiveElement;
 import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRenderContext;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.FlexLayout;
 import com.Kizunad.tinyUI.layout.FlexParams;
-import com.Kizunad.tinyUI.layout.GridLayout;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
 import com.Kizunad.tinyUI.theme.Theme;
 import java.util.HashMap;
@@ -61,7 +60,6 @@ public class ComplexLayoutScreen
     private static final int PLAYER_ROWS = 4;
     private static final int PLAYER_GAP = 4;
     private static final int PLAYER_PADDING = 4;
-    private static final int PLAYER_SLOTS_TOTAL = 36;
     private static final int PLAYER_GRID_Y = 25;
     
     private static final int FLEX_GAP = 30;
@@ -78,6 +76,12 @@ public class ComplexLayoutScreen
         super(menu, playerInventory, title);
         this.theme = theme;
         this.customSlotCount = menu.getCustomSlotCount();
+    }
+
+    @Override
+    protected boolean shouldEnforceMenuBinding() {
+        // Demo 场景为纯客户端菜单，允许跳过 containerMenu 绑定检查以启用交互
+        return false;
     }
 
     @Override
@@ -102,40 +106,50 @@ public class ComplexLayoutScreen
             main,
             mainParams
         );
+        // 主布局完成后，强制重算内部网格，避免首次布局时尺寸为 0
+        relayoutContainers(topSection, bottomPanel);
+    }
+
+    private void relayoutContainers(UIElement topSection, UIElement bottomPanel) {
+        // 左侧滚动区域：刷新其内容布局（容器自身尺寸已由 FlexLayout 写入）
+        if (!topSection.getChildren().isEmpty()) {
+            UIElement leftScroll = topSection.getChildren().get(0);
+            if (leftScroll instanceof com.Kizunad.tinyUI.controls.ScrollContainer scroll) {
+                UIElement content = scroll.getChildren().isEmpty() ? null : scroll.getChildren().get(0);
+                if (content != null) {
+                    new com.Kizunad.tinyUI.layout.GridLayout(
+                        CUSTOM_COLS, 0, CUSTOM_GAP, CUSTOM_PADDING
+                    ).layout(content, null);
+                }
+            }
+        }
+        // 底部玩家背包：重新布局其网格
+        if (!bottomPanel.getChildren().isEmpty()) {
+            // child 0 是 Label，child 1 是背包网格
+            if (bottomPanel.getChildren().size() > 1) {
+                UIElement invGrid = bottomPanel.getChildren().get(1);
+                new com.Kizunad.tinyUI.layout.GridLayout(
+                    PLAYER_COLS,
+                    PLAYER_ROWS,
+                    PLAYER_GAP,
+                    PLAYER_PADDING
+                ).layout(invGrid, null);
+            }
+        }
     }
     
     private UIElement createTopSection() {
         UIElement topSection = new UIElement() {};
 
         // 1. Left: 9*n Grid (Scrollable) with REAL slots
-        ScrollContainer leftScroll = new ScrollContainer(theme);
-        UIElement leftContent = new UIElement() {};
-
-        int customRows = (int) Math.ceil(
-            customSlotCount / (double) CUSTOM_COLS
-        );
-        // 高度/宽度按“槽位尺寸 + 间隔 + 内边距”精准计算，避免列/行未对齐导致重叠
-        int gridWidth =
-            CUSTOM_COLS * SLOT_SIZE +
-            (CUSTOM_COLS - 1) * CUSTOM_GAP +
-            CUSTOM_PADDING * 2;
-        int gridHeight = (customRows > 0)
-            ? customRows * SLOT_SIZE +
-              (customRows - 1) * CUSTOM_GAP +
-              CUSTOM_PADDING * 2
-            : CUSTOM_PADDING * 2;
-        leftContent.setFrame(0, 0, gridWidth, gridHeight);
-        leftScroll.setContent(leftContent);
-
-        // Add UISlots for custom inventory
-        for (int i = 0; i < customSlotCount; i++) {
-            UISlot slot = new UISlot(i, theme);
-            slot.setFrame(0, 0, SLOT_SIZE, SLOT_SIZE); // Set size before layout!
-            leftContent.addChild(slot);
-        }
-        new GridLayout(CUSTOM_COLS, 0, CUSTOM_GAP, CUSTOM_PADDING).layout(
-            leftContent,
-            null
+        UIElement leftScroll = ContainerUI.scrollableGrid(
+            0,
+            customSlotCount,
+            CUSTOM_COLS,
+            SLOT_SIZE,
+            CUSTOM_GAP,
+            CUSTOM_PADDING,
+            theme
         );
 
         // 2. Middle: Preview Window
@@ -233,31 +247,15 @@ public class ComplexLayoutScreen
         invLabel.setFrame(0, 0, PREVIEW_LABEL_W, PREVIEW_LABEL_H);
         bottomPanel.addChild(invLabel);
 
-        UIElement invGrid = new UIElement() {};
-        int invGridWidth =
-            PLAYER_COLS * SLOT_SIZE +
-            (PLAYER_COLS - 1) * PLAYER_GAP +
-            PLAYER_PADDING * 2;
-        int invGridHeight =
-            PLAYER_ROWS * SLOT_SIZE +
-            (PLAYER_ROWS - 1) * PLAYER_GAP +
-            PLAYER_PADDING * 2;
-        invGrid.setFrame(0, PLAYER_GRID_Y, invGridWidth, invGridHeight);
-        bottomPanel.addChild(invGrid);
-
-        // Player inventory: 27 main slots + 9 hotbar = 36 slots
-        // Slot indices in menu: customSlotCount onwards
-        for (int i = 0; i < PLAYER_SLOTS_TOTAL; i++) {
-            UISlot slot = new UISlot(customSlotCount + i, theme);
-            slot.setFrame(0, 0, SLOT_SIZE, SLOT_SIZE); // Set size before layout!
-            invGrid.addChild(slot);
-        }
-        new GridLayout(
-            PLAYER_COLS,
-            PLAYER_ROWS,
+        UIElement invGrid = InventoryUI.playerInventoryGrid(
+            customSlotCount,
+            SLOT_SIZE,
             PLAYER_GAP,
-            PLAYER_PADDING
-        ).layout(invGrid, null);
+            PLAYER_PADDING,
+            theme
+        );
+        invGrid.setFrame(0, PLAYER_GRID_Y, invGrid.getWidth(), invGrid.getHeight());
+        bottomPanel.addChild(invGrid);
         
         return bottomPanel;
     }

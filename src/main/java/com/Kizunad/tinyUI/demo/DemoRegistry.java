@@ -116,7 +116,6 @@ public final class DemoRegistry {
     }
 
     private static final int DEMO_ID_COMPLEX = 5;
-    private static final int DEMO_ID_COMPLEX_CONTAINER = 6;
 
     public Map<Integer, String> getDemoNames() {
         final Map<Integer, String> names = new HashMap<>();
@@ -126,7 +125,6 @@ public final class DemoRegistry {
         names.put(DEMO_ID_SETTINGS, "Settings Panel");
         names.put(DEMO_ID_SHOP, "Shop Interface");
         names.put(DEMO_ID_COMPLEX, "Complex Layout");
-        names.put(DEMO_ID_COMPLEX_CONTAINER, "Complex Layout (Container)");
         return Collections.unmodifiableMap(names);
     }
 

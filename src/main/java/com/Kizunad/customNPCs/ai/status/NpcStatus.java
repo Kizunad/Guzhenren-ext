@@ -10,37 +10,84 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * NPC 状态组件：管理饥饿/饱和/耗竭，以及基于饥饿的回血/掉血。
+ * NPC 状态组件:管理饥饿/饱和/耗竭,以及基于饥饿的回血/掉血。
+ * <p>
+ * 该组件模拟了类似于玩家的饥饿系统,包括:
+ * - 饥饿值管理
+ * - 饱和度管理
+ * - 耗竭值管理
+ * - 高饥饿度时的自然回血
+ * - 饥饿时的持续伤害
+ * </p>
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class NpcStatus {
 
+    /** 初始饱和度为最大值的一半 */
+    private static final float INITIAL_SATURATION_RATIO = 0.5f;
+    
+    /** 进食时饱和度增益倍数 */
+    private static final float SATURATION_GAIN_MULTIPLIER = 2.0f;
+    
+    /** 进食时耗竭值减少量 */
+    private static final float EXHAUSTION_REDUCTION_ON_EAT = 0.5f;
+    
+    /** 最大耗竭值 */
+    private static final float MAX_EXHAUSTION = 40.0f;
+
+    /** 配置实例 */
     private final NpcStatusConfig config = NpcStatusConfig.getInstance();
 
+    /** 当前饥饿值 */
     private int hunger = config.getMaxHunger();
-    private float saturation = config.getMaxSaturation() / 2.0f;
+    
+    /** 当前饱和度 */
+    private float saturation = config.getMaxSaturation() * INITIAL_SATURATION_RATIO;
+    
+    /** 当前耗竭值 */
     private float exhaustion = 0.0f;
 
+    /** 回血计时器 */
     private int regenTimer = 0;
+    
+    /** 饥饿伤害计时器 */
     private int starvationTimer = 0;
 
+    /**
+     * 每tick执行一次的状态更新。
+     * <p>
+     * 处理耗竭值衰减、回血和饥饿伤害。
+     * </p>
+     *
+     * @param level 服务端世界
+     * @param entity NPC实体
+     */
     public void tick(ServerLevel level, LivingEntity entity) {
         applyExhaustionDecay();
         handleRegen(level, entity);
         handleStarvation(level, entity);
     }
 
+    /**
+     * 消耗食物并恢复饥饿值、饱和度。
+     * <p>
+     * 根据食物属性增加饥饿值和饱和度,并减少耗竭值。
+     * 同时应用食物的效果(如药水效果)。
+     * </p>
+     *
+     * @param stack 食物物品堆
+     * @param entity NPC实体
+     */
     public void eat(ItemStack stack, LivingEntity entity) {
         FoodProperties props = stack.getFoodProperties(entity);
         if (props == null) {
             return;
         }
         int nutrition = props.nutrition();
-        float saturationGain = props.saturation() * nutrition * 2.0f;
+        float saturationGain = props.saturation() * nutrition * SATURATION_GAIN_MULTIPLIER;
 
         hunger = Math.min(config.getMaxHunger(), hunger + nutrition);
         saturation = Math.min(config.getMaxSaturation(), saturation + saturationGain);
-        exhaustion = Math.max(0.0f, exhaustion - 0.5f);
+        exhaustion = Math.max(0.0f, exhaustion - EXHAUSTION_REDUCTION_ON_EAT);
 
         if (!entity.level().isClientSide()) {
             for (var pair : props.effects()) {
@@ -53,8 +100,13 @@ public class NpcStatus {
         }
     }
 
+    /**
+     * 增加耗竭值。
+     *
+     * @param amount 增加量
+     */
     public void addExhaustion(float amount) {
-        exhaustion = Math.min(exhaustion + amount, 40.0f);
+        exhaustion = Math.min(exhaustion + amount, MAX_EXHAUSTION);
     }
 
     public int getHunger() {

@@ -15,20 +15,39 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 从背包/手中选择最佳食物并食用。
- * - 优先低价值食物，保留高价值物品（如金苹果）到最后。
- * - 可中断；失败时回滚手中物品。
+ * <p>
+ * - 优先低价值食物,保留高价值物品(如金苹果)到最后。
+ * - 可中断;失败时回滚手中物品。
+ * </p>
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class EatFromInventoryAction extends AbstractStandardAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EatFromInventoryAction.class);
 
+    /** 负面效果的分数惩罚 */
+    private static final double NEGATIVE_EFFECT_PENALTY = 4.0;
+    
+    /** 高价值食物的分数惩罚,使其排在最后 */
+    private static final double HIGH_VALUE_PENALTY = 100.0;
+
+    /** 之前的主手物品 */
     private ItemStack previousMainHand = ItemStack.EMPTY;
+    
+    /** 消耗的物品堆 */
     private ItemStack consumedStack = ItemStack.EMPTY;
+    
+    /** 消耗物品来源槽位 */
     private int consumedFromSlot = -1;
+    
+    /** 使用物品动作委托 */
     private UseItemAction delegate;
+    
+    /** 是否已开始使用 */
     private boolean startedUse = false;
 
+    /**
+     * 创建从背包进食动作。
+     */
     public EatFromInventoryAction() {
         super("EatFromInventoryAction", null, CONFIG.getDefaultItemUseTicks() + CONFIG.getTimeoutBufferTicks(), 1, 0);
     }
@@ -148,6 +167,20 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         return !stack.isEmpty() && stack.getFoodProperties(entity) != null;
     }
 
+    /**
+     * 计算食物的分数。
+     * <p>
+     * 分数越高表示优先级越高。
+     * 计算因素:
+     * - 营养值和饱食度
+     * - 负面效果会降低分数
+     * - 高价值食物(金苹果等)会大幅降低分数,使其排在最后
+     * </p>
+     *
+     * @param stack 食物物品堆
+     * @param entity NPC实体
+     * @return 食物分数
+     */
     private double scoreFood(ItemStack stack, LivingEntity entity) {
         var food = stack.getFoodProperties(entity);
         if (food == null) {
@@ -156,11 +189,11 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         double base = food.nutrition() + food.saturation() * food.nutrition() * 2.0;
         for (var pair : food.effects()) {
             if (pair.effect() != null && !pair.effect().getEffect().value().isBeneficial()) {
-                base -= 4.0;
+                base -= NEGATIVE_EFFECT_PENALTY;
             }
         }
         if (isHighValueFood(stack.getItem())) {
-            base -= 100.0;
+            base -= HIGH_VALUE_PENALTY;
         }
         return base;
     }

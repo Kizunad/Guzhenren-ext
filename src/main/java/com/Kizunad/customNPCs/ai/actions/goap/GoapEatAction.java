@@ -9,14 +9,29 @@ import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * GOAP 进食动作，包装 EatFromInventoryAction。
+ * GOAP 进食动作,包装 EatFromInventoryAction。
+ * <p>
+ * 该动作用于GOAP规划系统,提供进食行为的前置条件和效果。
+ * </p>
  */
 public class GoapEatAction implements IGoapAction {
 
+    /** 饥饿恢复状态的短期记忆持续时间(tick) */
+    private static final int HUNGER_RESTORED_MEMORY_DURATION = 200;
+
+    /** 前置条件 */
     private final WorldState preconditions;
+    
+    /** 效果 */
     private final WorldState effects;
+    
+    /** 实际执行的进食动作 */
     private final EatFromInventoryAction action = new EatFromInventoryAction();
 
+    /**
+     * 创建GOAP进食动作。
+     * 设置前置条件为有食物且饥饿,效果为恢复饥饿度。
+     */
     public GoapEatAction() {
         preconditions = new WorldState();
         preconditions.setState(WorldStateKeys.HAS_FOOD, true);
@@ -48,7 +63,7 @@ public class GoapEatAction implements IGoapAction {
         if (status == ActionStatus.SUCCESS) {
             mind
                 .getMemory()
-                .rememberShortTerm(WorldStateKeys.HUNGER_RESTORED, true, 200);
+                .rememberShortTerm(WorldStateKeys.HUNGER_RESTORED, true, HUNGER_RESTORED_MEMORY_DURATION);
         }
         return status;
     }

@@ -30,11 +30,12 @@ public final class Label extends UIElement {
         /** 居中对齐 */
         CENTER,
         /** 右对齐 */
-        RIGHT
+        RIGHT,
     }
 
     /** 默认内边距（像素） */
     private static final int DEFAULT_PADDING = 2;
+    private static final int DEFAULT_FONT_LINE_HEIGHT = 12;
 
     /** 文本内容 */
     private String text;
@@ -83,8 +84,12 @@ public final class Label extends UIElement {
     }
 
     @Override
-    protected void onRender(final UIRenderContext context, final double mouseX, final double mouseY,
-                            final float partialTicks) {
+    protected void onRender(
+        final UIRenderContext context,
+        final double mouseX,
+        final double mouseY,
+        final float partialTicks
+    ) {
         final int width = getWidth();
         int drawX = getAbsoluteX() + DEFAULT_PADDING;
         if (horizontalAlign == HorizontalAlign.CENTER) {
@@ -92,12 +97,12 @@ public final class Label extends UIElement {
         } else if (horizontalAlign == HorizontalAlign.RIGHT) {
             drawX = getAbsoluteX() + width - DEFAULT_PADDING;
         }
-        
+
         // Support multi-line text by splitting on \n
         String[] lines = text.split("\n");
         int drawY = getAbsoluteY() + DEFAULT_PADDING;
-        int lineHeight = 12; // Standard font height + small spacing
-        
+        final int lineHeight = DEFAULT_FONT_LINE_HEIGHT;
+
         for (String line : lines) {
             context.drawText(line, drawX, drawY, color);
             drawY += lineHeight;

@@ -13,26 +13,64 @@ import net.minecraft.world.entity.LivingEntity;
 
 /**
  * 自动装备更优盔甲的 GOAP 目标。
+ * <p>
+ * 该目标会评估背包中的盔甲,并在发现更优的盔甲时自动装备。
+ * 优先级基于盔甲改进程度动态计算。
+ * </p>
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class EquipArmorGoal extends PlanBasedGoal {
 
+    /** 默认基础优先级 */
+    private static final float DEFAULT_BASE_PRIORITY = 0.6f;
+    
+    /** 改进度缩放因子,用于将盔甲改进度转换为优先级增量 */
+    private static final double IMPROVEMENT_SCALE_FACTOR = 0.05;
+
+    /** 基础优先级 */
     private final float basePriority;
+    
+    /** 欲望权重,用于调整目标的重要性 */
     private final double desireWeight;
 
+    /**
+     * 使用默认配置创建装备盔甲目标。
+     * 使用默认基础优先级和配置文件中的欲望权重。
+     */
     public EquipArmorGoal() {
-        this(0.6f, ActionConfig.getInstance().getArmorDesireWeight());
+        this(DEFAULT_BASE_PRIORITY, ActionConfig.getInstance().getArmorDesireWeight());
     }
 
+    /**
+     * 使用指定基础优先级创建装备盔甲目标。
+     *
+     * @param basePriority 基础优先级
+     */
     public EquipArmorGoal(float basePriority) {
         this(basePriority, 1.0);
     }
 
+    /**
+     * 使用完整参数创建装备盔甲目标。
+     *
+     * @param basePriority 基础优先级
+     * @param desireWeight 欲望权重
+     */
     public EquipArmorGoal(float basePriority, double desireWeight) {
         this.basePriority = basePriority;
         this.desireWeight = desireWeight;
     }
 
+    /**
+     * 计算装备盔甲目标的优先级。
+     * <p>
+     * 优先级基于盔甲改进程度计算:
+     * priority = min(1.0, basePriority + improvement * IMPROVEMENT_SCALE_FACTOR)
+     * </p>
+     *
+     * @param mind NPC的思维接口
+     * @param entity NPC实体
+     * @return 优先级值,范围[0.0, 1.0]
+     */
     @Override
     public float getPriority(INpcMind mind, LivingEntity entity) {
         ArmorEvaluationUtil.ArmorUpgrade upgrade = ArmorEvaluationUtil.findBestUpgrade(
@@ -43,7 +81,7 @@ public class EquipArmorGoal extends PlanBasedGoal {
             return 0.0f;
         }
         double improvement = upgrade.improvement();
-        double scaled = Math.min(1.0, basePriority + improvement * 0.05);
+        double scaled = Math.min(1.0, basePriority + improvement * IMPROVEMENT_SCALE_FACTOR);
         return (float) scaled;
     }
 
