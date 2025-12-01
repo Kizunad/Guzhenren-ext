@@ -1,17 +1,17 @@
 - [ ] **状态总结** <!-- id: npc-entity-status -->
     - [ ] 当前为预计划草案，尚未落地，实现按下列任务分批推进。
 
-- [ ] **实体定义与注册** <!-- id: npc-entity-definition -->
-    - [ ] 注册 `CustomNpcEntity` EntityType 与渲染器 <!-- id: npc-entity-type -->
-    - [ ] 定义属性构建器（生命/攻击/移速/护甲） <!-- id: npc-entity-attributes -->
-    - [ ] 构造时清空原版 `goalSelector/targetSelector`，只运行自研 AI <!-- id: npc-entity-clear-vanilla-ai -->
-    - [ ] 指定/确认合适的 `PathNavigation`（地面/飞行） <!-- id: npc-entity-navigation -->
+- [x] **实体定义与注册** <!-- id: npc-entity-definition -->
+    - [x] 注册 `CustomNpcEntity` EntityType（ModEntities） <!-- id: npc-entity-type -->
+    - [x] 定义属性构建器（生命/攻击/移速/护甲）常量化 <!-- id: npc-entity-attributes -->
+    - [x] 构造时清空原版 `goalSelector/targetSelector`（留空 registerGoals），仅自研 AI <!-- id: npc-entity-clear-vanilla-ai -->
+    - [x] 指定/确认合适的 `PathNavigation`（地面/飞行等，已支持枚举切换） <!-- id: npc-entity-navigation -->
 
 - [ ] **AI 集成与驱动** <!-- id: npc-entity-ai -->
-    - [ ] 绑定 `NpcMind`、`SensorManager`、`UtilityGoalSelector`、`ActionExecutor` <!-- id: npc-entity-mind-bind -->
-    - [ ] 实体 tick 驱动 `mind.tick`，初始化传感器（Vision/Damage/Safety） <!-- id: npc-entity-mind-tick -->
+    - [x] 绑定 `NpcMind`、`SensorManager`、`UtilityGoalSelector`、`ActionExecutor`（Attachment 时 initializeMind 注册默认 Goals/Sensors） <!-- id: npc-entity-mind-bind -->
+    - [x] 实体 tick 驱动 `mind.tick`（全局事件），传感器默认注册（Vision/Damage/Safety） <!-- id: npc-entity-mind-tick -->
     - [ ] 调整 `MoveToAction` 等动作参数（超时/重算/速度因子）确保流畅寻路 <!-- id: npc-entity-move-tuning -->
-    - [ ] 验证无原版 Goal 抢占：仅自有目标/动作在跑 <!-- id: npc-entity-no-vanilla-preempt -->
+    - [x] 验证无原版 Goal 抢占：registerGoals 留空，仅自有目标/动作在跑 <!-- id: npc-entity-no-vanilla-preempt -->
 
 - [ ] **生存能力** <!-- id: npc-entity-survival -->
     - [ ] 基线属性与防御（含盾牌支持） <!-- id: npc-entity-base-stats -->

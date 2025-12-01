@@ -1,6 +1,7 @@
 package com.Kizunad.customNPCs.capabilities.mind;
 
 import com.Kizunad.customNPCs.CustomNPCsMod;
+import com.Kizunad.customNPCs.ai.NpcMindRegistry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -62,9 +63,12 @@ public class NpcMindAttachment {
             
             // 检查是否已有 NpcMind
             if (!entity.hasData(NPC_MIND)) {
-                // 附加 NpcMind
                 entity.setData(NPC_MIND, new NpcMind());
             }
+
+            // 初始化默认 Sensors/Goals（避免未注册导致逻辑缺失）
+            var mind = entity.getData(NPC_MIND);
+            NpcMindRegistry.initializeMind(mind);
         }
     }
 }

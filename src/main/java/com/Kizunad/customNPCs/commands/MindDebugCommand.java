@@ -12,6 +12,8 @@ import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+import com.Kizunad.customNPCs.entity.CustomNpcEntity;
+import com.Kizunad.customNPCs.entity.ModEntities;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -26,12 +28,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
@@ -378,51 +378,53 @@ public class MindDebugCommand {
             return 0;
         }
         ServerLevel level = source.getLevel();
-        // 使用 Skeleton 作为测试实体，默认远程配置（弓 + 箭）
-        Skeleton skeleton = EntityType.SKELETON.create(level);
-        if (skeleton == null) {
-            source.sendFailure(Component.literal("生成 Skeleton 失败"));
+        // 使用自定义 NPC 作为测试实体，默认远程配置（弓 + 箭），地面导航
+        CustomNpcEntity npc =
+            new CustomNpcEntity(
+                ModEntities.CUSTOM_NPC.get(),
+                level,
+                CustomNpcEntity.NavigationMode.GROUND
+            );
+        if (npc == null) {
+            source.sendFailure(Component.literal("生成 Custom NPC 失败"));
             return 0;
         }
 
         Vec3 pos = executor.position();
-        skeleton.moveTo(pos.x(), pos.y(), pos.z(), executor.getYRot(), 0.0F);
-        skeleton.setCustomName(Component.literal(TEST_ENTITY_NAME));
-        skeleton.setCustomNameVisible(true);
-        skeleton.addTag(TEST_ENTITY_TAG);
-        skeleton.addTag(TEST_CONTEXT_TAG);
-        skeleton.setPersistenceRequired();
+        npc.moveTo(pos.x(), pos.y(), pos.z(), executor.getYRot(), 0.0F);
+        npc.setCustomName(Component.literal(TEST_ENTITY_NAME));
+        npc.setCustomNameVisible(true);
+        npc.addTag(TEST_ENTITY_TAG);
+        npc.addTag(TEST_CONTEXT_TAG);
+        npc.setPersistenceRequired();
 
         // 装备基础护甲 + 远程所需物品（主手弓，副手箭）
-        skeleton.setItemSlot(
+        npc.setItemSlot(
             EquipmentSlot.HEAD,
             new ItemStack(Items.LEATHER_HELMET)
         );
-        skeleton.setItemInHand(
-            InteractionHand.MAIN_HAND,
-            new ItemStack(Items.BOW)
-        );
-        skeleton.setItemInHand(
+        npc.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+        npc.setItemInHand(
             InteractionHand.OFF_HAND,
             new ItemStack(Items.ARROW, TEST_ARROW_STACK)
         );
 
-        level.addFreshEntity(skeleton);
+        level.addFreshEntity(npc);
 
-        if (!skeleton.hasData(NpcMindAttachment.NPC_MIND)) {
-            skeleton.setData(
+        if (!npc.hasData(NpcMindAttachment.NPC_MIND)) {
+            npc.setData(
                 NpcMindAttachment.NPC_MIND,
                 new com.Kizunad.customNPCs.capabilities.mind.NpcMind()
             );
         }
-        INpcMind mind = skeleton.getData(NpcMindAttachment.NPC_MIND);
+        INpcMind mind = npc.getData(NpcMindAttachment.NPC_MIND);
         NpcMindRegistry.initializeMind(mind);
 
         source.sendSuccess(
             () ->
                 Component.literal(
                     "生成测试实体: " +
-                        skeleton.getUUID() +
+                        npc.getUUID() +
                         " 标签: " +
                         TEST_ENTITY_TAG
                 ),
