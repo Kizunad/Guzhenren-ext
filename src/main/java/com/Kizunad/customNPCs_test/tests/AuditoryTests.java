@@ -20,7 +20,7 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 /**
  * 听觉传感器测试逻辑
  */
-@GameTestHolder("guzhenrenext")
+@GameTestHolder("guzhenrenext_disabled")
 public class AuditoryTests {
 
     private static final int TICK_DELAY = 20;

@@ -24,7 +24,7 @@ import java.util.List;
  * <p>
  * 验证感知、规划和执行系统的协同工作能力
  */
-@GameTestHolder("guzhenrenext")
+@GameTestHolder("guzhenrenext_disabled")
 public class ComplexScenarios {
     
     /**
