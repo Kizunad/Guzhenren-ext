@@ -119,11 +119,14 @@ public class UtilityGoalSelector {
         IGoal bestGoal = null;
         float bestPriority = 0.0f;
 
+        // 如果当前目标的最终优先级高于已知的最高优先级，则更新最高优先级和最佳目标
         for (IGoal goal : goals) {
+            // 检查目标是否在冷却中
             if (isOnCooldown(goal)) {
                 continue;
             }
 
+            // 检查目标是否可以运行
             if (!goal.canRun(mind, entity)) {
                 continue;
             }
@@ -137,6 +140,7 @@ public class UtilityGoalSelector {
                 .getModifierForGoal(goal.getName());
             float finalPriority = basePriority * (1.0f + personalityModifier);
 
+            // 如果当前目标的最终优先级高于已知的最高优先级，则更新最高优先级和最佳目标
             if (finalPriority > bestPriority) {
                 bestPriority = finalPriority;
                 bestGoal = goal;
@@ -212,11 +216,7 @@ public class UtilityGoalSelector {
      * @param entity 实体
      * @param goal 目标实例
      */
-    public void forceSwitchTo(
-        INpcMind mind,
-        LivingEntity entity,
-        IGoal goal
-    ) {
+    public void forceSwitchTo(INpcMind mind, LivingEntity entity, IGoal goal) {
         if (currentGoal != null) {
             mind.getActionExecutor().stopCurrentPlan();
             currentGoal.stop(mind, entity);
@@ -228,7 +228,6 @@ public class UtilityGoalSelector {
             currentGoal.start(mind, entity);
         }
     }
-
 
     /**
      * 强制重新评估（用于紧急情况，如受到攻击）
