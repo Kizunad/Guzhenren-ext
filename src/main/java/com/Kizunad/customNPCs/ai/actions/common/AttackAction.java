@@ -3,8 +3,8 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
-import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
+import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.world.InteractionHand;
@@ -30,10 +30,13 @@ import org.slf4j.LoggerFactory;
  * - cooldownTicks: 攻击冷却时长（默认 20 ticks）
  * - maxAttempts: 最大攻击尝试次数
  */
-@SuppressWarnings("checkstyle:MagicNumber")
-public class AttackAction extends AbstractStandardAction implements IAttackAction {
+public class AttackAction
+    extends AbstractStandardAction
+    implements IAttackAction {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AttackAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        AttackAction.class
+    );
 
     // 从配置获取默认值
 
@@ -113,6 +116,8 @@ public class AttackAction extends AbstractStandardAction implements IAttackActio
             return ActionStatus.FAILURE;
         }
 
+        // NOTE: 可能需要一个缓存EntityUUID
+        // 场景：周围过多友方实体导致的性能问题
         if (
             targetEntity instanceof LivingEntity livingTarget &&
             EntityRelationUtil.isAlly(mob, livingTarget)
@@ -140,7 +145,7 @@ public class AttackAction extends AbstractStandardAction implements IAttackActio
         Vec3 mobPos = mob.position();
         Vec3 targetPos = targetEntity.position();
         double distance = mobPos.distanceTo(targetPos);
-        
+
         if (!isInRange(mobPos, targetPos, attackRange)) {
             if (CONFIG.isDebugLoggingEnabled()) {
                 LOGGER.debug(
@@ -166,7 +171,10 @@ public class AttackAction extends AbstractStandardAction implements IAttackActio
         hasHit = true;
 
         // 成功条件：命中一次即为成功
-        LOGGER.info("[AttackAction] 攻击成功，目标: {}", targetEntity.getName().getString());
+        LOGGER.info(
+            "[AttackAction] 攻击成功，目标: {}",
+            targetEntity.getName().getString()
+        );
         return ActionStatus.SUCCESS;
     }
 

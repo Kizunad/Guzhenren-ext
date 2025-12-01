@@ -19,7 +19,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class NavigationUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NavigationUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        NavigationUtil.class
+    );
     private static final ActionConfig CONFIG = ActionConfig.getInstance();
 
     /**
@@ -35,8 +37,7 @@ public final class NavigationUtil {
     /**
      * 私有构造函数（工具类）
      */
-    private NavigationUtil() {
-    }
+    private NavigationUtil() {}
 
     /**
      * 检查是否在范围内（标准到达判定）
@@ -45,7 +46,11 @@ public final class NavigationUtil {
      * @param threshold 距离阈值
      * @return true 如果在范围内
      */
-    public static boolean isInRange(Vec3 entityPos, Vec3 targetPos, double threshold) {
+    public static boolean isInRange(
+        Vec3 entityPos,
+        Vec3 targetPos,
+        double threshold
+    ) {
         double distance = entityPos.distanceTo(targetPos);
         return distance <= threshold;
     }
@@ -59,7 +64,11 @@ public final class NavigationUtil {
      * @param acceptableDistance 可接受的到达距离
      * @return true 如果已到达
      */
-    public static boolean hasArrived(Vec3 entityPos, Vec3 targetPos, double acceptableDistance) {
+    public static boolean hasArrived(
+        Vec3 entityPos,
+        Vec3 targetPos,
+        double acceptableDistance
+    ) {
         double distance = entityPos.distanceTo(targetPos);
         return distance <= acceptableDistance + ARRIVAL_BUFFER;
     }
@@ -111,7 +120,7 @@ public final class NavigationUtil {
     ) {
         // 获取配置的更新间隔
         int updateInterval = CONFIG.getPathUpdateInterval();
-        
+
         // 移动目标使用更短的间隔（粘性策略）
         if (isMovingTarget) {
             updateInterval = Math.max(updateInterval / 2, 1); // 至少1 tick
@@ -210,12 +219,16 @@ public final class NavigationUtil {
      * @param maxDistance 最大距离
      * @return true 如果在视线范围内
      */
-    public static boolean canSeeTarget(Mob mob, Vec3 targetPos, double maxDistance) {
+    public static boolean canSeeTarget(
+        Mob mob,
+        Vec3 targetPos,
+        double maxDistance
+    ) {
         double distance = mob.position().distanceTo(targetPos);
         if (distance > maxDistance) {
             return false;
         }
-        
+
         // 未来可添加射线追踪检查障碍物
         return true;
     }

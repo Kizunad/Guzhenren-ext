@@ -13,7 +13,6 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * GOAP 装备盔甲动作包装。
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class GoapEquipArmorAction implements IGoapAction {
 
     private static final float BASE_COST = 2.5f;
@@ -29,7 +28,9 @@ public class GoapEquipArmorAction implements IGoapAction {
      */
     public GoapEquipArmorAction(double improvementScore, double desireWeight) {
         this(
-            new EquipArmorAction(ArmorEvaluationUtil.ArmorPreference.defaults()),
+            new EquipArmorAction(
+                ArmorEvaluationUtil.ArmorPreference.defaults()
+            ),
             improvementScore,
             desireWeight
         );
@@ -43,10 +44,7 @@ public class GoapEquipArmorAction implements IGoapAction {
     }
 
     public GoapEquipArmorAction() {
-        this(
-            0.0,
-            ActionConfig.getInstance().getArmorDesireWeight()
-        );
+        this(0.0, ActionConfig.getInstance().getArmorDesireWeight());
     }
 
     public GoapEquipArmorAction(
@@ -56,7 +54,10 @@ public class GoapEquipArmorAction implements IGoapAction {
     ) {
         this.wrappedAction = wrappedAction;
         this.preconditions = new WorldState();
-        this.preconditions.setState(WorldStateKeys.ARMOR_BETTER_AVAILABLE, true);
+        this.preconditions.setState(
+            WorldStateKeys.ARMOR_BETTER_AVAILABLE,
+            true
+        );
 
         this.effects = new WorldState();
         this.effects.setState(WorldStateKeys.ARMOR_OPTIMIZED, true);
