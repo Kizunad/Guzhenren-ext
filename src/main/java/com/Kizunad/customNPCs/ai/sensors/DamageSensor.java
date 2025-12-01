@@ -12,7 +12,6 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * 伤害传感器 - 感知受到的伤害和攻击者
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class DamageSensor implements ISensor {
 
     private int lastHurtTime = 0; // 最后一次受伤时间
@@ -41,16 +40,20 @@ public class DamageSensor implements ISensor {
         if (hurtTime > lastHurtTime && hurtTime > 0) {
             lastHurtTime = hurtTime;
 
-            // 获取攻击者
+            // 获取攻击者（玩家也属于 LivingEntity）
             LivingEntity attacker = entity.getLastHurtByMob();
+
             if (attacker != null) {
                 // 记录攻击者到记忆中（使用 UUID 以便持久化）
                 UUID attackerUuid = attacker.getUUID();
+
                 mind
                     .getMemory()
                     .rememberLongTerm("last_attacker", attackerUuid);
                 mind.getMemory().rememberShortTerm("under_attack", true, 200); // 10秒战斗状态
+
                 double attackerDistance = entity.distanceTo(attacker);
+
                 // 汇总威胁状态写入，避免内联重复逻辑
                 rememberThreat(mind, attackerUuid, attackerDistance);
 
@@ -86,7 +89,7 @@ public class DamageSensor implements ISensor {
                         );
                 }
 
-                // 触发紧急中断,立即重新评估目标（带节流，防止同一攻击者抖动）
+                // 触发紧急中断，立即重新评估目标（带节流，防止同一攻击者抖动）
                 if (
                     interruptThrottle.allowInterrupt(
                         attackerUuid,
@@ -128,6 +131,10 @@ public class DamageSensor implements ISensor {
      */
     private void rememberThreat(INpcMind mind, UUID threatId, double distance) {
         MemoryModule memory = mind.getMemory();
+
+        // 写入的记忆键：
+        // DISTANCE_TO_TARGET, TARGET_IN_RANGE, TARGET_VISIBLE,
+        // HOSTILE_NEARBY, IN_DANGER, THREAT_DETECTED, CURRENT_THREAT_ID
         memory.rememberShortTerm(
             WorldStateKeys.DISTANCE_TO_TARGET,
             distance,
@@ -154,9 +161,13 @@ public class DamageSensor implements ISensor {
             true,
             MEMORY_DURATION
         );
-        memory.rememberShortTerm("threat_detected", true, MEMORY_DURATION);
         memory.rememberShortTerm(
-            "current_threat_id",
+            WorldStateKeys.THREAT_DETECTED,
+            true,
+            MEMORY_DURATION
+        );
+        memory.rememberShortTerm(
+            WorldStateKeys.CURRENT_THREAT_ID,
             threatId,
             MEMORY_DURATION
         );

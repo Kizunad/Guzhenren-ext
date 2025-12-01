@@ -147,6 +147,16 @@ public final class WorldStateKeys {
     public static final String HOSTILE_NEARBY = "hostile_nearby";
 
     /**
+     * 是否检测到威胁
+     */
+    public static final String THREAT_DETECTED = "threat_detected";
+
+    /**
+     * 当前威胁的 UUID
+     */
+    public static final String CURRENT_THREAT_ID = "current_threat_id";
+
+    /**
      * 是否有友方单位
      */
     public static final String ALLY_NEARBY = "ally_nearby";
