@@ -43,3 +43,29 @@
 4. 自然生成开关/配置（可默认禁用，留配置项）。
 5. 持久化与 Cap 写入。
 6. GameTest 编写/跑通：生成、威胁响应、持久化、接口存在性。
+
+## 常用属性速查（Minecraft 1.21.x）
+| Key (Namespaced) | 说明 |
+| --- | --- |
+| `generic.max_health` | 最大生命值 |
+| `generic.follow_range` | 目标搜索距离 |
+| `generic.knockback_resistance` | 击退抗性 |
+| `generic.movement_speed` | 移动速度 |
+| `generic.flying_speed` | 飞行速度 |
+| `generic.attack_damage` | 近战攻击力 |
+| `generic.attack_speed` | 攻击速度 |
+| `generic.armor` | 护甲值 |
+| `generic.armor_toughness` | 护甲韧性 |
+| `generic.attack_knockback` | 攻击击退 |
+| `generic.luck` | 幸运值 |
+| `generic.jump_strength` | 跳跃力（常用于坐骑） |
+| `generic.scale` | 实体缩放 |
+| `generic.step_height` | 跨越台阶高度 |
+| `generic.block_break_speed` | 方块破坏速度 |
+| `generic.gravity` | 重力影响 |
+| `generic.safe_fall_distance` | 安全落差 |
+| `generic.fall_damage_multiplier` | 摔落伤害系数 |
+| `horse.jump_strength` | 马系专用跳跃力 |
+| `zombie.spawn_reinforcements` | 僵尸增援概率 |
+| `player.block_interaction_range` | 玩家方块交互距离 |
+| `player.entity_interaction_range` | 玩家实体交互距离 |
