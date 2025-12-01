@@ -135,6 +135,7 @@ public class DamageSensor implements ISensor {
         // 写入的记忆键：
         // DISTANCE_TO_TARGET, TARGET_IN_RANGE, TARGET_VISIBLE,
         // HOSTILE_NEARBY, IN_DANGER, THREAT_DETECTED, CURRENT_THREAT_ID
+        //
         memory.rememberShortTerm(
             WorldStateKeys.DISTANCE_TO_TARGET,
             distance,
@@ -145,7 +146,7 @@ public class DamageSensor implements ISensor {
             distance <= CLOSE_COMBAT_RANGE,
             MEMORY_DURATION
         );
-        // 受击视为已暴露威胁：即便未直视，也将可见标记为 true 以强制决策抢占
+        // 此处受击视为已暴露威胁：即便未直视，也将可见标记为 true 以强制决策抢占
         memory.rememberShortTerm(
             WorldStateKeys.TARGET_VISIBLE,
             true,
