@@ -5,18 +5,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 
 /**
- * Interface for actions that involve interacting with blocks or entities.
+ * 交互类动作接口 - 用于描述与方块或实体交互的动作
  */
 public interface IInteractAction extends IAction {
     /**
-     * Gets the target position of the interaction.
-     * @return The target BlockPos, or null if interacting with an entity.
+     * 获取交互目标坐标
+     * @return 目标方块坐标，若与实体交互则为 null
      */
     BlockPos getTargetPos();
 
     /**
-     * Gets the hand used for interaction.
-     * @return The InteractionHand used.
+     * 获取用于交互的手
+     * @return 使用的 InteractionHand
      */
     InteractionHand getHand();
 }

@@ -4,18 +4,18 @@ import com.Kizunad.customNPCs.ai.actions.IAction;
 import java.util.UUID;
 
 /**
- * Interface for actions that involve attacking a target.
+ * 攻击类动作接口 - 用于描述对目标发起攻击的动作
  */
 public interface IAttackAction extends IAction {
     /**
-     * Gets the UUID of the target entity.
-     * @return The target entity's UUID.
+     * 获取目标实体的 UUID
+     * @return 目标实体 UUID
      */
     UUID getTargetUuid();
 
     /**
-     * Checks if the attack was successful (hit the target).
-     * @return true if the attack hit, false otherwise.
+     * 检查攻击是否命中
+     * @return 命中返回 true，否则返回 false
      */
     boolean hasHit();
 }
