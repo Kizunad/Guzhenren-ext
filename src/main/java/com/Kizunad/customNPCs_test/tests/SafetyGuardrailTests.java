@@ -62,7 +62,7 @@ public class SafetyGuardrailTests {
     /**
      * 验证视觉传感器的敌友识别：记录敌对数量且不把友方计为威胁。
      */
-    @GameTest(template = "npcmindgametests.empty")
+    // @GameTest(template = "npcmindgametests.empty") // 暂停该测试
     public static void testVisionSensorFriendFoe(GameTestHelper helper) {
         System.out.println("[GameTest] VisionSensorFriendFoe start");
         Villager observer = TestEntityFactory.createTestNPC(

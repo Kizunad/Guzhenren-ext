@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs_test;
 
 import com.Kizunad.customNPCs_test.utils.TestBatches;
 import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
 
 @GameTestHolder("guzhenrenext")
 public class NpcMindGameTests {
@@ -41,6 +43,34 @@ public class NpcMindGameTests {
     //    public void testVisionSensorNoEntities(GameTestHelper helper) {
     //        com.Kizunad.customNPCs_test.tests.SensorTests.testVisionSensorNoEntities(helper);
     //    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, required = false)
+    public void testDefendGoalClearsThreatMemory(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ThreatResponseTests.testDefendGoalClearsThreatMemory(
+            helper
+        );
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, required = false)
+    public void testFleeGoalClearsThreatMemory(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ThreatResponseTests.testFleeGoalClearsThreatMemory(
+            helper
+        );
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, required = false)
+    public void testDefendGoalPrefersBlockClose(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ThreatResponseTests.testDefendGoalPrefersBlockClose(
+            helper
+        );
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, required = false)
+    public void testDefendGoalPrefersRanged(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.ThreatResponseTests.testDefendGoalPrefersRanged(
+            helper
+        );
+    }
 
     //    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
     //    public void testDynamicScanInterval(GameTestHelper helper) {

@@ -142,12 +142,16 @@
         - [x] 覆盖失败场景 (路径阻塞、目标消失、超时) <!-- id: 121 -->
         - [x] 添加性能回归断言 <!-- id: 122 -->
 
+- [ ] **情绪集中式架构 (FUTURE)** <!-- backlog-emotion-architecture -->
+    - [ ] 情绪处理从分散逻辑拆分出来，设计集中管理架构，统一写入/衰减/触发接口，避免当前过于散乱。
+
 - [ ] **威胁响应策略细化 (Threat Response)** <!-- backlog-threat-response -->
     - [x] 触发：传感器写入威胁状态（可见/距离/UUID/危害），CRITICAL/IMPORTANT 分级调用 `triggerInterrupt`，forceReevaluate 调整滞后；清理旧威胁记忆。（Vision/Damage/Safety 补充威胁距离桶、距离/可见状态、IN_DANGER 写入与去重，受击/危害即时标记 `current_threat_id` 并触发中断）
     - [ ] 过程：目标注册与选择（`FleeGoal`/`DefendGoal`/`SeekShelterGoal`），`FleeGoal` 反向安全点与计划清理；`BlockAction` 持续举盾；`RangedAttackItemAction` 维持距离窗；近战回退；中断/切换时 `stopCurrentPlan`。
         - [x] **RangedAttackItemAction 改进完成**：重命名为 `RangedAttackItemAction`（强调使用物品而非技能），添加弹药检查、持续瞄准、弩/弓分离处理、世界状态写入（`TARGET_DAMAGED`/`HAS_RANGED_WEAPON`）；距离窗口 4-12 格；7 个 GameTest 覆盖（有/无弹药、距离检查、弩充能、无武器、目标不存在）。
-        - [ ] 在 `DefendGoal` 中整合远程攻击：根据距离（>6格）和 `HAS_RANGED_WEAPON` 状态选择使用 `RangedAttackItemAction` 或近战 `AttackAction`；无弹药时自动回退近战。
-    - [ ] 结束：撤退达安全距离或威胁解除即完成；忘记临时威胁记忆，重置举盾/扫描间隔；为撤退/防御设置短冷却防振荡；GameTest 覆盖撤退/格挡/远程命中与回退并更新 `ThreatResponsePlan.md`。
+        - [x] 在 `DefendGoal` 中整合远程/格挡/近战：距离 >=6 且 `HAS_RANGED_WEAPON` 走远程，<=3.5 格举盾，其他情况近战；按 `current_threat_id`/`last_attacker` 选目标，切换动作时清理旧动作。
+        - [x] `FleeGoal` 依据 `current_threat_id`/危害坐标反向安全点，增加安全余量；路径失败重算。
+    - [x] 结束：撤退/防御完成时清理威胁短期记忆（`threat_detected/current_threat_id` 等）、重置举盾/远程状态，`FleeGoal`/`DefendGoal` 添加短冷却防振荡；后续 GameTest（撤退/格挡/远程回退）待补。
 
 - [ ] **NpcStatus 饥饿/饱和与进食链路** <!-- backlog-hunger -->
     - [ ] 引入 `NpcStatus` 组件（hunger/saturation/exhaustion，NBT 序列化，配置阈值）。
