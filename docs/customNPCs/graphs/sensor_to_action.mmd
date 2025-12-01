@@ -1,0 +1,53 @@
+flowchart LR
+      subgraph Sensors[传感器层]
+          VISION[VisionSensor<br/>可见/距离/阵营分类<br/>InterruptThrottle 去重]
+          DAMAGE[DamageSensor<br/>受击/攻击者 UUID<br/>重要/关键中断]
+          SAFETY[SafetySensor<br/>危险方块/IN_DANGER<br/>去重节流]
+      end
+
+      subgraph Mind[NpcMind]
+          MEM[MemoryModule<br/>短期威胁/距离桶/可见状态]
+          STATUS[NpcStatus/Personality<br/>状态衰减]
+          TRIGGER[triggerInterrupt(eventType)<br/>10t 冷却，记录最后类型]
+          STATE[getCurrentWorldState<br/>has_threat/in_danger/has_ranged_weapon...]
+      end
+
+      subgraph Selector[UtilityGoalSelector]
+          REEVAL[forceReevaluate<br/>CRITICAL 0 阈值抢占<br/>IMPORTANT 滞后保护]
+          GOALS[注册目标: Defend/Flee/...<br/>按优先级选择并激活]
+      end
+
+      subgraph Execution[ActionExecutor/Actions]
+          DEFEND[DefendGoal<br/>距离分支: 远程/格挡/近战]
+          FLEE[FleeGoal<br/>反向安全点/冷却]
+          BLOCK[BlockWithShieldAction<br/>举盾保持到时限]
+          RANGED[RangedAttackItemAction<br/>拉弓/弩，弹药检查，距离窗]
+          MELEE[AttackAction 近战]
+      end
+
+      VISION -->|写入威胁记忆/距离桶| MEM
+      DAMAGE -->|写入 current_threat_id/IN_DANGER| MEM
+      SAFETY -->|写入 hazard_detected/IN_DANGER| MEM
+
+      VISION -.节流OK触发.-> TRIGGER
+      DAMAGE -.节流OK触发.-> TRIGGER
+      SAFETY -.节流OK触发.-> TRIGGER
+
+      MEM --> STATE
+      STATUS --> STATE
+
+      TRIGGER --> REEVAL
+      STATE --> REEVAL
+      REEVAL --> GOALS
+
+      GOALS -->|激活| DEFEND
+      GOALS -->|激活| FLEE
+
+      DEFEND -->|选择模式| BLOCK
+      DEFEND -->|选择模式| RANGED
+      DEFEND -->|选择模式| MELEE
+
+      BLOCK -->|tick/stop| ActionExecutor
+      RANGED -->|tick/stop| ActionExecutor
+      MELEE -->|tick/stop| ActionExecutor
+      FLEE -->|tick/stop| ActionExecutor
