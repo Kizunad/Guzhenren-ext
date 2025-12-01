@@ -167,11 +167,7 @@ public class MoveToAction implements IAction {
         // 获取目标位置
         Vec3 currentTarget = getCurrentTarget();
         if (currentTarget == null || !isValidTarget(currentTarget)) {
-            MindLog.execution(
-                MindLogLevel.WARN,
-                "目标无效: {}",
-                currentTarget
-            );
+            MindLog.execution(MindLogLevel.WARN, "目标无效: {}", currentTarget);
             return ActionStatus.FAILURE;
         }
 
@@ -321,10 +317,7 @@ public class MoveToAction implements IAction {
         }
 
         if (pathCreated && currentTick % 20 == 0) {
-            MindLog.execution(
-                MindLogLevel.DEBUG,
-                "路径已创建/更新"
-            );
+            MindLog.execution(MindLogLevel.DEBUG, "路径已创建/更新");
         }
         return null;
     }
@@ -393,11 +386,7 @@ public class MoveToAction implements IAction {
         String targetName = targetEntity != null
             ? targetEntity.getName().getString()
             : (targetPos != null ? targetPos.toString() : "null");
-        MindLog.execution(
-            MindLogLevel.INFO,
-            "停止移动到: {}",
-            targetName
-        );
+        MindLog.execution(MindLogLevel.INFO, "停止移动到: {}", targetName);
     }
 
     @Override
