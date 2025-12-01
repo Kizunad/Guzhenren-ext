@@ -12,8 +12,8 @@ import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -24,12 +24,14 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
@@ -51,24 +53,27 @@ public class MindDebugCommand {
 
     /** 射线检测距离 */
     private static final double RAYTRACE_DISTANCE = 20.0D;
-    
+
     /** 测试实体标签 */
     private static final String TEST_ENTITY_TAG = "customnpcs_test_entity";
-    
+
     /** 测试上下文标签 */
     private static final String TEST_CONTEXT_TAG = "test:command";
-    
+
     /** 测试实体名称 */
     private static final String TEST_ENTITY_NAME = "TestEntity";
-    
+
     /** LookAt动作默认持续时间(tick) */
     private static final int DEFAULT_LOOK_AT_DURATION = 40;
-    
+
     /** LookAt动作最大持续时间(tick) */
     private static final int MAX_LOOK_AT_DURATION = 400;
-    
+
     /** Wait动作最大持续时间(tick) */
     private static final int MAX_WAIT_DURATION = 2000;
+
+    /** 远程测试箭矢堆叠数量 */
+    private static final int TEST_ARROW_STACK = 64;
 
     public static void register(
         CommandDispatcher<CommandSourceStack> dispatcher
@@ -102,278 +107,205 @@ public class MindDebugCommand {
     /**
      * 注册inspect命令。
      */
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> registerInspectCommands() {
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerInspectCommands() {
         return Commands.literal("inspect")
             .executes(MindDebugCommand::inspectLookingAt)
             .then(
-                Commands.argument(
-                    "target",
-                    EntityArgument.entity()
-                ).executes(MindDebugCommand::inspectTarget)
+                Commands.argument("target", EntityArgument.entity()).executes(
+                    MindDebugCommand::inspectTarget
+                )
             );
     }
 
     /**
      * 注册spawn_test_entity命令。
      */
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> registerSpawnTestCommand() {
-        return Commands.literal("spawn_test_entity")
-            .executes(context ->
-                spawnTestEntity(context.getSource())
-            );
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerSpawnTestCommand() {
+        return Commands.literal("spawn_test_entity").executes(context ->
+            spawnTestEntity(context.getSource())
+        );
     }
 
     /**
      * 注册action命令。
      */
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> registerActionCommands() {
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerActionCommands() {
         return Commands.literal("action")
             .then(
-                Commands.literal("move_to")
-                    .then(
+                Commands.literal("move_to").then(
+                    Commands.argument("npc", EntityArgument.entity()).then(
                         Commands.argument(
-                            "npc",
+                            "target",
                             EntityArgument.entity()
-                        )
-                            .then(
-                                Commands.argument(
-                                    "target",
-                                    EntityArgument.entity()
-                                )
-                                    .executes(MindDebugCommand::runMoveTo)
-                            )
+                        ).executes(MindDebugCommand::runMoveTo)
                     )
+                )
             )
             .then(
-                Commands.literal("look_at")
-                    .then(
-                        Commands.argument(
-                            "npc",
-                            EntityArgument.entity()
-                        )
+                Commands.literal("look_at").then(
+                    Commands.argument("npc", EntityArgument.entity()).then(
+                        Commands.argument("target", EntityArgument.entity())
                             .then(
                                 Commands.argument(
-                                    "target",
-                                    EntityArgument.entity()
-                                )
-                                    .then(
-                                        Commands
-                                            .argument(
-                                                "duration",
-                                                IntegerArgumentType
-                                                    .integer(1, MAX_LOOK_AT_DURATION)
-                                            )
-                                            .executes(
-                                                MindDebugCommand::runLookAtWithDuration
-                                            )
+                                    "duration",
+                                    IntegerArgumentType.integer(
+                                        1,
+                                        MAX_LOOK_AT_DURATION
                                     )
-                                    .executes(
-                                        MindDebugCommand::runLookAt
-                                    )
+                                ).executes(
+                                    MindDebugCommand::runLookAtWithDuration
+                                )
                             )
+                            .executes(MindDebugCommand::runLookAt)
                     )
+                )
             )
             .then(
-                Commands.literal("attack")
-                    .then(
+                Commands.literal("attack").then(
+                    Commands.argument("npc", EntityArgument.entity()).then(
                         Commands.argument(
-                            "npc",
+                            "target",
                             EntityArgument.entity()
-                        )
-                            .then(
-                                Commands.argument(
-                                    "target",
-                                    EntityArgument.entity()
-                                )
-                                    .executes(MindDebugCommand::runAttack)
-                            )
+                        ).executes(MindDebugCommand::runAttack)
                     )
+                )
             )
             .then(
-                Commands.literal("wait")
-                    .then(
+                Commands.literal("wait").then(
+                    Commands.argument("npc", EntityArgument.entity()).then(
                         Commands.argument(
-                            "npc",
-                            EntityArgument.entity()
-                        )
-                            .then(
-                                Commands.argument(
-                                    "ticks",
-                                    IntegerArgumentType.integer(1, MAX_WAIT_DURATION)
-                                )
-                                    .executes(MindDebugCommand::runWait)
-                            )
+                            "ticks",
+                            IntegerArgumentType.integer(1, MAX_WAIT_DURATION)
+                        ).executes(MindDebugCommand::runWait)
                     )
+                )
             );
     }
 
     /**
      * 注册goal命令。
      */
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> registerGoalCommands() {
-        return Commands.literal("goal")
-            .then(
-                Commands.literal("force")
-                    .then(
-                        Commands.argument(
-                            "goal",
-                            StringArgumentType.word()
-                        )
-                            .then(
-                                Commands.argument(
-                                    "npc",
-                                    EntityArgument.entity()
-                                )
-                                    .executes(MindDebugCommand::forceGoal)
-                            )
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerGoalCommands() {
+        return Commands.literal("goal").then(
+            Commands.literal("force").then(
+                Commands.argument("goal", StringArgumentType.word()).then(
+                    Commands.argument("npc", EntityArgument.entity()).executes(
+                        MindDebugCommand::forceGoal
                     )
-            );
+                )
+            )
+        );
     }
 
     /**
      * 注册plan命令。
      */
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> registerPlanCommands() {
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerPlanCommands() {
         return Commands.literal("plan")
             .then(
-                Commands.literal("run")
-                    .then(
-                        Commands.argument(
-                            "goal",
-                            StringArgumentType.word()
-                        )
-                            .then(
-                                Commands.argument(
-                                    "npc",
-                                    EntityArgument.entity()
-                                )
-                                    .executes(
-                                        MindDebugCommand::runPlanGoal
-                                )
-                        )
-                    )
-            )
-            .then(
-                Commands.literal("pickup")
-                    .then(
+                Commands.literal("run").then(
+                    Commands.argument("goal", StringArgumentType.word()).then(
                         Commands.argument(
                             "npc",
                             EntityArgument.entity()
-                        )
+                        ).executes(MindDebugCommand::runPlanGoal)
+                    )
+                )
+            )
+            .then(
+                Commands.literal("pickup").then(
+                    Commands.argument("npc", EntityArgument.entity()).then(
+                        Commands.argument("item", EntityArgument.entity())
                             .then(
                                 Commands.argument(
-                                    "item",
-                                    EntityArgument.entity()
+                                    "priority",
+                                    DoubleArgumentType.doubleArg(0.0)
+                                ).executes(
+                                    MindDebugCommand::runPickupPlanWithPriority
                                 )
-                                    .then(
-                                        Commands
-                                            .argument(
-                                                "priority",
-                                                DoubleArgumentType.doubleArg(
-                                                    0.0
-                                                )
-                                            )
-                                            .executes(
-                                                MindDebugCommand::runPickupPlanWithPriority
-                                            )
-                                    )
-                                    .executes(
-                                        MindDebugCommand::runPickupPlan
-                                    )
                             )
+                            .executes(MindDebugCommand::runPickupPlan)
                     )
+                )
             );
     }
 
     /**
      * 注册log命令。
      */
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> registerLogCommands() {
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerLogCommands() {
         return Commands.literal("log")
             .then(
-                Commands.literal("decision")
-                    .then(
-                        Commands
-                            .argument(
-                                "enabled",
-                                BoolArgumentType.bool()
-                            )
-                            .executes(context ->
-                                toggleLog(
-                                    context.getSource(),
-                                    MindLogCategory.DECISION,
-                                    BoolArgumentType.getBool(
-                                        context,
-                                        "enabled"
-                                    )
-                                )
-                            )
+                Commands.literal("decision").then(
+                    Commands.argument(
+                        "enabled",
+                        BoolArgumentType.bool()
+                    ).executes(context ->
+                        toggleLog(
+                            context.getSource(),
+                            MindLogCategory.DECISION,
+                            BoolArgumentType.getBool(context, "enabled")
+                        )
                     )
+                )
             )
             .then(
-                Commands.literal("planning")
-                    .then(
-                        Commands
-                            .argument(
-                                "enabled",
-                                BoolArgumentType.bool()
-                            )
-                            .executes(context ->
-                                toggleLog(
-                                    context.getSource(),
-                                    MindLogCategory.PLANNING,
-                                    BoolArgumentType.getBool(
-                                        context,
-                                        "enabled"
-                                    )
-                                )
-                            )
+                Commands.literal("planning").then(
+                    Commands.argument(
+                        "enabled",
+                        BoolArgumentType.bool()
+                    ).executes(context ->
+                        toggleLog(
+                            context.getSource(),
+                            MindLogCategory.PLANNING,
+                            BoolArgumentType.getBool(context, "enabled")
+                        )
                     )
+                )
             )
             .then(
-                Commands.literal("execution")
-                    .then(
-                        Commands
-                            .argument(
-                                "enabled",
-                                BoolArgumentType.bool()
-                            )
-                            .executes(context ->
-                                toggleLog(
-                                    context.getSource(),
-                                    MindLogCategory.EXECUTION,
-                                    BoolArgumentType.getBool(
-                                        context,
-                                        "enabled"
-                                    )
-                                )
-                            )
+                Commands.literal("execution").then(
+                    Commands.argument(
+                        "enabled",
+                        BoolArgumentType.bool()
+                    ).executes(context ->
+                        toggleLog(
+                            context.getSource(),
+                            MindLogCategory.EXECUTION,
+                            BoolArgumentType.getBool(context, "enabled")
+                        )
                     )
+                )
             )
             .then(
-                Commands.literal("all")
-                    .then(
-                        Commands
-                            .argument(
-                                "enabled",
-                                BoolArgumentType.bool()
-                            )
-                            .executes(context ->
-                                toggleAllLogs(
-                                    context.getSource(),
-                                    BoolArgumentType.getBool(
-                                        context,
-                                        "enabled"
-                                    )
-                                )
-                            )
+                Commands.literal("all").then(
+                    Commands.argument(
+                        "enabled",
+                        BoolArgumentType.bool()
+                    ).executes(context ->
+                        toggleAllLogs(
+                            context.getSource(),
+                            BoolArgumentType.getBool(context, "enabled")
+                        )
                     )
+                )
             )
             .then(
-                Commands.literal("status")
-                    .executes(context ->
-                        showLogStatus(context.getSource())
-                    )
+                Commands.literal("status").executes(context ->
+                    showLogStatus(context.getSource())
+                )
             );
     }
 
@@ -446,34 +378,53 @@ public class MindDebugCommand {
             return 0;
         }
         ServerLevel level = source.getLevel();
-        Zombie zombie = new Zombie(level);
+        // 使用 Skeleton 作为测试实体，默认远程配置（弓 + 箭）
+        Skeleton skeleton = EntityType.SKELETON.create(level);
+        if (skeleton == null) {
+            source.sendFailure(Component.literal("生成 Skeleton 失败"));
+            return 0;
+        }
 
         Vec3 pos = executor.position();
-        zombie.moveTo(pos.x(), pos.y(), pos.z(), executor.getYRot(), 0.0F);
-        zombie.setCustomName(Component.literal(TEST_ENTITY_NAME));
-        zombie.setCustomNameVisible(true);
-        zombie.addTag(TEST_ENTITY_TAG);
-        zombie.addTag(TEST_CONTEXT_TAG);
-        zombie.setPersistenceRequired();
+        skeleton.moveTo(pos.x(), pos.y(), pos.z(), executor.getYRot(), 0.0F);
+        skeleton.setCustomName(Component.literal(TEST_ENTITY_NAME));
+        skeleton.setCustomNameVisible(true);
+        skeleton.addTag(TEST_ENTITY_TAG);
+        skeleton.addTag(TEST_CONTEXT_TAG);
+        skeleton.setPersistenceRequired();
 
-        ItemStack head = new ItemStack(Items.LEATHER_HELMET);
-        zombie.setItemSlot(EquipmentSlot.HEAD, head);
+        // 装备基础护甲 + 远程所需物品（主手弓，副手箭）
+        skeleton.setItemSlot(
+            EquipmentSlot.HEAD,
+            new ItemStack(Items.LEATHER_HELMET)
+        );
+        skeleton.setItemInHand(
+            InteractionHand.MAIN_HAND,
+            new ItemStack(Items.BOW)
+        );
+        skeleton.setItemInHand(
+            InteractionHand.OFF_HAND,
+            new ItemStack(Items.ARROW, TEST_ARROW_STACK)
+        );
 
-        level.addFreshEntity(zombie);
+        level.addFreshEntity(skeleton);
 
-        if (!zombie.hasData(NpcMindAttachment.NPC_MIND)) {
-            zombie.setData(
+        if (!skeleton.hasData(NpcMindAttachment.NPC_MIND)) {
+            skeleton.setData(
                 NpcMindAttachment.NPC_MIND,
                 new com.Kizunad.customNPCs.capabilities.mind.NpcMind()
             );
         }
-        INpcMind mind = zombie.getData(NpcMindAttachment.NPC_MIND);
+        INpcMind mind = skeleton.getData(NpcMindAttachment.NPC_MIND);
         NpcMindRegistry.initializeMind(mind);
 
         source.sendSuccess(
             () ->
                 Component.literal(
-                    "生成测试实体: " + zombie.getUUID() + " 标签: " + TEST_ENTITY_TAG
+                    "生成测试实体: " +
+                        skeleton.getUUID() +
+                        " 标签: " +
+                        TEST_ENTITY_TAG
                 ),
             false
         );
@@ -498,9 +449,9 @@ public class MindDebugCommand {
                 () ->
                     Component.literal(
                         "已向 " +
-                        npc.getName().getString() +
-                        " 提交 MoveToAction -> " +
-                        target.getName().getString()
+                            npc.getName().getString() +
+                            " 提交 MoveToAction -> " +
+                            target.getName().getString()
                     ),
                 false
             );
@@ -539,11 +490,11 @@ public class MindDebugCommand {
                 () ->
                     Component.literal(
                         "已向 " +
-                        npc.getName().getString() +
-                        " 提交 LookAtAction(" +
-                        duration +
-                        "t) -> " +
-                        target.getName().getString()
+                            npc.getName().getString() +
+                            " 提交 LookAtAction(" +
+                            duration +
+                            "t) -> " +
+                            target.getName().getString()
                     ),
                 false
             );
@@ -568,9 +519,9 @@ public class MindDebugCommand {
                 () ->
                     Component.literal(
                         "已向 " +
-                        npc.getName().getString() +
-                        " 提交 AttackAction -> " +
-                        target.getName().getString()
+                            npc.getName().getString() +
+                            " 提交 AttackAction -> " +
+                            target.getName().getString()
                     ),
                 false
             );
@@ -595,10 +546,10 @@ public class MindDebugCommand {
                 () ->
                     Component.literal(
                         "已向 " +
-                        npc.getName().getString() +
-                        " 提交 WaitAction(" +
-                        ticks +
-                        "t)"
+                            npc.getName().getString() +
+                            " 提交 WaitAction(" +
+                            ticks +
+                            "t)"
                     ),
                 false
             );
@@ -629,9 +580,7 @@ public class MindDebugCommand {
         if (goal == null) {
             context
                 .getSource()
-                .sendFailure(
-                    Component.literal("未知目标: " + goalName)
-                );
+                .sendFailure(Component.literal("未知目标: " + goalName));
             return 0;
         }
 
@@ -647,9 +596,9 @@ public class MindDebugCommand {
                 () ->
                     Component.literal(
                         "强制切换 " +
-                        npc.getName().getString() +
-                        " 的目标为: " +
-                        goal.getName()
+                            npc.getName().getString() +
+                            " 的目标为: " +
+                            goal.getName()
                     ),
                 false
             );
@@ -705,21 +654,19 @@ public class MindDebugCommand {
                 () ->
                     Component.literal(
                         "已为 " +
-                        npc.getName().getString() +
-                        " 启动拾取计划 pick_up_item -> " +
-                        itemEntity.getDisplayName().getString() +
-                        " 优先级 " +
-                        priority +
-                        (hasPriorityArg ? "" : " (默认)")
+                            npc.getName().getString() +
+                            " 启动拾取计划 pick_up_item -> " +
+                            itemEntity.getDisplayName().getString() +
+                            " 优先级 " +
+                            priority +
+                            (hasPriorityArg ? "" : " (默认)")
                     ),
                 false
             );
         return 1;
     }
 
-    private static int runPlanGoal(
-        CommandContext<CommandSourceStack> context
-    ) {
+    private static int runPlanGoal(CommandContext<CommandSourceStack> context) {
         LivingEntity npc = getLivingEntity(context, "npc");
         if (npc == null) {
             return 0;
@@ -733,9 +680,7 @@ public class MindDebugCommand {
         if (goal == null) {
             context
                 .getSource()
-                .sendFailure(
-                    Component.literal("未知目标: " + goalName)
-                );
+                .sendFailure(Component.literal("未知目标: " + goalName));
             return 0;
         }
         if (!(goal instanceof PlanBasedGoal planGoal)) {
@@ -759,9 +704,9 @@ public class MindDebugCommand {
                 () ->
                     Component.literal(
                         "已启动计划目标: " +
-                        goal.getName() +
-                        " -> " +
-                        npc.getName().getString()
+                            goal.getName() +
+                            " -> " +
+                            npc.getName().getString()
                     ),
                 false
             );
@@ -893,12 +838,12 @@ public class MindDebugCommand {
     }
 
     private static int showLogStatus(CommandSourceStack source) {
-        String status = Arrays
-            .stream(MindLogCategory.values())
-            .map(category ->
-                category.getDisplayName() +
-                "=" +
-                (MindLog.isEnabled(category) ? "on" : "off")
+        String status = Arrays.stream(MindLogCategory.values())
+            .map(
+                category ->
+                    category.getDisplayName() +
+                    "=" +
+                    (MindLog.isEnabled(category) ? "on" : "off")
             )
             .reduce((left, right) -> left + ", " + right)
             .orElse("无");
@@ -920,9 +865,7 @@ public class MindDebugCommand {
             }
             context
                 .getSource()
-                .sendFailure(
-                    Component.literal(name + " 不是生物实体")
-                );
+                .sendFailure(Component.literal(name + " 不是生物实体"));
             return null;
         } catch (Exception e) {
             context

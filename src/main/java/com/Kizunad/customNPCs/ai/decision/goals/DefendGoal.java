@@ -35,7 +35,7 @@ public class DefendGoal implements IGoal {
     private static final float PRIORITY_RECENT_HIT = 0.7f; // 最近一次受击在防御优先级计算中的权重
     private static final float PRIORITY_MEMORY = 0.65f; // 记忆中受击事件在防御优先级计算中的权重
     private static final int DEFEND_COOLDOWN_TICKS = 80; // 防御动作后的冷却时间（80 tick），防止频繁重复进入防御状态
-    private static final double RANGED_TRIGGER_MIN = 6.0d; // 近距离射击触发防御的最小距离（以方块为单位）
+    private static final double RANGED_TRIGGER_MIN = 10.0d; // 进入远程模式的最小距离（格）
     private static final double BLOCK_RANGE_MAX = 3.5d; // NPC 进行格挡的最大有效距离（以方块为单位）
 
     private AttackAction attackAction = null; // 当前正在执行的近战攻击动作
@@ -164,9 +164,16 @@ public class DefendGoal implements IGoal {
      * 检查实体是否有防御能力（攻击力 > 0）
      */
     private boolean canDefend(LivingEntity entity) {
-        double attackDamage = entity.getAttributeValue(
-            Attributes.ATTACK_DAMAGE
-        );
+        // 部分实体（如村民）缺少攻击属性，需空值保护
+        var attr = entity.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (attr == null) {
+            LOGGER.warn(
+                "[DefendGoal] {} 缺少 attack_damage 属性，视为不可防御",
+                entity.getName().getString()
+            );
+            return false;
+        }
+        double attackDamage = attr.getValue();
         return attackDamage >= MIN_ATTACK_DAMAGE;
     }
 

@@ -3,7 +3,6 @@ package com.Kizunad.customNPCs_test.tests;
 import com.Kizunad.customNPCs.ai.planner.GoapPlanner;
 
 import com.Kizunad.customNPCs_test.goap.CourierGoal;
-import com.Kizunad.customNPCs_test.goap.GatherItemGoal;
 import com.Kizunad.customNPCs_test.utils.TestBatches;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
