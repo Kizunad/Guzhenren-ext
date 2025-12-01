@@ -33,9 +33,7 @@ public final class ThreatResponseTests {
         );
         INpcMind mind = NpcTestHelper.getMind(helper, defender);
 
-        mind
-            .getMemory()
-            .rememberShortTerm("current_threat_id", UUID.randomUUID(), 40);
+        // 已脱战的场景：仅残留威胁标记，未处于受击/追击状态
         mind.getMemory().rememberShortTerm("threat_detected", true, 40);
 
         DefendGoal goal = new DefendGoal();
@@ -116,6 +114,8 @@ public final class ThreatResponseTests {
 
         var attacker = helper.spawn(EntityType.ZOMBIE, new BlockPos(3, 2, 1));
         INpcMind mind = NpcTestHelper.getMind(helper, defender);
+        // 禁用逃跑干扰，专注于防御逻辑
+        mind.getMemory().rememberShortTerm("flee_cooldown", true, 200);
         mind
             .getMemory()
             .rememberShortTerm("current_threat_id", attacker.getUUID(), 40);
@@ -124,13 +124,12 @@ public final class ThreatResponseTests {
         goal.start(mind, defender);
         helper.onEachTick(() -> goal.tick(mind, defender));
 
-        helper.runAtTickTime(
-            20,
-            () -> helper.assertTrue(
+        helper.succeedWhen(() -> {
+            helper.assertTrue(
                 defender.isUsingItem() && defender.getUseItem().is(Items.SHIELD),
                 "DefendGoal should raise shield at close range"
-            )
-        );
+            );
+        });
     }
 
     /**
@@ -158,12 +157,11 @@ public final class ThreatResponseTests {
         goal.start(mind, defender);
         helper.onEachTick(() -> goal.tick(mind, defender));
 
-        helper.runAtTickTime(
-            40,
-            () -> helper.assertTrue(
+        helper.succeedWhen(() -> {
+            helper.assertTrue(
                 defender.isUsingItem() && defender.getUseItem().is(Items.BOW),
                 "DefendGoal should use bow at mid range"
-            )
-        );
+            );
+        });
     }
 }

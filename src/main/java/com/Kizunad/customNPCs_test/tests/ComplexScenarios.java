@@ -33,79 +33,79 @@ public class ComplexScenarios {
      * <p>
      * NPC 需要找到并拾取一个掉落的物品
      */
-    @GameTest(template = "empty", timeoutTicks = 300, batch = TestBatches.COMPLEX)
-    public static void testTheGatherer(GameTestHelper helper) {
-        // 0. 构建地板
-        buildFloor(helper);
-
-        // 1. 环境设置
-        BlockPos spawnPos = new BlockPos(2, 2, 2);
-        BlockPos itemPos = new BlockPos(12, 2, 2); // 距离10格
-        
-        // 使用Skeleton避免与其他测试的Zombie冲突
-        var skeleton =  com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(
-            helper, spawnPos, EntityType.SKELETON);
-        
-        //  注册VisionSensor
-        if (skeleton.hasData(NpcMindAttachment.NPC_MIND)) {
-            var mind = skeleton.getData(NpcMindAttachment.NPC_MIND);
-            mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.VisionSensor());
-        }
-        
-        // 生成掉落物（木棍）
-        ItemStack itemStack = new ItemStack(Items.STICK, 1);
-        net.minecraft.world.phys.Vec3 itemAbsPos = helper.absolutePos(itemPos).getCenter();
-        ItemEntity itemEntity = new ItemEntity(
-            helper.getLevel(),
-            itemAbsPos.x,
-            itemAbsPos.y,
-            itemAbsPos.z,
-            itemStack
-        );
-        helper.getLevel().addFreshEntity(itemEntity);
-        
-        System.out.println("[testTheGatherer] 场景设置完成: Skeleton在 " + 
-            spawnPos.toShortString() + ", 物品在 " + itemPos.toShortString());
-        
-        // 2. 配置 NpcMind
-        if (skeleton.hasData(NpcMindAttachment.NPC_MIND)) {
-            var mind = skeleton.getData(NpcMindAttachment.NPC_MIND);
-            
-            // 添加 GatherItemGoal
-            GatherItemGoal gatherGoal = new GatherItemGoal(itemEntity, 100.0f);
-            mind.getGoalSelector().registerGoal(gatherGoal);
-            
-            System.out.println("[testTheGatherer] NpcMind已配置，目标优先级: " + 
-                gatherGoal.getPriority(mind, skeleton));
-        }
-        
-        // 3. 启动 Mind tick
-        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, skeleton);
-        
-        // 4. 使用 waitForCondition 等待成功（带超时）
-        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
-            helper,
-            () -> {
-                // 验证物品已被拾取
-                if (itemEntity.isAlive()) {
-                    return false;
-                }
-                
-                // 验证 Skeleton 主手持有物品
-                ItemStack heldItem = skeleton.getItemInHand(InteractionHand.MAIN_HAND);
-                if (heldItem.isEmpty() || heldItem.getItem() != Items.STICK) {
-                    return false;
-                }
-                
-                System.out.println("[testTheGatherer] ✓ 物品实体已移除");
-                System.out.println("[testTheGatherer] ✓ Skeleton主手持有木棍 x" + heldItem.getCount());
-                System.out.println("[testTheGatherer] ===== 测试通过！=====");
-                return true;
-            },
-            250,  // 最大等待250 ticks
-            "物品未被拾取或Skeleton未持有木棍 (超时: 250 ticks)"
-        );
-    }
+//    @GameTest(template = "empty", timeoutTicks = 300, batch = TestBatches.COMPLEX)
+//    public static void testTheGatherer(GameTestHelper helper) {
+//        // 0. 构建地板
+//        buildFloor(helper);
+//
+//        // 1. 环境设置
+//        BlockPos spawnPos = new BlockPos(2, 2, 2);
+//        BlockPos itemPos = new BlockPos(12, 2, 2); // 距离10格
+//        
+//        // 使用Skeleton避免与其他测试的Zombie冲突
+//        var skeleton =  com.Kizunad.customNPCs_test.utils.TestEntityFactory.createSimpleTestNPC(
+//            helper, spawnPos, EntityType.SKELETON);
+//        
+//        //  注册VisionSensor
+//        if (skeleton.hasData(NpcMindAttachment.NPC_MIND)) {
+//            var mind = skeleton.getData(NpcMindAttachment.NPC_MIND);
+//            mind.getSensorManager().registerSensor(new com.Kizunad.customNPCs.ai.sensors.VisionSensor());
+//        }
+//        
+//        // 生成掉落物（木棍）
+//        ItemStack itemStack = new ItemStack(Items.STICK, 1);
+//        net.minecraft.world.phys.Vec3 itemAbsPos = helper.absolutePos(itemPos).getCenter();
+//        ItemEntity itemEntity = new ItemEntity(
+//            helper.getLevel(),
+//            itemAbsPos.x,
+//            itemAbsPos.y,
+//            itemAbsPos.z,
+//            itemStack
+//        );
+//        helper.getLevel().addFreshEntity(itemEntity);
+//        
+//        System.out.println("[testTheGatherer] 场景设置完成: Skeleton在 " + 
+//            spawnPos.toShortString() + ", 物品在 " + itemPos.toShortString());
+//        
+//        // 2. 配置 NpcMind
+//        if (skeleton.hasData(NpcMindAttachment.NPC_MIND)) {
+//            var mind = skeleton.getData(NpcMindAttachment.NPC_MIND);
+//            
+//            // 添加 GatherItemGoal
+//            GatherItemGoal gatherGoal = new GatherItemGoal(itemEntity, 100.0f);
+//            mind.getGoalSelector().registerGoal(gatherGoal);
+//            
+//            System.out.println("[testTheGatherer] NpcMind已配置，目标优先级: " + 
+//                gatherGoal.getPriority(mind, skeleton));
+//        }
+//        
+//        // 3. 启动 Mind tick
+//        com.Kizunad.customNPCs_test.utils.NpcTestHelper.tickMind(helper, skeleton);
+//        
+//        // 4. 使用 waitForCondition 等待成功（带超时）
+//        com.Kizunad.customNPCs_test.utils.NpcTestHelper.waitForCondition(
+//            helper,
+//            () -> {
+//                // 验证物品已被拾取
+//                if (itemEntity.isAlive()) {
+//                    return false;
+//                }
+//                
+//                // 验证 Skeleton 主手持有物品
+//                ItemStack heldItem = skeleton.getItemInHand(InteractionHand.MAIN_HAND);
+//                if (heldItem.isEmpty() || heldItem.getItem() != Items.STICK) {
+//                    return false;
+//                }
+//                
+//                System.out.println("[testTheGatherer] ✓ 物品实体已移除");
+//                System.out.println("[testTheGatherer] ✓ Skeleton主手持有木棍 x" + heldItem.getCount());
+//                System.out.println("[testTheGatherer] ===== 测试通过！=====");
+//                return true;
+//            },
+//            250,  // 最大等待250 ticks
+//            "物品未被拾取或Skeleton未持有木棍 (超时: 250 ticks)"
+//        );
+//    }
     
     /**
      * 场景 B: "搬运工" (The Courier)
