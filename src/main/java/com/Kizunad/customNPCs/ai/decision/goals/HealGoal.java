@@ -5,13 +5,13 @@ import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,47 +25,49 @@ import org.slf4j.LoggerFactory;
  */
 public class HealGoal implements IGoal {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HealGoal.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        HealGoal.class
+    );
 
     /** 触发治疗的血量阈值(50%) */
     private static final float HEAL_THRESHOLD = 0.5f;
-    
+
     /** 认为已恢复健康的血量阈值(80%) */
     private static final float HEALTHY_THRESHOLD = 0.8f;
-    
+
     /** 治疗记忆持续时间(tick) */
     private static final int HEALING_MEMORY_DURATION = 200;
 
     /** 主手槽位标识 */
     private static final int MAIN_HAND_SLOT = -1;
-    
+
     /** 副手槽位标识 */
     private static final int OFF_HAND_SLOT = -2;
-    
+
     /** 瞬间治疗效果基础分数 */
     private static final int INSTANT_HEAL_BASE_SCORE = 10;
-    
+
     /** 瞬间治疗效果等级加成 */
     private static final int INSTANT_HEAL_AMPLIFIER_BONUS = 5;
-    
+
     /** 再生效果基础分数 */
     private static final int REGENERATION_BASE_SCORE = 6;
-    
+
     /** 再生效果等级加成 */
     private static final int REGENERATION_AMPLIFIER_BONUS = 2;
-    
+
     /** 再生效果持续时间转换因子(tick转分数) */
     private static final double REGENERATION_DURATION_FACTOR = 40.0;
-    
+
     /** 未知药水默认分数 */
     private static final int UNKNOWN_POTION_SCORE = 4;
-    
+
     /** 金苹果治疗分数 */
     private static final int GOLDEN_APPLE_SCORE = 12;
-    
+
     /** 附魔金苹果治疗分数 */
     private static final int ENCHANTED_GOLDEN_APPLE_SCORE = 20;
-    
+
     /** 食物再生效果基础分数 */
     private static final int FOOD_REGENERATION_BASE_SCORE = 4;
 
@@ -108,8 +110,10 @@ public class HealGoal implements IGoal {
      */
     @Override
     public boolean canRun(INpcMind mind, LivingEntity entity) {
-        return entity.getHealth() < entity.getMaxHealth() * HEAL_THRESHOLD
-            && findHealingItem(mind, entity) != null;
+        return (
+            entity.getHealth() < entity.getMaxHealth() * HEAL_THRESHOLD &&
+            findHealingItem(mind, entity) != null
+        );
     }
 
     /**
@@ -121,11 +125,9 @@ public class HealGoal implements IGoal {
      */
     @Override
     public void start(INpcMind mind, LivingEntity entity) {
-        mind.getMemory().rememberShortTerm(
-            "is_healing",
-            true,
-            HEALING_MEMORY_DURATION
-        );
+        mind
+            .getMemory()
+            .rememberShortTerm("is_healing", true, HEALING_MEMORY_DURATION);
 
         LOGGER.info(
             "[HealGoal] {} 开始治疗 | 当前血量: {}/{}",
@@ -154,9 +156,14 @@ public class HealGoal implements IGoal {
                 return;
             }
             prepareItem(candidate, mind, entity);
-            currentAction = new UseItemAction(entity.getMainHandItem().getItem());
+            currentAction = new UseItemAction(
+                entity.getMainHandItem().getItem()
+            );
             currentAction.start(mind, entity);
-            LOGGER.debug("[HealGoal] 开始使用治疗物品: {}", entity.getMainHandItem().getDescriptionId());
+            LOGGER.debug(
+                "[HealGoal] 开始使用治疗物品: {}",
+                entity.getMainHandItem().getDescriptionId()
+            );
         }
 
         if (currentAction != null) {
@@ -207,7 +214,8 @@ public class HealGoal implements IGoal {
      */
     @Override
     public boolean isFinished(INpcMind mind, LivingEntity entity) {
-        boolean healthRestored = entity.getHealth() >= entity.getMaxHealth() * HEALTHY_THRESHOLD;
+        boolean healthRestored =
+            entity.getHealth() >= entity.getMaxHealth() * HEALTHY_THRESHOLD;
         boolean noHealingItem = findHealingItem(mind, entity) == null;
 
         return healthRestored || noHealingItem;
@@ -234,7 +242,10 @@ public class HealGoal implements IGoal {
      * @param entity NPC实体
      * @return 最佳治疗物品候选,如果没有找到返回null
      */
-    private HealingCandidate findHealingItem(INpcMind mind, LivingEntity entity) {
+    private HealingCandidate findHealingItem(
+        INpcMind mind,
+        LivingEntity entity
+    ) {
         if (!(entity instanceof Mob mob)) {
             return null;
         }
@@ -244,7 +255,10 @@ public class HealGoal implements IGoal {
         if (!main.isEmpty()) {
             double score = healingScore(main, mob);
             if (score > 0) {
-                best = better(best, new HealingCandidate(main.copy(), MAIN_HAND_SLOT, score));
+                best = better(
+                    best,
+                    new HealingCandidate(main.copy(), MAIN_HAND_SLOT, score)
+                );
             }
         }
 
@@ -252,7 +266,10 @@ public class HealGoal implements IGoal {
         if (!off.isEmpty()) {
             double score = healingScore(off, mob);
             if (score > 0) {
-                best = better(best, new HealingCandidate(off.copy(), OFF_HAND_SLOT, score));
+                best = better(
+                    best,
+                    new HealingCandidate(off.copy(), OFF_HAND_SLOT, score)
+                );
             }
         }
 
@@ -264,7 +281,10 @@ public class HealGoal implements IGoal {
             }
             double score = healingScore(stack, mob);
             if (score > 0) {
-                best = better(best, new HealingCandidate(stack.copy(), i, score));
+                best = better(
+                    best,
+                    new HealingCandidate(stack.copy(), i, score)
+                );
             }
         }
         return best;
@@ -285,19 +305,37 @@ public class HealGoal implements IGoal {
      */
     private double healingScore(ItemStack stack, LivingEntity entity) {
         Item item = stack.getItem();
-        if (item == Items.POTION || item == Items.SPLASH_POTION || item == Items.LINGERING_POTION) {
+        if (
+            item == Items.POTION ||
+            item == Items.SPLASH_POTION ||
+            item == Items.LINGERING_POTION
+        ) {
             PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
             double score = 0;
             if (contents != null) {
                 for (var effect : contents.getAllEffects()) {
-                    if (effect.getEffect().equals(net.minecraft.world.effect.MobEffects.HEAL)) {
-                        score += INSTANT_HEAL_BASE_SCORE 
-                            + effect.getAmplifier() * INSTANT_HEAL_AMPLIFIER_BONUS;
+                    if (
+                        effect
+                            .getEffect()
+                            .equals(net.minecraft.world.effect.MobEffects.HEAL)
+                    ) {
+                        score +=
+                            INSTANT_HEAL_BASE_SCORE +
+                            effect.getAmplifier() *
+                            INSTANT_HEAL_AMPLIFIER_BONUS;
                     }
-                    if (effect.getEffect().equals(net.minecraft.world.effect.MobEffects.REGENERATION)) {
-                        score += REGENERATION_BASE_SCORE 
-                            + effect.getAmplifier() * REGENERATION_AMPLIFIER_BONUS 
-                            + effect.getDuration() / REGENERATION_DURATION_FACTOR;
+                    if (
+                        effect
+                            .getEffect()
+                            .equals(
+                                net.minecraft.world.effect.MobEffects.REGENERATION
+                            )
+                    ) {
+                        score +=
+                            REGENERATION_BASE_SCORE +
+                            effect.getAmplifier() *
+                            REGENERATION_AMPLIFIER_BONUS +
+                            effect.getDuration() / REGENERATION_DURATION_FACTOR;
                     }
                 }
             } else {
@@ -317,11 +355,19 @@ public class HealGoal implements IGoal {
         if (food != null) {
             double score = 0;
             for (var pair : food.effects()) {
-                if (pair.effect() != null 
-                    && pair.effect().getEffect().equals(
-                        net.minecraft.world.effect.MobEffects.REGENERATION)) {
-                    score += FOOD_REGENERATION_BASE_SCORE 
-                        + pair.effect().getDuration() / REGENERATION_DURATION_FACTOR;
+                if (
+                    pair.effect() != null &&
+                    pair
+                        .effect()
+                        .getEffect()
+                        .equals(
+                            net.minecraft.world.effect.MobEffects.REGENERATION
+                        )
+                ) {
+                    score +=
+                        FOOD_REGENERATION_BASE_SCORE +
+                        pair.effect().getDuration() /
+                        REGENERATION_DURATION_FACTOR;
                 }
             }
             return score;
@@ -339,20 +385,32 @@ public class HealGoal implements IGoal {
      * @param mind NPC的思维接口
      * @param entity NPC实体
      */
-    private void prepareItem(HealingCandidate candidate, INpcMind mind, LivingEntity entity) {
+    private void prepareItem(
+        HealingCandidate candidate,
+        INpcMind mind,
+        LivingEntity entity
+    ) {
         previousMainHand = entity.getMainHandItem().copy();
         previousOffHand = entity.getOffhandItem().copy();
         sourceSlot = candidate.slot();
         sourceStack = candidate.stack();
         if (candidate.slot() >= 0) {
-            ItemStack removed = mind.getInventory().removeItem(candidate.slot());
+            ItemStack removed = mind
+                .getInventory()
+                .removeItem(candidate.slot());
             entity.setItemInHand(InteractionHand.MAIN_HAND, removed);
         } else if (candidate.slot() == OFF_HAND_SLOT) {
-            entity.setItemInHand(InteractionHand.MAIN_HAND, entity.getOffhandItem());
+            entity.setItemInHand(
+                InteractionHand.MAIN_HAND,
+                entity.getOffhandItem()
+            );
             entity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
             // 主手已有合适物品
-            entity.setItemInHand(InteractionHand.MAIN_HAND, entity.getMainHandItem());
+            entity.setItemInHand(
+                InteractionHand.MAIN_HAND,
+                entity.getMainHandItem()
+            );
         }
     }
 

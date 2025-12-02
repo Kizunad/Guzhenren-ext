@@ -1,6 +1,5 @@
 package com.Kizunad.customNPCs.ai.actions.common;
 
-import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
@@ -25,6 +24,8 @@ public class EquipArmorAction extends AbstractStandardAction {
 
     /** 盔甲优化状态的短期记忆持续时间(tick) */
     private static final int ARMOR_MEMORY_DURATION = 200;
+    /** 单次动作最多尝试装备的件数，避免极端情况下的无限循环 */
+    private static final int MAX_EQUIP_ITERATIONS = 4;
 
     /** 盔甲偏好设置 */
     private final ArmorEvaluationUtil.ArmorPreference preference;
@@ -52,25 +53,49 @@ public class EquipArmorAction extends AbstractStandardAction {
             LOGGER.warn("[EquipArmorAction] mind 为空，无法执行");
             return ActionStatus.FAILURE;
         }
+        boolean equippedAny = false;
+        int attempts = 0;
         NpcInventory inventory = mind.getInventory();
-        ArmorEvaluationUtil.ArmorUpgrade upgrade = ArmorEvaluationUtil.findBestUpgrade(
-            inventory,
-            mob,
-            preference
-        );
 
-        if (upgrade == null) {
+        while (attempts < MAX_EQUIP_ITERATIONS) {
+            ArmorEvaluationUtil.ArmorUpgrade upgrade =
+                ArmorEvaluationUtil.findBestUpgrade(inventory, mob, preference);
+            if (upgrade == null) {
+                break;
+            }
+            boolean equipped = equipUpgrade(mob, inventory, upgrade);
+            attempts++;
+            if (equipped) {
+                equippedAny = true;
+            } else {
+                // 当前升级失败，避免无意义重复
+                break;
+            }
+        }
+
+        if (!equippedAny) {
             LOGGER.debug("[EquipArmorAction] 未发现更优盔甲，跳过");
             return ActionStatus.FAILURE;
         }
 
+        return ActionStatus.SUCCESS;
+    }
+
+    /**
+     * 执行一次盔甲替换。
+     */
+    private boolean equipUpgrade(
+        Mob mob,
+        NpcInventory inventory,
+        ArmorEvaluationUtil.ArmorUpgrade upgrade
+    ) {
         ItemStack candidate = inventory.removeItem(upgrade.inventorySlot());
         if (candidate.isEmpty()) {
             LOGGER.warn(
                 "[EquipArmorAction] 目标槽位 {} 已为空，无法装备",
                 upgrade.inventorySlot()
             );
-            return ActionStatus.FAILURE;
+            return false;
         }
 
         // 盔甲通常不可堆叠，仍保证仅装备 1 个并回收余量
@@ -103,22 +128,12 @@ public class EquipArmorAction extends AbstractStandardAction {
             }
         }
 
-        mind.getMemory().rememberLongTerm(WorldStateKeys.ARMOR_OPTIMIZED, true);
-        mind
-            .getMemory()
-            .rememberShortTerm(
-                WorldStateKeys.ARMOR_BETTER_AVAILABLE,
-                false,
-                ARMOR_MEMORY_DURATION
-            );
-
         LOGGER.info(
             "[EquipArmorAction] 装备更优盔甲 -> 槽位 {} | 提升 {}",
-            slot,
+            upgrade.slot(),
             String.format("%.2f", upgrade.improvement())
         );
-
-        return ActionStatus.SUCCESS;
+        return true;
     }
 
     @Override

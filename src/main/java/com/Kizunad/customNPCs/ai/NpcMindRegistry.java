@@ -6,6 +6,7 @@ import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.DefendGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipArmorGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
@@ -55,6 +56,7 @@ public final class NpcMindRegistry {
         registerGoal("flee", FleeGoal::new);
         registerGoal("defend", DefendGoal::new);
         registerGoal("seek_shelter", SeekShelterGoal::new);
+        registerGoal("heal", HealGoal::new);
 
         registerSensor("vision", VisionSensor::new);
         registerSensor("damage", DamageSensor::new);

@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import java.util.function.Predicate;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * 简单的 NPC 背包实现（参考玩家背包大小）。
@@ -13,18 +15,26 @@ import java.util.function.Predicate;
  * 仅负责基础的存取与序列化，不处理界面交互。
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class NpcInventory {
+public class NpcInventory implements Container {
 
-    private static final int DEFAULT_SIZE = 36; // 与玩家主背包尺寸一致
+    public static final int MAIN_SIZE = 36; // 与玩家主背包一致
+    public static final int ARMOR_SIZE = 4; // 头、胸、腿、脚
+    public static final int OFFHAND_SIZE = 1;
+    public static final int TOTAL_SIZE = MAIN_SIZE + ARMOR_SIZE + OFFHAND_SIZE;
 
     private final NonNullList<ItemStack> items;
+    private Player viewer;
 
     public NpcInventory() {
-        this(DEFAULT_SIZE);
+        this(TOTAL_SIZE);
     }
 
     public NpcInventory(int size) {
         this.items = NonNullList.withSize(size, ItemStack.EMPTY);
+    }
+
+    public void setViewer(Player player) {
+        this.viewer = player;
     }
 
     /**
@@ -160,5 +170,51 @@ public class NpcInventory {
 
     private boolean isValidSlot(int slot) {
         return slot >= 0 && slot < items.size();
+    }
+
+    @Override
+    public void clearContent() {
+        for (int i = 0; i < items.size(); i++) {
+            items.set(i, ItemStack.EMPTY);
+        }
+    }
+
+    // ========== Container 接口 ==========
+    @Override
+    public int getContainerSize() {
+        return items.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for (ItemStack stack : items) {
+            if (!stack.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot) {
+        if (!isValidSlot(slot)) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack stack = items.get(slot);
+        items.set(slot, ItemStack.EMPTY);
+        return stack;
+    }
+
+    @Override
+    public void setChanged() {
+        // 无额外标记
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        if (player == null) {
+            return true;
+        }
+        return viewer == null || viewer == player;
     }
 }

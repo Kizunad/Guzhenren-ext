@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.Holder;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * 专属自定义 NPC 实体，运行自研 AI（NpcMind + Sensors + Actions）。
@@ -87,6 +88,7 @@ public class CustomNpcEntity extends PathfinderMob {
         this.navigationMode = mode;
         this.setPersistenceRequired();
         this.getTags().add(MIND_TAG); // 触发 NpcMindAttachment 自动挂载
+        this.setCanPickUpLoot(true);
 
         /*
          * NOTE: FlyingMoveControl
@@ -104,6 +106,43 @@ public class CustomNpcEntity extends PathfinderMob {
     @Override
     protected void registerGoals() {
         // 自定义 AI 全由 NpcMind 驱动，清空原版 Goals 避免干扰。
+    }
+
+    @Override
+    protected void pickUpItem(net.minecraft.world.entity.item.ItemEntity itemEntity) {
+        var mindHolder = this.getData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND);
+        if (mindHolder != null) {
+            var mind = mindHolder;
+            var inventory = mind.getInventory();
+            ItemStack remaining = inventory.addItem(itemEntity.getItem());
+            if (remaining.isEmpty()) {
+                this.take(itemEntity, itemEntity.getItem().getCount());
+                itemEntity.discard();
+                return;
+            } else {
+                itemEntity.setItem(remaining);
+            }
+        }
+        super.pickUpItem(itemEntity);
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(
+        net.minecraft.server.level.ServerLevel level,
+        net.minecraft.world.damagesource.DamageSource source,
+        boolean causedByPlayer
+    ) {
+        super.dropCustomDeathLoot(level, source, causedByPlayer);
+        if (this.hasData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND)) {
+            var mind = this.getData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND);
+            var inventory = mind.getInventory();
+            for (int i = 0; i < inventory.getContainerSize(); i++) {
+                ItemStack stack = inventory.removeItemNoUpdate(i);
+                if (!stack.isEmpty()) {
+                    this.spawnAtLocation(stack);
+                }
+            }
+        }
     }
 
     @Override

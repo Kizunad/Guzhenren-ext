@@ -308,13 +308,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             WorldStateKeys.ARMOR_SCORE,
             ArmorEvaluationUtil.totalEquippedScore(entity)
         );
-        Object armorOptimized = memory.getMemory(
-            WorldStateKeys.ARMOR_OPTIMIZED
-        );
-        state.setState(
-            WorldStateKeys.ARMOR_OPTIMIZED,
-            armorOptimized != null ? armorOptimized : false
-        );
+        // 直接由当前装备是否需要升级判定是否已优化，避免记忆状态与实际脱节
+        state.setState(WorldStateKeys.ARMOR_OPTIMIZED, !armorUpgradeAvailable);
 
         // 武器/防御能力
         state.setState(

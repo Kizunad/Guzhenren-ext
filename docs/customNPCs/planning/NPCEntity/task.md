@@ -7,10 +7,10 @@
     - [x] 构造时清空原版 `goalSelector/targetSelector`（留空 registerGoals），仅自研 AI <!-- id: npc-entity-clear-vanilla-ai -->
     - [x] 指定/确认合适的 `PathNavigation`（地面/飞行等，已支持枚举切换） <!-- id: npc-entity-navigation -->
 
-- [ ] **AI 集成与驱动** <!-- id: npc-entity-ai -->
+- [x] **AI 集成与驱动** <!-- id: npc-entity-ai -->
     - [x] 绑定 `NpcMind`、`SensorManager`、`UtilityGoalSelector`、`ActionExecutor`（Attachment 时 initializeMind 注册默认 Goals/Sensors） <!-- id: npc-entity-mind-bind -->
     - [x] 实体 tick 驱动 `mind.tick`（全局事件），传感器默认注册（Vision/Damage/Safety） <!-- id: npc-entity-mind-tick -->
-    - [ ] 调整 `MoveToAction` 等动作参数（超时/重算/速度因子）确保流畅寻路 <!-- id: npc-entity-move-tuning -->
+    - [x] 调整 `MoveToAction` 等动作参数（超时/重算/速度因子）确保流畅寻路 <!-- id: npc-entity-move-tuning -->
     - [x] 验证无原版 Goal 抢占：registerGoals 留空，仅自有目标/动作在跑 <!-- id: npc-entity-no-vanilla-preempt -->
 
 - [ ] **生存能力** <!-- id: npc-entity-survival -->

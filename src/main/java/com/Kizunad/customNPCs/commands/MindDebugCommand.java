@@ -14,6 +14,7 @@ import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.customNPCs.entity.ModEntities;
+import com.Kizunad.customNPCs.menu.NpcInventoryMenu;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -26,17 +27,21 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.MenuProvider;
 
 /**
  * NPC Mind 调试命令
@@ -96,6 +101,7 @@ public class MindDebugCommand {
             Commands.literal(literal)
                 .requires(source -> source.hasPermission(2)) // 需要 OP 权限
                 .then(registerInspectCommands())
+                .then(registerInspectInventoryCommand())
                 .then(registerSpawnTestCommand())
                 .then(registerActionCommands())
                 .then(registerGoalCommands())
@@ -115,6 +121,20 @@ public class MindDebugCommand {
             .then(
                 Commands.argument("target", EntityArgument.entity()).executes(
                     MindDebugCommand::inspectTarget
+                )
+            );
+    }
+
+    /**
+     * 注册 inspectInv 命令：打开 NPC 背包 UI。
+     */
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerInspectInventoryCommand() {
+        return Commands.literal("inspectInv")
+            .then(
+                Commands.argument("target", EntityArgument.entity()).executes(
+                    MindDebugCommand::openInventoryForTarget
                 )
             );
     }
@@ -369,6 +389,56 @@ public class MindDebugCommand {
                 .sendFailure(Component.literal("错误: " + e.getMessage()));
             return 0;
         }
+    }
+
+    private static int openInventoryForTarget(
+        CommandContext<CommandSourceStack> context
+    ) {
+        ServerPlayer player;
+        try {
+            player = context.getSource().getPlayerOrException();
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("需要玩家执行"));
+            return 0;
+        }
+        Entity entity = getEntity(context, "target");
+        if (!(entity instanceof CustomNpcEntity npc)) {
+            context
+                .getSource()
+                .sendFailure(Component.literal("目标不是 CustomNpcEntity"));
+            return 0;
+        }
+        var mind = npc.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            context
+                .getSource()
+                .sendFailure(Component.literal("目标未初始化 NpcMind"));
+            return 0;
+        }
+
+        MenuProvider provider = new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.literal("Inventory - " + npc.getName().getString());
+            }
+
+            @Override
+            public net.minecraft.world.inventory.AbstractContainerMenu createMenu(
+                int containerId,
+                Inventory playerInventory,
+                Player player
+            ) {
+                return new NpcInventoryMenu(
+                    containerId,
+                    playerInventory,
+                    npc,
+                    mind.getInventory()
+                );
+            }
+        };
+
+        player.openMenu(provider, buf -> buf.writeVarInt(npc.getId()));
+        return 1;
     }
 
     private static int spawnTestEntity(CommandSourceStack source) {
