@@ -4,6 +4,8 @@ import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CookGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CraftItemGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.DefendGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
@@ -11,6 +13,7 @@ import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SeekShelterGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal;
 import com.Kizunad.customNPCs.ai.sensors.AuditorySensor;
@@ -57,6 +60,9 @@ public final class NpcMindRegistry {
         registerGoal("defend", DefendGoal::new);
         registerGoal("seek_shelter", SeekShelterGoal::new);
         registerGoal("heal", HealGoal::new);
+        registerGoal("cook", CookGoal::new);
+        registerGoal("hunt", HuntGoal::new);
+        registerGoal("craft_item", CraftItemGoal::new);
 
         registerSensor("vision", VisionSensor::new);
         registerSensor("damage", DamageSensor::new);

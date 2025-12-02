@@ -1,8 +1,8 @@
 package com.Kizunad.customNPCs_test;
 
 import com.Kizunad.customNPCs_test.utils.TestBatches;
-//import net.minecraft.gametest.framework.GameTest;
-//import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
 @GameTestHolder("guzhenrenext")
@@ -13,6 +13,27 @@ public class NpcMindGameTests {
     private static final String BATCH_GOAP = TestBatches.GOAP;
     private static final String BATCH_REAL_API = TestBatches.REAL_API;
     private static final String BATCH_PERF = TestBatches.PERFORMANCE;
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 260)
+    public void testCookGoalProducesCookedFood(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.goals.CookGoalTests.testCookGoalProducesCookedFood(
+            helper
+        );
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 220)
+    public void testCraftItemGoalManualPlan(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.goals.CraftItemGoalTests.testCraftItemGoalManualPlan(
+            helper
+        );
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 240)
+    public void testHuntGoalAttacksWeakerEntities(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.goals.HuntGoalTests.testHuntGoalAttacksWeakerEntities(
+            helper
+        );
+    }
 
     //    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
     //    public void testIdleGoal(GameTestHelper helper) {
