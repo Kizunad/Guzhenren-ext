@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.config.NpcCombatDefaults;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,7 +20,6 @@ public class BlockWithShieldAction extends AbstractStandardAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(
         BlockWithShieldAction.class
     );
-    private static final int DEFAULT_BLOCK_DURATION_TICKS = 40;
 
     private final int blockDurationTicks;
     private int remainingTicks;
@@ -29,7 +29,7 @@ public class BlockWithShieldAction extends AbstractStandardAction {
      * 默认构造函数，使用默认格挡持续时间。
      */
     public BlockWithShieldAction() {
-        this(DEFAULT_BLOCK_DURATION_TICKS);
+        this(NpcCombatDefaults.SHIELD_MIN_RAISE_TICKS);
     }
 
     /**
@@ -38,7 +38,10 @@ public class BlockWithShieldAction extends AbstractStandardAction {
      */
     public BlockWithShieldAction(int blockDurationTicks) {
         super("BlockWithShieldAction");
-        this.blockDurationTicks = blockDurationTicks;
+        this.blockDurationTicks = Math.max(
+            NpcCombatDefaults.SHIELD_MIN_RAISE_TICKS,
+            blockDurationTicks
+        );
     }
 
     @Override

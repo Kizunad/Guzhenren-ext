@@ -14,7 +14,9 @@
     - [x] 验证无原版 Goal 抢占：registerGoals 留空，仅自有目标/动作在跑 <!-- id: npc-entity-no-vanilla-preempt -->
 
 - [ ] **生存能力** <!-- id: npc-entity-survival -->
-    - [ ] 基线属性与防御（含盾牌支持） <!-- id: npc-entity-base-stats -->
+    - [x] 基线属性与防御（含盾牌支持） <!-- id: npc-entity-base-stats -->
+        - 基线模板集中于 `com.Kizunad.customNPCs.ai.config.NpcAttributeDefaults`（生命/攻速/护甲/移速/击退抗/游泳/重力/交互范围等全量默认值 + nametag/swim_speed 可选注册），供属性注册器直接复用。
+        - 盾牌举盾基线：`NpcCombatDefaults.SHIELD_MIN_RAISE_TICKS` + `SHIELD_COOLDOWN_TICKS`，统一由 `BlockWithShieldAction`/`DefendGoal` 使用。
     - [ ] 进食/回血策略（可先被动回血，预留食物链路） <!-- id: npc-entity-heal -->
     - [ ] 伤害抗性处理（火焰/跌落等） <!-- id: npc-entity-resistance -->
     - [ ] 威胁响应链路：沿用 Sensors → triggerInterrupt → UtilityGoalSelector → Defend/Flee/Ranged/Melee <!-- id: npc-entity-threat -->

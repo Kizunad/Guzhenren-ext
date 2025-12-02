@@ -5,6 +5,7 @@ import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.common.AttackAction;
 import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
+import com.Kizunad.customNPCs.ai.config.NpcCombatDefaults;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
@@ -116,7 +117,7 @@ public class DefendGoal implements IGoal {
 
         if (shouldUseRanged(mind, entity, distance)) {
             switchToRanged(mind, entity);
-        } else if (shouldBlock(entity, distance)) {
+        } else if (shouldBlock(mind, entity, distance)) {
             switchToBlock(mind, entity);
         } else {
             switchToMelee(mind, entity);
@@ -237,8 +238,18 @@ public class DefendGoal implements IGoal {
         return distance >= RANGED_TRIGGER_MIN && hasRangedWeapon(mind, entity);
     }
 
-    private boolean shouldBlock(LivingEntity entity, double distance) {
-        return distance > 0 && distance <= BLOCK_RANGE_MAX && hasShield(entity);
+    private boolean shouldBlock(
+        INpcMind mind,
+        LivingEntity entity,
+        double distance
+    ) {
+        boolean inCooldown = mind.getMemory().hasMemory("block_cooldown");
+        return (
+            !inCooldown &&
+            distance > 0 &&
+            distance <= BLOCK_RANGE_MAX &&
+            hasShield(entity)
+        );
     }
 
     private boolean hasShield(LivingEntity entity) {
@@ -264,7 +275,9 @@ public class DefendGoal implements IGoal {
             return;
         }
         stopAllActions(mind, entity);
-        blockAction = new BlockWithShieldAction();
+        blockAction = new BlockWithShieldAction(
+            NpcCombatDefaults.SHIELD_MIN_RAISE_TICKS
+        );
         blockAction.start(mind, entity);
         activeMode = Mode.BLOCK;
         LOGGER.debug("[DefendGoal] 切换为格挡");
@@ -299,6 +312,13 @@ public class DefendGoal implements IGoal {
             if (status != ActionStatus.RUNNING) {
                 blockAction = null;
                 activeMode = Mode.NONE;
+                mind
+                    .getMemory()
+                    .rememberShortTerm(
+                        "block_cooldown",
+                        true,
+                        NpcCombatDefaults.SHIELD_COOLDOWN_TICKS
+                    );
             }
         }
     }

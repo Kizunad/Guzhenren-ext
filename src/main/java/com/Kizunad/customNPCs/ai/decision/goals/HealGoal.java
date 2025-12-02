@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
+import com.Kizunad.customNPCs.ai.config.NpcCombatDefaults;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
@@ -29,14 +30,17 @@ public class HealGoal implements IGoal {
         HealGoal.class
     );
 
-    /** 触发治疗的血量阈值(50%) */
-    private static final float HEAL_THRESHOLD = 0.5f;
+    /** 触发治疗的血量阈值(默认 50%，可集中调优) */
+    private static final float HEAL_THRESHOLD =
+        NpcCombatDefaults.HEAL_TRIGGER_RATIO;
 
-    /** 认为已恢复健康的血量阈值(80%) */
-    private static final float HEALTHY_THRESHOLD = 0.8f;
+    /** 认为已恢复健康的血量阈值(默认 80%) */
+    private static final float HEALTHY_THRESHOLD =
+        NpcCombatDefaults.HEAL_HEALTHY_RATIO;
 
     /** 治疗记忆持续时间(tick) */
-    private static final int HEALING_MEMORY_DURATION = 200;
+    private static final int HEALING_MEMORY_DURATION =
+        NpcCombatDefaults.HEAL_MEMORY_TICKS;
 
     /** 主手槽位标识 */
     private static final int MAIN_HAND_SLOT = -1;
