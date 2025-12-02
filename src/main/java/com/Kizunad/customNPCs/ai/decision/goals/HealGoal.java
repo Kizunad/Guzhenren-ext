@@ -80,6 +80,7 @@ public class HealGoal implements IGoal {
     private ItemStack previousOffHand = ItemStack.EMPTY;
     private int sourceSlot = -1;
     private ItemStack sourceStack = ItemStack.EMPTY;
+    private boolean mainHandStoredInInventory = false;
 
     /**
      * 计算治疗目标的优先级。
@@ -415,10 +416,29 @@ public class HealGoal implements IGoal {
         previousOffHand = entity.getOffhandItem().copy();
         sourceSlot = candidate.slot();
         sourceStack = candidate.stack();
+        mainHandStoredInInventory = false;
+        // 若治疗物不在主手，先腾空主手到背包，避免覆盖
+        if (candidate.slot() != MAIN_HAND_SLOT) {
+            ItemStack currentMain = entity.getMainHandItem();
+            if (!currentMain.isEmpty()) {
+                ItemStack leftover = mind.getInventory().addItem(currentMain);
+                if (!leftover.isEmpty()) {
+                    entity.spawnAtLocation(leftover);
+                }
+                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                mainHandStoredInInventory = true;
+            }
+        }
+
         if (candidate.slot() >= 0) {
             ItemStack removed = mind
                 .getInventory()
-                .removeItem(candidate.slot());
+                .removeItem(candidate.slot(), 1);
+            if (removed.isEmpty()) {
+                LOGGER.warn("[HealGoal] 无法从背包槽位 {} 取出治疗物", candidate.slot());
+                return;
+            }
+            sourceStack = removed.copy();
             entity.setItemInHand(InteractionHand.MAIN_HAND, removed);
         } else if (candidate.slot() == OFF_HAND_SLOT) {
             entity.setItemInHand(
@@ -427,11 +447,7 @@ public class HealGoal implements IGoal {
             );
             entity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            // 主手已有合适物品
-            entity.setItemInHand(
-                InteractionHand.MAIN_HAND,
-                entity.getMainHandItem()
-            );
+            // 主手已有合适物品，保持不动
         }
     }
 
@@ -446,13 +462,24 @@ public class HealGoal implements IGoal {
      */
     private void cleanupAfterUse(INpcMind mind, LivingEntity entity) {
         ItemStack hand = entity.getItemInHand(InteractionHand.MAIN_HAND);
+        boolean fromMainHand = sourceSlot == MAIN_HAND_SLOT;
         if (!hand.isEmpty()) {
-            ItemStack leftover = mind.getInventory().addItem(hand);
-            if (!leftover.isEmpty()) {
-                entity.spawnAtLocation(leftover);
+            if (fromMainHand) {
+                // 保持主手中剩余的消耗品，不回收至背包，避免复制
+                entity.setItemInHand(InteractionHand.MAIN_HAND, hand);
+            } else {
+                ItemStack leftover = mind.getInventory().addItem(hand);
+                if (!leftover.isEmpty()) {
+                    entity.spawnAtLocation(leftover);
+                }
+                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             }
         }
-        entity.setItemInHand(InteractionHand.MAIN_HAND, previousMainHand);
+
+        // 仅在治疗物不是来自主手时恢复之前的主手物品
+        if (!fromMainHand) {
+            restorePreviousMainHand(mind, entity);
+        }
         entity.setItemInHand(InteractionHand.OFF_HAND, previousOffHand);
     }
 
@@ -467,20 +494,44 @@ public class HealGoal implements IGoal {
      */
     private void rollback(INpcMind mind, LivingEntity entity) {
         ItemStack hand = entity.getItemInHand(InteractionHand.MAIN_HAND);
+        boolean fromMainHand = sourceSlot == MAIN_HAND_SLOT;
         if (!hand.isEmpty()) {
-            ItemStack leftover = mind.getInventory().addItem(hand);
-            if (!leftover.isEmpty()) {
-                entity.spawnAtLocation(leftover);
+            if (fromMainHand) {
+                // 若来源于主手，保留当前剩余堆叠
+                entity.setItemInHand(InteractionHand.MAIN_HAND, hand);
+            } else {
+                ItemStack leftover = mind.getInventory().addItem(hand);
+                if (!leftover.isEmpty()) {
+                    entity.spawnAtLocation(leftover);
+                }
+                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
+        }
+        if (!fromMainHand) {
+            restorePreviousMainHand(mind, entity);
+        }
+        entity.setItemInHand(InteractionHand.OFF_HAND, previousOffHand);
+    }
+
+    /**
+     * 将先前主手物从背包取回主手，避免重复复制。
+     */
+    private void restorePreviousMainHand(INpcMind mind, LivingEntity entity) {
+        if (mainHandStoredInInventory && !previousMainHand.isEmpty()) {
+            int slot = mind
+                .getInventory()
+                .findFirstSlot(stack ->
+                    ItemStack.isSameItemSameComponents(stack, previousMainHand)
+                );
+            if (slot >= 0) {
+                ItemStack pulled = mind.getInventory().removeItem(slot);
+                entity.setItemInHand(InteractionHand.MAIN_HAND, pulled);
+                mainHandStoredInInventory = false;
+                return;
             }
         }
         entity.setItemInHand(InteractionHand.MAIN_HAND, previousMainHand);
-        entity.setItemInHand(InteractionHand.OFF_HAND, previousOffHand);
-        if (sourceSlot >= 0 && !sourceStack.isEmpty()) {
-            ItemStack leftover = mind.getInventory().addItem(sourceStack);
-            if (!leftover.isEmpty()) {
-                entity.spawnAtLocation(leftover);
-            }
-        }
+        mainHandStoredInInventory = false;
     }
 
     /**

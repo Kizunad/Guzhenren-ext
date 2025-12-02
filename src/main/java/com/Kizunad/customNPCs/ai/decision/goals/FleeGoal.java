@@ -99,6 +99,13 @@ public class FleeGoal implements IGoal {
                 LOGGER.info("[FleeGoal] 已到达安全位置");
                 fleeAction = null;
                 safeLocation = null;
+                // 立即退出逃跑状态，进入短冷却，防止原地反复“到达安全位置”刷屏
+                mind.getMemory().forget("is_fleeing");
+                mind.getMemory().forget("flee_lock");
+                mind
+                    .getMemory()
+                    .rememberShortTerm("flee_cooldown", true, FLEE_COOLDOWN_TICKS);
+                clearThreatMemory(mind);
             } else if (status == ActionStatus.FAILURE) {
                 LOGGER.warn("[FleeGoal] 逃跑失败，重新计算路径");
                 fleeAction = null;

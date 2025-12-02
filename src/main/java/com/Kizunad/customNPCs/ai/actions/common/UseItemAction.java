@@ -137,16 +137,19 @@ public class UseItemAction extends AbstractStandardAction implements IUseItemAct
         // 增加使用计数
         useCounter++;
 
-        // 检查是否超时
-        if (useCounter >= maxUseTicks) {
-            LOGGER.info("[UseItemAction] 使用完成（超时）");
-            mob.stopUsingItem();
-            return ActionStatus.SUCCESS;
-        }
+        // 动态估算使用时长（物品 useDuration + 缓冲），避免过早打断食物/药水
+        int expectedTicks = getExpectedUseTicks(mob);
 
         // 检查物品是否自动完成使用（如食物吃完）
         if (!mob.isUsingItem()) {
             LOGGER.info("[UseItemAction] 物品使用完成");
+            return ActionStatus.SUCCESS;
+        }
+
+        // 超过预期时长则强制收尾，防止卡死
+        if (useCounter >= expectedTicks) {
+            LOGGER.info("[UseItemAction] 使用达到预期时长，强制结束");
+            mob.stopUsingItem();
             return ActionStatus.SUCCESS;
         }
 
@@ -197,6 +200,22 @@ public class UseItemAction extends AbstractStandardAction implements IUseItemAct
 
         // 如果未指定目标物品，检查物品是否可使用
         return stack.getFoodProperties(mob) != null || stack.getUseDuration(mob) > 0;
+    }
+
+    /**
+     * 估算本次使用的合理时长（物品 useDuration + 缓冲），下限为配置的默认值。
+     */
+    private int getExpectedUseTicks(Mob mob) {
+        int itemDuration = 0;
+        if (usingHand != null) {
+            ItemStack stack = mob.getItemInHand(usingHand);
+            itemDuration = stack.getUseDuration(mob);
+        }
+        int baseline = Math.max(maxUseTicks, CONFIG.getDefaultItemUseTicks());
+        int buffered = itemDuration > 0
+            ? itemDuration + CONFIG.getTimeoutBufferTicks()
+            : baseline + CONFIG.getTimeoutBufferTicks();
+        return Math.max(baseline, buffered);
     }
 
     @Override
