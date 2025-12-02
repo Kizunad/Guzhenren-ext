@@ -1,6 +1,10 @@
 package com.Kizunad.customNPCs.entity;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -12,11 +16,8 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.world.level.Level;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 /**
  * 专属自定义 NPC 实体，运行自研 AI（NpcMind + Sensors + Actions）。
@@ -58,8 +59,10 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final double BASE_ENTITY_INTERACTION_RANGE = 3.0D;
     private static final double BASE_SPAWN_REINFORCEMENTS = 0.0D;
     private static final double BASE_NAMETAG_DISTANCE = 64.0D;
-    private static final ResourceLocation NAMETAG_ATTR_ID = ResourceLocation.parse("neoforge:nametag_distance");
-    private static final ResourceLocation SWIM_SPEED_ATTR_ID = ResourceLocation.parse("neoforge:swim_speed");
+    private static final ResourceLocation NAMETAG_ATTR_ID =
+        ResourceLocation.parse("neoforge:nametag_distance");
+    private static final ResourceLocation SWIM_SPEED_ATTR_ID =
+        ResourceLocation.parse("neoforge:swim_speed");
     private static final int FLYING_MAX_TURN = 10;
 
     public enum NavigationMode {
@@ -97,7 +100,11 @@ public class CustomNpcEntity extends PathfinderMob {
          * 应用速度和角度。
          */
         if (navigationMode == NavigationMode.FLYING) {
-            this.moveControl = new FlyingMoveControl(this, FLYING_MAX_TURN, false);
+            this.moveControl = new FlyingMoveControl(
+                this,
+                FLYING_MAX_TURN,
+                false
+            );
         }
         // 覆盖 super 中创建的默认导航，按模式替换
         this.navigation = createNavigation(level);
@@ -109,8 +116,12 @@ public class CustomNpcEntity extends PathfinderMob {
     }
 
     @Override
-    protected void pickUpItem(net.minecraft.world.entity.item.ItemEntity itemEntity) {
-        var mindHolder = this.getData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND);
+    protected void pickUpItem(
+        net.minecraft.world.entity.item.ItemEntity itemEntity
+    ) {
+        var mindHolder = this.getData(
+            com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
+        );
         if (mindHolder != null) {
             var mind = mindHolder;
             var inventory = mind.getInventory();
@@ -133,13 +144,30 @@ public class CustomNpcEntity extends PathfinderMob {
         boolean causedByPlayer
     ) {
         super.dropCustomDeathLoot(level, source, causedByPlayer);
-        if (this.hasData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND)) {
-            var mind = this.getData(com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND);
+        if (
+            this.hasData(
+                com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
+            )
+        ) {
+            var mind = this.getData(
+                com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
+            );
             var inventory = mind.getInventory();
             for (int i = 0; i < inventory.getContainerSize(); i++) {
                 ItemStack stack = inventory.removeItemNoUpdate(i);
                 if (!stack.isEmpty()) {
                     this.spawnAtLocation(stack);
+                }
+            }
+        }
+
+        // 确保装备槽（主手/副手/护甲）也掉落，避免仅背包物品被清空
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() == EquipmentSlot.Type.HAND || slot.isArmor()) {
+                ItemStack equipped = this.getItemBySlot(slot);
+                if (!equipped.isEmpty()) {
+                    this.spawnAtLocation(equipped.copy());
+                    this.setItemSlot(slot, ItemStack.EMPTY);
                 }
             }
         }
@@ -179,7 +207,10 @@ public class CustomNpcEntity extends PathfinderMob {
             .add(Attributes.GRAVITY, BASE_GRAVITY)
             .add(Attributes.STEP_HEIGHT, BASE_STEP_HEIGHT)
             .add(Attributes.MOVEMENT_EFFICIENCY, BASE_MOVEMENT_EFFICIENCY)
-            .add(Attributes.WATER_MOVEMENT_EFFICIENCY, BASE_WATER_MOVEMENT_EFFICIENCY)
+            .add(
+                Attributes.WATER_MOVEMENT_EFFICIENCY,
+                BASE_WATER_MOVEMENT_EFFICIENCY
+            )
             .add(Attributes.MINING_EFFICIENCY, BASE_MINING_EFFICIENCY)
             .add(Attributes.BLOCK_BREAK_SPEED, BASE_BLOCK_BREAK_SPEED)
             .add(Attributes.SUBMERGED_MINING_SPEED, BASE_SUBMERGED_MINING_SPEED)
@@ -193,10 +224,22 @@ public class CustomNpcEntity extends PathfinderMob {
             .add(Attributes.SNEAKING_SPEED, BASE_SNEAKING_SPEED)
             .add(Attributes.SWEEPING_DAMAGE_RATIO, BASE_SWEEPING_DAMAGE_RATIO)
             .add(Attributes.BURNING_TIME, BASE_BURNING_TIME)
-            .add(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, BASE_EXPLOSION_KB_RESISTANCE)
-            .add(Attributes.BLOCK_INTERACTION_RANGE, BASE_BLOCK_INTERACTION_RANGE)
-            .add(Attributes.ENTITY_INTERACTION_RANGE, BASE_ENTITY_INTERACTION_RANGE)
-            .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, BASE_SPAWN_REINFORCEMENTS);
+            .add(
+                Attributes.EXPLOSION_KNOCKBACK_RESISTANCE,
+                BASE_EXPLOSION_KB_RESISTANCE
+            )
+            .add(
+                Attributes.BLOCK_INTERACTION_RANGE,
+                BASE_BLOCK_INTERACTION_RANGE
+            )
+            .add(
+                Attributes.ENTITY_INTERACTION_RANGE,
+                BASE_ENTITY_INTERACTION_RANGE
+            )
+            .add(
+                Attributes.SPAWN_REINFORCEMENTS_CHANCE,
+                BASE_SPAWN_REINFORCEMENTS
+            );
 
         resolveAttribute(NAMETAG_ATTR_ID).ifPresent(holder ->
             builder.add(holder, BASE_NAMETAG_DISTANCE)
