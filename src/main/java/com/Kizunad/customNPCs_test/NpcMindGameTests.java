@@ -1,8 +1,8 @@
 package com.Kizunad.customNPCs_test;
 
 import com.Kizunad.customNPCs_test.utils.TestBatches;
-import net.minecraft.gametest.framework.GameTest;
-import net.minecraft.gametest.framework.GameTestHelper;
+//import net.minecraft.gametest.framework.GameTest;
+//import net.minecraft.gametest.framework.GameTestHelper;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
 @GameTestHolder("guzhenrenext")

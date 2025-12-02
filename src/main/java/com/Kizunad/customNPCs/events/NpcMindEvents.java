@@ -1,7 +1,11 @@
 package com.Kizunad.customNPCs.events;
 
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+import com.Kizunad.customNPCs.config.ModGameRules;
+import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -16,6 +20,8 @@ public class NpcMindEvents {
 
     private static final float FIRE_REDUCTION = 0.6f;
     private static final float FALL_REDUCTION = 0.7f;
+    private static final TicketType<Integer> CUSTOM_NPC_TICKET =
+        TicketType.create("customnpc_chunk", Integer::compareTo);
 
     /**
      * 在实体 tick 时，调用 NpcMind.tick()
@@ -27,14 +33,38 @@ public class NpcMindEvents {
         }
 
         // 只处理服务端
-        if (entity.level().isClientSide()) {
+        if (
+            entity.level().isClientSide() ||
+            entity.isRemoved() ||
+            !entity.isAlive()
+        ) {
             return;
         }
 
         // 获取 NpcMind Data Attachment
         if (entity.hasData(NpcMindAttachment.NPC_MIND)) {
             var mind = entity.getData(NpcMindAttachment.NPC_MIND);
-            mind.tick((ServerLevel) entity.level(), entity);
+            ServerLevel serverLevel = (ServerLevel) entity.level();
+
+            // 可选：维持区块加载，避免跨区块演化时被卸载（受 gamerule 控制）
+            if (
+                entity instanceof CustomNpcEntity &&
+                serverLevel
+                    .getGameRules()
+                    .getBoolean(ModGameRules.ALLOW_CUSTOM_NPC_LOAD_CHUNK)
+            ) {
+                ChunkPos pos = new ChunkPos(entity.blockPosition());
+                serverLevel
+                    .getChunkSource()
+                    .addRegionTicket(
+                        CUSTOM_NPC_TICKET,
+                        pos,
+                        2,
+                        entity.getId()
+                    );
+            }
+
+            mind.tick(serverLevel, entity);
         }
     }
 

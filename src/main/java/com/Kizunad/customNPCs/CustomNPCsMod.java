@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.entity.ModEntities;
 import com.Kizunad.customNPCs.events.NpcMindEvents;
+import com.Kizunad.customNPCs.config.ModGameRules;
 import com.Kizunad.customNPCs.menu.ModMenus;
 import com.Kizunad.customNPCs.client.ClientScreens;
 import net.neoforged.bus.api.IEventBus;
@@ -29,6 +30,8 @@ public class CustomNPCsMod {
         ModEntities.register(modEventBus);
         // 注册菜单
         ModMenus.MENUS.register(modEventBus);
+        // 注册自定义 gamerule
+        ModGameRules.register();
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(ClientScreens::registerScreens);
         }

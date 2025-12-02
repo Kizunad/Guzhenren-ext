@@ -82,6 +82,9 @@ public class EatFromInventoryAction extends AbstractStandardAction {
 
     @Override
     protected void onStop(INpcMind mind, LivingEntity entity) {
+        if (entity == null || !entity.isAlive()) {
+            return;
+        }
         rollback(mind, entity);
     }
 
@@ -113,6 +116,9 @@ public class EatFromInventoryAction extends AbstractStandardAction {
     }
 
     private void rollback(INpcMind mind, LivingEntity entity) {
+        if (entity == null) {
+            return;
+        }
         ItemStack hand = entity.getItemInHand(InteractionHand.MAIN_HAND);
         // 如果实体未实际消耗（如僵尸无法吃），模拟消耗一份
         if (consumedFromSlot >= 0 && !hand.isEmpty()) {
@@ -134,6 +140,9 @@ public class EatFromInventoryAction extends AbstractStandardAction {
     }
 
     private void returnLeftovers(INpcMind mind, LivingEntity entity) {
+        if (entity == null) {
+            return;
+        }
         ItemStack hand = entity.getItemInHand(InteractionHand.MAIN_HAND);
         if (!hand.isEmpty()) {
             ItemStack remaining = mind.getInventory().addItem(hand);

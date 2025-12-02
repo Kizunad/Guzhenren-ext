@@ -64,7 +64,7 @@ public class HealGoal implements IGoal {
     private static final double REGENERATION_DURATION_FACTOR = 40.0;
 
     /** 未知药水默认分数 */
-    private static final int UNKNOWN_POTION_SCORE = 4;
+    private static final int UNKNOWN_POTION_SCORE = 1;
 
     /** 金苹果治疗分数 */
     private static final int GOLDEN_APPLE_SCORE = 12;
@@ -153,13 +153,20 @@ public class HealGoal implements IGoal {
      */
     @Override
     public void tick(INpcMind mind, LivingEntity entity) {
+        if (entity == null || !entity.isAlive()) {
+            LOGGER.warn("[HealGoal] 实体为空或已死亡，跳过本次治疗 tick");
+            return;
+        }
         if (currentAction == null) {
             HealingCandidate candidate = findHealingItem(mind, entity);
+
             if (candidate == null) {
                 LOGGER.warn("[HealGoal] 找不到可用于治疗的物品");
                 return;
             }
+
             prepareItem(candidate, mind, entity);
+
             currentAction = new UseItemAction(
                 entity.getMainHandItem().getItem()
             );
@@ -172,6 +179,7 @@ public class HealGoal implements IGoal {
 
         if (currentAction != null) {
             ActionStatus status = currentAction.tick(mind, entity);
+
             if (status == ActionStatus.SUCCESS) {
                 LOGGER.info("[HealGoal] 治疗物品使用成功");
                 cleanupAfterUse(mind, entity);
@@ -309,25 +317,32 @@ public class HealGoal implements IGoal {
      */
     private double healingScore(ItemStack stack, LivingEntity entity) {
         Item item = stack.getItem();
+        // 如果物品是药水、喷溅药水或滞留药水
         if (
             item == Items.POTION ||
             item == Items.SPLASH_POTION ||
             item == Items.LINGERING_POTION
         ) {
+            // 获取药水内容组件
             PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
-            double score = 0;
+            double score = 0; // 初始化药水评分
+            // 如果药水内容不为空
             if (contents != null) {
+                // 遍历药水中的所有效果
                 for (var effect : contents.getAllEffects()) {
+                    // 如果效果是瞬间治疗 (HEAL)
                     if (
                         effect
                             .getEffect()
                             .equals(net.minecraft.world.effect.MobEffects.HEAL)
                     ) {
+                        // 计算瞬间治疗的评分：基础分 + 放大器加成 * 放大器等级
                         score +=
                             INSTANT_HEAL_BASE_SCORE +
                             effect.getAmplifier() *
                             INSTANT_HEAL_AMPLIFIER_BONUS;
                     }
+                    // 如果效果是生命恢复 (REGENERATION)
                     if (
                         effect
                             .getEffect()
@@ -335,6 +350,7 @@ public class HealGoal implements IGoal {
                                 net.minecraft.world.effect.MobEffects.REGENERATION
                             )
                     ) {
+                        // 计算生命恢复的评分：基础分 + 放大器加成 * 放大器等级 + 持续时间 / 持续时间因子
                         score +=
                             REGENERATION_BASE_SCORE +
                             effect.getAmplifier() *
@@ -343,9 +359,10 @@ public class HealGoal implements IGoal {
                     }
                 }
             } else {
+                // 如果药水内容为空（例如自定义药水或数据缺失），则给予一个默认评分
                 score = UNKNOWN_POTION_SCORE; // 兜底认为是正面治疗类药水
             }
-            return score;
+            return score; // 返回药水评分
         }
 
         if (item == Items.GOLDEN_APPLE) {

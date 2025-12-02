@@ -18,6 +18,9 @@
         - 基线模板集中于 `com.Kizunad.customNPCs.ai.config.NpcAttributeDefaults`（生命/攻速/护甲/移速/击退抗/游泳/重力/交互范围等全量默认值 + nametag/swim_speed 可选注册），供属性注册器直接复用。
         - 盾牌举盾基线：`NpcCombatDefaults.SHIELD_MIN_RAISE_TICKS` + `SHIELD_COOLDOWN_TICKS`，统一由 `BlockWithShieldAction`/`DefendGoal` 使用。
     - [ ] 进食/回血策略（可先被动回血，预留食物链路） <!-- id: npc-entity-heal -->
+        - HealGoal 已接入，触发/健康阈值来自 `NpcCombatDefaults`（<50% 启动，≥80% 结束），优先级 = 1 - 当前血量；仅在有治疗物时运行。
+        - 当前可用物品：即时治疗/再生药水、金苹果/附魔金苹果、带再生效果的食物；使用后会回滚手持状态，治疗记忆短期存活 200t。
+        - 可选食物链路（未实现）：在无治疗物时，允许消耗高饥饿值食物补满饥饿再配合被动回血，或作为低优先级 fallback；需明确是否开启并写 GameTest。
     - [ ] 伤害抗性处理（火焰/跌落等） <!-- id: npc-entity-resistance -->
     - [ ] 威胁响应链路：沿用 Sensors → triggerInterrupt → UtilityGoalSelector → Defend/Flee/Ranged/Melee <!-- id: npc-entity-threat -->
 
@@ -30,6 +33,7 @@
     - [ ] 命令生成：`spawn_test_entity` 切换为自定义 NPC，附默认装备 <!-- id: npc-entity-command-spawn -->
     - [ ] 自然生成配置（默认禁用或仅命令；预留群系/权重） <!-- id: npc-entity-natural-spawn -->
     - [ ] 持久化：`saveAdditional/readAdditional` 同步 mind/memory/inventory/cap <!-- id: npc-entity-persist -->
+    - [ ] Gamerule：`allowCustomNPCLoadChunk`（默认 true）控制是否允许自定义 NPC 通过票据维持当前区块加载 <!-- id: npc-entity-gamerule -->
 
 - [ ] **测试与调试** <!-- id: npc-entity-test -->
     - [ ] GameTest：生成/存活/威胁响应/持久化/接口存在性 <!-- id: npc-entity-gametest -->
