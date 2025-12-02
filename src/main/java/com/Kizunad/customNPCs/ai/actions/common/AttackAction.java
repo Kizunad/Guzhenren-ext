@@ -37,6 +37,12 @@ public class AttackAction
     private static final Logger LOGGER = LoggerFactory.getLogger(
         AttackAction.class
     );
+    private static final double DESIRED_RANGE_FACTOR = 0.9D;
+    private static final double BACKOFF_RANGE_FACTOR = 0.6D;
+    private static final double REPOSITION_SPEED = 1.2D;
+    private static final double RETREAT_EXTRA = 0.8D;
+    private static final double RANGE_HYSTERESIS = 0.5D;
+    private static final double MIN_LOWER_THRESHOLD = 0.1D;
 
     // 从配置获取默认值
 
@@ -118,6 +124,7 @@ public class AttackAction
 
         // NOTE: 可能需要一个缓存EntityUUID
         // 场景：周围过多友方实体导致的性能问题
+        // 现在暂时不考虑
         if (
             targetEntity instanceof LivingEntity livingTarget &&
             EntityRelationUtil.isAlly(mob, livingTarget)
@@ -146,15 +153,23 @@ public class AttackAction
         Vec3 targetPos = targetEntity.position();
         double distance = mobPos.distanceTo(targetPos);
 
-        if (!isInRange(mobPos, targetPos, attackRange)) {
-            if (CONFIG.isDebugLoggingEnabled()) {
-                LOGGER.debug(
-                    "[AttackAction] 目标超出攻击范围 | 距离: {}, 阈值: {}",
-                    distance,
-                    attackRange
-                );
-            }
-            return ActionStatus.FAILURE; // 距离过远，由规划器重新生成 [MoveTo, Attack] 计划
+        // 主动保持近战理想距离窗口，加入滞后避免抖动
+        double upperThreshold = Math.max(
+            attackRange,
+            attackRange * DESIRED_RANGE_FACTOR + RANGE_HYSTERESIS
+        );
+        double lowerThreshold = Math.max(
+            MIN_LOWER_THRESHOLD,
+            attackRange * BACKOFF_RANGE_FACTOR - RANGE_HYSTERESIS
+        );
+
+        if (distance > upperThreshold) {
+            navigateTowards(mob, targetPos);
+            return ActionStatus.RUNNING;
+        }
+        if (distance < lowerThreshold) {
+            navigateAway(mob, mobPos, targetPos);
+            return ActionStatus.RUNNING;
         }
 
         // 处理冷却
@@ -234,5 +249,30 @@ public class AttackAction
     @Override
     public boolean hasHit() {
         return hasHit;
+    }
+
+    /**
+     * 朝目标推进到理想距离。
+     */
+    private void navigateTowards(Mob mob, Vec3 targetPos) {
+        double desiredDistance = attackRange * DESIRED_RANGE_FACTOR;
+        Vec3 dir = targetPos.subtract(mob.position());
+        Vec3 dest = targetPos.subtract(dir.normalize().scale(desiredDistance));
+        mob
+            .getNavigation()
+            .moveTo(dest.x(), dest.y(), dest.z(), REPOSITION_SPEED);
+    }
+
+    /**
+     * 当过近时，朝远离目标方向后撤。
+     */
+    private void navigateAway(Mob mob, Vec3 mobPos, Vec3 targetPos) {
+        Vec3 dir = mobPos.subtract(targetPos);
+        Vec3 dest = mobPos.add(
+            dir.normalize().scale(attackRange + RETREAT_EXTRA)
+        );
+        mob
+            .getNavigation()
+            .moveTo(dest.x(), dest.y(), dest.z(), REPOSITION_SPEED);
     }
 }

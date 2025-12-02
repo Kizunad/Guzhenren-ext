@@ -12,6 +12,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,11 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 最大射程（格）- 太远命中率低
      */
     private static final double MAX_RANGE = 12.0d;
+    private static final double DESIRED_RANGE = 10.0d;
+    private static final double APPROACH_SPEED = 1.15d;
+    private static final double BACKOFF_SPEED = 1.05d;
+    private static final double BACKOFF_EXTRA = 1.0d;
+    private static final double MIN_TOWARDS_DISTANCE = 0.1d;
 
     // ==================== 充能配置 ====================
     /**
@@ -111,17 +117,16 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         }
 
         // ==================== Step 2: 距离检查 ====================
-        double distance = mob.position().distanceTo(livingTarget.position());
-        if (distance < MIN_RANGE || distance > MAX_RANGE) {
-            if (CONFIG.isDebugLoggingEnabled()) {
-                LOGGER.debug(
-                    "[RangedAttackItemAction] 距离不在窗口内: {} ({}-{})",
-                    distance,
-                    MIN_RANGE,
-                    MAX_RANGE
-                );
-            }
-            return ActionStatus.FAILURE;
+        Vec3 targetPos = livingTarget.position();
+        Vec3 selfPos = mob.position();
+        double distance = selfPos.distanceTo(targetPos);
+        if (distance < MIN_RANGE) {
+            navigateAway(mob, selfPos, targetPos);
+            return ActionStatus.RUNNING;
+        }
+        if (distance > MAX_RANGE) {
+            navigateTowards(mob, targetPos);
+            return ActionStatus.RUNNING;
         }
 
         // ==================== Step 3: 武器检查 ====================
@@ -348,5 +353,23 @@ public class RangedAttackItemAction extends AbstractStandardAction {
     public boolean canInterrupt() {
         // 允许被 CRITICAL 事件中断（如受到攻击时切换到逃跑）
         return true;
+    }
+
+    private void navigateTowards(Mob mob, Vec3 targetPos) {
+        Vec3 dir = targetPos.subtract(mob.position());
+        Vec3 dest = targetPos.subtract(
+            dir.normalize().scale(Math.max(MIN_TOWARDS_DISTANCE, DESIRED_RANGE))
+        );
+        mob
+            .getNavigation()
+            .moveTo(dest.x(), dest.y(), dest.z(), APPROACH_SPEED);
+    }
+
+    private void navigateAway(Mob mob, Vec3 mobPos, Vec3 targetPos) {
+        Vec3 dir = mobPos.subtract(targetPos);
+        Vec3 dest = mobPos.add(dir.normalize().scale(MIN_RANGE + BACKOFF_EXTRA));
+        mob
+            .getNavigation()
+            .moveTo(dest.x(), dest.y(), dest.z(), BACKOFF_SPEED);
     }
 }
