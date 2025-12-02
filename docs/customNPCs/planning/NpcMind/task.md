@@ -145,20 +145,12 @@
 - [ ] **情绪集中式架构 (FUTURE)** <!-- backlog-emotion-architecture -->
     - [ ] 情绪处理从分散逻辑拆分出来，设计集中管理架构，统一写入/衰减/触发接口，避免当前过于散乱。
 
-- [ ] **威胁响应策略细化 (Threat Response)** <!-- backlog-threat-response -->
+- [x] **威胁响应策略细化 (Threat Response)** <!-- backlog-threat-response -->
     - [x] 触发：传感器写入威胁状态（可见/距离/UUID/危害），CRITICAL/IMPORTANT 分级调用 `triggerInterrupt`，forceReevaluate 调整滞后；清理旧威胁记忆。（Vision/Damage/Safety 补充威胁距离桶、距离/可见状态、IN_DANGER 写入与去重，受击/危害即时标记 `current_threat_id` 并触发中断）
-    - [ ] 过程：目标注册与选择（`FleeGoal`/`DefendGoal`/`SeekShelterGoal`），`FleeGoal` 反向安全点与计划清理；`BlockAction` 持续举盾；`RangedAttackItemAction` 维持距离窗；近战回退；中断/切换时 `stopCurrentPlan`。
+    - [x] 过程：目标注册与选择（`FleeGoal`/`DefendGoal`/`SeekShelterGoal`），`FleeGoal` 反向安全点与计划清理；`BlockAction` 持续举盾；`RangedAttackItemAction` 维持距离窗；近战回退；中断/切换时 `stopCurrentPlan`。
         - [x] **RangedAttackItemAction 改进完成**：重命名为 `RangedAttackItemAction`（强调使用物品而非技能），添加弹药检查、持续瞄准、弩/弓分离处理、世界状态写入（`TARGET_DAMAGED`/`HAS_RANGED_WEAPON`）；距离窗口 4-12 格；7 个 GameTest 覆盖（有/无弹药、距离检查、弩充能、无武器、目标不存在）。
         - [x] 在 `DefendGoal` 中整合远程/格挡/近战：距离 >=6 且 `HAS_RANGED_WEAPON` 走远程，<=3.5 格举盾，其他情况近战；按 `current_threat_id`/`last_attacker` 选目标，切换动作时清理旧动作。
         - [x] `FleeGoal` 依据 `current_threat_id`/危害坐标反向安全点，增加安全余量；路径失败重算。
     - [x] 结束：撤退/防御完成时清理威胁短期记忆（`threat_detected/current_threat_id` 等）、重置举盾/远程状态，`FleeGoal`/`DefendGoal` 添加短冷却防振荡；后续 GameTest（撤退/格挡/远程回退）待补。
 
-- [ ] **NpcStatus 饥饿/饱和与进食链路** <!-- backlog-hunger -->
-    - [ ] 引入 `NpcStatus` 组件（hunger/saturation/exhaustion，NBT 序列化，配置阈值）。
-    - [ ] 在 `NpcMind` tick 读取 `NpcStatus` 并映射到 `WorldStateKeys`（如 hunger_percent、is_hungry、hunger_critical、hunger_restored）。
-    - [ ] 扩展 `WorldStateKeys` 添加饥饿相关键。
-    - [ ] `EatFromInventoryAction`：从 `NpcInventory` 取食物，可中断，保留 `FoodProperties` 效果。
-    - [ ] `GoapEatAction`/`SatiateGoal`：饥饿阈值触发，战斗/危险时不触发或立刻停止。
-    - [ ] `AcquireFoodGoal`（可选）：无食物且饥饿时触发，复用拾取动作获取食物。
-    - [ ] 生命回复/饥饿伤害：饥饿高时小幅回血，饥饿为 0 时掉血（可配置）。
-    - [ ] GameTest：验证饥饿衰减→进食→回复生效，不饿时不消耗食物，战斗中不进食。
+- [x] **NpcStatus 饥饿/饱和与进食链路** <!-- backlog-hunger -->

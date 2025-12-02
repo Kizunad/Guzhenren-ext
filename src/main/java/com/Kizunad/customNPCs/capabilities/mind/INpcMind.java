@@ -87,6 +87,18 @@ public interface INpcMind {
     com.Kizunad.customNPCs.ai.status.NpcStatus getStatus();
 
     /**
+     * 获取交易状态（预留接口）。
+     * @return 交易状态
+     */
+    com.Kizunad.customNPCs.ai.interaction.NpcTradeState getTradeState();
+
+    /**
+     * 获取任务状态（预留接口）。
+     * @return 任务状态
+     */
+    com.Kizunad.customNPCs.ai.interaction.NpcQuestState getQuestState();
+
+    /**
      * 获取当前世界状态（用于 GOAP 规划）
      * <p>
      * 此方法从 NPC 的记忆和实体状态中提取信息，构建当前世界状态。

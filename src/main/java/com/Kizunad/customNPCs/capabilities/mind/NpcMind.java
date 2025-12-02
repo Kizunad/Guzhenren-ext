@@ -6,6 +6,8 @@ import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.memory.MemoryModule;
+import com.Kizunad.customNPCs.ai.interaction.NpcQuestState;
+import com.Kizunad.customNPCs.ai.interaction.NpcTradeState;
 import com.Kizunad.customNPCs.ai.status.NpcStatus;
 import com.Kizunad.customNPCs.ai.util.ArmorEvaluationUtil;
 import net.minecraft.core.HolderLookup;
@@ -30,6 +32,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     private final com.Kizunad.customNPCs.ai.personality.PersonalityModule personality;
     private final NpcInventory inventory;
     private final NpcStatus status;
+    private final NpcTradeState tradeState;
+    private final NpcQuestState questState;
 
     // 中断冷却机制
     private long lastInterruptTick = 0;
@@ -48,6 +52,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
             new com.Kizunad.customNPCs.ai.personality.PersonalityModule();
         this.inventory = new NpcInventory();
         this.status = new NpcStatus();
+        this.tradeState = new NpcTradeState();
+        this.questState = new NpcQuestState();
     }
 
     /**
@@ -95,6 +101,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         this.personality = personality;
         this.inventory = new NpcInventory();
         this.status = new NpcStatus();
+        this.tradeState = new NpcTradeState();
+        this.questState = new NpcQuestState();
     }
 
     @Override
@@ -133,6 +141,16 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     }
 
     @Override
+    public NpcTradeState getTradeState() {
+        return tradeState;
+    }
+
+    @Override
+    public NpcQuestState getQuestState() {
+        return questState;
+    }
+
+    @Override
     public void tick(ServerLevel level, LivingEntity entity) {
         // 绑定执行器上下文，防止跨实体/测试计划污染
         actionExecutor.bindToEntity(entity);
@@ -163,6 +181,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         tag.put("personality", personality.serializeNBT());
         tag.put("inventory", inventory.serializeNBT(provider));
         tag.put("status", status.serializeNBT(provider));
+        tag.put("trade", tradeState.serializeNBT(provider));
+        tag.put("quest", questState.serializeNBT(provider));
         // 注意：目标选择器不需要序列化，因为目标是在代码中注册的
         return tag;
     }
@@ -183,6 +203,12 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("status")) {
             status.deserializeNBT(provider, nbt.getCompound("status"));
+        }
+        if (nbt.contains("trade")) {
+            tradeState.deserializeNBT(provider, nbt.getCompound("trade"));
+        }
+        if (nbt.contains("quest")) {
+            questState.deserializeNBT(provider, nbt.getCompound("quest"));
         }
     }
 
