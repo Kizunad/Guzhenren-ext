@@ -21,13 +21,16 @@ import org.slf4j.LoggerFactory;
  */
 public class FleeGoal implements IGoal {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FleeGoal.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        FleeGoal.class
+    );
 
     private static final float DANGER_THRESHOLD = 0.3f; // 30%血量认为危险
     private static final double FLEE_DISTANCE = 20.0; // 逃跑距离
     private static final double THREAT_DETECTION_RANGE = 10.0; // 威胁检测范围
     private static final int FLEE_MEMORY_DURATION = 100; // 5秒
     private static final int FLEE_COOLDOWN_TICKS = 80; // 避免立即反复逃跑
+    private static final int FLEE_LOCK_DURATION = 80; // 逃跑期间维持“危险”记忆，避免视野丢失导致提前停
     private static final float BASE_PRIORITY = 0.9f;
     private static final float PRIORITY_SCALE = 0.1f;
     private static final double FLEE_SPEED = 1.5;
@@ -54,11 +57,12 @@ public class FleeGoal implements IGoal {
 
     @Override
     public void start(INpcMind mind, LivingEntity entity) {
-        mind.getMemory().rememberShortTerm(
-            "is_fleeing",
-            true,
-            FLEE_MEMORY_DURATION
-        );
+        mind
+            .getMemory()
+            .rememberShortTerm("is_fleeing", true, FLEE_MEMORY_DURATION);
+        mind
+            .getMemory()
+            .rememberShortTerm("flee_lock", true, FLEE_LOCK_DURATION);
 
         LOGGER.info(
             "[FleeGoal] {} 开始逃跑 | 血量: {}/{}",
@@ -87,6 +91,9 @@ public class FleeGoal implements IGoal {
 
         // 执行逃跑动作
         if (fleeAction != null) {
+            // 逃跑中保持“危险”记忆，避免短期记忆过期导致提前停
+            refreshThreatMemory(mind, entity);
+
             ActionStatus status = fleeAction.tick(mind, entity);
             if (status == ActionStatus.SUCCESS) {
                 LOGGER.info("[FleeGoal] 已到达安全位置");
@@ -103,11 +110,10 @@ public class FleeGoal implements IGoal {
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
         mind.getMemory().forget("is_fleeing");
-        mind.getMemory().rememberShortTerm(
-            "flee_cooldown",
-            true,
-            FLEE_COOLDOWN_TICKS
-        );
+        mind
+            .getMemory()
+            .rememberShortTerm("flee_cooldown", true, FLEE_COOLDOWN_TICKS);
+        mind.getMemory().forget("flee_lock");
 
         if (fleeAction != null) {
             fleeAction.stop(mind, entity);
@@ -115,7 +121,7 @@ public class FleeGoal implements IGoal {
         }
         safeLocation = null;
 
-        // 已离危险时清理威胁相关短期记忆，防止遗留状态影响后续决策
+        // 逃跑结束时清理威胁相关短期记忆，防止遗留状态影响后续决策
         if (!isInDanger(mind, entity)) {
             clearThreatMemory(mind);
         }
@@ -126,8 +132,11 @@ public class FleeGoal implements IGoal {
     @Override
     public boolean isFinished(INpcMind mind, LivingEntity entity) {
         // 不再处于危险中或已到达安全位置
-        return !isInDanger(mind, entity) || (safeLocation != null 
-            && entity.position().distanceTo(safeLocation) < 2.0);
+        return (
+            !isInDanger(mind, entity) ||
+            (safeLocation != null &&
+                entity.position().distanceTo(safeLocation) < 2.0)
+        );
     }
 
     @Override
@@ -139,19 +148,23 @@ public class FleeGoal implements IGoal {
      * 检查是否处于危险中
      */
     private boolean isInDanger(INpcMind mind, LivingEntity entity) {
+        if (mind.getMemory().hasMemory("flee_lock")) {
+            return true;
+        }
         if (mind.getMemory().hasMemory("hazard_detected")) {
             return true;
         }
 
         // 血量低
-        boolean lowHealth = entity.getHealth() < entity.getMaxHealth() * DANGER_THRESHOLD;
-        
+        boolean lowHealth =
+            entity.getHealth() < entity.getMaxHealth() * DANGER_THRESHOLD;
+
         // 检查Memory中是否有威胁记录
         boolean hasThreat = mind.getMemory().hasMemory("threat_detected");
-        
+
         // 或者检查最近是否受到伤害
         boolean recentlyHurt = entity.hurtTime > 0;
-        
+
         return lowHealth && (hasThreat || recentlyHurt);
     }
 
@@ -163,10 +176,20 @@ public class FleeGoal implements IGoal {
         mind.getMemory().forget("threat_detected");
         mind.getMemory().forget("current_threat_id");
         mind.getMemory().forget("last_attacker");
-        mind.getMemory().forget(com.Kizunad.customNPCs.ai.WorldStateKeys.TARGET_VISIBLE);
-        mind.getMemory().forget(com.Kizunad.customNPCs.ai.WorldStateKeys.TARGET_IN_RANGE);
-        mind.getMemory().forget(com.Kizunad.customNPCs.ai.WorldStateKeys.DISTANCE_TO_TARGET);
-        mind.getMemory().forget(com.Kizunad.customNPCs.ai.WorldStateKeys.HOSTILE_NEARBY);
+        mind
+            .getMemory()
+            .forget(com.Kizunad.customNPCs.ai.WorldStateKeys.TARGET_VISIBLE);
+        mind
+            .getMemory()
+            .forget(com.Kizunad.customNPCs.ai.WorldStateKeys.TARGET_IN_RANGE);
+        mind
+            .getMemory()
+            .forget(
+                com.Kizunad.customNPCs.ai.WorldStateKeys.DISTANCE_TO_TARGET
+            );
+        mind
+            .getMemory()
+            .forget(com.Kizunad.customNPCs.ai.WorldStateKeys.HOSTILE_NEARBY);
     }
 
     /**
@@ -191,11 +214,7 @@ public class FleeGoal implements IGoal {
         double dx = Math.cos(angle) * FLEE_DISTANCE;
         double dz = Math.sin(angle) * FLEE_DISTANCE;
 
-        return new Vec3(
-            currentPos.x + dx,
-            currentPos.y,
-            currentPos.z + dz
-        );
+        return new Vec3(currentPos.x + dx, currentPos.y, currentPos.z + dz);
     }
 
     private Vec3 resolveThreatPosition(INpcMind mind, LivingEntity entity) {
@@ -214,12 +233,29 @@ public class FleeGoal implements IGoal {
         }
 
         if (uuid != null && entity.level() instanceof ServerLevel serverLevel) {
-            net.minecraft.world.entity.Entity threat = serverLevel.getEntity(uuid);
+            net.minecraft.world.entity.Entity threat = serverLevel.getEntity(
+                uuid
+            );
             if (threat != null) {
                 return threat.position();
             }
         }
 
         return null;
+    }
+
+    /**
+     * 逃跑过程中刷新威胁记忆，避免传感器短暂失联导致提前停下。
+     */
+    private void refreshThreatMemory(INpcMind mind, LivingEntity entity) {
+        mind
+            .getMemory()
+            .rememberShortTerm("flee_lock", true, FLEE_LOCK_DURATION);
+        // 如果仍能解析到威胁位置，刷新 threat_detected
+        if (resolveThreatPosition(mind, entity) != null) {
+            mind
+                .getMemory()
+                .rememberShortTerm("threat_detected", true, FLEE_MEMORY_DURATION);
+        }
     }
 }
