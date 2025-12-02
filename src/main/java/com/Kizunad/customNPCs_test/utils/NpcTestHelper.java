@@ -5,22 +5,14 @@ import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-
 import java.util.function.Supplier;
-
-import com.Kizunad.customNPCs.ai.sensors.SensorManager;
-import com.Kizunad.customNPCs.ai.executor.ActionExecutor;
-import com.Kizunad.customNPCs.capabilities.mind.NpcMind;
-import com.Kizunad.customNPCs_test.overrides.TestVisionSensor;
-import com.Kizunad.customNPCs_test.overrides.TestAuditorySensor;
-import com.Kizunad.customNPCs_test.overrides.TestActionExecutor;
 
 /**
  * NPC 测试助手类
@@ -42,29 +34,16 @@ public class NpcTestHelper {
      * @return 生成的实体（已附加NpcMind）
      */
     public static <T extends Mob> T spawnNPCWithMind(
-            GameTestHelper helper,
-            BlockPos pos,
-            EntityType<T> entityType) {
+        GameTestHelper helper,
+        BlockPos pos,
+        EntityType<T> entityType
+    ) {
         ensureFloorAround(helper, pos, 160);
         T entity = helper.spawn(entityType, pos);
         applyTestTag(helper, entity);
 
-        // 创建带有测试隔离的组件
-        SensorManager sensorManager = new SensorManager();
-        // 清除默认传感器（如果有）并添加测试传感器
-        // 注意：SensorManager 构造函数可能已经添加了默认传感器，这里我们手动添加测试版
-        // 如果 SensorManager 没有 clear 方法，我们可能需要创建一个空的 SensorManager 或者在 TestSensorManager 中处理
-        // 假设 SensorManager 是空的或者我们可以添加覆盖
-        sensorManager.registerSensor(new TestVisionSensor());
-        sensorManager.registerSensor(new TestAuditorySensor());
-
-        ActionExecutor actionExecutor = new TestActionExecutor();
-
-        // 创建并注入测试专用的 NpcMind
-        NpcMind testMind = new NpcMind(actionExecutor, sensorManager);
-        
-        entity.setData(NpcMindAttachment.NPC_MIND, testMind);
-
+        // 附加空 mind，由 AttachmentHandler 初始化
+        entity.setData(NpcMindAttachment.NPC_MIND, new com.Kizunad.customNPCs.capabilities.mind.NpcMind());
         return entity;
     }
 
@@ -79,22 +58,21 @@ public class NpcTestHelper {
      * @param failureMessage 超时时的失败消息
      */
     public static void waitForCondition(
-            GameTestHelper helper,
-            Supplier<Boolean> condition,
-            int timeoutTicks,
-            String failureMessage) {
+        GameTestHelper helper,
+        Supplier<Boolean> condition,
+        int timeoutTicks,
+        String failureMessage
+    ) {
         final int[] tickCount = {0};
 
         helper.onEachTick(() -> {
             tickCount[0]++;
 
-            // 检查条件
             if (condition.get()) {
                 helper.succeed();
                 return;
             }
 
-            // 检查超时
             if (tickCount[0] >= timeoutTicks) {
                 helper.fail(failureMessage + " (超时: " + timeoutTicks + " ticks)");
             }
@@ -111,9 +89,10 @@ public class NpcTestHelper {
      * @param failureMessage 超时时的失败消息
      */
     public static void waitForAssertion(
-            GameTestHelper helper,
-            Runnable assertion,
-            String failureMessage) {
+        GameTestHelper helper,
+        Runnable assertion,
+        String failureMessage
+    ) {
         final int[] tickCount = {0};
         final int timeoutTicks = 100; // 默认超时
 
@@ -124,25 +103,26 @@ public class NpcTestHelper {
                 assertion.run();
                 helper.succeed();
             } catch (net.minecraft.gametest.framework.GameTestAssertException e) {
-                // 断言失败，继续等待
                 if (tickCount[0] >= timeoutTicks) {
-                    helper.fail(failureMessage + " (超时: " + timeoutTicks + " ticks). Last error: " + e.getMessage());
+                    helper.fail(
+                        failureMessage +
+                        " (超时: " +
+                        timeoutTicks +
+                        " ticks). Last error: " +
+                        e.getMessage()
+                    );
                 }
             } catch (Exception e) {
-                // 其他异常直接失败
                 helper.fail("Unexpected exception: " + e.getMessage());
             }
         });
     }
 
-    /**
-     * 断言NPC当前目标是指定类型
-     *
-     * @param helper GameTest 助手
-     * @param npc NPC实体
-     * @param goalClass 期望的目标类
-     */
-    public static void assertGoal(GameTestHelper helper, Mob npc, Class<? extends IGoal> goalClass) {
+    public static void assertGoal(
+        GameTestHelper helper,
+        Mob npc,
+        Class<? extends IGoal> goalClass
+    ) {
         if (!npc.hasData(NpcMindAttachment.NPC_MIND)) {
             helper.fail("NPC 没有 NpcMind 附加");
             return;
@@ -157,72 +137,64 @@ public class NpcTestHelper {
         }
 
         if (!goalClass.isInstance(currentGoal)) {
-            helper.fail("当前目标类型不匹配。期望: " + goalClass.getSimpleName()
-                    + ", 实际: " + currentGoal.getClass().getSimpleName());
+            helper.fail(
+                "当前目标类型不匹配。期望: " +
+                goalClass.getSimpleName() +
+                ", 实际: " +
+                currentGoal.getClass().getSimpleName()
+            );
         }
     }
 
-    /**
-     * 断言NPC位置在期望位置附近
-     *
-     * @param helper GameTest 助手
-     * @param npc NPC实体
-     * @param expectedPos 期望位置
-     * @param tolerance 容差距离
-     */
     public static void assertNPCPosition(
-            GameTestHelper helper,
-            Mob npc,
-            Vec3 expectedPos,
-            double tolerance) {
+        GameTestHelper helper,
+        Mob npc,
+        Vec3 expectedPos,
+        double tolerance
+    ) {
         Vec3 actualPos = npc.position();
         double distance = actualPos.distanceTo(expectedPos);
 
         if (distance > tolerance) {
-            helper.fail("NPC位置不在期望范围内。期望: " + expectedPos
-                    + ", 实际: " + actualPos + ", 距离: " + distance + ", 容差: " + tolerance);
+            helper.fail(
+                "NPC位置不在期望范围内。期望: " +
+                expectedPos +
+                ", 实际: " +
+                actualPos +
+                ", 距离: " +
+                distance +
+                ", 容差: " +
+                tolerance
+            );
         }
     }
 
-    /**
-     * 断言NPC主手持有指定物品
-     *
-     * @param helper GameTest 助手
-     * @param npc NPC实体
-     * @param expectedItem 期望的物品
-     * @param expectedCount 期望的数量（-1表示不检查数量）
-     */
     public static void assertItemInHand(
-            GameTestHelper helper,
-            Mob npc,
-            Item expectedItem,
-            int expectedCount) {
+        GameTestHelper helper,
+        Mob npc,
+        Item expectedItem,
+        int expectedCount
+    ) {
         ItemStack heldItem = npc.getMainHandItem();
-
-        if (heldItem.isEmpty()) {
-            helper.fail("NPC主手为空，期望持有: " + expectedItem.getDescriptionId());
-            return;
-        }
-
         if (!heldItem.is(expectedItem)) {
-            helper.fail("NPC主手物品不匹配。期望: " + expectedItem.getDescriptionId()
-                    + ", 实际: " + heldItem.getItem().getDescriptionId());
-            return;
+            helper.fail(
+                "主手物品不匹配。期望: " +
+                expectedItem.getDescriptionId() +
+                ", 实际: " +
+                heldItem.getDescriptionId()
+            );
         }
 
         if (expectedCount >= 0 && heldItem.getCount() != expectedCount) {
-            helper.fail("NPC主手物品数量不匹配。期望: " + expectedCount
-                    + ", 实际: " + heldItem.getCount());
+            helper.fail(
+                "主手物品数量不匹配。期望: " +
+                expectedCount +
+                ", 实际: " +
+                heldItem.getCount()
+            );
         }
     }
 
-    /**
-     * 获取NPC的NpcMind（如果存在）
-     *
-     * @param helper GameTest 助手
-     * @param npc NPC实体
-     * @return NpcMind实例
-     */
     public static INpcMind getMind(GameTestHelper helper, Mob npc) {
         if (!npc.hasData(NpcMindAttachment.NPC_MIND)) {
             helper.fail("NPC 没有 NpcMind 附加");
@@ -231,9 +203,6 @@ public class NpcTestHelper {
         return npc.getData(NpcMindAttachment.NPC_MIND);
     }
 
-    /**
-     * 将测试标签写入实体，便于传感器过滤跨测试干扰。
-     */
     public static void applyTestTag(GameTestHelper helper, Entity entity) {
         String tag = getTestTag(helper);
         if (tag != null && !tag.isEmpty()) {
@@ -241,35 +210,21 @@ public class NpcTestHelper {
         }
     }
 
-    /**
-     * 基于 GameTest 名称生成当前测试的标签。
-     */
     public static String getTestTag(GameTestHelper helper) {
-        // GameTestHelper 未公开提供测试名，这里使用 helper 实例的 identityHashCode 生成稳定标签
         return "test:" + System.identityHashCode(helper);
     }
 
-    /**
-     * 生成一个带标签的常规实体（无NpcMind）。
-     */
     public static <T extends Entity> T spawnTaggedEntity(
-            GameTestHelper helper,
-            EntityType<T> entityType,
-            BlockPos pos) {
+        GameTestHelper helper,
+        EntityType<T> entityType,
+        BlockPos pos
+    ) {
         ensureFloorAround(helper, pos, 160);
         T entity = helper.spawn(entityType, pos);
         applyTestTag(helper, entity);
         return entity;
     }
 
-    /**
-     * 在每个tick驱动NPC的Mind
-     * <p>
-     * 应该在测试开始时调用此方法，以确保NpcMind能够正常工作
-     *
-     * @param helper GameTest 助手
-     * @param npc NPC实体
-     */
     public static void tickMind(GameTestHelper helper, Mob npc) {
         helper.onEachTick(() -> {
             if (npc.hasData(NpcMindAttachment.NPC_MIND)) {
@@ -279,13 +234,11 @@ public class NpcTestHelper {
         });
     }
 
-    /**
-     * 确保给定位置周围有一层石头地板，防止实体生成后下落导致寻路失败。
-     * @param helper GameTest 助手
-     * @param center 地板中心（使用相对坐标）
-     * @param radius 覆盖半径（方形）
-     */
-    public static void ensureFloorAround(GameTestHelper helper, BlockPos center, int radius) {
+    public static void ensureFloorAround(
+        GameTestHelper helper,
+        BlockPos center,
+        int radius
+    ) {
         BlockPos absoluteCenter = helper.absolutePos(center);
         int baseY = absoluteCenter.getY() - 1;
         int startX = absoluteCenter.getX() - radius;
@@ -294,8 +247,41 @@ public class NpcTestHelper {
         int endZ = absoluteCenter.getZ() + radius;
         for (int x = startX; x <= endX; x++) {
             for (int z = startZ; z <= endZ; z++) {
-                helper.getLevel().setBlock(new BlockPos(x, baseY, z), Blocks.STONE.defaultBlockState(), 3);
+                helper
+                    .getLevel()
+                    .setBlock(
+                        new BlockPos(x, baseY, z),
+                        Blocks.STONE.defaultBlockState(),
+                        3
+                    );
             }
         }
+    }
+
+    /**
+     * 提交 MoveToAction 到指定坐标（中心对齐），使用给定速度和可接受距离。
+     */
+    public static void submitMoveTo(
+        GameTestHelper helper,
+        Mob npc,
+        BlockPos target,
+        double speed,
+        double acceptableDistance
+    ) {
+        INpcMind mind = getMind(helper, npc);
+        if (mind == null) {
+            return;
+        }
+        var action =
+            new com.Kizunad.customNPCs.ai.actions.base.MoveToAction(
+                new Vec3(
+                    target.getX() + 0.5,
+                    target.getY(),
+                    target.getZ() + 0.5
+                ),
+                speed,
+                acceptableDistance
+            );
+        mind.getActionExecutor().addAction(action);
     }
 }

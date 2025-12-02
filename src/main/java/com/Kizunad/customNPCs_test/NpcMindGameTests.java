@@ -275,4 +275,18 @@ public class NpcMindGameTests {
     //    public void testPersonalityDrivenDecision(GameTestHelper helper) {
     //        com.Kizunad.customNPCs_test.tests.PersonalityTests.testPersonalityDrivenDecision(helper);
     //    }
+
+    // ==================== MoveToAction 调参回归 ====================
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE, timeoutTicks = 120, required = false)
+    public static void testMoveToFlat(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToTuningTests.testMoveToFlat(helper);
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE, timeoutTicks = 200, required = false)
+    public static void testMoveToWithBlocks(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.MoveToTuningTests.testMoveToWithBlocks(
+            helper
+        );
+    }
 }

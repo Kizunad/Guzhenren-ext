@@ -7,6 +7,9 @@ import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -165,7 +168,8 @@ public class MoveToAction implements IAction {
         }
 
         // 获取目标位置
-        Vec3 currentTarget = getCurrentTarget();
+        Vec3 currentTargetRaw = getCurrentTarget();
+        Vec3 currentTarget = normalizeTarget(entity, currentTargetRaw);
         if (currentTarget == null || !isValidTarget(currentTarget)) {
             MindLog.execution(MindLogLevel.WARN, "目标无效: {}", currentTarget);
             return ActionStatus.FAILURE;
@@ -415,6 +419,49 @@ public class MoveToAction implements IAction {
             return targetPos;
         }
         return null;
+    }
+
+    /**
+     * 将目标坐标规范到可站立位置（仅对固定坐标生效，实体目标保持原样）。
+     */
+    private Vec3 normalizeTarget(LivingEntity entity, Vec3 rawTarget) {
+        if (rawTarget == null) {
+            return null;
+        }
+        // 对实体目标不做修改，保持动态追踪
+        if (targetEntity != null) {
+            return rawTarget;
+        }
+        Level level = entity.level();
+        BlockPos base = BlockPos.containing(rawTarget);
+        // 未加载区块直接判失败，避免空路径
+        if (!level.hasChunkAt(base)) {
+            MindLog.execution(
+                MindLogLevel.WARN,
+                "目标区块未加载: ({}, {}, {})",
+                base.getX(),
+                base.getY(),
+                base.getZ()
+            );
+            return null;
+        }
+        int surfaceY = level.getHeight(
+            Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            base.getX(),
+            base.getZ()
+        );
+        if (
+            surfaceY < level.getMinBuildHeight() ||
+            surfaceY > level.getMaxBuildHeight()
+        ) {
+            return null;
+        }
+        // 对齐至可站立方块顶部中心
+        return new Vec3(
+            base.getX() + 0.5D,
+            surfaceY,
+            base.getZ() + 0.5D
+        );
     }
 
     private boolean tryTeleportToTarget(LivingEntity entity, Vec3 target) {
