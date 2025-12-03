@@ -1,18 +1,16 @@
 package com.Kizunad.customNPCs.ai.decision.goals;
 
-import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.decision.UtilityGoalSelector;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
-import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.sensors.SensorEventType;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * 闲置目标 - 默认目标，当没有其他事情做时执行
@@ -22,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 public class IdleGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "IdleGoal: lowest-priority fallback, wait and occasionally wander short distance.";
+        "IdleGoal: lowest-priority fallback, periodically teleport to a random surface spot then re-evaluate goals.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -30,17 +28,16 @@ public class IdleGoal implements IGoal {
 
     private static final float IDLE_PRIORITY = 0.1f;
     private static final int IDLE_TICK_INTERVAL = 100; // 每 5 秒打印一次（100 ticks）
-    private static final int WANDER_INTERVAL = 40; // 闲逛尝试间隔
-    private static final int WANDER_RANGE = 6; // 横向随机范围
-    private static final double WANDER_SPEED = 1.0D;
-    private static final double WANDER_ACCEPT_DIST = 1.5D;
-    private static final int WANDER_TIMEOUT = 200;
+    private static final int TELEPORT_INTERVAL = 40; // 传送尝试间隔
+    private static final double TELEPORT_MIN_DISTANCE = 8.0D; // 最小水平距离
+    private static final double TELEPORT_MAX_DISTANCE = 36.0D; // 最大水平距离
+    private static final int TELEPORT_ATTEMPTS = 8;
     private static final double BLOCK_CENTER_OFFSET = 0.5D;
-    private static final int WANDER_ATTEMPTS = 8;
     private static final int MAX_IDLE_TICKS = 20 * 30; // 最长闲置 30s 后强制重评估
+    private static final double TWO_PI = Math.PI * 2;
 
     private int idleTicks;
-    private int wanderCooldown;
+    private int teleportCooldown;
 
     @Override
     public float getPriority(INpcMind mind, LivingEntity entity) {
@@ -57,7 +54,7 @@ public class IdleGoal implements IGoal {
     @Override
     public void start(INpcMind mind, LivingEntity entity) {
         idleTicks = 0;
-        wanderCooldown = 0;
+        teleportCooldown = 0;
         mind.getMemory().rememberShortTerm("is_idle", true, -1);
         MindLog.decision(
             MindLogLevel.INFO,
@@ -70,31 +67,40 @@ public class IdleGoal implements IGoal {
     public void tick(INpcMind mind, LivingEntity entity) {
         idleTicks++;
 
-        // 若执行器空闲，周期性提交一次随机闲逛移动
+        // 若执行器空闲，周期性随机传送到地表位置并触发重评估
         if (mind.getActionExecutor().isIdle()) {
-            wanderCooldown--;
-            if (wanderCooldown <= 0) {
-                BlockPos target = pickWanderTarget(entity);
+            teleportCooldown--;
+            if (teleportCooldown <= 0) {
+                BlockPos target = pickTeleportTarget(entity);
+                teleportCooldown = TELEPORT_INTERVAL;
+
                 if (target != null) {
+                    entity.teleportTo(
+                        target.getX() + BLOCK_CENTER_OFFSET,
+                        target.getY(),
+                        target.getZ() + BLOCK_CENTER_OFFSET
+                    );
+                    MindLog.decision(
+                        MindLogLevel.INFO,
+                        "NPC {} 闲置随机传送到 ({}, {}, {})，触发重评估",
+                        entity.getName().getString(),
+                        target.getX(),
+                        target.getY(),
+                        target.getZ()
+                    );
+                    idleTicks = 0;
                     mind
-                        .getActionExecutor()
-                        .addAction(
-                            new MoveToAction(
-                                new Vec3(
-                                    target.getX() + BLOCK_CENTER_OFFSET,
-                                    target.getY(),
-                                    target.getZ() + BLOCK_CENTER_OFFSET
-                                ),
-                                WANDER_SPEED,
-                                WANDER_ACCEPT_DIST,
-                                WANDER_TIMEOUT
-                            )
+                        .getGoalSelector()
+                        .forceReevaluate(
+                            mind,
+                            entity,
+                            SensorEventType.CRITICAL
                         );
+                    return;
                 }
-                wanderCooldown = WANDER_INTERVAL;
             }
         } else {
-            wanderCooldown = WANDER_INTERVAL;
+            teleportCooldown = TELEPORT_INTERVAL;
         }
 
         // FUTURE: 实际的闲置行为
@@ -147,19 +153,27 @@ public class IdleGoal implements IGoal {
     }
 
     /**
-     * 选取附近可站立的随机目标点。
+     * 选取附近可站立的随机传送点（地表）。
      */
-    private BlockPos pickWanderTarget(LivingEntity entity) {
+    private BlockPos pickTeleportTarget(LivingEntity entity) {
         RandomSource random = entity.level().getRandom();
         BlockPos origin = entity.blockPosition();
-        for (int i = 0; i < WANDER_ATTEMPTS; i++) {
-            int dx = random.nextIntBetweenInclusive(-WANDER_RANGE, WANDER_RANGE);
-            int dz = random.nextIntBetweenInclusive(-WANDER_RANGE, WANDER_RANGE);
-            if (dx == 0 && dz == 0) {
+        for (int i = 0; i < TELEPORT_ATTEMPTS; i++) {
+            double angle = random.nextDouble() * TWO_PI;
+            double distance =
+                TELEPORT_MIN_DISTANCE +
+                (TELEPORT_MAX_DISTANCE - TELEPORT_MIN_DISTANCE) *
+                random.nextDouble();
+
+            int x =
+                origin.getX() + (int) Math.round(Math.cos(angle) * distance);
+            int z =
+                origin.getZ() + (int) Math.round(Math.sin(angle) * distance);
+            BlockPos sample = new BlockPos(x, origin.getY(), z);
+            if (!entity.level().hasChunkAt(sample)) {
                 continue;
             }
-            int x = origin.getX() + dx;
-            int z = origin.getZ() + dz;
+
             int y = entity
                 .level()
                 .getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

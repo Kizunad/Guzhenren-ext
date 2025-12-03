@@ -36,6 +36,16 @@ public class NpcMindGameTests {
         );
     }
 
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP)
+    public void testRangedAttackPostFire(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.RangedAttackFixTests.testRangedAttackPostFire(helper);
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP)
+    public void testRangedAttackStuckDetection(GameTestHelper helper) {
+        com.Kizunad.customNPCs_test.tests.RangedAttackFixTests.testRangedAttackStuckDetection(helper);
+    }
+
 
     //    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
     //    public void testIdleGoal(GameTestHelper helper) {

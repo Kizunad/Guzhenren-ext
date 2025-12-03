@@ -71,6 +71,16 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 弓的最小充能时间（ticks）- 确保有足够的伤害
      */
     private static final int BOW_MIN_CHARGE_TICKS = 20;
+    
+    /**
+     * 最大被迫近身时间（ticks）- 超过此时间无法拉开距离则视为失败
+     */
+    private static final int MAX_CLOSE_RANGE_TICKS = 60;
+    
+    /**
+     * 射击后的后摇时间（ticks）- 防止动作立即结束导致鬼畜重启
+     */
+    private static final int POST_FIRE_TICKS = 10;
 
     /**
      * 最大转头速度（度/tick）
@@ -92,6 +102,16 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 充能计数（拉弓/装弩时间）
      */
     private int chargeTicks;
+    
+    /**
+     * 处于最小距离内的计数器
+     */
+    private int closeRangeTicks;
+    
+    /**
+     * 射击后摇计数器
+     */
+    private int postFireTicks;
 
     /**
      * 持武器的手（主手/副手）
@@ -106,6 +126,8 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         super("RangedAttackItemAction", targetUuid);
         this.fired = false;
         this.chargeTicks = 0;
+        this.closeRangeTicks = 0;
+        this.postFireTicks = 0;
         this.weaponHand = null;
     }
 
@@ -114,11 +136,22 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         // 重置状态
         this.fired = false;
         this.chargeTicks = 0;
+        this.closeRangeTicks = 0;
+        this.postFireTicks = 0;
         this.weaponHand = null;
     }
 
     @Override
     protected ActionStatus tickInternal(INpcMind mind, Mob mob) {
+        // ==================== Step 0: 后摇处理 ====================
+        if (fired) {
+            postFireTicks++;
+            if (postFireTicks >= POST_FIRE_TICKS) {
+                return ActionStatus.SUCCESS;
+            }
+            return ActionStatus.RUNNING;
+        }
+
         // ==================== Step 1: 目标验证 ====================
         Entity targetEntity = resolveEntity(mob.level());
         if (!(targetEntity instanceof LivingEntity livingTarget)) {
@@ -130,10 +163,19 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         Vec3 targetPos = livingTarget.position();
         Vec3 selfPos = mob.position();
         double distance = selfPos.distanceTo(targetPos);
+        
         if (distance < MIN_RANGE) {
+            closeRangeTicks++;
+            if (closeRangeTicks > MAX_CLOSE_RANGE_TICKS) {
+                LOGGER.debug("[RangedAttackItemAction] 被迫近身超过 {} ticks，动作失败", MAX_CLOSE_RANGE_TICKS);
+                return ActionStatus.FAILURE;
+            }
             navigateAway(mob, selfPos, targetPos);
             return ActionStatus.RUNNING;
+        } else {
+            closeRangeTicks = 0;
         }
+        
         if (distance > MAX_RANGE) {
             navigateTowards(mob, targetPos);
             return ActionStatus.RUNNING;
@@ -267,7 +309,7 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
             // 写入世界状态
             writeAttackState(mind);
-            return ActionStatus.SUCCESS;
+            return ActionStatus.RUNNING; // 进入后摇
         }
 
         // 未装填，开始装填
@@ -326,7 +368,7 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
             // 写入世界状态
             writeAttackState(mind);
-            return ActionStatus.SUCCESS;
+            return ActionStatus.RUNNING; // 进入后摇
         }
 
         return ActionStatus.RUNNING;
@@ -364,7 +406,7 @@ public class RangedAttackItemAction extends AbstractStandardAction {
             );
 
             writeAttackState(mind);
-            return ActionStatus.SUCCESS;
+            return ActionStatus.RUNNING; // 进入后摇
         }
 
         return ActionStatus.RUNNING;

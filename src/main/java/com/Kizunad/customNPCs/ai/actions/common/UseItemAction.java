@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IUseItemAction;
+import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
@@ -86,6 +87,21 @@ public class UseItemAction extends AbstractStandardAction implements IUseItemAct
     private ItemStack currentStack = ItemStack.EMPTY;
 
     /**
+     * 记录临时占用的手上原有物品，便于恢复。
+     */
+    private ItemStack previousHandItem = ItemStack.EMPTY;
+
+    /**
+     * 是否从背包临时取出了物品。
+     */
+    private boolean borrowedFromInventory = false;
+
+    /**
+     * 取自背包的槽位索引，便于调试。
+     */
+    private int borrowedSlotIndex = -1;
+
+    /**
      * 创建使用物品动作（使用默认值）
      * @param targetItem 目标物品（null 表示使用当前手中物品）
      */
@@ -119,12 +135,25 @@ public class UseItemAction extends AbstractStandardAction implements IUseItemAct
     protected ActionStatus tickInternal(INpcMind mind, Mob mob) {
         // 如果还未开始使用，先选择物品
         if (!hasStartedUsing) {
-            InteractionHand hand = selectItemHand(mob);
-            if (hand == null) {
+            ItemSelection selection = selectItem(mind, mob);
+            if (selection == null) {
                 LOGGER.warn("[UseItemAction] 找不到可用物品");
                 return ActionStatus.FAILURE;
             }
-            this.usingHand = hand;
+            this.usingHand = selection.hand();
+
+            // 如果是从背包取出的物品，临时放到手上，使用后归还
+            if (selection.fromInventory()) {
+                previousHandItem = mob.getItemInHand(usingHand).copy();
+                mob.setItemInHand(usingHand, selection.stack());
+                borrowedFromInventory = true;
+                borrowedSlotIndex = selection.inventorySlot();
+                LOGGER.debug(
+                    "[UseItemAction] 从背包槽位 {} 取出物品临时使用，放入 {}",
+                    borrowedSlotIndex,
+                    usingHand
+                );
+            }
 
             // 开始使用物品
             mob.startUsingItem(usingHand);
@@ -163,31 +192,6 @@ public class UseItemAction extends AbstractStandardAction implements IUseItemAct
         }
 
         return ActionStatus.RUNNING;
-    }
-
-    /**
-     * 选择可用的物品手
-     * @param mob NPC 实体
-     * @return 可用的手，如果没有则返回 null
-     */
-    private InteractionHand selectItemHand(Mob mob) {
-        // 1. 优先检查 preferHand
-        if (isItemUsable(mob, preferHand)) {
-            return preferHand;
-        }
-
-        // 2. 检查另一只手
-        InteractionHand otherHand = preferHand == InteractionHand.MAIN_HAND
-            ? InteractionHand.OFF_HAND
-            : InteractionHand.MAIN_HAND;
-        if (isItemUsable(mob, otherHand)) {
-            return otherHand;
-        }
-
-        // 背包搜索功能未实现
-        LOGGER.debug("[UseItemAction] 背包搜索功能未实现");
-
-        return null;
     }
 
     /**
@@ -233,13 +237,29 @@ public class UseItemAction extends AbstractStandardAction implements IUseItemAct
         this.useCounter = 0;
         String itemName = targetItem != null ? targetItem.toString() : "当前物品";
         LOGGER.info("[UseItemAction] 准备使用物品: {}", itemName);
+        this.previousHandItem = ItemStack.EMPTY;
+        this.borrowedFromInventory = false;
+        this.borrowedSlotIndex = -1;
     }
 
     @Override
     protected void onStop(INpcMind mind, LivingEntity entity) {
         // 确保停止使用物品
-        if (entity instanceof Mob mob && mob.isUsingItem()) {
-            mob.stopUsingItem();
+        if (entity instanceof Mob mob) {
+            if (mob.isUsingItem()) {
+                mob.stopUsingItem();
+            }
+            // 使用完成后将手上的剩余物品归还背包，并恢复原手持
+            if (usingHand != null && borrowedFromInventory && mind != null) {
+                ItemStack hand = mob.getItemInHand(usingHand);
+                if (!hand.isEmpty()) {
+                    ItemStack leftover = mind.getInventory().addItem(hand);
+                    if (!leftover.isEmpty()) {
+                        mob.spawnAtLocation(leftover);
+                    }
+                }
+                mob.setItemInHand(usingHand, previousHandItem);
+            }
         }
         LOGGER.info("[UseItemAction] 停止使用物品 | 已使用 {} ticks", useCounter);
     }
@@ -259,4 +279,83 @@ public class UseItemAction extends AbstractStandardAction implements IUseItemAct
     public boolean isUsageComplete() {
         return useCounter >= maxUseTicks; // 或者其他完成条件
     }
+
+    /**
+     * 选择可用物品来源：优先手上，其次背包。
+     * @param mind NPC 心智
+     * @param mob  实体
+     * @return 选择结果，找不到返回 null
+     */
+    private ItemSelection selectItem(INpcMind mind, Mob mob) {
+        // 1. 优先检查 preferHand
+        if (isItemUsable(mob, preferHand)) {
+            return new ItemSelection(preferHand, ItemStack.EMPTY, false, -1);
+        }
+
+        // 2. 检查另一只手
+        InteractionHand otherHand = preferHand == InteractionHand.MAIN_HAND
+            ? InteractionHand.OFF_HAND
+            : InteractionHand.MAIN_HAND;
+        if (isItemUsable(mob, otherHand)) {
+            return new ItemSelection(otherHand, ItemStack.EMPTY, false, -1);
+        }
+
+        // 3. 背包搜索（解决副手被占用时无法使用的问题）
+        if (mind != null && mind.getInventory() != null) {
+            NpcInventory inventory = mind.getInventory();
+            for (int i = 0; i < inventory.size(); i++) {
+                ItemStack stack = inventory.getItem(i);
+                if (!isInventoryCandidate(stack, mob)) {
+                    continue;
+                }
+                ItemStack toUse = extractUsableStack(inventory, i);
+                if (toUse.isEmpty()) {
+                    continue;
+                }
+                return new ItemSelection(preferHand, toUse, true, i);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 判断背包中的物品是否可用。
+     */
+    private boolean isInventoryCandidate(ItemStack stack, Mob mob) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        if (targetItem != null) {
+            return stack.getItem() == targetItem;
+        }
+        return stack.getFoodProperties(mob) != null || stack.getUseDuration(mob) > 0;
+    }
+
+    /**
+     * 从背包取出一份可用物品（可堆叠则只取 1 个）。
+     */
+    private ItemStack extractUsableStack(NpcInventory inventory, int slot) {
+        ItemStack source = inventory.getItem(slot);
+        if (source.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        if (source.getMaxStackSize() > 1 && source.getCount() > 1) {
+            ItemStack split = source.copy();
+            split.setCount(1);
+            source.shrink(1);
+            inventory.setItem(slot, source);
+            return split;
+        }
+        return inventory.removeItem(slot);
+    }
+
+    /**
+     * 选择结果封装。
+     */
+    private record ItemSelection(
+        InteractionHand hand,
+        ItemStack stack,
+        boolean fromInventory,
+        int inventorySlot
+    ) { }
 }

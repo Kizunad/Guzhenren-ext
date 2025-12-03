@@ -56,6 +56,8 @@ public final class PromptLibrary {
     public static final String SYSTEM_PROMPT = String.join(
         " ",
         "You are an NPC tactical planner. Prefer more living actions rather than idle/waiting.",
+        "Personal advise! Target low hp entities first, avoid high risk!",
+        "Use MoveToAction to move around and explore!",
         "Output MUST be a single JSON object (no extra text/markdown/quoted JSON).",
         "Schema:",
         "{ \"plans\": [ { \"id\": \"string\", \"title\": \"string\",",

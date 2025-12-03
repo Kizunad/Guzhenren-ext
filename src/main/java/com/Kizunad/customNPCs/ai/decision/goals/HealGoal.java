@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class HealGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "HealGoal: when health below threshold, fetch best healing consumable (potion/golden apple/food) and use.";
+        "HealGoal: when health low, use best healing item (potion/golden apple/regen food).";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -433,7 +433,10 @@ public class HealGoal implements IGoal {
                 if (!leftover.isEmpty()) {
                     entity.spawnAtLocation(leftover);
                 }
-                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                entity.setItemInHand(
+                    InteractionHand.MAIN_HAND,
+                    ItemStack.EMPTY
+                );
                 mainHandStoredInInventory = true;
             }
         }
@@ -443,7 +446,10 @@ public class HealGoal implements IGoal {
                 .getInventory()
                 .removeItem(candidate.slot(), 1);
             if (removed.isEmpty()) {
-                LOGGER.warn("[HealGoal] 无法从背包槽位 {} 取出治疗物", candidate.slot());
+                LOGGER.warn(
+                    "[HealGoal] 无法从背包槽位 {} 取出治疗物",
+                    candidate.slot()
+                );
                 return;
             }
             sourceStack = removed.copy();
@@ -480,7 +486,10 @@ public class HealGoal implements IGoal {
                 if (!leftover.isEmpty()) {
                     entity.spawnAtLocation(leftover);
                 }
-                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                entity.setItemInHand(
+                    InteractionHand.MAIN_HAND,
+                    ItemStack.EMPTY
+                );
             }
         }
 
@@ -512,7 +521,10 @@ public class HealGoal implements IGoal {
                 if (!leftover.isEmpty()) {
                     entity.spawnAtLocation(leftover);
                 }
-                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                entity.setItemInHand(
+                    InteractionHand.MAIN_HAND,
+                    ItemStack.EMPTY
+                );
             }
         }
         if (!fromMainHand) {

@@ -26,11 +26,13 @@ public class UtilityGoalSelector {
     private IGoal currentGoal;
     private int currentGoalActiveTicks;
     private int ticksSinceLastEvaluation;
+    private int idleStallTicks;
     private static final int EVALUATION_INTERVAL = 20; // 每秒重新评估一次（20 ticks）
     private static final float HYSTERESIS_THRESHOLD = 0.1f; // 10% 滞后阈值
     private static final float PREEMPTION_ADDITIONAL_THRESHOLD = 0.15f; // 早期抢占额外阈值
     private static final int PREEMPTION_GRACE_TICKS = 15; // 刚切换后至少坚持 15 ticks
     private static final int GOAL_COOLDOWN_TICKS = 40; // 目标切换后的冷却期
+    private static final int IDLE_STALL_THRESHOLD = 8; // 连续无目标/动作的判定阈值
 
     public UtilityGoalSelector() {
         this.goals = new ArrayList<>();
@@ -38,6 +40,7 @@ public class UtilityGoalSelector {
         this.currentGoal = null;
         this.currentGoalActiveTicks = 0;
         this.ticksSinceLastEvaluation = 0;
+        this.idleStallTicks = 0;
     }
 
     /**
@@ -99,6 +102,8 @@ public class UtilityGoalSelector {
             // 如果没有当前目标，立即选择一个
             reevaluate(mind, entity, null);
         }
+
+        guardAgainstStall(mind, entity);
     }
 
     /**
@@ -116,6 +121,15 @@ public class UtilityGoalSelector {
         LivingEntity entity,
         SensorEventType interruptLevel
     ) {
+        reevaluateInternal(mind, entity, interruptLevel, false);
+    }
+
+    private void reevaluateInternal(
+        INpcMind mind,
+        LivingEntity entity,
+        SensorEventType interruptLevel,
+        boolean ignoreCooldown
+    ) {
         IGoal bestGoal = null;
         float bestPriority = 0.0f;
 
@@ -126,7 +140,7 @@ public class UtilityGoalSelector {
         // 如果当前目标的最终优先级高于已知的最高优先级，则更新最高优先级和最佳目标
         for (IGoal goal : goals) {
             // 检查目标是否在冷却中
-            if (isOnCooldown(goal)) {
+            if (!ignoreCooldown && isOnCooldown(goal)) {
                 continue;
             }
 
@@ -269,7 +283,7 @@ public class UtilityGoalSelector {
         SensorEventType eventType
     ) {
         ticksSinceLastEvaluation = 0;
-        reevaluate(mind, entity, eventType);
+        reevaluateInternal(mind, entity, eventType, false);
     }
 
     private boolean isOnCooldown(IGoal goal) {
@@ -315,6 +329,31 @@ public class UtilityGoalSelector {
         }
 
         return HYSTERESIS_THRESHOLD;
+    }
+
+    /**
+     * 防止长时间无目标/动作导致站桩：连续空闲 N tick 后忽略冷却强制重评估。
+     */
+    private void guardAgainstStall(INpcMind mind, LivingEntity entity) {
+        if (currentGoal == null && mind.getActionExecutor().isIdle()) {
+            idleStallTicks++;
+            if (idleStallTicks >= IDLE_STALL_THRESHOLD) {
+                MindLog.decision(
+                    MindLogLevel.WARN,
+                    "检测到连续 {} tick 无目标/动作，强制重评估（忽略冷却）",
+                    idleStallTicks
+                );
+                reevaluateInternal(
+                    mind,
+                    entity,
+                    SensorEventType.CRITICAL,
+                    true
+                );
+                idleStallTicks = 0;
+            }
+        } else {
+            idleStallTicks = 0;
+        }
     }
 
     /**

@@ -16,18 +16,21 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Locale;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +60,7 @@ public class LlmPlanner {
     private static final int LONG_TERM_SUMMARY_LIMIT = 3;
     private static final int PLAN_QUEUE_LIMIT = 10;
     private static final int QUEUE_INFO_TTL = 40;
+    private static final int INVENTORY_SNAPSHOT_LIMIT = 3 * 9; // LLM 上下文中背包摘要的截断上限 这里不做限制了
 
     private final LlmConfig config = LlmConfig.getInstance();
     private long lastRequestTick = 0;
@@ -226,20 +230,24 @@ public class LlmPlanner {
         );
         double health = entity.getHealth();
         double maxHealth = entity.getMaxHealth();
+        String inventory = buildInventorySnapshot(mind);
+        String equipment = buildEquipmentSnapshot(entity);
         Object threat = mind.getMemory().getMemory("threat_detected");
         Object currentTarget = mind.getMemory().getMemory("current_threat_id");
         String nearby = buildNearbyEntitiesSnapshot(level, entity);
         String recentPlan = mind
             .getMemory()
             .getShortTerm(MEMORY_PLAN_RECENT, String.class, "none");
-        String longTerm = mind.getLongTermMemory().summarize(
-            LONG_TERM_SUMMARY_LIMIT
-        );
+        String longTerm = mind
+            .getLongTermMemory()
+            .summarize(LONG_TERM_SUMMARY_LIMIT);
         return """
         角色: CustomNPC
         维度: %s
         坐标: %s
         生命: %.1f/%.1f
+        背包: %s
+        装备: %s
         威胁: %s
         当前目标: %s
         周围实体: %s
@@ -251,12 +259,65 @@ public class LlmPlanner {
                 position,
                 health,
                 maxHealth,
+                inventory,
+                equipment,
                 threat == null ? "none" : threat,
                 currentTarget == null ? "none" : currentTarget,
                 nearby,
                 longTerm,
                 recentPlan
             );
+    }
+
+    private String buildInventorySnapshot(NpcMind mind) {
+        var inventory = mind.getInventory();
+        if (inventory == null || inventory.isEmpty()) {
+            return "empty";
+        }
+        List<String> items = new ArrayList<>();
+        for (int i = 0; i < inventory.size(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.isEmpty()) {
+                items.add(describeItem(stack));
+                if (items.size() >= INVENTORY_SNAPSHOT_LIMIT) {
+                    break;
+                }
+            }
+        }
+        if (items.isEmpty()) {
+            return "empty";
+        }
+        return String.join(", ", items);
+    }
+
+    private String buildEquipmentSnapshot(LivingEntity entity) {
+        String mainHand = describeItem(entity.getMainHandItem());
+        String offHand = describeItem(entity.getOffhandItem());
+        String head = describeItem(entity.getItemBySlot(EquipmentSlot.HEAD));
+        String chest = describeItem(entity.getItemBySlot(EquipmentSlot.CHEST));
+        String legs = describeItem(entity.getItemBySlot(EquipmentSlot.LEGS));
+        String feet = describeItem(entity.getItemBySlot(EquipmentSlot.FEET));
+        return "主手:%s 副手:%s 头:%s 胸:%s 腿:%s 脚:%s".formatted(
+            mainHand,
+            offHand,
+            head,
+            chest,
+            legs,
+            feet
+        );
+    }
+
+    private String describeItem(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return "empty";
+        }
+        String id = stack
+            .getItem()
+            .builtInRegistryHolder()
+            .key()
+            .location()
+            .toString();
+        return "%dx %s".formatted(stack.getCount(), id);
     }
 
     private String buildNearbyEntitiesSnapshot(
@@ -266,7 +327,10 @@ public class LlmPlanner {
         List<LivingEntity> nearby = level.getEntitiesOfClass(
             LivingEntity.class,
             self.getBoundingBox().inflate(NEARBY_SCAN_RADIUS),
-            other -> other.isAlive() && other != self
+            other ->
+                other.isAlive() &&
+                other != self &&
+                !shouldIgnoreEntityForContext(other)
         );
         if (nearby.isEmpty()) {
             return "none";
@@ -311,9 +375,21 @@ public class LlmPlanner {
         return sb.toString();
     }
 
+    /**
+     * 过滤对策规划无意义/不可交互的目标（例如旁观者、隐身）。
+     */
+    private boolean shouldIgnoreEntityForContext(LivingEntity entity) {
+        if (entity instanceof Player player && player.isSpectator()) {
+            return true;
+        }
+        return entity.isInvisible();
+    }
+
     private String buildPlanSummary(String planJson, String planId) {
         try {
-            JsonObject root = JsonParser.parseString(planJson).getAsJsonObject();
+            JsonObject root = JsonParser.parseString(
+                planJson
+            ).getAsJsonObject();
             JsonArray plans = root.getAsJsonArray("plans");
             if (plans == null || plans.isEmpty()) {
                 return "none";
@@ -358,7 +434,9 @@ public class LlmPlanner {
     private void rebuildQueueFromPlan(String planJson, NpcMind mind) {
         planQueue.clear();
         try {
-            JsonObject root = JsonParser.parseString(planJson).getAsJsonObject();
+            JsonObject root = JsonParser.parseString(
+                planJson
+            ).getAsJsonObject();
             JsonArray plans = root.getAsJsonArray("plans");
             if (plans == null || plans.isEmpty()) {
                 mind
@@ -384,15 +462,11 @@ public class LlmPlanner {
                 double priority = obj.has("priority")
                     ? obj.get("priority").getAsDouble()
                     : 0.0D;
-                String id = obj.has("id")
-                    ? obj.get("id").getAsString()
-                    : "";
+                String id = obj.has("id") ? obj.get("id").getAsString() : "";
                 String title = obj.has("title")
                     ? obj.get("title").getAsString()
                     : "";
-                collected.add(
-                    new LlmQueuedPlan(id, title, priority, names)
-                );
+                collected.add(new LlmQueuedPlan(id, title, priority, names));
             }
             collected.sort(
                 Comparator.comparingDouble(LlmQueuedPlan::priority).reversed()
@@ -600,21 +674,6 @@ public class LlmPlanner {
         return new LlmPlanResult("defend_and_kite", "{}", requestJson);
     }
 
-    private String escapeForJson(String raw) {
-        return raw
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n");
-    }
-
-    private String truncateForJson(String raw) {
-        final int maxLen = 200;
-        if (raw.length() <= maxLen) {
-            return escapeForJson(raw);
-        }
-        return escapeForJson(raw.substring(0, maxLen));
-    }
-
     private CompletableFuture<LlmPlanResult> sendRequestAsync(
         String requestJson,
         NpcMind mind
@@ -642,8 +701,7 @@ public class LlmPlanner {
             .build();
 
         if (config.isLogRequest()) {
-            LOGGER.info("[LLM] 请求体: {}", truncateForJson(requestJson));
-            LOGGER.info("[LLM] 请求体全文: {}", requestJson);
+            LOGGER.info("[LLM] 请求体: {}", requestJson);
         }
 
         return HTTP_CLIENT.sendAsync(
@@ -677,19 +735,14 @@ public class LlmPlanner {
                 mind,
                 "LLM HTTP 状态异常: %d body=%s".formatted(
                     status,
-                    truncateForJson(body == null ? "" : body)
+                    body == null ? "" : body
                 )
             );
             return null;
         }
         String safeBody = body == null ? "" : body;
         if (config.isLogResponse()) {
-            LOGGER.info(
-                "[LLM] 响应状态: {} 片段: {}",
-                status,
-                truncateForJson(safeBody)
-            );
-            LOGGER.info("[LLM] 响应全文: {}", safeBody);
+            LOGGER.info("[LLM] 响应状态: {} 内容: {}", status, safeBody);
         }
         if (safeBody.trim().isEmpty()) {
             logWarn(mind, "LLM 响应为空或仅空白，status=" + status);
