@@ -3,8 +3,11 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import java.util.UUID;
+import java.util.function.Predicate;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,8 +19,6 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.UUID;
 
 /**
  * 远程武器攻击动作 - 使用弓、弩等远程物品对目标进行射击
@@ -38,8 +39,8 @@ import java.util.UUID;
 public class RangedAttackItemAction extends AbstractStandardAction {
 
     public static final String LLM_USAGE_DESC =
-        "RangedAttackItemAction: bow/crossbow attack at 4-12 blocks; requires ammo and HAS_RANGED_WEAPON; "
-            + "keeps distance window, charges/aims, writes TARGET_DAMAGED/HAS_RANGED_WEAPON.";
+        "RangedAttackItemAction: bow/crossbow attack at 4-12 blocks; requires ammo and HAS_RANGED_WEAPON; " +
+        "keeps distance window, charges/aims, writes TARGET_DAMAGED/HAS_RANGED_WEAPON.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -58,7 +59,7 @@ public class RangedAttackItemAction extends AbstractStandardAction {
     /**
      * 最大射程（格）- 太远命中率低
      */
-    private static final double MAX_RANGE = 12.0d;
+    private static final double MAX_RANGE = 64.0d;
     private static final double DESIRED_RANGE = 10.0d;
     private static final double APPROACH_SPEED = 1.15d;
     private static final double BACKOFF_SPEED = 1.05d;
@@ -163,28 +164,68 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
         // ==================== Step 4: 弹药检查 ====================
         ItemStack ammo = mob.getProjectile(weapon);
+        // 兼容副手持有弹药的情况：mob.getProjectile 有时无法识别另一只手的弹药
+        if (
+            ammo.isEmpty() &&
+            weapon.getItem() instanceof
+                ProjectileWeaponItem projectileWeaponItem
+        ) {
+            Predicate<ItemStack> ammoPredicate =
+                projectileWeaponItem.getAllSupportedProjectiles();
+            ItemStack otherHandItem = weaponHand == InteractionHand.MAIN_HAND
+                ? off
+                : main;
+            if (ammoPredicate.test(otherHandItem)) {
+                ammo = otherHandItem;
+            } else if (otherHandItem.isEmpty()) {
+                // 兼容 NPC 自带背包：尝试从背包直接取出 1 个弹药放到空闲手
+                NpcInventory inventory = mind.getInventory();
+                int ammoSlot = inventory.findFirstSlot(ammoPredicate);
+                if (ammoSlot >= 0) {
+                    ItemStack pulled = inventory.removeItem(ammoSlot, 1);
+                    if (!pulled.isEmpty()) {
+                        InteractionHand ammoHand = weaponHand ==
+                            InteractionHand.MAIN_HAND
+                            ? InteractionHand.OFF_HAND
+                            : InteractionHand.MAIN_HAND;
+                        mob.setItemInHand(ammoHand, pulled);
+                        ammo = pulled;
+                    }
+                }
+            }
+        }
         if (ammo.isEmpty()) {
             LOGGER.warn("[RangedAttackItemAction] 无弹药，无法射击");
             // 写入世界状态：无弹药
-            mind.getMemory().rememberShortTerm(
-                WorldStateKeys.HAS_RANGED_WEAPON,
-                false,
-                STATE_MEMORY_DURATION
-            );
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    WorldStateKeys.HAS_RANGED_WEAPON,
+                    false,
+                    STATE_MEMORY_DURATION
+                );
             return ActionStatus.FAILURE;
         }
 
         // ==================== Step 5: 持续瞄准目标 ====================
-        mob.getLookControl().setLookAt(
-            livingTarget,
-            MAX_HEAD_ROTATION,  // 最大水平转速
-            MAX_HEAD_ROTATION   // 最大俯仰转速
-        );
+        mob
+            .getLookControl()
+            .setLookAt(
+                livingTarget,
+                MAX_HEAD_ROTATION, // 最大水平转速
+                MAX_HEAD_ROTATION // 最大俯仰转速
+            );
 
         // ==================== Step 6: 充能与射击 ====================
         // 弩的特殊处理
         if (weapon.getItem() instanceof CrossbowItem) {
-            return handleCrossbowAttack(mind, mob, weapon, livingTarget, distance);
+            return handleCrossbowAttack(
+                mind,
+                mob,
+                weapon,
+                livingTarget,
+                distance
+            );
         }
 
         // 弓的处理
@@ -193,7 +234,13 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         }
 
         // 其他远程武器（使用默认逻辑）
-        return handleGenericProjectileWeapon(mind, mob, weapon, livingTarget, distance);
+        return handleGenericProjectileWeapon(
+            mind,
+            mob,
+            weapon,
+            livingTarget,
+            distance
+        );
     }
 
     /**
@@ -328,18 +375,22 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      */
     private void writeAttackState(INpcMind mind) {
         // 写入目标受到伤害状态
-        mind.getMemory().rememberShortTerm(
-            WorldStateKeys.TARGET_DAMAGED,
-            true,
-            STATE_MEMORY_DURATION
-        );
+        mind
+            .getMemory()
+            .rememberShortTerm(
+                WorldStateKeys.TARGET_DAMAGED,
+                true,
+                STATE_MEMORY_DURATION
+            );
 
         // 写入有远程武器状态（用于后续决策）
-        mind.getMemory().rememberShortTerm(
-            WorldStateKeys.HAS_RANGED_WEAPON,
-            true,
-            STATE_MEMORY_DURATION
-        );
+        mind
+            .getMemory()
+            .rememberShortTerm(
+                WorldStateKeys.HAS_RANGED_WEAPON,
+                true,
+                STATE_MEMORY_DURATION
+            );
     }
 
     @Override
@@ -355,7 +406,9 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 检查是否为远程武器
      */
     private boolean isProjectileWeapon(ItemStack stack) {
-        return !stack.isEmpty() && stack.getItem() instanceof ProjectileWeaponItem;
+        return (
+            !stack.isEmpty() && stack.getItem() instanceof ProjectileWeaponItem
+        );
     }
 
     @Override
@@ -376,9 +429,9 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
     private void navigateAway(Mob mob, Vec3 mobPos, Vec3 targetPos) {
         Vec3 dir = mobPos.subtract(targetPos);
-        Vec3 dest = mobPos.add(dir.normalize().scale(MIN_RANGE + BACKOFF_EXTRA));
-        mob
-            .getNavigation()
-            .moveTo(dest.x(), dest.y(), dest.z(), BACKOFF_SPEED);
+        Vec3 dest = mobPos.add(
+            dir.normalize().scale(MIN_RANGE + BACKOFF_EXTRA)
+        );
+        mob.getNavigation().moveTo(dest.x(), dest.y(), dest.z(), BACKOFF_SPEED);
     }
 }

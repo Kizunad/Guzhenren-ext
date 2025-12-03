@@ -2,9 +2,11 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.decision.UtilityGoalSelector;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
+import com.Kizunad.customNPCs.ai.sensors.SensorEventType;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -35,6 +37,7 @@ public class IdleGoal implements IGoal {
     private static final int WANDER_TIMEOUT = 200;
     private static final double BLOCK_CENTER_OFFSET = 0.5D;
     private static final int WANDER_ATTEMPTS = 8;
+    private static final int MAX_IDLE_TICKS = 20 * 30; // 最长闲置 30s 后强制重评估
 
     private int idleTicks;
     private int wanderCooldown;
@@ -107,6 +110,18 @@ public class IdleGoal implements IGoal {
                 entity.getName().getString(),
                 idleTicks
             );
+        }
+
+        // 闲置过久时强制重评估一次，避免持续不活跃
+        if (idleTicks >= MAX_IDLE_TICKS) {
+            MindLog.decision(
+                MindLogLevel.INFO,
+                "NPC {} 闲置超过阈值，强制重评估目标",
+                entity.getName().getString()
+            );
+            UtilityGoalSelector selector = mind.getGoalSelector();
+            selector.forceReevaluate(mind, entity, SensorEventType.CRITICAL);
+            idleTicks = 0;
         }
     }
 

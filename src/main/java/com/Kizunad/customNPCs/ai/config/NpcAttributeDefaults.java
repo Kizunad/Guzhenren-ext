@@ -18,19 +18,19 @@ public final class NpcAttributeDefaults {
 
     private NpcAttributeDefaults() {}
 
-    public static final double MAX_HEALTH = 20.0D;
-    public static final double ATTACK_DAMAGE = 4.0D;
+    public static final double MAX_HEALTH = 80.0D;
+    public static final double ATTACK_DAMAGE = 10.0D;
     public static final double ATTACK_KNOCKBACK = 0.4D;
-    public static final double ATTACK_SPEED = 4.0D;
-    public static final double MOVEMENT_SPEED = 0.32D;
+    public static final double ATTACK_SPEED = 8.0D;
+    public static final double MOVEMENT_SPEED = 0.40D;
     public static final double FLYING_SPEED = 0.4D;
     public static final double SWIM_SPEED = 1.0D;
-    public static final double ARMOR = 2.0D;
+    public static final double ARMOR = 0.0D;
     public static final double ARMOR_TOUGHNESS = 0.0D;
     public static final double KNOCKBACK_RESISTANCE = 0.0D;
     public static final double FOLLOW_RANGE = 24.0D;
     public static final double GRAVITY = 0.08D;
-    public static final double STEP_HEIGHT = 0.6D;
+    public static final double STEP_HEIGHT = 3.0D;
     public static final double MOVEMENT_EFFICIENCY = 1.0D;
     public static final double WATER_MOVEMENT_EFFICIENCY = 0.0D;
     public static final double MINING_EFFICIENCY = 0.0D;
@@ -75,7 +75,10 @@ public final class NpcAttributeDefaults {
             .add(Attributes.GRAVITY, GRAVITY)
             .add(Attributes.STEP_HEIGHT, STEP_HEIGHT)
             .add(Attributes.MOVEMENT_EFFICIENCY, MOVEMENT_EFFICIENCY)
-            .add(Attributes.WATER_MOVEMENT_EFFICIENCY, WATER_MOVEMENT_EFFICIENCY)
+            .add(
+                Attributes.WATER_MOVEMENT_EFFICIENCY,
+                WATER_MOVEMENT_EFFICIENCY
+            )
             .add(Attributes.MINING_EFFICIENCY, MINING_EFFICIENCY)
             .add(Attributes.BLOCK_BREAK_SPEED, BLOCK_BREAK_SPEED)
             .add(Attributes.SUBMERGED_MINING_SPEED, SUBMERGED_MINING_SPEED)
@@ -95,10 +98,7 @@ public final class NpcAttributeDefaults {
             )
             .add(Attributes.BLOCK_INTERACTION_RANGE, BLOCK_INTERACTION_RANGE)
             .add(Attributes.ENTITY_INTERACTION_RANGE, ENTITY_INTERACTION_RANGE)
-            .add(
-                Attributes.SPAWN_REINFORCEMENTS_CHANCE,
-                SPAWN_REINFORCEMENTS
-            )
+            .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, SPAWN_REINFORCEMENTS)
             // NeoForge 扩展属性
             .add(NeoForgeMod.SWIM_SPEED, SWIM_SPEED);
     }
@@ -106,7 +106,9 @@ public final class NpcAttributeDefaults {
     /**
      * 附加可选属性（如 nametag 距离），若注册表中存在则添加。
      */
-    public static void applyOptionalAttributes(AttributeSupplier.Builder builder) {
+    public static void applyOptionalAttributes(
+        AttributeSupplier.Builder builder
+    ) {
         resolveAttribute(NAMETAG_ATTR_ID).ifPresent(holder ->
             builder.add(holder, NAMETAG_DISTANCE)
         );

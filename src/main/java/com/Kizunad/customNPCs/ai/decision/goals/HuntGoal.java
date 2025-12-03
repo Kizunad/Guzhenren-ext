@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.common.AttackAction;
+import com.Kizunad.customNPCs.ai.actions.config.ActionConfig;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
@@ -42,10 +43,19 @@ public class HuntGoal implements IGoal {
     private static final float PRIORITY_GAIN = 0.25f;
     private static final float SAFE_HEALTH_RATIO = 0.6f; // 血量低于此值不主动出击
     private static final double DISTANCE_WEIGHT = 0.05D; // 轻度偏好近目标
+    private static final int ATTACK_TIMEOUT_TICKS = 200; // 近战最长尝试时间（10s）
 
+    private final double attackRange;
+    private final int attackCooldownTicks;
     private AttackAction attackAction;
     private UUID targetUuid;
     private double cachedAdvantageRatio = 0.0D;
+
+    public HuntGoal() {
+        ActionConfig config = ActionConfig.getInstance();
+        this.attackRange = config.getAttackRange();
+        this.attackCooldownTicks = config.getAttackCooldownTicks();
+    }
 
     @Override
     public float getPriority(INpcMind mind, LivingEntity entity) {
@@ -71,7 +81,12 @@ public class HuntGoal implements IGoal {
         LivingEntity target = ensureTarget(entity);
         if (target != null) {
             targetUuid = target.getUUID();
-            attackAction = new AttackAction(targetUuid);
+            attackAction = new AttackAction(
+                targetUuid,
+                attackRange,
+                attackCooldownTicks,
+                ATTACK_TIMEOUT_TICKS
+            );
             attackAction.start(mind, entity);
             LOGGER.info(
                 "[HuntGoal] {} 开始猎杀目标 {}",
@@ -93,7 +108,12 @@ public class HuntGoal implements IGoal {
         }
 
         if (attackAction == null) {
-            attackAction = new AttackAction(target.getUUID());
+            attackAction = new AttackAction(
+                target.getUUID(),
+                attackRange,
+                attackCooldownTicks,
+                ATTACK_TIMEOUT_TICKS
+            );
             attackAction.start(mind, entity);
         }
 
@@ -105,9 +125,15 @@ public class HuntGoal implements IGoal {
                 attackAction = null;
             }
         } else if (status == ActionStatus.FAILURE) {
-            LOGGER.debug("[HuntGoal] 攻击失败，重新选择目标");
-            attackAction = null;
-            targetUuid = null;
+            LOGGER.info("[HuntGoal] 攻击失败，重新尝试同一目标");
+            attackAction.stop(mind, entity);
+            attackAction = new AttackAction(
+                target.getUUID(),
+                attackRange,
+                attackCooldownTicks,
+                ATTACK_TIMEOUT_TICKS
+            );
+            attackAction.start(mind, entity);
         }
     }
 

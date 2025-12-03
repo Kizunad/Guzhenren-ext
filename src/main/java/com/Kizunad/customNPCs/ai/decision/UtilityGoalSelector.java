@@ -169,6 +169,21 @@ public class UtilityGoalSelector {
             return;
         }
 
+        // 若当前有正在执行的计划且非中断场景，不抢占，等待动作队列空闲
+        if (
+            currentGoal != null &&
+            bestGoal != currentGoal &&
+            interruptLevel == null &&
+            !mind.getActionExecutor().isIdle()
+        ) {
+            MindLog.decision(
+                MindLogLevel.DEBUG,
+                "保持当前目标 {}，因动作计划执行中且无中断事件",
+                currentGoal.getName()
+            );
+            return;
+        }
+
         // 滞后判断:新目标必须显著优于当前目标
         if (bestGoal != currentGoal) {
             float threshold = getSwitchThreshold(interruptLevel);

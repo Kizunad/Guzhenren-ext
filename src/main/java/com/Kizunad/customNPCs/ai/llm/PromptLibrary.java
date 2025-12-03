@@ -37,6 +37,7 @@ public final class PromptLibrary {
         "Idle/Observe: wait/look around; Scan: check for threats/hazards."
     );
 
+    // 后续可能需要按照是否能够成功执行来过滤提示词
     private static String buildCatalog() {
         Set<String> merged = new LinkedHashSet<>();
         merged.addAll(BASE_ACTION_DESCS);
