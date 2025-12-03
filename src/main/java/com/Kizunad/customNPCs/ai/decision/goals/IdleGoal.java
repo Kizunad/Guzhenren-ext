@@ -4,6 +4,7 @@ import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -17,6 +18,13 @@ import net.minecraft.world.phys.Vec3;
  * 此目标的优先级总是很低，作为保底目标
  */
 public class IdleGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "IdleGoal: lowest-priority fallback, wait and occasionally wander short distance.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final float IDLE_PRIORITY = 0.1f;
     private static final int IDLE_TICK_INTERVAL = 100; // 每 5 秒打印一次（100 ticks）

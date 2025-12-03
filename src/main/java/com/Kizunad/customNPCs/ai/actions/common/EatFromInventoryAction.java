@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,7 +23,15 @@ import org.slf4j.LoggerFactory;
  */
 public class EatFromInventoryAction extends AbstractStandardAction {
 
+    public static final String LLM_USAGE_DESC =
+        "EatFromInventoryAction: pick food from NPC inventory and consume to heal; "
+            + "works with UseItemAction; good when hp low.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EatFromInventoryAction.class);
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     /** 负面效果的分数惩罚 */
     private static final double NEGATIVE_EFFECT_PENALTY = 4.0;

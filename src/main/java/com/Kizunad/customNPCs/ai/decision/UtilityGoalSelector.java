@@ -119,6 +119,10 @@ public class UtilityGoalSelector {
         IGoal bestGoal = null;
         float bestPriority = 0.0f;
 
+        if (goals.isEmpty()) {
+            return;
+        }
+
         // 如果当前目标的最终优先级高于已知的最高优先级，则更新最高优先级和最佳目标
         for (IGoal goal : goals) {
             // 检查目标是否在冷却中
@@ -155,6 +159,14 @@ public class UtilityGoalSelector {
                 .getPersonality()
                 .getModifierForGoal(currentGoal.getName());
             currentPriority = basePriority * (1.0f + personalityModifier);
+        }
+
+        // 如果没有可用目标，则保持现状
+        if (bestGoal == null && currentGoal == null) {
+            return;
+        }
+        if (bestGoal == null) {
+            return;
         }
 
         // 滞后判断:新目标必须显著优于当前目标
@@ -295,6 +307,23 @@ public class UtilityGoalSelector {
      */
     public IGoal getCurrentGoal() {
         return currentGoal;
+    }
+
+    /**
+     * 根据名称获取已注册的目标实例。
+     * @param name 目标名称
+     * @return 匹配的目标实例，不存在时返回 null
+     */
+    public IGoal getGoalByName(String name) {
+        if (name == null) {
+            return null;
+        }
+        for (IGoal goal : goals) {
+            if (name.equals(goal.getName())) {
+                return goal;
+            }
+        }
+        return null;
     }
 
     /**

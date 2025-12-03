@@ -3,6 +3,8 @@ package com.Kizunad.customNPCs.ai;
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
+import com.Kizunad.customNPCs.ai.actions.common.RunGoalAction;
+import com.Kizunad.customNPCs.ai.actions.common.SimpleNamedAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CookGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftItemGoal;
@@ -71,6 +73,23 @@ public final class NpcMindRegistry {
 
         registerAction("block_with_shield", BlockWithShieldAction::new);
         registerAction("ranged_attack", () -> new RangedAttackItemAction(null));
+        registerGoalActionBridges();
+        // 兼容 LLM 返回的类名/别名（无参数占位动作，避免跳过计划）。
+        registerAliasActions(
+            List.of(
+                "Scan",
+                "Wait",
+                "Observe",
+                "MoveToAction",
+                "AttackAction",
+                "EatFromInventoryAction",
+                "UseItemAction",
+                "RememberLongTermAction",
+                "ForgetLongTermAction",
+                "RangedAttackItemAction",
+                "BlockWithShieldAction"
+            )
+        );
     }
 
     /**
@@ -98,6 +117,63 @@ public final class NpcMindRegistry {
      */
     public static void registerAction(String name, Supplier<IAction> factory) {
         register(name, factory, ACTION_FACTORIES, "Action");
+    }
+
+    private static void registerGoalActionBridges() {
+        synchronized (GOAL_FACTORIES) {
+            for (String goalName : GOAL_FACTORIES.keySet()) {
+                String pascal = toPascalCase(goalName);
+                registerActionIfAbsent(
+                    goalName,
+                    () -> new RunGoalAction(goalName)
+                );
+                registerActionIfAbsent(
+                    pascal,
+                    () -> new RunGoalAction(goalName)
+                );
+                registerActionIfAbsent(
+                    pascal + "Goal",
+                    () -> new RunGoalAction(goalName)
+                );
+            }
+        }
+    }
+
+    private static void registerActionIfAbsent(
+        String name,
+        Supplier<IAction> factory
+    ) {
+        synchronized (ACTION_FACTORIES) {
+            if (ACTION_FACTORIES.containsKey(name)) {
+                return;
+            }
+        }
+        registerAction(name, factory);
+    }
+
+    private static String toPascalCase(String name) {
+        String[] parts = name.split("_");
+        StringBuilder builder = new StringBuilder();
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            builder.append(Character.toUpperCase(part.charAt(0)));
+            if (part.length() > 1) {
+                builder.append(part.substring(1));
+            }
+        }
+        return builder.toString();
+    }
+
+    private static void registerAliasActions(List<String> names) {
+        for (String name : names) {
+            registerAction(name, () -> new SimpleNamedAction(name));
+            String snake = name
+                .replaceAll("([a-z])([A-Z])", "$1_$2")
+                .toLowerCase();
+            registerAction(snake, () -> new SimpleNamedAction(name));
+        }
     }
 
     /**

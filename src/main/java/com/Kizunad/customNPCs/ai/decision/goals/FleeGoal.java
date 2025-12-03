@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
@@ -20,6 +21,14 @@ import org.slf4j.LoggerFactory;
  * 触发条件: 血量 < 30% 且附近有威胁
  */
 public class FleeGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "FleeGoal: run opposite to current threat id/pos with safety margin; "
+            + "re-path on failure; finishes when safe and cooldown applies.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
         FleeGoal.class

@@ -4,6 +4,7 @@ import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,6 +16,13 @@ import net.minecraft.world.entity.LivingEntity;
  * 主要用于 GameTest 验证动作系统的正确性。
  */
 public class TestPlanGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "TestPlanGoal: manual-priority goal that enqueues predefined action list for validation; dev/testing only.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private final float priority;
     private final List<IAction> actionPlan;

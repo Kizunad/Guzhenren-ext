@@ -1,6 +1,7 @@
 package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
@@ -14,6 +15,13 @@ import net.minecraft.world.entity.Mob;
  * 示例目标：演示如何根据 NPC 状态计算优先级
  */
 public class SurvivalGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "SurvivalGoal: trigger when health is critical; set survival memory and attempt simple self-heal.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final float LOW_HEALTH_THRESHOLD = 0.3f; // 30% 血量以下认为是危险
     private static final float HEALTHY_THRESHOLD = 0.8f; // 80% 血量认为是安全

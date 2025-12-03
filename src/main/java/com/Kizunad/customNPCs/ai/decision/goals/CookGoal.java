@@ -7,6 +7,7 @@ import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.executor.ActionExecutor;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -19,6 +20,13 @@ import net.minecraft.world.entity.LivingEntity;
  * - 非危险状态（避免战斗时停留）
  */
 public class CookGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "CookGoal: smelt edible items when fuel exists; stay safe; uses FurnaceAction and ActionExecutor.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final float BASE_PRIORITY = 0.45f;
     private static final float HUNGER_BONUS = 0.25f;

@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -35,6 +36,14 @@ import java.util.UUID;
  * - 有可用弹药
  */
 public class RangedAttackItemAction extends AbstractStandardAction {
+
+    public static final String LLM_USAGE_DESC =
+        "RangedAttackItemAction: bow/crossbow attack at 4-12 blocks; requires ammo and HAS_RANGED_WEAPON; "
+            + "keeps distance window, charges/aims, writes TARGET_DAMAGED/HAS_RANGED_WEAPON.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
         RangedAttackItemAction.class

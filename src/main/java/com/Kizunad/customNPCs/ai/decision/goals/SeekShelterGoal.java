@@ -4,6 +4,7 @@ import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.actions.common.InteractBlockAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,6 +24,14 @@ import org.slf4j.LoggerFactory;
  * 触发条件: 处于危险环境（夜晚、暴露）
  */
 public class SeekShelterGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "SeekShelterGoal: find safe block position away from threats/hazards and navigate there; "
+            + "fails if no path; used for regroup or hazard avoidance.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeekShelterGoal.class);
 

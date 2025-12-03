@@ -5,6 +5,8 @@ import com.Kizunad.customNPCs.ai.decision.UtilityGoalSelector;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.llm.LlmPlanner;
+import com.Kizunad.customNPCs.ai.llm.LongTermMemory;
 import com.Kizunad.customNPCs.ai.memory.MemoryModule;
 import com.Kizunad.customNPCs.ai.interaction.NpcQuestState;
 import com.Kizunad.customNPCs.ai.interaction.NpcTradeState;
@@ -34,6 +36,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     private final NpcStatus status;
     private final NpcTradeState tradeState;
     private final NpcQuestState questState;
+    private final LongTermMemory longTermMemory;
+    private final LlmPlanner llmPlanner;
 
     // 中断冷却机制
     private long lastInterruptTick = 0;
@@ -54,6 +58,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         this.status = new NpcStatus();
         this.tradeState = new NpcTradeState();
         this.questState = new NpcQuestState();
+        this.longTermMemory = new LongTermMemory();
+        this.llmPlanner = new LlmPlanner();
     }
 
     /**
@@ -103,6 +109,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         this.status = new NpcStatus();
         this.tradeState = new NpcTradeState();
         this.questState = new NpcQuestState();
+        this.longTermMemory = new LongTermMemory();
+        this.llmPlanner = new LlmPlanner();
     }
 
     @Override
@@ -136,6 +144,11 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     }
 
     @Override
+    public LongTermMemory getLongTermMemory() {
+        return longTermMemory;
+    }
+
+    @Override
     public NpcStatus getStatus() {
         return status;
     }
@@ -148,6 +161,10 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     @Override
     public NpcQuestState getQuestState() {
         return questState;
+    }
+
+    public LlmPlanner getLlmPlanner() {
+        return llmPlanner;
     }
 
     @Override
@@ -167,6 +184,9 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         // 3.5 更新状态（饥饿/饱和/回血/掉血）
         status.tick(level, entity);
 
+        // 3.6 周期性异步请求 LLM 计划（仅生成候选，不直接执行）
+        llmPlanner.tick(level, entity, this);
+
         // 4. 目标选择器执行
         goalSelector.tick(this, entity);
 
@@ -183,6 +203,8 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         tag.put("status", status.serializeNBT(provider));
         tag.put("trade", tradeState.serializeNBT(provider));
         tag.put("quest", questState.serializeNBT(provider));
+        tag.put("llm_long_term", longTermMemory.serializeNBT());
+        tag.put("llm", llmPlanner.serializeNBT(provider));
         // 注意：目标选择器不需要序列化，因为目标是在代码中注册的
         return tag;
     }
@@ -209,6 +231,12 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("quest")) {
             questState.deserializeNBT(provider, nbt.getCompound("quest"));
+        }
+        if (nbt.contains("llm_long_term")) {
+            longTermMemory.deserializeNBT(nbt.getCompound("llm_long_term"));
+        }
+        if (nbt.contains("llm")) {
+            llmPlanner.deserializeNBT(provider, nbt.getCompound("llm"));
         }
     }
 

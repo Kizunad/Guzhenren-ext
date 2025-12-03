@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.config.NpcCombatDefaults;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,6 +17,14 @@ import org.slf4j.LoggerFactory;
  * 格挡动作 - 使用盾牌短时间举盾，减少伤害并为撤退/反击争取时间。
  */
 public class BlockWithShieldAction extends AbstractStandardAction {
+
+    public static final String LLM_USAGE_DESC =
+        "BlockWithShieldAction: raise shield when target is close (<3.5), blocks damage; "
+            + "stops when threat gone or distance safe.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
         BlockWithShieldAction.class

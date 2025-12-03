@@ -5,6 +5,7 @@ import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
 import com.Kizunad.customNPCs.ai.config.NpcCombatDefaults;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
@@ -25,6 +26,13 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public class HealGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "HealGoal: when health below threshold, fetch best healing consumable (potion/golden apple/food) and use.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
         HealGoal.class

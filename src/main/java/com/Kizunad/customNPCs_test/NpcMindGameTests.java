@@ -13,6 +13,7 @@ public class NpcMindGameTests {
     private static final String BATCH_GOAP = TestBatches.GOAP;
     private static final String BATCH_REAL_API = TestBatches.REAL_API;
     private static final String BATCH_PERF = TestBatches.PERFORMANCE;
+    private static final String BATCH_LLM = TestBatches.REAL_API;
 
     @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 260)
     public void testCookGoalProducesCookedFood(GameTestHelper helper) {
@@ -34,6 +35,7 @@ public class NpcMindGameTests {
             helper
         );
     }
+
 
     //    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_BASE)
     //    public void testIdleGoal(GameTestHelper helper) {

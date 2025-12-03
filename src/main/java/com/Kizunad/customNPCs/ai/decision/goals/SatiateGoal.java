@@ -4,6 +4,7 @@ import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.actions.goap.GoapEatAction;
 import com.Kizunad.customNPCs.ai.planner.IGoapAction;
 import com.Kizunad.customNPCs.ai.planner.WorldState;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +18,13 @@ import net.minecraft.world.entity.LivingEntity;
  * </p>
  */
 public class SatiateGoal extends PlanBasedGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "SatiateGoal: GOAP eat when hungry and safe; uses GoapEatAction to consume food items.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     /** 基础优先级,用于计算进食目标的最低优先级 */
     private static final double BASE_PRIORITY = 0.3;

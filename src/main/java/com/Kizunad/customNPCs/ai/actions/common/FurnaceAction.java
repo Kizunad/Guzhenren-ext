@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 public class FurnaceAction extends AbstractStandardAction {
 
     private static final int DEFAULT_COOK_TIME = 200;
+    private static final int COOK_TIMEOUT_MULTIPLIER = 3;
 
     private CookCandidate candidate;
     private ItemStack consumedInput = ItemStack.EMPTY;
@@ -37,7 +38,8 @@ public class FurnaceAction extends AbstractStandardAction {
         super(
             "furnace_cook",
             null,
-            DEFAULT_COOK_TIME * 3 + CONFIG.getTimeoutBufferTicks(),
+            DEFAULT_COOK_TIME * COOK_TIMEOUT_MULTIPLIER +
+            CONFIG.getTimeoutBufferTicks(),
             0,
             0
         );

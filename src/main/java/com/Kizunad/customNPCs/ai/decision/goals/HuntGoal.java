@@ -4,13 +4,13 @@ import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.common.AttackAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.AABB;
@@ -27,6 +27,13 @@ import java.util.UUID;
  * 优先级：中等，低于逃跑/防御等保命类目标。
  */
 public class HuntGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "HuntGoal: when healthy/safe, seek weaker non-friendly targets in radius and attack via AttackAction.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HuntGoal.class);
     private static final double SEARCH_RADIUS = 12.0D;

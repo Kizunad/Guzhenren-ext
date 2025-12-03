@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
@@ -33,6 +34,14 @@ import org.slf4j.LoggerFactory;
 public class AttackAction
     extends AbstractStandardAction
     implements IAttackAction {
+
+    public static final String LLM_USAGE_DESC =
+        "AttackAction: melee strike target within ~3.5 blocks; backs off if too close; "
+            + "requires target UUID set; uses mob swing/doHurtTarget.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
         AttackAction.class

@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.actions.base;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
@@ -26,6 +27,14 @@ import net.minecraft.world.phys.Vec3;
  */
 @SuppressWarnings("checkstyle:MagicNumber")
 public class MoveToAction implements IAction {
+
+    public static final String LLM_USAGE_DESC =
+        "MoveToAction: use PathNavigation to reach position/entity; supports kiting/reposition; "
+            + "times out on repeated path failures; acceptableDistance controls stop range.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private final Vec3 targetPos;
     private final Entity targetEntity;

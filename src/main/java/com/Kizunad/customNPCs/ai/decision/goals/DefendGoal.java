@@ -7,6 +7,7 @@ import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.config.NpcCombatDefaults;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +27,14 @@ import org.slf4j.LoggerFactory;
  * 触发条件: 受到攻击 且 攻击力 > 0
  */
 public class DefendGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "DefendGoal: pick current_threat/last_attacker; melee <=3.5, shield if close, "
+            + "ranged 4-12 with HAS_RANGED_WEAPON; switches actions as distance/weapon changes.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
         DefendGoal.class

@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.planner.IGoapAction;
 import com.Kizunad.customNPCs.ai.planner.WorldState;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,13 @@ import net.minecraft.world.phys.Vec3;
  */
 @SuppressWarnings("checkstyle:MagicNumber")
 public class PickUpItemGoal extends PlanBasedGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "PickUpItemGoal: GOAP move to a specific item entity and collect it; distance scales priority.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final double ARRIVE_DISTANCE = 2.0D;
     private static final double PRIORITY_FALLOFF_DISTANCE = 50.0D;

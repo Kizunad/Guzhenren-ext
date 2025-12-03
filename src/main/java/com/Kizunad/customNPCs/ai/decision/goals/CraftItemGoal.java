@@ -4,6 +4,7 @@ import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +19,13 @@ import net.minecraft.world.entity.LivingEntity;
  * - 供后续 LLM/外部 Plan 工具注入具体制作计划后，通过命令或 forceSwitch 手动触发。
  */
 public class CraftItemGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "CraftItemGoal: execute externally assigned crafting plan steps; manual start; no auto priority.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     /** 手动注入的计划步骤 */
     private final List<IAction> assignedPlan = new ArrayList<>();

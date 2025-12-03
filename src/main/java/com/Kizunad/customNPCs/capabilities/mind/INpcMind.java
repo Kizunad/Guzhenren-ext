@@ -81,6 +81,12 @@ public interface INpcMind {
     com.Kizunad.customNPCs.ai.inventory.NpcInventory getInventory();
 
     /**
+     * 获取 LLM 长期记忆。
+     * @return 长期记忆组件
+     */
+    com.Kizunad.customNPCs.ai.llm.LongTermMemory getLongTermMemory();
+
+    /**
      * 获取 NPC 状态（饥饿/饱和/耗竭等）。
      * @return 状态组件
      */

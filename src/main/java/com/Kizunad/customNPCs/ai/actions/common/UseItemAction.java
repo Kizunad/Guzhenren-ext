@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IUseItemAction;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,7 +31,15 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("checkstyle:MagicNumber")
 public class UseItemAction extends AbstractStandardAction implements IUseItemAction {
 
+    public static final String LLM_USAGE_DESC =
+        "UseItemAction: use item in hand/backpack (food/potion/shield/bow charge etc); "
+            + "pair with EatFromInventoryAction to fetch food first; respects maxUseTicks.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UseItemAction.class);
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     // 从配置获取默认值
 

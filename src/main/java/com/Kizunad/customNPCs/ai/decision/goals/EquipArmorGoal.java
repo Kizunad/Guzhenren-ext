@@ -6,6 +6,7 @@ import com.Kizunad.customNPCs.ai.actions.goap.GoapEquipArmorAction;
 import com.Kizunad.customNPCs.ai.planner.IGoapAction;
 import com.Kizunad.customNPCs.ai.planner.WorldState;
 import com.Kizunad.customNPCs.ai.util.ArmorEvaluationUtil;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +20,13 @@ import net.minecraft.world.entity.LivingEntity;
  * </p>
  */
 public class EquipArmorGoal extends PlanBasedGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "EquipArmorGoal: evaluate inventory armor, equip better pieces via GOAP; priority scales with upgrade.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     /** 默认基础优先级 */
     private static final float DEFAULT_BASE_PRIORITY = 0.6f;

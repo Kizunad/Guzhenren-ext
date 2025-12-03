@@ -1,7 +1,8 @@
 package com.Kizunad.customNPCs.ai.decision.goals;
 
-import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.actions.base.LookAtAction;
+import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,13 @@ import net.minecraft.world.entity.LivingEntity;
  * 这是一个反应式目标，优先级取决于是否有可见实体。
  */
 public class WatchClosestEntityGoal implements IGoal {
+
+    public static final String LLM_USAGE_DESC =
+        "WatchClosestEntityGoal: when memory.nearest_entity exists, look at that entity briefly via LookAtAction.";
+
+    static {
+        LlmPromptRegistry.register(LLM_USAGE_DESC);
+    }
 
     private static final float PRIORITY_ACTIVE = 0.6f; // 当有目标时的优先级（高于 Idle，低于 Survival）
     private static final float PRIORITY_INACTIVE = 0.0f; // 无目标时的优先级
