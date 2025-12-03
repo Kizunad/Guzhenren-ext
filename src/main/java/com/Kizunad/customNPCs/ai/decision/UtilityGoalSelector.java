@@ -10,9 +10,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * Utility AI 目标选择器
@@ -40,7 +40,7 @@ public class UtilityGoalSelector {
     private static final int PREEMPTION_GRACE_TICKS = 15; // 刚切换后至少坚持 15 ticks
     private static final int GOAL_COOLDOWN_TICKS = 40; // 目标切换后的冷却期
     private static final int IDLE_STALL_THRESHOLD = 8; // 连续无目标/动作的判定阈值
-    private static final int STUCK_TICKS_THRESHOLD = 200; // 10 秒站桩判定
+    private static final int STUCK_TICKS_THRESHOLD = 20 * 60; // 10 秒站桩判定
     private static final double STUCK_MOVE_EPSILON = 0.1d; // 判定移动阈值
     private static final int STUCK_TELEPORT_ATTEMPTS = 8;
     private static final double STUCK_TELEPORT_MIN_DISTANCE = 8.0d;

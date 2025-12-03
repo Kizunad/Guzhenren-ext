@@ -83,6 +83,10 @@ public final class CustomNpcConfigs {
             .setApiKey(data.apiKey)
             .setApiReferer(data.apiReferer)
             .setApiTitle(data.apiTitle);
+
+        SpawnConfig.getInstance()
+            .setNaturalSpawnEnabled(data.naturalSpawnEnabled)
+            .setMaxNaturalSpawns(data.maxNaturalSpawns);
     }
 
     /**
@@ -108,5 +112,9 @@ public final class CustomNpcConfigs {
         public String apiKey = "";
         public String apiReferer = "";
         public String apiTitle = "";
+
+        // 生成配置
+        public boolean naturalSpawnEnabled = true;
+        public int maxNaturalSpawns = SpawnConfig.DEFAULT_MAX_NATURAL_SPAWNS;
     }
 }

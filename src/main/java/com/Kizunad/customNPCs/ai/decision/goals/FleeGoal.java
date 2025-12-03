@@ -35,16 +35,17 @@ public class FleeGoal implements IGoal {
     );
 
     private static final float DANGER_THRESHOLD = 0.3f; // 30%血量认为危险
-    private static final double FLEE_DISTANCE = 20.0; // 逃跑距离
-    private static final double THREAT_DETECTION_RANGE = 10.0; // 威胁检测范围
+    private static final double FLEE_DISTANCE = 32.0; // 逃跑距离
+    private static final double THREAT_DETECTION_RANGE = 16.0; // 威胁检测范围
     private static final int FLEE_MEMORY_DURATION = 100; // 5秒
     private static final int FLEE_COOLDOWN_TICKS = 80; // 避免立即反复逃跑
-    private static final int FLEE_LOCK_DURATION = 80; // 逃跑期间维持“危险”记忆，避免视野丢失导致提前停
+    private static final int FLEE_LOCK_DURATION = 120; // 逃跑期间维持“危险”记忆，避免视野丢失导致提前停
     private static final float BASE_PRIORITY = 0.9f;
     private static final float PRIORITY_SCALE = 0.1f;
     private static final double FLEE_SPEED = 1.5;
     private static final double MIN_DIRECTION_LENGTH_SQR = 0.0001d;
     private static final double SAFE_PADDING = 4.0d;
+    private static final double SAFE_DISTANCE_BUFFER = 5.0d;
 
     private MoveToAction fleeAction = null;
     private Vec3 safeLocation = null;
@@ -105,18 +106,28 @@ public class FleeGoal implements IGoal {
 
             ActionStatus status = fleeAction.tick(mind, entity);
             if (status == ActionStatus.SUCCESS) {
-                LOGGER.info("[FleeGoal] 已到达安全位置");
-                fleeAction = null;
-                safeLocation = null;
-                // 立即退出逃跑状态，进入短冷却，防止原地反复“到达安全位置”刷屏
-                mind.getMemory().forget("is_fleeing");
-                mind.getMemory().forget("flee_lock");
-                mind
-                    .getMemory()
-                    .rememberShortTerm("flee_cooldown", true, FLEE_COOLDOWN_TICKS);
-                clearThreatMemory(mind);
+                // 检查是否真的安全了
+                Vec3 threatPos = resolveThreatPosition(mind, entity);
+                double distToThreat = (threatPos != null) ? entity.position().distanceTo(threatPos) : Double.MAX_VALUE;
+                double safeDist = THREAT_DETECTION_RANGE + SAFE_DISTANCE_BUFFER;
+
+                if (threatPos != null && distToThreat < safeDist) {
+                    LOGGER.info("[FleeGoal] 到达中间点但仍危险 (dist={}), 继续逃跑", String.format("%.1f", distToThreat));
+                    fleeAction = null;
+                    safeLocation = null;
+                    // 不清除锁，让下一 tick 重新计算新的撤离点
+                } else {
+                    LOGGER.info("[FleeGoal] 已到达安全位置且确认安全");
+                    fleeAction = null;
+                    safeLocation = null;
+                    // 立即退出逃跑状态，进入短冷却
+                    mind.getMemory().forget("is_fleeing");
+                    mind.getMemory().forget("flee_lock");
+                    mind.getMemory().rememberShortTerm("flee_cooldown", true, FLEE_COOLDOWN_TICKS);
+                    clearThreatMemory(mind);
+                }
             } else if (status == ActionStatus.FAILURE) {
-                LOGGER.warn("[FleeGoal] 逃跑失败，重新计算路径");
+                LOGGER.warn("[FleeGoal] 逃跑路径受阻，尝试重新规划");
                 fleeAction = null;
                 safeLocation = null;
             }
@@ -147,12 +158,8 @@ public class FleeGoal implements IGoal {
 
     @Override
     public boolean isFinished(INpcMind mind, LivingEntity entity) {
-        // 不再处于危险中或已到达安全位置
-        return (
-            !isInDanger(mind, entity) ||
-            (safeLocation != null &&
-                entity.position().distanceTo(safeLocation) < 2.0)
-        );
+        // 只要还在危险中（有 flee_lock），就继续跑
+        return !isInDanger(mind, entity);
     }
 
     @Override

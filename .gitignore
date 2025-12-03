@@ -1,5 +1,6 @@
 LibSourceCodes/
 tool/
+tmp/
 
 build_n_move.sh
 

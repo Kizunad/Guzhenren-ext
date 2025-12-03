@@ -18,7 +18,7 @@ public final class NpcAttributeDefaults {
 
     private NpcAttributeDefaults() {}
 
-    public static final double MAX_HEALTH = 800.0D;
+    public static final double MAX_HEALTH = 80.0D;
     public static final double ATTACK_DAMAGE = 20.0D;
     public static final double ATTACK_KNOCKBACK = 0.4D;
     public static final double ATTACK_SPEED = 8.0D;
@@ -26,7 +26,7 @@ public final class NpcAttributeDefaults {
     public static final double FLYING_SPEED = 0.4D;
     public static final double SWIM_SPEED = 1.0D;
     public static final double ARMOR = 80.0D;
-    public static final double ARMOR_TOUGHNESS = 0.0D;
+    public static final double ARMOR_TOUGHNESS = 10.0D;
     public static final double KNOCKBACK_RESISTANCE = 0.0D;
     public static final double FOLLOW_RANGE = 24.0D;
     public static final double GRAVITY = 0.08D;

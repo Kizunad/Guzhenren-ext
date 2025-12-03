@@ -137,6 +137,12 @@ public class CustomNpcEntity extends PathfinderMob {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        com.Kizunad.customNPCs.registry.NpcTickRegistry.onTick(this);
+    }
+
+    @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         // 经验值：后续成长系统基础数据，默认 0
