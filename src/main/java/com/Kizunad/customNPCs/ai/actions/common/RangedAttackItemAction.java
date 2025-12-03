@@ -71,6 +71,7 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 弓的最小充能时间（ticks）- 确保有足够的伤害
      */
     private static final int BOW_MIN_CHARGE_TICKS = 20;
+    private static final int LONG_USE_DURATION_THRESHOLD = 60;
     
     /**
      * 最大被迫近身时间（ticks）- 超过此时间无法拉开距离则视为失败
@@ -386,6 +387,9 @@ public class RangedAttackItemAction extends AbstractStandardAction {
     ) {
         // 使用默认逻辑（与弓类似）
         if (!mob.isUsingItem()) {
+            if (chargeTicks > 0) {
+                LOGGER.debug("[RangedAttackItemAction] 蓄力中断，重新开始 (was {})", chargeTicks);
+            }
             mob.startUsingItem(weaponHand);
             chargeTicks = 0;
             return ActionStatus.RUNNING;
@@ -393,16 +397,24 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
         chargeTicks++;
         int useDuration = weapon.getUseDuration(mob);
+        
+        // 修复无限蓄力 BUG：如果持续时间很长（>60 ticks），假设它是手动释放类（如弓），使用默认蓄力时间
+        // 否则（如三叉戟、特定法杖），等待 duration 结束（或接近结束）
+        int targetCharge =
+            (useDuration >= LONG_USE_DURATION_THRESHOLD)
+                ? BOW_MIN_CHARGE_TICKS
+                : (useDuration - 2);
+        targetCharge = Math.max(1, targetCharge);
 
-        // 使用物品持续时间的 90% 作为充能完成标准
-        if (chargeTicks >= Math.max(BOW_MIN_CHARGE_TICKS, useDuration - 2)) {
+        if (chargeTicks >= targetCharge) {
             mob.releaseUsingItem();
             fired = true;
 
             LOGGER.info(
-                "[RangedAttackItemAction] 远程射击 {} (dist={})",
+                "[RangedAttackItemAction] 远程射击 {} (dist={}, item={})",
                 target.getName().getString(),
-                String.format("%.1f", distance)
+                String.format("%.1f", distance),
+                weapon.getItem().getName(weapon).getString()
             );
 
             writeAttackState(mind);

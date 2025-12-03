@@ -15,7 +15,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -36,7 +35,8 @@ import org.slf4j.LoggerFactory;
 public class HuntGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "HuntGoal: when healthy/safe, seek weaker non-friendly targets; switches between Melee and Ranged based on distance and equipment.";
+        "HuntGoal: when healthy/safe, seek weaker non-friendly targets; "
+            + "switches between Melee and Ranged based on distance and equipment.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -197,14 +197,18 @@ public class HuntGoal implements IGoal {
     }
 
     private boolean hasAmmoForWeapon(Mob mob, ItemStack weapon) {
-        if (!isProjectileWeapon(weapon)) return false;
+        if (!isProjectileWeapon(weapon)) {
+            return false;
+        }
         ProjectileWeaponItem gun = (ProjectileWeaponItem) weapon.getItem();
         Predicate<ItemStack> ammoPredicate = gun.getAllSupportedProjectiles();
         // 检查另一只手
         ItemStack other = weapon == mob.getMainHandItem()
             ? mob.getOffhandItem()
             : mob.getMainHandItem();
-        if (ammoPredicate.test(other)) return true;
+        if (ammoPredicate.test(other)) {
+            return true;
+        }
         // 简单检查背包（不遍历整个 inventory，只依赖原版 getProjectile 逻辑可能不够，
         // 但这里为了不引入过多依赖，假设 Action 会处理失败）
         return !mob.getProjectile(weapon).isEmpty();

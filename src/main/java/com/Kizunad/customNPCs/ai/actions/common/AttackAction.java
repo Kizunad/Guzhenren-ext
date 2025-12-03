@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
+import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
@@ -10,8 +11,12 @@ import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +57,7 @@ public class AttackAction
     private static final double RETREAT_EXTRA = 0.8D;
     private static final double RANGE_HYSTERESIS = 0.5D;
     private static final double MIN_LOWER_THRESHOLD = 0.1D;
+    private static final float LOOK_MAX_ROTATION = 30.0F;
 
     // 从配置获取默认值
 
@@ -124,6 +130,7 @@ public class AttackAction
 
     @Override
     protected ActionStatus tickInternal(INpcMind mind, Mob mob) {
+        attemptTicks++;
         // 获取目标实体
         Entity targetEntity = resolveEntity(mob.level());
         if (targetEntity == null) {
@@ -156,6 +163,13 @@ public class AttackAction
             LOGGER.warn("[AttackAction] 目标切换维度");
             return ActionStatus.FAILURE;
         }
+
+        // 始终面向目标，防止因朝向问题导致攻击判定失败或卡住
+        mob.getLookControl().setLookAt(
+            targetEntity,
+            LOOK_MAX_ROTATION,
+            LOOK_MAX_ROTATION
+        );
 
         // 检查距离
         Vec3 mobPos = mob.position();
@@ -232,7 +246,70 @@ public class AttackAction
         this.cooldownCounter = 0;
         this.hasHit = false;
         this.attemptTicks = 0;
+
+        if (entity instanceof Mob mob) {
+            equipBestMeleeWeapon(mind, mob);
+        }
+
         LOGGER.info("[AttackAction] 开始攻击目标 {}", targetUuid);
+    }
+
+    /**
+     * 尝试从背包中装备攻击力最高的近战武器。
+     */
+    private void equipBestMeleeWeapon(INpcMind mind, Mob mob) {
+        ItemStack currentStack = mob.getMainHandItem();
+        double bestDamage = getAttackDamage(currentStack);
+        int bestSlot = -1;
+
+        NpcInventory inventory = mind.getInventory();
+
+        // 遍历主背包寻找更好的武器
+        for (int i = 0; i < NpcInventory.MAIN_SIZE; i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            double damage = getAttackDamage(stack);
+            if (damage > bestDamage) {
+                bestDamage = damage;
+                bestSlot = i;
+            }
+        }
+
+        // 如果找到了更好的武器，执行交换
+        if (bestSlot != -1) {
+            ItemStack bestWeapon = inventory.getItem(bestSlot);
+            ItemStack toInventory = currentStack.copy();
+
+            // 1. 装备新武器
+            mob.setItemInHand(InteractionHand.MAIN_HAND, bestWeapon);
+
+            // 2. 旧武器（如果有）放回原槽位
+            inventory.setItem(bestSlot, toInventory);
+
+            LOGGER.info("[AttackAction] 自动切换更强武器: {} (攻: {})",
+                bestWeapon.getHoverName().getString(), bestDamage);
+        }
+    }
+
+    private double getAttackDamage(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return 0.0; // 空手（实际上基础攻击是1，但这用于比较增量）
+        }
+        // 获取主手属性修饰符中的攻击伤害总和
+        ItemAttributeModifiers modifiers = stack.getAttributeModifiers();
+        final double[] damage = {0.0d};
+        modifiers.forEach(
+            EquipmentSlot.MAINHAND,
+            (attribute, modifier) -> {
+                if (attribute.equals(Attributes.ATTACK_DAMAGE)) {
+                    damage[0] += modifier.amount();
+                }
+            }
+        );
+        return damage[0];
     }
 
     @Override

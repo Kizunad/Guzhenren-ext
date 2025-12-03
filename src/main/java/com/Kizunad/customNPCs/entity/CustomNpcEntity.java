@@ -118,6 +118,25 @@ public class CustomNpcEntity extends PathfinderMob {
     }
 
     @Override
+    @javax.annotation.Nullable
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(
+        net.minecraft.world.level.ServerLevelAccessor level,
+        net.minecraft.world.DifficultyInstance difficulty,
+        net.minecraft.world.entity.MobSpawnType reason,
+        @javax.annotation.Nullable net.minecraft.world.entity.SpawnGroupData spawnData
+    ) {
+        spawnData = super.finalizeSpawn(level, difficulty, reason, spawnData);
+        com.Kizunad.customNPCs.registry.NpcSpawnRegistry.onSpawn(
+            this,
+            level,
+            difficulty,
+            reason,
+            spawnData
+        );
+        return spawnData;
+    }
+
+    @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         // 经验值：后续成长系统基础数据，默认 0
@@ -207,10 +226,9 @@ public class CustomNpcEntity extends PathfinderMob {
             int gain = 1 + Mth.floor(victim.getMaxHealth());
             this.addExperience(gain);
             // 额外奖励：尝试发放一块熟猪排，有空位才放入
-            var mind =
-                this.getData(
-                    com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
-                );
+            var mind = this.getData(
+                com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
+            );
             if (mind != null) {
                 var inventory = mind.getInventory();
                 ItemStack leftover = inventory.addItem(

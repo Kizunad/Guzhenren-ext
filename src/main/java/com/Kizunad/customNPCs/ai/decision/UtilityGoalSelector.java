@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.util.RandomSource;
 
 /**
  * Utility AI 目标选择器
@@ -27,12 +30,22 @@ public class UtilityGoalSelector {
     private int currentGoalActiveTicks;
     private int ticksSinceLastEvaluation;
     private int idleStallTicks;
+    private int stuckTicks;
+    private double lastStuckPosX;
+    private double lastStuckPosY;
+    private double lastStuckPosZ;
     private static final int EVALUATION_INTERVAL = 20; // 每秒重新评估一次（20 ticks）
     private static final float HYSTERESIS_THRESHOLD = 0.1f; // 10% 滞后阈值
     private static final float PREEMPTION_ADDITIONAL_THRESHOLD = 0.15f; // 早期抢占额外阈值
     private static final int PREEMPTION_GRACE_TICKS = 15; // 刚切换后至少坚持 15 ticks
     private static final int GOAL_COOLDOWN_TICKS = 40; // 目标切换后的冷却期
     private static final int IDLE_STALL_THRESHOLD = 8; // 连续无目标/动作的判定阈值
+    private static final int STUCK_TICKS_THRESHOLD = 200; // 10 秒站桩判定
+    private static final double STUCK_MOVE_EPSILON = 0.1d; // 判定移动阈值
+    private static final int STUCK_TELEPORT_ATTEMPTS = 8;
+    private static final double STUCK_TELEPORT_MIN_DISTANCE = 8.0d;
+    private static final double STUCK_TELEPORT_MAX_DISTANCE = 36.0d;
+    private static final double BLOCK_CENTER_OFFSET = 0.5d;
 
     public UtilityGoalSelector() {
         this.goals = new ArrayList<>();
@@ -41,6 +54,10 @@ public class UtilityGoalSelector {
         this.currentGoalActiveTicks = 0;
         this.ticksSinceLastEvaluation = 0;
         this.idleStallTicks = 0;
+        this.stuckTicks = 0;
+        this.lastStuckPosX = Double.NaN;
+        this.lastStuckPosY = Double.NaN;
+        this.lastStuckPosZ = Double.NaN;
     }
 
     /**
@@ -104,6 +121,7 @@ public class UtilityGoalSelector {
         }
 
         guardAgainstStall(mind, entity);
+        guardAgainstStuck(mind, entity);
     }
 
     /**
@@ -354,6 +372,99 @@ public class UtilityGoalSelector {
         } else {
             idleStallTicks = 0;
         }
+    }
+
+    /**
+     * 检测实体是否长时间未移动，判定为卡住后随机传送并强制重评估。
+     */
+    private void guardAgainstStuck(INpcMind mind, LivingEntity entity) {
+        if (Double.isNaN(lastStuckPosX)) {
+            lastStuckPosX = entity.getX();
+            lastStuckPosY = entity.getY();
+            lastStuckPosZ = entity.getZ();
+            return;
+        }
+
+        double dx = entity.getX() - lastStuckPosX;
+        double dy = entity.getY() - lastStuckPosY;
+        double dz = entity.getZ() - lastStuckPosZ;
+        double distSq = dx * dx + dy * dy + dz * dz;
+
+        if (distSq > STUCK_MOVE_EPSILON * STUCK_MOVE_EPSILON) {
+            stuckTicks = 0;
+            lastStuckPosX = entity.getX();
+            lastStuckPosY = entity.getY();
+            lastStuckPosZ = entity.getZ();
+            return;
+        }
+
+        stuckTicks++;
+        if (stuckTicks < STUCK_TICKS_THRESHOLD) {
+            return;
+        }
+
+        BlockPos target = pickTeleportTarget(entity);
+        if (target != null) {
+            entity.teleportTo(
+                target.getX() + BLOCK_CENTER_OFFSET,
+                target.getY(),
+                target.getZ() + BLOCK_CENTER_OFFSET
+            );
+            mind.getActionExecutor().stopCurrentPlan();
+            if (currentGoal != null) {
+                currentGoal.stop(mind, entity);
+                startCooldown(currentGoal);
+                currentGoal = null;
+                currentGoalActiveTicks = 0;
+            }
+            MindLog.decision(
+                MindLogLevel.WARN,
+                "检测到 NPC {} 连续 {} tick 未移动，强制传送至 ({}, {}, {}) 并重评估",
+                entity.getName().getString(),
+                stuckTicks,
+                target.getX(),
+                target.getY(),
+                target.getZ()
+            );
+            reevaluateInternal(mind, entity, SensorEventType.CRITICAL, true);
+        }
+
+        stuckTicks = 0;
+        lastStuckPosX = entity.getX();
+        lastStuckPosY = entity.getY();
+        lastStuckPosZ = entity.getZ();
+    }
+
+    private BlockPos pickTeleportTarget(LivingEntity entity) {
+        RandomSource random = entity.level().getRandom();
+        BlockPos origin = entity.blockPosition();
+        for (int i = 0; i < STUCK_TELEPORT_ATTEMPTS; i++) {
+            double angle = random.nextDouble() * Math.PI * 2;
+            double distance =
+                STUCK_TELEPORT_MIN_DISTANCE +
+                (STUCK_TELEPORT_MAX_DISTANCE - STUCK_TELEPORT_MIN_DISTANCE) *
+                random.nextDouble();
+            int x =
+                origin.getX() + (int) Math.round(Math.cos(angle) * distance);
+            int z =
+                origin.getZ() + (int) Math.round(Math.sin(angle) * distance);
+            BlockPos sample = new BlockPos(x, origin.getY(), z);
+            if (!entity.level().hasChunkAt(sample)) {
+                continue;
+            }
+
+            int y = entity
+                .level()
+                .getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            if (
+                y < entity.level().getMinBuildHeight() ||
+                y > entity.level().getMaxBuildHeight()
+            ) {
+                continue;
+            }
+            return new BlockPos(x, y, z);
+        }
+        return null;
     }
 
     /**

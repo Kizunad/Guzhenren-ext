@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 public class EnhanceAttributeAction extends AbstractStandardAction {
 
     public static final String LLM_USAGE_DESC =
-        "EnhanceAttributeAction: spend 10 experience to grant ~5% base-value bonus to one attribute "
-            + "(strength/health/speed/defense/sensor); optional direction, otherwise pick random with reduced gain.";
+        "EnhanceAttributeAction: spend 10 experience to grant 2x base-value bonus to one attribute " +
+        "(strength/health/speed/defense/sensor); optional direction, otherwise pick random with reduced gain.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -35,10 +35,11 @@ public class EnhanceAttributeAction extends AbstractStandardAction {
     );
     private static final int EXPERIENCE_COST = 10;
     private static final float TOKEN_PER_EXPERIENCE = 0.01F; // 10 exp -> 0.1 token
-    private static final float PERCENT_PER_TOKEN = 0.05F; // 每个 token 增加基准属性的 5%
+    private static final float PERCENT_PER_TOKEN = 2.0F; // 每个 token 增加基准属性的 5%
     private static final float MIN_DELTA = 0.01F;
     private static final float RANDOM_FACTOR_MIN = 0.35F;
     private static final float RANDOM_FACTOR_MAX = 0.65F;
+    private static final float SPEED_FACTOR = 0.05f;
 
     private final AttributeDirection preferredDirection;
     private AttributeDirection resolvedDirection;
@@ -78,7 +79,12 @@ public class EnhanceAttributeAction extends AbstractStandardAction {
         applyDelta(npc, resolvedDirection, delta);
         npc.addExperience(-EXPERIENCE_COST);
 
-        LOGGER.info("[EnhanceAttributeAction] {} 增加 {} | 消耗经验 {}", resolvedDirection, delta, EXPERIENCE_COST);
+        LOGGER.info(
+            "[EnhanceAttributeAction] {} 增加 {} | 消耗经验 {}",
+            resolvedDirection,
+            delta,
+            EXPERIENCE_COST
+        );
         return ActionStatus.SUCCESS;
     }
 
@@ -132,15 +138,18 @@ public class EnhanceAttributeAction extends AbstractStandardAction {
         return Math.max(MIN_DELTA, (float) scaled);
     }
 
-    private void applyDelta(CustomNpcEntity npc, AttributeDirection direction, float delta) {
+    private void applyDelta(
+        CustomNpcEntity npc,
+        AttributeDirection direction,
+        float delta
+    ) {
         switch (direction) {
             case STRENGTH -> npc.addStrengthBonus(delta);
             case HEALTH -> npc.addHealthBonus(delta);
-            case SPEED -> npc.addSpeedBonus(delta);
+            case SPEED -> npc.addSpeedBonus(delta * SPEED_FACTOR);
             case DEFENSE -> npc.addDefenseBonus(delta);
             case SENSOR -> npc.addSensorBonus(delta);
-            default -> {
-            }
+            default -> {}
         }
     }
 
