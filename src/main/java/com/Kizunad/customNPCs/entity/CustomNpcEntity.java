@@ -1,11 +1,17 @@
 package com.Kizunad.customNPCs.entity;
 
 import com.Kizunad.customNPCs.ai.config.NpcAttributeDefaults;
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
@@ -15,6 +21,7 @@ import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForgeMod;
 
 /**
  * 专属自定义 NPC 实体，运行自研 AI（NpcMind + Sensors + Actions）。
@@ -23,6 +30,42 @@ import net.minecraft.world.level.Level;
 public class CustomNpcEntity extends PathfinderMob {
 
     public static final String MIND_TAG = "customnpcs:mind_allowed";
+    private static final String EXPERIENCE_TAG = "customnpcs:experience";
+    private static final String STRENGTH_TAG = "customnpcs:strength_bonus";
+    private static final String HEALTH_TAG = "customnpcs:health_bonus";
+    private static final String SPEED_TAG = "customnpcs:speed_bonus";
+    private static final String DEFENSE_TAG = "customnpcs:defense_bonus";
+    private static final String SENSOR_TAG = "customnpcs:sensor_bonus";
+    private static final EntityDataAccessor<Integer> EXPERIENCE =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.INT
+        );
+    private static final EntityDataAccessor<Float> STRENGTH_BONUS =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.FLOAT
+        );
+    private static final EntityDataAccessor<Float> HEALTH_BONUS =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.FLOAT
+        );
+    private static final EntityDataAccessor<Float> SPEED_BONUS =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.FLOAT
+        );
+    private static final EntityDataAccessor<Float> DEFENSE_BONUS =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.FLOAT
+        );
+    private static final EntityDataAccessor<Float> SENSOR_BONUS =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.FLOAT
+        );
     private static final int FLYING_MAX_TURN = 10;
 
     public enum NavigationMode {
@@ -68,6 +111,25 @@ public class CustomNpcEntity extends PathfinderMob {
         }
         // 覆盖 super 中创建的默认导航，按模式替换
         this.navigation = createNavigation(level);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        // 经验值：后续成长系统基础数据，默认 0
+        builder.define(EXPERIENCE, 0);
+        // 成长增益：暂存升级点，后续映射到 Attribute
+        // Strength -> ATTACK_DAMAGE
+        builder.define(STRENGTH_BONUS, 0.0F);
+        // Health -> MAX_HEALTH
+        builder.define(HEALTH_BONUS, 0.0F);
+        // Speed -> ATTACK_SPEED/MOVEMENT_SPEED/FLYING_SPEED/SWIM_SPEED
+        //       -> STEP_HEIGHT/JUMP_STRENGTH/SNEAKING_SPEED
+        builder.define(SPEED_BONUS, 0.0F);
+        // Defense -> ARMOR/KNOCKBACK_RESISTANCE
+        builder.define(DEFENSE_BONUS, 0.0F);
+        // Sensor -> FOLLOW_RANGE
+        builder.define(SENSOR_BONUS, 0.0F);
     }
 
     @Override
@@ -147,6 +209,241 @@ public class CustomNpcEntity extends PathfinderMob {
             case WALL -> new WallClimberNavigation(this, level);
             case GROUND -> new GroundPathNavigation(this, level);
         };
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt(EXPERIENCE_TAG, this.getExperience());
+        tag.putFloat(STRENGTH_TAG, this.getStrengthBonus());
+        tag.putFloat(HEALTH_TAG, this.getHealthBonus());
+        tag.putFloat(SPEED_TAG, this.getSpeedBonus());
+        tag.putFloat(DEFENSE_TAG, this.getDefenseBonus());
+        tag.putFloat(SENSOR_TAG, this.getSensorBonus());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains(EXPERIENCE_TAG)) {
+            this.setExperience(tag.getInt(EXPERIENCE_TAG));
+        }
+        if (tag.contains(STRENGTH_TAG)) {
+            this.setStrengthBonus(tag.getFloat(STRENGTH_TAG));
+        }
+        if (tag.contains(HEALTH_TAG)) {
+            this.setHealthBonus(tag.getFloat(HEALTH_TAG));
+        }
+        if (tag.contains(SPEED_TAG)) {
+            this.setSpeedBonus(tag.getFloat(SPEED_TAG));
+        }
+        if (tag.contains(DEFENSE_TAG)) {
+            this.setDefenseBonus(tag.getFloat(DEFENSE_TAG));
+        }
+        if (tag.contains(SENSOR_TAG)) {
+            this.setSensorBonus(tag.getFloat(SENSOR_TAG));
+        }
+    }
+
+    /**
+     * 当前经验值。
+     */
+    public int getExperience() {
+        return this.entityData.get(EXPERIENCE);
+    }
+
+    /**
+     * 设置经验值，负数会被归零。
+     */
+    public void setExperience(int experience) {
+        this.entityData.set(EXPERIENCE, Math.max(0, experience));
+    }
+
+    /**
+     * 增量修改经验值，可用于掉落/奖励等场景。
+     */
+    public void addExperience(int experience) {
+        if (experience == 0) {
+            return;
+        }
+        this.setExperience(this.getExperience() + experience);
+    }
+
+    /**
+     * 力量增益（映射 ATTACK_DAMAGE）。
+     */
+    public float getStrengthBonus() {
+        return this.entityData.get(STRENGTH_BONUS);
+    }
+
+    public void setStrengthBonus(float value) {
+        this.entityData.set(STRENGTH_BONUS, clampNonNegative(value));
+        this.refreshGrowthAttributes();
+    }
+
+    public void addStrengthBonus(float delta) {
+        if (delta == 0) {
+            return;
+        }
+        this.setStrengthBonus(this.getStrengthBonus() + delta);
+    }
+
+    /**
+     * 生命增益（映射 MAX_HEALTH）。
+     */
+    public float getHealthBonus() {
+        return this.entityData.get(HEALTH_BONUS);
+    }
+
+    public void setHealthBonus(float value) {
+        this.entityData.set(HEALTH_BONUS, clampNonNegative(value));
+        this.refreshGrowthAttributes();
+    }
+
+    public void addHealthBonus(float delta) {
+        if (delta == 0) {
+            return;
+        }
+        this.setHealthBonus(this.getHealthBonus() + delta);
+    }
+
+    /**
+     * 速度增益（映射 ATTACK_SPEED、MOVE/FLY/SWIM、STEP_HEIGHT、JUMP_STRENGTH、
+     * SNEAKING_SPEED）。
+     */
+    public float getSpeedBonus() {
+        return this.entityData.get(SPEED_BONUS);
+    }
+
+    public void setSpeedBonus(float value) {
+        this.entityData.set(SPEED_BONUS, clampNonNegative(value));
+        this.refreshGrowthAttributes();
+    }
+
+    public void addSpeedBonus(float delta) {
+        if (delta == 0) {
+            return;
+        }
+        this.setSpeedBonus(this.getSpeedBonus() + delta);
+    }
+
+    /**
+     * 防御增益（映射 ARMOR、KNOCKBACK_RESISTANCE）。
+     */
+    public float getDefenseBonus() {
+        return this.entityData.get(DEFENSE_BONUS);
+    }
+
+    public void setDefenseBonus(float value) {
+        this.entityData.set(DEFENSE_BONUS, clampNonNegative(value));
+        this.refreshGrowthAttributes();
+    }
+
+    public void addDefenseBonus(float delta) {
+        if (delta == 0) {
+            return;
+        }
+        this.setDefenseBonus(this.getDefenseBonus() + delta);
+    }
+
+    /**
+     * 感应增益（映射 FOLLOW_RANGE）。
+     */
+    public float getSensorBonus() {
+        return this.entityData.get(SENSOR_BONUS);
+    }
+
+    public void setSensorBonus(float value) {
+        this.entityData.set(SENSOR_BONUS, clampNonNegative(value));
+        this.refreshGrowthAttributes();
+    }
+
+    public void addSensorBonus(float delta) {
+        if (delta == 0) {
+            return;
+        }
+        this.setSensorBonus(this.getSensorBonus() + delta);
+    }
+
+    private float clampNonNegative(float value) {
+        return Math.max(0.0F, value);
+    }
+
+    /**
+     * 将增益数据同步到实体 Attribute，已在各 setter 内部自动调用。
+     */
+    private void refreshGrowthAttributes() {
+        if (this.level().isClientSide()) {
+            return;
+        }
+        double strengthBonus = this.getStrengthBonus();
+        double healthBonus = this.getHealthBonus();
+        double speedBonus = this.getSpeedBonus();
+        double defenseBonus = this.getDefenseBonus();
+        double sensorBonus = this.getSensorBonus();
+
+        setAttributeBase(
+            Attributes.ATTACK_DAMAGE,
+            NpcAttributeDefaults.ATTACK_DAMAGE + strengthBonus
+        );
+
+        setAttributeBase(
+            Attributes.MAX_HEALTH,
+            NpcAttributeDefaults.MAX_HEALTH + healthBonus
+        );
+
+        setAttributeBase(
+            Attributes.ATTACK_SPEED,
+            NpcAttributeDefaults.ATTACK_SPEED + speedBonus
+        );
+        setAttributeBase(
+            Attributes.MOVEMENT_SPEED,
+            NpcAttributeDefaults.MOVEMENT_SPEED + speedBonus
+        );
+        setAttributeBase(
+            Attributes.FLYING_SPEED,
+            NpcAttributeDefaults.FLYING_SPEED + speedBonus
+        );
+        setAttributeBase(
+            NeoForgeMod.SWIM_SPEED,
+            NpcAttributeDefaults.SWIM_SPEED + speedBonus
+        );
+        setAttributeBase(
+            Attributes.STEP_HEIGHT,
+            NpcAttributeDefaults.STEP_HEIGHT + speedBonus
+        );
+        setAttributeBase(
+            Attributes.JUMP_STRENGTH,
+            NpcAttributeDefaults.JUMP_STRENGTH + speedBonus
+        );
+        setAttributeBase(
+            Attributes.SNEAKING_SPEED,
+            NpcAttributeDefaults.SNEAKING_SPEED + speedBonus
+        );
+
+        setAttributeBase(
+            Attributes.ARMOR,
+            NpcAttributeDefaults.ARMOR + defenseBonus
+        );
+        setAttributeBase(
+            Attributes.KNOCKBACK_RESISTANCE,
+            NpcAttributeDefaults.KNOCKBACK_RESISTANCE + defenseBonus
+        );
+
+        setAttributeBase(
+            Attributes.FOLLOW_RANGE,
+            NpcAttributeDefaults.FOLLOW_RANGE + sensorBonus
+        );
+    }
+
+    private void setAttributeBase(
+        Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
+        double value
+    ) {
+        var instance = this.getAttribute(attribute);
+        if (instance != null) {
+            instance.setBaseValue(value);
+        }
     }
 
     /**

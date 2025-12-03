@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai;
 
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
+import com.Kizunad.customNPCs.ai.actions.common.EnhanceAttributeAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.actions.common.RunGoalAction;
 import com.Kizunad.customNPCs.ai.actions.common.SimpleNamedAction;
@@ -10,12 +11,12 @@ import com.Kizunad.customNPCs.ai.decision.goals.CookGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftItemGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.DefendGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipArmorGoal;
-import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SeekShelterGoal;
-import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal;
 import com.Kizunad.customNPCs.ai.sensors.AuditorySensor;
@@ -26,6 +27,7 @@ import com.Kizunad.customNPCs.ai.sensors.VisionSensor;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.ArrayList;
 import java.util.Collections;
+import com.Kizunad.customNPCs.ai.decision.goals.EnhanceGoal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,7 @@ public final class NpcMindRegistry {
         registerGoal("cook", CookGoal::new);
         registerGoal("hunt", HuntGoal::new);
         registerGoal("craft_item", CraftItemGoal::new);
+        registerGoal("enhance", EnhanceGoal::new);
 
         registerSensor("vision", VisionSensor::new);
         registerSensor("damage", DamageSensor::new);
@@ -74,6 +77,34 @@ public final class NpcMindRegistry {
         registerAction("block_with_shield", BlockWithShieldAction::new);
         registerAction("ranged_attack", () -> new RangedAttackItemAction(null));
         registerGoalActionBridges();
+        registerAction("enhance_attribute", () ->
+            new EnhanceAttributeAction(null)
+        );
+        registerAction("enhance_strength", () ->
+            new EnhanceAttributeAction(
+                EnhanceAttributeAction.AttributeDirection.STRENGTH
+            )
+        );
+        registerAction("enhance_health", () ->
+            new EnhanceAttributeAction(
+                EnhanceAttributeAction.AttributeDirection.HEALTH
+            )
+        );
+        registerAction("enhance_speed", () ->
+            new EnhanceAttributeAction(
+                EnhanceAttributeAction.AttributeDirection.SPEED
+            )
+        );
+        registerAction("enhance_defense", () ->
+            new EnhanceAttributeAction(
+                EnhanceAttributeAction.AttributeDirection.DEFENSE
+            )
+        );
+        registerAction("enhance_sensor", () ->
+            new EnhanceAttributeAction(
+                EnhanceAttributeAction.AttributeDirection.SENSOR
+            )
+        );
         // 兼容 LLM 返回的类名/别名（无参数占位动作，避免跳过计划）。
         registerAliasActions(
             List.of(
@@ -123,17 +154,14 @@ public final class NpcMindRegistry {
         synchronized (GOAL_FACTORIES) {
             for (String goalName : GOAL_FACTORIES.keySet()) {
                 String pascal = toPascalCase(goalName);
-                registerActionIfAbsent(
-                    goalName,
-                    () -> new RunGoalAction(goalName)
+                registerActionIfAbsent(goalName, () ->
+                    new RunGoalAction(goalName)
                 );
-                registerActionIfAbsent(
-                    pascal,
-                    () -> new RunGoalAction(goalName)
+                registerActionIfAbsent(pascal, () ->
+                    new RunGoalAction(goalName)
                 );
-                registerActionIfAbsent(
-                    pascal + "Goal",
-                    () -> new RunGoalAction(goalName)
+                registerActionIfAbsent(pascal + "Goal", () ->
+                    new RunGoalAction(goalName)
                 );
             }
         }

@@ -6,7 +6,8 @@
 - `IGoal`：目标接口，要求实现 `getPriority`、`canRun`、`start`、`tick`、`stop`、`isFinished`、`getName`。可选提供 `getDesiredState` 与 `getAvailableActions` 以接入 GOAP 规划。
 - `UtilityGoalSelector`：Utility AI 选择器，管理注册目标并在 `tick` 中评估切换。使用滞后与冷却避免抖动；切换时会调用 `ActionExecutor.stopCurrentPlan()` 清理旧计划。
 - `goals/`：具体目标实现与示例，包含 `IdleGoal`、`SatiateGoal`、`HealGoal`、`SurvivalGoal`、`FleeGoal`、`DefendGoal`、`EquipArmorGoal`、`PickUpItemGoal`、`SeekShelterGoal`、`WatchClosestEntityGoal`、`TestPlanGoal` 等，以及 GOAP 抽象基类 `PlanBasedGoal`。
-- 常用扩展：`CookGoal`（虚拟熔炉烹饪），`HuntGoal`（安全时猎杀弱小目标，低于保命优先级），`CraftItemGoal`（仅供外部 Plan/LLM 注入手工计划，不参与 Utility 评分）。
+- 常用扩展：`CookGoal`（虚拟熔炉烹饪），`HuntGoal`（安全时猎杀弱小目标，低于保命优先级），`CraftItemGoal`（仅供外部 Plan/LLM 注入手工计划，不参与 Utility 评分），`EnhanceGoal`（经验充足时分配属性点，经验越多优先级越高）。
+- LLM 适配：`RunGoalAction` 将计划中出现的目标名（如 `hunt`/`HuntGoal`）桥接到真实的 Utility 目标执行；`RememberLongTermAction`/`ForgetLongTermAction` 仅写入长期记忆，`PromptLibrary` 会将动作/目标的 `LLM_USAGE_DESC` 汇入提示。
 
 ## 选择器行为速览（UtilityGoalSelector）
 - 评估节奏：`EVALUATION_INTERVAL=20`（每秒）定期评估；若当前无目标或目标终止会立即评估。
@@ -29,3 +30,4 @@
 ## 调试与排查
 - 日志：`MindLog` 分 `decision` 与 `planning` 频道，涵盖目标切换、滞后阻止、规划成功/失败等关键事件。
 - 现象观察：若目标频繁切换，检查优先级计算是否过于接近或冷却未覆盖；若规划型目标卡住，查看 `replan` 重试与 `ActionExecutor` 的最后动作状态。
+- LLM 采样字段：`LlmPlanner` 上下文包含当前位置、生命值、最近计划摘要与长期记忆摘要（固定条数）。要让 LLM 计划直接驱动目标，可输出动作名为注册 Goal 名称（`cook`/`HuntGoal` 等），由 `RunGoalAction` 映射并强制切换目标；未知动作名会被跳过并记录警告。
