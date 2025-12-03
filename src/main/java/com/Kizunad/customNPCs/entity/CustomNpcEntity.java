@@ -6,8 +6,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -20,6 +23,7 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForgeMod;
 
@@ -193,6 +197,31 @@ public class CustomNpcEntity extends PathfinderMob {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean killedEntity(ServerLevel level, LivingEntity victim) {
+        boolean result = super.killedEntity(level, victim);
+        // 击杀奖励：基础 1 点，叠加目标最大生命值
+        if (!level.isClientSide) {
+            int gain = 1 + Mth.floor(victim.getMaxHealth());
+            this.addExperience(gain);
+            // 额外奖励：尝试发放一块熟猪排，有空位才放入
+            var mind =
+                this.getData(
+                    com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
+                );
+            if (mind != null) {
+                var inventory = mind.getInventory();
+                ItemStack leftover = inventory.addItem(
+                    new ItemStack(Items.COOKED_PORKCHOP)
+                );
+                if (!leftover.isEmpty()) {
+                    // 背包无空间，按需求不做额外处理
+                }
+            }
+        }
+        return result;
     }
 
     @Override
