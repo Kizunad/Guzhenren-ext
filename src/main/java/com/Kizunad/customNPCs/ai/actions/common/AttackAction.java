@@ -7,7 +7,6 @@ import com.Kizunad.customNPCs.ai.actions.util.NavigationUtil;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
-import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.world.InteractionHand;
@@ -161,10 +160,10 @@ public class AttackAction
         // 现在暂时不考虑
         if (
             targetEntity instanceof LivingEntity livingTarget &&
-            EntityRelationUtil.isAlly(mob, livingTarget)
+            isProtectedAlly(mob, livingTarget)
         ) {
             LOGGER.info(
-                "[AttackAction] 目标 {} 被识别为友方，放弃攻击",
+                "[AttackAction] 目标 {} 属于同队伍或自身，放弃攻击",
                 targetEntity.getName().getString()
             );
             return ActionStatus.FAILURE;
@@ -289,6 +288,16 @@ public class AttackAction
                 livingTarget.getHealth()
             );
         }
+    }
+
+    /**
+     * 判定是否需要保护的友军（仅保留队伍/自身保护，允许攻击同类）。
+     */
+    private boolean isProtectedAlly(Mob mob, LivingEntity target) {
+        if (mob == target) {
+            return true;
+        }
+        return mob.isAlliedTo(target);
     }
 
     @Override

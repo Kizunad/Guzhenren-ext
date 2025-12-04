@@ -2,7 +2,10 @@ package com.Kizunad.customNPCs.entity;
 
 import com.Kizunad.customNPCs.CustomNPCsMod;
 import com.Kizunad.customNPCs.ai.config.NpcAttributeDefaults;
+import com.Kizunad.customNPCs.ai.status.StatusProviderRegistry;
 import com.Kizunad.customNPCs.util.SkinPool;
+import com.Kizunad.customNPCs.network.OpenInteractGuiPayload;
+import com.Kizunad.customNPCs.network.dto.DialogueOption;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -10,6 +13,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EntityType;
@@ -32,6 +36,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.common.NeoForgeMod;
 
 /**
@@ -122,6 +127,9 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final int TOTEM_FIRE_RESIST_DURATION_TICKS = 800;
     private static final int TOTEM_FIRE_RESIST_AMPLIFIER = 0;
     private static final byte TOTEM_USE_EVENT = 35;
+    private static final double INTERACT_DISTANCE = 20.0D;
+    private static final double INTERACT_DISTANCE_SQR =
+        INTERACT_DISTANCE * INTERACT_DISTANCE;
 
     private int waterTeleportCooldown = 0;
     /**
@@ -188,27 +196,39 @@ public class CustomNpcEntity extends PathfinderMob {
         net.minecraft.world.InteractionHand hand
     ) {
         if (hand == net.minecraft.world.InteractionHand.MAIN_HAND) {
-            if (!this.level().isClientSide) {
-                var mind = this.getData(
-                    com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
-                );
-                if (mind != null) {
-                    var tradeState = mind.getTradeState();
-                    if (tradeState.getPriceMultiplier() <= 0.0F) {
-                        tradeState.generateNewMultiplier();
-                    }
-                    return com.Kizunad.customNPCs.ai.interaction.NpcTradeHooks.tryOpenTrade(
-                        this,
-                        player,
-                        tradeState
-                    );
-                }
+            if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+                openInteractGui(serverPlayer);
             }
             return net.minecraft.world.InteractionResult.sidedSuccess(
                 this.level().isClientSide
             );
         }
         return super.mobInteract(player, hand);
+    }
+
+    private void openInteractGui(ServerPlayer serverPlayer) {
+        if (
+            !this.isAlive() ||
+            this.isRemoved() ||
+            this.distanceToSqr(serverPlayer) > INTERACT_DISTANCE_SQR
+        ) {
+            return;
+        }
+        var statuses = StatusProviderRegistry.collect(this);
+        var options = java.util.Collections.<DialogueOption>emptyList();
+        boolean isOwner = false;
+        PacketDistributor.sendToPlayer(
+            serverPlayer,
+            new OpenInteractGuiPayload(
+                this.getId(),
+                this.getDisplayName(),
+                this.getHealth(),
+                this.getMaxHealth(),
+                isOwner,
+                statuses,
+                options
+            )
+        );
     }
 
     @Override

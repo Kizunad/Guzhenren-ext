@@ -8,6 +8,7 @@ import com.Kizunad.customNPCs.config.CustomNpcConfigs;
 import com.Kizunad.customNPCs.network.ModNetworking;
 import com.Kizunad.customNPCs.menu.ModMenus;
 import com.Kizunad.customNPCs.client.ClientScreens;
+import com.Kizunad.customNPCs.ai.status.StatusProvidersBootstrap;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -39,8 +40,11 @@ public class CustomNPCsMod {
         // 加载配置文件（config/customnpcs-llm.json）
         CustomNpcConfigs.load();
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            modEventBus.addListener(ClientScreens::registerScreens);
+        modEventBus.addListener(ClientScreens::registerScreens);
         }
+
+        // 注册内置状态提供者
+        StatusProvidersBootstrap.registerBuiltins();
 
         // 尝试注册测试内容（在独立发布 jar 中缺失时自动跳过）
         registerOptionalTestContent(modEventBus);
