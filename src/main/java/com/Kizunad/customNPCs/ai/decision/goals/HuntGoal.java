@@ -54,6 +54,8 @@ public class HuntGoal implements IGoal {
     private static final double DISTANCE_WEIGHT = 0.05D; // 轻度偏好近目标
     private static final int ATTACK_TIMEOUT_TICKS = 200; // 近战最长尝试时间（10s）
     private static final double RANGED_MIN_DIST = 4.0D; // 远程切换阈值
+    private static final double LOW_VALUE_HP_RATIO = 0.08D; // 低价值目标阈值
+    private static final float LOW_VALUE_PRIORITY_FACTOR = 0.35F; // 低价值目标优先级折减
 
     private final double attackRange;
     private final int attackCooldownTicks;
@@ -78,7 +80,11 @@ public class HuntGoal implements IGoal {
         }
         // 优先级随优势提升，但上限控制在中等水平，避免压过保命目标
         double clamped = Math.min(1.0D, Math.max(0.0D, cachedAdvantageRatio));
-        return BASE_PRIORITY + (float) (clamped * PRIORITY_GAIN);
+        float priority = BASE_PRIORITY + (float) (clamped * PRIORITY_GAIN);
+        if (isLowValueTarget(target)) {
+            priority *= LOW_VALUE_PRIORITY_FACTOR;
+        }
+        return priority;
     }
 
     @Override
@@ -394,6 +400,18 @@ public class HuntGoal implements IGoal {
     ) {
         var instance = entity.getAttribute(attribute);
         return instance == null ? 0.0D : instance.getValue();
+    }
+
+    /**
+     * 低价值目标判定：血量占比过低则降低优先级，避免浪费时间。
+     */
+    private boolean isLowValueTarget(LivingEntity target) {
+        double max = target.getMaxHealth();
+        if (max <= 0.0D) {
+            return false;
+        }
+        double ratio = target.getHealth() / max;
+        return ratio <= LOW_VALUE_HP_RATIO;
     }
 
     /**

@@ -32,10 +32,6 @@ public class ItemValueManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(
         ItemValueManager.class
     );
-    private static final ItemValueManager INSTANCE = new ItemValueManager();
-    private static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
-        .create();
     private static final String FILE_NAME = "customnpcs-item-values.json";
     private static final Path CONFIG_PATH = Paths.get("config").resolve(
         FILE_NAME
@@ -43,6 +39,10 @@ public class ItemValueManager {
     private static final String DEFAULT_RESOURCE = "data/customnpcs/item_values.json";
     private static final Type MAP_TYPE = new TypeToken<Map<String, Integer>>() {}
         .getType();
+    private static final Gson GSON = new GsonBuilder()
+        .setPrettyPrinting()
+        .create();
+    private static final ItemValueManager INSTANCE = new ItemValueManager();
 
     private final Map<Item, Integer> baseValues = new HashMap<>();
 

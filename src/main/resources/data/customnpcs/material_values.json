@@ -69,5 +69,6 @@
     "minecraft:crossbow": 4.0,
     "minecraft:shield": 6.0,
     "minecraft:trident": 10.0,
+    "minecraft:totem_of_undying": 20.0,
     "minecraft:potion": 4.0
 }

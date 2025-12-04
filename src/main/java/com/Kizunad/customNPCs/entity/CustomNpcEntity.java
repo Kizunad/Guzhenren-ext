@@ -11,6 +11,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,14 +21,15 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
-import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.neoforged.neoforge.common.NeoForgeMod;
@@ -47,7 +49,8 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final String SENSOR_TAG = "customnpcs:sensor_bonus";
     private static final String MATERIAL_TAG = "customnpcs:material";
     private static final String SKIN_TAG = "customnpcs:skin";
-    private static final ResourceLocation DEFAULT_SKIN = SkinPool.getRandomSkin();
+    private static final ResourceLocation DEFAULT_SKIN =
+        SkinPool.getRandomSkin();
     private static final ResourceLocation LEGACY_DEFAULT_SKIN =
         ResourceLocation.fromNamespaceAndPath(
             CustomNPCsMod.MODID,
@@ -94,6 +97,38 @@ public class CustomNpcEntity extends PathfinderMob {
             EntityDataSerializers.STRING
         );
     private static final int FLYING_MAX_TURN = 10;
+    private static final int SWIM_MAX_TURN = 85;
+    private static final int SWIM_VERTICAL_RATE = 10;
+    private static final double SWIM_MOVE_EPSILON_SQ = 2.5E-7D;
+    private static final float RAD_TO_DEG = 180.0F / (float) Math.PI;
+    private static final float SWIM_YAW_OFFSET_DEG = 90.0F;
+    private static final float SWIM_MAX_PITCH_DEG = 85.0F;
+    // 适中速度/加速度，避免高频上下抖动
+    private static final float SWIM_BASE_SPEED = 0.3F;
+    private static final float SWIM_ACCELERATION = 0.05F;
+    private static final boolean SWIM_HAS_GRAVITY = false;
+    private static final float WATER_SPEED_MODIFIER = 0.01F;
+    private static final double WATER_MOMENTUM_RETENTION = 0.9D;
+    private static final double WATER_PATH_PUSH_SCALE = 0.15D;
+    private static final float WATER_YAW_LERP_FACTOR = 0.1F;
+
+    private static final int WATER_TELEPORT_COOLDOWN_TICKS = 100;
+    private static final int LAND_SEARCH_RADIUS = 10;
+    private static final int LAND_SEARCH_VERTICAL_RANGE = 4;
+    private static final int TOTEM_REGEN_DURATION_TICKS = 900;
+    private static final int TOTEM_REGEN_AMPLIFIER = 1;
+    private static final int TOTEM_ABSORPTION_DURATION_TICKS = 100;
+    private static final int TOTEM_ABSORPTION_AMPLIFIER = 1;
+    private static final int TOTEM_FIRE_RESIST_DURATION_TICKS = 800;
+    private static final int TOTEM_FIRE_RESIST_AMPLIFIER = 0;
+    private static final byte TOTEM_USE_EVENT = 35;
+
+    private int waterTeleportCooldown = 0;
+    /**
+     * 开关：是否允许在水中时自动寻找陆地并传送。
+     * 默认为 true。修改此字段可控制行为。
+     */
+    public boolean allowWaterTeleport = false;
 
     public enum NavigationMode {
         GROUND,
@@ -103,14 +138,15 @@ public class CustomNpcEntity extends PathfinderMob {
         WALL,
     }
 
-    private NavigationMode navigationMode = NavigationMode.GROUND;
+    private NavigationMode navigationMode = NavigationMode.AMPHIBIOUS;
     private ResourceLocation cachedSkinTexture = null;
 
     public CustomNpcEntity(
         EntityType<? extends CustomNpcEntity> type,
         Level level
     ) {
-        this(type, level, NavigationMode.GROUND);
+        // 默认使用两栖导航，确保水下/水面/陆地都能正常寻路和攻击
+        this(type, level, NavigationMode.AMPHIBIOUS);
     }
 
     public CustomNpcEntity(
@@ -199,7 +235,128 @@ public class CustomNpcEntity extends PathfinderMob {
     @Override
     public void tick() {
         super.tick();
+        // 两栖/水生：在水中重置氧气，避免缺氧导致上浮，保证水下攻击
+        boolean inWater = this.isInWater();
+        if (
+            (this.navigationMode == NavigationMode.WATER ||
+                this.navigationMode == NavigationMode.AMPHIBIOUS) &&
+            inWater
+        ) {
+            this.setAirSupply(this.getMaxAirSupply());
+            this.setSwimming(true); // 强制游泳姿态
+            
+            // 手动水中推进逻辑：
+            // 因为使用了 GroundPathNavigation，在水中 MoveControl 几乎失效。
+            // 这里直接检测是否有路径，如果有，强行推向下一个节点。
+            if (!this.level().isClientSide && !this.navigation.isDone()) {
+                net.minecraft.world.level.pathfinder.Path path = this.navigation.getPath();
+                if (path != null) {
+                    net.minecraft.world.phys.Vec3 nextPos = path.getNextEntityPos(this);
+                    net.minecraft.world.phys.Vec3 dir = nextPos.subtract(this.position()).normalize();
+                    // 给予一个向前的推力，速度适中
+                    double speed = this.getAttributeValue(Attributes.MOVEMENT_SPEED) * WATER_PATH_PUSH_SCALE;
+                    this.setDeltaMovement(this.getDeltaMovement().add(dir.scale(speed)));
+                    
+                    // 简单的朝向调整
+                    double dx = nextPos.x - this.getX();
+                    double dz = nextPos.z - this.getZ();
+                    float targetYaw =
+                        (float) (Mth.atan2(dz, dx) * RAD_TO_DEG) -
+                        SWIM_YAW_OFFSET_DEG;
+                    this.setYRot(
+                        this.getYRot() +
+                        Mth.wrapDegrees(targetYaw - this.getYRot()) * WATER_YAW_LERP_FACTOR
+                    );
+                    this.yBodyRot = this.getYRot();
+                }
+            }
+            
+        } else {
+            this.setSwimming(false);
+        }
+
+        if (
+            !this.level().isClientSide &&
+            this.isInWater() &&
+            this.allowWaterTeleport
+        ) {
+            if (this.waterTeleportCooldown > 0) {
+                this.waterTeleportCooldown--;
+            } else {
+                // 尝试寻找陆地
+                net.minecraft.core.BlockPos land = findNearestLand(
+                    (ServerLevel) this.level(),
+                    this.blockPosition()
+                );
+                if (land != null) {
+                    net.minecraft.world.phys.Vec3 target =
+                        net.minecraft.world.phys.Vec3.atCenterOf(land);
+                    this.teleportTo(target.x, target.y, target.z);
+                    this.waterTeleportCooldown = WATER_TELEPORT_COOLDOWN_TICKS; // 传送成功后冷却
+                } else {
+                    this.waterTeleportCooldown = WATER_TELEPORT_COOLDOWN_TICKS; // 找不到陆地也冷却，回归原有行为
+                }
+            }
+        } else {
+            this.waterTeleportCooldown = 0;
+        }
+
         com.Kizunad.customNPCs.registry.NpcTickRegistry.onTick(this);
+    }
+
+    private net.minecraft.core.BlockPos findNearestLand(
+        ServerLevel level,
+        net.minecraft.core.BlockPos origin
+    ) {
+        net.minecraft.core.BlockPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        int radius = LAND_SEARCH_RADIUS;
+        int vRange = LAND_SEARCH_VERTICAL_RANGE;
+
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -vRange; dy <= vRange; dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    net.minecraft.core.BlockPos pos = origin.offset(dx, dy, dz);
+                    if (isLandable(level, pos)) {
+                        double dist = origin.distSqr(pos);
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            best = pos.immutable();
+                        }
+                    }
+                }
+            }
+        }
+        return best;
+    }
+
+    private boolean isLandable(
+        ServerLevel level,
+        net.minecraft.core.BlockPos pos
+    ) {
+        if (!level.hasChunkAt(pos)) {
+            return false;
+        }
+        net.minecraft.world.level.block.state.BlockState feet =
+            level.getBlockState(pos);
+        net.minecraft.world.level.block.state.BlockState above =
+            level.getBlockState(pos.above());
+        if (
+            !feet.getFluidState().isEmpty() || !above.getFluidState().isEmpty()
+        ) {
+            return false;
+        }
+        if (!feet.getCollisionShape(level, pos).isEmpty()) {
+            return false;
+        }
+        net.minecraft.core.BlockPos belowPos = pos.below();
+        net.minecraft.world.level.block.state.BlockState below =
+            level.getBlockState(belowPos);
+        return below.isFaceSturdy(
+            level,
+            belowPos,
+            net.minecraft.core.Direction.UP
+        );
     }
 
     @Override
@@ -227,8 +384,14 @@ public class CustomNpcEntity extends PathfinderMob {
 
     @Override
     protected void registerGoals() {
-        // 自定义 AI 全由 NpcMind 驱动，清空原版 Goals 避免干扰；保留漂浮避免溺水
-        this.goalSelector.addGoal(0, new FloatGoal(this));
+        // 自定义 AI 全由 NpcMind 驱动，清空原版 Goals 避免干扰
+        // 对地面/攀墙实体保留漂浮，避免落水即溺亡；两栖/水生无需强制上浮
+        NavigationMode mode = this.navigationMode == null
+            ? NavigationMode.GROUND
+            : this.navigationMode;
+        if (mode == NavigationMode.GROUND || mode == NavigationMode.WALL) {
+            this.goalSelector.addGoal(0, new FloatGoal(this));
+        }
     }
 
     @Override
@@ -291,6 +454,68 @@ public class CustomNpcEntity extends PathfinderMob {
     }
 
     @Override
+    public void die(DamageSource source) {
+        if (tryUseTotemFromInventory(source)) {
+            return;
+        }
+        super.die(source);
+    }
+
+    /**
+     * 尝试从背包消耗不死图腾，复刻原版效果。
+     * @param source 伤害来源
+     * @return 成功触发图腾则返回 true
+     */
+    private boolean tryUseTotemFromInventory(DamageSource source) {
+        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return false;
+        }
+        var mind = this.getData(
+            com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
+        );
+        if (mind == null) {
+            return false;
+        }
+        var inventory = mind.getInventory();
+        int totemSlot = inventory.findFirstSlot(
+            stack -> stack.is(Items.TOTEM_OF_UNDYING)
+        );
+        if (totemSlot < 0) {
+            return false;
+        }
+        ItemStack totemStack = inventory.getItem(totemSlot);
+        totemStack.shrink(1);
+        if (totemStack.isEmpty()) {
+            inventory.setItem(totemSlot, ItemStack.EMPTY);
+        }
+        this.setHealth(1.0F);
+        this.removeAllEffects();
+        this.addEffect(
+            new MobEffectInstance(
+                MobEffects.REGENERATION,
+                TOTEM_REGEN_DURATION_TICKS,
+                TOTEM_REGEN_AMPLIFIER
+            )
+        );
+        this.addEffect(
+            new MobEffectInstance(
+                MobEffects.ABSORPTION,
+                TOTEM_ABSORPTION_DURATION_TICKS,
+                TOTEM_ABSORPTION_AMPLIFIER
+            )
+        );
+        this.addEffect(
+            new MobEffectInstance(
+                MobEffects.FIRE_RESISTANCE,
+                TOTEM_FIRE_RESIST_DURATION_TICKS,
+                TOTEM_FIRE_RESIST_AMPLIFIER
+            )
+        );
+        this.level().broadcastEntityEvent(this, TOTEM_USE_EVENT);
+        return true;
+    }
+
+    @Override
     public boolean killedEntity(ServerLevel level, LivingEntity victim) {
         boolean result = super.killedEntity(level, victim);
         // 击杀奖励：基础 1 点，叠加目标最大生命值
@@ -321,15 +546,41 @@ public class CustomNpcEntity extends PathfinderMob {
             mode = NavigationMode.GROUND;
             this.navigationMode = mode;
         }
-        PathNavigation created = switch (mode) {
-            case FLYING -> new FlyingPathNavigation(this, level);
-            case WATER -> new WaterBoundPathNavigation(this, level);
-            case AMPHIBIOUS -> new AmphibiousPathNavigation(this, level);
-            case WALL -> new WallClimberNavigation(this, level);
-            case GROUND -> new GroundPathNavigation(this, level);
-        };
-        created.setCanFloat(true);
+        PathNavigation created;
+        if (mode == NavigationMode.FLYING) {
+            created = new FlyingPathNavigation(this, level);
+        } else if (mode == NavigationMode.WALL) {
+            created = new WallClimberNavigation(this, level);
+        } else {
+            // 地面、水生、两栖统一使用地面导航，依靠手动逻辑处理水中移动
+            created = new GroundPathNavigation(this, level);
+        }
+        
+        // 允许在水中漂浮/游泳
+        boolean shouldFloat = true;
+        created.setCanFloat(shouldFloat);
         return created;
+    }
+
+    @Override
+    public void travel(net.minecraft.world.phys.Vec3 pTravelVector) {
+        if (
+            this.isEffectiveAi() &&
+            this.isInWater() &&
+            (this.navigationMode == NavigationMode.WATER ||
+                this.navigationMode == NavigationMode.AMPHIBIOUS)
+        ) {
+            this.moveRelative(WATER_SPEED_MODIFIER, pTravelVector);
+            this.move(
+                net.minecraft.world.entity.MoverType.SELF,
+                this.getDeltaMovement()
+            );
+            this.setDeltaMovement(
+                this.getDeltaMovement().scale(WATER_MOMENTUM_RETENTION)
+            );
+        } else {
+            super.travel(pTravelVector);
+        }
     }
 
     @Override
@@ -370,7 +621,9 @@ public class CustomNpcEntity extends PathfinderMob {
             this.setMaterial(tag.getFloat(MATERIAL_TAG));
         }
         if (tag.contains(SKIN_TAG)) {
-            ResourceLocation skin = ResourceLocation.tryParse(tag.getString(SKIN_TAG));
+            ResourceLocation skin = ResourceLocation.tryParse(
+                tag.getString(SKIN_TAG)
+            );
             if (skin != null) {
                 // 兼容旧存档/占位纹理，自动切换到随机皮肤
                 if (skin.equals(LEGACY_DEFAULT_SKIN)) {
@@ -405,7 +658,9 @@ public class CustomNpcEntity extends PathfinderMob {
     /**
      * 设置皮肤纹理，传入 null 时回退到默认皮肤。
      */
-    public void setSkinTexture(@javax.annotation.Nullable ResourceLocation skin) {
+    public void setSkinTexture(
+        @javax.annotation.Nullable ResourceLocation skin
+    ) {
         ResourceLocation target = skin == null ? DEFAULT_SKIN : skin;
         this.cachedSkinTexture = target;
         this.entityData.set(SKIN_TEXTURE, target.toString());

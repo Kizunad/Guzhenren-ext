@@ -32,11 +32,6 @@ public class MaterialValueManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(
         MaterialValueManager.class
     );
-    private static final MaterialValueManager INSTANCE =
-        new MaterialValueManager();
-    private static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
-        .create();
     private static final String FILE_NAME = "customnpcs-material-values.json";
     private static final Path CONFIG_PATH = Paths.get("config").resolve(
         FILE_NAME
@@ -44,6 +39,11 @@ public class MaterialValueManager {
     private static final String DEFAULT_RESOURCE = "data/customnpcs/material_values.json";
     private static final Type MAP_TYPE = new TypeToken<Map<String, Float>>() {}
         .getType();
+    private static final Gson GSON = new GsonBuilder()
+        .setPrettyPrinting()
+        .create();
+    private static final MaterialValueManager INSTANCE =
+        new MaterialValueManager();
 
     private final Map<Item, Float> values = new HashMap<>();
 

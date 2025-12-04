@@ -18,9 +18,9 @@ import com.Kizunad.customNPCs.ai.decision.goals.BrewHealingPotionGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.UpgradeArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftSwordGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CraftUndyingTotemGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipShieldGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.ArmorToMaterialGoal;
-import com.Kizunad.customNPCs.ai.decision.goals.AvoidInWaterGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
+import com.Kizunad.customNPCs.ai.decision.goals.ChallangeGoal;
 
 /**
  * NpcMind 组件注册表
@@ -77,13 +78,14 @@ public final class NpcMindRegistry {
         registerGoal("craft_sword", CraftSwordGoal::new);
         registerGoal("upgrade_sword", UpgradeSwordGoal::new);
         registerGoal("craft_shield", CraftShieldGoal::new);
+        registerGoal("craft_undying_totem", CraftUndyingTotemGoal::new);
+        registerGoal("challange", ChallangeGoal::new);
         registerGoal("brew_healing_potion", BrewHealingPotionGoal::new);
         registerGoal("equip_shield", EquipShieldGoal::new);
         registerGoal("equip_armor", EquipArmorGoal::new);
         registerGoal("satiate", SatiateGoal::new);
         registerGoal("flee", FleeGoal::new);
         registerGoal("defend", DefendGoal::new);
-        registerGoal("avoid_in_water", AvoidInWaterGoal::new);
         registerGoal("seek_shelter", SeekShelterGoal::new);
         registerGoal("heal", HealGoal::new);
         registerGoal("cook", CookGoal::new);
