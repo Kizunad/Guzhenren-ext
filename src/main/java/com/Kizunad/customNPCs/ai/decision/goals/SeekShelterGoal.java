@@ -26,18 +26,19 @@ import org.slf4j.LoggerFactory;
 public class SeekShelterGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "SeekShelterGoal: find safe block position away from threats/hazards and navigate there; "
-            + "fails if no path; used for regroup or hazard avoidance.";
+        "SeekShelterGoal: find safe block position away from threats/hazards and navigate there; " +
+        "fails if no path; used for regroup or hazard avoidance.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeekShelterGoal.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        SeekShelterGoal.class
+    );
 
     private static final int SHELTER_SEARCH_RADIUS = 20; // 搜索半径
     private static final int SHELTER_MEMORY_DURATION = 200; // 10秒
-    private static final double ARRIVAL_DISTANCE = 2.0;
     private static final float PRIORITY_DANGER = 0.5f;
     private static final int VERTICAL_SEARCH_RADIUS = 5;
 
@@ -62,11 +63,13 @@ public class SeekShelterGoal implements IGoal {
 
     @Override
     public void start(INpcMind mind, LivingEntity entity) {
-        mind.getMemory().rememberShortTerm(
-            "seeking_shelter",
-            true,
-            SHELTER_MEMORY_DURATION
-        );
+        mind
+            .getMemory()
+            .rememberShortTerm(
+                "seeking_shelter",
+                true,
+                SHELTER_MEMORY_DURATION
+            );
 
         LOGGER.info(
             "[SeekShelterGoal] {} 开始寻找掩体",
@@ -103,9 +106,22 @@ public class SeekShelterGoal implements IGoal {
         if (moveAction != null) {
             ActionStatus status = moveAction.tick(mind, entity);
             if (status == ActionStatus.SUCCESS) {
+                boolean sheltered = !isInDangerousEnvironment(entity);
                 LOGGER.info("[SeekShelterGoal] 已到达掩体");
                 moveAction = null;
-                
+
+                if (!sheltered) {
+                    // 当前位置仍然暴露，视为失效掩体，重新搜索
+                    LOGGER.debug("[SeekShelterGoal] 掩体位置仍暴露，重新搜索");
+                    shelterPos = null;
+                    isDoorShelter = false;
+                    if (interactAction != null) {
+                        interactAction.stop(mind, entity);
+                        interactAction = null;
+                    }
+                    return;
+                }
+
                 // 如果是门，尝试打开
                 if (isDoorShelter && interactAction == null) {
                     interactAction = new InteractBlockAction(shelterPos);
@@ -131,7 +147,7 @@ public class SeekShelterGoal implements IGoal {
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
         mind.getMemory().forget("seeking_shelter");
-        
+
         if (moveAction != null) {
             moveAction.stop(mind, entity);
             moveAction = null;
@@ -143,17 +159,16 @@ public class SeekShelterGoal implements IGoal {
         shelterPos = null;
         isDoorShelter = false;
 
-        LOGGER.info("[SeekShelterGoal] {} 停止寻找掩体", entity.getName().getString());
+        LOGGER.info(
+            "[SeekShelterGoal] {} 停止寻找掩体",
+            entity.getName().getString()
+        );
     }
 
     @Override
     public boolean isFinished(INpcMind mind, LivingEntity entity) {
-        // 不再处于危险环境或已到达掩体
-        boolean safe = !isInDangerousEnvironment(entity);
-        boolean arrived = shelterPos != null 
-            && entity.position().distanceTo(Vec3.atCenterOf(shelterPos)) < ARRIVAL_DISTANCE;
-        
-        return safe || arrived;
+        // 仅在脱离危险环境后退出，防止“已到达掩体”但仍暴露导致的重复触发
+        return !isInDangerousEnvironment(entity);
     }
 
     @Override
@@ -165,18 +180,15 @@ public class SeekShelterGoal implements IGoal {
      * 检查是否处于危险环境
      */
     private boolean isInDangerousEnvironment(LivingEntity entity) {
-        Level level = entity.level();
-        
-        // 夜晚
-        boolean isNight = level.isNight();
-        
-        // 暴露在外（天空可见）
-        boolean isExposed = level.canSeeSky(entity.blockPosition());
-        
-        // 下雨
-        boolean isRaining = level.isRaining();
-        
-        return (isNight || isRaining) && isExposed;
+        //      Level level = entity.level();
+        //      // 夜晚
+        //      boolean isNight = level.isNight();
+        //      // 暴露在外（天空可见）
+        //      boolean isExposed = level.canSeeSky(entity.blockPosition());
+        //      // 下雨
+        //      boolean isRaining = level.isRaining();
+        //      return (isNight || isRaining) && isExposed;
+        return false; // 此处暂时禁用，没有一个完整的Shelter逻辑
     }
 
     /**
@@ -189,25 +201,34 @@ public class SeekShelterGoal implements IGoal {
         double bestDistance = Double.MAX_VALUE;
 
         // 搜索附近的方块
-        for (int dx = -SHELTER_SEARCH_RADIUS; dx <= SHELTER_SEARCH_RADIUS; dx++) {
+        for (
+            int dx = -SHELTER_SEARCH_RADIUS;
+            dx <= SHELTER_SEARCH_RADIUS;
+            dx++
+        ) {
             for (
                 int dy = -VERTICAL_SEARCH_RADIUS;
                 dy <= VERTICAL_SEARCH_RADIUS;
                 dy++
             ) {
-                for (int dz = -SHELTER_SEARCH_RADIUS; dz <= SHELTER_SEARCH_RADIUS; dz++) {
+                for (
+                    int dz = -SHELTER_SEARCH_RADIUS;
+                    dz <= SHELTER_SEARCH_RADIUS;
+                    dz++
+                ) {
                     BlockPos pos = entityPos.offset(dx, dy, dz);
-                    
+
                     // 检查是否是有遮蔽的位置
                     if (isShelterLocation(level, pos)) {
                         double distance = entityPos.distSqr(pos);
                         if (distance < bestDistance) {
                             bestDistance = distance;
                             bestShelter = pos;
-                            
+
                             // 检查是否是门
                             BlockState state = level.getBlockState(pos);
-                            isDoorShelter = state.getBlock() instanceof DoorBlock;
+                            isDoorShelter =
+                                state.getBlock() instanceof DoorBlock;
                         }
                     }
                 }
@@ -224,12 +245,15 @@ public class SeekShelterGoal implements IGoal {
         // 位置上方有方块（有遮蔽）
         BlockPos above = pos.above();
         BlockState aboveState = level.getBlockState(above);
-        boolean hasCover = !aboveState.isAir() && aboveState.isSolidRender(level, above);
-        
+        boolean hasCover =
+            !aboveState.isAir() && aboveState.isSolidRender(level, above);
+
         // 位置本身是空气或门
         BlockState currentState = level.getBlockState(pos);
-        boolean canStand = currentState.isAir() || currentState.getBlock() instanceof DoorBlock;
-        
+        boolean canStand =
+            currentState.isAir() ||
+            currentState.getBlock() instanceof DoorBlock;
+
         return hasCover && canStand;
     }
 }

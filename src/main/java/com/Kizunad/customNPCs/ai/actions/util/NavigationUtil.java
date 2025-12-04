@@ -1,9 +1,11 @@
 package com.Kizunad.customNPCs.ai.actions.util;
 
 import com.Kizunad.customNPCs.ai.actions.config.ActionConfig;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +73,54 @@ public final class NavigationUtil {
     ) {
         double distance = entityPos.distanceTo(targetPos);
         return distance <= acceptableDistance + ARRIVAL_BUFFER;
+    }
+
+    /**
+     * 检查目标实体是否可达。
+     * <p>
+     * 使用一次性的 createPath 计算，不会启动实际导航。
+     *
+     * @param mob   当前实体
+     * @param target 目标实体
+     * @param maxDistance 最大允许距离（<=0 则忽略距离限制）
+     * @return true 表示可达
+     */
+    public static boolean canReachEntity(
+        Mob mob,
+        Entity target,
+        double maxDistance
+    ) {
+        if (mob == null || target == null) {
+            return false;
+        }
+        if (!mob.level().equals(target.level())) {
+            return false;
+        }
+        if (maxDistance > 0 && mob.distanceTo(target) > maxDistance) {
+            return false;
+        }
+        PathNavigation navigation = mob.getNavigation();
+        Path path = navigation.createPath(target, 0);
+        return path != null && path.canReach();
+    }
+
+    /**
+     * 检查坐标是否可达。
+     * <p>
+     * 仅用于预判，避免持续尝试不可达位置。
+     *
+     * @param mob 当前实体
+     * @param targetPos 目标坐标
+     * @return true 表示存在可达路径
+     */
+    public static boolean canReachPosition(Mob mob, Vec3 targetPos) {
+        if (mob == null || targetPos == null) {
+            return false;
+        }
+        PathNavigation navigation = mob.getNavigation();
+        BlockPos blockPos = BlockPos.containing(targetPos);
+        Path path = navigation.createPath(blockPos, 0);
+        return path != null && path.canReach();
     }
 
     /**

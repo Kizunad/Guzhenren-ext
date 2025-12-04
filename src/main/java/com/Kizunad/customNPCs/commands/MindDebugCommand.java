@@ -102,6 +102,7 @@ public class MindDebugCommand {
                 .requires(source -> source.hasPermission(2)) // 需要 OP 权限
                 .then(registerInspectCommands())
                 .then(registerInspectInventoryCommand())
+                .then(registerTestTradeCommand())
                 .then(registerSpawnTestCommand())
                 .then(registerActionCommands())
                 .then(registerGoalCommands())
@@ -123,6 +124,15 @@ public class MindDebugCommand {
                     MindDebugCommand::inspectTarget
                 )
             );
+    }
+
+    /**
+     * 注册 testTrade 命令：打开 NPC 交易测试 UI。
+     */
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > registerTestTradeCommand() {
+        return Commands.literal("testTrade").executes(MindDebugCommand::testTrade);
     }
 
     /**
@@ -438,6 +448,42 @@ public class MindDebugCommand {
         };
 
         player.openMenu(provider, buf -> buf.writeVarInt(npc.getId()));
+        return 1;
+    }
+
+    private static int testTrade(CommandContext<CommandSourceStack> context) {
+        ServerPlayer player;
+        try {
+            player = context.getSource().getPlayerOrException();
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("需要玩家执行"));
+            return 0;
+        }
+
+        MenuProvider provider = new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.literal("Test Trade UI");
+            }
+
+            @Override
+            public net.minecraft.world.inventory.AbstractContainerMenu createMenu(
+                int containerId,
+                Inventory playerInventory,
+                Player player
+            ) {
+                return new com.Kizunad.customNPCs.menu.NpcTradeMenu(
+                    containerId,
+                    playerInventory
+                );
+            }
+        };
+
+        player.openMenu(provider, buf -> {
+            // 如果 fromNetwork 需要读取数据，这里必须写入对应的初始数据
+            // 目前 NpcTradeMenu.fromNetwork 只是调用构造函数，不需要额外数据
+            // 但 FriendlyByteBuf 可能不允许空？通常没问题。
+        });
         return 1;
     }
 

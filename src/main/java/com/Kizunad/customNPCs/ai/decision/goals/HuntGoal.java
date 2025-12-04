@@ -6,6 +6,7 @@ import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.common.AttackAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.actions.config.ActionConfig;
+import com.Kizunad.customNPCs.ai.actions.util.NavigationUtil;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
@@ -35,8 +36,8 @@ import org.slf4j.LoggerFactory;
 public class HuntGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "HuntGoal: when healthy/safe, seek weaker non-friendly targets; "
-            + "switches between Melee and Ranged based on distance and equipment.";
+        "HuntGoal: when healthy/safe, seek weaker non-friendly targets; " +
+        "switches between Melee and Ranged based on distance and equipment.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -254,25 +255,31 @@ public class HuntGoal implements IGoal {
             return false;
         }
         // 若存在威胁记忆或正在逃跑，避免进入猎杀状态
-        return !mind.getMemory().hasMemory("threat_detected") &&
+        return (
+            !mind.getMemory().hasMemory("threat_detected") &&
             !mind.getMemory().hasMemory(WorldStateKeys.IN_DANGER) &&
-            !mind.getMemory().hasMemory("is_fleeing");
+            !mind.getMemory().hasMemory("is_fleeing")
+        );
     }
 
     /**
      * 保障有有效的目标，并缓存优势比。
      */
     private LivingEntity ensureTarget(LivingEntity hunter) {
+        if (!(hunter instanceof Mob mob)) {
+            return null;
+        }
         LivingEntity current = resolveTarget(hunter);
         if (
             current != null &&
             isTargetWeak(hunter, current) &&
-            hunter.distanceTo(current) <= SEARCH_RADIUS
+            hunter.distanceTo(current) <= SEARCH_RADIUS &&
+            isReachable(mob, current)
         ) {
             cachedAdvantageRatio = computeAdvantageRatio(hunter, current);
             return current;
         }
-        LivingEntity selected = selectWeakTarget(hunter);
+        LivingEntity selected = selectWeakTarget(mob);
         targetUuid = selected == null ? null : selected.getUUID();
         if (selected != null) {
             cachedAdvantageRatio = computeAdvantageRatio(hunter, selected);
@@ -283,17 +290,28 @@ public class HuntGoal implements IGoal {
     }
 
     private LivingEntity resolveTarget(LivingEntity hunter) {
-        if (targetUuid == null || !(hunter.level() instanceof ServerLevel serverLevel)) {
+        if (
+            targetUuid == null ||
+            !(hunter.level() instanceof ServerLevel serverLevel)
+        ) {
             return null;
         }
         Entity resolved = serverLevel.getEntity(targetUuid);
         return resolved instanceof LivingEntity living ? living : null;
     }
 
+    private boolean isReachable(Mob hunter, LivingEntity target) {
+        return NavigationUtil.canReachEntity(
+            hunter,
+            target,
+            SEARCH_RADIUS + 1.0D
+        );
+    }
+
     /**
      * 在搜索范围内选择最弱且最近的合法目标。
      */
-    private LivingEntity selectWeakTarget(LivingEntity hunter) {
+    private LivingEntity selectWeakTarget(Mob hunter) {
         if (!(hunter.level() instanceof ServerLevel serverLevel)) {
             return null;
         }
@@ -301,8 +319,11 @@ public class HuntGoal implements IGoal {
         AABB box = hunter.getBoundingBox().inflate(SEARCH_RADIUS);
 
         return serverLevel
-            .getEntitiesOfClass(LivingEntity.class, box, target -> isCandidate(hunter, target))
+            .getEntitiesOfClass(LivingEntity.class, box, target ->
+                isCandidate(hunter, target)
+            )
             .stream()
+            .filter(target -> isReachable(hunter, target))
             .map(target ->
                 new TargetCandidate(
                     target,
@@ -324,7 +345,10 @@ public class HuntGoal implements IGoal {
         if (EntityRelationUtil.isAlly(hunter, target)) {
             return false;
         }
-        if (target instanceof Player player && (player.isCreative() || player.isSpectator())) {
+        if (
+            target instanceof Player player &&
+            (player.isCreative() || player.isSpectator())
+        ) {
             return false;
         }
         if (target.isInvisible()) {
@@ -339,7 +363,9 @@ public class HuntGoal implements IGoal {
     private boolean isTargetWeak(LivingEntity hunter, LivingEntity target) {
         double hunterScore = computeStrengthScore(hunter);
         double targetScore = computeStrengthScore(target);
-        return targetScore > 0 && targetScore <= hunterScore * WEAKNESS_THRESHOLD;
+        return (
+            targetScore > 0 && targetScore <= hunterScore * WEAKNESS_THRESHOLD
+        );
     }
 
     private double computeStrengthScore(LivingEntity entity) {
@@ -349,7 +375,10 @@ public class HuntGoal implements IGoal {
         return health + attack * 2.0D + armor;
     }
 
-    private double computeAdvantageRatio(LivingEntity hunter, LivingEntity target) {
+    private double computeAdvantageRatio(
+        LivingEntity hunter,
+        LivingEntity target
+    ) {
         double hunterScore = computeStrengthScore(hunter);
         double targetScore = computeStrengthScore(target);
         if (hunterScore <= 0) {
@@ -377,11 +406,17 @@ public class HuntGoal implements IGoal {
         double distanceSqr
     ) {
         boolean isWeakerThanHunter() {
-            return targetScore > 0 && targetScore <= hunterScore * WEAKNESS_THRESHOLD;
+            return (
+                targetScore > 0 &&
+                targetScore <= hunterScore * WEAKNESS_THRESHOLD
+            );
         }
 
         double score() {
-            double advantageRatio = Math.max(0.0D, (hunterScore - targetScore) / hunterScore);
+            double advantageRatio = Math.max(
+                0.0D,
+                (hunterScore - targetScore) / hunterScore
+            );
             double distancePenalty = Math.sqrt(distanceSqr) * DISTANCE_WEIGHT;
             return advantageRatio - distancePenalty;
         }

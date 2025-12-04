@@ -4,6 +4,8 @@ import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.actions.common.AttackAction;
 import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
 import com.Kizunad.customNPCs.ai.actions.common.EatFromInventoryAction;
+import com.Kizunad.customNPCs.ai.actions.common.EquipShieldAction;
+import com.Kizunad.customNPCs.ai.actions.common.GatherMaterialAction;
 import com.Kizunad.customNPCs.ai.actions.common.ForgetLongTermAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.actions.common.RememberLongTermAction;
@@ -32,6 +34,8 @@ public final class PromptLibrary {
         MoveToAction.LLM_USAGE_DESC,
         EatFromInventoryAction.LLM_USAGE_DESC,
         UseItemAction.LLM_USAGE_DESC,
+        GatherMaterialAction.LLM_USAGE_DESC,
+        EquipShieldAction.LLM_USAGE_DESC,
         RememberLongTermAction.LLM_USAGE_DESC,
         ForgetLongTermAction.LLM_USAGE_DESC,
         "Idle/Observe: wait/look around; Scan: check for threats/hazards."

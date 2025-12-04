@@ -1,11 +1,14 @@
 package com.Kizunad.customNPCs.entity;
 
+import com.Kizunad.customNPCs.CustomNPCsMod;
 import com.Kizunad.customNPCs.ai.config.NpcAttributeDefaults;
+import com.Kizunad.customNPCs.util.SkinPool;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -16,6 +19,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -25,6 +29,7 @@ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.neoforged.neoforge.common.NeoForgeMod;
 
 /**
@@ -40,6 +45,14 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final String SPEED_TAG = "customnpcs:speed_bonus";
     private static final String DEFENSE_TAG = "customnpcs:defense_bonus";
     private static final String SENSOR_TAG = "customnpcs:sensor_bonus";
+    private static final String MATERIAL_TAG = "customnpcs:material";
+    private static final String SKIN_TAG = "customnpcs:skin";
+    private static final ResourceLocation DEFAULT_SKIN = SkinPool.getRandomSkin();
+    private static final ResourceLocation LEGACY_DEFAULT_SKIN =
+        ResourceLocation.fromNamespaceAndPath(
+            CustomNPCsMod.MODID,
+            "textures/entity/custom_npc.png"
+        );
     private static final EntityDataAccessor<Integer> EXPERIENCE =
         SynchedEntityData.defineId(
             CustomNpcEntity.class,
@@ -70,6 +83,16 @@ public class CustomNpcEntity extends PathfinderMob {
             CustomNpcEntity.class,
             EntityDataSerializers.FLOAT
         );
+    private static final EntityDataAccessor<Float> MATERIAL =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.FLOAT
+        );
+    private static final EntityDataAccessor<String> SKIN_TEXTURE =
+        SynchedEntityData.defineId(
+            CustomNpcEntity.class,
+            EntityDataSerializers.STRING
+        );
     private static final int FLYING_MAX_TURN = 10;
 
     public enum NavigationMode {
@@ -81,6 +104,7 @@ public class CustomNpcEntity extends PathfinderMob {
     }
 
     private NavigationMode navigationMode = NavigationMode.GROUND;
+    private ResourceLocation cachedSkinTexture = null;
 
     public CustomNpcEntity(
         EntityType<? extends CustomNpcEntity> type,
@@ -99,6 +123,11 @@ public class CustomNpcEntity extends PathfinderMob {
         this.setPersistenceRequired();
         this.getTags().add(MIND_TAG); // 触发 NpcMindAttachment 自动挂载
         this.setCanPickUpLoot(true);
+        // 允许水域寻路并消除水域惩罚，避免落水后导航停滞
+        this.setPathfindingMalus(PathType.WATER, 0.0F);
+        this.setPathfindingMalus(PathType.WATER_BORDER, 0.0F);
+        // 服务端构造时立即分配皮肤，后续读取存档会覆盖随机值，避免指令/代码生成时未触发 finalizeSpawn 造成纹理缺失。
+        this.ensureSkinTextureAssigned();
 
         /*
          * NOTE: FlyingMoveControl
@@ -118,6 +147,35 @@ public class CustomNpcEntity extends PathfinderMob {
     }
 
     @Override
+    public net.minecraft.world.InteractionResult mobInteract(
+        net.minecraft.world.entity.player.Player player,
+        net.minecraft.world.InteractionHand hand
+    ) {
+        if (hand == net.minecraft.world.InteractionHand.MAIN_HAND) {
+            if (!this.level().isClientSide) {
+                var mind = this.getData(
+                    com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
+                );
+                if (mind != null) {
+                    var tradeState = mind.getTradeState();
+                    if (tradeState.getPriceMultiplier() <= 0.0F) {
+                        tradeState.generateNewMultiplier();
+                    }
+                    return com.Kizunad.customNPCs.ai.interaction.NpcTradeHooks.tryOpenTrade(
+                        this,
+                        player,
+                        tradeState
+                    );
+                }
+            }
+            return net.minecraft.world.InteractionResult.sidedSuccess(
+                this.level().isClientSide
+            );
+        }
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
     @javax.annotation.Nullable
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(
         net.minecraft.world.level.ServerLevelAccessor level,
@@ -133,6 +191,8 @@ public class CustomNpcEntity extends PathfinderMob {
             reason,
             spawnData
         );
+        // 保底分配皮肤（自然生成流程中仍走 finalizeSpawn）。
+        this.ensureSkinTextureAssigned();
         return spawnData;
     }
 
@@ -159,11 +219,16 @@ public class CustomNpcEntity extends PathfinderMob {
         builder.define(DEFENSE_BONUS, 0.0F);
         // Sensor -> FOLLOW_RANGE
         builder.define(SENSOR_BONUS, 0.0F);
+        // 材料储备：用于制造/建造等行为的基础点数
+        builder.define(MATERIAL, 0.0F);
+        // 默认皮肤：使用占位纹理，未分配随机皮肤时兜底
+        builder.define(SKIN_TEXTURE, DEFAULT_SKIN.toString());
     }
 
     @Override
     protected void registerGoals() {
-        // 自定义 AI 全由 NpcMind 驱动，清空原版 Goals 避免干扰。
+        // 自定义 AI 全由 NpcMind 驱动，清空原版 Goals 避免干扰；保留漂浮避免溺水
+        this.goalSelector.addGoal(0, new FloatGoal(this));
     }
 
     @Override
@@ -176,14 +241,15 @@ public class CustomNpcEntity extends PathfinderMob {
         if (mindHolder != null) {
             var mind = mindHolder;
             var inventory = mind.getInventory();
-            ItemStack remaining = inventory.addItem(itemEntity.getItem());
+            ItemStack entityStack = itemEntity.getItem();
+            int originalCount = entityStack.getCount();
+            ItemStack remaining = inventory.addItem(entityStack);
             if (remaining.isEmpty()) {
-                this.take(itemEntity, itemEntity.getItem().getCount());
+                this.take(itemEntity, originalCount);
                 itemEntity.discard();
                 return;
-            } else {
-                itemEntity.setItem(remaining);
             }
+            itemEntity.setItem(remaining);
         }
         super.pickUpItem(itemEntity);
     }
@@ -255,13 +321,15 @@ public class CustomNpcEntity extends PathfinderMob {
             mode = NavigationMode.GROUND;
             this.navigationMode = mode;
         }
-        return switch (mode) {
+        PathNavigation created = switch (mode) {
             case FLYING -> new FlyingPathNavigation(this, level);
             case WATER -> new WaterBoundPathNavigation(this, level);
             case AMPHIBIOUS -> new AmphibiousPathNavigation(this, level);
             case WALL -> new WallClimberNavigation(this, level);
             case GROUND -> new GroundPathNavigation(this, level);
         };
+        created.setCanFloat(true);
+        return created;
     }
 
     @Override
@@ -273,6 +341,8 @@ public class CustomNpcEntity extends PathfinderMob {
         tag.putFloat(SPEED_TAG, this.getSpeedBonus());
         tag.putFloat(DEFENSE_TAG, this.getDefenseBonus());
         tag.putFloat(SENSOR_TAG, this.getSensorBonus());
+        tag.putFloat(MATERIAL_TAG, this.getMaterial());
+        tag.putString(SKIN_TAG, this.getSkinTexture().toString());
     }
 
     @Override
@@ -295,6 +365,65 @@ public class CustomNpcEntity extends PathfinderMob {
         }
         if (tag.contains(SENSOR_TAG)) {
             this.setSensorBonus(tag.getFloat(SENSOR_TAG));
+        }
+        if (tag.contains(MATERIAL_TAG)) {
+            this.setMaterial(tag.getFloat(MATERIAL_TAG));
+        }
+        if (tag.contains(SKIN_TAG)) {
+            ResourceLocation skin = ResourceLocation.tryParse(tag.getString(SKIN_TAG));
+            if (skin != null) {
+                // 兼容旧存档/占位纹理，自动切换到随机皮肤
+                if (skin.equals(LEGACY_DEFAULT_SKIN)) {
+                    this.setSkinTexture(SkinPool.getRandomSkin());
+                } else {
+                    this.setSkinTexture(skin);
+                }
+            }
+        }
+    }
+
+    /**
+     * 当前皮肤纹理，已在服务端抽取并同步。
+     */
+    public ResourceLocation getSkinTexture() {
+        String stored = this.entityData.get(SKIN_TEXTURE);
+        if (
+            this.cachedSkinTexture != null &&
+            stored.equals(this.cachedSkinTexture.toString())
+        ) {
+            return this.cachedSkinTexture;
+        }
+        ResourceLocation skin = ResourceLocation.tryParse(stored);
+        if (LEGACY_DEFAULT_SKIN.toString().equals(stored)) {
+            skin = SkinPool.getRandomSkin();
+            this.setSkinTexture(skin);
+        }
+        this.cachedSkinTexture = skin == null ? DEFAULT_SKIN : skin;
+        return this.cachedSkinTexture;
+    }
+
+    /**
+     * 设置皮肤纹理，传入 null 时回退到默认皮肤。
+     */
+    public void setSkinTexture(@javax.annotation.Nullable ResourceLocation skin) {
+        ResourceLocation target = skin == null ? DEFAULT_SKIN : skin;
+        this.cachedSkinTexture = target;
+        this.entityData.set(SKIN_TEXTURE, target.toString());
+    }
+
+    /**
+     * 确保服务端已有皮肤纹理，默认占位时抽取随机皮肤。
+     */
+    private void ensureSkinTextureAssigned() {
+        if (this.level().isClientSide()) {
+            return;
+        }
+        String current = this.entityData.get(SKIN_TEXTURE);
+        if (
+            DEFAULT_SKIN.toString().equals(current) ||
+            LEGACY_DEFAULT_SKIN.toString().equals(current)
+        ) {
+            this.setSkinTexture(SkinPool.getRandomSkin());
         }
     }
 
@@ -416,6 +545,30 @@ public class CustomNpcEntity extends PathfinderMob {
             return;
         }
         this.setSensorBonus(this.getSensorBonus() + delta);
+    }
+
+    /**
+     * 可用于制造/建造的材料点数。
+     */
+    public float getMaterial() {
+        return this.entityData.get(MATERIAL);
+    }
+
+    /**
+     * 设置材料点数，自动裁剪为非负数。
+     */
+    public void setMaterial(float value) {
+        this.entityData.set(MATERIAL, clampNonNegative(value));
+    }
+
+    /**
+     * 增量调整材料点数。
+     */
+    public void addMaterial(float delta) {
+        if (delta == 0) {
+            return;
+        }
+        this.setMaterial(this.getMaterial() + delta);
     }
 
     private float clampNonNegative(float value) {

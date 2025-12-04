@@ -21,4 +21,10 @@ public final class ModMenus {
             "npc_inventory",
             () -> IMenuTypeExtension.create(NpcInventoryMenu::fromNetwork)
         );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<NpcTradeMenu>> NPC_TRADE =
+        MENUS.register(
+            "npc_trade",
+            () -> IMenuTypeExtension.create(NpcTradeMenu::fromNetwork)
+        );
 }

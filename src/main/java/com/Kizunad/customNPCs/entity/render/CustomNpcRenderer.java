@@ -1,26 +1,17 @@
 package com.Kizunad.customNPCs.entity.render;
 
-import com.Kizunad.customNPCs.CustomNPCsMod;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 /**
  * 自定义 NPC 渲染器：复用僵尸模型+占位纹理。
  */
 public class CustomNpcRenderer
-    extends HumanoidMobRenderer<
-        CustomNpcEntity,
-        PlayerModel<CustomNpcEntity>
-    > {
-
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
-        CustomNPCsMod.MODID,
-        "textures/entity/custom_npc.png"
-    );
+    extends HumanoidMobRenderer<CustomNpcEntity, PlayerModel<CustomNpcEntity>> {
 
     private static final float SHADOW_RADIUS = 0.5f;
 
@@ -34,6 +25,6 @@ public class CustomNpcRenderer
 
     @Override
     public ResourceLocation getTextureLocation(CustomNpcEntity entity) {
-        return TEXTURE;
+        return entity.getSkinTexture();
     }
 }

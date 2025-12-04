@@ -41,13 +41,15 @@ public class NpcInventory implements Container {
      * 尝试添加物品。
      * @param stack 要添加的物品
      * @return 未能放入的剩余物品（全部放入则返回 EMPTY）
+     *
+     * 注意：会直接修改传入的 stack，剩余未放入的数量保留在该栈中，调用方无需再额外缩减以避免复制。
      */
     public ItemStack addItem(ItemStack stack) {
         if (stack.isEmpty()) {
             return ItemStack.EMPTY;
         }
 
-        ItemStack remaining = stack.copy();
+        ItemStack remaining = stack;
 
         // 先尝试与已有同类物品合并
         for (int i = 0; i < items.size(); i++) {
@@ -72,14 +74,19 @@ public class NpcInventory implements Container {
         }
 
         // 再尝试放入空槽位
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).isEmpty()) {
-                items.set(i, remaining);
-                return ItemStack.EMPTY;
+        for (int i = 0; i < items.size() && !remaining.isEmpty(); i++) {
+            if (!items.get(i).isEmpty()) {
+                continue;
             }
+            int toInsert = Math.min(
+                remaining.getCount(),
+                remaining.getMaxStackSize()
+            );
+            items.set(i, remaining.copyWithCount(toInsert));
+            remaining.shrink(toInsert);
         }
 
-        return remaining;
+        return remaining.isEmpty() ? ItemStack.EMPTY : remaining;
     }
 
     /**

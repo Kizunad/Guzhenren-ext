@@ -6,7 +6,6 @@ import com.Kizunad.customNPCs.ai.sensors.SensorEventType;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -38,8 +37,8 @@ public class UtilityGoalSelector {
     private static final float HYSTERESIS_THRESHOLD = 0.1f; // 10% 滞后阈值
     private static final float PREEMPTION_ADDITIONAL_THRESHOLD = 0.15f; // 早期抢占额外阈值
     private static final int PREEMPTION_GRACE_TICKS = 15; // 刚切换后至少坚持 15 ticks
-    private static final int GOAL_COOLDOWN_TICKS = 40; // 目标切换后的冷却期
-    private static final int IDLE_STALL_THRESHOLD = 8; // 连续无目标/动作的判定阈值
+    private static final int GOAL_COOLDOWN_TICKS = 0; // 目标切换后的冷却期（关闭）
+    private static final int IDLE_STALL_THRESHOLD = 1; // 无目标/动作立即重评估
     private static final int STUCK_TICKS_THRESHOLD = 20 * 60; // 10 秒站桩判定
     private static final double STUCK_MOVE_EPSILON = 0.1d; // 判定移动阈值
     private static final int STUCK_TELEPORT_ATTEMPTS = 8;
@@ -305,32 +304,19 @@ public class UtilityGoalSelector {
     }
 
     private boolean isOnCooldown(IGoal goal) {
-        Integer cooldownTicks = goalCooldowns.get(goal.getName());
-        return cooldownTicks != null && cooldownTicks > 0;
+        // 冷却关闭，始终允许候选目标参与评估
+        return false;
     }
 
     private void startCooldown(IGoal goal) {
-        if (goal != null && goals.size() > 1) {
-            goalCooldowns.put(goal.getName(), GOAL_COOLDOWN_TICKS);
+        // 冷却关闭，仅清理可能残留的记录
+        if (goal != null) {
+            goalCooldowns.remove(goal.getName());
         }
     }
 
     private void decayCooldowns() {
-        if (goalCooldowns.isEmpty()) {
-            return;
-        }
-        Iterator<Map.Entry<String, Integer>> iterator = goalCooldowns
-            .entrySet()
-            .iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Integer> entry = iterator.next();
-            int remaining = entry.getValue() - 1;
-            if (remaining <= 0) {
-                iterator.remove();
-            } else {
-                entry.setValue(remaining);
-            }
-        }
+        goalCooldowns.clear();
     }
 
     private float getSwitchThreshold(SensorEventType interruptLevel) {
@@ -355,20 +341,19 @@ public class UtilityGoalSelector {
     private void guardAgainstStall(INpcMind mind, LivingEntity entity) {
         if (currentGoal == null && mind.getActionExecutor().isIdle()) {
             idleStallTicks++;
-            if (idleStallTicks >= IDLE_STALL_THRESHOLD) {
+            if (idleStallTicks == IDLE_STALL_THRESHOLD) {
                 MindLog.decision(
                     MindLogLevel.WARN,
-                    "检测到连续 {} tick 无目标/动作，强制重评估（忽略冷却）",
-                    idleStallTicks
+                    "检测到无目标且执行器空闲，立即重评估（无冷却）"
                 );
-                reevaluateInternal(
-                    mind,
-                    entity,
-                    SensorEventType.CRITICAL,
-                    true
-                );
-                idleStallTicks = 0;
             }
+            ticksSinceLastEvaluation = 0;
+            reevaluateInternal(
+                mind,
+                entity,
+                SensorEventType.CRITICAL,
+                true
+            );
         } else {
             idleStallTicks = 0;
         }

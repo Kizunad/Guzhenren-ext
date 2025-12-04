@@ -3,6 +3,8 @@ package com.Kizunad.customNPCs.ai;
 import com.Kizunad.customNPCs.ai.actions.IAction;
 import com.Kizunad.customNPCs.ai.actions.common.BlockWithShieldAction;
 import com.Kizunad.customNPCs.ai.actions.common.EnhanceAttributeAction;
+import com.Kizunad.customNPCs.ai.actions.common.GatherMaterialAction;
+import com.Kizunad.customNPCs.ai.actions.common.EquipShieldAction;
 import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.actions.common.RunGoalAction;
 import com.Kizunad.customNPCs.ai.actions.common.SimpleNamedAction;
@@ -11,6 +13,12 @@ import com.Kizunad.customNPCs.ai.decision.goals.CookGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftItemGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.DefendGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipArmorGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.GatherMaterialGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.UpgradeArmorGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CraftArmorGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.EquipShieldGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.ArmorToMaterialGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.AvoidInWaterGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
@@ -19,6 +27,7 @@ import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SeekShelterGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.WatchClosestEntityGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CraftShieldGoal;
 import com.Kizunad.customNPCs.ai.sensors.AuditorySensor;
 import com.Kizunad.customNPCs.ai.sensors.DamageSensor;
 import com.Kizunad.customNPCs.ai.sensors.ISensor;
@@ -58,10 +67,17 @@ public final class NpcMindRegistry {
         registerGoal("survival", SurvivalGoal::new);
         registerGoal("watch_closest_entity", WatchClosestEntityGoal::new);
         registerGoal("idle", IdleGoal::new);
+        registerGoal("gather_material", GatherMaterialGoal::new);
+        registerGoal("craft_armor", CraftArmorGoal::new);
+        registerGoal("upgrade_armor", UpgradeArmorGoal::new);
+        registerGoal("armor_to_material", ArmorToMaterialGoal::new);
+        registerGoal("craft_shield", CraftShieldGoal::new);
+        registerGoal("equip_shield", EquipShieldGoal::new);
         registerGoal("equip_armor", EquipArmorGoal::new);
         registerGoal("satiate", SatiateGoal::new);
         registerGoal("flee", FleeGoal::new);
         registerGoal("defend", DefendGoal::new);
+        registerGoal("avoid_in_water", AvoidInWaterGoal::new);
         registerGoal("seek_shelter", SeekShelterGoal::new);
         registerGoal("heal", HealGoal::new);
         registerGoal("cook", CookGoal::new);
@@ -76,6 +92,10 @@ public final class NpcMindRegistry {
 
         registerAction("block_with_shield", BlockWithShieldAction::new);
         registerAction("ranged_attack", () -> new RangedAttackItemAction(null));
+        registerAction("gather_material", GatherMaterialAction::new);
+        registerAction("GatherMaterialAction", GatherMaterialAction::new);
+        registerAction("equip_shield", EquipShieldAction::new);
+        registerAction("EquipShieldAction", EquipShieldAction::new);
         registerGoalActionBridges();
         registerAction("enhance_attribute", () ->
             new EnhanceAttributeAction(null)

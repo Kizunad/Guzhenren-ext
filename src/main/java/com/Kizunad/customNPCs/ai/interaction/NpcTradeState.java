@@ -12,6 +12,11 @@ public class NpcTradeState {
 
     private boolean tradeEnabled = true;
     private int restockDelayTicks = DEFAULT_RESTOCK_DELAY_TICKS;
+    private float priceMultiplier = 1.0f;
+
+    public NpcTradeState() {
+        generateNewMultiplier();
+    }
 
     public boolean isTradeEnabled() {
         return tradeEnabled;
@@ -29,10 +34,24 @@ public class NpcTradeState {
         this.restockDelayTicks = Math.max(0, restockDelayTicks);
     }
 
+    public float getPriceMultiplier() {
+        return priceMultiplier;
+    }
+
+    public void setPriceMultiplier(float priceMultiplier) {
+        this.priceMultiplier = priceMultiplier;
+    }
+
+    public void generateNewMultiplier() {
+        // Random [1.0, 3.0)
+        this.priceMultiplier = 1.0f + (float) Math.random() * 2.0f;
+    }
+
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("enabled", tradeEnabled);
         tag.putInt("restockDelay", restockDelayTicks);
+        tag.putFloat("priceMultiplier", priceMultiplier);
         return tag;
     }
 
@@ -42,6 +61,9 @@ public class NpcTradeState {
         }
         if (tag.contains("restockDelay")) {
             restockDelayTicks = Math.max(0, tag.getInt("restockDelay"));
+        }
+        if (tag.contains("priceMultiplier")) {
+            priceMultiplier = tag.getFloat("priceMultiplier");
         }
     }
 }

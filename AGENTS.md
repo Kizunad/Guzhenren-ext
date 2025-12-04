@@ -1,4 +1,4 @@
-LibSourceCodes 可以参考 Neoforge Source Code / guzhenren Decompile Code / chestcavity Source Code
+LibSourceCodes 可以参考 Neoforge Source Code / guzhenren Decompile Code / chestcavity Source Code / Minecraft 1.21.1-Deobfuscated
 必须遵循：
 - 使用 Serena MCP - Project: Guzhenren-ext
 - 使用 `agent_workflow.py assign` 时务必附带 `--details` 描述当前工作内容，便于多 AGENT 识别与避免冲突；同一项目若已被占用需先确认完成并执行 `unlock` 释放。

@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
+import com.Kizunad.customNPCs.ai.actions.util.NavigationUtil;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
@@ -41,8 +42,8 @@ public class AttackAction
     implements IAttackAction {
 
     public static final String LLM_USAGE_DESC =
-        "AttackAction: melee strike target within ~3.5 blocks; backs off if too close; "
-            + "requires target UUID set; uses mob swing/doHurtTarget.";
+        "AttackAction: melee strike target within ~3.5 blocks; backs off if too close; " +
+        "requires target UUID set; uses mob swing/doHurtTarget.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -51,13 +52,17 @@ public class AttackAction
     private static final Logger LOGGER = LoggerFactory.getLogger(
         AttackAction.class
     );
-    private static final double DESIRED_RANGE_FACTOR = 0.9D;
-    private static final double BACKOFF_RANGE_FACTOR = 0.6D;
+    private static final double DESIRED_RANGE_FACTOR = 0.75D;
+    private static final double BACKOFF_RANGE_FACTOR = 0.55D;
     private static final double REPOSITION_SPEED = 1.2D;
     private static final double RETREAT_EXTRA = 0.8D;
-    private static final double RANGE_HYSTERESIS = 0.5D;
+    private static final double RANGE_HYSTERESIS = 0.35D;
+    private static final double ATTACK_RANGE_BUFFER = 0.4D;
     private static final double MIN_LOWER_THRESHOLD = 0.1D;
     private static final float LOOK_MAX_ROTATION = 30.0F;
+    private static final int UNREACHABLE_TICKS_THRESHOLD = 40;
+    private static final double STUCK_DISTANCE_EPSILON = 0.25D;
+    private static final int STUCK_NO_HIT_TICKS = 80;
 
     // 从配置获取默认值
 
@@ -94,6 +99,16 @@ public class AttackAction
     private int attemptTicks;
 
     /**
+     * 连续不可达计数
+     */
+    private int unreachableTicks;
+    /**
+     * 最近一次产生位移的位置与 tick，用于检测卡位
+     */
+    private Vec3 lastProgressPos;
+    private int lastProgressTick;
+
+    /**
      * 创建攻击动作（使用默认值）
      * @param targetUuid 目标实体 UUID
      */
@@ -126,6 +141,9 @@ public class AttackAction
         this.cooldownCounter = 0;
         this.hasHit = false;
         this.attemptTicks = 0;
+        this.unreachableTicks = 0;
+        this.lastProgressPos = null;
+        this.lastProgressTick = 0;
     }
 
     @Override
@@ -164,33 +182,65 @@ public class AttackAction
             return ActionStatus.FAILURE;
         }
 
+        if (!NavigationUtil.canReachEntity(mob, targetEntity, 0.0D)) {
+            unreachableTicks++;
+            if (unreachableTicks >= UNREACHABLE_TICKS_THRESHOLD) {
+                LOGGER.debug(
+                    "[AttackAction] 连续 {} ticks 无法到达目标，放弃",
+                    unreachableTicks
+                );
+                return ActionStatus.FAILURE;
+            }
+        } else {
+            unreachableTicks = 0;
+        }
+
         // 始终面向目标，防止因朝向问题导致攻击判定失败或卡住
-        mob.getLookControl().setLookAt(
-            targetEntity,
-            LOOK_MAX_ROTATION,
-            LOOK_MAX_ROTATION
-        );
+        mob
+            .getLookControl()
+            .setLookAt(targetEntity, LOOK_MAX_ROTATION, LOOK_MAX_ROTATION);
 
         // 检查距离
         Vec3 mobPos = mob.position();
         Vec3 targetPos = targetEntity.position();
+
+        // 卡位检测：位置长时间几乎不变且未命中，认为卡住，提前失败让目标重评估
+        if (
+            lastProgressPos == null ||
+            mobPos.distanceToSqr(lastProgressPos) >
+            STUCK_DISTANCE_EPSILON * STUCK_DISTANCE_EPSILON
+        ) {
+            lastProgressPos = mobPos;
+            lastProgressTick = attemptTicks;
+        } else if (
+            !hasHit && attemptTicks - lastProgressTick >= STUCK_NO_HIT_TICKS
+        ) {
+            LOGGER.warn(
+                "[AttackAction] 持续 {} ticks 位置未变化且未命中，判定卡住，触发重评估",
+                attemptTicks - lastProgressTick
+            );
+            return ActionStatus.FAILURE;
+        }
+
         double distance = mobPos.distanceTo(targetPos);
 
-        // 主动保持近战理想距离窗口，加入滞后避免抖动
-        double upperThreshold = Math.max(
-            attackRange,
-            attackRange * DESIRED_RANGE_FACTOR + RANGE_HYSTERESIS
-        );
+        // 主动靠近：靠前一些减少脱手；攻击窗口增加缓冲避免轻微拉开就判定失败
+        double approachRange = attackRange * DESIRED_RANGE_FACTOR;
+        double attackWindowUpper = attackRange + ATTACK_RANGE_BUFFER;
+        double approachUpper = approachRange + RANGE_HYSTERESIS;
         double lowerThreshold = Math.max(
             MIN_LOWER_THRESHOLD,
-            attackRange * BACKOFF_RANGE_FACTOR - RANGE_HYSTERESIS
+            approachRange * BACKOFF_RANGE_FACTOR - RANGE_HYSTERESIS
         );
 
-        if (distance > upperThreshold) {
+        if (distance > attackWindowUpper) {
             navigateTowards(mob, targetPos);
             return ActionStatus.RUNNING;
         }
-        if (distance < lowerThreshold) {
+
+        if (distance > approachUpper) {
+            navigateTowards(mob, targetPos);
+        } else if (distance < lowerThreshold) {
             navigateAway(mob, mobPos, targetPos);
             return ActionStatus.RUNNING;
         }
@@ -246,6 +296,9 @@ public class AttackAction
         this.cooldownCounter = 0;
         this.hasHit = false;
         this.attemptTicks = 0;
+        this.unreachableTicks = 0;
+        this.lastProgressPos = null;
+        this.lastProgressTick = 0;
 
         if (entity instanceof Mob mob) {
             equipBestMeleeWeapon(mind, mob);
@@ -289,8 +342,11 @@ public class AttackAction
             // 2. 旧武器（如果有）放回原槽位
             inventory.setItem(bestSlot, toInventory);
 
-            LOGGER.info("[AttackAction] 自动切换更强武器: {} (攻: {})",
-                bestWeapon.getHoverName().getString(), bestDamage);
+            LOGGER.info(
+                "[AttackAction] 自动切换更强武器: {} (攻: {})",
+                bestWeapon.getHoverName().getString(),
+                bestDamage
+            );
         }
     }
 
@@ -301,14 +357,11 @@ public class AttackAction
         // 获取主手属性修饰符中的攻击伤害总和
         ItemAttributeModifiers modifiers = stack.getAttributeModifiers();
         final double[] damage = {0.0d};
-        modifiers.forEach(
-            EquipmentSlot.MAINHAND,
-            (attribute, modifier) -> {
-                if (attribute.equals(Attributes.ATTACK_DAMAGE)) {
-                    damage[0] += modifier.amount();
-                }
+        modifiers.forEach(EquipmentSlot.MAINHAND, (attribute, modifier) -> {
+            if (attribute.equals(Attributes.ATTACK_DAMAGE)) {
+                damage[0] += modifier.amount();
             }
-        );
+        });
         return damage[0];
     }
 

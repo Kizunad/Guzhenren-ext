@@ -3,19 +3,26 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
+import com.Kizunad.customNPCs.ai.actions.util.NavigationUtil;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import java.util.function.Predicate;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +72,9 @@ public class RangedAttackItemAction extends AbstractStandardAction {
     private static final double BACKOFF_SPEED = 1.05d;
     private static final double BACKOFF_EXTRA = 1.0d;
     private static final double MIN_TOWARDS_DISTANCE = 0.1d;
+    private static final double CLEARANCE_STEP = 2.5d;
+    private static final double HORIZONTAL_EPSILON = 1.0E-4D;
+    private static final int MAX_REPOSITION_ATTEMPTS = 3;
 
     // ==================== 充能配置 ====================
     /**
@@ -72,12 +82,12 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      */
     private static final int BOW_MIN_CHARGE_TICKS = 20;
     private static final int LONG_USE_DURATION_THRESHOLD = 60;
-    
+
     /**
      * 最大被迫近身时间（ticks）- 超过此时间无法拉开距离则视为失败
      */
     private static final int MAX_CLOSE_RANGE_TICKS = 60;
-    
+
     /**
      * 射击后的后摇时间（ticks）- 防止动作立即结束导致鬼畜重启
      */
@@ -87,6 +97,18 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 最大转头速度（度/tick）
      */
     private static final float MAX_HEAD_ROTATION = 30.0F;
+
+    /**
+     * 最小判定蓄力比例（BowItem 与玩家逻辑一致）
+     */
+    private static final float MIN_BOW_POWER = 0.1F;
+
+    /**
+     * 弓箭瞄准偏移/抛物线参数
+     */
+    private static final double TARGET_Y_OFFSET = 0.3333333333333333D;
+    private static final double ARROW_VERTICAL_FACTOR = 0.2D;
+    private static final float BOW_SPEED_MULTIPLIER = 3.0F;
 
     /**
      * 世界状态记忆时长（ticks）
@@ -103,12 +125,12 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 充能计数（拉弓/装弩时间）
      */
     private int chargeTicks;
-    
+
     /**
      * 处于最小距离内的计数器
      */
     private int closeRangeTicks;
-    
+
     /**
      * 射击后摇计数器
      */
@@ -118,6 +140,16 @@ public class RangedAttackItemAction extends AbstractStandardAction {
      * 持武器的手（主手/副手）
      */
     private InteractionHand weaponHand;
+
+    /**
+     * 当前尝试的无遮挡位置
+     */
+    private Vec3 seekingPosition;
+
+    /**
+     * 连续重定位次数
+     */
+    private int repositionAttempts;
 
     /**
      * 构造函数
@@ -130,6 +162,8 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         this.closeRangeTicks = 0;
         this.postFireTicks = 0;
         this.weaponHand = null;
+        this.seekingPosition = null;
+        this.repositionAttempts = 0;
     }
 
     @Override
@@ -140,6 +174,8 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         this.closeRangeTicks = 0;
         this.postFireTicks = 0;
         this.weaponHand = null;
+        this.seekingPosition = null;
+        this.repositionAttempts = 0;
     }
 
     @Override
@@ -154,33 +190,19 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         }
 
         // ==================== Step 1: 目标验证 ====================
-        Entity targetEntity = resolveEntity(mob.level());
-        if (!(targetEntity instanceof LivingEntity livingTarget)) {
-            LOGGER.warn("[RangedAttackItemAction] 目标不存在或非生物");
+        LivingEntity livingTarget = resolveLivingTarget(mob);
+        if (livingTarget == null) {
             return ActionStatus.FAILURE;
         }
 
         // ==================== Step 2: 距离检查 ====================
-        Vec3 targetPos = livingTarget.position();
-        Vec3 selfPos = mob.position();
-        double distance = selfPos.distanceTo(targetPos);
-        
-        if (distance < MIN_RANGE) {
-            closeRangeTicks++;
-            if (closeRangeTicks > MAX_CLOSE_RANGE_TICKS) {
-                LOGGER.debug("[RangedAttackItemAction] 被迫近身超过 {} ticks，动作失败", MAX_CLOSE_RANGE_TICKS);
-                return ActionStatus.FAILURE;
-            }
-            navigateAway(mob, selfPos, targetPos);
-            return ActionStatus.RUNNING;
-        } else {
-            closeRangeTicks = 0;
+        ActionStatus positioningStatus = handlePositioning(mob, livingTarget);
+        if (positioningStatus != null) {
+            return positioningStatus;
         }
-        
-        if (distance > MAX_RANGE) {
-            navigateTowards(mob, targetPos);
-            return ActionStatus.RUNNING;
-        }
+        double distance = mob
+            .position()
+            .distanceTo(livingTarget.position());
 
         // ==================== Step 3: 武器检查 ====================
         ItemStack main = mob.getMainHandItem();
@@ -251,13 +273,7 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         }
 
         // ==================== Step 5: 持续瞄准目标 ====================
-        mob
-            .getLookControl()
-            .setLookAt(
-                livingTarget,
-                MAX_HEAD_ROTATION, // 最大水平转速
-                MAX_HEAD_ROTATION // 最大俯仰转速
-            );
+        lookAtTarget(mob, livingTarget);
 
         // ==================== Step 6: 充能与射击 ====================
         // 弩的特殊处理
@@ -273,7 +289,14 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
         // 弓的处理
         if (weapon.getItem() instanceof BowItem) {
-            return handleBowAttack(mind, mob, weapon, livingTarget, distance);
+            return handleBowAttack(
+                mind,
+                mob,
+                weapon,
+                ammo,
+                livingTarget,
+                distance
+            );
         }
 
         // 其他远程武器（使用默认逻辑）
@@ -284,6 +307,60 @@ public class RangedAttackItemAction extends AbstractStandardAction {
             livingTarget,
             distance
         );
+    }
+
+    /**
+     * 处理距离窗口、无遮挡与重定位逻辑。
+     * @return 非 null 表示需要提前返回的动作状态；null 表示可继续执行后续步骤
+     */
+    private ActionStatus handlePositioning(
+        Mob mob,
+        LivingEntity livingTarget
+    ) {
+        Vec3 targetPos = livingTarget.position();
+        Vec3 selfPos = mob.position();
+        double distance = selfPos.distanceTo(targetPos);
+
+        if (distance < MIN_RANGE) {
+            closeRangeTicks++;
+            if (closeRangeTicks > MAX_CLOSE_RANGE_TICKS) {
+                LOGGER.debug(
+                    "[RangedAttackItemAction] 被迫近身超过 {} ticks，动作失败",
+                    MAX_CLOSE_RANGE_TICKS
+                );
+                return ActionStatus.FAILURE;
+            }
+            navigateAway(mob, selfPos, targetPos);
+            return ActionStatus.RUNNING;
+        }
+        closeRangeTicks = 0;
+
+        if (distance > MAX_RANGE) {
+            navigateTowards(mob, targetPos);
+            return ActionStatus.RUNNING;
+        }
+
+        if (!hasClearShot(mob, livingTarget)) {
+            if (!mob.getNavigation().isDone()) {
+                return ActionStatus.RUNNING;
+            }
+            if (repositionAttempts >= MAX_REPOSITION_ATTEMPTS) {
+                LOGGER.debug("[RangedAttackItemAction] 无法找到无遮挡位，动作失败");
+                return ActionStatus.FAILURE;
+            }
+            if (!tryMoveToClearShot(mob, livingTarget)) {
+                LOGGER.debug(
+                    "[RangedAttackItemAction] 路径或视线受阻，重定位失败 (lastPos={})",
+                    seekingPosition
+                );
+                return ActionStatus.FAILURE;
+            }
+            return ActionStatus.RUNNING;
+        }
+
+        seekingPosition = null;
+        repositionAttempts = 0;
+        return null;
     }
 
     /**
@@ -340,6 +417,7 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         INpcMind mind,
         Mob mob,
         ItemStack weapon,
+        ItemStack ammo,
         LivingEntity target,
         double distance
     ) {
@@ -356,8 +434,40 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
         // 弓需要至少 20 ticks 才能充满能量
         if (chargeTicks >= BOW_MIN_CHARGE_TICKS) {
-            // 释放射击
-            mob.releaseUsingItem();
+            // BowItem 默认只对玩家生效，这里手动生成箭矢以支持 NPC
+            float power = BowItem.getPowerForTime(chargeTicks);
+            if (
+                power >= MIN_BOW_POWER &&
+                mob.level() instanceof ServerLevel serverLevel
+            ) {
+                AbstractArrow arrow = ProjectileUtil.getMobArrow(
+                    mob,
+                    ammo,
+                    power,
+                    weapon
+                );
+                double dx = target.getX() - mob.getX();
+                double dz = target.getZ() - mob.getZ();
+                double dy = target.getY(TARGET_Y_OFFSET) - arrow.getY();
+                double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
+                arrow.shoot(
+                    dx,
+                    dy + horizontalDistance * ARROW_VERTICAL_FACTOR,
+                    dz,
+                    power * BOW_SPEED_MULTIPLIER,
+                    1.0F
+                );
+                serverLevel.addFreshEntity(arrow);
+                if (!ammo.isEmpty()) {
+                    ammo.shrink(1); // 消耗一支箭
+                }
+                EquipmentSlot slot =
+                    weaponHand == InteractionHand.MAIN_HAND
+                        ? EquipmentSlot.MAINHAND
+                        : EquipmentSlot.OFFHAND;
+                weapon.hurtAndBreak(1, mob, slot);
+            }
+            mob.stopUsingItem();
             fired = true;
 
             LOGGER.info(
@@ -388,7 +498,10 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         // 使用默认逻辑（与弓类似）
         if (!mob.isUsingItem()) {
             if (chargeTicks > 0) {
-                LOGGER.debug("[RangedAttackItemAction] 蓄力中断，重新开始 (was {})", chargeTicks);
+                LOGGER.debug(
+                    "[RangedAttackItemAction] 蓄力中断，重新开始 (was {})",
+                    chargeTicks
+                );
             }
             mob.startUsingItem(weaponHand);
             chargeTicks = 0;
@@ -397,13 +510,12 @@ public class RangedAttackItemAction extends AbstractStandardAction {
 
         chargeTicks++;
         int useDuration = weapon.getUseDuration(mob);
-        
+
         // 修复无限蓄力 BUG：如果持续时间很长（>60 ticks），假设它是手动释放类（如弓），使用默认蓄力时间
         // 否则（如三叉戟、特定法杖），等待 duration 结束（或接近结束）
-        int targetCharge =
-            (useDuration >= LONG_USE_DURATION_THRESHOLD)
-                ? BOW_MIN_CHARGE_TICKS
-                : (useDuration - 2);
+        int targetCharge = (useDuration >= LONG_USE_DURATION_THRESHOLD)
+            ? BOW_MIN_CHARGE_TICKS
+            : (useDuration - 2);
         targetCharge = Math.max(1, targetCharge);
 
         if (chargeTicks >= targetCharge) {
@@ -445,6 +557,102 @@ public class RangedAttackItemAction extends AbstractStandardAction {
                 true,
                 STATE_MEMORY_DURATION
             );
+    }
+
+    /**
+     * 解析并校验目标实体
+     */
+    private LivingEntity resolveLivingTarget(Mob mob) {
+        Entity targetEntity = resolveEntity(mob.level());
+        if (targetEntity instanceof LivingEntity livingTarget) {
+            return livingTarget;
+        }
+        LOGGER.warn("[RangedAttackItemAction] 目标不存在或非生物");
+        return null;
+    }
+
+    private boolean hasClearShot(Mob mob, LivingEntity target) {
+        return hasClearShotFromPosition(mob.position(), mob, target);
+    }
+
+    private boolean hasClearShotFromPosition(
+        Vec3 fromPos,
+        Mob mob,
+        LivingEntity target
+    ) {
+        Vec3 start = fromPos.add(0.0D, mob.getEyeHeight(), 0.0D);
+        Vec3 end = target.getEyePosition();
+        ClipContext context = new ClipContext(
+            start,
+            end,
+            ClipContext.Block.COLLIDER,
+            ClipContext.Fluid.NONE,
+            mob
+        );
+        HitResult result = mob.level().clip(context);
+        return result.getType() == HitResult.Type.MISS;
+    }
+
+    private boolean tryMoveToClearShot(Mob mob, LivingEntity target) {
+        Vec3 selfPos = mob.position();
+        Vec3 targetPos = target.position();
+        Vec3 forward = targetPos.subtract(selfPos);
+        Vec3 horizontal = new Vec3(forward.x, 0.0D, forward.z);
+        if (horizontal.lengthSqr() < HORIZONTAL_EPSILON) {
+            horizontal = new Vec3(1.0D, 0.0D, 0.0D);
+        } else {
+            horizontal = horizontal.normalize();
+        }
+        Vec3 right = new Vec3(-horizontal.z, 0.0D, horizontal.x);
+
+        Vec3[] offsets = new Vec3[] {
+            horizontal.scale(CLEARANCE_STEP),
+            horizontal.scale(-CLEARANCE_STEP),
+            right.scale(CLEARANCE_STEP),
+            right.scale(-CLEARANCE_STEP),
+            horizontal.add(right).normalize().scale(CLEARANCE_STEP),
+            horizontal.subtract(right).normalize().scale(CLEARANCE_STEP)
+        };
+
+        for (Vec3 offset : offsets) {
+            Vec3 candidate = selfPos.add(offset);
+            if (!isValidClearShotPosition(mob, target, candidate)) {
+                continue;
+            }
+            if (!NavigationUtil.canReachPosition(mob, candidate)) {
+                continue;
+            }
+            if (mob
+                .getNavigation()
+                .moveTo(candidate.x, candidate.y, candidate.z, APPROACH_SPEED)
+            ) {
+                seekingPosition = candidate;
+                repositionAttempts++;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isValidClearShotPosition(
+        Mob mob,
+        LivingEntity target,
+        Vec3 candidate
+    ) {
+        double distance = candidate.distanceTo(target.position());
+        if (distance < MIN_RANGE || distance > MAX_RANGE) {
+            return false;
+        }
+        return hasClearShotFromPosition(candidate, mob, target);
+    }
+
+    /**
+     * 持续朝向目标
+     */
+    private void lookAtTarget(Mob mob, LivingEntity target) {
+        mob
+            .getLookControl()
+            .setLookAt(target, MAX_HEAD_ROTATION, MAX_HEAD_ROTATION);
     }
 
     @Override
