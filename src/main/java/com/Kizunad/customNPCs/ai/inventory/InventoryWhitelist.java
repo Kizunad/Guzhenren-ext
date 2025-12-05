@@ -27,6 +27,8 @@ public final class InventoryWhitelist {
 
     static {
         addItem(Items.TOTEM_OF_UNDYING);
+        addItem(Items.GOLDEN_APPLE);
+        addItem(Items.ENCHANTED_GOLDEN_APPLE);
         addPredicate(stack -> stack.getItem() instanceof PotionItem);
         addPredicate(stack -> stack.getItem() instanceof ArmorItem);
         addPredicate(stack -> stack.getItem() instanceof TieredItem);
