@@ -1,10 +1,18 @@
 package com.Kizunad.customNPCs.ai.util;
 
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
+import java.util.Optional;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 /**
  * 盔甲评分与择优工具。
@@ -109,11 +117,46 @@ public final class ArmorEvaluationUtil {
             return 0.0;
         }
 
+        EquipmentSlot slot = armorItem.getEquipmentSlot();
         double score = 0.0;
         score += armorItem.getDefense() * preference.armorWeight();
         score += armorItem.getToughness() * preference.toughnessWeight();
 
-        // 以防未来需要扩展击退/附魔: 当前版本简化为防御+韧性+耐久
+        // 击退抗性
+        ItemAttributeModifiers modifiers = stack.getAttributeModifiers();
+        final double[] knockbackResistance = {0.0d};
+        modifiers.forEach(
+            slot,
+            (attribute, modifier) -> {
+                if (attribute.equals(Attributes.KNOCKBACK_RESISTANCE)) {
+                    knockbackResistance[0] += modifier.amount();
+                }
+            }
+        );
+        score += knockbackResistance[0] * preference.knockbackWeight();
+
+        // 附魔加成：爆炸/火焰/射击/通用保护、荆棘、耐久等
+        double enchantScore = 0.0;
+        int curseCount = 0;
+        ItemEnchantments enchantments = stack.getEnchantments();
+        for (Holder<Enchantment> holder : enchantments.keySet()) {
+            int level = enchantments.getLevel(holder);
+            if (level <= 0) {
+                continue;
+            }
+            if (holder.is(EnchantmentTags.CURSE)) {
+                curseCount++;
+            }
+            Optional<ResourceKey<Enchantment>> keyOptional = holder.unwrapKey();
+            if (keyOptional.isPresent()) {
+                ResourceKey<Enchantment> key = keyOptional.get();
+                if (ArmorEnchantmentUtil.ARMOR_ENCHANTMENTS.contains(key)) {
+                    enchantScore += level;
+                }
+            }
+        }
+        score += enchantScore * preference.enchantWeight();
+        score -= curseCount * preference.cursePenaltyWeight();
 
         // 耐久度（比例）
         if (stack.isDamageableItem()) {

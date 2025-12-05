@@ -25,6 +25,7 @@ import com.Kizunad.customNPCs.ai.decision.goals.ArmorToMaterialGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EnchantArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EnchantmentUpgradeArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CompressInventoryGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
@@ -76,6 +77,7 @@ public final class NpcMindRegistry {
         registerGoal("watch_closest_entity", WatchClosestEntityGoal::new);
         registerGoal("idle", IdleGoal::new);
         registerGoal("gather_material", GatherMaterialGoal::new);
+        registerGoal("compress_inventory", CompressInventoryGoal::new);
         registerGoal("craft_armor", CraftArmorGoal::new);
         registerGoal("upgrade_armor", UpgradeArmorGoal::new);
         registerGoal("enchant_armor", EnchantArmorGoal::new);
