@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * 使用标准动作: {@link AttackAction}
  * <p>
  * 优先级: 中高
- * 触发条件: 受到攻击 且 攻击力 > 0
+ * 触发条件: 近期受到攻击/威胁 且 攻击力 > 0
  */
 public class DefendGoal implements IGoal {
 
@@ -44,7 +44,7 @@ public class DefendGoal implements IGoal {
     private static final double MIN_ATTACK_DAMAGE = 1.0; // 触发防御逻辑所需的最小攻击伤害阈值
     private static final float PRIORITY_RECENT_HIT = 0.7f; // 最近一次受击在防御优先级计算中的权重
     private static final float PRIORITY_MEMORY = 0.65f; // 记忆中受击事件在防御优先级计算中的权重
-    private static final int DEFEND_COOLDOWN_TICKS = 80; // 防御动作后的冷却时间（80 tick），防止频繁重复进入防御状态
+    private static final int DEFEND_COOLDOWN_TICKS = 160; // 防御动作后的冷却时间（160 tick），防止频繁重复进入防御状态
     private static final double RANGED_TRIGGER_MIN = 10.0d; // 进入远程模式的最小距离（格）
     private static final double BLOCK_RANGE_MAX = 3.5d; // NPC 进行格挡的最大有效距离（以方块为单位）
 
@@ -63,17 +63,23 @@ public class DefendGoal implements IGoal {
 
     @Override
     public float getPriority(INpcMind mind, LivingEntity entity) {
-        // 如果最近受到攻击且有反击能力
-        if (entity.hurtTime > 0 && canDefend(entity)) {
+        if (!canDefend(entity)) {
+            return 0.0f;
+        }
+
+        boolean recentlyHurt = entity.hurtTime > 0;
+        boolean recentThreatMemory =
+            mind.getMemory().hasMemory("under_attack") ||
+            mind.getMemory().hasMemory("current_threat_id");
+
+        // 如果最近受到攻击且有反击能力（即时事件权重大）
+        if (recentlyHurt) {
             // 中高优先级，但低于逃跑
             return PRIORITY_RECENT_HIT;
         }
 
-        // 如果Memory中记录了攻击者
-        if (
-            mind.getMemory().hasMemory("last_attacker") ||
-            mind.getMemory().hasMemory("current_threat_id")
-        ) {
+        // 仅在短期威胁窗口内才进入防御，避免旧攻击者记忆导致反复触发
+        if (recentThreatMemory) {
             return PRIORITY_MEMORY;
         }
 
@@ -82,13 +88,13 @@ public class DefendGoal implements IGoal {
 
     @Override
     public boolean canRun(INpcMind mind, LivingEntity entity) {
-        // 最近受到攻击或Memory中有攻击者，且有反击能力，且未处于防御冷却
-        boolean wasHurt =
+        // 最近受到攻击或短期威胁记忆存在，且有反击能力，且未处于防御冷却
+        boolean recentThreat =
             entity.hurtTime > 0 ||
-            mind.getMemory().hasMemory("last_attacker") ||
+            mind.getMemory().hasMemory("under_attack") ||
             mind.getMemory().hasMemory("current_threat_id");
         boolean onCooldown = mind.getMemory().hasMemory("defend_cooldown");
-        return wasHurt && canDefend(entity) && !onCooldown;
+        return recentThreat && canDefend(entity) && !onCooldown;
     }
 
     @Override

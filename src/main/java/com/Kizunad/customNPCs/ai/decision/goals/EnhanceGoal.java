@@ -95,36 +95,14 @@ public class EnhanceGoal implements IGoal {
     }
 
     /**
-     * 选择当前增益最低的方向，避免某一项收益过高。
+     * 随机选取增益方向，避免长期偏向某一属性。
      */
     private EnhanceAttributeAction.AttributeDirection pickDirection(
         CustomNpcEntity npc
     ) {
-        float strength = npc.getStrengthBonus();
-        float health = npc.getHealthBonus();
-        float speed = npc.getSpeedBonus();
-        float defense = npc.getDefenseBonus();
-        float sensor = npc.getSensorBonus();
-
-        float min = strength;
-        EnhanceAttributeAction.AttributeDirection dir =
-            EnhanceAttributeAction.AttributeDirection.STRENGTH;
-
-        if (health < min) {
-            min = health;
-            dir = EnhanceAttributeAction.AttributeDirection.HEALTH;
-        }
-        if (speed < min) {
-            min = speed;
-            dir = EnhanceAttributeAction.AttributeDirection.SPEED;
-        }
-        if (defense < min) {
-            min = defense;
-            dir = EnhanceAttributeAction.AttributeDirection.DEFENSE;
-        }
-        if (sensor < min) {
-            dir = EnhanceAttributeAction.AttributeDirection.SENSOR;
-        }
-        return dir;
+        EnhanceAttributeAction.AttributeDirection[] directions =
+            EnhanceAttributeAction.AttributeDirection.values();
+        int idx = npc.getRandom().nextInt(directions.length);
+        return directions[idx];
     }
 }

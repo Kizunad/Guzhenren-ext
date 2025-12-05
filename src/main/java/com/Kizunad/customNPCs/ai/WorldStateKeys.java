@@ -166,6 +166,43 @@ public final class WorldStateKeys {
      */
     public static final String HAS_FOOD = "has_food";
 
+    // ==================== 关系 / 指令 ====================
+    /**
+     * 主人 UUID
+     */
+    public static final String OWNER_UUID = "owner_uuid";
+
+    /**
+     * 当前指令类型（字符串，枚举名称）
+     */
+    public static final String CURRENT_COMMAND = "current_command";
+
+    /**
+     * 当前关系类型（字符串，如 HIRED / OPPRESSED）
+     */
+    public static final String RELATIONSHIP_TYPE = "relationship_type";
+
+    /**
+     * 是否已接近主人（跟随指令使用）
+     */
+    public static final String NEAR_OWNER = "near_owner";
+
+    // ==================== 关系流程状态 ====================
+    /**
+     * 雇佣所需价值（double）
+     */
+    public static final String HIRE_REQUIRED_VALUE = "hire_required_value";
+
+    /**
+     * 雇佣候选玩家 UUID
+     */
+    public static final String HIRE_CANDIDATE = "hire_candidate";
+
+    /**
+     * 是否正在进行雇佣流程
+     */
+    public static final String HIRE_PENDING = "hire_pending";
+
     // ==================== 工具方法 ====================
     /**
      * 生成"拥有物品"的状态键

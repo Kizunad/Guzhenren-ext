@@ -55,11 +55,6 @@ public class MemoryModule {
      * @param key 记忆键
      * @return 记忆值，如果不存在返回 null
      */
-    /**
-     * 获取记忆（先查短期，再查长期）
-     * @param key 记忆键
-     * @return 记忆值，如果不存在返回 null
-     */
     public Object recall(String key) {
         MemoryEntry entry = shortTermMemory.get(key);
         if (entry != null && !entry.isExpired()) {
@@ -88,13 +83,24 @@ public class MemoryModule {
      * @param key 记忆键
      * @return 记忆值
      */
-    /**
-     * 获取记忆值（recall 的别名）
-     * @param key 记忆键
-     * @return 记忆值
-     */
     public Object getMemory(String key) {
         return recall(key);
+    }
+
+    /**
+     * 获取记忆值（带类型转换）
+     * @param key 记忆键
+     * @param type 目标类型
+     * @return 记忆值，如果不存在或类型不匹配则返回 null
+     * @param <T> 类型参数
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getMemory(String key, Class<T> type) {
+        Object value = recall(key);
+        if (value != null && type.isInstance(value)) {
+            return (T) value;
+        }
+        return null;
     }
 
     /**

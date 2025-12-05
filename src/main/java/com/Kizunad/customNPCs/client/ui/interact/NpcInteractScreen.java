@@ -269,13 +269,10 @@ public class NpcInteractScreen extends TinyUIScreen {
         currentY += BUTTON_HEIGHT + BUTTON_GAP;
 
         if (isOwner) {
-            Button owner = createActionButton("Owner Opts", () ->
-                sendAction(
-                    InteractActionPayload.ActionType.CUSTOM,
-                    rl("owner_opts"),
-                    null
-                )
-            );
+            Button owner = createActionButton("Owner Opts", () -> {
+                dialogueMode = true;
+                syncVisibility();
+            });
             owner.setFrame(
                 BUTTON_INNER_PADDING,
                 currentY,

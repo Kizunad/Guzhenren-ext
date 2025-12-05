@@ -33,4 +33,10 @@ public final class ModMenus {
             "npc_gift",
             () -> IMenuTypeExtension.create(NpcGiftMenu::fromNetwork)
         );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<NpcHireMenu>> NPC_HIRE =
+        MENUS.register(
+            "npc_hire",
+            () -> IMenuTypeExtension.create(NpcHireMenu::fromNetwork)
+        );
 }

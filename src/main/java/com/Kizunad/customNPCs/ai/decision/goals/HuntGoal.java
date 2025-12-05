@@ -14,12 +14,10 @@ import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.Comparator;
 import java.util.UUID;
 import java.util.function.Predicate;
-import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -28,15 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 猎杀弱小生物的 Goal。
+ * 猎杀弱小/残血生物的 Goal。
  * <p>
- * 逻辑：在安全状态下寻找比自身弱小的非友方实体，根据距离和装备智能选择近战或远程攻击。
+ * 逻辑：在安全状态下寻找当前血量低于 80% 的非友方实体，根据距离和装备选择近战或远程攻击。
  * 优先级：中等，低于逃跑/防御等保命类目标。
  */
 public class HuntGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "HuntGoal: when healthy/safe, seek weaker non-friendly targets; " +
+        "HuntGoal: when healthy/safe, seek non-friendly targets whose HP ratio is <= 80%; " +
         "switches between Melee and Ranged based on distance and equipment.";
 
     static {
@@ -47,11 +45,9 @@ public class HuntGoal implements IGoal {
         HuntGoal.class
     );
     private static final double SEARCH_RADIUS = 12.0D;
-    private static final double WEAKNESS_THRESHOLD = 0.8D; // 目标综合评分需低于此比例
-    private static final float BASE_PRIORITY = 0.35f; // 明确低于 Flee/Defend
-    private static final float PRIORITY_GAIN = 0.25f;
+    private static final double PREY_HEALTH_RATIO = 0.8D; // 目标当前血量占比阈值
+    private static final float BASE_PRIORITY = 0.6f; // 提高基础优先级，简化为固定值
     private static final float SAFE_HEALTH_RATIO = 0.6f; // 血量低于此值不主动出击
-    private static final double DISTANCE_WEIGHT = 0.05D; // 轻度偏好近目标
     private static final int ATTACK_TIMEOUT_TICKS = 200; // 近战最长尝试时间（10s）
     private static final double RANGED_MIN_DIST = 4.0D; // 远程切换阈值
     private static final double LOW_VALUE_HP_RATIO = 0.08D; // 低价值目标阈值
@@ -61,7 +57,6 @@ public class HuntGoal implements IGoal {
     private final int attackCooldownTicks;
     private AbstractStandardAction attackAction;
     private UUID targetUuid;
-    private double cachedAdvantageRatio = 0.0D;
 
     public HuntGoal() {
         ActionConfig config = ActionConfig.getInstance();
@@ -78,9 +73,7 @@ public class HuntGoal implements IGoal {
         if (target == null) {
             return 0.0f;
         }
-        // 优先级随优势提升，但上限控制在中等水平，避免压过保命目标
-        double clamped = Math.min(1.0D, Math.max(0.0D, cachedAdvantageRatio));
-        float priority = BASE_PRIORITY + (float) (clamped * PRIORITY_GAIN);
+        float priority = BASE_PRIORITY;
         if (isLowValueTarget(target)) {
             priority *= LOW_VALUE_PRIORITY_FACTOR;
         }
@@ -239,7 +232,7 @@ public class HuntGoal implements IGoal {
         return (
             target == null ||
             !target.isAlive() ||
-            !isTargetWeak(entity, target) ||
+            !isPrey(target) ||
             entity.distanceTo(target) > SEARCH_RADIUS
         );
     }
@@ -268,9 +261,7 @@ public class HuntGoal implements IGoal {
         );
     }
 
-    /**
-     * 保障有有效的目标，并缓存优势比。
-     */
+    /** 保障有有效的目标，并记录目标 UUID。 */
     private LivingEntity ensureTarget(LivingEntity hunter) {
         if (!(hunter instanceof Mob mob)) {
             return null;
@@ -278,20 +269,14 @@ public class HuntGoal implements IGoal {
         LivingEntity current = resolveTarget(hunter);
         if (
             current != null &&
-            isTargetWeak(hunter, current) &&
+            isPrey(current) &&
             hunter.distanceTo(current) <= SEARCH_RADIUS &&
             isReachable(mob, current)
         ) {
-            cachedAdvantageRatio = computeAdvantageRatio(hunter, current);
             return current;
         }
-        LivingEntity selected = selectWeakTarget(mob);
+        LivingEntity selected = selectPreyTarget(mob);
         targetUuid = selected == null ? null : selected.getUUID();
-        if (selected != null) {
-            cachedAdvantageRatio = computeAdvantageRatio(hunter, selected);
-        } else {
-            cachedAdvantageRatio = 0.0D;
-        }
         return selected;
     }
 
@@ -315,13 +300,12 @@ public class HuntGoal implements IGoal {
     }
 
     /**
-     * 在搜索范围内选择最弱且最近的合法目标。
+     * 在搜索范围内选择血量低于阈值且最近的合法目标。
      */
-    private LivingEntity selectWeakTarget(Mob hunter) {
+    private LivingEntity selectPreyTarget(Mob hunter) {
         if (!(hunter.level() instanceof ServerLevel serverLevel)) {
             return null;
         }
-        double hunterScore = computeStrengthScore(hunter);
         AABB box = hunter.getBoundingBox().inflate(SEARCH_RADIUS);
 
         return serverLevel
@@ -330,17 +314,8 @@ public class HuntGoal implements IGoal {
             )
             .stream()
             .filter(target -> isReachable(hunter, target))
-            .map(target ->
-                new TargetCandidate(
-                    target,
-                    hunterScore,
-                    computeStrengthScore(target),
-                    hunter.distanceToSqr(target)
-                )
-            )
-            .filter(candidate -> candidate.isWeakerThanHunter())
-            .max(Comparator.comparingDouble(TargetCandidate::score))
-            .map(TargetCandidate::entity)
+            .filter(this::isPrey)
+            .min(Comparator.comparingDouble(hunter::distanceToSqr))
             .orElse(null);
     }
 
@@ -364,42 +339,15 @@ public class HuntGoal implements IGoal {
     }
 
     /**
-     * 目标强度需明显低于猎手。
+     * 判定目标血量是否低于猎杀阈值。
      */
-    private boolean isTargetWeak(LivingEntity hunter, LivingEntity target) {
-        double hunterScore = computeStrengthScore(hunter);
-        double targetScore = computeStrengthScore(target);
-        return (
-            targetScore > 0 && targetScore <= hunterScore * WEAKNESS_THRESHOLD
-        );
-    }
-
-    private double computeStrengthScore(LivingEntity entity) {
-        double attack = getAttributeValue(entity, Attributes.ATTACK_DAMAGE);
-        double health = entity.getMaxHealth();
-        double armor = getAttributeValue(entity, Attributes.ARMOR);
-        return health + attack * 2.0D + armor;
-    }
-
-    private double computeAdvantageRatio(
-        LivingEntity hunter,
-        LivingEntity target
-    ) {
-        double hunterScore = computeStrengthScore(hunter);
-        double targetScore = computeStrengthScore(target);
-        if (hunterScore <= 0) {
-            return 0.0D;
+    private boolean isPrey(LivingEntity target) {
+        double max = target.getMaxHealth();
+        if (max <= 0.0D) {
+            return false;
         }
-        double gap = hunterScore - targetScore;
-        return Math.max(0.0D, gap / hunterScore);
-    }
-
-    private double getAttributeValue(
-        LivingEntity entity,
-        Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute
-    ) {
-        var instance = entity.getAttribute(attribute);
-        return instance == null ? 0.0D : instance.getValue();
+        double ratio = target.getHealth() / max;
+        return ratio <= PREY_HEALTH_RATIO;
     }
 
     /**
@@ -414,29 +362,4 @@ public class HuntGoal implements IGoal {
         return ratio <= LOW_VALUE_HP_RATIO;
     }
 
-    /**
-     * 目标候选包装，便于按优势与距离综合排序。
-     */
-    private record TargetCandidate(
-        LivingEntity entity,
-        double hunterScore,
-        double targetScore,
-        double distanceSqr
-    ) {
-        boolean isWeakerThanHunter() {
-            return (
-                targetScore > 0 &&
-                targetScore <= hunterScore * WEAKNESS_THRESHOLD
-            );
-        }
-
-        double score() {
-            double advantageRatio = Math.max(
-                0.0D,
-                (hunterScore - targetScore) / hunterScore
-            );
-            double distancePenalty = Math.sqrt(distanceSqr) * DISTANCE_WEIGHT;
-            return advantageRatio - distancePenalty;
-        }
-    }
 }

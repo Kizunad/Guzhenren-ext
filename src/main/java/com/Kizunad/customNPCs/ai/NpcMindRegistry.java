@@ -14,6 +14,7 @@ import com.Kizunad.customNPCs.ai.decision.goals.CraftItemGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.DefendGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.GatherMaterialGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CommandGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.BrewHealingPotionGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.UpgradeArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftArmorGoal;
@@ -21,6 +22,8 @@ import com.Kizunad.customNPCs.ai.decision.goals.CraftSwordGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftUndyingTotemGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.EquipShieldGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.ArmorToMaterialGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.EnchantArmorGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.EnchantmentUpgradeArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.FleeGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
@@ -69,11 +72,17 @@ public final class NpcMindRegistry {
     static {
         // 注册内置组件，保持与现有默认行为一致
         registerGoal("survival", SurvivalGoal::new);
+        registerGoal("command", CommandGoal::new);
         registerGoal("watch_closest_entity", WatchClosestEntityGoal::new);
         registerGoal("idle", IdleGoal::new);
         registerGoal("gather_material", GatherMaterialGoal::new);
         registerGoal("craft_armor", CraftArmorGoal::new);
         registerGoal("upgrade_armor", UpgradeArmorGoal::new);
+        registerGoal("enchant_armor", EnchantArmorGoal::new);
+        registerGoal(
+            "enchantment_upgrade_armor",
+            EnchantmentUpgradeArmorGoal::new
+        );
         registerGoal("armor_to_material", ArmorToMaterialGoal::new);
         registerGoal("craft_sword", CraftSwordGoal::new);
         registerGoal("upgrade_sword", UpgradeSwordGoal::new);
@@ -252,6 +261,8 @@ public final class NpcMindRegistry {
             }
         }
 
+        mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.CommandGoal());
+        mind.getGoalSelector().registerGoal(new com.Kizunad.customNPCs.ai.decision.goals.IdleGoal());
         for (IGoal goal : createGoals()) {
             if (!mind.getGoalSelector().containsGoal(goal.getName())) {
                 mind.getGoalSelector().registerGoal(goal);

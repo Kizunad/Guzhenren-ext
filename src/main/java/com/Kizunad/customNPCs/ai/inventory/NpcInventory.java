@@ -165,6 +165,29 @@ public class NpcInventory implements Container {
         return items.size();
     }
 
+    /**
+     * 统计非空槽位数量。
+     */
+    public int getFilledSlotCount() {
+        int count = 0;
+        for (ItemStack stack : items) {
+            if (!stack.isEmpty()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 背包填充比例（0.0-1.0）。
+     */
+    public float getFillRatio() {
+        if (items.isEmpty()) {
+            return 0.0F;
+        }
+        return (float) getFilledSlotCount() / (float) items.size();
+    }
+
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         ContainerHelper.saveAllItems(tag, items, provider);

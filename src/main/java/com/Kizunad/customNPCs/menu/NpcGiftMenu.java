@@ -5,7 +5,6 @@ import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.tinyUI.demo.TinyUISlot;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -132,11 +131,7 @@ public class NpcGiftMenu extends AbstractContainerMenu {
         if (id != CONFIRM_BUTTON_ID || npc == null || npcInventory == null) {
             return false;
         }
-        if (!(player instanceof ServerPlayer)) {
-            return false;
-        }
         transferGiftsToNpc();
-        // 清空并关闭
         giftSlots.clearContent();
         player.closeContainer();
         return true;

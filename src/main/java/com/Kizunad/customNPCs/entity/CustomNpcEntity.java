@@ -1,8 +1,10 @@
 package com.Kizunad.customNPCs.entity;
 
 import com.Kizunad.customNPCs.CustomNPCsMod;
+import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.config.NpcAttributeDefaults;
 import com.Kizunad.customNPCs.ai.status.StatusProviderRegistry;
+import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.util.SkinPool;
 import com.Kizunad.customNPCs.network.OpenInteractGuiPayload;
 import com.Kizunad.customNPCs.network.dto.DialogueOption;
@@ -36,8 +38,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import net.minecraft.network.chat.Component;
 
 /**
  * 专属自定义 NPC 实体，运行自研 AI（NpcMind + Sensors + Actions）。
@@ -130,6 +137,31 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final double INTERACT_DISTANCE = 20.0D;
     private static final double INTERACT_DISTANCE_SQR =
         INTERACT_DISTANCE * INTERACT_DISTANCE;
+    private static final String DODGE_COUNTER_TAG = "dodge_counterattack";
+    private static final float COUNTER_DAMAGE_RATIO = 0.6F;
+    private static final double BASE_DODGE_CHANCE = 0.15D;
+    private static final double MAX_DODGE_CHANCE = 0.85D;
+    private static final double MIN_DODGE_CHANCE = 0.05D;
+    private static final double DAMAGE_PRESSURE_FACTOR = 0.05D;
+    private static final double SPEED_BONUS_FACTOR = 0.05D;
+    private static final double COUNTER_MAX_CHANCE = 0.65D;
+    private static final double COUNTER_BASE_CHANCE = 0.2D;
+    private static final double COUNTER_SPEED_FACTOR = 0.6D;
+    private static final double COUNTER_MIN_CHANCE = 0.05D;
+    private static final double DODGE_DIVISOR_EPSILON = 0.1D;
+    private static final double MITIGATION_BASE = 0.25D;
+    private static final double MITIGATION_SPEED_FACTOR = 0.35D;
+    private static final double MITIGATION_ATTACKER_FACTOR = 0.15D;
+    private static final double MITIGATION_MIN = 0.2D;
+    private static final double MITIGATION_MAX = 0.75D;
+    private static final double DASH_BASE_STRENGTH = 0.35D;
+    private static final double DASH_SPEED_FACTOR = 0.8D;
+    private static final double DASH_MIN = 0.35D;
+    private static final double DASH_MAX = 1.25D;
+    private static final double DASH_VERTICAL_BOOST = 0.1D;
+    private static final double SPEED_SCALE_DIVISOR_EPSILON = 0.1D;
+    private static final double COUNTER_SPEED_SCALE_MIN = 0.5D;
+    private static final double COUNTER_SPEED_SCALE_MAX = 1.5D;
 
     private int waterTeleportCooldown = 0;
     /**
@@ -214,9 +246,33 @@ public class CustomNpcEntity extends PathfinderMob {
         ) {
             return;
         }
+        var mind = this.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            return;
+        }
         var statuses = StatusProviderRegistry.collect(this);
-        var options = java.util.Collections.<DialogueOption>emptyList();
-        boolean isOwner = false;
+        List<DialogueOption> options = new ArrayList<>();
+        UUID ownerId = mind.getMemory().getMemory(
+            WorldStateKeys.OWNER_UUID,
+            UUID.class
+        );
+        boolean isOwner = ownerId != null &&
+            ownerId.equals(serverPlayer.getUUID());
+        if (ownerId == null) {
+            options.add(createOption("Hire", "hire"));
+            options.add(createOption("Oppress", "oppress"));
+        } else if (isOwner) {
+            options.add(createOption("Orders", "orders"));
+            options.add(createOption("Dismiss", "dismiss"));
+        } else {
+            String ownerName = resolveOwnerName(serverPlayer, ownerId);
+            options.add(
+                createOption(
+                    "This NPC belongs to " + ownerName,
+                    "owned_info"
+                )
+            );
+        }
         PacketDistributor.sendToPlayer(
             serverPlayer,
             new OpenInteractGuiPayload(
@@ -229,6 +285,28 @@ public class CustomNpcEntity extends PathfinderMob {
                 options
             )
         );
+    }
+
+    private DialogueOption createOption(String text, String actionPath) {
+        return new DialogueOption(
+            Component.literal(text),
+            ResourceLocation.fromNamespaceAndPath(
+                CustomNPCsMod.MODID,
+                actionPath
+            ),
+            ""
+        );
+    }
+
+    private String resolveOwnerName(ServerPlayer viewer, UUID ownerId) {
+        ServerPlayer owner = viewer
+            .server
+            .getPlayerList()
+            .getPlayer(ownerId);
+        if (owner != null) {
+            return owner.getName().getString();
+        }
+        return ownerId.toString();
     }
 
     @Override
@@ -435,6 +513,130 @@ public class CustomNpcEntity extends PathfinderMob {
             itemEntity.setItem(remaining);
         }
         super.pickUpItem(itemEntity);
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        float adjustedDamage = amount;
+        if (!this.level().isClientSide() && amount > 0.0F) {
+            adjustedDamage = this.applyDashOnDamage(source, amount);
+        }
+        return super.hurt(source, adjustedDamage);
+    }
+
+    /**
+     * Dash 技能：受击时基于攻防速度与伤害强度判定闪避、减伤，并可能触发“闪避反击”。
+     * 算法输入：攻击方移动速度、原始伤害值、NPC 移动速度、customnpcs:speed_bonus。
+     * @param source 伤害来源
+     * @param incomingDamage 原始伤害
+     * @return 处理后的伤害值
+     */
+    private float applyDashOnDamage(DamageSource source, float incomingDamage) {
+        if (!(source.getEntity() instanceof LivingEntity attacker)) {
+            return incomingDamage;
+        }
+
+        double attackerSpeed =
+            attacker.getAttributeValue(Attributes.MOVEMENT_SPEED);
+        double npcSpeed = this.getAttributeValue(Attributes.MOVEMENT_SPEED);
+        double speedBonus = this.getSpeedBonus();
+        double agilityScore = npcSpeed + speedBonus * SPEED_BONUS_FACTOR;
+        double pressureScore =
+            attackerSpeed + incomingDamage * DAMAGE_PRESSURE_FACTOR;
+
+        double dodgeChance = Mth.clamp(
+            BASE_DODGE_CHANCE +
+            agilityScore / (pressureScore + DODGE_DIVISOR_EPSILON),
+            MIN_DODGE_CHANCE,
+            MAX_DODGE_CHANCE
+        );
+        if (this.getRandom().nextDouble() >= dodgeChance) {
+            return incomingDamage;
+        }
+
+        this.performDashMovement(agilityScore);
+
+        double mitigationRatio = Mth.clamp(
+            MITIGATION_BASE +
+            agilityScore * MITIGATION_SPEED_FACTOR -
+            attackerSpeed * MITIGATION_ATTACKER_FACTOR,
+            MITIGATION_MIN,
+            MITIGATION_MAX
+        );
+        float mitigatedDamage =
+            (float) (incomingDamage * (1.0D - mitigationRatio));
+
+        this.tryCounterAttack(attacker, attackerSpeed, agilityScore);
+
+        return Math.max(0.0F, mitigatedDamage);
+    }
+
+    /**
+     * 闪避位移：随机水平偏转并稍微抬升，避免原地挨打。
+     * @param agilityScore 速度综合评分
+     */
+    private void performDashMovement(double agilityScore) {
+        double dashStrength = Mth.clamp(
+            DASH_BASE_STRENGTH + agilityScore * DASH_SPEED_FACTOR,
+            DASH_MIN,
+            DASH_MAX
+        );
+        double angle = this.getRandom().nextDouble() * (Math.PI * 2.0D);
+        Vec3 dashVector = new Vec3(
+            Math.cos(angle),
+            DASH_VERTICAL_BOOST,
+            Math.sin(angle)
+        )
+            .normalize()
+            .scale(dashStrength);
+        this.setDeltaMovement(this.getDeltaMovement().add(dashVector));
+        this.hasImpulse = true;
+    }
+
+    /**
+     * 闪避成功后的反击判定。
+     * @param attacker 攻击者
+     * @param attackerSpeed 攻击者速度
+     * @param agilityScore NPC 速度评分
+     */
+    private void tryCounterAttack(
+        LivingEntity attacker,
+        double attackerSpeed,
+        double agilityScore
+    ) {
+        if (!attacker.isAlive()) {
+            return;
+        }
+        double counterChance = Mth.clamp(
+            COUNTER_BASE_CHANCE +
+            (agilityScore - attackerSpeed) * COUNTER_SPEED_FACTOR,
+            COUNTER_MIN_CHANCE,
+            COUNTER_MAX_CHANCE
+        );
+        if (this.getRandom().nextDouble() >= counterChance) {
+            return;
+        }
+        double speedScale = Mth.clamp(
+            agilityScore / (attackerSpeed + SPEED_SCALE_DIVISOR_EPSILON),
+            COUNTER_SPEED_SCALE_MIN,
+            COUNTER_SPEED_SCALE_MAX
+        );
+        float counterDamage = (float) (
+            this.getAttributeValue(Attributes.ATTACK_DAMAGE) *
+            COUNTER_DAMAGE_RATIO *
+            speedScale
+        );
+        DamageSource baseSource = this.damageSources().mobAttack(this);
+        DamageSource counterSource = new DamageSource(
+            baseSource.typeHolder(),
+            this
+        ) {
+            @Override
+            public String getMsgId() {
+                return DODGE_COUNTER_TAG;
+            }
+        };
+        attacker.hurt(counterSource, counterDamage);
     }
 
     @Override
