@@ -147,7 +147,9 @@ public abstract class UIElement {
         }
         onRender(context, mouseX, mouseY, partialTicks);
         for (final UIElement child : children) {
-            child.render(context, mouseX, mouseY, partialTicks);
+            if (shouldRenderChild(child, mouseX, mouseY, partialTicks)) {
+                child.render(context, mouseX, mouseY, partialTicks);
+            }
         }
     }
 
@@ -181,5 +183,17 @@ public abstract class UIElement {
 
     protected void onDetachedFromParent(final UIElement oldParent) {
         // 钩子：子类可覆写。
+    }
+
+    /**
+     * 子类可覆写以裁剪或过滤子元素的渲染。
+     */
+    protected boolean shouldRenderChild(
+        final UIElement child,
+        final double mouseX,
+        final double mouseY,
+        final float partialTicks
+    ) {
+        return true;
     }
 }

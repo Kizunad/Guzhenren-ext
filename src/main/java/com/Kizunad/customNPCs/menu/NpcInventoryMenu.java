@@ -2,32 +2,23 @@ package com.Kizunad.customNPCs.menu;
 
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
+import com.Kizunad.tinyUI.demo.TinyUISlot;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.entity.Entity;
-import com.Kizunad.tinyUI.demo.TinyUISlot;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.SimpleContainer;
 
 public class NpcInventoryMenu extends AbstractContainerMenu {
 
     private static final int ARMOR_SLOT_COUNT = 4;
-    public static final int NPC_MAIN_START = 0;
-    public static final int NPC_MAIN_COUNT = NpcInventory.MAIN_SIZE;
-    public static final int NPC_EQUIP_START = NPC_MAIN_START + NPC_MAIN_COUNT;
+    private static final int NPC_MAIN_START = 0;
     public static final int NPC_EQUIP_COUNT = 1 + ARMOR_SLOT_COUNT + 1; // main hand + armor + offhand
-    public static final int EQUIP_MAIN_HAND_INDEX = NPC_EQUIP_START;
-    public static final int EQUIP_ARMOR_START = EQUIP_MAIN_HAND_INDEX + 1;
-    public static final int EQUIP_ARMOR_COUNT = ARMOR_SLOT_COUNT;
-    public static final int EQUIP_OFFHAND_INDEX =
-        EQUIP_ARMOR_START + EQUIP_ARMOR_COUNT;
-    public static final int TOTAL_NPC_SLOTS = NPC_EQUIP_START + NPC_EQUIP_COUNT;
-
     private static final int PLAYER_INV_ROWS = 3;
     private static final int PLAYER_INV_COLS = 9;
     private static final int HIDDEN_POS = -10000;
@@ -36,6 +27,12 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
     private final NpcInventory inventory;
     private final CustomNpcEntity npc;
     private final Level level;
+    private final int npcMainCount;
+    private final int npcEquipStart;
+    private final int equipMainHandIndex;
+    private final int equipArmorStart;
+    private final int equipOffhandIndex;
+    private final int totalNpcSlots;
 
     public NpcInventoryMenu(
         int containerId,
@@ -44,18 +41,27 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
         NpcInventory inventory
     ) {
         super(ModMenus.NPC_INVENTORY.get(), containerId);
-        this.inventory = inventory;
+        this.inventory = inventory != null ? inventory : new NpcInventory();
         this.npc = npc;
         this.level = playerInventory.player.level();
-        if (inventory != null) {
-            inventory.setViewer(playerInventory.player);
-        }
+        this.inventory.setViewer(playerInventory.player);
+
+        this.npcMainCount = this.inventory.getMainSize();
+        this.npcEquipStart = NPC_MAIN_START + npcMainCount;
+        this.equipMainHandIndex = npcEquipStart;
+        this.equipArmorStart = equipMainHandIndex + 1;
+        this.equipOffhandIndex = equipArmorStart + ARMOR_SLOT_COUNT;
+        this.totalNpcSlots = npcEquipStart + NPC_EQUIP_COUNT;
 
         addNpcSlots();
         addPlayerSlots(playerInventory);
     }
 
-    public static NpcInventoryMenu fromNetwork(int containerId, Inventory inv, FriendlyByteBuf buf) {
+    public static NpcInventoryMenu fromNetwork(
+        int containerId,
+        Inventory inv,
+        FriendlyByteBuf buf
+    ) {
         int entityId = buf.readVarInt();
         Level level = inv.player.level();
         Entity entity = level.getEntity(entityId);
@@ -63,22 +69,34 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
             var mind = custom.getData(
                 com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment.NPC_MIND
             );
-            return new NpcInventoryMenu(containerId, inv, custom, mind.getInventory());
+            return new NpcInventoryMenu(
+                containerId,
+                inv,
+                custom,
+                mind.getInventory()
+            );
         }
         return new NpcInventoryMenu(containerId, inv, null, new NpcInventory());
     }
 
     private void addNpcSlots() {
-        // 主背包 4 行 x 9
-        for (int i = 0; i < NPC_MAIN_COUNT; i++) {
-            addSlot(new TinyUISlot(inventory, NPC_MAIN_START + i, HIDDEN_POS, HIDDEN_POS));
+        // 主背包
+        for (int i = 0; i < npcMainCount; i++) {
+            addSlot(
+                new TinyUISlot(
+                    inventory,
+                    NPC_MAIN_START + i,
+                    HIDDEN_POS,
+                    HIDDEN_POS
+                )
+            );
         }
         // 主手
         addSlot(
             new EquipmentSlotProxy(
                 npc,
                 EquipmentSlot.MAINHAND,
-                EQUIP_MAIN_HAND_INDEX,
+                equipMainHandIndex,
                 HIDDEN_POS,
                 HIDDEN_POS
             )
@@ -88,7 +106,7 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
             new EquipmentSlotProxy(
                 npc,
                 EquipmentSlot.HEAD,
-                EQUIP_ARMOR_START,
+                equipArmorStart,
                 HIDDEN_POS,
                 HIDDEN_POS
             )
@@ -97,7 +115,7 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
             new EquipmentSlotProxy(
                 npc,
                 EquipmentSlot.CHEST,
-                EQUIP_ARMOR_START + 1,
+                equipArmorStart + 1,
                 HIDDEN_POS,
                 HIDDEN_POS
             )
@@ -106,7 +124,7 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
             new EquipmentSlotProxy(
                 npc,
                 EquipmentSlot.LEGS,
-                EQUIP_ARMOR_START + 2,
+                equipArmorStart + 2,
                 HIDDEN_POS,
                 HIDDEN_POS
             )
@@ -115,7 +133,7 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
             new EquipmentSlotProxy(
                 npc,
                 EquipmentSlot.FEET,
-                EQUIP_ARMOR_START + (ARMOR_SLOT_COUNT - 1),
+                equipArmorStart + (ARMOR_SLOT_COUNT - 1),
                 HIDDEN_POS,
                 HIDDEN_POS
             )
@@ -125,7 +143,7 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
             new EquipmentSlotProxy(
                 npc,
                 EquipmentSlot.OFFHAND,
-                EQUIP_OFFHAND_INDEX,
+                equipOffhandIndex,
                 HIDDEN_POS,
                 HIDDEN_POS
             )
@@ -137,12 +155,21 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
         for (int row = 0; row < PLAYER_INV_ROWS; row++) {
             for (int col = 0; col < PLAYER_INV_COLS; col++) {
                 int index = col + row * PLAYER_INV_COLS + PLAYER_INV_COLS;
-                addSlot(new TinyUISlot(playerInventory, index, HIDDEN_POS, HIDDEN_POS));
+                addSlot(
+                    new TinyUISlot(
+                        playerInventory,
+                        index,
+                        HIDDEN_POS,
+                        HIDDEN_POS
+                    )
+                );
             }
         }
         // Hotbar
         for (int col = 0; col < PLAYER_INV_COLS; col++) {
-            addSlot(new TinyUISlot(playerInventory, col, HIDDEN_POS, HIDDEN_POS));
+            addSlot(
+                new TinyUISlot(playerInventory, col, HIDDEN_POS, HIDDEN_POS)
+            );
         }
     }
 
@@ -154,21 +181,28 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
             ItemStack stack = slot.getItem();
             result = stack.copy();
 
-            if (index < TOTAL_NPC_SLOTS) {
+            if (index < totalNpcSlots) {
                 // NPC -> player
-                if (!moveItemStackTo(
-                    stack,
-                    TOTAL_NPC_SLOTS,
-                    slots.size(),
-                    true
-                )) {
+                if (
+                    !moveItemStackTo(stack, totalNpcSlots, slots.size(), true)
+                ) {
                     return ItemStack.EMPTY;
                 }
             } else {
                 // Player -> NPC main first, then armor/offhand
                 if (
-                    !moveItemStackTo(stack, NPC_MAIN_START, NPC_MAIN_START + NPC_MAIN_COUNT, false) &&
-                    !moveItemStackTo(stack, NPC_EQUIP_START, NPC_EQUIP_START + NPC_EQUIP_COUNT, false)
+                    !moveItemStackTo(
+                        stack,
+                        NPC_MAIN_START,
+                        NPC_MAIN_START + npcMainCount,
+                        false
+                    ) &&
+                    !moveItemStackTo(
+                        stack,
+                        npcEquipStart,
+                        npcEquipStart + NPC_EQUIP_COUNT,
+                        false
+                    )
                 ) {
                     return ItemStack.EMPTY;
                 }
@@ -197,6 +231,18 @@ public class NpcInventoryMenu extends AbstractContainerMenu {
 
     public NpcInventory getInventory() {
         return inventory;
+    }
+
+    public int getNpcMainCount() {
+        return npcMainCount;
+    }
+
+    public int getNpcEquipStart() {
+        return npcEquipStart;
+    }
+
+    public int getTotalNpcSlots() {
+        return totalNpcSlots;
     }
 
     private static class EquipmentSlotProxy extends Slot {

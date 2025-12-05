@@ -7,6 +7,7 @@ import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.input.FocusManager;
 import com.Kizunad.tinyUI.input.HotkeyManager;
 import com.Kizunad.tinyUI.input.InputRouter;
+import com.Kizunad.tinyUI.controls.ScrollContainer;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -144,7 +145,9 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
 
                 // 检查是否在屏幕内 (处理滚动裁剪)
                 if (
-                    uiSlot.isEnabledAndVisible() && isVisibleInHierarchy(uiSlot)
+                    uiSlot.isEnabledAndVisible() &&
+                    isVisibleInHierarchy(uiSlot) &&
+                    isInsideScrollViewports(uiSlot)
                 ) {
                     // Vanilla 会在绘制时对物品+1px 内缩，这里提前对 Slot 坐标做偏移保持对齐
                     int alignedX = absX + ITEM_RENDER_OFFSET_X - guiLeft;
@@ -208,6 +211,20 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
         int h = element.getHeight();
 
         return x + w > 0 && y + h > 0 && x < width && y < height;
+    }
+
+    private boolean isInsideScrollViewports(UIElement element) {
+        UIElement current = element;
+        while (current != null) {
+            UIElement parent = current.getParent();
+            if (parent instanceof ScrollContainer scroll) {
+                if (!scroll.isChildVisibleInViewport(element)) {
+                    return false;
+                }
+            }
+            current = parent;
+        }
+        return true;
     }
 
     @Override

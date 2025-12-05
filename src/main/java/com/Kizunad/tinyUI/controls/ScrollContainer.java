@@ -35,6 +35,8 @@ public final class ScrollContainer extends InteractiveElement {
     private static final int SCROLLBAR_BG_COLOR = 0xFF333333;
     /** 最小滑块高度 */
     private static final int MIN_HANDLE_HEIGHT = 10;
+    /** 视口最小尺寸，避免除零 */
+    private static final int MIN_VIEWPORT_SIZE = 1;
 
     /** 主题配置 */
     private final Theme theme;
@@ -138,6 +140,26 @@ public final class ScrollContainer extends InteractiveElement {
         );
         drawBorder(context);
         drawScrollbar(context);
+        // 绘制内容裁剪：仅在视口区域内的子元素才会渲染（参见 shouldRenderChild）
+        if (content != null && content.isVisible()) {
+            for (UIElement child : content.getChildren()) {
+                if (!child.isVisible() || !intersectsViewport(child)) {
+                    continue;
+                }
+                child.render(context, mouseX, mouseY, partialTicks);
+            }
+        }
+    }
+
+    @Override
+    protected boolean shouldRenderChild(
+        final UIElement child,
+        final double mouseX,
+        final double mouseY,
+        final float partialTicks
+    ) {
+        // 主体渲染由 onRender 内部处理，跳过父类默认迭代
+        return false;
     }
 
     /**
@@ -176,24 +198,35 @@ public final class ScrollContainer extends InteractiveElement {
      * @param context 渲染上下文
      */
     private void drawScrollbar(final UIRenderContext context) {
-        if (content == null || content.getHeight() <= getHeight()) {
+        if (content == null) {
             return;
         }
         final int x =
             getAbsoluteX() + getWidth() - SCROLLBAR_WIDTH - BORDER_THICKNESS;
         final int y = getAbsoluteY() + BORDER_THICKNESS;
         final int h = getHeight() - BORDER_THICKNESS * 2;
+        if (h < MIN_VIEWPORT_SIZE) {
+            return;
+        }
 
         // Draw track
         context.drawRect(x, y, SCROLLBAR_WIDTH, h, SCROLLBAR_BG_COLOR);
 
-        // Draw handle
-        final int maxScroll = content.getHeight() - getHeight();
-        int handleH = (int) (((float) h / content.getHeight()) * h);
+        final int contentHeight = content.getHeight();
+        final boolean scrollable = contentHeight > getHeight();
+        int handleH = scrollable
+            ? (int) (((float) h / contentHeight) * h)
+            : h;
         handleH = Math.max(MIN_HANDLE_HEIGHT, Math.min(h, handleH));
 
-        final int handleY = (int) (((float) scrollY / maxScroll) *
-            (h - handleH));
+        int handleY = 0;
+        if (scrollable) {
+            final int maxScroll = contentHeight - getHeight();
+            if (maxScroll > 0) {
+                handleY =
+                    (int) (((float) scrollY / maxScroll) * (h - handleH));
+            }
+        }
 
         context.drawRect(
             x,
@@ -225,6 +258,26 @@ public final class ScrollContainer extends InteractiveElement {
     public void onLayoutUpdated() {
         super.onLayoutUpdated();
         applyScrollIfReady();
+    }
+
+    public boolean isChildVisibleInViewport(final UIElement element) {
+        final int vx = getAbsoluteX();
+        final int vy = getAbsoluteY();
+        final int vw = Math.max(MIN_VIEWPORT_SIZE, getWidth());
+        final int vh = Math.max(MIN_VIEWPORT_SIZE, getHeight());
+
+        final int ex = element.getAbsoluteX();
+        final int ey = element.getAbsoluteY();
+        final int ew = Math.max(0, element.getWidth());
+        final int eh = Math.max(0, element.getHeight());
+
+        final boolean separated =
+            ex + ew <= vx || ex >= vx + vw || ey + eh <= vy || ey >= vy + vh;
+        return !separated;
+    }
+
+    private boolean intersectsViewport(final UIElement element) {
+        return isChildVisibleInViewport(element);
     }
 
     /**

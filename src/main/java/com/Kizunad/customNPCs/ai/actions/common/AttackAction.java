@@ -327,7 +327,7 @@ public class AttackAction
         NpcInventory inventory = mind.getInventory();
 
         // 遍历主背包寻找更好的武器
-        for (int i = 0; i < NpcInventory.MAIN_SIZE; i++) {
+        for (int i = 0; i < inventory.getMainSize(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack.isEmpty()) {
                 continue;

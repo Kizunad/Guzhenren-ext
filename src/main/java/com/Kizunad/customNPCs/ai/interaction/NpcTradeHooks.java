@@ -74,7 +74,7 @@ public final class NpcTradeHooks {
         List<Integer> validSlots = new ArrayList<>();
 
         // 仅从主背包区域选取
-        for (int i = 0; i < NpcInventory.MAIN_SIZE; i++) {
+        for (int i = 0; i < inv.getMainSize(); i++) {
             if (!inv.getItem(i).isEmpty()) {
                 validSlots.add(i);
             }
@@ -195,7 +195,7 @@ public final class NpcTradeHooks {
         result.setCount(0);
         int needed = prototype.getCount();
 
-        for (int i = 0; i < NpcInventory.MAIN_SIZE; i++) {
+        for (int i = 0; i < inv.getMainSize(); i++) {
             ItemStack slot = inv.getItem(i);
             if (ItemStack.isSameItemSameComponents(slot, prototype)) {
                 int take = Math.min(needed, slot.getCount());

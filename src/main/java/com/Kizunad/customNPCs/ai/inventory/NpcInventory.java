@@ -1,40 +1,73 @@
 package com.Kizunad.customNPCs.ai.inventory;
 
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.item.ItemStack;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * 简单的 NPC 背包实现（参考玩家背包大小）。
  * <p>
  * 仅负责基础的存取与序列化，不处理界面交互。
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class NpcInventory implements Container {
 
-    public static final int MAIN_SIZE = 36; // 与玩家主背包一致
-    public static final int ARMOR_SIZE = 4; // 头、胸、腿、脚
-    public static final int OFFHAND_SIZE = 1;
-    public static final int TOTAL_SIZE = MAIN_SIZE + ARMOR_SIZE + OFFHAND_SIZE;
+    public static final int SLOTS_PER_ROW = 9;
+    public static final int DEFAULT_MAIN_ROWS = 7;
+    public static final int DEFAULT_MAIN_SIZE =
+        DEFAULT_MAIN_ROWS * SLOTS_PER_ROW;
 
-    private final NonNullList<ItemStack> items;
+    private NonNullList<ItemStack> items;
+    private int mainRows;
     private Player viewer;
 
     public NpcInventory() {
-        this(TOTAL_SIZE);
+        this(DEFAULT_MAIN_ROWS);
     }
 
-    public NpcInventory(int size) {
-        this.items = NonNullList.withSize(size, ItemStack.EMPTY);
+    public NpcInventory(int mainRows) {
+        this.mainRows = clampRows(mainRows);
+        this.items = NonNullList.withSize(getMainSize(), ItemStack.EMPTY);
     }
 
     public void setViewer(Player player) {
         this.viewer = player;
+    }
+
+    /**
+     * 当前主背包行数（每行 9 格）。
+     */
+    public int getMainRows() {
+        return mainRows;
+    }
+
+    /**
+     * 当前主背包槽位数量。
+     */
+    public int getMainSize() {
+        return mainRows * SLOTS_PER_ROW;
+    }
+
+    /**
+     * 调整主背包行数（每次整行变动）。缩小时会将溢出的物品掉落到指定位置。
+     * @param newMainRows 目标行数
+     * @param level 掉落实例所在维度
+     * @param dropPos 掉落坐标
+     */
+    public void resizeMainRows(int newMainRows, Level level, Vec3 dropPos) {
+        List<ItemStack> overflow = resizeInternal(newMainRows);
+        if (level != null && dropPos != null) {
+            dropStacks(level, dropPos, overflow);
+        }
     }
 
     /**
@@ -188,13 +221,29 @@ public class NpcInventory implements Container {
         return (float) getFilledSlotCount() / (float) items.size();
     }
 
+    /**
+     * 反序列化时同步行数（不掉落物品），仅由数据层调用。
+     */
+    public void applyMainRowsFromData(int newMainRows) {
+        resizeInternal(newMainRows);
+    }
+
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
+        tag.putInt("main_rows", mainRows);
         ContainerHelper.saveAllItems(tag, items, provider);
         return tag;
     }
 
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+    public void deserializeNBT(
+        HolderLookup.Provider provider,
+        CompoundTag tag
+    ) {
+        int savedRows = DEFAULT_MAIN_ROWS;
+        if (tag.contains("main_rows")) {
+            savedRows = clampRows(tag.getInt("main_rows"));
+        }
+        applyMainRowsFromData(savedRows);
         ContainerHelper.loadAllItems(tag, items, provider);
     }
 
@@ -246,5 +295,49 @@ public class NpcInventory implements Container {
             return true;
         }
         return viewer == null || viewer == player;
+    }
+
+    private List<ItemStack> resizeInternal(int newMainRows) {
+        int normalizedRows = clampRows(newMainRows);
+        if (normalizedRows == this.mainRows) {
+            return List.of();
+        }
+
+        int newMainSize = normalizedRows * SLOTS_PER_ROW;
+        int oldMainSize = items.size();
+        List<ItemStack> overflow = new ArrayList<>();
+
+        NonNullList<ItemStack> newItems = NonNullList.withSize(
+            newMainSize,
+            ItemStack.EMPTY
+        );
+
+        int copyCount = Math.min(oldMainSize, newMainSize);
+        for (int i = 0; i < copyCount; i++) {
+            newItems.set(i, items.get(i));
+        }
+
+        if (newMainSize < oldMainSize) {
+            for (int i = newMainSize; i < oldMainSize; i++) {
+                ItemStack extra = items.get(i);
+                if (!extra.isEmpty()) {
+                    overflow.add(extra);
+                }
+            }
+        }
+
+        this.items = newItems;
+        this.mainRows = normalizedRows;
+        return overflow;
+    }
+
+    private void dropStacks(Level level, Vec3 pos, List<ItemStack> stacks) {
+        for (ItemStack stack : stacks) {
+            Containers.dropItemStack(level, pos.x, pos.y, pos.z, stack);
+        }
+    }
+
+    private int clampRows(int rows) {
+        return Math.max(0, rows);
     }
 }
