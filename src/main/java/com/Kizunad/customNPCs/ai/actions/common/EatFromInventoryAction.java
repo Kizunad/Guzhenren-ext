@@ -84,7 +84,6 @@ public class EatFromInventoryAction extends AbstractStandardAction {
 
         ActionStatus status = delegate.tick(mind, mob);
         if (status == ActionStatus.SUCCESS) {
-            mind.getStatus().eat(consumedStack, mob);
             completedSuccessfully = true;
         }
         return status;

@@ -3,14 +3,13 @@ package com.Kizunad.customNPCs_test.actions;
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.customNPCs_test.utils.NpcTestHelper;
 import com.Kizunad.customNPCs_test.utils.TestBatches;
 import com.Kizunad.customNPCs_test.utils.TestEntityFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -28,10 +27,9 @@ public class HungerActionsTests {
         timeoutTicks = 200
     )
     public static void testSatiateUsesLowerValueFood(GameTestHelper helper) {
-        Zombie npc = TestEntityFactory.createSimpleTestNPC(
+        CustomNpcEntity npc = TestEntityFactory.createCustomNpc(
             helper,
-            new BlockPos(2, 2, 2),
-            EntityType.ZOMBIE
+            new BlockPos(2, 2, 2)
         );
         INpcMind mind = NpcTestHelper.getMind(helper, npc);
         mind.getGoalSelector().registerGoal(new SatiateGoal());
@@ -56,10 +54,9 @@ public class HungerActionsTests {
         timeoutTicks = 160
     )
     public static void testSatiateSkipsWhenInDanger(GameTestHelper helper) {
-        Zombie npc = TestEntityFactory.createSimpleTestNPC(
+        CustomNpcEntity npc = TestEntityFactory.createCustomNpc(
             helper,
-            new BlockPos(2, 2, 2),
-            EntityType.ZOMBIE
+            new BlockPos(2, 2, 2)
         );
         INpcMind mind = NpcTestHelper.getMind(helper, npc);
         mind.getGoalSelector().registerGoal(new SatiateGoal());

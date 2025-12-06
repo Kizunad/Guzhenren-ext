@@ -4,7 +4,6 @@ import com.Kizunad.customNPCs.ai.status.config.NpcStatusConfig;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
@@ -71,7 +70,7 @@ public class NpcStatus {
      * 消耗食物并恢复饥饿值、饱和度。
      * <p>
      * 根据食物属性增加饥饿值和饱和度,并减少耗竭值。
-     * 同时应用食物的效果(如药水效果)。
+     * 效果应用交由原版 {@link net.minecraft.world.entity.LivingEntity#eat} 逻辑处理。
      * </p>
      *
      * @param stack 食物物品堆
@@ -89,15 +88,6 @@ public class NpcStatus {
         saturation = Math.min(config.getMaxSaturation(), saturation + saturationGain);
         exhaustion = Math.max(0.0f, exhaustion - EXHAUSTION_REDUCTION_ON_EAT);
 
-        if (!entity.level().isClientSide()) {
-            for (var pair : props.effects()) {
-                MobEffectInstance effect = pair.effect();
-                float chance = pair.probability();
-                if (effect != null && entity.getRandom().nextFloat() < chance) {
-                    entity.addEffect(new MobEffectInstance(effect));
-                }
-            }
-        }
     }
 
     /**

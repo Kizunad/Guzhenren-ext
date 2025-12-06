@@ -4,6 +4,8 @@ import com.Kizunad.customNPCs.ai.sensors.VisionSensor;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMind;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+import com.Kizunad.customNPCs.entity.CustomNpcEntity;
+import com.Kizunad.customNPCs.entity.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EntityType;
@@ -67,6 +69,30 @@ public class TestEntityFactory {
             BlockPos pos,
             EntityType<T> entityType) {
         T npc = NpcTestHelper.spawnNPCWithMind(helper, pos, entityType);
+        resetMindState(helper, npc, false);
+        return npc;
+    }
+
+    /**
+     * 创建自定义 NPC 实体，复用实际游戏内逻辑。
+     *
+     * @param helper GameTest 助手
+     * @param pos 生成位置
+     * @return 配置好的自定义 NPC
+     */
+    public static CustomNpcEntity createCustomNpc(
+        GameTestHelper helper,
+        BlockPos pos
+    ) {
+        CustomNpcEntity npc = ModEntities.CUSTOM_NPC.get().create(helper.getLevel());
+        if (npc == null) {
+            helper.fail("无法生成自定义 NPC 实体");
+            return null;
+        }
+        NpcTestHelper.ensureFloorAround(helper, pos, 8);
+        BlockPos abs = helper.absolutePos(pos);
+        npc.moveTo(abs.getX() + 0.5D, abs.getY(), abs.getZ() + 0.5D, npc.getYRot(), npc.getXRot());
+        helper.getLevel().addFreshEntity(npc);
         resetMindState(helper, npc, false);
         return npc;
     }
