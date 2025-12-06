@@ -1,6 +1,7 @@
 package com.Kizunad.tinyUI.neoforge;
 
 import com.Kizunad.tinyUI.controls.UISlot;
+import com.Kizunad.tinyUI.core.ScaleConfig;
 import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRenderContext;
 import com.Kizunad.tinyUI.core.UIRoot;
@@ -26,6 +27,8 @@ import org.jetbrains.annotations.Nullable;
  * 它混合了 TinyUI 的组件树和 Minecraft 原生的 Slot 系统。
  * 你可以使用 TinyUI 的布局（Flex/Grid/Scroll）来排版，
  * 这个 Screen 会自动将 {@link UISlot} 的位置同步给底层的 {@link Slot}。
+ * <p>
+ * <b>注意</b>：由于 MC 物品图标无法缩放，此 Screen 默认禁用设计分辨率缩放。
  */
 public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
     extends AbstractContainerScreen<T> {
@@ -63,6 +66,9 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
     @Override
     protected void init() {
         super.init();
+        // Container 屏幕默认禁用缩放，因为 MC 物品图标无法缩放
+        root.getScaleConfig().setScaleMode(ScaleConfig.ScaleMode.NONE);
+
         // 使用全屏坐标系，消除 AbstractContainerScreen 默认的左上偏移
         this.imageWidth = this.width;
         this.imageHeight = this.height;

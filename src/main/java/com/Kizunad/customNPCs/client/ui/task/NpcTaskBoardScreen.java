@@ -13,10 +13,10 @@ import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
 import com.Kizunad.tinyUI.neoforge.TinyUIScreen;
 import com.Kizunad.tinyUI.theme.Theme;
+import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
-import java.util.List;
 
 /**
  * 玩家端：NPC 任务面板。
@@ -48,6 +48,10 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
     private static final int COLOR_TEXT_BODY = 0xDDDDDD;
     private static final int COLOR_TEXT_REWARD = 0xF0B400;
 
+    /** 设计分辨率 - 设置为 1280x720 实现 1.5 倍放大（原始 1920/1.5=1280, 1080/1.5=720） */
+    private static final int DESIGN_WIDTH = 1280;
+    private static final int DESIGN_HEIGHT = 720;
+
     private final UIRoot uiRoot;
     private final Theme theme;
     private final int npcEntityId;
@@ -74,6 +78,8 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
     @Override
     protected void init() {
         super.init();
+        // 启用 1280x720 设计分辨率（相对于 1920x1080 实际屏幕会放大 1.5 倍）
+        uiRoot.setDesignResolution(DESIGN_WIDTH, DESIGN_HEIGHT);
         uiRoot.clearChildren();
         uiRoot.setViewport(width, height);
         buildLayout();
@@ -99,7 +105,12 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         uiRoot.addChild(rootPanel);
 
         PanelElement listPanel = new PanelElement();
-        listPanel.setFrame(MARGIN, MARGIN, LIST_WIDTH, WINDOW_HEIGHT - MARGIN * 2);
+        listPanel.setFrame(
+            MARGIN,
+            MARGIN,
+            LIST_WIDTH,
+            WINDOW_HEIGHT - MARGIN * 2
+        );
         rootPanel.addChild(listPanel);
 
         listScroll = new ScrollContainer(theme);
@@ -113,11 +124,13 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
 
         detailPanel = new PanelElement();
         int detailX = MARGIN + LIST_WIDTH + PANEL_GAP;
-        int detailWidth =
-            WINDOW_WIDTH -
-            detailX -
-            MARGIN;
-        detailPanel.setFrame(detailX, MARGIN, detailWidth, WINDOW_HEIGHT - MARGIN * 2 - BUTTON_HEIGHT - BUTTON_GAP);
+        int detailWidth = WINDOW_WIDTH - detailX - MARGIN;
+        detailPanel.setFrame(
+            detailX,
+            MARGIN,
+            detailWidth,
+            WINDOW_HEIGHT - MARGIN * 2 - BUTTON_HEIGHT - BUTTON_GAP
+        );
         rootPanel.addChild(detailPanel);
 
         PanelElement buttonPanel = new PanelElement();
@@ -185,7 +198,12 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
             list.addChild(button);
             y += BUTTON_HEIGHT + BUTTON_GAP;
         }
-        list.setFrame(0, 0, listScroll.getWidth(), Math.max(listScroll.getHeight(), y));
+        list.setFrame(
+            0,
+            0,
+            listScroll.getWidth(),
+            Math.max(listScroll.getHeight(), y)
+        );
         listScroll.setContent(list);
     }
 
@@ -234,13 +252,12 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
     }
 
     @Override
-    public void render(
+    protected void renderScaledContent(
         GuiGraphics graphics,
         int mouseX,
         int mouseY,
         float partialTick
     ) {
-        super.render(graphics, mouseX, mouseY, partialTick);
         renderDetail(graphics);
     }
 
@@ -251,9 +268,18 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         }
         int x = detailPanel.getAbsoluteX() + DETAIL_PADDING;
         int y = detailPanel.getAbsoluteY() + DETAIL_PADDING;
-        graphics.drawString(font, entry.title(), x, y, COLOR_TEXT_PRIMARY, false);
+        graphics.drawString(
+            font,
+            entry.title(),
+            x,
+            y,
+            COLOR_TEXT_PRIMARY,
+            false
+        );
         y += LINE_HEIGHT + 2;
-        Component stateText = Component.literal("State: " + entry.state().name());
+        Component stateText = Component.literal(
+            "State: " + entry.state().name()
+        );
         graphics.drawString(font, stateText, x, y, COLOR_TEXT_MUTED, false);
         y += LINE_HEIGHT + 2;
 
@@ -277,11 +303,7 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         );
         y += LINE_HEIGHT;
         for (OpenTaskBoardPayload.SubmitObjectiveEntry objective : entry.objectives()) {
-            graphics.renderItem(
-                objective.item(),
-                x,
-                y - ITEM_ICON_Y_OFFSET
-            );
+            graphics.renderItem(objective.item(), x, y - ITEM_ICON_Y_OFFSET);
             String label = String.format(
                 "%d / %d %s",
                 objective.currentCount(),
