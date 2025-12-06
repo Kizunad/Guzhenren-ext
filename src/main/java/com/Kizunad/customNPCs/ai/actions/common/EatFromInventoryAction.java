@@ -24,10 +24,12 @@ import org.slf4j.LoggerFactory;
 public class EatFromInventoryAction extends AbstractStandardAction {
 
     public static final String LLM_USAGE_DESC =
-        "EatFromInventoryAction: pick food from NPC inventory and consume to heal; "
-            + "works with UseItemAction; good when hp low.";
+        "EatFromInventoryAction: pick food from NPC inventory and consume to heal; " +
+        "works with UseItemAction; good when hp low.";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EatFromInventoryAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        EatFromInventoryAction.class
+    );
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
@@ -35,30 +37,39 @@ public class EatFromInventoryAction extends AbstractStandardAction {
 
     /** 负面效果的分数惩罚 */
     private static final double NEGATIVE_EFFECT_PENALTY = 4.0;
-    
+
     /** 高价值食物的分数惩罚,使其排在最后 */
     private static final double HIGH_VALUE_PENALTY = 100.0;
 
     /** 之前的主手物品 */
     private ItemStack previousMainHand = ItemStack.EMPTY;
-    
+
     /** 消耗的物品堆 */
     private ItemStack consumedStack = ItemStack.EMPTY;
-    
+
     /** 消耗物品来源槽位 */
     private int consumedFromSlot = -1;
-    
+
     /** 使用物品动作委托 */
     private UseItemAction delegate;
-    
+
     /** 是否已开始使用 */
     private boolean startedUse = false;
+
+    /** 是否已成功完成，用于避免重复清理 */
+    private boolean completedSuccessfully = false;
 
     /**
      * 创建从背包进食动作。
      */
     public EatFromInventoryAction() {
-        super("EatFromInventoryAction", null, CONFIG.getDefaultItemUseTicks() + CONFIG.getTimeoutBufferTicks(), 1, 0);
+        super(
+            "EatFromInventoryAction",
+            null,
+            CONFIG.getDefaultItemUseTicks() + CONFIG.getTimeoutBufferTicks(),
+            1,
+            0
+        );
     }
 
     @Override
@@ -74,9 +85,7 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         ActionStatus status = delegate.tick(mind, mob);
         if (status == ActionStatus.SUCCESS) {
             mind.getStatus().eat(consumedStack, mob);
-            returnLeftovers(mind, mob);
-        } else if (status == ActionStatus.FAILURE) {
-            rollback(mind, mob);
+            completedSuccessfully = true;
         }
         return status;
     }
@@ -87,6 +96,7 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         startedUse = false;
         consumedFromSlot = -1;
         consumedStack = ItemStack.EMPTY;
+        completedSuccessfully = false;
     }
 
     @Override
@@ -94,7 +104,11 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         if (entity == null || !entity.isAlive()) {
             return;
         }
-        rollback(mind, entity);
+        if (completedSuccessfully) {
+            returnLeftovers(mind, entity);
+        } else {
+            rollback(mind, entity);
+        }
     }
 
     @Override
@@ -162,7 +176,10 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         entity.setItemInHand(InteractionHand.MAIN_HAND, previousMainHand);
     }
 
-    private Selection selectBestFood(NpcInventory inventory, LivingEntity entity) {
+    private Selection selectBestFood(
+        NpcInventory inventory,
+        LivingEntity entity
+    ) {
         Selection best = null;
         ItemStack main = entity.getMainHandItem();
         if (isEdible(main, entity)) {
@@ -170,12 +187,18 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         }
         ItemStack off = entity.getOffhandItem();
         if (isEdible(off, entity)) {
-            best = better(best, new Selection(off.copy(), -1, scoreFood(off, entity)));
+            best = better(
+                best,
+                new Selection(off.copy(), -1, scoreFood(off, entity))
+            );
         }
         for (int i = 0; i < inventory.size(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (isEdible(stack, entity)) {
-                best = better(best, new Selection(stack.copy(), i, scoreFood(stack, entity)));
+                best = better(
+                    best,
+                    new Selection(stack.copy(), i, scoreFood(stack, entity))
+                );
             }
         }
         return best;
@@ -204,9 +227,13 @@ public class EatFromInventoryAction extends AbstractStandardAction {
         if (food == null) {
             return -Double.MAX_VALUE;
         }
-        double base = food.nutrition() + food.saturation() * food.nutrition() * 2.0;
+        double base =
+            food.nutrition() + food.saturation() * food.nutrition() * 2.0;
         for (var pair : food.effects()) {
-            if (pair.effect() != null && !pair.effect().getEffect().value().isBeneficial()) {
+            if (
+                pair.effect() != null &&
+                !pair.effect().getEffect().value().isBeneficial()
+            ) {
                 base -= NEGATIVE_EFFECT_PENALTY;
             }
         }
@@ -217,9 +244,11 @@ public class EatFromInventoryAction extends AbstractStandardAction {
     }
 
     private boolean isHighValueFood(Item item) {
-        return item == Items.GOLDEN_APPLE
-            || item == Items.ENCHANTED_GOLDEN_APPLE
-            || item == Items.GOLDEN_CARROT;
+        return (
+            item == Items.GOLDEN_APPLE ||
+            item == Items.ENCHANTED_GOLDEN_APPLE ||
+            item == Items.GOLDEN_CARROT
+        );
     }
 
     private Selection better(Selection a, Selection b) {
