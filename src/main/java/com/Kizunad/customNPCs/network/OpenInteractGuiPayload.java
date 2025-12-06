@@ -24,6 +24,7 @@ public record OpenInteractGuiPayload(
     float health,
     float maxHealth,
     boolean isOwner,
+    boolean startInDialogueMode,
     List<NpcStatusEntry> statusEntries,
     List<DialogueOption> dialogueOptions
 ) implements CustomPacketPayload {
@@ -64,6 +65,7 @@ public record OpenInteractGuiPayload(
         buf.writeFloat(payload.health);
         buf.writeFloat(payload.maxHealth);
         buf.writeBoolean(payload.isOwner);
+        buf.writeBoolean(payload.startInDialogueMode);
         buf.writeVarInt(payload.statusEntries.size());
         for (NpcStatusEntry entry : payload.statusEntries) {
             NpcStatusEntry.STREAM_CODEC.encode(buf, entry);
@@ -82,6 +84,7 @@ public record OpenInteractGuiPayload(
         float health = buf.readFloat();
         float maxHealth = buf.readFloat();
         boolean isOwner = buf.readBoolean();
+        boolean startInDialogueMode = buf.readBoolean();
         int statusCount = buf.readVarInt();
         List<NpcStatusEntry> statuses = java.util.stream.IntStream
             .range(0, statusCount)
@@ -98,6 +101,7 @@ public record OpenInteractGuiPayload(
             health,
             maxHealth,
             isOwner,
+            startInDialogueMode,
             statuses,
             options
         );
@@ -124,6 +128,7 @@ public record OpenInteractGuiPayload(
                     payload.health(),
                     payload.maxHealth(),
                     payload.isOwner(),
+                    payload.startInDialogueMode(),
                     payload.statusEntries(),
                     payload.dialogueOptions()
                 ))

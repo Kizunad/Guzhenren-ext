@@ -3,12 +3,15 @@ package com.Kizunad.customNPCs.network;
 import com.Kizunad.customNPCs.CustomNPCsMod;
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.decision.NpcCommandType;
+import com.Kizunad.customNPCs.ai.interaction.MaterialWorkService;
 import com.Kizunad.customNPCs.ai.interaction.NpcTradeHooks;
 import com.Kizunad.customNPCs.ai.status.StatusProviderRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
+import com.Kizunad.customNPCs.menu.NpcCraftMenu;
 import com.Kizunad.customNPCs.menu.NpcGiftMenu;
-import com.Kizunad.customNPCs.menu.NpcHireMenu;
+import com.Kizunad.customNPCs.menu.NpcMaterialMenu;
+import com.Kizunad.customNPCs.menu.NpcWorkMenu;
 import com.Kizunad.customNPCs.network.dto.DialogueOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +63,16 @@ public record InteractActionPayload(
         ResourceLocation.fromNamespaceAndPath(CustomNPCsMod.MODID, "order_sit");
     private static final ResourceLocation ORDER_WORK =
         ResourceLocation.fromNamespaceAndPath(CustomNPCsMod.MODID, "order_work");
+    private static final ResourceLocation ORDER_WORK_MATERIAL =
+        ResourceLocation.fromNamespaceAndPath(
+            CustomNPCsMod.MODID,
+            "order_work_material"
+        );
+    private static final ResourceLocation ORDER_WORK_CRAFT =
+        ResourceLocation.fromNamespaceAndPath(
+            CustomNPCsMod.MODID,
+            "order_work_craft"
+        );
     private static final ResourceLocation ORDER_GUARD =
         ResourceLocation.fromNamespaceAndPath(CustomNPCsMod.MODID, "order_guard");
     private static final double OPPRESSION_THRESHOLD = 0.8D;
@@ -67,8 +80,6 @@ public record InteractActionPayload(
     private static final double POWER_ATTACK_WEIGHT = 10.0D;
     private static final double POWER_ARMOR_WEIGHT = 2.0D;
     private static final double POWER_TOUGHNESS_WEIGHT = 1.0D;
-    private static final double HIRE_BASE_MULTIPLIER = 0.8D;
-    private static final double HIRE_LEVEL_DIVISOR = 10.0D;
     private static final int OPPRESSION_MEMORY_DURATION = 120;
     private static final double OPPRESSION_MELEE_RANGE = 3.5D;
 
@@ -233,6 +244,15 @@ public record InteractActionPayload(
         }
         if (ORDER_WORK.equals(actionId)) {
             setCommand(npc, serverPlayer, NpcCommandType.WORK);
+            openWorkMenu(npc, serverPlayer);
+            return;
+        }
+        if (ORDER_WORK_MATERIAL.equals(actionId)) {
+            openMaterialMenu(npc, serverPlayer);
+            return;
+        }
+        if (ORDER_WORK_CRAFT.equals(actionId)) {
+            openCraftMenu(npc, serverPlayer);
             return;
         }
         if (ORDER_GUARD.equals(actionId)) {
@@ -246,33 +266,16 @@ public record InteractActionPayload(
         if (mind == null) {
             return;
         }
-        double required = calculateRequiredHireValue(npc);
-        mind.getMemory().rememberLongTerm(
-            WorldStateKeys.HIRE_REQUIRED_VALUE,
-            required
-        );
-        mind.getMemory().rememberLongTerm(
-            WorldStateKeys.HIRE_CANDIDATE,
-            player.getUUID()
-        );
-        mind.getMemory().rememberLongTerm(
-            WorldStateKeys.HIRE_PENDING,
-            true
-        );
-
-        player.openMenu(
-            new SimpleMenuProvider(
-                (id, inv, p) ->
-                    new NpcHireMenu(id, inv, npc, mind.getInventory()),
-                Component.literal(
-                    "Offer items to hire " + npc.getDisplayName().getString()
-                )
-            ),
-            buf -> buf.writeVarInt(npc.getId())
-        );
+        // 待实现：扣除金币/雇佣成本
+        mind
+            .getMemory()
+            .rememberLongTerm(WorldStateKeys.OWNER_UUID, player.getUUID());
+        mind
+            .getMemory()
+            .rememberLongTerm(WorldStateKeys.RELATIONSHIP_TYPE, "HIRED");
         player.displayClientMessage(
             Component.literal(
-                "Hiring requires value >= " + String.format("%.1f", required)
+                "You hired " + npc.getDisplayName().getString() + "!"
             ),
             false
         );
@@ -299,6 +302,7 @@ public record InteractActionPayload(
         if (mind == null) {
             return;
         }
+        // 待实现：更精确的力量检定算法，当前按简单判定执行
         double npcPower = calculatePower(npc);
         double playerPower = calculatePower(player);
         if (playerPower < npcPower * OPPRESSION_THRESHOLD) {
@@ -363,9 +367,55 @@ public record InteractActionPayload(
                 npc.getHealth(),
                 npc.getMaxHealth(),
                 true, // isOwner
+                true, // startInDialogueMode
                 statuses,
                 options
             )
+        );
+    }
+
+    private static void openMaterialMenu(CustomNpcEntity npc, ServerPlayer player) {
+        var mind = npc.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            return;
+        }
+        MaterialWorkService.syncOwnerMaterial(npc, mind.getMaterialWallet(), player);
+        player.openMenu(
+            new SimpleMenuProvider(
+                (id, inv, p) -> new NpcMaterialMenu(id, inv, npc),
+                npc.getDisplayName()
+            ),
+            buf -> buf.writeVarInt(npc.getId())
+        );
+    }
+
+    private static void openWorkMenu(CustomNpcEntity npc, ServerPlayer player) {
+        var mind = npc.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            return;
+        }
+        MaterialWorkService.syncOwnerMaterial(npc, mind.getMaterialWallet(), player);
+        player.openMenu(
+            new SimpleMenuProvider(
+                (id, inv, p) -> new NpcWorkMenu(id, inv, npc),
+                npc.getDisplayName()
+            ),
+            buf -> buf.writeVarInt(npc.getId())
+        );
+    }
+
+    private static void openCraftMenu(CustomNpcEntity npc, ServerPlayer player) {
+        var mind = npc.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            return;
+        }
+        MaterialWorkService.syncOwnerMaterial(npc, mind.getMaterialWallet(), player);
+        player.openMenu(
+            new SimpleMenuProvider(
+                (id, inv, p) -> new NpcCraftMenu(id, inv, npc),
+                npc.getDisplayName()
+            ),
+            buf -> buf.writeVarInt(npc.getId())
         );
     }
 
@@ -401,12 +451,6 @@ public record InteractActionPayload(
             attack * POWER_ATTACK_WEIGHT +
             armor * POWER_ARMOR_WEIGHT +
             toughness * POWER_TOUGHNESS_WEIGHT;
-    }
-
-    private static double calculateRequiredHireValue(CustomNpcEntity npc) {
-        double base = calculatePower(npc);
-        double levelFactor = Math.max(1.0D, npc.getExperience() / HIRE_LEVEL_DIVISOR);
-        return base * HIRE_BASE_MULTIPLIER + levelFactor;
     }
 
     private static void rememberThreat(

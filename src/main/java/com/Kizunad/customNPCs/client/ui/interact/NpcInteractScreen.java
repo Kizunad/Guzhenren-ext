@@ -84,6 +84,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         float health,
         float maxHealth,
         boolean isOwner,
+        boolean startInDialogueMode,
         List<NpcStatusEntry> statusEntries,
         List<DialogueOption> dialogueOptions
     ) {}
@@ -122,6 +123,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         this.health = data.health();
         this.maxHealth = data.maxHealth();
         this.isOwner = data.isOwner();
+        this.dialogueMode = data.startInDialogueMode();
         this.statusEntries =
             List.copyOf(
                 Objects.requireNonNull(

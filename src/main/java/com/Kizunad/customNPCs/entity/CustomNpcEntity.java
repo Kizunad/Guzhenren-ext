@@ -281,6 +281,7 @@ public class CustomNpcEntity extends PathfinderMob {
                 this.getHealth(),
                 this.getMaxHealth(),
                 isOwner,
+                false, // startInDialogueMode
                 statuses,
                 options
             )

@@ -26,9 +26,24 @@ public final class ModNetworking {
             InteractActionPayload::handle
         );
         registrar.playToServer(
+            RequestMaterialConversionPayload.TYPE,
+            RequestMaterialConversionPayload.STREAM_CODEC,
+            RequestMaterialConversionPayload::handle
+        );
+        registrar.playToServer(
+            RequestCraftingPayload.TYPE,
+            RequestCraftingPayload.STREAM_CODEC,
+            RequestCraftingPayload::handle
+        );
+        registrar.playToServer(
             ServerboundTradePayload.TYPE,
             ServerboundTradePayload.STREAM_CODEC,
             ServerboundTradePayload::handle
+        );
+        registrar.playToClient(
+            SyncMaterialDataPayload.TYPE,
+            SyncMaterialDataPayload.STREAM_CODEC,
+            SyncMaterialDataPayload::handle
         );
     }
 

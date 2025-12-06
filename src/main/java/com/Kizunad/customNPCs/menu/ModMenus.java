@@ -39,4 +39,22 @@ public final class ModMenus {
             "npc_hire",
             () -> IMenuTypeExtension.create(NpcHireMenu::fromNetwork)
         );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<NpcMaterialMenu>> NPC_MATERIAL =
+        MENUS.register(
+            "npc_material",
+            () -> IMenuTypeExtension.create(NpcMaterialMenu::fromNetwork)
+        );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<NpcWorkMenu>> NPC_WORK =
+        MENUS.register(
+            "npc_work",
+            () -> IMenuTypeExtension.create(NpcWorkMenu::fromNetwork)
+        );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<NpcCraftMenu>> NPC_CRAFT =
+        MENUS.register(
+            "npc_craft",
+            () -> IMenuTypeExtension.create(NpcCraftMenu::fromNetwork)
+        );
 }

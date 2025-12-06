@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.entity.ModEntities;
 import com.Kizunad.customNPCs.events.NpcMindEvents;
+import com.Kizunad.customNPCs.events.MaterialValueEvents;
 import com.Kizunad.customNPCs.config.ModGameRules;
 import com.Kizunad.customNPCs.config.CustomNpcConfigs;
 import com.Kizunad.customNPCs.network.ModNetworking;
@@ -45,6 +46,8 @@ public class CustomNPCsMod {
 
         // 注册内置状态提供者
         StatusProvidersBootstrap.registerBuiltins();
+        // 数据包重载监听器：材料表（需挂在 NeoForge EVENT_BUS）
+        NeoForge.EVENT_BUS.addListener(MaterialValueEvents::onAddReloadListener);
 
         // 尝试注册测试内容（在独立发布 jar 中缺失时自动跳过）
         registerOptionalTestContent(modEventBus);

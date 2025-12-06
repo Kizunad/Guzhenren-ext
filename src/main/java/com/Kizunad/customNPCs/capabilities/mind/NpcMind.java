@@ -38,6 +38,7 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     private final NpcQuestState questState;
     private final LongTermMemory longTermMemory;
     private final LlmPlanner llmPlanner;
+    private final MaterialWallet materialWallet;
 
     // 中断冷却机制
     private long lastInterruptTick = 0;
@@ -60,6 +61,7 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         this.questState = new NpcQuestState();
         this.longTermMemory = new LongTermMemory();
         this.llmPlanner = new LlmPlanner();
+        this.materialWallet = new MaterialWallet();
     }
 
     /**
@@ -111,6 +113,7 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         this.questState = new NpcQuestState();
         this.longTermMemory = new LongTermMemory();
         this.llmPlanner = new LlmPlanner();
+        this.materialWallet = new MaterialWallet();
     }
 
     @Override
@@ -167,6 +170,10 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         return llmPlanner;
     }
 
+    public MaterialWallet getMaterialWallet() {
+        return materialWallet;
+    }
+
     @Override
     public void tick(ServerLevel level, LivingEntity entity) {
         // 绑定执行器上下文，防止跨实体/测试计划污染
@@ -205,6 +212,7 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         tag.put("quest", questState.serializeNBT(provider));
         tag.put("llm_long_term", longTermMemory.serializeNBT());
         tag.put("llm", llmPlanner.serializeNBT(provider));
+        tag.put("material_wallet", materialWallet.serializeNBT());
         // 注意：目标选择器不需要序列化，因为目标是在代码中注册的
         return tag;
     }
@@ -237,6 +245,9 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         }
         if (nbt.contains("llm")) {
             llmPlanner.deserializeNBT(provider, nbt.getCompound("llm"));
+        }
+        if (nbt.contains("material_wallet")) {
+            materialWallet.deserializeNBT(nbt.getCompound("material_wallet"));
         }
     }
 
