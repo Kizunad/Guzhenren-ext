@@ -1,5 +1,6 @@
 package com.Kizunad.customNPCs.network;
 
+//import com.Kizunad.customNPCs.network.ServerboundRefreshTaskBoardPayload;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -59,6 +60,11 @@ public final class ModNetworking {
             ServerboundSubmitTaskPayload.TYPE,
             ServerboundSubmitTaskPayload.STREAM_CODEC,
             ServerboundSubmitTaskPayload::handle
+        );
+        registrar.playToServer(
+            ServerboundRefreshTaskBoardPayload.TYPE,
+            ServerboundRefreshTaskBoardPayload.STREAM_CODEC,
+            ServerboundRefreshTaskBoardPayload::handle
         );
     }
 

@@ -36,9 +36,12 @@ public final class TaskBoardSyncService {
         PlayerTaskData data = PlayerTaskAttachment.get(player);
         List<TaskEntry> entries = new ArrayList<>();
         for (TaskDefinition definition : definitions) {
-            TaskProgress progress = data.getProgress(definition.id());
+            TaskProgress progress = data.getProgress(
+                definition.id(),
+                npc.getUUID()
+            );
             boolean completed = progress == null &&
-                data.hasCompleted(definition.id());
+                data.hasCompleted(definition.id(), npc.getUUID());
             TaskProgressState state;
             if (progress != null) {
                 state = progress.getState();

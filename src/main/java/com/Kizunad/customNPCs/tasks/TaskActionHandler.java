@@ -1,5 +1,6 @@
 package com.Kizunad.customNPCs.tasks;
 
+import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.capabilities.tasks.PlayerTaskAttachment;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
@@ -24,7 +25,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class TaskActionHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TaskActionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        TaskActionHandler.class
+    );
     private static final double MAX_DISTANCE_SQR = 20.0D * 20.0D;
 
     private TaskActionHandler() {}
@@ -40,18 +43,30 @@ public final class TaskActionHandler {
         }
         TaskDefinition definition = TaskRegistry.getInstance().get(taskId);
         if (definition == null) {
-            LOGGER.warn("玩家 {} 请求未知任务 {}", player.getGameProfile().getName(), taskId);
+            LOGGER.warn(
+                "玩家 {} 请求未知任务 {}",
+                player.getGameProfile().getName(),
+                taskId
+            );
             return;
         }
         var mind = npc.getData(NpcMindAttachment.NPC_MIND);
-        if (mind == null || !mind.getQuestState().getTaskIds().contains(taskId)) {
-            player.displayClientMessage(Component.literal("该 NPC 不提供此任务"), false);
+        if (
+            mind == null || !mind.getQuestState().getTaskIds().contains(taskId)
+        ) {
+            player.displayClientMessage(
+                Component.literal("该 NPC 不提供此任务"),
+                false
+            );
             return;
         }
         PlayerTaskData data = PlayerTaskAttachment.get(player);
         boolean accepted = data.accept(definition, npc.getUUID());
         if (!accepted) {
-            player.displayClientMessage(Component.literal("无法接受任务，可能已在进行中或已完成"), false);
+            player.displayClientMessage(
+                Component.literal("无法接受任务，可能已在进行中或已完成"),
+                false
+            );
             return;
         }
         player.displayClientMessage(
@@ -74,14 +89,28 @@ public final class TaskActionHandler {
         if (definition == null) {
             return;
         }
+        var mind = npc.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            player.displayClientMessage(
+                Component.literal("NPC 状态异常，无法提交"),
+                false
+            );
+            return;
+        }
         PlayerTaskData data = PlayerTaskAttachment.get(player);
-        TaskProgress progress = data.getProgress(taskId);
+        TaskProgress progress = data.getProgress(taskId, npc.getUUID());
         if (progress == null) {
-            player.displayClientMessage(Component.literal("尚未接受该任务"), false);
+            player.displayClientMessage(
+                Component.literal("尚未接受该任务"),
+                false
+            );
             return;
         }
         if (progress.getState() == TaskProgressState.COMPLETED) {
-            player.displayClientMessage(Component.literal("该任务已完成"), false);
+            player.displayClientMessage(
+                Component.literal("该任务已完成"),
+                false
+            );
             return;
         }
         boolean delivered = false;
@@ -93,7 +122,13 @@ public final class TaskActionHandler {
                 if (needed <= 0) {
                     continue;
                 }
-                int deliveredAmount = deliverItems(player, submit, needed);
+                int deliveredAmount = transferItemsToNpc(
+                    player,
+                    npc,
+                    mind.getInventory(),
+                    submit,
+                    needed
+                );
                 if (deliveredAmount > 0) {
                     progress.incrementObjective(
                         i,
@@ -105,18 +140,29 @@ public final class TaskActionHandler {
             }
         }
         if (!delivered) {
-            player.displayClientMessage(Component.literal("没有可交付的物品"), false);
+            player.displayClientMessage(
+                Component.literal("没有可交付的物品"),
+                false
+            );
             return;
         }
         player.displayClientMessage(Component.literal("已提交任务物资"), true);
         if (progress.isCompleted(definition)) {
             progress.setState(TaskProgressState.COMPLETED);
             grantRewards(player, npc, definition);
-            data.completeTask(definition.id());
+            data.completeTask(definition.id(), npc.getUUID());
             player.displayClientMessage(
                 Component.literal("任务完成: " + definition.title()),
                 false
             );
+        }
+        syncBoard(player, npc);
+    }
+
+    public static void handleRefresh(ServerPlayer player, int npcEntityId) {
+        CustomNpcEntity npc = validateNpc(player, npcEntityId);
+        if (npc == null) {
+            return;
         }
         syncBoard(player, npc);
     }
@@ -129,52 +175,60 @@ public final class TaskActionHandler {
         if (!(entity instanceof CustomNpcEntity npc)) {
             return null;
         }
-        if (
-            !npc.isAlive() ||
-            npc.distanceToSqr(player) > MAX_DISTANCE_SQR
-        ) {
+        if (!npc.isAlive() || npc.distanceToSqr(player) > MAX_DISTANCE_SQR) {
             return null;
         }
         return npc;
     }
 
-    private static int deliverItems(
+    /**
+     * 将玩家提交的物品转移到 NPC 背包中，只计入真实放入的数量。
+     * 若 NPC 背包已满，未放入的部分会返还给玩家（返还失败则掉落）。
+     */
+    private static int transferItemsToNpc(
         ServerPlayer player,
+        CustomNpcEntity npc,
+        NpcInventory npcInventory,
         SubmitItemObjectiveDefinition objective,
         int needed
     ) {
-        Inventory inventory = player.getInventory();
-        int available = countItems(inventory, objective);
-        if (available <= 0) {
-            return 0;
-        }
-        int deliver = Math.min(available, needed);
-        int remaining = deliver;
-        for (int slot = 0; slot < inventory.getContainerSize() && remaining > 0; slot++) {
-            ItemStack stack = inventory.getItem(slot);
+        Inventory playerInv = player.getInventory();
+        int remainingNeed = needed;
+        int inserted = 0;
+        for (
+            int slot = 0;
+            slot < playerInv.getContainerSize() && remainingNeed > 0;
+            slot++
+        ) {
+            ItemStack stack = playerInv.getItem(slot);
             if (!objective.matches(stack)) {
                 continue;
             }
-            int remove = Math.min(remaining, stack.getCount());
+            int remove = Math.min(remainingNeed, stack.getCount());
+            ItemStack extracted = stack.copyWithCount(remove);
             stack.shrink(remove);
-            remaining -= remove;
-        }
-        inventory.setChanged();
-        return deliver - remaining;
-    }
+            if (stack.isEmpty()) {
+                playerInv.setItem(slot, ItemStack.EMPTY);
+            }
+            playerInv.setChanged();
 
-    private static int countItems(
-        Inventory inventory,
-        SubmitItemObjectiveDefinition objective
-    ) {
-        int total = 0;
-        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            ItemStack stack = inventory.getItem(slot);
-            if (objective.matches(stack)) {
-                total += stack.getCount();
+            int originalCount = extracted.getCount();
+            ItemStack leftover = npcInventory.addItem(extracted);
+            int placed =
+                originalCount - (leftover.isEmpty() ? 0 : leftover.getCount());
+            inserted += placed;
+            remainingNeed -= placed;
+
+            if (!leftover.isEmpty()) {
+                // 背包已满，尽量返还给玩家，避免物品丢失
+                //boolean returned = playerInv.add(leftover);
+                //if (!returned) {
+                //    npc.spawnAtLocation(leftover, 0.0F);
+                //}
+                //  这里不做任何操作
             }
         }
-        return total;
+        return inserted;
     }
 
     private static void grantRewards(

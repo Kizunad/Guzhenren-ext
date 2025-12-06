@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.client.ui.task;
 
 import com.Kizunad.customNPCs.network.OpenTaskBoardPayload;
 import com.Kizunad.customNPCs.network.ServerboundAcceptTaskPayload;
+import com.Kizunad.customNPCs.network.ServerboundRefreshTaskBoardPayload;
 import com.Kizunad.customNPCs.network.ServerboundSubmitTaskPayload;
 import com.Kizunad.customNPCs.tasks.data.TaskProgressState;
 import com.Kizunad.tinyUI.controls.Button;
@@ -34,7 +35,8 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
     private static final int BUTTON_INNER_MARGIN = 4;
     private static final int BUTTON_INNER_WIDTH = 90;
     private static final int BUTTON_SUBMIT_OFFSET = 100;
-    private static final int BUTTON_CLOSE_OFFSET = 200;
+    private static final int BUTTON_REFRESH_OFFSET = 200;
+    private static final int BUTTON_CLOSE_OFFSET = 310;
     private static final int DETAIL_PADDING = 10;
     private static final int ITEM_ICON_SIZE = 18;
     private static final int ITEM_ICON_Y_OFFSET = 4;
@@ -147,6 +149,16 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         submitButton.setOnClick(() -> sendSubmit());
         buttonPanel.addChild(submitButton);
 
+        Button refreshButton = new Button("Refresh", theme);
+        refreshButton.setFrame(
+            DETAIL_PADDING + BUTTON_REFRESH_OFFSET,
+            BUTTON_INNER_MARGIN,
+            BUTTON_INNER_WIDTH,
+            BUTTON_HEIGHT - BUTTON_INNER_MARGIN * 2
+        );
+        refreshButton.setOnClick(() -> sendRefresh());
+        buttonPanel.addChild(refreshButton);
+
         Button closeButton = new Button("Close", theme);
         closeButton.setFrame(
             DETAIL_PADDING + BUTTON_CLOSE_OFFSET,
@@ -212,6 +224,12 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         }
         PacketDistributor.sendToServer(
             new ServerboundSubmitTaskPayload(npcEntityId, entry.taskId())
+        );
+    }
+
+    private void sendRefresh() {
+        PacketDistributor.sendToServer(
+            new ServerboundRefreshTaskBoardPayload(npcEntityId)
         );
     }
 

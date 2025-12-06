@@ -22,12 +22,17 @@ public final class NpcTaskBoard {
         if (mind == null) {
             return Collections.emptyList();
         }
+
+        // 检查任务状态是否启用
         NpcQuestState questState = mind.getQuestState();
         if (!questState.isQuestEnabled()) {
             return Collections.emptyList();
         }
+
         List<ResourceLocation> ids = questState.getTaskIds();
         TaskRegistry registry = TaskRegistry.getInstance();
+
+        // 初始化
         if (ids.isEmpty()) {
             List<ResourceLocation> defaults = registry.pickDefaultIds(
                 DEFAULT_SLOT_COUNT
@@ -35,6 +40,7 @@ public final class NpcTaskBoard {
             questState.ensureTaskIds(defaults);
             ids = questState.getTaskIds();
         }
+
         List<ResourceLocation> filtered = new ArrayList<>();
         for (ResourceLocation id : ids) {
             if (registry.get(id) != null) {
