@@ -71,17 +71,30 @@ public class GatherMaterialAction extends AbstractStandardAction {
     }
 
     /**
-     * 遍历半径内方块，按硬度和数量换算材料点数，跳过空气/液体/不可破坏方块，实际破坏可采集方块。
+     * 遍历半径内方块，按硬度和数量换算材料点数，跳过空气/液体/不可破坏方块。
+     * mobGriefing 关闭时仅扫描收集点数，开启时额外破坏方块避免重复刷取。
      */
-    private float collectNearbyMaterial(ServerLevel level, Mob mob, BlockPos origin) {
-        boolean canGrief = level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-        if (!canGrief) {
-            LOGGER.debug("[GatherMaterialAction] mobGriefing 关闭，跳过破坏收集");
-            return 0.0F;
-        }
+    private float collectNearbyMaterial(
+        ServerLevel level,
+        Mob mob,
+        BlockPos origin
+    ) {
+        // Gamerule 仅允许被破坏方块时破坏，其余逻辑为仅收集材料
+        boolean canGrief = level
+            .getGameRules()
+            .getBoolean(GameRules.RULE_MOBGRIEFING);
 
-        BlockPos min = origin.offset(-SEARCH_RADIUS, -SEARCH_RADIUS, -SEARCH_RADIUS);
-        BlockPos max = origin.offset(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS);
+        BlockPos min = origin.offset(
+            -SEARCH_RADIUS,
+            -SEARCH_RADIUS,
+            -SEARCH_RADIUS
+        );
+
+        BlockPos max = origin.offset(
+            SEARCH_RADIUS,
+            SEARCH_RADIUS,
+            SEARCH_RADIUS
+        );
         int processed = 0;
         float total = 0.0F;
 
@@ -101,11 +114,21 @@ public class GatherMaterialAction extends AbstractStandardAction {
                 continue;
             }
 
-            // 尝试破坏方块，避免无限刷取材料
-            boolean destroyed = level.destroyBlock(pos, false, mob);
-            if (!destroyed) {
-                LOGGER.debug("[GatherMaterialAction] 方块 {} 未被破坏，跳过", state.getBlock());
-                continue;
+            if (canGrief) {
+                // 破坏方块避免无限刷取材料
+                boolean destroyed = level.destroyBlock(pos, false, mob);
+                if (!destroyed) {
+                    LOGGER.debug(
+                        "[GatherMaterialAction] 方块 {} 未被破坏，跳过",
+                        state.getBlock()
+                    );
+                    continue;
+                }
+            } else {
+                LOGGER.trace(
+                    "[GatherMaterialAction] mobGriefing 关闭，仅扫描方块 {}",
+                    state.getBlock()
+                );
             }
 
             total += BASE_GAIN + hardness * HARDNESS_FACTOR;
