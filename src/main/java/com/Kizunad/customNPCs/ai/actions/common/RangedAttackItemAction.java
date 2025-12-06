@@ -194,6 +194,10 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         if (livingTarget == null) {
             return ActionStatus.FAILURE;
         }
+        if (isOwnMount(mob, livingTarget)) {
+            LOGGER.debug("[RangedAttackItemAction] 目标 {} 是当前坐骑，放弃射击", livingTarget.getUUID());
+            return ActionStatus.FAILURE;
+        }
 
         // ==================== Step 2: 距离检查 ====================
         ActionStatus positioningStatus = handlePositioning(mob, livingTarget);
@@ -653,6 +657,11 @@ public class RangedAttackItemAction extends AbstractStandardAction {
         mob
             .getLookControl()
             .setLookAt(target, MAX_HEAD_ROTATION, MAX_HEAD_ROTATION);
+    }
+
+    private boolean isOwnMount(Mob mob, LivingEntity target) {
+        Entity vehicle = mob.getVehicle();
+        return vehicle == target;
     }
 
     @Override

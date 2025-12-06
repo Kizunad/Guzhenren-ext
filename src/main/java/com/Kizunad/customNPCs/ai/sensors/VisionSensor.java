@@ -10,6 +10,9 @@ import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -108,6 +111,9 @@ public class VisionSensor implements ISensor {
         Vec3 position = entity.position();
         AABB searchBox = new AABB(position, position).inflate(range);
 
+        // 额外扫描坐骑候选，避免错过静止载具
+        scanMountCandidates(mind, entity, level, searchBox);
+
         // 步骤2: 查询附近所有有效活体实体（使用过滤器排除无效目标）
         List<LivingEntity> nearbyEntities = level.getEntitiesOfClass(
             LivingEntity.class,
@@ -180,6 +186,82 @@ public class VisionSensor implements ISensor {
                 level
             );
         }
+    }
+
+    private void scanMountCandidates(
+        INpcMind mind,
+        LivingEntity observer,
+        ServerLevel level,
+        AABB searchBox
+    ) {
+        List<Entity> mounts = level.getEntities(
+            observer,
+            searchBox,
+            candidate -> isMountCandidate(observer, candidate)
+        );
+        Entity nearestMount = null;
+        double bestDistanceSq = Double.MAX_VALUE;
+        for (Entity mount : mounts) {
+            double distanceSq = observer.distanceToSqr(mount.position());
+            if (distanceSq < bestDistanceSq) {
+                bestDistanceSq = distanceSq;
+                nearestMount = mount;
+            }
+        }
+
+        if (nearestMount != null) {
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    WorldStateKeys.HAS_MOUNT_NEARBY,
+                    true,
+                    MEMORY_DURATION
+                );
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    WorldStateKeys.MOUNT_UUID,
+                    nearestMount.getUUID(),
+                    MEMORY_DURATION
+                );
+            mind
+                .getMemory()
+                .rememberShortTerm(
+                    WorldStateKeys.MOUNT_TYPE,
+                    resolveMountType(nearestMount),
+                    MEMORY_DURATION
+                );
+        } else {
+            mind.getMemory().forget(WorldStateKeys.HAS_MOUNT_NEARBY);
+            mind.getMemory().forget(WorldStateKeys.MOUNT_UUID);
+            mind.getMemory().forget(WorldStateKeys.MOUNT_TYPE);
+        }
+    }
+
+    private boolean isMountCandidate(LivingEntity observer, Entity candidate) {
+        if (candidate == null || candidate == observer || candidate.isRemoved()) {
+            return false;
+        }
+        if (!candidate.isAlive() || !candidate.getPassengers().isEmpty()) {
+            return false;
+        }
+        if (candidate instanceof AbstractHorse horse) {
+            return horse.isTamed() && !horse.isBaby();
+        }
+        return candidate instanceof Boat || candidate instanceof AbstractMinecart;
+    }
+
+    private String resolveMountType(Entity mount) {
+        if (mount instanceof AbstractHorse) {
+            return "horse";
+        }
+        if (mount instanceof Boat) {
+            return "boat";
+        }
+        if (mount instanceof AbstractMinecart) {
+            return "minecart";
+        }
+        return mount.getType().toString();
     }
 
     private List<LivingEntity> findVisibleEntities(

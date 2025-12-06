@@ -21,6 +21,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -31,6 +32,8 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
@@ -43,6 +46,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import net.minecraft.network.chat.Component;
 
@@ -113,7 +117,8 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final int SWIM_VERTICAL_RATE = 10;
     private static final double SWIM_MOVE_EPSILON_SQ = 2.5E-7D;
     private static final float RAD_TO_DEG = 180.0F / (float) Math.PI;
-    private static final float SWIM_YAW_OFFSET_DEG = 90.0F;
+    private static final float VEHICLE_YAW_OFFSET_DEG = 90.0F;
+    private static final float SWIM_YAW_OFFSET_DEG = VEHICLE_YAW_OFFSET_DEG;
     private static final float SWIM_MAX_PITCH_DEG = 85.0F;
     // 适中速度/加速度，避免高频上下抖动
     private static final float SWIM_BASE_SPEED = 0.3F;
@@ -123,6 +128,19 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final double WATER_MOMENTUM_RETENTION = 0.9D;
     private static final double WATER_PATH_PUSH_SCALE = 0.15D;
     private static final float WATER_YAW_LERP_FACTOR = 0.1F;
+    private static final double MOUNT_STOP_DISTANCE_SQ = 0.5625D;
+    private static final double MOUNT_TARGET_DRIVE_DISTANCE_SQ = 36.0D;
+    private static final double LIVING_MOUNT_SPEED_SCALE = 0.85D;
+    private static final double LIVING_MIN_FORWARD_FACTOR = 0.35D;
+    private static final float MOUNT_ROT_LERP_FACTOR = 0.2F;
+    private static final double BOAT_MAX_SPEED = 0.4D;
+    private static final double BOAT_PUSH_SCALE = 0.05D;
+    private static final double BOAT_BRAKE_FACTOR = 0.5D;
+    private static final double MINECART_MAX_SPEED = 0.45D;
+    private static final double MINECART_PUSH_SCALE = 0.04D;
+    private static final double MINECART_BRAKE_FACTOR = 0.6D;
+    private static final double VEHICLE_MIN_MOVEMENT_EPSILON = 1.0E-3D;
+    private static final int AUTO_DISMOUNT_IDLE_TICKS = 40;
 
     private static final int WATER_TELEPORT_COOLDOWN_TICKS = 100;
     private static final int LAND_SEARCH_RADIUS = 10;
@@ -164,6 +182,7 @@ public class CustomNpcEntity extends PathfinderMob {
     private static final double COUNTER_SPEED_SCALE_MAX = 1.5D;
 
     private int waterTeleportCooldown = 0;
+    private int ridingIdleTicks = 0;
     /**
      * 开关：是否允许在水中时自动寻找陆地并传送。
      * 默认为 true。修改此字段可控制行为。
@@ -401,6 +420,238 @@ public class CustomNpcEntity extends PathfinderMob {
         }
 
         com.Kizunad.customNPCs.registry.NpcTickRegistry.onTick(this);
+        if (!this.level().isClientSide()) {
+            this.driveMountedVehicle();
+            this.tryAutoDismount();
+        }
+    }
+
+    /**
+     * 将当前寻路节点转译为载具控制输入，让玩家坐骑遵循 NPC 的路径。
+     */
+    private void driveMountedVehicle() {
+        if (!this.isPassenger()) {
+            return;
+        }
+        net.minecraft.world.entity.Entity vehicle = this.getVehicle();
+        if (vehicle == null || !vehicle.isAlive()) {
+            return;
+        }
+        if (vehicle.getControllingPassenger() != this) {
+            return;
+        }
+        PathNavigation navigation = this.navigation;
+        if (navigation == null || navigation.isDone()) {
+            this.stopVehicleInput(vehicle);
+            return;
+        }
+        net.minecraft.world.level.pathfinder.Path path = navigation.getPath();
+        if (path == null || path.isDone()) {
+            this.stopVehicleInput(vehicle);
+            return;
+        }
+        Vec3 nextPos = path.getNextEntityPos(this);
+        if (nextPos == null) {
+            this.stopVehicleInput(vehicle);
+            return;
+        }
+
+        if (vehicle instanceof Mob living) {
+            this.driveLivingMount(living, nextPos);
+        } else if (vehicle instanceof Boat boat) {
+            this.driveBoat(boat, nextPos);
+        } else if (vehicle instanceof AbstractMinecart minecart) {
+            this.driveMinecart(minecart, nextPos);
+        } else {
+            this.syncRidingOrientation(vehicle.getYRot());
+        }
+    }
+
+    /**
+     * 落地生物型载具（马匹等）：手动设置朝向+速度，利用自身属性提供稳定输出。
+     */
+    private void driveLivingMount(Mob mount, Vec3 targetPos) {
+        Vec3 mountPos = mount.position();
+        Vec3 delta = targetPos.subtract(mountPos);
+        double horizontalSqr = delta.x * delta.x + delta.z * delta.z;
+        if (horizontalSqr <= MOUNT_STOP_DISTANCE_SQ) {
+            mount.setSpeed(0.0F);
+            mount.setZza(0.0F);
+            mount.setXxa(0.0F);
+            this.syncRidingOrientation(mount.getYRot());
+            return;
+        }
+
+        float targetYaw =
+            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) - VEHICLE_YAW_OFFSET_DEG;
+        float newYaw = Mth.rotLerp(MOUNT_ROT_LERP_FACTOR, mount.getYRot(), targetYaw);
+        mount.setYRot(newYaw);
+        mount.yBodyRot = newYaw;
+        mount.yHeadRot = newYaw;
+        this.syncRidingOrientation(newYaw);
+
+        double forwardLerp = Mth.clamp(
+            horizontalSqr / MOUNT_TARGET_DRIVE_DISTANCE_SQ,
+            LIVING_MIN_FORWARD_FACTOR,
+            1.0D
+        );
+        double baseSpeed = mount.getAttributeValue(Attributes.MOVEMENT_SPEED);
+        float desiredSpeed = (float) (baseSpeed * LIVING_MOUNT_SPEED_SCALE);
+        mount.setSpeed(desiredSpeed);
+        mount.setZza((float) forwardLerp);
+        mount.setXxa(0.0F);
+    }
+
+    /**
+     * 船只：直接计算目标方向向量并强制线性速度，避免 Paddle 状态抖动。
+     */
+    private void driveBoat(Boat boat, Vec3 targetPos) {
+        Vec3 delta = targetPos.subtract(boat.position());
+        double horizontalSqr = delta.x * delta.x + delta.z * delta.z;
+        if (horizontalSqr <= MOUNT_STOP_DISTANCE_SQ) {
+            this.applyBoatBraking(boat);
+            this.syncRidingOrientation(boat.getYRot());
+            return;
+        }
+        float targetYaw =
+            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) - VEHICLE_YAW_OFFSET_DEG;
+        float newYaw = Mth.rotLerp(MOUNT_ROT_LERP_FACTOR, boat.getYRot(), targetYaw);
+        boat.setYRot(newYaw);
+        boat.setXRot(0.0F);
+        this.syncRidingOrientation(newYaw);
+
+        double horizontalDist = Math.sqrt(horizontalSqr);
+        if (horizontalDist <= VEHICLE_MIN_MOVEMENT_EPSILON) {
+            this.applyBoatBraking(boat);
+            return;
+        }
+        Vec3 direction = new Vec3(delta.x / horizontalDist, 0.0D, delta.z / horizontalDist);
+        double desiredSpeed = Math.min(
+            BOAT_MAX_SPEED,
+            horizontalDist * BOAT_PUSH_SCALE
+        );
+        Vec3 current = boat.getDeltaMovement();
+        Vec3 newVelocity = new Vec3(
+            direction.x * desiredSpeed,
+            current.y,
+            direction.z * desiredSpeed
+        );
+        boat.setDeltaMovement(newVelocity);
+    }
+
+    /**
+     * 矿车：沿路径投影方向施加推力，保持与铁轨方向一致的速度分量。
+     */
+    private void driveMinecart(AbstractMinecart minecart, Vec3 targetPos) {
+        Vec3 delta = targetPos.subtract(minecart.position());
+        double horizontalSqr = delta.x * delta.x + delta.z * delta.z;
+        if (horizontalSqr <= MOUNT_STOP_DISTANCE_SQ) {
+            this.applyMinecartBraking(minecart);
+            this.syncRidingOrientation(minecart.getYRot());
+            return;
+        }
+        float targetYaw =
+            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) - VEHICLE_YAW_OFFSET_DEG;
+        float newYaw = Mth.rotLerp(MOUNT_ROT_LERP_FACTOR, minecart.getYRot(), targetYaw);
+        minecart.setYRot(newYaw);
+        this.syncRidingOrientation(newYaw);
+
+        double horizontalDist = Math.sqrt(horizontalSqr);
+        if (horizontalDist <= VEHICLE_MIN_MOVEMENT_EPSILON) {
+            this.applyMinecartBraking(minecart);
+            return;
+        }
+        Vec3 direction = new Vec3(delta.x / horizontalDist, 0.0D, delta.z / horizontalDist);
+        double desiredSpeed = Math.min(
+            MINECART_MAX_SPEED,
+            horizontalDist * MINECART_PUSH_SCALE
+        );
+        Vec3 current = minecart.getDeltaMovement();
+        Vec3 updated = new Vec3(
+            direction.x * desiredSpeed,
+            current.y,
+            direction.z * desiredSpeed
+        );
+        minecart.setDeltaMovement(updated);
+    }
+
+    private void tryAutoDismount() {
+        if (!this.isPassenger()) {
+            this.ridingIdleTicks = 0;
+            return;
+        }
+        PathNavigation currentNavigation = this.navigation;
+        boolean navigationIdle =
+            currentNavigation == null || currentNavigation.isDone();
+        if (!navigationIdle || this.shouldPreserveMountedAim()) {
+            this.ridingIdleTicks = 0;
+            return;
+        }
+        this.ridingIdleTicks++;
+        if (this.ridingIdleTicks >= AUTO_DISMOUNT_IDLE_TICKS) {
+            this.stopRiding();
+            this.ridingIdleTicks = 0;
+        }
+    }
+
+    /**
+     * 停止/减速不同载具，避免松开控制后仍在原地打转。
+     */
+    private void stopVehicleInput(net.minecraft.world.entity.Entity vehicle) {
+        if (vehicle instanceof Mob living) {
+            living.setSpeed(0.0F);
+            living.setZza(0.0F);
+            living.setXxa(0.0F);
+        } else if (vehicle instanceof Boat boat) {
+            this.applyBoatBraking(boat);
+        } else if (vehicle instanceof AbstractMinecart minecart) {
+            this.applyMinecartBraking(minecart);
+        }
+    }
+
+    private void applyBoatBraking(Boat boat) {
+        Vec3 slowed = boat.getDeltaMovement().scale(BOAT_BRAKE_FACTOR);
+        boat.setDeltaMovement(slowed);
+    }
+
+    private void applyMinecartBraking(AbstractMinecart minecart) {
+        Vec3 velocity = minecart.getDeltaMovement();
+        Vec3 slowed = new Vec3(
+            velocity.x * MINECART_BRAKE_FACTOR,
+            velocity.y,
+            velocity.z * MINECART_BRAKE_FACTOR
+        );
+        minecart.setDeltaMovement(slowed);
+    }
+
+    private void syncRidingOrientation(float yaw) {
+        if (this.shouldPreserveMountedAim()) {
+            return;
+        }
+        this.setYRot(yaw);
+        this.yBodyRot = yaw;
+        this.setYHeadRot(yaw);
+    }
+
+    private boolean shouldPreserveMountedAim() {
+        if (!this.isPassenger()) {
+            return false;
+        }
+        var mind = this.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            return false;
+        }
+        com.Kizunad.customNPCs.ai.actions.IAction currentAction =
+            mind.getActionExecutor().getCurrentAction();
+        if (currentAction == null) {
+            return false;
+        }
+        String actionName = currentAction.getName();
+        if (actionName == null) {
+            return false;
+        }
+        String lowered = actionName.toLowerCase(Locale.ROOT);
+        return lowered.contains("attack");
     }
 
     private net.minecraft.core.BlockPos findNearestLand(

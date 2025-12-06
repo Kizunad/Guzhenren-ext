@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import java.util.UUID;
 
 /**
  * NpcMind 默认实现
@@ -298,6 +299,18 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
         state.setState(WorldStateKeys.HAZARD_NEARBY, hazardNearby);
         state.setState(WorldStateKeys.HOSTILE_NEARBY, hasHostile);
         state.setState(WorldStateKeys.ALLY_NEARBY, hasAlly);
+        state.setState(WorldStateKeys.IS_RIDING, entity.isPassenger());
+        boolean hasMountNearby = Boolean.TRUE.equals(
+            memory.getMemory(WorldStateKeys.HAS_MOUNT_NEARBY)
+        );
+        state.setState(WorldStateKeys.HAS_MOUNT_NEARBY, hasMountNearby);
+        UUID trackedMount = memory.getMemory(
+            WorldStateKeys.MOUNT_UUID,
+            UUID.class
+        );
+        state.setState(WorldStateKeys.MOUNT_UUID, trackedMount);
+        Object mountType = memory.getMemory(WorldStateKeys.MOUNT_TYPE);
+        state.setState(WorldStateKeys.MOUNT_TYPE, mountType);
 
         // 从记忆读取自定义状态（供 GOAP 动作使用）
         // 这些状态由 GOAP 动作在执行时写入记忆

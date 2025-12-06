@@ -297,6 +297,10 @@ public class AttackAction
         if (mob == target) {
             return true;
         }
+        Entity vehicle = mob.getVehicle();
+        if (vehicle == target) {
+            return true;
+        }
         return mob.isAlliedTo(target);
     }
 

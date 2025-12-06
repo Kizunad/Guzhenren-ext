@@ -6,6 +6,8 @@ import com.Kizunad.customNPCs.ai.actions.base.LookAtAction;
 import com.Kizunad.customNPCs.ai.actions.base.MoveToAction;
 import com.Kizunad.customNPCs.ai.actions.base.WaitAction;
 import com.Kizunad.customNPCs.ai.actions.common.AttackAction;
+import com.Kizunad.customNPCs.ai.actions.common.DismountAction;
+import com.Kizunad.customNPCs.ai.actions.common.MountAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.PlanBasedGoal;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
@@ -214,6 +216,22 @@ public class MindDebugCommand {
                             IntegerArgumentType.integer(1, MAX_WAIT_DURATION)
                         ).executes(MindDebugCommand::runWait)
                     )
+                )
+            )
+            .then(
+                Commands.literal("mount").then(
+                    Commands.argument("npc", EntityArgument.entity()).then(
+                        Commands.argument(
+                            "mount",
+                            EntityArgument.entity()
+                        ).executes(MindDebugCommand::runMount)
+                    )
+                )
+            )
+            .then(
+                Commands.literal("dismount").then(
+                    Commands.argument("npc", EntityArgument.entity())
+                        .executes(MindDebugCommand::runDismount)
                 )
             );
     }
@@ -668,6 +686,58 @@ public class MindDebugCommand {
                             " 提交 WaitAction(" +
                             ticks +
                             "t)"
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int runMount(CommandContext<CommandSourceStack> context) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        Entity mount = getEntity(context, "mount");
+        if (npc == null || mount == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        IAction action = new MountAction(mount.getUUID());
+        mind.getActionExecutor().addAction(action);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已向 " +
+                            npc.getName().getString() +
+                            " 提交 MountAction -> " +
+                            mount.getName().getString()
+                    ),
+                false
+            );
+        return 1;
+    }
+
+    private static int runDismount(CommandContext<CommandSourceStack> context) {
+        LivingEntity npc = getLivingEntity(context, "npc");
+        if (npc == null) {
+            return 0;
+        }
+        INpcMind mind = getMindOrReport(context, npc);
+        if (mind == null) {
+            return 0;
+        }
+        IAction action = new DismountAction();
+        mind.getActionExecutor().addAction(action);
+        context
+            .getSource()
+            .sendSuccess(
+                () ->
+                    Component.literal(
+                        "已向 " +
+                            npc.getName().getString() +
+                            " 提交 DismountAction"
                     ),
                 false
             );

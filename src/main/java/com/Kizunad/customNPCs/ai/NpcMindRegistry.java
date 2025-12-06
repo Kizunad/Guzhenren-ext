@@ -29,6 +29,7 @@ import com.Kizunad.customNPCs.ai.decision.goals.CompressInventoryGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HealGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.HuntGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.IdleGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.FindMountGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SatiateGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SeekShelterGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.SurvivalGoal;
@@ -101,6 +102,7 @@ public final class NpcMindRegistry {
         registerGoal("heal", HealGoal::new);
         registerGoal("cook", CookGoal::new);
         registerGoal("hunt", HuntGoal::new);
+        registerGoal("find_mount", FindMountGoal::new);
         registerGoal("craft_item", CraftItemGoal::new);
         registerGoal("enhance", EnhanceGoal::new);
 

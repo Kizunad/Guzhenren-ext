@@ -178,6 +178,26 @@ public final class WorldStateKeys {
     public static final String CURRENT_COMMAND = "current_command";
 
     /**
+     * 是否处于骑乘状态
+     */
+    public static final String IS_RIDING = "is_riding";
+
+    /**
+     * 附近是否存在可用坐骑
+     */
+    public static final String HAS_MOUNT_NEARBY = "has_mount_nearby";
+
+    /**
+     * 记忆中的目标坐骑 UUID
+     */
+    public static final String MOUNT_UUID = "mount_uuid";
+
+    /**
+     * 记忆中的目标坐骑类型（horse/boat/minecart 等）
+     */
+    public static final String MOUNT_TYPE = "mount_type";
+
+    /**
      * 当前关系类型（字符串，如 HIRED / OPPRESSED）
      */
     public static final String RELATIONSHIP_TYPE = "relationship_type";
