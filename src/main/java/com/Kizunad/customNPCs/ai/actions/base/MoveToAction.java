@@ -2,6 +2,7 @@ package com.Kizunad.customNPCs.ai.actions.base;
 
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.IAction;
+import com.Kizunad.customNPCs.ai.actions.util.NavigationUtil;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogCategory;
@@ -474,6 +475,26 @@ public class MoveToAction implements IAction {
     }
 
     private boolean tryTeleportToTarget(LivingEntity entity, Vec3 target) {
+        if (entity instanceof net.minecraft.world.entity.Mob mob) {
+            boolean speedTeleported = NavigationUtil.trySpeedTeleport(
+                mob,
+                target,
+                speed,
+                acceptableDistance
+            );
+            if (speedTeleported) {
+                lastPosition = entity.position();
+                stuckTicks = 0;
+                pathUpdateCooldown = PATH_UPDATE_INTERVAL;
+                MindLog.execution(
+                    MindLogLevel.DEBUG,
+                    "触发高速短距传送 | 当前速度 {} | 目标 {}",
+                    speed,
+                    target
+                );
+                return true;
+            }
+        }
         if (teleportAttempted || !hasTestTag(entity)) {
             return false;
         }

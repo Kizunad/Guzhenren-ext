@@ -2,10 +2,14 @@ package com.Kizunad.customNPCs.ai.actions.util;
 
 import com.Kizunad.customNPCs.ai.actions.config.ActionConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +39,35 @@ public final class NavigationUtil {
      * 最小移动距离（用于卡住检测）
      */
     private static final double MIN_MOVEMENT = 0.1;
+    /**
+     * 最小距离（用于卡住检测）
+     */
+    private static final double MIN_DISTANCE = 0.001d;
+    /**
+     * 高速兜底传送的速度阈值
+     */
+    private static final double SPEED_TELEPORT_THRESHOLD = 1.5;
+    /**
+     * 高速兜底传送的基础距离
+     */
+    private static final double SPEED_TELEPORT_BASE_RANGE = 2.0;
+    /**
+     * 每提升 1.0 速度可增加的传送距离
+     */
+    private static final double SPEED_TELEPORT_RANGE_PER_SPEED = 2.5;
+    /**
+     * 高速传送的最大可用距离
+     */
+    private static final double SPEED_TELEPORT_MAX_RANGE = 7.0;
+    /**
+     * 触发传送所需的最小距离
+     */
+    private static final double SPEED_TELEPORT_MIN_STEP = 0.75;
+    /**
+     * 检测安全落点时的采样高度
+     */
+    private static final double[] SPEED_TELEPORT_VERTICAL_OFFSETS =
+        new double[] { 0.0, 1.0, -1.0, 2.0, -2.0 };
 
     /**
      * 私有构造函数（工具类）
@@ -248,6 +281,135 @@ public final class NavigationUtil {
             pathUpdateCooldown,
             false // 固定目标
         );
+    }
+
+    /**
+     * 当速度过高导致寻路系统不稳定时，尝试进行短距离传送。
+     * <p>
+     * 仅在服务端生效：根据速度计算最大传送距离，沿水平向量逼近目标，
+     * 并检测路径/落点是否被方块阻挡。
+     *
+     * @param mob NPC 实体
+     * @param targetPos 目标位置
+     * @param moveSpeed 当前设定速度
+     * @param acceptableDistance 可接受的到达距离，用于避免过冲
+     * @return true 表示传送成功
+     */
+    public static boolean trySpeedTeleport(
+        Mob mob,
+        Vec3 targetPos,
+        double moveSpeed,
+        double acceptableDistance
+    ) {
+        if (mob == null || targetPos == null) {
+            return false;
+        }
+        if (mob.level().isClientSide()) {
+            return false;
+        }
+        if (moveSpeed < SPEED_TELEPORT_THRESHOLD) {
+            return false;
+        }
+        Vec3 start = mob.position();
+        Vec3 horizontalDelta = new Vec3(
+            targetPos.x - start.x,
+            0.0,
+            targetPos.z - start.z
+        );
+        double planarDistance = horizontalDelta.length();
+        if (planarDistance < MIN_DISTANCE) {
+            return false;
+        }
+
+        double allowedRange =
+            SPEED_TELEPORT_BASE_RANGE +
+            (moveSpeed - SPEED_TELEPORT_THRESHOLD) *
+            SPEED_TELEPORT_RANGE_PER_SPEED;
+        allowedRange = Mth.clamp(
+            allowedRange,
+            SPEED_TELEPORT_MIN_STEP,
+            SPEED_TELEPORT_MAX_RANGE
+        );
+
+        double desiredDistance = Math.max(
+            planarDistance - acceptableDistance,
+            0.0
+        );
+        double teleportDistance = Math.min(desiredDistance, allowedRange);
+        if (teleportDistance < SPEED_TELEPORT_MIN_STEP) {
+            return false;
+        }
+
+        Vec3 horizontalDir = horizontalDelta.scale(1.0d / planarDistance);
+        Vec3 projected = start.add(horizontalDir.scale(teleportDistance));
+        Vec3 candidate = new Vec3(projected.x, targetPos.y, projected.z);
+
+        Vec3 safePos = findSpeedTeleportSpot(mob, candidate);
+        if (safePos == null) {
+            safePos = findSpeedTeleportSpot(
+                mob,
+                new Vec3(projected.x, start.y, projected.z)
+            );
+        }
+        if (safePos == null) {
+            return false;
+        }
+
+        mob.teleportTo(safePos.x, safePos.y, safePos.z);
+        mob.getNavigation().stop();
+
+        if (CONFIG.isDebugLoggingEnabled()) {
+            LOGGER.info(
+                "[NavigationUtil] 高速传送: {} -> {} | 移动速度 {} | 实际距离 {}",
+                start,
+                safePos,
+                String.format("%.2f", moveSpeed),
+                String.format("%.2f", teleportDistance)
+            );
+        }
+
+        return true;
+    }
+
+    private static Vec3 findSpeedTeleportSpot(Mob mob, Vec3 candidate) {
+        for (double offset : SPEED_TELEPORT_VERTICAL_OFFSETS) {
+            Vec3 adjusted = candidate.add(0.0, offset, 0.0);
+            if (!isTeleportDestinationClear(mob, adjusted)) {
+                continue;
+            }
+            if (!hasClearTravelPath(mob, adjusted)) {
+                continue;
+            }
+            return adjusted;
+        }
+        return null;
+    }
+
+    private static boolean isTeleportDestinationClear(
+        Mob mob,
+        Vec3 destination
+    ) {
+        Vec3 delta = destination.subtract(mob.position());
+        AABB shifted = mob.getBoundingBox().move(delta);
+        return mob.level().noCollision(mob, shifted);
+    }
+
+    private static boolean hasClearTravelPath(Mob mob, Vec3 destination) {
+        Vec3 startEye = mob.getEyePosition();
+        Vec3 destEye = new Vec3(
+            destination.x,
+            destination.y + mob.getEyeHeight(),
+            destination.z
+        );
+        ClipContext context = new ClipContext(
+            startEye,
+            destEye,
+            ClipContext.Block.COLLIDER,
+            ClipContext.Fluid.NONE,
+            mob
+        );
+        HitResult result = mob.level().clip(context);
+        return result.getType() == HitResult.Type.MISS;
     }
 
     /**
