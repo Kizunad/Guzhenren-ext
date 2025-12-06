@@ -1,0 +1,21 @@
+{
+  "id": "customnpcs:golden_reserve",
+  "title": "Golden Reserve",
+  "description": "We are reinforcing the armory with Golden Apples. Bring enough supplies to harden our frontline.",
+  "type": "side",
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "minecraft:golden_apple",
+      "count": 10,
+      "base_value_snapshot": 150
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "minecraft:netherite_scrap",
+      "count": 6
+    }
+  ]
+}

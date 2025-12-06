@@ -30,6 +30,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.Kizunad.customNPCs.tasks.TaskBoardSyncService;
 
 /**
  * C2S：客户端点击交互按钮/对话选项后上报服务端。
@@ -57,6 +58,8 @@ public record InteractActionPayload(
         ResourceLocation.fromNamespaceAndPath(CustomNPCsMod.MODID, "dismiss");
     private static final ResourceLocation ACTION_OWNER_OPTS =
         ResourceLocation.fromNamespaceAndPath(CustomNPCsMod.MODID, "owner_opts");
+    private static final ResourceLocation ACTION_TASKS =
+        ResourceLocation.fromNamespaceAndPath(CustomNPCsMod.MODID, "tasks");
     private static final ResourceLocation ORDER_FOLLOW =
         ResourceLocation.fromNamespaceAndPath(CustomNPCsMod.MODID, "order_follow");
     private static final ResourceLocation ORDER_SIT =
@@ -234,6 +237,10 @@ public record InteractActionPayload(
             handleDismiss(npc, serverPlayer);
             return;
         }
+        if (ACTION_TASKS.equals(actionId)) {
+            openTaskBoard(npc, serverPlayer);
+            return;
+        }
         if (ORDER_FOLLOW.equals(actionId)) {
             setCommand(npc, serverPlayer, NpcCommandType.FOLLOW);
             return;
@@ -371,6 +378,16 @@ public record InteractActionPayload(
                 statuses,
                 options
             )
+        );
+    }
+
+    private static void openTaskBoard(
+        CustomNpcEntity npc,
+        ServerPlayer player
+    ) {
+        PacketDistributor.sendToPlayer(
+            player,
+            TaskBoardSyncService.buildPayload(npc, player)
         );
     }
 

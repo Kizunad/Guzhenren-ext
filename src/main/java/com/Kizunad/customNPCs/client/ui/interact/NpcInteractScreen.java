@@ -41,7 +41,7 @@ public class NpcInteractScreen extends TinyUIScreen {
     private static final int BUTTON_INNER_PADDING = 10;
     private static final int BUTTON_INNER_WIDTH =
         BUTTON_PANEL_WIDTH - BUTTON_INNER_PADDING * 2;
-    private static final int ACTION_BUTTON_COUNT = 4;
+    private static final int ACTION_BUTTON_COUNT = 5;
     private static final int ACTION_BUTTON_GAPS = ACTION_BUTTON_COUNT - 1;
     private static final int STATUS_ROW_HEIGHT = 26;
     private static final int STATUS_LIST_HEIGHT = 260;
@@ -255,6 +255,22 @@ public class NpcInteractScreen extends TinyUIScreen {
             BUTTON_HEIGHT
         );
         buttonPanel.addChild(gift);
+        currentY += BUTTON_HEIGHT + BUTTON_GAP;
+
+        Button quest = createActionButton("Tasks", () ->
+            sendAction(
+                InteractActionPayload.ActionType.CHAT,
+                rl("tasks"),
+                null
+            )
+        );
+        quest.setFrame(
+            BUTTON_INNER_PADDING,
+            currentY,
+            BUTTON_INNER_WIDTH,
+            BUTTON_HEIGHT
+        );
+        buttonPanel.addChild(quest);
         currentY += BUTTON_HEIGHT + BUTTON_GAP;
 
         Button chat = createActionButton("Chat", () -> {

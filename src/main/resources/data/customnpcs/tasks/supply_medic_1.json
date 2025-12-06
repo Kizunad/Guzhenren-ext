@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:supply_medic_1",
+  "title": "Field Medic Needed",
+  "description": "We're low on Healing Potions. Deliver a batch so we can keep fighting.",
+  "type": "side",
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "minecraft:potion",
+      "nbt": "{Potion:\"minecraft:healing\"}",
+      "count": 10,
+      "base_value_snapshot": 50
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "minecraft:emerald",
+      "count": 7
+    }
+  ]
+}

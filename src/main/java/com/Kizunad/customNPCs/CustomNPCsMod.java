@@ -30,6 +30,7 @@ public class CustomNPCsMod {
     public CustomNPCsMod(IEventBus modEventBus, ModContainer modContainer) {
         // 注册 Data Attachments
         NpcMindAttachment.ATTACHMENT_TYPES.register(modEventBus);
+        com.Kizunad.customNPCs.capabilities.tasks.PlayerTaskAttachment.ATTACHMENT_TYPES.register(modEventBus);
         // 注册自定义实体
         ModEntities.register(modEventBus);
         // 注册菜单
@@ -46,8 +47,9 @@ public class CustomNPCsMod {
 
         // 注册内置状态提供者
         StatusProvidersBootstrap.registerBuiltins();
-        // 数据包重载监听器：材料表（需挂在 NeoForge EVENT_BUS）
+        // 数据包重载监听器：材料/任务数据
         NeoForge.EVENT_BUS.addListener(MaterialValueEvents::onAddReloadListener);
+        NeoForge.EVENT_BUS.addListener(com.Kizunad.customNPCs.events.TaskDataEvents::onAddReloadListener);
 
         // 尝试注册测试内容（在独立发布 jar 中缺失时自动跳过）
         registerOptionalTestContent(modEventBus);

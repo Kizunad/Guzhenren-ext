@@ -1,0 +1,26 @@
+{
+  "id": "customnpcs:lifeline",
+  "title": "The Lifeline",
+  "description": "A squad is heading into hostile territory. Secure Totems of Undying to keep everyone alive.",
+  "type": "side",
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "minecraft:totem_of_undying",
+      "count": 5,
+      "base_value_snapshot": 500
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "minecraft:netherite_ingot",
+      "count": 2
+    },
+    {
+      "type": "item",
+      "item": "minecraft:diamond",
+      "count": 5
+    }
+  ]
+}

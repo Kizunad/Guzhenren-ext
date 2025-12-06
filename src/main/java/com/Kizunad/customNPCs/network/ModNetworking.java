@@ -20,6 +20,11 @@ public final class ModNetworking {
             OpenInteractGuiPayload.STREAM_CODEC,
             OpenInteractGuiPayload::handle
         );
+        registrar.playToClient(
+            OpenTaskBoardPayload.TYPE,
+            OpenTaskBoardPayload.STREAM_CODEC,
+            OpenTaskBoardPayload::handle
+        );
         registrar.playToServer(
             InteractActionPayload.TYPE,
             InteractActionPayload.STREAM_CODEC,
@@ -44,6 +49,16 @@ public final class ModNetworking {
             SyncMaterialDataPayload.TYPE,
             SyncMaterialDataPayload.STREAM_CODEC,
             SyncMaterialDataPayload::handle
+        );
+        registrar.playToServer(
+            ServerboundAcceptTaskPayload.TYPE,
+            ServerboundAcceptTaskPayload.STREAM_CODEC,
+            ServerboundAcceptTaskPayload::handle
+        );
+        registrar.playToServer(
+            ServerboundSubmitTaskPayload.TYPE,
+            ServerboundSubmitTaskPayload.STREAM_CODEC,
+            ServerboundSubmitTaskPayload::handle
         );
     }
 
