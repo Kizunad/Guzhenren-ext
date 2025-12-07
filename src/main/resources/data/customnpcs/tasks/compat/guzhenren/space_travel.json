@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/space_travel",
+    "title": "咫尺天涯",
+    "description": "“世界虽大，我自去得。”\n\n想要瞬息千里？那是蛊仙的手段。但若是想在战斗中灵活走位，或是翻越险峻山岭，【挪移蛊】便足矣。这【空界草】生长在空间裂缝边缘，极难采摘。若你能带回几株，我便让你领略宇道的奥妙。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:kongjiecao",
+            "count": 16
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:nuoyigu",
+            "count": 1
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/boar_strength_training",
+    "title": "豕突之勇",
+    "description": "想要在近身搏杀中活下来，一层厚皮必不可少。去猎杀那些皮糙肉厚的野猪，给我带回 10 块【生猪排】证明你的勇武，这只【石皮蛊】便是你的了。它能让你的皮肤坚韧如野猪。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:porkchop",
+            "count": 10
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:shi_pi_gu",
+            "count": 1
+        }
+    ]
+}

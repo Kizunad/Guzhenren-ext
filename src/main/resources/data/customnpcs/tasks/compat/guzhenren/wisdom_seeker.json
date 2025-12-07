@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/wisdom_seeker",
+  "title": "智者千虑",
+  "description": "“智道蛊师，算天算地算众生，唯独难算人心。”\n\n想要踏入智道的门槛，首先要学会保持头脑的清明。【忘忧石】能让人摒弃杂念，专心思考。给我弄来 3 颗，这只【书虫】便是你的了。用它来记载你的心得，或许有一天，你也能算尽天下。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:gu_cai_wang_you_shi",
+      "count": 3
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:shuchong",
+      "count": 1
+    }
+  ]
+}

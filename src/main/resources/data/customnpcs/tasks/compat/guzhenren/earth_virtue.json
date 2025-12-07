@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/earth_virtue",
+  "title": "厚德载物",
+  "description": "\“地势坤，君子以厚德载物。\”\n\n但在蛊师眼中，这大地不过是最坚实的盾牌。想要在狂风骤雨般的攻势下屹立不倒？那就向脚下的土地寻求庇护吧。去挖掘 16 份【阴土】，这种土质阴冷致密，最适合炼制防御蛊。有了这【土墙蛊】，任他东西南北风，我自岿然不动。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:gucaiyintu",
+      "count": 16
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:tu_qiang_gu",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/wolf_skin_collection",
+  "title": "狼群扫荡",
+  "description": "近来野外狼群泛滥，伤了不少凡人奴隶。去猎杀它们，带回 10 张【狼皮】。家族库房会赏你一些【生机叶】，关键时刻可保你一命。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:llangpi",
+      "count": 10
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:sheng_ji_xie",
+      "count": 2
+    }
+  ]
+}

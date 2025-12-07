@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/spectral_soul_ritual",
+  "title": "幽魂祭礼",
+  "description": "“幽魂老祖，法力无边！杀生证道，屠戮苍生！”\n\n嘘……小点声！你也是来朝拜魔尊大人的吗？老祖虽然身陨，但他的意志永存！凡人的魂魄不过是微不足道的祭品。给我带来 64 个【魂魄】，让我为老祖献上一场饕餮盛宴。作为赏赐，这卷【摄心夺魂】的杀招便传给你，让你也尝尝操纵人心的滋味。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:fanrenhunpo",
+      "count": 64
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:shexinduohun",
+      "count": 1
+    }
+  ]
+}

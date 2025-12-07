@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/sky_ambition",
+  "title": "云霄之志",
+  "description": "“不甘于陆地的束缚，便要向天空借力。”\n\n凡人看鸟，只觉自由；蛊师看鸟，却见杀机。澜风隼乃是天空的宠儿，取其羽毛，便可炼制出这只【燕翅蛊】。来吧，给我 5 根【澜风隼羽毛】，让我看看你是否有搏击长空的资格！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:ying_yu_1",
+      "count": 5
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:yanchigu",
+      "count": 1
+    }
+  ]
+}

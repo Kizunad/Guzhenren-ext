@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/cold_edge_memory",
+  "title": "冰锋冷冽",
+  "description": "\u201c精彩！真是太精彩了！\n\n这卷心得是我在一处被冰封的废墟中捡到的。上面字迹狂草，透着一股视苍生如草芥的疯狂与冷傲。据说，这可能与那位传说中的十绝体——北冥冰魄体有关。我不修冰雪道，看多了只觉寒气逼人。你若能给我弄来 5 只【冰刃蛊】，这卷心得便归你了。小心点，别被里面的寒意冻伤了心神。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:bing_ren_gu",
+      "count": 5
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:xindebingxuedaoputongji",
+      "count": 1
+    }
+  ]
+}

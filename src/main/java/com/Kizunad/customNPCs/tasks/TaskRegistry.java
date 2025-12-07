@@ -1,11 +1,11 @@
 package com.Kizunad.customNPCs.tasks;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,19 +39,19 @@ public final class TaskRegistry {
     }
 
     /**
-     * 选取若干默认任务（按注册顺序），用于 NPC 初始任务池。
+     * 随机选取若干默认任务，用于 NPC 初始任务池，避免所有 NPC 任务完全一致。
      */
-    public List<ResourceLocation> pickDefaultIds(int limit) {
-        List<ResourceLocation> list = new ArrayList<>();
-        if (limit <= 0) {
-            return list;
+    public List<ResourceLocation> pickDefaultIds(int limit, RandomSource random) {
+        if (limit <= 0 || definitions.isEmpty()) {
+            return List.of();
         }
-        for (ResourceLocation id : definitions.keySet()) {
-            list.add(id);
-            if (list.size() >= limit) {
-                break;
-            }
+
+        List<ResourceLocation> pool = new java.util.ArrayList<>(definitions.keySet());
+        List<ResourceLocation> picked = new java.util.ArrayList<>();
+        while (!pool.isEmpty() && picked.size() < limit) {
+            int index = random.nextInt(pool.size());
+            picked.add(pool.remove(index));
         }
-        return list;
+        return picked;
     }
 }

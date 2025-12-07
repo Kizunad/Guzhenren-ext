@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/fire_trade_basic",
+    "title": "薪火相传",
+    "description": "“星星之火，可以燎原。”\n\n小兄弟，我看你也修习炎道？我这只火炭蛊最近胃口大开，急需【烈焰棒】补充火力。我手头只有些【赤铁】，虽然也能炼火，但不如火炭石纯粹。你要是愿意帮我这个忙，用 10 块赤炼金原矿换 5 根烈焰棒 以后在这炎道圈子里，我罩着你！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:blaze_rod",
+            "count": 5
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:chilianjinyuankuang",
+            "count": 10
+        }
+    ]
+}

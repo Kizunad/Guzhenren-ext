@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/sword_qi_burst",
+    "title": "剑气纵横",
+    "description": "\"十年磨一剑，霜刃未曾试。\"\n\n剑道，主杀伐。你若想走这条路，就得先学会什么是锋利。去采摘 10 株【剑脊藤】，小心别割伤了手。有了这些材料，我就能炼制出【剑指蛊】，让你不仅能手持利刃，更能口吐剑气，杀人于无形！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:jianjiteng",
+            "count": 10
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:jianzhigu",
+            "count": 1
+        }
+    ]
+}

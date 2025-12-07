@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/wisdom_hardship",
+    "title": "智道苦修",
+    "description": "“智者劳心，往往寿元不长，且身无长物。”\n\n唉，推演天机太耗心神，也太耗钱财了。老夫现在身无分文，连饭都吃不起了。这只跟随我多年的【星光蛊】，灵性十足。罢罢罢，给我 32 块【元石】，它就归你了。莫要埋没了它！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gucaiyuanshi",
+            "count": 32
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:weilianhuaxingguanggu",
+            "count": 1
+        }
+    ]
+}

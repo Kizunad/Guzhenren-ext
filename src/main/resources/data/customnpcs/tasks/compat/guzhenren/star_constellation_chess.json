@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/star_constellation_chess",
+    "title": "星宿棋局",
+    "description": "“星宿仙尊，身合天道，算计万古。”\n\n你看这满天繁星，每一颗都可能是那位仙尊落下的一枚棋子。想要修习智道，怎能不懂观星？去搜集 10 块【星星石】，这是最接近星空的材料。我便传你一只多余的【救星蛊】，助你在这浩瀚棋局中，窥得一线天机。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:xingxingshi",
+            "count": 10
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:weilianhuajiuxinggu",
+            "count": 1
+        }
+    ]
+}

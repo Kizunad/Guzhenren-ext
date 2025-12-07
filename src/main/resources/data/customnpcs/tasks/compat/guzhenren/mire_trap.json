@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/mire_trap",
+    "title": "泥足深陷",
+    "description": "“踏入我的领地，便是踏入了鬼门关。”\n\n真正的土道高手，从不与人正面硬撼。我们只需要改变地形，让敌人寸步难行。给我找来 几块【仙材_青泽腐土】，我要用它那令人作呕的粘性来炼蛊。这只【地狼爪蛊】，能让你生出獠牙，将来犯之敌死死抓住，拖入无底深渊！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gu_cai_qing_ze_fu_tu",
+            "count": 16
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:di_xiong_zhua_gu",
+            "count": 1
+        }
+    ]
+}

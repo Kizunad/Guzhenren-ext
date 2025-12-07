@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/recipe_restoration",
+    "title": "残方复原",
+    "description": "这张【酒虫蛊方】残缺不全，上面的墨迹都被酒水晕开了……不过，凭借老夫多年的炼道造诣，再加上你提供的这些【纸】和【墨囊】，或许能将其补全。这可是二转蛊虫的秘方，珍贵无比！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:paper",
+            "count": 8
+        },
+        {
+            "type": "submit_item",
+            "item": "minecraft:ink_sac",
+            "count": 3
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:si_wei_jiu_chong_gu_fang",
+            "count": 1
+        }
+    ]
+}

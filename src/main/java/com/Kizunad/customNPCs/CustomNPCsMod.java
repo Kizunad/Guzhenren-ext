@@ -57,6 +57,7 @@ public class CustomNPCsMod {
         // 注册事件监听器
         NeoForge.EVENT_BUS.register(new NpcMindEvents());
         NeoForge.EVENT_BUS.register(new com.Kizunad.customNPCs.handler.NpcSpawningHandler());
+        NeoForge.EVENT_BUS.register(new com.Kizunad.customNPCs.events.TaskProgressEvents());
     }
 
     private void registerOptionalTestContent(IEventBus modEventBus) {

@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/hidden_dragon_trade",
+    "title": "潜龙勿用",
+    "description": "“龙战于野，其血玄黄。”\n\n我那泉眼最近有些躁动，急需一条水龙镇压气运。小子，你若舍得割爱，把你的【水龙蛊】让给我，这几颗【冰魄龙纹鲨牙齿】就是你的了。这可是来自北原冰原深处的凶兽，用来炼制冰道或水道的攻击蛊，威力倍增！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:shui_long_gu",
+            "count": 1
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:sha_yu_ya_chi_4",
+            "count": 16
+        }
+    ]
+}

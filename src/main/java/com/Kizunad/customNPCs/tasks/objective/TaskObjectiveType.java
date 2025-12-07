@@ -4,7 +4,8 @@ package com.Kizunad.customNPCs.tasks.objective;
  * 任务目标枚举。
  */
 public enum TaskObjectiveType {
-    SUBMIT_ITEM;
+    SUBMIT_ITEM,
+    KILL_ENTITY;
 
     public static TaskObjectiveType fromString(String value) {
         if (value == null || value.isEmpty()) {

@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/primeval_stone_exchange",
+    "title": "元石兑换",
+    "description": "凡俗的金银对我等蛊师虽无大用，但有时在凡人村落行走也需打点一二。你若有【金锭】，我可用【元石】与你交换。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:gold_ingot",
+            "count": 16
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:gucaiyuanshi",
+            "count": 10
+        }
+    ]
+}

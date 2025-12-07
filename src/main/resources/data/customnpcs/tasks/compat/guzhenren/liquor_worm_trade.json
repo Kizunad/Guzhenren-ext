@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/liquor_worm_trade",
+    "title": "酒虫交易",
+    "description": "嘿，小子！我看你也是同道中人。若你能给我弄来 5 坛【酒】，我便将这只【一转酒虫】换与你。此蛊可精炼真元，对你大有裨益。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:jiu",
+            "count": 5
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:jiu_chong",
+            "count": 1
+        }
+    ]
+}

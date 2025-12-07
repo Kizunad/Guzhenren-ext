@@ -35,7 +35,8 @@ public final class NpcTaskBoard {
         // 初始化
         if (ids.isEmpty()) {
             List<ResourceLocation> defaults = registry.pickDefaultIds(
-                DEFAULT_SLOT_COUNT
+                DEFAULT_SLOT_COUNT,
+                npc.getRandom()
             );
             questState.ensureTaskIds(defaults);
             ids = questState.getTaskIds();

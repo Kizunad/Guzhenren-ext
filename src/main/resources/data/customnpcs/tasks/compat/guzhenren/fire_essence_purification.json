@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/fire_essence_purification",
+    "title": "烈火真金",
+    "description": "\u201c凡火千团，不如真火一点。\u201d\n\n想要炼制三转以上的炎道蛊虫，普通的蛊材已经不够看了。你需要的是【蛊材_百兽王熊皮】！这可极其难得。不过老夫这里刚好有一块多余的。你若能给我弄来 64 块【煤炭】供我烧炉子，这块就当是赏给你的。别嫌贵，这可是质的飞跃！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:coal",
+            "count": 64
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:bai_shouwangxiongpi",
+            "count": 1
+        }
+    ]
+}

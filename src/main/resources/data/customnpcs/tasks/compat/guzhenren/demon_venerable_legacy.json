@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/demon_venerable_legacy",
+    "title": "魔尊遗刻",
+    "description": "“这是……幽魂魔尊大人的真迹？！”\n\n虽然只是拓本，但其中蕴含的杀意已足以令天地变色。想要参悟它，必须以强魂为引。快！把那几个【三转魂魄】拿来献祭！一旦成功，这只威力恐怖的【魂爆蛊】便是你的了！想象一下，引爆敌人的魂魄，那是多么美妙的声音啊……哈哈哈哈！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:sanzhunhunpo",
+            "count": 16
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:hun_bao_gu",
+            "count": 1
+        }
+    ]
+}

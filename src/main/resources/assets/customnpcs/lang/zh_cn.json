@@ -18,6 +18,8 @@
     "gui.customnpcs.task_board.section.objectives": "目标要求",
     "gui.customnpcs.task_board.section.rewards": "任务奖励",
     "gui.customnpcs.task_board.objective.entry": "%1$s / %2$s %3$s",
+    "gui.customnpcs.task_board.objective.submit": "%1$s / %2$s %3$s",
+    "gui.customnpcs.task_board.objective.kill": "击杀: %1$s / %2$s %3$s",
     "gui.customnpcs.task_board.reward.entry": "%1$s个 %2$s",
     "gui.customnpcs.craft.title": "制造物品",
     "gui.customnpcs.craft.empty": "暂无可制作物品",

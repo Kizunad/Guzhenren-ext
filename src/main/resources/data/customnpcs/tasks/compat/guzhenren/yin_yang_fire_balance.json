@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/yin_yang_fire_balance",
+    "title": "阴阳调和",
+    "description": "“孤阴不生，独阳不长。”\n\n咳咳……老夫这次炼蛊有些托大了，火毒攻心！急需一颗【冰心】来镇压体内的躁动。快！谁有冰心？老夫愿用这根【疾风掠云雕羽毛】来换！这可是炼制蛊虫的绝佳主材啊！快给我，再晚老夫就要自焚而亡了！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gu_cai_bing_xin",
+            "count": 1
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:ying_yu_5",
+            "count": 5
+        }
+    ]
+}

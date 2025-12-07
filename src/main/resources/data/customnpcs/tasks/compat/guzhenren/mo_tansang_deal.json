@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/mo_tansang_deal",
+    "title": "墨坦桑的交易",
+    "description": "“智者求同存异，愚者党同伐异。”\n\n我是墨人城的使者。我们墨人一族，最敬重智者。这只【书虫】能记录浩如烟海的知识，正是我们急需的。作为交换，我将这【小智蛊】的炼制方子传授于你。虽然只是凡蛊，但却能开启民智，乃是无量功德。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:shuchong",
+            "count": 1
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:xiaozhigugufang",
+            "count": 1
+        }
+    ]
+}

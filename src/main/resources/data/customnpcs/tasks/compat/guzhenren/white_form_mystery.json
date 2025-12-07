@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/white_form_mystery",
+    "title": "白相之谜",
+    "description": "‘白相非相，众生皆苦。’\n\n传说在那遥远的白相洞天中，有一条通体雪白的仙蛇，能化万物，能御万法。老夫穷极一生，只寻得这【白相仙蛇蛊】的一角残方。若你能为我寻来【冰泪】与【冰心】这两样至寒之物，助我推演，我愿将这残方与你共享。记住，这可是触及仙道的机缘！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gu_cai_lei_bing",
+            "count": 12
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gu_cai_bing_xin",
+            "count": 16
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:bai_xiang_xian_she_gu_can_gu_fang",
+            "count": 1
+        }
+    ]
+}

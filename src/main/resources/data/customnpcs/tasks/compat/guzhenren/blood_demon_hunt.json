@@ -1,0 +1,33 @@
+{
+    "id": "customnpcs:compat/guzhenren/blood_demon_hunt",
+    "title": "血道试炼",
+    "description": "“血流成河，方证大道。”\n\n最近有个自称【血煞老魔】的家伙，仗着几分血道手段，在附近为非作歹。听说他炼成了某种邪恶的血道杀招，肉身极其强横，且出手狠辣。去，杀了他！让我看看是他的血道硬，还是你的手段高。事成之后，他手上的那只【血战蛊】便是你的了。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "kill_entity",
+            "entity": "customnpcs:custom_npc",
+            "count": 1,
+            "spawn_range": 32.0,
+            "name": "血煞老魔",
+            "attributes": {
+                "max_health": 800.0,
+                "movement_speed": 0.8,
+                "attack_damage": 200.0,
+                "armor": {
+                    "head": "guzhenren:xueguishigongji_helmet",
+                    "chest": "guzhenren:xueguishiride_chestplate",
+                    "legs": "guzhenren:xueguishisleep_leggings",
+                    "feet": "guzhenren:xueguishiride_boots"
+                }
+            }
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:weilianhuaxuezhangu",
+            "count": 1
+        }
+    ]
+}

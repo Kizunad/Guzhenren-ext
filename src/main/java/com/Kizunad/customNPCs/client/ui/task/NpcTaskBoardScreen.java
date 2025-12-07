@@ -305,14 +305,22 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
             false
         );
         y += LINE_HEIGHT;
-        for (OpenTaskBoardPayload.SubmitObjectiveEntry objective : entry.objectives()) {
-            graphics.renderItem(objective.item(), x, y - ITEM_ICON_Y_OFFSET);
-            Component label = Component.translatable(
-                "gui.customnpcs.task_board.objective.entry",
-                objective.currentCount(),
-                objective.requiredCount(),
-                objective.item().getHoverName()
-            );
+        for (OpenTaskBoardPayload.ObjectiveEntry objective : entry.objectives()) {
+            graphics.renderItem(objective.displayItem(), x, y - ITEM_ICON_Y_OFFSET);
+            Component label = switch (objective.type()) {
+                case SUBMIT_ITEM -> Component.translatable(
+                    "gui.customnpcs.task_board.objective.submit",
+                    objective.currentCount(),
+                    objective.requiredCount(),
+                    objective.displayName()
+                );
+                case KILL_ENTITY -> Component.translatable(
+                    "gui.customnpcs.task_board.objective.kill",
+                    objective.currentCount(),
+                    objective.requiredCount(),
+                    objective.displayName()
+                );
+            };
             graphics.drawString(
                 font,
                 label,

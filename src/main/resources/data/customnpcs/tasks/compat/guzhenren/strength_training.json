@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/strength_training",
+    "title": "力拔山兮",
+    "description": "“一力降十会！”\n\n什么智道算计，什么幻道迷离，在绝对的力量面前，都是花拳绣腿！想要拥有搬山之力吗？去猎杀万兽王，把那充满野性力量的【万兽王虎肉】给我带回来。吃了它，炼化这只【熊力蛊】，你的一拳，便是天崩地裂！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:wanshouwanghurou",
+            "count": 5
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:xiong_li_gu",
+            "count": 1
+        }
+    ]
+}

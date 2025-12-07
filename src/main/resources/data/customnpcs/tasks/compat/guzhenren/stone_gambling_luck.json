@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/stone_gambling_luck",
+    "title": "赌石一搏",
+    "description": "“一刀穷，一刀富，一刀穿麻布！”\n\n客官，我看你印堂发亮，定是红运当头！这几块【蛊材原石】看着虽然粗糙，里面说不定就睡着一只极品蛊虫呢！什么？你不敢开？那不如卖给我，我用这只成品【青铜蛊】跟你赌一把！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:chi_tie_du_shi",
+            "count": 5
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:qingtonggu",
+            "count": 1
+        }
+    ]
+}

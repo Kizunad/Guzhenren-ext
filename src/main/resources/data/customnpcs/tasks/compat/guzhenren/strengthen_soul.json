@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/strengthen_soul",
+    "title": "壮魂之法",
+    "description": "“魂若不强，如无根之木。”\n\n想要追随魔尊大人的脚步，你这点微末的魂底蕴怎么够看？稍微施展几个杀招便会魂飞魄散！这【仙魂草】乃是滋养魂魄的良药。去采 64 株来，我便给你这只【魂盾蛊】，保你在魂道交锋中不至于瞬间毙命。记住，活下来，才能杀更多的人。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:xianhuncao",
+            "count": 64
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:hundungu",
+            "count": 1
+        }
+    ]
+}

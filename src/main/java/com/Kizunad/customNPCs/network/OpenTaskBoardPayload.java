@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.network;
 import com.Kizunad.customNPCs.CustomNPCsMod;
 import com.Kizunad.customNPCs.client.ui.task.NpcTaskBoardScreen;
 import com.Kizunad.customNPCs.tasks.TaskType;
+import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveType;
 import com.Kizunad.customNPCs.tasks.data.TaskProgressState;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -88,7 +89,7 @@ public record OpenTaskBoardPayload(
         Component description,
         TaskType type,
         TaskProgressState state,
-        List<SubmitObjectiveEntry> objectives,
+        List<ObjectiveEntry> objectives,
         List<ItemStack> rewards
     ) {
 
@@ -107,8 +108,8 @@ public record OpenTaskBoardPayload(
             buf.writeVarInt(entry.type.ordinal());
             buf.writeVarInt(entry.state.ordinal());
             buf.writeVarInt(entry.objectives.size());
-            for (SubmitObjectiveEntry objective : entry.objectives) {
-                SubmitObjectiveEntry.write(buf, objective);
+            for (ObjectiveEntry objective : entry.objectives) {
+                ObjectiveEntry.write(buf, objective);
             }
             buf.writeVarInt(entry.rewards.size());
             for (ItemStack stack : entry.rewards) {
@@ -125,11 +126,11 @@ public record OpenTaskBoardPayload(
             TaskType type = fromTypeOrdinal(buf.readVarInt());
             TaskProgressState state = fromStateOrdinal(buf.readVarInt());
             int objectiveSize = buf.readVarInt();
-            List<SubmitObjectiveEntry> objectives = new java.util.ArrayList<>(
+            List<ObjectiveEntry> objectives = new java.util.ArrayList<>(
                 objectiveSize
             );
             for (int i = 0; i < objectiveSize; i++) {
-                objectives.add(SubmitObjectiveEntry.read(buf));
+                objectives.add(ObjectiveEntry.read(buf));
             }
             int rewardSize = buf.readVarInt();
             List<ItemStack> rewards = new java.util.ArrayList<>(rewardSize);
@@ -164,26 +165,37 @@ public record OpenTaskBoardPayload(
         }
     }
 
-    public record SubmitObjectiveEntry(
-        ItemStack item,
+    public record ObjectiveEntry(
+        TaskObjectiveType type,
+        ItemStack displayItem,
+        Component displayName,
         int requiredCount,
         int currentCount
     ) {
 
         private static void write(
             RegistryFriendlyByteBuf buf,
-            SubmitObjectiveEntry entry
+            ObjectiveEntry entry
         ) {
-            ItemStack.STREAM_CODEC.encode(buf, entry.item);
+            buf.writeVarInt(entry.type.ordinal());
+            ItemStack.STREAM_CODEC.encode(buf, entry.displayItem);
+            ComponentSerialization.STREAM_CODEC.encode(
+                buf,
+                entry.displayName
+            );
             buf.writeVarInt(entry.requiredCount);
             buf.writeVarInt(entry.currentCount);
         }
 
-        private static SubmitObjectiveEntry read(RegistryFriendlyByteBuf buf) {
+        private static ObjectiveEntry read(RegistryFriendlyByteBuf buf) {
+            TaskObjectiveType type = TaskObjectiveType.values()[
+                Math.max(0, Math.min(buf.readVarInt(), TaskObjectiveType.values().length - 1))
+            ];
             ItemStack stack = ItemStack.STREAM_CODEC.decode(buf);
+            Component name = ComponentSerialization.STREAM_CODEC.decode(buf);
             int required = buf.readVarInt();
             int current = buf.readVarInt();
-            return new SubmitObjectiveEntry(stack, required, current);
+            return new ObjectiveEntry(type, stack, name, required, current);
         }
     }
 }

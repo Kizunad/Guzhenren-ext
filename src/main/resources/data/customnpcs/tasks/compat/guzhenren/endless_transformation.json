@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/endless_transformation",
+    "title": "变化无穷",
+    "description": "“万物皆可化，万道皆可修。”\n\n变化道的精髓，在于从野兽身上学习力量。给我找来【豹爪】和【蛊材_千兽王豹毛皮】，我要研究它们的构造。作为交换，这只【狐妖蛊】借你一用。虽然不能让你真正变成狐妖，但那份灵动与狡黠，却能让你在战场上游刃有余。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:baozhua",
+            "count": 16
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:qianshoubaopi",
+            "count": 4
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:hu_yao_gu",
+            "count": 1
+        }
+    ]
+}

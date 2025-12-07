@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/flesh_bone_reunion",
+    "title": "骨肉团圆",
+    "description": "“哥哥，我不疼……”桀桀桀，好一对情深义重的兄弟！若是将这【腐肉】与【白骨】一同投入火中，再佐以亲情的羁绊，不知能炼出何等美妙的蛊虫？来吧，帮我收集这些材料，我也想看看，这就是所谓的……团圆吗？",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:rotten_flesh",
+            "count": 32
+        },
+        {
+            "type": "submit_item",
+            "item": "minecraft:bone",
+            "count": 32
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:guroutuanyuangu",
+            "count": 1
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/spring_revival",
+  "title": "枯木逢春",
+  "description": "“人若无心，尚且可活；蛊师无命，万事皆休。”\n\n在战斗中，能活下来的往往不是攻击最强的，而是最能扛的。这【蓝度草】虽然常见，却是提炼生机的良药。给我找 10 株来，我便给你换几片【生机叶】。关键时刻，它比什么杀招都管用。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:landucao_1",
+      "count": 10
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:sheng_ji_xie",
+      "count": 5
+    }
+  ]
+}

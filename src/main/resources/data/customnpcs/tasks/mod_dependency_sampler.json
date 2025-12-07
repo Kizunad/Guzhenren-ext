@@ -1,0 +1,23 @@
+{
+  "id": "customnpcs:mod_dependency_sampler",
+  "title": "Dependency Example Task",
+  "description": "This task serves as a documentation sample for the 'dependencies' feature. It will NOT be loaded into the game because the required mod does not exist.",
+  "type": "hidden",
+  "dependencies": [
+    "example_mod_id_placeholder_that_does_not_exist"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "minecraft:apple",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "minecraft:stick",
+      "count": 1
+    }
+  ]
+}

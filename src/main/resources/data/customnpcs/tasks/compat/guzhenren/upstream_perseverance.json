@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/upstream_perseverance",
+    "title": "逆流而上",
+    "description": "“人祖啊，你要去哪里？”\n“我要去逆流河的尽头，寻找自由。”\n\n逆流河中，唯有【坚持】相伴。这里的风太大，吹得人睁不开眼。给我找些【羽毛】来编织蓑衣，再装满【水桶】以备干渴。若你能像人祖一样坚持下来，这只【逆风战蛊】便能助你劈开狂风！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:feather",
+            "count": 12
+        },
+        {
+            "type": "submit_item",
+            "item": "minecraft:water_bucket",
+            "count": 1
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:weilianhuanifengzhangu_4",
+            "count": 1
+        }
+    ]
+}

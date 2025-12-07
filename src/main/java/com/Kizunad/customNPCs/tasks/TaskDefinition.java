@@ -14,6 +14,7 @@ public record TaskDefinition(
     String title,
     String description,
     TaskType type,
+    List<String> dependencies,
     List<TaskObjectiveDefinition> objectives,
     List<TaskRewardDefinition> rewards
 ) {
@@ -23,6 +24,7 @@ public record TaskDefinition(
         Objects.requireNonNull(title, "title");
         Objects.requireNonNull(description, "description");
         Objects.requireNonNull(type, "type");
+        Objects.requireNonNull(dependencies, "dependencies");
         Objects.requireNonNull(objectives, "objectives");
         Objects.requireNonNull(rewards, "rewards");
     }

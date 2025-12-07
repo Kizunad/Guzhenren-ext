@@ -50,6 +50,10 @@ public class PlayerTaskData implements INBTSerializable<CompoundTag> {
         return getActiveMap(questGiver).values();
     }
 
+    public Set<UUID> getQuestGivers() {
+        return activeTasks.keySet();
+    }
+
     public boolean accept(TaskDefinition definition, UUID questGiver) {
         if (definition == null || questGiver == null) {
             return false;

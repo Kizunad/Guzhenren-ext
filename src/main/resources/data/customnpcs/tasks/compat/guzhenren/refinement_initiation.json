@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/refinement_initiation",
+  "title": "炼道初成",
+  "description": "“炼人炼蛊炼天地。”\n\n想要在炼道一途有所建树，控火是基本功。普通的凡火怎能炼出绝世好蛊？给我找 3 块【玄金锭】来，这东西耐烧。作为回报，我传你这只【单窍火炭蛊】，它能帮你稳定火候，是你成为炼道大师的第一步。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:gu_cai_xuan_jin",
+      "count": 3
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:dan_qiao_huo_tan_gu",
+      "count": 1
+    }
+  ]
+}

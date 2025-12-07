@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/moonlight_gu_gift",
+    "title": "月光初现",
+    "description": "古月一族的标志便是这月光蛊。既然你已开窍，只需缴纳 5 块【元石】作为家族贡献，我便传你这只【月光蛊】，助你护身。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gucaiyuanshi",
+            "count": 5
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:yuegu",
+            "count": 1
+        }
+    ]
+}

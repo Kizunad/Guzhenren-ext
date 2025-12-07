@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/ice_muscle_jade_bone",
+    "title": "冰肌玉骨",
+    "description": "\"肌如冰雪，骨似美玉。\"\n\n那白衣少年虽是男儿身，却有着令女子都嫉妒的容颜与体质。你也想拥有那般强横的防御力吗？集齐【冰肌蛊】与【玉骨蛊】，我便传你这道【冰肌玉骨】杀招。虽然比不上真正的北冥冰魄体，但在凡人蛊师中，已足以傲视群雄了！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:bing_ji_gu",
+            "count": 1
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:yu_gu_gu",
+            "count": 1
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:bingjiyugugujuan",
+            "count": 1
+        }
+    ]
+}

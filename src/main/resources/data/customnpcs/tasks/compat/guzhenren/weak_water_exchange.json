@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/weak_water_exchange",
+  "title": "弱水三千",
+  "description": "\u201c水利万物而不争，故几于道。\u201d\n\n哼，那是凡人的说法！在我等手中，水便是最锋利的箭矢！老夫近日演练杀招，【水箭蛊】损耗颇大。你若能给我送来 10 只成品，我便将这卷【水道心得】传授于你。别小看它，这可是老夫在瀑布下苦修三年的感悟！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:shui_jian_gu",
+      "count": 10
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:xindeshuidaoputong",
+      "count": 1
+    }
+  ]
+}

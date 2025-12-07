@@ -3,13 +3,15 @@ package com.Kizunad.customNPCs.tasks;
 import com.Kizunad.customNPCs.capabilities.tasks.PlayerTaskAttachment;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.customNPCs.network.OpenTaskBoardPayload;
-import com.Kizunad.customNPCs.network.OpenTaskBoardPayload.SubmitObjectiveEntry;
+import com.Kizunad.customNPCs.network.OpenTaskBoardPayload.ObjectiveEntry;
 import com.Kizunad.customNPCs.network.OpenTaskBoardPayload.TaskEntry;
 import com.Kizunad.customNPCs.tasks.data.PlayerTaskData;
 import com.Kizunad.customNPCs.tasks.data.TaskProgress;
 import com.Kizunad.customNPCs.tasks.data.TaskProgressState;
+import com.Kizunad.customNPCs.tasks.objective.KillEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.SubmitItemObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveDefinition;
+import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveType;
 import com.Kizunad.customNPCs.tasks.reward.ItemRewardDefinition;
 import com.Kizunad.customNPCs.tasks.reward.TaskRewardDefinition;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.Items;
 
 /**
  * 服务端→客户端任务同步服务。
@@ -50,7 +54,7 @@ public final class TaskBoardSyncService {
             } else {
                 state = TaskProgressState.AVAILABLE;
             }
-            List<SubmitObjectiveEntry> objectives = buildObjectives(
+            List<ObjectiveEntry> objectives = buildObjectives(
                 definition,
                 progress,
                 completed
@@ -69,12 +73,12 @@ public final class TaskBoardSyncService {
         return new OpenTaskBoardPayload(npc.getId(), entries);
     }
 
-    private static List<SubmitObjectiveEntry> buildObjectives(
+    private static List<ObjectiveEntry> buildObjectives(
         TaskDefinition definition,
         TaskProgress progress,
         boolean completed
     ) {
-        List<SubmitObjectiveEntry> list = new ArrayList<>();
+        List<ObjectiveEntry> list = new ArrayList<>();
         for (int i = 0; i < definition.objectiveCount(); i++) {
             TaskObjectiveDefinition objective = definition.objective(i);
             if (objective instanceof SubmitItemObjectiveDefinition submit) {
@@ -82,9 +86,28 @@ public final class TaskBoardSyncService {
                 int current = progress != null
                     ? progress.getObjectiveProgress(i)
                     : (completed ? submit.requiredCount() : 0);
-                list.add(new SubmitObjectiveEntry(
+                list.add(new ObjectiveEntry(
+                    TaskObjectiveType.SUBMIT_ITEM,
                     itemStack,
+                    itemStack.getHoverName(),
                     submit.requiredCount(),
+                    current
+                ));
+            } else if (objective instanceof KillEntityObjectiveDefinition kill) {
+                ItemStack icon = createKillIcon(kill);
+                int current = progress != null
+                    ? progress.getObjectiveProgress(i)
+                    : (completed ? kill.requiredKills() : 0);
+                Component name = kill.customName() != null
+                    ? kill.customName()
+                    : Component.translatable(
+                        kill.entityType().getDescriptionId()
+                    );
+                list.add(new ObjectiveEntry(
+                    TaskObjectiveType.KILL_ENTITY,
+                    icon,
+                    name,
+                    kill.requiredKills(),
                     current
                 ));
             }
@@ -119,6 +142,18 @@ public final class TaskBoardSyncService {
                 DataComponents.CUSTOM_DATA,
                 CustomData.of(submit.requiredNbt().copy())
             );
+        }
+        return stack;
+    }
+
+    private static ItemStack createKillIcon(KillEntityObjectiveDefinition kill) {
+        SpawnEggItem egg = SpawnEggItem.byId(kill.entityType());
+        if (egg != null) {
+            return new ItemStack(egg);
+        }
+        ItemStack stack = new ItemStack(Items.NAME_TAG);
+        if (kill.customName() != null) {
+            stack.set(DataComponents.CUSTOM_NAME, kill.customName());
         }
         return stack;
     }

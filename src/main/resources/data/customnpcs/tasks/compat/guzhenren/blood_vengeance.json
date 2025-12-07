@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/blood_vengeance",
+    "title": "血海深仇",
+    "description": "\u201c以血还血，以牙还牙。\u201d\n\n正道人士对血道喊打喊杀，不过是畏惧它的威力罢了。只要有足够的【鲜血】，你的修为就能一日千里。去吧，无论是野兽的血，还是仇敌的血，只要是新鲜的，我都要！给我弄来 10 份，这只【铁血蛊】就是你的第一把复仇之刃！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gucaixianxue",
+            "count": 10
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:weilianhuatiexuegu",
+            "count": 1
+        }
+    ]
+}

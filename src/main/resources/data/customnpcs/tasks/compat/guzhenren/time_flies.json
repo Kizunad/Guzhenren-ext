@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/time_flies",
+  "title": "光阴似箭",
+  "description": "“一寸光阴一寸金，寸金难买寸光阴。”\n\n世人皆叹时间易逝，唯有宙道蛊师试图将其握在手中。【软玉沙】是制作沙漏的上好材料，也蕴含着微弱的时间道痕。给我搜集 32 份来，我教你炼制【寸光阴】。虽然不能逆转时光，但至少能让你比别人快上一线。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:gu_cai_ruan_yu_sha",
+      "count": 32
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:cun_guang_yin",
+      "count": 1
+    }
+  ]
+}

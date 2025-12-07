@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/wisdom_venerable_inheritance",
+  "title": "智尊传承",
+  "description": "“万道归一，殊途同归。”\n\n老夫观你骨骼惊奇，这卷【力道心得】在你手中似乎有些浪费了。老夫正在推演万物演化之理，恰缺这一份力道的感悟。你若肯割爱，老夫便送你这只【大智蛊】。它能生出智道道痕，助你大彻大悟。这可是多少人求都求不来的机缘啊！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:xindelidaozhundashiyicanwu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:dazhigu",
+      "count": 1
+    }
+  ]
+}

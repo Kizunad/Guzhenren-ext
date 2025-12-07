@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/solid_rock",
+  "title": "磐石之固",
+  "description": "\"千磨万击还坚劲，任尔东西南北风。\"\n\n土墙不过是土鸡瓦狗，唯有磐石方能永恒。这【青拳土】坚硬如铁，用它炼出的蛊，能让你的身躯如岩石般坚不可摧。搜集 12 块来，让我看看你的决心是否也如这磐石一般！炼成这【磐石蛊】，你便是这战场上的一座移动堡垒！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:gu_cai_qing_quan_tu",
+      "count": 12
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:pan_shi_gu",
+      "count": 1
+    }
+  ]
+}

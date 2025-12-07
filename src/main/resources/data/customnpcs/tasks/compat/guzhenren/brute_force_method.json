@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/brute_force_method",
+    "title": "吃形补形",
+    "description": "那些正道修士天天打坐，练到猴年马月才能力能扛鼎？哼！老子有秘法，直接掠夺野兽的精气！快去给老子宰几头牛，把最新鲜的【生牛肉】带回来！若是肉质鲜美，老子心情一好，就赏你这只【蛮力天牛蛊】，让你一拳打死一头牛！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:beef",
+            "count": 16
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:man_li_tian_niu_gu",
+            "count": 1
+        }
+    ]
+}

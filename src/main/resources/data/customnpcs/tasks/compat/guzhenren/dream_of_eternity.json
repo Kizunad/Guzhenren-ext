@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/dream_of_eternity",
+    "title": "永生之梦",
+    "description": "“早岁哪知世事艰。。。”\n\n你也渴望永生吗？哪怕是举世皆敌，哪怕是万劫不复？拿出你最珍贵的【不死图腾】和【金苹果】！虽然这只是一只微不足道的【养生蛊】，但它不仅是寿命的延续，更是我们向着那虚无缥缈的目标，迈出的第一步！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "minecraft:totem_of_undying",
+            "count": 1
+        },
+        {
+            "type": "submit_item",
+            "item": "minecraft:golden_apple",
+            "count": 3
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:yangshenggu",
+            "count": 1
+        }
+    ]
+}
