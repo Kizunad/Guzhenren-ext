@@ -9,6 +9,7 @@ import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
 import com.Kizunad.tinyUI.controls.ScrollContainer;
 import com.Kizunad.tinyUI.core.UIElement;
+import com.Kizunad.tinyUI.core.ScaleConfig;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
@@ -44,6 +45,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
     private static final int COST_COLOR_NORMAL = 0xFFFFFF;
     private static final double EPSILON = 1.0E-6D;
 
+    /** 设计分辨率 - 设置为 1280x720 实现 1.5 倍放大 */
+    private static final int DESIGN_WIDTH = 1280;
+    private static final int DESIGN_HEIGHT = 720;
+
     private final Theme theme;
     private ScrollContainer itemList;
     private Label ownerLabel;
@@ -65,6 +70,9 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
 
     @Override
     protected void initUI(UIRoot root) {
+        // 启用 1.5 倍缩放（此屏幕无物品槽位）
+        root.getScaleConfig().setScaleMode(ScaleConfig.ScaleMode.FIT_MIN);
+        root.setDesignResolution(DESIGN_WIDTH, DESIGN_HEIGHT);
         root.setViewport(width, height);
 
         UIElement window = new UIElement() {};

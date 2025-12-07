@@ -75,6 +75,10 @@ public class NpcInteractScreen extends TinyUIScreen {
     private static final int BACK_BUTTON_HEIGHT = 20;
     private static final int BACK_BUTTON_MARGIN = 8;
 
+    /** 设计分辨率 - 设置为 1280x720 实现 1.5 倍放大 */
+    private static final int DESIGN_WIDTH = 1280;
+    private static final int DESIGN_HEIGHT = 720;
+
     /**
      * 交互数据载体，避免超参构造。
      */
@@ -143,6 +147,8 @@ public class NpcInteractScreen extends TinyUIScreen {
     @Override
     protected void init() {
         super.init();
+        // 启用 1280x720 设计分辨率（相对于 1920x1080 实际屏幕会放大 1.5 倍）
+        uiRoot.setDesignResolution(DESIGN_WIDTH, DESIGN_HEIGHT);
         uiRoot.clearChildren();
         uiRoot.setViewport(width, height);
         buildDashboard(uiRoot);
@@ -485,13 +491,12 @@ public class NpcInteractScreen extends TinyUIScreen {
     }
 
     @Override
-    public void render(
+    protected void renderScaledContent(
         GuiGraphics graphics,
         int mouseX,
         int mouseY,
         float partialTick
     ) {
-        super.render(graphics, mouseX, mouseY, partialTick);
         renderPreview(graphics, mouseX, mouseY);
     }
 
