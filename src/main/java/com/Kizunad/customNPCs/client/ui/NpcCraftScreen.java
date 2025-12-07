@@ -91,7 +91,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         );
         root.addChild(window);
 
-        Label titleLabel = new Label("Craft Items", theme);
+        Label titleLabel = new Label(
+            Component.translatable("gui.customnpcs.craft.title"),
+            theme
+        );
         titleLabel.setFrame(
             PADDING,
             PADDING,
@@ -127,7 +130,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         int width = itemList.getWidth();
         var entries = MaterialValueManager.getInstance().getEntriesSorted();
         if (entries.isEmpty()) {
-            Label empty = new Label("No craftable items", theme);
+            Label empty = new Label(
+                Component.translatable("gui.customnpcs.craft.empty"),
+                theme
+            );
             empty.setFrame(0, 0, width, ROW_HEIGHT);
             list.addChild(empty);
             list.setFrame(0, 0, width, ROW_HEIGHT);
@@ -140,7 +146,7 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
                 entry.item().getDescriptionId()
             ).getString();
             String text = name + " (" + formatValue(entry.value()) + ")";
-            Button btn = new Button(text, theme);
+            Button btn = new Button(Component.literal(text), theme);
             btn.setFrame(0, y, width, ROW_HEIGHT);
             btn.setOnClick(() -> selectItem(entry));
             list.addChild(btn);
@@ -157,7 +163,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         detail.setFrame(detailX, contentY, detailWidth, LIST_HEIGHT);
         window.addChild(detail);
 
-        selectedLabel = new Label("Select an item", theme);
+        selectedLabel = new Label(
+            Component.translatable("gui.customnpcs.craft.select_prompt"),
+            theme
+        );
         selectedLabel.setFrame(0, 0, detailWidth, TITLE_HEIGHT);
         detail.addChild(selectedLabel);
 
@@ -167,7 +176,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         dec.setOnClick(() -> changeAmount(-1));
         detail.addChild(dec);
 
-        amountLabel = new Label("x 1", theme);
+        amountLabel = new Label(
+            Component.translatable("gui.customnpcs.craft.amount_label", amount),
+            theme
+        );
         amountLabel.setFrame(
             AMOUNT_BUTTON_WIDTH + INLINE_PADDING,
             amountY + INLINE_PADDING,
@@ -187,7 +199,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         detail.addChild(inc);
 
         int costY = amountY + BUTTON_HEIGHT + GAP;
-        costLabel = new Label("Cost: --", theme);
+        costLabel = new Label(
+            Component.translatable("gui.customnpcs.craft.cost_unknown"),
+            theme
+        );
         costLabel.setFrame(0, costY, detailWidth, TITLE_HEIGHT);
         detail.addChild(costLabel);
 
@@ -200,7 +215,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         );
         detail.addChild(ownerLabel);
 
-        Button craft = new Button("Craft!", theme);
+        Button craft = new Button(
+            Component.translatable("gui.customnpcs.craft.button.confirm"),
+            theme
+        );
         craft.setFrame(
             detailWidth - CRAFT_BUTTON_WIDTH,
             LIST_HEIGHT - BUTTON_HEIGHT,
@@ -237,30 +255,52 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
             menu.getNpcEntityId()
         );
         if (ownerLabel != null) {
-            ownerLabel.setText("Material: " + formatValue(owner));
+            ownerLabel.setText(
+                Component.translatable(
+                    "gui.customnpcs.owner.material_points",
+                    formatValue(owner)
+                )
+            );
         }
         if (amountLabel != null) {
-            amountLabel.setText("x " + amount);
+            amountLabel.setText(
+                Component.translatable(
+                    "gui.customnpcs.craft.amount_label",
+                    amount
+                )
+            );
         }
         if (selectedItem == null) {
             if (selectedLabel != null) {
-                selectedLabel.setText("Select an item");
+                selectedLabel.setText(
+                    Component.translatable("gui.customnpcs.craft.select_prompt")
+                );
             }
             if (costLabel != null) {
-                costLabel.setText("Cost: --");
+                costLabel.setText(
+                    Component.translatable("gui.customnpcs.craft.cost_unknown")
+                );
                 costLabel.setColor(COST_COLOR_NORMAL);
             }
             return;
         }
-        String name = Component.translatable(
-            selectedItem.getDescriptionId()
-        ).getString();
+        Component name = Component.translatable(selectedItem.getDescriptionId());
         double cost = unitCost * amount;
         if (selectedLabel != null) {
-            selectedLabel.setText("Item: " + name);
+            selectedLabel.setText(
+                Component.translatable(
+                    "gui.customnpcs.craft.item_label",
+                    name
+                )
+            );
         }
         if (costLabel != null) {
-            costLabel.setText("Cost: " + formatValue(cost));
+            costLabel.setText(
+                Component.translatable(
+                    "gui.customnpcs.craft.cost_label",
+                    formatValue(cost)
+                )
+            );
             if (owner + EPSILON < cost) {
                 costLabel.setColor(COST_COLOR_WARN);
             } else {

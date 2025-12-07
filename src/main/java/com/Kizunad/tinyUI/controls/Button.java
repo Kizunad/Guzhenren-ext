@@ -32,8 +32,8 @@ public class Button extends InteractiveElement {
 
     /** 边框线条粗细（像素） */
     private static final int BORDER_THICKNESS = 1;
-    /** 文本内边距（像素） */
-    private static final int CONTENT_PADDING = 4;
+    /** 文本缩放系数 */
+    private static final float LABEL_SCALE = 1.5F;
 
     /** 按钮文本 */
     private Component text;
@@ -182,8 +182,14 @@ public class Button extends InteractiveElement {
      * @param context 渲染上下文
      */
     private void drawLabel(final UIRenderContext context) {
-        final int textX = getAbsoluteX() + CONTENT_PADDING;
-        final int textY = getAbsoluteY() + CONTENT_PADDING;
-        context.drawText(text, textX, textY, theme.getTextColor());
+        final int textWidth = context.measureTextWidth(text);
+        final int textHeight = context.getFontLineHeight();
+        final int scaledWidth = Math.max(0, Math.round(textWidth * LABEL_SCALE));
+        final int scaledHeight = Math.max(0, Math.round(textHeight * LABEL_SCALE));
+        final int centerX = getAbsoluteX() + getWidth() / 2;
+        final int centerY = getAbsoluteY() + getHeight() / 2;
+        final int drawX = centerX - scaledWidth / 2;
+        final int drawY = centerY - scaledHeight / 2;
+        context.drawTextScaled(text, drawX, drawY, theme.getTextColor(), LABEL_SCALE);
     }
 }

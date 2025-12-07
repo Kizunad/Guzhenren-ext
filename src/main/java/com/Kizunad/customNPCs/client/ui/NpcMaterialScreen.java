@@ -79,7 +79,10 @@ public class NpcMaterialScreen extends TinyUIContainerScreen<NpcMaterialMenu> {
         );
         root.addChild(window);
 
-        Label titleLabel = new Label("Input Materials", theme);
+        Label titleLabel = new Label(
+            Component.translatable("gui.customnpcs.material.title"),
+            theme
+        );
         titleLabel.setFrame(MATERIAL_GRID_X, TITLE_Y, TITLE_WIDTH, TITLE_HEIGHT);
         window.addChild(titleLabel);
 
@@ -133,7 +136,10 @@ public class NpcMaterialScreen extends TinyUIContainerScreen<NpcMaterialMenu> {
         );
         window.addChild(playerGrid);
 
-        Button convert = new Button("Convert", theme);
+        Button convert = new Button(
+            Component.translatable("gui.customnpcs.material.button.convert"),
+            theme
+        );
         convert.setFrame(
             WINDOW_WIDTH - BUTTON_WIDTH - BUTTON_MARGIN,
             WINDOW_HEIGHT - BUTTON_HEIGHT - BUTTON_MARGIN,
@@ -158,12 +164,18 @@ public class NpcMaterialScreen extends TinyUIContainerScreen<NpcMaterialMenu> {
         cachedPreview = calculatePreviewValue();
         if (ownerValueLabel != null) {
             ownerValueLabel.setText(
-                String.format("当前材料点数: %.2f", cachedOwnerMaterial)
+                Component.translatable(
+                    "gui.customnpcs.material.owner_points",
+                    String.format("%.2f", cachedOwnerMaterial)
+                )
             );
         }
         if (previewValueLabel != null) {
             previewValueLabel.setText(
-                String.format("槽位预估: %.2f", cachedPreview)
+                Component.translatable(
+                    "gui.customnpcs.material.preview_points",
+                    String.format("%.2f", cachedPreview)
+                )
             );
         }
     }

@@ -52,6 +52,32 @@ public interface UIRenderContext {
     void drawText(Component text, int x, int y, int argbColor);
 
     /**
+     * 获取文本宽度（像素）。
+     *
+     * @param text 文本组件
+     * @return 渲染后的像素宽度
+     */
+    int measureTextWidth(Component text);
+
+    /**
+     * 获取字体行高。
+     *
+     * @return 当前字体的行高（像素）
+     */
+    int getFontLineHeight();
+
+    /**
+     * 缩放绘制文本。
+     *
+     * @param text 文本组件
+     * @param x 起始 X 坐标
+     * @param y 起始 Y 坐标
+     * @param argbColor 颜色
+     * @param scale 缩放系数
+     */
+    void drawTextScaled(Component text, int x, int y, int argbColor, float scale);
+
+    /**
      * 绘制九宫格纹理（可缩放的边框/背景）。
      * 九宫格将纹理分为9个区域，边角保持原始大小，边缘和中心区域可拉伸。
      *
@@ -62,4 +88,27 @@ public interface UIRenderContext {
      * @param height 目标区域高度
      */
     void drawNinePatch(NinePatch patch, int x, int y, int width, int height);
+
+    /**
+     * 缩放绘制字符串（默认实现转换为组件）。
+     *
+     * @param text 字符串文本
+     * @param x 起始 X
+     * @param y 起始 Y
+     * @param argbColor 颜色
+     * @param scale 缩放
+     */
+    default void drawTextScaled(String text, int x, int y, int argbColor, float scale) {
+        drawTextScaled(Component.literal(text), x, y, argbColor, scale);
+    }
+
+    /**
+     * 计算字符串宽度（默认实现转换为组件）。
+     *
+     * @param text 字符串文本
+     * @return 像素宽度
+     */
+    default int measureTextWidth(String text) {
+        return measureTextWidth(Component.literal(text));
+    }
 }

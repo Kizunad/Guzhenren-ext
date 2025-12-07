@@ -68,7 +68,7 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
     }
 
     private NpcTaskBoardScreen(UIRoot root, OpenTaskBoardPayload payload) {
-        super(Component.literal("NPC Tasks"), root);
+        super(Component.translatable("gui.customnpcs.task_board.title"), root);
         this.uiRoot = root;
         this.theme = Theme.vanilla();
         this.npcEntityId = payload.npcEntityId();
@@ -142,7 +142,10 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         );
         rootPanel.addChild(buttonPanel);
 
-        acceptButton = new Button("Accept", theme);
+        acceptButton = new Button(
+            Component.translatable("gui.customnpcs.task_board.button.accept"),
+            theme
+        );
         acceptButton.setFrame(
             DETAIL_PADDING,
             BUTTON_INNER_MARGIN,
@@ -152,7 +155,10 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         acceptButton.setOnClick(() -> sendAccept());
         buttonPanel.addChild(acceptButton);
 
-        submitButton = new Button("Submit", theme);
+        submitButton = new Button(
+            Component.translatable("gui.customnpcs.task_board.button.submit"),
+            theme
+        );
         submitButton.setFrame(
             DETAIL_PADDING + BUTTON_SUBMIT_OFFSET,
             BUTTON_INNER_MARGIN,
@@ -162,7 +168,10 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         submitButton.setOnClick(() -> sendSubmit());
         buttonPanel.addChild(submitButton);
 
-        Button refreshButton = new Button("Refresh", theme);
+        Button refreshButton = new Button(
+            Component.translatable("gui.customnpcs.task_board.button.refresh"),
+            theme
+        );
         refreshButton.setFrame(
             DETAIL_PADDING + BUTTON_REFRESH_OFFSET,
             BUTTON_INNER_MARGIN,
@@ -172,7 +181,10 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         refreshButton.setOnClick(() -> sendRefresh());
         buttonPanel.addChild(refreshButton);
 
-        Button closeButton = new Button("Close", theme);
+        Button closeButton = new Button(
+            Component.translatable("gui.customnpcs.task_board.button.close"),
+            theme
+        );
         closeButton.setFrame(
             DETAIL_PADDING + BUTTON_CLOSE_OFFSET,
             BUTTON_INNER_MARGIN,
@@ -188,7 +200,7 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         int y = 0;
         for (int i = 0; i < tasks.size(); i++) {
             OpenTaskBoardPayload.TaskEntry entry = tasks.get(i);
-            Button button = new Button(entry.title().getString(), theme);
+            Button button = new Button(entry.title(), theme);
             int index = i;
             button.setOnClick(() -> {
                 selectedIndex = index;
@@ -268,18 +280,9 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         }
         int x = detailPanel.getAbsoluteX() + DETAIL_PADDING;
         int y = detailPanel.getAbsoluteY() + DETAIL_PADDING;
-        graphics.drawString(
-            font,
-            entry.title(),
-            x,
-            y,
-            COLOR_TEXT_PRIMARY,
-            false
-        );
+        graphics.drawString(font, entry.title(), x, y, COLOR_TEXT_PRIMARY, false);
         y += LINE_HEIGHT + 2;
-        Component stateText = Component.literal(
-            "State: " + entry.state().name()
-        );
+        Component stateText = resolveStateLabel(entry.state());
         graphics.drawString(font, stateText, x, y, COLOR_TEXT_MUTED, false);
         y += LINE_HEIGHT + 2;
 
@@ -295,7 +298,7 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
 
         graphics.drawString(
             font,
-            Component.literal("Objectives"),
+            Component.translatable("gui.customnpcs.task_board.section.objectives"),
             x,
             y,
             COLOR_TEXT_PRIMARY,
@@ -304,11 +307,11 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         y += LINE_HEIGHT;
         for (OpenTaskBoardPayload.SubmitObjectiveEntry objective : entry.objectives()) {
             graphics.renderItem(objective.item(), x, y - ITEM_ICON_Y_OFFSET);
-            String label = String.format(
-                "%d / %d %s",
+            Component label = Component.translatable(
+                "gui.customnpcs.task_board.objective.entry",
                 objective.currentCount(),
                 objective.requiredCount(),
-                objective.item().getHoverName().getString()
+                objective.item().getHoverName()
             );
             graphics.drawString(
                 font,
@@ -324,7 +327,7 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         y += SECTION_GAP;
         graphics.drawString(
             font,
-            Component.literal("Rewards"),
+            Component.translatable("gui.customnpcs.task_board.section.rewards"),
             x,
             y,
             COLOR_TEXT_PRIMARY,
@@ -333,10 +336,10 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
         y += LINE_HEIGHT;
         for (net.minecraft.world.item.ItemStack stack : entry.rewards()) {
             graphics.renderItem(stack, x, y - ITEM_ICON_Y_OFFSET);
-            String label = String.format(
-                "%dx %s",
+            Component label = Component.translatable(
+                "gui.customnpcs.task_board.reward.entry",
                 stack.getCount(),
-                stack.getHoverName().getString()
+                stack.getHoverName()
             );
             graphics.drawString(
                 font,
@@ -348,6 +351,27 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
             );
             y += ITEM_ICON_SIZE;
         }
+    }
+
+    private Component resolveStateLabel(TaskProgressState state) {
+        return Component.translatable(
+            "gui.customnpcs.task_board.state_label",
+            resolveStateName(state)
+        );
+    }
+
+    private Component resolveStateName(TaskProgressState state) {
+        return switch (state) {
+            case AVAILABLE -> Component.translatable(
+                "gui.customnpcs.task_board.state.available"
+            );
+            case ACCEPTED -> Component.translatable(
+                "gui.customnpcs.task_board.state.accepted"
+            );
+            case COMPLETED -> Component.translatable(
+                "gui.customnpcs.task_board.state.completed"
+            );
+        };
     }
 
     /**

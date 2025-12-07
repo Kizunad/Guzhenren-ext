@@ -63,6 +63,26 @@ final class NinePatchRendererTest {
         }
 
         @Override
+        public int measureTextWidth(final Component text) {
+            return 0;
+        }
+
+        @Override
+        public int getFontLineHeight() {
+            return 0;
+        }
+
+        @Override
+        public void drawTextScaled(
+            final Component text,
+            final int x,
+            final int y,
+            final int argbColor,
+            final float scale
+        ) {
+        }
+
+        @Override
         public void drawNinePatch(final NinePatch patch, final int x, final int y,
                                   final int width, final int height) {
             ninePatchCalled = true;

@@ -46,6 +46,31 @@ public final class GuiRenderContext implements UIRenderContext {
         graphics.drawString(font, text, x, y, argbColor, false);
     }
 
+    @Override
+    public int measureTextWidth(final Component text) {
+        return font.width(text);
+    }
+
+    @Override
+    public int getFontLineHeight() {
+        return font.lineHeight;
+    }
+
+    @Override
+    public void drawTextScaled(
+        final Component text,
+        final int x,
+        final int y,
+        final int argbColor,
+        final float scale
+    ) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.drawString(font, text, 0, 0, argbColor, false);
+        graphics.pose().popPose();
+    }
+
     private static final int FALLBACK_COLOR = 0xCC1E1E1E;
 
     @Override

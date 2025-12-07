@@ -70,7 +70,10 @@ public class NpcWorkScreen extends TinyUIContainerScreen<NpcWorkMenu> {
         );
         root.addChild(window);
 
-        Label titleLabel = new Label("Work Station", theme);
+        Label titleLabel = new Label(
+            Component.translatable("gui.customnpcs.work.title"),
+            theme
+        );
         titleLabel.setFrame(
             PADDING,
             PADDING,
@@ -99,12 +102,18 @@ public class NpcWorkScreen extends TinyUIContainerScreen<NpcWorkMenu> {
         window.addChild(ownerLabel);
 
         int buttonsY = WINDOW_HEIGHT - BUTTON_HEIGHT - PADDING;
-        Button addMaterial = new Button("Add Material", theme);
+        Button addMaterial = new Button(
+            Component.translatable("gui.customnpcs.work.button.add_material"),
+            theme
+        );
         addMaterial.setFrame(PADDING, buttonsY, BUTTON_WIDTH, BUTTON_HEIGHT);
         addMaterial.setOnClick(() -> sendAction("order_work_material"));
         window.addChild(addMaterial);
 
-        Button craftButton = new Button("Craft", theme);
+        Button craftButton = new Button(
+            Component.translatable("gui.customnpcs.work.button.craft"),
+            theme
+        );
         craftButton.setFrame(
             WINDOW_WIDTH - BUTTON_WIDTH - PADDING,
             buttonsY,
@@ -130,12 +139,20 @@ public class NpcWorkScreen extends TinyUIContainerScreen<NpcWorkMenu> {
         double value = MaterialDataCache.getOwnerMaterial(
             menu.getNpcEntityId()
         );
-        ownerLabel.setText("Material: " + String.format("%.2f", value));
+        ownerLabel.setText(
+            Component.translatable(
+                "gui.customnpcs.owner.material_points",
+                String.format("%.2f", value)
+            )
+        );
     }
 
-    private String resolveStatusText() {
+    private Component resolveStatusText() {
         // 目前尚无详细工作队列，先展示占位状态。
-        return "Work State: Idle";
+        return Component.translatable(
+            "gui.customnpcs.work.status_label",
+            Component.translatable("gui.customnpcs.work.status.idle")
+        );
     }
 
     private void sendAction(String path) {
