@@ -46,6 +46,7 @@
 | 任务ID | 标题 | 目标 | 奖励 | 文件名 |
 | :--- | :--- | :--- | :--- | :--- |
 | `customnpcs:compat/guzhenren/strength_training` | 力拔山兮 | 5 万兽王虎肉 | 1 熊力蛊 | `strength_training.json` |
+| `customnpcs:compat/guzhenren/strength_challenge_tieniu` | 力之试炼 | 击杀 1 铁牛 | 1 全力以赴蛊 | `strength_challenge_tieniu.json` |
 
 ## 智道 (Wisdom Path)
 *算天算地算众生*
@@ -138,6 +139,13 @@
 | `customnpcs:compat/guzhenren/fire_essence_purification` | 烈火真金 | 64 火炭石 | 1 火精 | `fire_essence_purification.json` |
 | `customnpcs:compat/guzhenren/yin_yang_fire_balance` | 阴阳调和 | 1 冰心 | 1 凤凰羽 | `yin_yang_fire_balance.json` |
 
+## 雷道 (Lightning Path)
+*雷霆万钧，正气浩存*
+
+| 任务ID | 标题 | 目标 | 奖励 | 文件名 |
+| :--- | :--- | :--- | :--- | :--- |
+| `customnpcs:compat/guzhenren/lightning_hunt_leigui` | 雷霆怒火 | 击杀 1 雷鬼 | 1 雷翼蛊 | `lightning_hunt_leigui.json` |
+
 ## 魂道 (Soul Path)
 *魂若不强，如无根之木*
 
@@ -146,3 +154,4 @@
 | `customnpcs:compat/guzhenren/spectral_soul_ritual` | 幽魂祭礼 | 64 凡人魂魄 | 1 摄心夺魂杀招 | `spectral_soul_ritual.json` |
 | `customnpcs:compat/guzhenren/strengthen_soul` | 壮魂之法 | 5 仙魂草 | 1 魂盾蛊 | `strengthen_soul.json` |
 | `customnpcs:compat/guzhenren/demon_venerable_legacy` | 魔尊遗刻 | 1 三转魂魄 | 1 魂爆蛊 | `demon_venerable_legacy.json` |
+| `customnpcs:compat/guzhenren/soul_hunt_guisha` | 魔踪鬼煞 | 击杀 1 鬼煞 | 1 定魂蛊 | `soul_hunt_guisha.json` |

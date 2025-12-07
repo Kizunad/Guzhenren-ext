@@ -1,0 +1,33 @@
+{
+    "id": "customnpcs:compat/guzhenren/soul_hunt_guisha",
+    "title": "魔踪鬼煞",
+    "description": "‘魂魄无依，百鬼夜行。’\n\n那名叫【鬼煞】的魔道散修，为了炼制万鬼幡，竟然屠戮了三个凡人村落！此人手段阴狠，能役使冤魂。他此刻正躲在阴风洞中祭炼魔宝。去，送他上路！只要你提着他的头来见我，这只【定魂蛊】便是你的酬劳。有了它，你便不怕魂魄震荡。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "kill_entity",
+            "entity": "customnpcs:custom_npc",
+            "count": 1,
+            "spawn_range": 32.0,
+            "name": "鬼煞",
+            "attributes": {
+                "max_health": 120000.0,
+                "movement_speed": 0.6,
+                "attack_damage": 150.0,
+                "armor": {
+                    "head": "guzhenren:xueguishiswim_helmet",
+                    "chest": "guzhenren:xueguishisneaking_chestplate",
+                    "legs": "guzhenren:xueguishiidel_leggings",
+                    "feet": "guzhenren:xueguishigongji_4_boots"
+                }
+            }
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:ding_hun_gu",
+            "count": 1
+        }
+    ]
+}

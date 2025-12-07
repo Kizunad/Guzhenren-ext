@@ -1,0 +1,30 @@
+{
+    "id": "customnpcs:compat/guzhenren/lightning_hunt_leigui",
+    "title": "雷霆怒火",
+    "description": "“快如闪电，爆裂如雷。”\n\n那只名叫【雷鬼】的怪物又在雷雨夜出来害人了！它的速度快得惊人，寻常蛊师连它的影子都摸不到。但我相信你的手段。趁着下次雷暴，除掉这个祸害！这只【雷翼蛊】正好适合你，有了它，你也能拥有雷电般的速度。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "kill_entity",
+            "entity": "customnpcs:custom_npc",
+            "count": 1,
+            "spawn_range": 32.0,
+            "name": "雷鬼",
+            "attributes": {
+                "max_health": 600.0,
+                "movement_speed": 1.2,
+                "attack_damage": 400.0,
+                "armor": {
+                    "chest": "guzhenren:leiyi_chestplate"
+                }
+            }
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:lei_yi_gu",
+            "count": 1
+        }
+    ]
+}
