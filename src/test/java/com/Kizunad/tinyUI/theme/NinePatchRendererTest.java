@@ -1,6 +1,7 @@
 package com.Kizunad.tinyUI.theme;
 
 import com.Kizunad.tinyUI.core.UIRenderContext;
+import net.minecraft.network.chat.Component;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -55,6 +56,10 @@ final class NinePatchRendererTest {
 
         @Override
         public void drawText(final String text, final int x, final int y, final int argbColor) {
+        }
+
+        @Override
+        public void drawText(final Component text, final int x, final int y, final int argbColor) {
         }
 
         @Override

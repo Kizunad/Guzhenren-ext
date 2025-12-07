@@ -1,0 +1,9 @@
+{
+    "gui.customnpcs.status": "状态",
+    "gui.customnpcs.action.trade": "交易",
+    "gui.customnpcs.action.gift": "赠送",
+    "gui.customnpcs.action.tasks": "任务",
+    "gui.customnpcs.action.chat": "对话",
+    "gui.customnpcs.action.owner_opts": "主人选项",
+    "gui.customnpcs.action.back": "返回"
+}

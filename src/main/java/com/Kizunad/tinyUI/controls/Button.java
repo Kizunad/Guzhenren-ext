@@ -4,6 +4,7 @@ import com.Kizunad.tinyUI.core.InteractiveElement;
 import com.Kizunad.tinyUI.core.UIRenderContext;
 import com.Kizunad.tinyUI.theme.Theme;
 import java.util.Objects;
+import net.minecraft.network.chat.Component;
 
 /**
  * 按钮控件 - 支持点击交互的基础 UI 组件。
@@ -35,7 +36,7 @@ public class Button extends InteractiveElement {
     private static final int CONTENT_PADDING = 4;
 
     /** 按钮文本 */
-    private String text;
+    private Component text;
     /** 主题配置 */
     private Theme theme;
     /** 点击回调函数 */
@@ -46,13 +47,24 @@ public class Button extends InteractiveElement {
     /**
      * 创建按钮。
      *
+     * @param text 按钮文本（如果为 null 则使用空组件）
+     * @param theme 主题配置（不能为 null）
+     * @throws NullPointerException 如果 theme 为 null
+     */
+    public Button(final Component text, final Theme theme) {
+        this.text = Objects.requireNonNullElse(text, Component.empty());
+        this.theme = Objects.requireNonNull(theme, "theme");
+    }
+
+    /**
+     * 创建按钮（兼容字符串）。
+     *
      * @param text 按钮文本（如果为 null 则使用空字符串）
      * @param theme 主题配置（不能为 null）
      * @throws NullPointerException 如果 theme 为 null
      */
     public Button(final String text, final Theme theme) {
-        this.text = Objects.requireNonNullElse(text, "");
-        this.theme = Objects.requireNonNull(theme, "theme");
+        this(Component.literal(Objects.requireNonNullElse(text, "")), theme);
     }
 
     /**
@@ -61,7 +73,16 @@ public class Button extends InteractiveElement {
      * @param text 新的文本内容（如果为 null 则使用空字符串）
      */
     public void setText(final String text) {
-        this.text = Objects.requireNonNullElse(text, "");
+        this.text = Component.literal(Objects.requireNonNullElse(text, ""));
+    }
+
+    /**
+     * 设置按钮文本。
+     *
+     * @param text 新的文本组件（如果为 null 则使用空组件）
+     */
+    public void setText(final Component text) {
+        this.text = Objects.requireNonNullElse(text, Component.empty());
     }
 
     /**

@@ -8,8 +8,8 @@ import com.Kizunad.customNPCs.network.RequestCraftingPayload;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
 import com.Kizunad.tinyUI.controls.ScrollContainer;
-import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.ScaleConfig;
+import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
@@ -45,9 +45,9 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
     private static final int COST_COLOR_NORMAL = 0xFFFFFF;
     private static final double EPSILON = 1.0E-6D;
 
-    /** 设计分辨率 - 设置为 1280x720 实现 1.5 倍放大 */
-    private static final int DESIGN_WIDTH = 1280;
-    private static final int DESIGN_HEIGHT = 720;
+    /** 设计分辨率 - 设置为 1920 / 2 实现 2倍放大 */
+    private static final int DESIGN_WIDTH = 1920 / 2;
+    private static final int DESIGN_HEIGHT = 1080 / 2;
 
     private final Theme theme;
     private ScrollContainer itemList;
@@ -136,9 +136,9 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         }
         int y = 0;
         for (MaterialValueManager.MaterialValueEntry entry : entries) {
-            String name = Component
-                .translatable(entry.item().getDescriptionId())
-                .getString();
+            String name = Component.translatable(
+                entry.item().getDescriptionId()
+            ).getString();
             String text = name + " (" + formatValue(entry.value()) + ")";
             Button btn = new Button(text, theme);
             btn.setFrame(0, y, width, ROW_HEIGHT);
@@ -222,14 +222,10 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         if (selectedItem == null) {
             return;
         }
-        amount =
-            Math.max(
-                1,
-                Math.min(
-                    MaterialWorkService.MAX_CRAFT_AMOUNT,
-                    amount + delta
-                )
-            );
+        amount = Math.max(
+            1,
+            Math.min(MaterialWorkService.MAX_CRAFT_AMOUNT, amount + delta)
+        );
         refreshTexts();
     }
 
@@ -237,7 +233,9 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
         if (menu == null) {
             return;
         }
-        double owner = MaterialDataCache.getOwnerMaterial(menu.getNpcEntityId());
+        double owner = MaterialDataCache.getOwnerMaterial(
+            menu.getNpcEntityId()
+        );
         if (ownerLabel != null) {
             ownerLabel.setText("Material: " + formatValue(owner));
         }
@@ -254,9 +252,9 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
             }
             return;
         }
-        String name = Component
-            .translatable(selectedItem.getDescriptionId())
-            .getString();
+        String name = Component.translatable(
+            selectedItem.getDescriptionId()
+        ).getString();
         double cost = unitCost * amount;
         if (selectedLabel != null) {
             selectedLabel.setText("Item: " + name);

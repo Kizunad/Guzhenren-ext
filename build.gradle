@@ -34,6 +34,11 @@ checkstyle {
 }
 
 sourceSets {
+    test {
+        java {
+            exclude 'com/Kizunad/tinyUI/**'
+        }
+    }
     tinyUi {
         java {
             srcDir 'src/main/java'
@@ -53,14 +58,14 @@ sourceSets {
         resources {
             srcDir 'src/test/resources'
         }
-        compileClasspath += sourceSets.tinyUi.output + configurations.testCompileClasspath
+        compileClasspath += sourceSets.tinyUi.output + configurations.testCompileClasspath + sourceSets.main.compileClasspath
         runtimeClasspath += output + compileClasspath + configurations.testRuntimeClasspath
     }
 }
 
 configurations {
     tinyUiImplementation.extendsFrom implementation
-    tinyUiTestImplementation.extendsFrom testImplementation
+    tinyUiTestImplementation.extendsFrom testImplementation, tinyUiImplementation
     tinyUiTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 

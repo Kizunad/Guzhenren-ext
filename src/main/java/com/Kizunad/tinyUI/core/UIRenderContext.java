@@ -1,6 +1,7 @@
 package com.Kizunad.tinyUI.core;
 
 import com.Kizunad.tinyUI.theme.NinePatch;
+import net.minecraft.network.chat.Component;
 
 /**
  * 渲染接口，封装基础绘制能力以便测试和替换实现。
@@ -39,6 +40,16 @@ public interface UIRenderContext {
      * @param argbColor 文本颜色（ARGB 格式）
      */
     void drawText(String text, int x, int y, int argbColor);
+
+    /**
+     * 绘制富文本组件。
+     *
+     * @param text 要绘制的文本组件
+     * @param x 文本起始 X 坐标（屏幕坐标）
+     * @param y 文本起始 Y 坐标（屏幕坐标）
+     * @param argbColor 文本颜色（ARGB 格式）
+     */
+    void drawText(Component text, int x, int y, int argbColor);
 
     /**
      * 绘制九宫格纹理（可缩放的边框/背景）。

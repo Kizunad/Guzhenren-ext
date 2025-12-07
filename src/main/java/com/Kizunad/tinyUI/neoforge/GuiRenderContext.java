@@ -4,6 +4,7 @@ import com.Kizunad.tinyUI.core.UIRenderContext;
 import com.Kizunad.tinyUI.theme.NinePatch;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 
 /**
  * NeoForge 渲染上下文实现，包装 GuiGraphics。
@@ -37,6 +38,11 @@ public final class GuiRenderContext implements UIRenderContext {
 
     @Override
     public void drawText(final String text, final int x, final int y, final int argbColor) {
+        graphics.drawString(font, text, x, y, argbColor, false);
+    }
+
+    @Override
+    public void drawText(final Component text, final int x, final int y, final int argbColor) {
         graphics.drawString(font, text, x, y, argbColor, false);
     }
 

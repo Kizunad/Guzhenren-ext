@@ -1,0 +1,9 @@
+{
+    "gui.customnpcs.status": "Status",
+    "gui.customnpcs.action.trade": "Trade",
+    "gui.customnpcs.action.gift": "Gift",
+    "gui.customnpcs.action.tasks": "Tasks",
+    "gui.customnpcs.action.chat": "Chat",
+    "gui.customnpcs.action.owner_opts": "Owner Opts",
+    "gui.customnpcs.action.back": "Back"
+}

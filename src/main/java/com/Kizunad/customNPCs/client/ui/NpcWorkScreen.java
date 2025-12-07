@@ -6,8 +6,8 @@ import com.Kizunad.customNPCs.menu.NpcWorkMenu;
 import com.Kizunad.customNPCs.network.InteractActionPayload;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
-import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.ScaleConfig;
+import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
@@ -31,9 +31,9 @@ public class NpcWorkScreen extends TinyUIContainerScreen<NpcWorkMenu> {
     private static final int BUTTON_WIDTH = 90;
     private static final int BUTTON_HEIGHT = 20;
 
-    /** 设计分辨率 - 设置为 1280x720 实现 1.5 倍放大 */
-    private static final int DESIGN_WIDTH = 1280;
-    private static final int DESIGN_HEIGHT = 720;
+    /** 设计分辨率 - 设置为 1920 / 2 实现 2倍放大 */
+    private static final int DESIGN_WIDTH = 1920 / 2;
+    private static final int DESIGN_HEIGHT = 1080 / 2;
 
     private final Theme theme;
     private Label ownerLabel;
@@ -100,12 +100,7 @@ public class NpcWorkScreen extends TinyUIContainerScreen<NpcWorkMenu> {
 
         int buttonsY = WINDOW_HEIGHT - BUTTON_HEIGHT - PADDING;
         Button addMaterial = new Button("Add Material", theme);
-        addMaterial.setFrame(
-            PADDING,
-            buttonsY,
-            BUTTON_WIDTH,
-            BUTTON_HEIGHT
-        );
+        addMaterial.setFrame(PADDING, buttonsY, BUTTON_WIDTH, BUTTON_HEIGHT);
         addMaterial.setOnClick(() -> sendAction("order_work_material"));
         window.addChild(addMaterial);
 
@@ -132,10 +127,10 @@ public class NpcWorkScreen extends TinyUIContainerScreen<NpcWorkMenu> {
         if (ownerLabel == null || menu == null) {
             return;
         }
-        double value = MaterialDataCache.getOwnerMaterial(menu.getNpcEntityId());
-        ownerLabel.setText(
-            "Material: " + String.format("%.2f", value)
+        double value = MaterialDataCache.getOwnerMaterial(
+            menu.getNpcEntityId()
         );
+        ownerLabel.setText("Material: " + String.format("%.2f", value));
     }
 
     private String resolveStatusText() {

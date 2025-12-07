@@ -49,8 +49,8 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
     private static final int COLOR_TEXT_REWARD = 0xF0B400;
 
     /** 设计分辨率 - 设置为 1280x720 实现 1.5 倍放大（原始 1920/1.5=1280, 1080/1.5=720） */
-    private static final int DESIGN_WIDTH = 1280;
-    private static final int DESIGN_HEIGHT = 720;
+    private static final int DESIGN_WIDTH = 1920 / 2;
+    private static final int DESIGN_HEIGHT = 1080 / 2;
 
     private final UIRoot uiRoot;
     private final Theme theme;

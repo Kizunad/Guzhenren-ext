@@ -75,9 +75,9 @@ public class NpcInteractScreen extends TinyUIScreen {
     private static final int BACK_BUTTON_HEIGHT = 20;
     private static final int BACK_BUTTON_MARGIN = 8;
 
-    /** 设计分辨率 - 设置为 1280x720 实现 1.5 倍放大 */
-    private static final int DESIGN_WIDTH = 1280;
-    private static final int DESIGN_HEIGHT = 720;
+    /** 设计分辨率 - 设置为 1920 / 2 ,2倍放大 */
+    private static final int DESIGN_WIDTH = 1920 / 2;
+    private static final int DESIGN_HEIGHT = 1080 / 2;
 
     /**
      * 交互数据载体，避免超参构造。
@@ -115,10 +115,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         this(new UIRoot(), data);
     }
 
-    private NpcInteractScreen(
-        UIRoot root,
-        InteractData data
-    ) {
+    private NpcInteractScreen(UIRoot root, InteractData data) {
         super(data.displayName(), root);
         this.uiRoot = root;
         this.theme = Theme.vanilla();
@@ -128,20 +125,12 @@ public class NpcInteractScreen extends TinyUIScreen {
         this.maxHealth = data.maxHealth();
         this.isOwner = data.isOwner();
         this.dialogueMode = data.startInDialogueMode();
-        this.statusEntries =
-            List.copyOf(
-                Objects.requireNonNull(
-                    data.statusEntries(),
-                    "statusEntries"
-                )
-            );
-        this.dialogueOptions =
-            new ArrayList<>(
-                Objects.requireNonNull(
-                    data.dialogueOptions(),
-                    "dialogueOptions"
-                )
-            );
+        this.statusEntries = List.copyOf(
+            Objects.requireNonNull(data.statusEntries(), "statusEntries")
+        );
+        this.dialogueOptions = new ArrayList<>(
+            Objects.requireNonNull(data.dialogueOptions(), "dialogueOptions")
+        );
     }
 
     @Override
@@ -171,11 +160,16 @@ public class NpcInteractScreen extends TinyUIScreen {
                 0
             )
         );
-        Label nameLabel = new Label(displayName.getString(), theme);
-        nameLabel.setFrame(MARGIN, MARGIN, STATUS_PANEL_WIDTH, NAME_LABEL_HEIGHT);
+        Label nameLabel = new Label(displayName, theme);
+        nameLabel.setFrame(
+            MARGIN,
+            MARGIN,
+            STATUS_PANEL_WIDTH,
+            NAME_LABEL_HEIGHT
+        );
         dashboardPanel.addChild(nameLabel);
 
-        Label statusTitle = new Label("Status", theme);
+        Label statusTitle = new Label(Component.translatable("gui.customnpcs.status"), theme);
         statusTitle.setFrame(
             MARGIN,
             MARGIN + STATUS_TITLE_Y_OFFSET,
@@ -221,11 +215,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         UIElement preview = new PanelElement();
         int previewX = MARGIN + STATUS_PANEL_WIDTH + PREVIEW_GAP;
         int previewW =
-            WINDOW_WIDTH -
-            previewX -
-            BUTTON_PANEL_WIDTH -
-            MARGIN -
-            PREVIEW_GAP;
+            WINDOW_WIDTH - previewX - BUTTON_PANEL_WIDTH - MARGIN - PREVIEW_GAP;
         previewW = Math.max(previewW, PREVIEW_MIN_WIDTH);
         int previewH = STATUS_LIST_HEIGHT;
         previewH = Math.max(previewH, PREVIEW_MIN_HEIGHT);
@@ -239,8 +229,12 @@ public class NpcInteractScreen extends TinyUIScreen {
     private void addActionButtons(UIElement buttonPanel) {
         int currentY = 0;
         buttonPanel.clearChildren();
-        Button trade = createActionButton("Trade", () ->
-            sendAction(InteractActionPayload.ActionType.TRADE, rl("trade"), null)
+        Button trade = createActionButton(Component.translatable("gui.customnpcs.action.trade"), () ->
+            sendAction(
+                InteractActionPayload.ActionType.TRADE,
+                rl("trade"),
+                null
+            )
         );
         trade.setFrame(
             BUTTON_INNER_PADDING,
@@ -251,7 +245,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         buttonPanel.addChild(trade);
         currentY += BUTTON_HEIGHT + BUTTON_GAP;
 
-        Button gift = createActionButton("Gift", () ->
+        Button gift = createActionButton(Component.translatable("gui.customnpcs.action.gift"), () ->
             sendAction(InteractActionPayload.ActionType.GIFT, rl("gift"), null)
         );
         gift.setFrame(
@@ -263,12 +257,8 @@ public class NpcInteractScreen extends TinyUIScreen {
         buttonPanel.addChild(gift);
         currentY += BUTTON_HEIGHT + BUTTON_GAP;
 
-        Button quest = createActionButton("Tasks", () ->
-            sendAction(
-                InteractActionPayload.ActionType.CHAT,
-                rl("tasks"),
-                null
-            )
+        Button quest = createActionButton(Component.translatable("gui.customnpcs.action.tasks"), () ->
+            sendAction(InteractActionPayload.ActionType.CHAT, rl("tasks"), null)
         );
         quest.setFrame(
             BUTTON_INNER_PADDING,
@@ -279,7 +269,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         buttonPanel.addChild(quest);
         currentY += BUTTON_HEIGHT + BUTTON_GAP;
 
-        Button chat = createActionButton("Chat", () -> {
+        Button chat = createActionButton(Component.translatable("gui.customnpcs.action.chat"), () -> {
             dialogueMode = true;
             syncVisibility();
         });
@@ -293,7 +283,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         currentY += BUTTON_HEIGHT + BUTTON_GAP;
 
         if (isOwner) {
-            Button owner = createActionButton("Owner Opts", () -> {
+            Button owner = createActionButton(Component.translatable("gui.customnpcs.action.owner_opts"), () -> {
                 dialogueMode = true;
                 syncVisibility();
             });
@@ -307,7 +297,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         }
     }
 
-    private Button createActionButton(String text, Runnable onClick) {
+    private Button createActionButton(Component text, Runnable onClick) {
         Button button = new Button(text, theme);
         button.setOnClick(onClick);
         return button;
@@ -354,7 +344,7 @@ public class NpcInteractScreen extends TinyUIScreen {
                 );
             }
         };
-        Label label = new Label(entry.label().getString(), theme);
+        Label label = new Label(entry.label(), theme);
         label.setFrame(
             STATUS_LABEL_X,
             STATUS_LABEL_Y,
@@ -363,7 +353,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         );
         row.addChild(label);
 
-        Label value = new Label(entry.value().getString(), theme);
+        Label value = new Label(entry.value(), theme);
         value.setColor(entry.color());
         value.setFrame(
             (STATUS_PANEL_WIDTH / 2),
@@ -400,7 +390,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         );
         dialoguePanel.addChild(container);
 
-        Label actorLabel = new Label(displayName.getString(), theme);
+        Label actorLabel = new Label(displayName, theme);
         actorLabel.setFrame(
             DIALOGUE_PADDING,
             DIALOGUE_PADDING,
@@ -409,9 +399,8 @@ public class NpcInteractScreen extends TinyUIScreen {
         );
         container.addChild(actorLabel);
 
-        dialogueTextLabel = new Label("......", theme);
-        int textX =
-            DIALOGUE_PADDING + DIALOGUE_ACTOR_WIDTH + DIALOGUE_TEXT_GAP;
+        dialogueTextLabel = new Label(Component.literal("......"), theme);
+        int textX = DIALOGUE_PADDING + DIALOGUE_ACTOR_WIDTH + DIALOGUE_TEXT_GAP;
         dialogueTextLabel.setFrame(
             textX,
             DIALOGUE_PADDING,
@@ -430,7 +419,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         container.addChild(optionsScroll);
         rebuildOptionList();
 
-        Button back = createActionButton("Back", () -> {
+        Button back = createActionButton(Component.translatable("gui.customnpcs.action.back"), () -> {
             dialogueMode = false;
             syncVisibility();
         });
@@ -450,7 +439,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         int y = 0;
         int optionWidth = optionsScroll == null ? 0 : optionsScroll.getWidth();
         for (DialogueOption option : dialogueOptions) {
-            Button btn = new Button(option.text().getString(), theme);
+            Button btn = new Button(option.text(), theme);
             btn.setFrame(0, y, optionWidth, OPTION_ROW_HEIGHT);
             btn.setOnClick(() -> sendDialogueOption(option));
             list.addChild(btn);
@@ -500,11 +489,7 @@ public class NpcInteractScreen extends TinyUIScreen {
         renderPreview(graphics, mouseX, mouseY);
     }
 
-    private void renderPreview(
-        GuiGraphics graphics,
-        int mouseX,
-        int mouseY
-    ) {
+    private void renderPreview(GuiGraphics graphics, int mouseX, int mouseY) {
         if (previewPanel == null || dialogueMode) {
             return;
         }
