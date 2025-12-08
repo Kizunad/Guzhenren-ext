@@ -182,7 +182,7 @@ tasks.register('customNpcsJar', Jar) {
 }
 
 dependencies {
-    compileOnly name: 'guzhenren蛊真人模组本体-测试版-12.6'
+    compileOnly name: 'guzhenren'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 }
