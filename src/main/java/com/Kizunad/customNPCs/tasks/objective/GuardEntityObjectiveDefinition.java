@@ -21,11 +21,18 @@ public record GuardEntityObjectiveDefinition(
     double spawnRadius
 ) implements TaskObjectiveDefinition {
 
+    public static final int MIN_TOTAL_DURATION_SECONDS = 10;
+    public static final int MIN_WAVE_INTERVAL_SECONDS = 1;
+    public static final double MIN_SPAWN_RADIUS = 5.0D;
+
     public GuardEntityObjectiveDefinition {
-        totalDurationSeconds = Math.max(10, totalDurationSeconds);
+        totalDurationSeconds = Math.max(
+            MIN_TOTAL_DURATION_SECONDS,
+            totalDurationSeconds
+        );
         prepareTimeSeconds = Math.max(0, prepareTimeSeconds);
-        waveIntervalSeconds = Math.max(1, waveIntervalSeconds);
-        spawnRadius = Math.max(5.0, spawnRadius);
+        waveIntervalSeconds = Math.max(MIN_WAVE_INTERVAL_SECONDS, waveIntervalSeconds);
+        spawnRadius = Math.max(MIN_SPAWN_RADIUS, spawnRadius);
         if (attackers == null) {
             attackers = Collections.emptyList();
         } else {
@@ -51,5 +58,11 @@ public record GuardEntityObjectiveDefinition(
         int minCount,
         int maxCount,
         @Nullable CompoundTag nbt
-    ) {}
+    ) {
+
+        public AttackerEntry {
+            minCount = Math.max(1, minCount);
+            maxCount = Math.max(minCount, maxCount);
+        }
+    }
 }

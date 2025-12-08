@@ -1,6 +1,7 @@
 package com.Kizunad.customNPCs.tasks.data;
 
 import com.Kizunad.customNPCs.tasks.TaskDefinition;
+import com.Kizunad.customNPCs.tasks.objective.GuardEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.KillEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.SubmitItemObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveDefinition;
@@ -106,6 +107,10 @@ public class TaskProgress {
                 }
             } else if (obj instanceof KillEntityObjectiveDefinition kill) {
                 if (objectiveProgress[i] < kill.requiredKills()) {
+                    return false;
+                }
+            } else if (obj instanceof GuardEntityObjectiveDefinition guard) {
+                if (objectiveProgress[i] < guard.totalDurationSeconds()) {
                     return false;
                 }
             } else if (obj.getType() == TaskObjectiveType.SUBMIT_ITEM) {

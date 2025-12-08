@@ -8,6 +8,7 @@ import com.Kizunad.customNPCs.network.OpenTaskBoardPayload.TaskEntry;
 import com.Kizunad.customNPCs.tasks.data.PlayerTaskData;
 import com.Kizunad.customNPCs.tasks.data.TaskProgress;
 import com.Kizunad.customNPCs.tasks.data.TaskProgressState;
+import com.Kizunad.customNPCs.tasks.objective.GuardEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.KillEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.SubmitItemObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveDefinition;
@@ -110,6 +111,36 @@ public final class TaskBoardSyncService {
                     kill.requiredKills(),
                     current
                 ));
+            } else if (objective instanceof GuardEntityObjectiveDefinition guard) {
+                ItemStack icon = createGuardIcon(guard);
+                int required = guard.totalDurationSeconds();
+                int current = progress != null
+                    ? progress.getObjectiveProgress(i)
+                    : (completed ? required : 0);
+                Component targetName;
+                if (guard.entityToSpawn() != null) {
+                    targetName = Component.translatable(
+                        guard.entityToSpawn().getDescriptionId()
+                    );
+                } else if (
+                    guard.targetType() ==
+                        GuardEntityObjectiveDefinition.GuardTargetType.SPAWN
+                ) {
+                    targetName = Component.translatable(
+                        "gui.customnpcs.task_board.objective.guard.target.unknown"
+                    );
+                } else {
+                    targetName = Component.translatable(
+                        "gui.customnpcs.task_board.objective.guard.target.self"
+                    );
+                }
+                list.add(new ObjectiveEntry(
+                    TaskObjectiveType.GUARD_ENTITY,
+                    icon,
+                    targetName,
+                    required,
+                    current
+                ));
             }
         }
         return list;
@@ -156,5 +187,23 @@ public final class TaskBoardSyncService {
             stack.set(DataComponents.CUSTOM_NAME, kill.customName());
         }
         return stack;
+    }
+
+    private static ItemStack createGuardIcon(
+        GuardEntityObjectiveDefinition guard
+    ) {
+        if (guard.entityToSpawn() != null) {
+            SpawnEggItem egg = SpawnEggItem.byId(guard.entityToSpawn());
+            if (egg != null) {
+                return new ItemStack(egg);
+            }
+            ItemStack stack = new ItemStack(Items.NAME_TAG);
+            stack.set(
+                DataComponents.CUSTOM_NAME,
+                Component.translatable(guard.entityToSpawn().getDescriptionId())
+            );
+            return stack;
+        }
+        return new ItemStack(Items.SHIELD);
     }
 }

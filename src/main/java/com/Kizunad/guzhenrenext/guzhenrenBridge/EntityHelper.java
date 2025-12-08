@@ -19,7 +19,9 @@ public final class EntityHelper {
      * @return true 如果已开窍
      */
     public static boolean isGuMaster(LivingEntity entity) {
-        if (entity == null) return false;
+        if (entity == null) {
+            return false;
+        }
         try {
             var vars = getVariables(entity);
             // 根据源码，jieduan (阶段/转数) >= 1 或 kongqiao (空窍完整度) > 0 视为已开窍
@@ -36,7 +38,9 @@ public final class EntityHelper {
      * @return 转数 (1-9)，如果不是蛊师或未开窍返回 0
      */
     public static int getGuMasterRank(LivingEntity entity) {
-        if (entity == null) return 0;
+        if (entity == null) {
+            return 0;
+        }
         try {
             // 向下取整，jieduan 可能是 1.5 (一转中阶)
             return (int) getVariables(entity).jieduan;
@@ -52,7 +56,9 @@ public final class EntityHelper {
      * @return 空窍值
      */
     public static double getApertureIntegrity(LivingEntity entity) {
-        if (entity == null) return 0.0;
+        if (entity == null) {
+            return 0.0;
+        }
         try {
             return getVariables(entity).kongqiao;
         } catch (Exception e) {

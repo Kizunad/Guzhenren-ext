@@ -16,7 +16,9 @@ public final class ZhenYuanHelper {
      * 获取当前真元值。
      */
     public static double getAmount(LivingEntity entity) {
-        if (entity == null) return 0.0;
+        if (entity == null) {
+            return 0.0;
+        }
         try {
             return getVariables(entity).zhenyuan;
         } catch (Exception e) {
@@ -28,7 +30,9 @@ public final class ZhenYuanHelper {
      * 获取最大真元值。
      */
     public static double getMaxAmount(LivingEntity entity) {
-        if (entity == null) return 0.0;
+        if (entity == null) {
+            return 0.0;
+        }
         try {
             return getVariables(entity).zuida_zhenyuan;
         } catch (Exception e) {
@@ -41,7 +45,9 @@ public final class ZhenYuanHelper {
      */
     public static float getPercentage(LivingEntity entity) {
         double max = getMaxAmount(entity);
-        if (max <= 0) return 0.0f;
+        if (max <= 0) {
+            return 0.0f;
+        }
         double current = getAmount(entity);
         return (float) Math.max(0.0, Math.min(1.0, current / max));
     }
@@ -60,7 +66,9 @@ public final class ZhenYuanHelper {
      * @return 修改后的真元值
      */
     public static double modify(LivingEntity entity, double amount) {
-        if (entity == null) return 0.0;
+        if (entity == null) {
+            return 0.0;
+        }
         try {
             var vars = getVariables(entity);
             double original = vars.zhenyuan;
@@ -82,7 +90,9 @@ public final class ZhenYuanHelper {
      * 设置真元值。
      */
     public static void set(LivingEntity entity, double amount) {
-        if (entity == null) return;
+        if (entity == null) {
+            return;
+        }
         try {
             var vars = getVariables(entity);
             double max = vars.zuida_zhenyuan;

@@ -42,6 +42,8 @@ public final class TaskActionHandler {
     private static final double MAX_DISTANCE_SQR = 20.0D * 20.0D;
     private static final double TARGET_SPAWN_YAW_RANGE = 360.0D;
     private static final double BLOCK_CENTER_OFFSET = 0.5D;
+    private static final long TICKS_PER_SECOND = 20L;
+    private static final double GUARD_TARGET_SEARCH_RADIUS = 5.0D;
 
     private TaskActionHandler() {}
 
@@ -314,7 +316,10 @@ public final class TaskActionHandler {
                 progress.getObjectiveTargets(i).add(targetUuid);
                 net.minecraft.nbt.CompoundTag tag = progress.getAdditionalData();
                 tag.putLong("startTime_" + i, gameTime);
-                tag.putLong("lastWave_" + i, gameTime + (guard.prepareTimeSeconds() * 20L)); // 第一波在准备时间结束后
+                tag.putLong(
+                    "lastWave_" + i,
+                    gameTime + guard.prepareTimeSeconds() * TICKS_PER_SECOND
+                ); // 第一波在准备时间结束后
                 progress.setAdditionalData(tag);
                 
                 player.displayClientMessage(
@@ -334,21 +339,34 @@ public final class TaskActionHandler {
         ServerLevel level = player.serverLevel();
         RandomSource random = level.getRandom();
         // 守卫目标默认生成在玩家附近，或者 NPC 附近
-        BlockPos origin = npc.blockPosition(); 
-        BlockPos targetPos = pickSurfacePosition(level, origin, 5.0, random);
+        BlockPos origin = npc.blockPosition();
+        BlockPos targetPos = pickSurfacePosition(
+            level,
+            origin,
+            GUARD_TARGET_SEARCH_RADIUS,
+            random
+        );
         
         if (targetPos == null) {
             targetPos = origin; // 找不到就生成在脚下
         }
 
-        if (objective.entityToSpawn() == null) return null;
+        if (objective.entityToSpawn() == null) {
+            return null;
+        }
 
         var created = objective.entityToSpawn().create(level);
         if (!(created instanceof LivingEntity entity)) {
             return null;
         }
         
-        entity.moveTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, 0, 0);
+        entity.moveTo(
+            targetPos.getX() + BLOCK_CENTER_OFFSET,
+            targetPos.getY(),
+            targetPos.getZ() + BLOCK_CENTER_OFFSET,
+            0,
+            0
+        );
         if (entity instanceof Mob mob) {
             mob.setPersistenceRequired();
             // 也许应该设置为不移动?

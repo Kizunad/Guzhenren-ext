@@ -320,6 +320,12 @@ public class NpcTaskBoardScreen extends TinyUIScreen {
                     objective.requiredCount(),
                     objective.displayName()
                 );
+                case GUARD_ENTITY -> Component.translatable(
+                    "gui.customnpcs.task_board.objective.guard",
+                    objective.currentCount(),
+                    objective.requiredCount(),
+                    objective.displayName()
+                );
             };
             graphics.drawString(
                 font,

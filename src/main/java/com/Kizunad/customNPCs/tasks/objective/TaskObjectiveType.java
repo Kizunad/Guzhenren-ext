@@ -12,10 +12,16 @@ public enum TaskObjectiveType {
         if (value == null || value.isEmpty()) {
             return SUBMIT_ITEM;
         }
-        try {
-            return TaskObjectiveType.valueOf(value.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return SUBMIT_ITEM;
+        String normalized = value.trim().toUpperCase();
+        switch (normalized) {
+            case "SUBMIT", "SUBMIT_ITEM":
+                return SUBMIT_ITEM;
+            case "KILL", "KILL_ENTITY":
+                return KILL_ENTITY;
+            case "GUARD", "GUARD_ENTITY":
+                return GUARD_ENTITY;
+            default:
+                return SUBMIT_ITEM;
         }
     }
 }

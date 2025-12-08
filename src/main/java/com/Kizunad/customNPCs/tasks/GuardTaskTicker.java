@@ -24,6 +24,11 @@ import java.util.UUID;
 @EventBusSubscriber
 public class GuardTaskTicker {
 
+    private static final int CHECK_INTERVAL_TICKS = 20;
+    private static final long TICKS_PER_SECOND = 20L;
+    private static final double HALF_BLOCK_OFFSET = 0.5D;
+    private static final float FULL_ROTATION_DEGREES = 360.0F;
+
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity().level().isClientSide) {
@@ -31,20 +36,26 @@ public class GuardTaskTicker {
         }
         ServerPlayer player = (ServerPlayer) event.getEntity();
         // 每秒检查一次 (20 ticks)
-        if (player.tickCount % 20 != 0) {
+        if (player.tickCount % CHECK_INTERVAL_TICKS != 0) {
             return;
         }
 
         PlayerTaskData data = PlayerTaskAttachment.get(player);
-        if (data == null) return;
+        if (data == null) {
+            return;
+        }
 
         List<TaskProgress> activeTasks = data.getAllProgress();
         for (TaskProgress progress : activeTasks) {
             if (progress.getState() != TaskProgressState.ACCEPTED) {
                 continue;
             }
-            TaskDefinition def = TaskRegistry.getInstance().get(progress.getTaskId());
-            if (def == null) continue;
+            TaskDefinition def = TaskRegistry
+                .getInstance()
+                .get(progress.getTaskId());
+            if (def == null) {
+                continue;
+            }
 
             boolean changed = false;
             for (int i = 0; i < def.objectiveCount(); i++) {
@@ -70,16 +81,20 @@ public class GuardTaskTicker {
     ) {
         CompoundTag tag = progress.getAdditionalData();
         String keyStart = "startTime_" + index;
-        if (!tag.contains(keyStart)) return false;
+        if (!tag.contains(keyStart)) {
+            return false;
+        }
 
         long startTime = tag.getLong(keyStart);
         long gameTime = player.serverLevel().getGameTime();
         long passedTicks = gameTime - startTime;
-        int passedSeconds = (int) (passedTicks / 20);
+        int passedSeconds = (int) (passedTicks / TICKS_PER_SECOND);
 
         // 1. 检查目标是否存活
         List<UUID> targets = progress.getObjectiveTargets(index);
-        if (targets.isEmpty()) return false; // 异常
+        if (targets.isEmpty()) {
+            return false; // 异常
+        }
         UUID targetId = targets.get(0);
         
         ServerLevel level = player.serverLevel();
@@ -103,7 +118,10 @@ public class GuardTaskTicker {
         }
 
         if (isDead) {
-            player.displayClientMessage(Component.literal("§c守卫目标已死亡！任务失败！"), true);
+            player.displayClientMessage(
+                Component.literal("§c守卫目标已死亡！任务失败！"),
+                true
+            );
             // 失败处理：重置进度或移除任务
             // data.removeTask(...) ? 目前没有直接移除接口
             progress.setState(TaskProgressState.COMPLETED); // 标记为完成但进度不够，导致无法提交？
@@ -118,23 +136,37 @@ public class GuardTaskTicker {
         // 2. 更新时间进度
         if (passedSeconds >= guard.totalDurationSeconds()) {
             if (progress.getObjectiveProgress(index) < guard.totalDurationSeconds()) {
-                progress.setObjectiveProgress(index, guard.totalDurationSeconds());
-                player.displayClientMessage(Component.literal("§a守卫时间结束！目标存活！"), true);
+                progress.setObjectiveProgress(
+                    index,
+                    guard.totalDurationSeconds()
+                );
+                player.displayClientMessage(
+                    Component.literal("§a守卫时间结束！目标存活！"),
+                    true
+                );
                 return true;
             }
             return false;
         }
-        
+
         // 更新显示的进度
         progress.setObjectiveProgress(index, passedSeconds);
 
         // 3. 刷怪逻辑
         if (passedSeconds > guard.prepareTimeSeconds()) {
             String keyLastWave = "lastWave_" + index;
-            long lastWave = tag.contains(keyLastWave) ? tag.getLong(keyLastWave) : startTime;
-            
-            if (gameTime - lastWave >= guard.waveIntervalSeconds() * 20L) {
-                spawnWave(player.serverLevel(), guard, targetEntity != null ? (LivingEntity)targetEntity : player);
+            long lastWave = tag.contains(keyLastWave)
+                ? tag.getLong(keyLastWave)
+                : startTime;
+
+            if (gameTime - lastWave >= guard.waveIntervalSeconds() * TICKS_PER_SECOND) {
+                spawnWave(
+                    player.serverLevel(),
+                    guard,
+                    targetEntity != null
+                        ? (LivingEntity) targetEntity
+                        : player
+                );
                 tag.putLong(keyLastWave, gameTime);
                 return true;
             }
@@ -143,21 +175,27 @@ public class GuardTaskTicker {
         return true; // 总是更新了进度
     }
 
-    private static void spawnWave(ServerLevel level, GuardEntityObjectiveDefinition guard, LivingEntity target) {
-        if (guard.attackers().isEmpty()) return;
-        
+    private static void spawnWave(
+        ServerLevel level,
+        GuardEntityObjectiveDefinition guard,
+        LivingEntity target
+    ) {
+        if (guard.attackers().isEmpty()) {
+            return;
+        }
+
         BlockPos center = target.blockPosition();
-        
+
         for (GuardEntityObjectiveDefinition.AttackerEntry entry : guard.attackers()) {
             int count = entry.minCount() + level.random.nextInt(entry.maxCount() - entry.minCount() + 1);
             for (int i = 0; i < count; i++) {
                 // 简单的圆形生成
                 double angle = level.random.nextDouble() * Math.PI * 2;
                 double dist = guard.spawnRadius();
-                int x = center.getX() + (int)(Math.cos(angle) * dist);
-                int z = center.getZ() + (int)(Math.sin(angle) * dist);
+                int x = center.getX() + (int) (Math.cos(angle) * dist);
+                int z = center.getZ() + (int) (Math.sin(angle) * dist);
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-                
+
                 Entity mob = entry.entityType().create(level);
                 if (mob instanceof Mob m) {
                     if (entry.nbt() != null) {
@@ -166,8 +204,14 @@ public class GuardTaskTicker {
                         mobTag.remove("UUID"); 
                         m.load(mobTag);
                     }
-                    
-                    m.moveTo(x + 0.5, y, z + 0.5, level.random.nextFloat() * 360f, 0);
+
+                    m.moveTo(
+                        x + HALF_BLOCK_OFFSET,
+                        y,
+                        z + HALF_BLOCK_OFFSET,
+                        level.random.nextFloat() * FULL_ROTATION_DEGREES,
+                        0
+                    );
                     m.setTarget(target); // 设置仇恨
                     level.addFreshEntity(m);
                 }

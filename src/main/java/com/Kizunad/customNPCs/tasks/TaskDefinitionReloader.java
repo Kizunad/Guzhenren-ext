@@ -58,6 +58,10 @@ public class TaskDefinitionReloader extends SimpleJsonResourceReloadListener {
         .create();
     private static final String FOLDER = "tasks";
     private static final double DEFAULT_KILL_SPAWN_RANGE = 24.0D;
+    private static final int DEFAULT_GUARD_DURATION_SECONDS = 60;
+    private static final int DEFAULT_GUARD_PREP_TIME_SECONDS = 10;
+    private static final int DEFAULT_GUARD_WAVE_INTERVAL_SECONDS = 20;
+    private static final double DEFAULT_GUARD_SPAWN_RADIUS = 10.0D;
 
     public TaskDefinitionReloader() {
         super(GSON, FOLDER);
@@ -181,51 +185,102 @@ public class TaskDefinitionReloader extends SimpleJsonResourceReloadListener {
         return result;
     }
 
-    private GuardEntityObjectiveDefinition parseGuardEntityObjective(JsonObject obj) {
-        String targetTypeStr = GsonHelper.getAsString(obj, "target_type", "self");
-        GuardEntityObjectiveDefinition.GuardTargetType targetType = 
-            "spawn".equalsIgnoreCase(targetTypeStr) 
-            ? GuardEntityObjectiveDefinition.GuardTargetType.SPAWN 
-            : GuardEntityObjectiveDefinition.GuardTargetType.SELF;
-        
+    private GuardEntityObjectiveDefinition parseGuardEntityObjective(
+        JsonObject obj
+    ) {
+        String targetTypeStr = GsonHelper.getAsString(
+            obj,
+            "target_type",
+            "self"
+        );
+        GuardEntityObjectiveDefinition.GuardTargetType targetType =
+            "spawn".equalsIgnoreCase(targetTypeStr)
+                ? GuardEntityObjectiveDefinition.GuardTargetType.SPAWN
+                : GuardEntityObjectiveDefinition.GuardTargetType.SELF;
+
         EntityType<? extends LivingEntity> entityType = null;
         if (targetType == GuardEntityObjectiveDefinition.GuardTargetType.SPAWN) {
-             ResourceLocation entityId = ResourceLocation.tryParse(GsonHelper.getAsString(obj, "entity", ""));
-             if (entityId != null) {
-                 EntityType<?> raw = BuiltInRegistries.ENTITY_TYPE.getOptional(entityId).orElse(null);
-                 if (raw != null && raw.getBaseClass() != null && LivingEntity.class.isAssignableFrom(raw.getBaseClass())) {
-                     //noinspection unchecked
-                     entityType = (EntityType<? extends LivingEntity>) raw;
-                 }
-             }
+            ResourceLocation entityId = ResourceLocation.tryParse(
+                GsonHelper.getAsString(obj, "entity", "")
+            );
+            if (entityId != null) {
+                EntityType<?> raw = BuiltInRegistries.ENTITY_TYPE
+                    .getOptional(entityId)
+                    .orElse(null);
+                if (
+                    raw != null &&
+                    raw.getBaseClass() != null &&
+                    LivingEntity.class.isAssignableFrom(raw.getBaseClass())
+                ) {
+                    //noinspection unchecked
+                    entityType = (EntityType<? extends LivingEntity>) raw;
+                }
+            }
         }
-        
-        int duration = GsonHelper.getAsInt(obj, "duration", 60);
-        int prepTime = GsonHelper.getAsInt(obj, "prep_time", 10);
-        int waveInterval = GsonHelper.getAsInt(obj, "wave_interval", 20);
-        double spawnRadius = GsonHelper.getAsDouble(obj, "spawn_radius", 10.0);
-        
-        List<GuardEntityObjectiveDefinition.AttackerEntry> attackers = new ArrayList<>();
+
+        int duration = GsonHelper.getAsInt(
+            obj,
+            "duration",
+            DEFAULT_GUARD_DURATION_SECONDS
+        );
+        int prepTime = GsonHelper.getAsInt(
+            obj,
+            "prep_time",
+            DEFAULT_GUARD_PREP_TIME_SECONDS
+        );
+        int waveInterval = GsonHelper.getAsInt(
+            obj,
+            "wave_interval",
+            DEFAULT_GUARD_WAVE_INTERVAL_SECONDS
+        );
+        double spawnRadius = GsonHelper.getAsDouble(
+            obj,
+            "spawn_radius",
+            DEFAULT_GUARD_SPAWN_RADIUS
+        );
+
+        List<GuardEntityObjectiveDefinition.AttackerEntry> attackers =
+            new ArrayList<>();
         if (obj.has("attackers")) {
             JsonArray arr = GsonHelper.getAsJsonArray(obj, "attackers");
             for (JsonElement e : arr) {
                 JsonObject aObj = e.getAsJsonObject();
-                ResourceLocation eid = ResourceLocation.tryParse(GsonHelper.getAsString(aObj, "entity"));
+                ResourceLocation eid = ResourceLocation.tryParse(
+                    GsonHelper.getAsString(aObj, "entity")
+                );
                 if (eid != null) {
-                    EntityType<?> raw = BuiltInRegistries.ENTITY_TYPE.getOptional(eid).orElse(null);
-                    if (raw != null && LivingEntity.class.isAssignableFrom(raw.getBaseClass())) {
+                    EntityType<?> raw = BuiltInRegistries.ENTITY_TYPE
+                        .getOptional(eid)
+                        .orElse(null);
+                    if (
+                        raw != null &&
+                        LivingEntity.class.isAssignableFrom(raw.getBaseClass())
+                    ) {
                         int min = GsonHelper.getAsInt(aObj, "min_count", 1);
                         int max = GsonHelper.getAsInt(aObj, "max_count", 1);
                         CompoundTag nbt = parseNbt(aObj, "nbt");
                         //noinspection unchecked
-                        attackers.add(new GuardEntityObjectiveDefinition.AttackerEntry((EntityType<? extends LivingEntity>) raw, min, max, nbt));
+                        attackers.add(
+                            new GuardEntityObjectiveDefinition.AttackerEntry(
+                                (EntityType<? extends LivingEntity>) raw,
+                                min,
+                                max,
+                                nbt
+                            )
+                        );
                     }
                 }
             }
         }
-        
+
         return new GuardEntityObjectiveDefinition(
-            targetType, entityType, duration, prepTime, waveInterval, attackers, spawnRadius
+            targetType,
+            entityType,
+            duration,
+            prepTime,
+            waveInterval,
+            attackers,
+            spawnRadius
         );
     }
 

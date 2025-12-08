@@ -50,6 +50,17 @@ public class PlayerTaskData implements INBTSerializable<CompoundTag> {
         return getActiveMap(questGiver).values();
     }
 
+    /**
+     * 获取所有进行中的任务（跨所有 NPC）。
+     */
+    public java.util.List<TaskProgress> getAllProgress() {
+        java.util.List<TaskProgress> all = new java.util.ArrayList<>();
+        for (Map<ResourceLocation, TaskProgress> map : activeTasks.values()) {
+            all.addAll(map.values());
+        }
+        return all;
+    }
+
     public Set<UUID> getQuestGivers() {
         return activeTasks.keySet();
     }
