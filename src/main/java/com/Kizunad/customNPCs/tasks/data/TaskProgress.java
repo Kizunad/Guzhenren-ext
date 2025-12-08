@@ -24,6 +24,7 @@ public class TaskProgress {
     private UUID questGiver;
     private final int[] objectiveProgress;
     private final List<UUID>[] objectiveTargets;
+    private CompoundTag additionalData = new CompoundTag();
     private TaskProgressState state = TaskProgressState.ACCEPTED;
 
     public TaskProgress(
@@ -40,6 +41,14 @@ public class TaskProgress {
         for (int i = 0; i < count; i++) {
             objectiveTargets[i] = new ArrayList<>();
         }
+    }
+
+    public CompoundTag getAdditionalData() {
+        return additionalData;
+    }
+
+    public void setAdditionalData(CompoundTag tag) {
+        this.additionalData = tag == null ? new CompoundTag() : tag;
     }
 
     public ResourceLocation getTaskId() {
@@ -125,6 +134,9 @@ public class TaskProgress {
             targets.add(inner);
         }
         tag.put("targets", targets);
+        if (!additionalData.isEmpty()) {
+            tag.put("extra", additionalData);
+        }
         return tag;
     }
 
@@ -144,6 +156,9 @@ public class TaskProgress {
             try {
                 data.state = TaskProgressState.valueOf(tag.getString("state"));
             } catch (IllegalArgumentException ignored) {}
+        }
+        if (tag.contains("extra")) {
+            data.additionalData = tag.getCompound("extra");
         }
         System.arraycopy(
             progress,

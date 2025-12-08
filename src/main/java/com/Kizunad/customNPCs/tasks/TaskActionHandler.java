@@ -8,6 +8,7 @@ import com.Kizunad.customNPCs.network.OpenTaskBoardPayload;
 import com.Kizunad.customNPCs.tasks.data.PlayerTaskData;
 import com.Kizunad.customNPCs.tasks.data.TaskProgress;
 import com.Kizunad.customNPCs.tasks.data.TaskProgressState;
+import com.Kizunad.customNPCs.tasks.objective.GuardEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.KillEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.SubmitItemObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveDefinition;
@@ -84,6 +85,7 @@ public final class TaskActionHandler {
         TaskProgress progress = data.getProgress(taskId, npc.getUUID());
         if (progress != null) {
             initializeKillObjectives(player, npc, definition, progress);
+            initializeGuardObjectives(player, npc, definition, progress);
         }
         player.displayClientMessage(
             Component.literal("接受任务: " + definition.title()),
@@ -281,6 +283,80 @@ public final class TaskActionHandler {
                 }
             }
         }
+    }
+
+    private static void initializeGuardObjectives(
+        ServerPlayer player,
+        CustomNpcEntity npc,
+        TaskDefinition definition,
+        TaskProgress progress
+    ) {
+        long gameTime = player.serverLevel().getGameTime();
+        for (int i = 0; i < definition.objectiveCount(); i++) {
+            TaskObjectiveDefinition objective = definition.objective(i);
+            if (!(objective instanceof GuardEntityObjectiveDefinition guard)) {
+                continue;
+            }
+            if (!progress.getObjectiveTargets(i).isEmpty()) {
+                continue;
+            }
+            
+            java.util.UUID targetUuid = null;
+            if (guard.targetType() == GuardEntityObjectiveDefinition.GuardTargetType.SELF) {
+                targetUuid = npc.getUUID();
+                // 让 NPC 进入防御状态? 暂时先不改 AI，只是记录
+                npc.setPersistenceRequired(); 
+            } else {
+                targetUuid = spawnGuardTarget(player, npc, guard);
+            }
+
+            if (targetUuid != null) {
+                progress.getObjectiveTargets(i).add(targetUuid);
+                net.minecraft.nbt.CompoundTag tag = progress.getAdditionalData();
+                tag.putLong("startTime_" + i, gameTime);
+                tag.putLong("lastWave_" + i, gameTime + (guard.prepareTimeSeconds() * 20L)); // 第一波在准备时间结束后
+                progress.setAdditionalData(tag);
+                
+                player.displayClientMessage(
+                    Component.literal("守卫任务开始！准备时间: " + guard.prepareTimeSeconds() + "秒"),
+                    true
+                );
+            }
+        }
+    }
+
+    @Nullable
+    private static java.util.UUID spawnGuardTarget(
+        ServerPlayer player,
+        CustomNpcEntity npc,
+        GuardEntityObjectiveDefinition objective
+    ) {
+        ServerLevel level = player.serverLevel();
+        RandomSource random = level.getRandom();
+        // 守卫目标默认生成在玩家附近，或者 NPC 附近
+        BlockPos origin = npc.blockPosition(); 
+        BlockPos targetPos = pickSurfacePosition(level, origin, 5.0, random);
+        
+        if (targetPos == null) {
+            targetPos = origin; // 找不到就生成在脚下
+        }
+
+        if (objective.entityToSpawn() == null) return null;
+
+        var created = objective.entityToSpawn().create(level);
+        if (!(created instanceof LivingEntity entity)) {
+            return null;
+        }
+        
+        entity.moveTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, 0, 0);
+        if (entity instanceof Mob mob) {
+            mob.setPersistenceRequired();
+            // 也许应该设置为不移动?
+            // mob.setNoAi(true); // 太死板了
+        }
+        
+        level.addFreshEntity(entity);
+        return entity.getUUID();
     }
 
     @Nullable

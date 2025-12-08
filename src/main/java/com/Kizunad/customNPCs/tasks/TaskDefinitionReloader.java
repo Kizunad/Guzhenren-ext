@@ -1,5 +1,6 @@
 package com.Kizunad.customNPCs.tasks;
 
+import com.Kizunad.customNPCs.tasks.objective.GuardEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.KillEntityObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.SubmitItemObjectiveDefinition;
 import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveDefinition;
@@ -173,9 +174,59 @@ public class TaskDefinitionReloader extends SimpleJsonResourceReloadListener {
                 result.add(parseSubmitItemObjective(obj));
             } else if (type == TaskObjectiveType.KILL_ENTITY) {
                 result.add(parseKillEntityObjective(obj));
+            } else if (type == TaskObjectiveType.GUARD_ENTITY) {
+                result.add(parseGuardEntityObjective(obj));
             }
         }
         return result;
+    }
+
+    private GuardEntityObjectiveDefinition parseGuardEntityObjective(JsonObject obj) {
+        String targetTypeStr = GsonHelper.getAsString(obj, "target_type", "self");
+        GuardEntityObjectiveDefinition.GuardTargetType targetType = 
+            "spawn".equalsIgnoreCase(targetTypeStr) 
+            ? GuardEntityObjectiveDefinition.GuardTargetType.SPAWN 
+            : GuardEntityObjectiveDefinition.GuardTargetType.SELF;
+        
+        EntityType<? extends LivingEntity> entityType = null;
+        if (targetType == GuardEntityObjectiveDefinition.GuardTargetType.SPAWN) {
+             ResourceLocation entityId = ResourceLocation.tryParse(GsonHelper.getAsString(obj, "entity", ""));
+             if (entityId != null) {
+                 EntityType<?> raw = BuiltInRegistries.ENTITY_TYPE.getOptional(entityId).orElse(null);
+                 if (raw != null && raw.getBaseClass() != null && LivingEntity.class.isAssignableFrom(raw.getBaseClass())) {
+                     //noinspection unchecked
+                     entityType = (EntityType<? extends LivingEntity>) raw;
+                 }
+             }
+        }
+        
+        int duration = GsonHelper.getAsInt(obj, "duration", 60);
+        int prepTime = GsonHelper.getAsInt(obj, "prep_time", 10);
+        int waveInterval = GsonHelper.getAsInt(obj, "wave_interval", 20);
+        double spawnRadius = GsonHelper.getAsDouble(obj, "spawn_radius", 10.0);
+        
+        List<GuardEntityObjectiveDefinition.AttackerEntry> attackers = new ArrayList<>();
+        if (obj.has("attackers")) {
+            JsonArray arr = GsonHelper.getAsJsonArray(obj, "attackers");
+            for (JsonElement e : arr) {
+                JsonObject aObj = e.getAsJsonObject();
+                ResourceLocation eid = ResourceLocation.tryParse(GsonHelper.getAsString(aObj, "entity"));
+                if (eid != null) {
+                    EntityType<?> raw = BuiltInRegistries.ENTITY_TYPE.getOptional(eid).orElse(null);
+                    if (raw != null && LivingEntity.class.isAssignableFrom(raw.getBaseClass())) {
+                        int min = GsonHelper.getAsInt(aObj, "min_count", 1);
+                        int max = GsonHelper.getAsInt(aObj, "max_count", 1);
+                        CompoundTag nbt = parseNbt(aObj, "nbt");
+                        //noinspection unchecked
+                        attackers.add(new GuardEntityObjectiveDefinition.AttackerEntry((EntityType<? extends LivingEntity>) raw, min, max, nbt));
+                    }
+                }
+            }
+        }
+        
+        return new GuardEntityObjectiveDefinition(
+            targetType, entityType, duration, prepTime, waveInterval, attackers, spawnRadius
+        );
     }
 
     private KillEntityObjectiveDefinition parseKillEntityObjective(

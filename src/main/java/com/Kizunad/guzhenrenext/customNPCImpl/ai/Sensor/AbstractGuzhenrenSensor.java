@@ -1,7 +1,8 @@
 package com.Kizunad.guzhenrenext.customNPCImpl.ai.Sensor;
 
 import com.Kizunad.customNPCs.ai.sensors.ISensor;
-//import net.minecraft.server.level.ServerLevel;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.EntityHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import net.minecraft.world.entity.LivingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,22 +33,16 @@ public abstract class AbstractGuzhenrenSensor implements ISensor {
     // --- 蛊真人特定辅助方法 ---
     /**
      * 检查实体是否为蛊师（例如，是否拥有空窍Capability）。
-     * TODO: 接入蛊真人模组的具体API以实现此方法。
      */
     protected boolean isGuMaster(LivingEntity entity) {
-        // Placeholder: 这里需要调用蛊真人模组的API来判断
-        // 例如: entity.getCapability(GuCapabilityProvider.APERTURE_CAPABILITY).isPresent();
-        // LOGGER.debug("检查实体 {} 是否为蛊师...", entity.getName().getString());
-        return false;
+        return EntityHelper.isGuMaster(entity);
     }
 
     /**
      * 获取实体的真元百分比。
-     * TODO: 接入蛊真人模组的具体API以实现此方法。
      */
     protected float getPrimevalEssencePercentage(LivingEntity entity) {
-        // Placeholder: 这里需要调用蛊真人模组的API来获取
-        return 0.0f;
+        return ZhenYuanHelper.getPercentage(entity);
     }
 
     // 默认实现 ISensor 的其他方法，子类可按需覆盖

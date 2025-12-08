@@ -1,14 +1,16 @@
 package com.Kizunad.guzhenrenext.customNPCImpl.ai;
 
 import com.Kizunad.customNPCs.ai.NpcMindRegistry;
-import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuzhenrenPlaceholderAction; // Corrected import
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuzhenrenPlaceholderAction;
 
 /**
  * 蛊真人扩展 AI 组件注册中心。
  * <p>
  * 在 Mod 初始化阶段调用 {@link #registerAll()} 以加载所有自定义的 Action, Goal 和 Sensor。
  */
-public class Registery { // 使用用户提供的 Registery 文件名
+public class Registery {
+
+    // 使用用户提供的 Registery 文件名
 
     private static boolean initialized = false;
 
@@ -16,13 +18,13 @@ public class Registery { // 使用用户提供的 Registery 文件名
         if (initialized) {
             return;
         }
-        
+
         // 注册 Action
         registerActions();
-        
+
         // 注册 Goal
         registerGoals();
-        
+
         // 注册 Sensor
         registerSensors();
 
@@ -31,8 +33,11 @@ public class Registery { // 使用用户提供的 Registery 文件名
 
     private static void registerActions() {
         // 注册你的占位 Action
-        NpcMindRegistry.registerAction("guzhenren_placeholder", GuzhenrenPlaceholderAction::new);
-        
+        NpcMindRegistry.registerAction(
+            "guzhenren_placeholder",
+            GuzhenrenPlaceholderAction::new
+        );
+
         // 示例：注册更多动作
         // NpcMindRegistry.registerAction("cultivate_action", CultivateAction::new);
     }

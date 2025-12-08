@@ -2,6 +2,8 @@ package com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal;
 
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.EntityHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import net.minecraft.world.entity.LivingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +14,10 @@ import org.slf4j.LoggerFactory;
  * 提供与蛊真人模组相关的通用目标辅助方法和框架。
  */
 public abstract class AbstractGuzhenrenGoal implements IGoal {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGuzhenrenGoal.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        AbstractGuzhenrenGoal.class
+    );
     private final String name;
 
     protected AbstractGuzhenrenGoal(String name) {
@@ -27,20 +32,16 @@ public abstract class AbstractGuzhenrenGoal implements IGoal {
     // --- 蛊真人特定辅助方法 ---
     /**
      * 检查实体是否为蛊师（例如，是否拥有空窍Capability）。
-     * TODO: 接入蛊真人模组的具体API以实现此方法。
      */
     protected boolean isGuMaster(LivingEntity entity) {
-        // Placeholder: 这里需要调用蛊真人模组的API来判断
-        return false;
+        return EntityHelper.isGuMaster(entity);
     }
 
     /**
      * 获取实体的真元百分比。
-     * TODO: 接入蛊真人模组的具体API以实现此方法。
      */
     protected float getPrimevalEssencePercentage(LivingEntity entity) {
-        // Placeholder: 这里需要调用蛊真人模组的API来获取
-        return 0.0f;
+        return ZhenYuanHelper.getPercentage(entity);
     }
 
     // --- IGoal 默认实现 (子类可覆盖) ---
