@@ -36,9 +36,11 @@ public class ItemValueManager {
     private static final Path CONFIG_PATH = Paths.get("config").resolve(
         FILE_NAME
     );
-    private static final String DEFAULT_RESOURCE = "data/customnpcs/item_values.json";
-    private static final Type MAP_TYPE = new TypeToken<Map<String, Integer>>() {}
-        .getType();
+    private static final String DEFAULT_RESOURCE =
+        "data/customnpcs/item_values.json";
+    private static final Type MAP_TYPE = new TypeToken<
+        Map<String, Integer>
+    >() {}.getType();
     private static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .create();
@@ -106,10 +108,12 @@ public class ItemValueManager {
         if (!Files.exists(CONFIG_PATH)) {
             return Collections.emptyMap();
         }
-        try (Reader reader = Files.newBufferedReader(
-                    CONFIG_PATH,
-                    StandardCharsets.UTF_8
-                )) {
+        try (
+            Reader reader = Files.newBufferedReader(
+                CONFIG_PATH,
+                StandardCharsets.UTF_8
+            )
+        ) {
             Map<String, Integer> data = GSON.fromJson(reader, MAP_TYPE);
             return (data != null) ? data : Collections.emptyMap();
         } catch (IOException | JsonSyntaxException e) {
@@ -123,9 +127,12 @@ public class ItemValueManager {
     }
 
     private Map<String, Integer> readDefaultResource() {
-        try (InputStream stream = ItemValueManager.class
-            .getClassLoader()
-            .getResourceAsStream(DEFAULT_RESOURCE)) {
+        try (
+            InputStream stream =
+                ItemValueManager.class.getClassLoader().getResourceAsStream(
+                    DEFAULT_RESOURCE
+                )
+        ) {
             if (stream == null) {
                 LOGGER.error(
                     "[ItemValueManager] 未找到默认价格表资源 {}",
@@ -133,10 +140,12 @@ public class ItemValueManager {
                 );
                 return Collections.emptyMap();
             }
-            try (Reader reader = new InputStreamReader(
-                        stream,
-                        StandardCharsets.UTF_8
-                    )) {
+            try (
+                Reader reader = new InputStreamReader(
+                    stream,
+                    StandardCharsets.UTF_8
+                )
+            ) {
                 Map<String, Integer> data = GSON.fromJson(reader, MAP_TYPE);
                 return (data != null) ? data : Collections.emptyMap();
             }

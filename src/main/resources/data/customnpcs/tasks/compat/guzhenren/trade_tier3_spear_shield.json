@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/trade_tier3_spear_shield",
+  "title": "矛盾之争",
+  "description": "“最好的防守就是进攻？年轻人，活下来才是硬道理。”\n\n你那【血刃蛊】固然锋利，但在雷霆万钧的攻势面前，不过是薄纸一张。把那凶戾之物交给我，我用这只【雷盾蛊】与你交换。有了它，便是雷劫加身，也能护你周全。一攻换一守，这笔买卖保命要紧。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:xue_ren_gu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:leidungu",
+      "count": 1
+    }
+  ]
+}

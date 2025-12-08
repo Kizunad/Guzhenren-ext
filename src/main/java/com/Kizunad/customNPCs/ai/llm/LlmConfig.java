@@ -54,8 +54,10 @@ public final class LlmConfig {
     }
 
     public LlmConfig setRequestIntervalTicks(int requestIntervalTicks) {
-        this.requestIntervalTicks =
-            Math.max(MIN_INTERVAL_TICKS, requestIntervalTicks);
+        this.requestIntervalTicks = Math.max(
+            MIN_INTERVAL_TICKS,
+            requestIntervalTicks
+        );
         return this;
     }
 

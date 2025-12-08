@@ -103,11 +103,6 @@ public class IdleGoal implements IGoal {
             teleportCooldown = TELEPORT_INTERVAL;
         }
 
-        // FUTURE: 实际的闲置行为
-        // - 随机走动
-        // - 观察周围
-        // - 播放闲置动画
-
         // 简单演示：每 100 ticks（5 秒）打印一次
         if (idleTicks % IDLE_TICK_INTERVAL == 0) {
             MindLog.decision(

@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/trade_tier3_attack_swap",
+  "title": "水火之变",
+  "description": "“水火不相容，但人心可变。”\n\n你手里的【水牢蛊】虽然控制力不错，但杀伤力终究差了点意思。我这有一只【火爪蛊】，三转炎道，攻击凌厉。若你想换个风格，从控制转为强攻，咱们可以做个交换。一换一，童叟无欺。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:shui_lao_gu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:huo_zhua_gu",
+      "count": 1
+    }
+  ]
+}

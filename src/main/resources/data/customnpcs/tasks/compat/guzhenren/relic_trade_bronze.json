@@ -1,0 +1,25 @@
+{
+    "id": "customnpcs:compat/guzhenren/relic_trade_bronze",
+    "title": "青铜之阶",
+    "description": "“想要变强？那得看你口袋里的元石够不够响！除此之外，还得看你有没有那份狠劲。”\n\n一转青铜舍利蛊，乃是提升一转蛊师小境界的捷径。但这东西稀缺得很。你若想要，拿 128 块元石来，再给我弄 5 块【狼肉】。别问我要狼肉干什么，老夫最近养了只贪吃的狗。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gucaiyuanshi",
+            "count": 128
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:langrou",
+            "count": 5
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:qing_tong_she_li_gu",
+            "count": 1
+        }
+    ]
+}

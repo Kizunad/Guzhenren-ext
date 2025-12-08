@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/trade_tier5_element_swap",
+  "title": "冰火两重天",
+  "description": "“极炎转极寒，大道殊途同归。”\n\n五转境界，每一只蛊虫都是底蕴的象征。【火光烛天蛊】威力无穷，焚天煮海；而【漫天飞雪蛊】则冰封万里，肃杀一切。老夫最近参悟冰雪道，急需换掉手头的炎道手段。你若有火光烛天蛊，我便用这漫天飞雪蛊与你交换。这可是跨越流派的顶级交易！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:huo_guang_zhu_tian_gu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:mantianfeixuegu",
+      "count": 1
+    }
+  ]
+}

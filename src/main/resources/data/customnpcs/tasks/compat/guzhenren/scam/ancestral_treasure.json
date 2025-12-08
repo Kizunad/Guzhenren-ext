@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/scam/ancestral_treasure",
+  "title": "祖传秘宝",
+  "description": "“嘘——小声点，别让旁人听见了。”\n\n小兄弟，我看你骨骼惊奇，这只【酒虫】便卖给你了。你别看它只有一转的气息，这可是我祖上传下来的【神酒虫】！传说它曾喝过九转仙尊的御酒，体内蕴含无上大道，甚至能精炼仙元！我现在手头紧，只要你拿那只俗气的【白银舍利蛊】来换，这通天机缘就是你的了！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:bai_yin_she_li_gu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:jiu_chong",
+      "count": 1
+    }
+  ]
+}

@@ -40,6 +40,39 @@
 | `customnpcs:compat/guzhenren/sky_ambition` | 云霄之志 | 5 澜风隼羽毛 | 1 燕翅蛊 | `sky_ambition.json` |
 | `customnpcs:compat/guzhenren/spring_revival` | 枯木逢春 | 10 蓝度草 | 5 生机叶 | `spring_revival.json` |
 
+## 修为提升 (Cultivation Path)
+*逆天而行，步步生莲*
+
+| 任务ID | 标题 | 目标 | 奖励 | 文件名 |
+| :--- | :--- | :--- | :--- | :--- |
+| `customnpcs:compat/guzhenren/relic_trade_bronze` | 青铜之阶 | 64 元石 | 1 青铜舍利蛊 | `relic_trade_bronze.json` |
+| `customnpcs:compat/guzhenren/relic_trade_red_steel` | 赤铁之炼 | 5 青铜舍利蛊 + 128 元石 | 1 赤铁舍利蛊 | `relic_trade_red_steel.json` |
+| `customnpcs:compat/guzhenren/relic_trade_silver` | 白银之辉 | 3 赤铁舍利蛊 + 256 元石 | 1 白银舍利蛊 | `relic_trade_silver.json` |
+
+## 蛊虫交换 (Gu Exchange)
+*同转蛊虫，各取所需*
+
+| 任务ID | 标题 | 目标 | 奖励 | 文件名 |
+| :--- | :--- | :--- | :--- | :--- |
+| `customnpcs:compat/guzhenren/trade_tier3_attack_swap` | 水火之变 | 1 水牢蛊 | 1 火爪蛊 | `trade_tier3_attack_swap.json` |
+| `customnpcs:compat/guzhenren/trade_tier3_spear_shield` | 矛盾之争 | 1 血刃蛊 | 1 雷盾蛊 | `trade_tier3_spear_shield.json` |
+| `customnpcs:compat/guzhenren/trade_tier4_support_swap` | 舍己为人 | 1 青山在蛊 | 1 骨肉团圆蛊 | `trade_tier4_support_swap.json` |
+| `customnpcs:compat/guzhenren/trade_tier4_space_tactic` | 虚空战法 | 1 破空蛊 | 1 宇构蛊 | `trade_tier4_space_tactic.json` |
+| `customnpcs:compat/guzhenren/trade_tier5_element_swap` | 冰火两重天 | 1 火光烛天蛊 | 1 漫天飞雪蛊 | `trade_tier5_element_swap.json` |
+| `customnpcs:compat/guzhenren/trade_tier5_path_change` | 奴力之辩 | 1 熊图蛊 | 1 龙力蛊 | `trade_tier5_path_change.json` |
+
+## 江湖骗术 (Scams & Tricks)
+*人心险恶，切莫贪婪*
+
+| 任务ID | 标题 | 目标 | 奖励 | 文件名 |
+| :--- | :--- | :--- | :--- | :--- |
+| `customnpcs:compat/guzhenren/scam/ancestral_treasure` | 祖传秘宝 | 1 白银舍利蛊 | 1 酒虫(自称神酒虫) | `scam/ancestral_treasure.json` |
+| `customnpcs:compat/guzhenren/scam/cursed_artifact` | 诅咒之物 | 1 龙力蛊 | 1 虎力蛊 | `scam/cursed_artifact.json` |
+| `customnpcs:compat/guzhenren/scam/immortal_promise` | 仙人承诺 | 1 定魂蛊 | 1 元石(自称仙石) | `scam/immortal_promise.json` |
+| `customnpcs:compat/guzhenren/scam/fake_treasure_guardian` | 秘藏传说 | 击杀 1 宝库守卫 | 1 宝库钥匙(假) | `scam/fake_treasure_guardian.json` |
+| `customnpcs:compat/guzhenren/scam/sect_traitor` | 宗门叛徒 | 击杀 1 叛逃长老 | 1 掌门信物(假) | `scam/sect_traitor.json` |
+| `customnpcs:compat/guzhenren/scam/immortal_guidance` | 仙缘指引 | 击杀 1 护法灵兽 | 1 登仙图(假) | `scam/immortal_guidance.json` |
+
 ## 力道 (Strength Path)
 *一力降十会*
 
@@ -95,6 +128,9 @@
 | 任务ID | 标题 | 目标 | 奖励 | 文件名 |
 | :--- | :--- | :--- | :--- | :--- |
 | `customnpcs:compat/guzhenren/space_travel` | 咫尺天涯 | 5 空界草 | 1 挪移蛊 | `space_travel.json` |
+| `customnpcs:compat/guzhenren/void_flower_collection` | 空谷幽兰 | 10 界空花 | 1 二转宇锚蛊 | `void_flower_collection.json` |
+| `customnpcs:compat/guzhenren/leopard_hunt_void` | 虚空猎影 | 3 穿宇青豹 | 1 斥空蛊 | `leopard_hunt_void.json` |
+| `customnpcs:compat/guzhenren/stable_space_ritual` | 定空仪式 | 5 定空宝珠 | 1 定空蛊 | `stable_space_ritual.json` |
 
 ## 变化道 (Transformation Path)
 *万物皆可化*

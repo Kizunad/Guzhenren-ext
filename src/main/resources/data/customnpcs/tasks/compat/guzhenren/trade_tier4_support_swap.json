@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/trade_tier4_support_swap",
+    "title": "舍己为人",
+    "description": "“留得青山在，不怕没柴烧？哼，那是弱者的借口。”\n\n【青山在蛊】虽能保留你的蛊虫，但对于家族大计来说，哪有【骨肉团圆蛊】来得重要？若你愿为了家族牺牲个人的保命手段，交出青山在蛊，我便将这只辅助修行的神蛊——骨肉团圆蛊交予你。",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:qingshanzaigu",
+            "count": 1
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:guroutuanyuangu",
+            "count": 1
+        }
+    ]
+}

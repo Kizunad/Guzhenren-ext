@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/trade_tier5_path_change",
+  "title": "奴力之辩",
+  "description": "“万兽奔腾，不如一力降魔。”\n\n奴道蛊师，虽然能指挥万兽，但终究是依靠外物。若兽群死绝，便是待宰羔羊。你那【熊图蛊】里装着不少好东西吧？不如交给我，换这只【龙力蛊】。从今往后，伟力归于自身，你也无需再费心饲养那些畜生，自己便是一头人形暴龙！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:xiong_tu_gu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:longligu",
+      "count": 1
+    }
+  ]
+}

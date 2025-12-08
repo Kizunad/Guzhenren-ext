@@ -1,0 +1,30 @@
+{
+    "id": "customnpcs:compat/guzhenren/relic_trade_red_steel",
+    "title": "赤铁之炼",
+    "description": "“一转凡俗，二转精英。”\n\n到了二转，修为提升便如龟爬。赤铁舍利蛊可是紧俏货，有价无市！不过，老夫这里有个路子。若你能寻来 5 只【青铜舍利蛊】，再加 256 块元石作为疏通关系的费用……哦对了，还得帮我采 10 株【血镰草】来炼药。这笔买卖，你做是不做？",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:qing_tong_she_li_gu",
+            "count": 5
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gucaiyuanshi",
+            "count": 256
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:xueliancao",
+            "count": 10
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:chi_tie_she_li_gu",
+            "count": 1
+        }
+    ]
+}

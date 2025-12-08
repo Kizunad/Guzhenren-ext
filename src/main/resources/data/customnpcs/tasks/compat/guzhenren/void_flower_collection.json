@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/void_flower_collection",
+  "title": "空谷幽兰",
+  "description": "“花开界空，咫尺天涯。”\n\n宇道流派最重资源。这【界空花】乃是宇道修行的根基之一，生长在空间薄弱之处，极难采摘。老夫最近炼制一只关键的宇道蛊虫，急需此物。若你能寻来 10 朵，这只【二转宇锚蛊】便送予你，助你往来天地之间。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:jiekonghua",
+      "count": 10
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:erzhuanyumaogu",
+      "count": 1
+    }
+  ]
+}

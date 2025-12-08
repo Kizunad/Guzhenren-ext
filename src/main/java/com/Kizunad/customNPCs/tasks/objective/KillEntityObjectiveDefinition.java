@@ -23,7 +23,9 @@ public record KillEntityObjectiveDefinition(
     @Nullable Double overrideMaxHealth,
     @Nullable Double overrideMoveSpeed,
     @Nullable Double overrideAttackDamage,
-    Map<EquipmentSlot, ItemStack> armorPieces
+    Map<EquipmentSlot, ItemStack> armorPieces,
+    @Nullable net.minecraft.core.BlockPos fixedSpawnPos,
+    boolean snapToSurface
 ) implements TaskObjectiveDefinition {
 
     private static final double MIN_SPAWN_RADIUS = 4.0D;
@@ -31,9 +33,11 @@ public record KillEntityObjectiveDefinition(
     public KillEntityObjectiveDefinition {
         requiredKills = Math.max(1, requiredKills);
         spawnRadius = Math.max(MIN_SPAWN_RADIUS, spawnRadius);
-        armorPieces = armorPieces == null
-            ? Collections.emptyMap()
-            : Collections.unmodifiableMap(new EnumMap<>(armorPieces));
+        if (armorPieces == null || armorPieces.isEmpty()) {
+            armorPieces = Collections.emptyMap();
+        } else {
+            armorPieces = Collections.unmodifiableMap(new EnumMap<>(armorPieces));
+        }
     }
 
     @Override

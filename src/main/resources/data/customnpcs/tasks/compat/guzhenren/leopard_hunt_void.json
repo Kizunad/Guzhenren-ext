@@ -1,0 +1,24 @@
+{
+  "id": "customnpcs:compat/guzhenren/leopard_hunt_void",
+  "title": "虚空猎影",
+  "description": "‘青影穿梭，防不胜防。’\n\n附近的【穿宇青豹】最近又在作乱了。这种畜生仗着天赋宇道手段，来去无踪，偷袭了不少过路的商队。哼，再快的畜生也只是畜生！去猎杀它们，带回它们的死讯。作为回报，这只【斥空蛊】传授于你，让你也能掌控推拉虚空之力。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "kill_entity",
+      "entity": "guzhenren:chuanyuqingbao",
+      "count": 3,
+      "spawn_range": 48.0,
+      "name": "穿宇青豹"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:chikonggu",
+      "count": 1
+    }
+  ]
+}

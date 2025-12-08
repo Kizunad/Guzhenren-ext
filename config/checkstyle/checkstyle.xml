@@ -13,7 +13,7 @@
         <property name="max" value="120"/>
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
-    
+
     <!-- 忽略测试代码的某些检查 -->
     <module name="SuppressionSingleFilter">
         <property name="checks" value="MagicNumber"/>
@@ -77,7 +77,5 @@
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
 
-        <!-- Miscellaneous -->
-        <module name="TodoComment"/>
     </module>
 </module>

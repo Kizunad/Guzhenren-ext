@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/stable_space_ritual",
+  "title": "定空仪式",
+  "description": "“万界飘摇，唯我定空。”\n\n空间乱流最是凶险，稍有不慎便是粉身碎骨。唯有【定空蛊】能镇压四方，稳固空窍。但这等神蛊，需要【定空宝珠】作为核心材料。这宝珠可遇不可求，若你能寻得 5 颗，老夫便以此蛊相赠，保你宇道修行无忧。",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:dingkongbaozhu",
+      "count": 5
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:dingkonggu",
+      "count": 1
+    }
+  ]
+}

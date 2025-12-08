@@ -1,0 +1,34 @@
+{
+  "id": "customnpcs:compat/guzhenren/scam/sect_traitor",
+  "title": "宗门叛徒",
+  "description": "“那老贼就在前方！”\n\n我乃名门正派的大弟子，奉命追杀宗门叛徒。那【叛逃长老】现藏身于 (X: -600, Z: -300) 的山谷中。我身负重伤，不便出手。少侠若能代劳，提他头来见，我便将象征下一任掌门继承权的【掌门信物】赠予你！这可是无上的荣耀啊！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "kill_entity",
+      "entity": "customnpcs:custom_npc",
+      "count": 1,
+      "spawn_range": 32.0,
+      "name": "叛逃长老",
+      "attributes": {
+        "max_health": 2500.0,
+        "attack_damage": 200.0,
+        "movement_speed": 0.4
+      },
+      "spawn_at": [
+        -600,
+        -300
+      ]
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:langrou",
+      "count": 1,
+      "nbt": "{display:{Name:\"{\\\"text\\\":\\\"掌门信物\\\",\\\"color\\\":\\\"dark_purple\\\",\\\"italic\\\":false}\",Lore:[\"{\\\"text\\\":\\\"一块发臭的狼肉...\\\",\\\"color\\\":\\\"gray\\\"}\",\"{\\\"text\\\":\\\"上面被人用指甲歪歪扭扭刻了个‘令’字。\\\",\\\"color\\\":\\\"gray\\\"}\",\"{\\\"text\\\":\\\"你感觉智商受到了侮辱。\\\",\\\"color\\\":\\\"dark_red\\\"}\"]}}"
+    }
+  ]
+}

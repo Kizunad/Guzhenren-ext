@@ -1,0 +1,30 @@
+{
+    "id": "customnpcs:compat/guzhenren/relic_trade_silver",
+    "title": "白银之辉",
+    "description": "“三转家老，威震一方。”\n\n白银舍利蛊，每一只流出都会引起腥风血雨！想要此物，非得付出巨大的代价不可。拿出 3 只【赤铁舍利蛊】，外加 512 块元石！除此之外，我还需要几份【月白宏金】来升炼我的本命蛊。凑齐了再来找我！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:chi_tie_she_li_gu",
+            "count": 3
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gucaiyuanshi",
+            "count": 512
+        },
+        {
+            "type": "submit_item",
+            "item": "guzhenren:gu_cai_yue_bai_hong_jin",
+            "count": 8
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:bai_yin_she_li_gu",
+            "count": 1
+        }
+    ]
+}

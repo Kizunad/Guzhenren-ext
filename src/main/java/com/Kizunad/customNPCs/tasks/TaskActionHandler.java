@@ -291,13 +291,28 @@ public final class TaskActionHandler {
     ) {
         ServerLevel level = player.serverLevel();
         RandomSource random = level.getRandom();
-        BlockPos origin = npc.blockPosition();
-        BlockPos targetPos = pickSurfacePosition(
-            level,
-            origin,
-            objective.spawnRadius(),
-            random
-        );
+        BlockPos targetPos;
+        if (objective.fixedSpawnPos() != null) {
+            if (objective.snapToSurface()) {
+                BlockPos p = objective.fixedSpawnPos();
+                int y = level.getHeight(
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    p.getX(),
+                    p.getZ()
+                );
+                targetPos = new BlockPos(p.getX(), y, p.getZ());
+            } else {
+                targetPos = objective.fixedSpawnPos();
+            }
+        } else {
+            BlockPos origin = npc.blockPosition();
+            targetPos = pickSurfacePosition(
+                level,
+                origin,
+                objective.spawnRadius(),
+                random
+            );
+        }
         if (targetPos == null) {
             LOGGER.warn(
                 "未找到合适的生成位置以创建击杀目标 {}",

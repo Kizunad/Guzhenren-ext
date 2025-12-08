@@ -1,0 +1,20 @@
+{
+    "id": "customnpcs:compat/guzhenren/scam/immortal_promise",
+    "title": "仙人承诺(前传)",
+    "description": "“咳咳……本座乃是【天庭】蛊仙，遭奸人暗算，流落凡间。”\n\n小友，本座观你我有缘。如今本座魂魄受损，急需一只【定魂蛊】疗伤。你若能助我一臂之力，待本座重返天庭，必赐你十只仙蛊，保你升仙！这块石头乃是本座贴身之物，沾染了仙气，便作为信物赐予你。切记，莫要声张！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "submit_item",
+            "item": "guzhenren:ding_hun_gu",
+            "count": 1
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "guzhenren:gucaiyuanshi",
+            "count": 1
+        }
+    ]
+}

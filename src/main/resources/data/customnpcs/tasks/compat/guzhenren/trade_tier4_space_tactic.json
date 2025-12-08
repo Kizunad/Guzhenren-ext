@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/trade_tier4_space_tactic",
+  "title": "虚空战法",
+  "description": "“只会逃跑，终究成不了大器。”\n\n【破空蛊】确实能让你瞬息千里，逃脱追杀。但身为宇道蛊师，怎能没有杀伐手段？这只【宇构蛊】，能让你在虚空中构建杀招，构筑牢笼。来，用你那逃跑的腿，换我这把杀人的刀。在虚空中决一死战吧！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:pokonggu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:yugougu",
+      "count": 1
+    }
+  ]
+}

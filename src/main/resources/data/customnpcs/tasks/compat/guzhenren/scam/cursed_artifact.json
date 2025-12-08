@@ -1,0 +1,22 @@
+{
+  "id": "customnpcs:compat/guzhenren/scam/cursed_artifact",
+  "title": "诅咒之物",
+  "description": "“哎呀！不得了！小兄弟你印堂发黑啊！”\n\n你身上那只【龙力蛊】，黑气缭绕，分明是带有上古诅咒的凶物！每用一次，都会折损十年阳寿，甚至可能当场爆体而亡！老夫心善，不忍见你英年早逝。快，把它交给我，老夫自有镇压之法。这只【虎力蛊】虽然弱了点，但胜在安全，便送予你护身吧！",
+  "dependencies": [
+    "guzhenren"
+  ],
+  "objectives": [
+    {
+      "type": "submit_item",
+      "item": "guzhenren:longligu",
+      "count": 1
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "guzhenren:hu_li_gu",
+      "count": 1
+    }
+  ]
+}

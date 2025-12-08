@@ -1,0 +1,28 @@
+{
+    "id": "customnpcs:compat/guzhenren/scam/immortal_guidance",
+    "title": "仙缘指引",
+    "description": "“仙路尽头谁为峰？”\n\n凡人，你渴望成仙吗？在极东之地 (X: 2000, Z: 0) 有一只【护法灵兽】守护着升仙的秘密。去战胜它，证明你的实力！只要你活着回来，本仙便赐你【登仙图】，指引你前往仙界！这可是千载难逢的机缘！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "kill_entity",
+            "entity": "customnpcs:custom_npc",
+            "count": 1,
+            "name": "护法灵兽",
+            "attributes": {
+                "max_health": 4000.0,
+                "attack_damage": 300.0,
+                "movement_speed": 0.6
+            },
+            "spawn_at": [2000, 0]
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "minecraft:paper",
+            "count": 1,
+            "nbt": "{display:{Name:\"{\\\"text\\\":\\\"登仙图\\\",\\\"color\\\":\\\"aqua\\\",\\\"italic\\\":false}\",Lore:[\"{\\\"text\\\":\\\"一张皱巴巴的草纸。\\\",\\\"color\\\":\\\"gray\\\"}\",\"{\\\"text\\\":\\\"上面画着几个火柴人，还有一个大大的笑脸。\\\",\\\"color\\\":\\\"gray\\\"}\",\"{\\\"text\\\":\\\"看起来像是三岁小孩的涂鸦。\\\",\\\"color\\\":\\\"dark_red\\\"}\"]}}"
+        }
+    ]
+}

@@ -1,11 +1,11 @@
 package com.Kizunad.customNPCs.ai.decision.goals;
 
+import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
-import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
-import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
+import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 

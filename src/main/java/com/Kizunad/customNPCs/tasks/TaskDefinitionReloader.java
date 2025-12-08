@@ -18,6 +18,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -247,6 +248,26 @@ public class TaskDefinitionReloader extends SimpleJsonResourceReloadListener {
         }
         var nameComponent = name.isEmpty() ? null : Component.literal(name);
         Map<EquipmentSlot, ItemStack> armor = parseArmor(attributes);
+
+        BlockPos fixedSpawnPos = null;
+        boolean snapToSurface = false;
+        final int spawnAtCoordsLengthWithY = 3;
+        if (obj.has("spawn_at")) {
+            JsonArray arr = GsonHelper.getAsJsonArray(obj, "spawn_at");
+            if (arr.size() == 2) {
+                int x = arr.get(0).getAsInt();
+                int z = arr.get(1).getAsInt();
+                fixedSpawnPos = new BlockPos(x, 0, z);
+                snapToSurface = true;
+            } else if (arr.size() == spawnAtCoordsLengthWithY) {
+                int x = arr.get(0).getAsInt();
+                int y = arr.get(1).getAsInt();
+                int z = arr.get(2).getAsInt();
+                fixedSpawnPos = new BlockPos(x, y, z);
+                snapToSurface = false;
+            }
+        }
+
         return new KillEntityObjectiveDefinition(
             entityType,
             required,
@@ -255,7 +276,9 @@ public class TaskDefinitionReloader extends SimpleJsonResourceReloadListener {
             maxHealth,
             moveSpeed,
             attackDamage,
-            armor
+            armor,
+            fixedSpawnPos,
+            snapToSurface
         );
     }
 

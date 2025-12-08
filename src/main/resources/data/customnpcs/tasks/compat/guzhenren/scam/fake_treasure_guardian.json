@@ -1,0 +1,33 @@
+{
+    "id": "customnpcs:compat/guzhenren/scam/fake_treasure_guardian",
+    "title": "秘藏传说",
+    "description": "“嘘！这可是个惊天大秘密！”\n\n据可靠消息，在坐标 (X: 250, Z: 500) 的地下遗迹里，沉睡着前朝的国库！不过门口有个傻大个【宝库守卫】守着。你去把他宰了，回来我把【宝库钥匙】给你，咱们五五分账！这钥匙我可是废了好大劲才搞到的，你可别想独吞！",
+    "dependencies": ["guzhenren"],
+    "objectives": [
+        {
+            "type": "kill_entity",
+            "entity": "customnpcs:custom_npc",
+            "count": 1,
+            "name": "宝库守卫",
+            "attributes": {
+                "max_health": 3000.0,
+                "attack_damage": 150.0,
+                "armor": {
+                    "head": "minecraft:diamond_helmet",
+                    "chest": "minecraft:diamond_chestplate",
+                    "legs": "minecraft:diamond_leggings",
+                    "feet": "minecraft:diamond_boots"
+                }
+            },
+            "spawn_at": [250, 500]
+        }
+    ],
+    "rewards": [
+        {
+            "type": "item",
+            "item": "minecraft:tripwire_hook",
+            "count": 1,
+            "nbt": "{display:{Name:\"{\\\"text\\\":\\\"宝库钥匙\\\",\\\"color\\\":\\\"gold\\\",\\\"italic\\\":false}\",Lore:[\"{\\\"text\\\":\\\"一把生锈的铁钩，甚至还有点弯...\\\",\\\"color\\\":\\\"gray\\\"}\",\"{\\\"text\\\":\\\"你确定这能打开国库大门？\\\",\\\"color\\\":\\\"dark_red\\\"}\"]}}"
+        }
+    ]
+}
