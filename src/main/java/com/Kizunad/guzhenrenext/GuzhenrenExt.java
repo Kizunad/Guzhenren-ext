@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext;
 
+import com.Kizunad.guzhenrenext.customNPCImpl.NpcSpawnInitializer;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Registery;
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import net.neoforged.bus.api.IEventBus;
@@ -15,6 +16,7 @@ public class GuzhenrenExt {
 
     public GuzhenrenExt(IEventBus modEventBus, ModContainer modContainer) {
         Registery.registerAll();
+        NpcSpawnInitializer.register();
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
     }
 
