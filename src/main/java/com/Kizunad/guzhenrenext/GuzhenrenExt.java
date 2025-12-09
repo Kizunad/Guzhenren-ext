@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext;
 
-import com.Kizunad.guzhenrenext.customNPCImpl.NpcSpawnInitializer;
+import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSpawnInitializer;
+import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSecondTicker;
+import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcResourceRegeneration;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Registery;
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import net.neoforged.bus.api.IEventBus;
@@ -17,6 +19,8 @@ public class GuzhenrenExt {
     public GuzhenrenExt(IEventBus modEventBus, ModContainer modContainer) {
         Registery.registerAll();
         NpcSpawnInitializer.register();
+        NpcSecondTicker.register();
+        NpcResourceRegeneration.register();
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
     }
 

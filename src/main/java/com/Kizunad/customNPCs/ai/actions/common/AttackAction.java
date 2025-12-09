@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.actions.common;
 import com.Kizunad.customNPCs.ai.actions.AbstractStandardAction;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.interfaces.IAttackAction;
+import com.Kizunad.customNPCs.ai.actions.registry.AttackCompatRegistry;
 import com.Kizunad.customNPCs.ai.actions.util.NavigationUtil;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
@@ -274,9 +275,21 @@ public class AttackAction
         // 播放挥手动画
         mob.swing(InteractionHand.MAIN_HAND);
 
-        // 造成伤害
         if (target instanceof LivingEntity livingTarget) {
-            mob.doHurtTarget(livingTarget);
+            AttackCompatRegistry.AttackContext context =
+                new AttackCompatRegistry.AttackContext(
+                    mind,
+                    mob,
+                    livingTarget,
+                    mob.getMainHandItem()
+                );
+            AttackCompatRegistry.AttackDecision decision =
+                AttackCompatRegistry.dispatch(context);
+
+            if (decision != AttackCompatRegistry.AttackDecision.HANDLED) {
+                mob.doHurtTarget(livingTarget);
+            }
+
             mind
                 .getStatus()
                 .addExhaustion(

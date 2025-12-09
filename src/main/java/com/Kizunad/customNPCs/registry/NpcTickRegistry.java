@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * NPC 每 tick 的回调注册表。
- * 允许注入持续运行的逻辑，如被动回血、状态监控等。
+ * 高频逻辑放在此处，低频（每秒）逻辑请使用 NpcSecondRegistry，避免手动取模。
  */
 public class NpcTickRegistry {
 
@@ -15,31 +15,7 @@ public class NpcTickRegistry {
         void handle(CustomNpcEntity npc);
     }
 
-    private static final int PASSIVE_HEAL_INTERVAL_TICKS = 20;
-    private static final float PASSIVE_HEAL_RATIO = 0.001f;
-
     private static final List<TickHandler> HANDLERS = new ArrayList<>();
-
-    static {
-        // 内置示例：每秒自然回复 0.1% 血量
-        register(npc -> {
-            if (npc.level().isClientSide) {
-                return;
-            }
-
-            // 每秒执行一次 (20 ticks)
-            if (npc.tickCount % PASSIVE_HEAL_INTERVAL_TICKS == 0) {
-                if (
-                    npc.getHealth() < npc.getMaxHealth() && npc.getHealth() > 0
-                ) {
-                    float healAmount = npc.getMaxHealth() * PASSIVE_HEAL_RATIO; // 0.1%
-                    if (healAmount > 0) {
-                        npc.heal(healAmount);
-                    }
-                }
-            }
-        });
-    }
 
     /**
      * 注册一个 Tick 处理器。

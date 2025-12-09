@@ -5,19 +5,27 @@ import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.config.NpcAttributeDefaults;
 import com.Kizunad.customNPCs.ai.status.StatusProviderRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
-import com.Kizunad.customNPCs.util.SkinPool;
 import com.Kizunad.customNPCs.network.OpenInteractGuiPayload;
 import com.Kizunad.customNPCs.network.dto.DialogueOption;
+import com.Kizunad.customNPCs.util.SkinPool;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,21 +42,13 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.common.NeoForgeMod;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 专属自定义 NPC 实体，运行自研 AI（NpcMind + Sensors + Actions）。
@@ -247,7 +247,10 @@ public class CustomNpcEntity extends PathfinderMob {
         net.minecraft.world.InteractionHand hand
     ) {
         if (hand == net.minecraft.world.InteractionHand.MAIN_HAND) {
-            if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+            if (
+                !this.level().isClientSide &&
+                player instanceof ServerPlayer serverPlayer
+            ) {
                 openInteractGui(serverPlayer);
             }
             return net.minecraft.world.InteractionResult.sidedSuccess(
@@ -271,12 +274,11 @@ public class CustomNpcEntity extends PathfinderMob {
         }
         var statuses = StatusProviderRegistry.collect(this);
         List<DialogueOption> options = new ArrayList<>();
-        UUID ownerId = mind.getMemory().getMemory(
-            WorldStateKeys.OWNER_UUID,
-            UUID.class
-        );
-        boolean isOwner = ownerId != null &&
-            ownerId.equals(serverPlayer.getUUID());
+        UUID ownerId = mind
+            .getMemory()
+            .getMemory(WorldStateKeys.OWNER_UUID, UUID.class);
+        boolean isOwner =
+            ownerId != null && ownerId.equals(serverPlayer.getUUID());
         if (ownerId == null) {
             options.add(createOption("Hire", "hire"));
             options.add(createOption("Oppress", "oppress"));
@@ -286,10 +288,7 @@ public class CustomNpcEntity extends PathfinderMob {
         } else {
             String ownerName = resolveOwnerName(serverPlayer, ownerId);
             options.add(
-                createOption(
-                    "This NPC belongs to " + ownerName,
-                    "owned_info"
-                )
+                createOption("This NPC belongs to " + ownerName, "owned_info")
             );
         }
         PacketDistributor.sendToPlayer(
@@ -319,10 +318,7 @@ public class CustomNpcEntity extends PathfinderMob {
     }
 
     private String resolveOwnerName(ServerPlayer viewer, UUID ownerId) {
-        ServerPlayer owner = viewer
-            .server
-            .getPlayerList()
-            .getPlayer(ownerId);
+        ServerPlayer owner = viewer.server.getPlayerList().getPlayer(ownerId);
         if (owner != null) {
             return owner.getName().getString();
         }
@@ -362,19 +358,27 @@ public class CustomNpcEntity extends PathfinderMob {
         ) {
             this.setAirSupply(this.getMaxAirSupply());
             this.setSwimming(true); // 强制游泳姿态
-            
+
             // 手动水中推进逻辑：
             // 因为使用了 GroundPathNavigation，在水中 MoveControl 几乎失效。
             // 这里直接检测是否有路径，如果有，强行推向下一个节点。
             if (!this.level().isClientSide && !this.navigation.isDone()) {
-                net.minecraft.world.level.pathfinder.Path path = this.navigation.getPath();
+                net.minecraft.world.level.pathfinder.Path path =
+                    this.navigation.getPath();
                 if (path != null) {
-                    net.minecraft.world.phys.Vec3 nextPos = path.getNextEntityPos(this);
-                    net.minecraft.world.phys.Vec3 dir = nextPos.subtract(this.position()).normalize();
+                    net.minecraft.world.phys.Vec3 nextPos =
+                        path.getNextEntityPos(this);
+                    net.minecraft.world.phys.Vec3 dir = nextPos
+                        .subtract(this.position())
+                        .normalize();
                     // 给予一个向前的推力，速度适中
-                    double speed = this.getAttributeValue(Attributes.MOVEMENT_SPEED) * WATER_PATH_PUSH_SCALE;
-                    this.setDeltaMovement(this.getDeltaMovement().add(dir.scale(speed)));
-                    
+                    double speed =
+                        this.getAttributeValue(Attributes.MOVEMENT_SPEED) *
+                        WATER_PATH_PUSH_SCALE;
+                    this.setDeltaMovement(
+                        this.getDeltaMovement().add(dir.scale(speed))
+                    );
+
                     // 简单的朝向调整
                     double dx = nextPos.x - this.getX();
                     double dz = nextPos.z - this.getZ();
@@ -383,12 +387,12 @@ public class CustomNpcEntity extends PathfinderMob {
                         SWIM_YAW_OFFSET_DEG;
                     this.setYRot(
                         this.getYRot() +
-                        Mth.wrapDegrees(targetYaw - this.getYRot()) * WATER_YAW_LERP_FACTOR
+                            Mth.wrapDegrees(targetYaw - this.getYRot()) *
+                            WATER_YAW_LERP_FACTOR
                     );
                     this.yBodyRot = this.getYRot();
                 }
             }
-            
         } else {
             this.setSwimming(false);
         }
@@ -420,6 +424,7 @@ public class CustomNpcEntity extends PathfinderMob {
         }
 
         com.Kizunad.customNPCs.registry.NpcTickRegistry.onTick(this);
+        com.Kizunad.customNPCs.registry.NpcSecondRegistry.onSecond(this);
         if (!this.level().isClientSide()) {
             this.driveMountedVehicle();
             this.tryAutoDismount();
@@ -483,8 +488,13 @@ public class CustomNpcEntity extends PathfinderMob {
         }
 
         float targetYaw =
-            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) - VEHICLE_YAW_OFFSET_DEG;
-        float newYaw = Mth.rotLerp(MOUNT_ROT_LERP_FACTOR, mount.getYRot(), targetYaw);
+            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) -
+            VEHICLE_YAW_OFFSET_DEG;
+        float newYaw = Mth.rotLerp(
+            MOUNT_ROT_LERP_FACTOR,
+            mount.getYRot(),
+            targetYaw
+        );
         mount.setYRot(newYaw);
         mount.yBodyRot = newYaw;
         mount.yHeadRot = newYaw;
@@ -514,8 +524,13 @@ public class CustomNpcEntity extends PathfinderMob {
             return;
         }
         float targetYaw =
-            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) - VEHICLE_YAW_OFFSET_DEG;
-        float newYaw = Mth.rotLerp(MOUNT_ROT_LERP_FACTOR, boat.getYRot(), targetYaw);
+            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) -
+            VEHICLE_YAW_OFFSET_DEG;
+        float newYaw = Mth.rotLerp(
+            MOUNT_ROT_LERP_FACTOR,
+            boat.getYRot(),
+            targetYaw
+        );
         boat.setYRot(newYaw);
         boat.setXRot(0.0F);
         this.syncRidingOrientation(newYaw);
@@ -525,7 +540,11 @@ public class CustomNpcEntity extends PathfinderMob {
             this.applyBoatBraking(boat);
             return;
         }
-        Vec3 direction = new Vec3(delta.x / horizontalDist, 0.0D, delta.z / horizontalDist);
+        Vec3 direction = new Vec3(
+            delta.x / horizontalDist,
+            0.0D,
+            delta.z / horizontalDist
+        );
         double desiredSpeed = Math.min(
             BOAT_MAX_SPEED,
             horizontalDist * BOAT_PUSH_SCALE
@@ -551,8 +570,13 @@ public class CustomNpcEntity extends PathfinderMob {
             return;
         }
         float targetYaw =
-            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) - VEHICLE_YAW_OFFSET_DEG;
-        float newYaw = Mth.rotLerp(MOUNT_ROT_LERP_FACTOR, minecart.getYRot(), targetYaw);
+            (float) (Mth.atan2(delta.z, delta.x) * RAD_TO_DEG) -
+            VEHICLE_YAW_OFFSET_DEG;
+        float newYaw = Mth.rotLerp(
+            MOUNT_ROT_LERP_FACTOR,
+            minecart.getYRot(),
+            targetYaw
+        );
         minecart.setYRot(newYaw);
         this.syncRidingOrientation(newYaw);
 
@@ -561,7 +585,11 @@ public class CustomNpcEntity extends PathfinderMob {
             this.applyMinecartBraking(minecart);
             return;
         }
-        Vec3 direction = new Vec3(delta.x / horizontalDist, 0.0D, delta.z / horizontalDist);
+        Vec3 direction = new Vec3(
+            delta.x / horizontalDist,
+            0.0D,
+            delta.z / horizontalDist
+        );
         double desiredSpeed = Math.min(
             MINECART_MAX_SPEED,
             horizontalDist * MINECART_PUSH_SCALE
@@ -641,8 +669,9 @@ public class CustomNpcEntity extends PathfinderMob {
         if (mind == null) {
             return false;
         }
-        com.Kizunad.customNPCs.ai.actions.IAction currentAction =
-            mind.getActionExecutor().getCurrentAction();
+        com.Kizunad.customNPCs.ai.actions.IAction currentAction = mind
+            .getActionExecutor()
+            .getCurrentAction();
         if (currentAction == null) {
             return false;
         }
@@ -788,8 +817,9 @@ public class CustomNpcEntity extends PathfinderMob {
             return incomingDamage;
         }
 
-        double attackerSpeed =
-            attacker.getAttributeValue(Attributes.MOVEMENT_SPEED);
+        double attackerSpeed = attacker.getAttributeValue(
+            Attributes.MOVEMENT_SPEED
+        );
         double npcSpeed = this.getAttributeValue(Attributes.MOVEMENT_SPEED);
         double speedBonus = this.getSpeedBonus();
         double agilityScore = npcSpeed + speedBonus * SPEED_BONUS_FACTOR;
@@ -798,7 +828,7 @@ public class CustomNpcEntity extends PathfinderMob {
 
         double dodgeChance = Mth.clamp(
             BASE_DODGE_CHANCE +
-            agilityScore / (pressureScore + DODGE_DIVISOR_EPSILON),
+                agilityScore / (pressureScore + DODGE_DIVISOR_EPSILON),
             MIN_DODGE_CHANCE,
             MAX_DODGE_CHANCE
         );
@@ -810,13 +840,13 @@ public class CustomNpcEntity extends PathfinderMob {
 
         double mitigationRatio = Mth.clamp(
             MITIGATION_BASE +
-            agilityScore * MITIGATION_SPEED_FACTOR -
-            attackerSpeed * MITIGATION_ATTACKER_FACTOR,
+                agilityScore * MITIGATION_SPEED_FACTOR -
+                attackerSpeed * MITIGATION_ATTACKER_FACTOR,
             MITIGATION_MIN,
             MITIGATION_MAX
         );
-        float mitigatedDamage =
-            (float) (incomingDamage * (1.0D - mitigationRatio));
+        float mitigatedDamage = (float) (incomingDamage *
+            (1.0D - mitigationRatio));
 
         this.tryCounterAttack(attacker, attackerSpeed, agilityScore);
 
@@ -861,7 +891,7 @@ public class CustomNpcEntity extends PathfinderMob {
         }
         double counterChance = Mth.clamp(
             COUNTER_BASE_CHANCE +
-            (agilityScore - attackerSpeed) * COUNTER_SPEED_FACTOR,
+                (agilityScore - attackerSpeed) * COUNTER_SPEED_FACTOR,
             COUNTER_MIN_CHANCE,
             COUNTER_MAX_CHANCE
         );
@@ -873,11 +903,11 @@ public class CustomNpcEntity extends PathfinderMob {
             COUNTER_SPEED_SCALE_MIN,
             COUNTER_SPEED_SCALE_MAX
         );
-        float counterDamage = (float) (
-            this.getAttributeValue(Attributes.ATTACK_DAMAGE) *
+        float counterDamage = (float) (this.getAttributeValue(
+                Attributes.ATTACK_DAMAGE
+            ) *
             COUNTER_DAMAGE_RATIO *
-            speedScale
-        );
+            speedScale);
         DamageSource baseSource = this.damageSources().mobAttack(this);
         DamageSource counterSource = new DamageSource(
             baseSource.typeHolder(),
@@ -951,8 +981,8 @@ public class CustomNpcEntity extends PathfinderMob {
             return false;
         }
         var inventory = mind.getInventory();
-        int totemSlot = inventory.findFirstSlot(
-            stack -> stack.is(Items.TOTEM_OF_UNDYING)
+        int totemSlot = inventory.findFirstSlot(stack ->
+            stack.is(Items.TOTEM_OF_UNDYING)
         );
         if (totemSlot < 0) {
             return false;
@@ -1029,7 +1059,7 @@ public class CustomNpcEntity extends PathfinderMob {
             // 地面、水生、两栖统一使用地面导航，依靠手动逻辑处理水中移动
             created = new GroundPathNavigation(this, level);
         }
-        
+
         // 允许在水中漂浮/游泳
         boolean shouldFloat = true;
         created.setCanFloat(shouldFloat);

@@ -1,7 +1,10 @@
 package com.Kizunad.guzhenrenext.customNPCImpl.ai;
 
 import com.Kizunad.customNPCs.ai.NpcMindRegistry;
+import com.Kizunad.customNPCs.ai.actions.registry.AttackCompatRegistry;
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuInsectAttackAction;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuzhenrenPlaceholderAction;
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.WenyunKongqiaoGoal;
 
 /**
  * 蛊真人扩展 AI 组件注册中心。
@@ -28,6 +31,8 @@ public class Registery {
         // 注册 Sensor
         registerSensors();
 
+        registerCompatHandlers();
+
         initialized = true;
     }
 
@@ -43,14 +48,19 @@ public class Registery {
     }
 
     private static void registerGoals() {
-        // 示例：注册新的蛊真人 Goal
-        // NpcMindRegistry.registerGoal("cultivate_gu_goal", CultivateGuGoal::new);
-        // NpcMindRegistry.registerGoal("refine_gu_goal", RefineGuGoal::new);
+        NpcMindRegistry.registerGoal(
+            "wenyun_kongqiao",
+            WenyunKongqiaoGoal::new
+        );
     }
 
     private static void registerSensors() {
         // 示例：注册新的蛊真人 Sensor
         // NpcMindRegistry.registerSensor("primeval_essence_sensor", PrimevalEssenceSensor::new);
         // NpcMindRegistry.registerSensor("gu_aura_sensor", GuAuraSensor::new);
+    }
+
+    private static void registerCompatHandlers() {
+        AttackCompatRegistry.register(new GuInsectAttackAction());
     }
 }

@@ -1,4 +1,4 @@
-package com.Kizunad.guzhenrenext.customNPCImpl;
+package com.Kizunad.guzhenrenext.customNPCImpl.lifecycle;
 
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.customNPCs.registry.NpcSpawnRegistry;
