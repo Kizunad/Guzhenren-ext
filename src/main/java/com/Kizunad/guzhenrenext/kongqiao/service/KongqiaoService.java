@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.kongqiao.KongqiaoOwner;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoInventory;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoSettings;
 import com.Kizunad.guzhenrenext.kongqiao.menu.AttackInventoryMenu;
+import com.Kizunad.guzhenrenext.kongqiao.menu.GuchongFeedMenu;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenu;
 import com.Kizunad.guzhenrenext.kongqiao.validator.TagBasedKongqiaoSlotValidator;
 import net.minecraft.network.chat.Component;
@@ -31,6 +32,9 @@ public final class KongqiaoService {
     );
     private static final Component ATTACK_TITLE = Component.translatable(
         "menu.guzhenrenext.attack_inventory"
+    );
+    private static final Component FEED_TITLE = Component.translatable(
+        "menu.guzhenrenext.guchong_feed"
     );
 
     private KongqiaoService() {}
@@ -117,6 +121,38 @@ public final class KongqiaoService {
                     containerId,
                     playerInventory,
                     owner.getAttackInventory()
+                );
+            }
+        };
+        player.openMenu(provider);
+    }
+
+    /**
+     * 打开蛊虫喂食界面。
+     */
+    public static void openGuchongFeedMenu(
+        ServerPlayer player,
+        KongqiaoOwner owner
+    ) {
+        if (player.level().isClientSide()) {
+            return;
+        }
+        MenuProvider provider = new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return FEED_TITLE;
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(
+                int containerId,
+                Inventory playerInventory,
+                Player playerEntity
+            ) {
+                return new GuchongFeedMenu(
+                    containerId,
+                    playerInventory,
+                    owner.getFeedInventory()
                 );
             }
         };

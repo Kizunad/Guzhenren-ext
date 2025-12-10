@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao;
 
 import com.Kizunad.guzhenrenext.kongqiao.inventory.AttackInventory;
+import com.Kizunad.guzhenrenext.kongqiao.inventory.GuchongFeedInventory;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoInventory;
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ public interface KongqiaoOwner {
     KongqiaoInventory getKongqiaoInventory();
 
     AttackInventory getAttackInventory();
+
+    GuchongFeedInventory getFeedInventory();
 
     /**
      * 按需同步到客户端/存档时调用。

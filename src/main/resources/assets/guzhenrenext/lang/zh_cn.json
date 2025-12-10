@@ -1,0 +1,17 @@
+{
+    "screen.guzhenrenext.kongqiao.title": "空窍",
+    "screen.guzhenrenext.kongqiao.hint": "可通过拓展按钮逐行解锁更多空窍",
+    "screen.guzhenrenext.kongqiao.button.expand": "拓展空窍",
+    "screen.guzhenrenext.kongqiao.button.attack": "打开攻击背包",
+    "screen.guzhenrenext.common.button.feed": "蛊虫喂食",
+    "screen.guzhenrenext.attack.title": "攻击背包",
+    "screen.guzhenrenext.attack.button.swap": "与玩家交换",
+    "screen.guzhenrenext.attack.button.return": "返回空窍",
+    "screen.guzhenrenext.common.player_inventory": "玩家背包",
+    "screen.guzhenrenext.feed.title": "蛊虫喂食",
+    "screen.guzhenrenext.feed.button.auto": "开启自动喂食",
+    "key.categories.guzhenrenext": "蛊真人扩展",
+    "key.guzhenrenext.kongqiao": "打开空窍界面",
+    "key.guzhenrenext.attack_swap": "交换攻击背包",
+    "key.guzhenrenext.attack_inventory": "打开攻击背包"
+}

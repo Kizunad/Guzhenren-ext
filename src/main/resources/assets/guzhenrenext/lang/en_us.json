@@ -1,0 +1,17 @@
+{
+    "screen.guzhenrenext.kongqiao.title": "Kongqiao",
+    "screen.guzhenrenext.kongqiao.hint": "Unlock more Kongqiao rows with the expand button.",
+    "screen.guzhenrenext.kongqiao.button.expand": "Expand Kongqiao",
+    "screen.guzhenrenext.kongqiao.button.attack": "Open Attack Inventory",
+    "screen.guzhenrenext.common.button.feed": "Feed Gu Insect",
+    "screen.guzhenrenext.attack.title": "Attack Inventory",
+    "screen.guzhenrenext.attack.button.swap": "Swap With Player",
+    "screen.guzhenrenext.attack.button.return": "Return to Kongqiao",
+    "screen.guzhenrenext.common.player_inventory": "Player Inventory",
+    "screen.guzhenrenext.feed.title": "Gu Insect Feeding",
+    "screen.guzhenrenext.feed.button.auto": "Enable Auto Feed",
+    "key.categories.guzhenrenext": "Guzhenren Extension",
+    "key.guzhenrenext.kongqiao": "Open Kongqiao Window",
+    "key.guzhenrenext.attack_swap": "Swap Attack Inventory",
+    "key.guzhenrenext.attack_inventory": "Open Attack Inventory"
+}

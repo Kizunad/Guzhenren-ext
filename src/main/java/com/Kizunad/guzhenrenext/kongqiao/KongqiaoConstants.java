@@ -31,6 +31,12 @@ public final class KongqiaoConstants {
     /** 攻击背包列数与玩家背包一致。 */
     public static final int ATTACK_COLUMNS = 9;
 
+    /** 蛊虫喂食页默认 4 行。 */
+    public static final int FEED_ROWS = 4;
+
+    /** 蛊虫喂食列数与玩家背包一致。 */
+    public static final int FEED_COLUMNS = 9;
+
     private static final List<ResourceLocation> TAG_IDS = List.of(
         ResourceLocation.parse("guzhenren:z1"),
         ResourceLocation.parse("guzhenren:z2"),

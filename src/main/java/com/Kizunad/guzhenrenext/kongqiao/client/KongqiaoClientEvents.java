@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.client;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.AttackInventoryScreen;
+import com.Kizunad.guzhenrenext.kongqiao.client.ui.GuchongFeedScreen;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.KongqiaoScreen;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import net.neoforged.api.distmarker.Dist;
@@ -24,6 +25,10 @@ public final class KongqiaoClientEvents {
         event.register(
             KongqiaoMenus.ATTACK_INVENTORY.get(),
             AttackInventoryScreen::new
+        );
+        event.register(
+            KongqiaoMenus.GUCHONG_FEED.get(),
+            GuchongFeedScreen::new
         );
     }
 

@@ -56,6 +56,10 @@ public record ServerboundKongqiaoActionPayload(Action action)
                         serverPlayer,
                         owner
                     );
+                case OPEN_FEED -> KongqiaoService.openGuchongFeedMenu(
+                        serverPlayer,
+                        owner
+                    );
                 case EXPAND -> KongqiaoService.expand(owner);
                 case SWAP_ATTACK -> KongqiaoService.swapAttackInventory(
                         serverPlayer,
@@ -70,6 +74,7 @@ public record ServerboundKongqiaoActionPayload(Action action)
     public enum Action {
         OPEN_KONGQIAO,
         OPEN_ATTACK,
+        OPEN_FEED,
         EXPAND,
         SWAP_ATTACK,
     }

@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoOwner;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.AttackInventory;
+import com.Kizunad.guzhenrenext.kongqiao.inventory.GuchongFeedInventory;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoInventory;
 import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoService;
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class KongqiaoData
 
     private final KongqiaoInventory kongqiaoInventory;
     private final AttackInventory attackInventory;
+    private final GuchongFeedInventory feedInventory;
     private UUID ownerId = Util.NIL_UUID;
     private boolean clientSide;
     private boolean dirty;
@@ -26,8 +28,10 @@ public class KongqiaoData
     public KongqiaoData() {
         this.kongqiaoInventory = KongqiaoService.createInventory();
         this.attackInventory = new AttackInventory();
+        this.feedInventory = new GuchongFeedInventory();
         this.kongqiaoInventory.setChangeListener(() -> dirty = true);
         this.attackInventory.setChangeListener(() -> dirty = true);
+        this.feedInventory.setChangeListener(() -> dirty = true);
     }
 
     public void bind(Entity entity) {
@@ -48,6 +52,11 @@ public class KongqiaoData
     @Override
     public AttackInventory getAttackInventory() {
         return attackInventory;
+    }
+
+    @Override
+    public GuchongFeedInventory getFeedInventory() {
+        return feedInventory;
     }
 
     @Override
@@ -78,6 +87,7 @@ public class KongqiaoData
         CompoundTag tag = new CompoundTag();
         tag.put("kongqiao", kongqiaoInventory.serializeNBT(provider));
         tag.put("attack", attackInventory.serializeNBT(provider));
+        tag.put("feed", feedInventory.serializeNBT(provider));
         return tag;
     }
 
@@ -94,6 +104,9 @@ public class KongqiaoData
         }
         if (tag.contains("attack")) {
             attackInventory.deserializeNBT(provider, tag.getCompound("attack"));
+        }
+        if (tag.contains("feed")) {
+            feedInventory.deserializeNBT(provider, tag.getCompound("feed"));
         }
     }
 }

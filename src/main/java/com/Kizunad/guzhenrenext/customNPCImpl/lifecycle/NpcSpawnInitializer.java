@@ -14,7 +14,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
  */
 public final class NpcSpawnInitializer {
 
-    private static final double DEFAULT_RESOURCE_VALUE = 100.0D;
+    private static final double DEFAULT_RESOURCE_VALUE = 1000.0D;
     private static final double DEFAULT_STAGE_VALUE = 1.0D;
 
     private static boolean registered;

@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.client.ui;
 
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoConstants;
+import com.Kizunad.guzhenrenext.kongqiao.KongqiaoI18n;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenu;
 import com.Kizunad.guzhenrenext.network.ServerboundKongqiaoActionPayload;
 import com.Kizunad.tinyUI.controls.Button;
@@ -24,17 +25,24 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
     private static final int SLOT_SIZE = 18;
     private static final int GRID_GAP = 2;
     private static final int GRID_PADDING = 2;
-    private static final int CONTENT_PADDING = 14;
     private static final int TITLE_HEIGHT = 16;
     private static final int BUTTON_HEIGHT = 18;
     private static final int BUTTON_WIDTH = 120;
     private static final int BUTTON_GAP = 8;
+    private static final int BUTTON_COUNT = 3;
     private static final int SECTION_GAP = 12;
-    private static final int PLAYER_SECTION_GAP = 18;
     private static final int SCROLLBAR_ALLOWANCE = 14;
     private static final int HINT_MARGIN_TOP = 4;
     private static final int HINT_LABEL_HEIGHT = 12;
-    private static final int BUTTON_EXTRA_GAP = 10;
+    private static final int MAIN_PANEL_WIDTH = 600;
+    private static final int MAIN_PANEL_PADDING = 16;
+    private static final int GRID_PANEL_MIN_WIDTH = 550;
+    private static final int GRID_PANEL_PADDING = 12;
+    private static final int BUTTON_ROW_MARGIN = 18;
+    private static final int PLAYER_PANEL_WIDTH = 450;
+    private static final int PLAYER_PANEL_PADDING = 12;
+    private static final int PLAYER_TITLE_HEIGHT = 14;
+    private static final int PANEL_GAP = 20;
 
     private final Theme theme = Theme.vanilla();
 
@@ -66,7 +74,6 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
             Math.max(0, visibleRows - 1) * GRID_GAP +
             GRID_PADDING * 2;
 
-        UIElement window = new UIElement() {};
         UIElement kongqiaoGrid = ContainerUI.scrollableGrid(
             0,
             totalSlots,
@@ -78,23 +85,35 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
         );
         kongqiaoGrid.setFrame(0, 0, viewportWidth, viewportHeight);
 
-        Label title = new Label(Component.literal("空窍"), theme);
-        title.setFrame(0, 0, viewportWidth, TITLE_HEIGHT);
-
+        Label title = new Label(
+            KongqiaoI18n.text(KongqiaoI18n.KONGQIAO_TITLE),
+            theme
+        );
         Label hint = new Label(
-            Component.literal("可通过拓展按钮逐行解锁更多空窍"),
+            KongqiaoI18n.text(KongqiaoI18n.KONGQIAO_HINT),
             theme
         );
 
-        Button expandButton = new Button("Expand 空窍", theme);
-        expandButton.setOnClick(
-            () -> sendAction(ServerboundKongqiaoActionPayload.Action.EXPAND)
+        Button expandButton = new Button(
+            KongqiaoI18n.text(KongqiaoI18n.KONGQIAO_BUTTON_EXPAND),
+            theme
         );
-        Button attackButton = new Button("Go to Attack Inventory", theme);
-        attackButton.setOnClick(
-            () -> sendAction(
-                ServerboundKongqiaoActionPayload.Action.OPEN_ATTACK
-            )
+        expandButton.setOnClick(() ->
+            sendAction(ServerboundKongqiaoActionPayload.Action.EXPAND)
+        );
+        Button feedButton = new Button(
+            KongqiaoI18n.text(KongqiaoI18n.COMMON_FEED_BUTTON),
+            theme
+        );
+        feedButton.setOnClick(() ->
+            sendAction(ServerboundKongqiaoActionPayload.Action.OPEN_FEED)
+        );
+        Button attackButton = new Button(
+            KongqiaoI18n.text(KongqiaoI18n.KONGQIAO_BUTTON_ATTACK),
+            theme
+        );
+        attackButton.setOnClick(() ->
+            sendAction(ServerboundKongqiaoActionPayload.Action.OPEN_ATTACK)
         );
 
         UIElement playerGrid = InventoryUI.playerInventoryGrid(
@@ -105,26 +124,83 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
             theme
         );
 
-        int buttonRowWidth = BUTTON_WIDTH * 2 + BUTTON_GAP;
-        int contentWidth = Math.max(viewportWidth, playerGrid.getWidth());
-        int windowWidth = contentWidth + CONTENT_PADDING * 2;
-        int windowHeight =
+        KongqiaoLayout layout = calculateLayout(
+            viewportWidth,
+            viewportHeight,
+            playerGrid.getHeight()
+        );
+        UIElement window = createWindow(root, layout.windowHeight());
+        buildMainPanel(
+            window,
+            layout,
+            kongqiaoGrid,
+            title,
+            hint,
+            new Button[] { expandButton, feedButton, attackButton }
+        );
+        buildPlayerPanel(window, layout, playerGrid);
+    }
+
+    private void sendAction(ServerboundKongqiaoActionPayload.Action action) {
+        PacketDistributor.sendToServer(
+            new ServerboundKongqiaoActionPayload(action)
+        );
+    }
+
+    private KongqiaoLayout calculateLayout(
+        int viewportWidth,
+        int viewportHeight,
+        int playerGridHeight
+    ) {
+        int containerInnerWidth = Math.max(
+            viewportWidth,
+            GRID_PANEL_MIN_WIDTH - GRID_PANEL_PADDING * 2
+        );
+        int availableMainWidth = MAIN_PANEL_WIDTH - MAIN_PANEL_PADDING * 2;
+        int containerWidth = Math.min(
+            containerInnerWidth + GRID_PANEL_PADDING * 2,
+            availableMainWidth
+        );
+        int containerInnerHeight =
+            viewportHeight + HINT_MARGIN_TOP + HINT_LABEL_HEIGHT;
+        int containerHeight = containerInnerHeight + GRID_PANEL_PADDING * 2;
+        int mainPanelHeight =
+            MAIN_PANEL_PADDING +
             TITLE_HEIGHT +
             SECTION_GAP +
-            viewportHeight +
-            SECTION_GAP +
+            containerHeight +
+            BUTTON_ROW_MARGIN +
             BUTTON_HEIGHT +
-            PLAYER_SECTION_GAP +
-            playerGrid.getHeight() +
-            CONTENT_PADDING * 2;
+            MAIN_PANEL_PADDING;
+        int playerPanelHeight =
+            PLAYER_PANEL_PADDING +
+            PLAYER_TITLE_HEIGHT +
+            SECTION_GAP +
+            playerGridHeight +
+            PLAYER_PANEL_PADDING;
+        int windowHeight = mainPanelHeight + PANEL_GAP + playerPanelHeight;
+        return new KongqiaoLayout(
+            viewportWidth,
+            viewportHeight,
+            containerInnerWidth,
+            containerWidth,
+            containerHeight,
+            availableMainWidth,
+            mainPanelHeight,
+            playerPanelHeight,
+            windowHeight
+        );
+    }
 
-        window.setFrame(0, 0, windowWidth, windowHeight);
+    private UIElement createWindow(UIRoot root, int windowHeight) {
+        UIElement window = new UIElement() {};
+        window.setFrame(0, 0, MAIN_PANEL_WIDTH, windowHeight);
         Anchor.apply(
             window,
             root.getWidth(),
             root.getHeight(),
             new Anchor.Spec(
-                windowWidth,
+                MAIN_PANEL_WIDTH,
                 windowHeight,
                 Anchor.Horizontal.CENTER,
                 Anchor.Vertical.CENTER,
@@ -133,58 +209,127 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
             )
         );
         root.addChild(window);
+        return window;
+    }
 
-        int centerX = CONTENT_PADDING + (contentWidth - viewportWidth) / 2;
-        title.setFrame(centerX, CONTENT_PADDING, viewportWidth, TITLE_HEIGHT);
-        window.addChild(title);
+    private void buildMainPanel(
+        UIElement window,
+        KongqiaoLayout layout,
+        UIElement kongqiaoGrid,
+        Label title,
+        Label hint,
+        Button[] buttons
+    ) {
+        SolidPanel mainPanel = new SolidPanel(theme);
+        mainPanel.setFrame(0, 0, MAIN_PANEL_WIDTH, layout.mainPanelHeight());
+        window.addChild(mainPanel);
 
-        kongqiaoGrid.setFrame(
-            centerX,
-            CONTENT_PADDING + TITLE_HEIGHT + SECTION_GAP,
-            viewportWidth,
-            viewportHeight
+        title.setFrame(
+            MAIN_PANEL_PADDING,
+            MAIN_PANEL_PADDING,
+            MAIN_PANEL_WIDTH - MAIN_PANEL_PADDING * 2,
+            TITLE_HEIGHT
         );
-        window.addChild(kongqiaoGrid);
+        mainPanel.addChild(title);
+
+        SolidPanel containerPanel = new SolidPanel(theme);
+        int containerX =
+            MAIN_PANEL_PADDING +
+            (layout.availableMainWidth() - layout.containerWidth()) / 2;
+        int containerY = MAIN_PANEL_PADDING + TITLE_HEIGHT + SECTION_GAP;
+        containerPanel.setFrame(
+            containerX,
+            containerY,
+            layout.containerWidth(),
+            layout.containerHeight()
+        );
+        mainPanel.addChild(containerPanel);
+
+        int gridOffsetX =
+            GRID_PANEL_PADDING +
+            (layout.containerInnerWidth() - layout.viewportWidth()) / 2;
+        kongqiaoGrid.setFrame(
+            gridOffsetX,
+            GRID_PANEL_PADDING,
+            layout.viewportWidth(),
+            layout.viewportHeight()
+        );
+        containerPanel.addChild(kongqiaoGrid);
 
         hint.setFrame(
-            centerX,
+            GRID_PANEL_PADDING,
             kongqiaoGrid.getY() + kongqiaoGrid.getHeight() + HINT_MARGIN_TOP,
-            viewportWidth,
+            layout.containerInnerWidth(),
             HINT_LABEL_HEIGHT
         );
-        window.addChild(hint);
+        containerPanel.addChild(hint);
 
+        int buttonRowWidth =
+            BUTTON_WIDTH * BUTTON_COUNT + BUTTON_GAP * (BUTTON_COUNT - 1);
+        int buttonRowX = (MAIN_PANEL_WIDTH - buttonRowWidth) / 2;
         int buttonRowY =
-            kongqiaoGrid.getY() + kongqiaoGrid.getHeight() + SECTION_GAP + BUTTON_EXTRA_GAP;
-        int buttonRowX =
-            CONTENT_PADDING + (contentWidth - buttonRowWidth) / 2;
-        expandButton.setFrame(
-            buttonRowX,
-            buttonRowY,
-            BUTTON_WIDTH,
-            BUTTON_HEIGHT
-        );
-        attackButton.setFrame(
-            buttonRowX + BUTTON_WIDTH + BUTTON_GAP,
-            buttonRowY,
-            BUTTON_WIDTH,
-            BUTTON_HEIGHT
-        );
-        window.addChild(expandButton);
-        window.addChild(attackButton);
+            containerY + layout.containerHeight() + BUTTON_ROW_MARGIN;
+        for (int i = 0; i < buttons.length; i++) {
+            Button button = buttons[i];
+            button.setFrame(
+                buttonRowX + i * (BUTTON_WIDTH + BUTTON_GAP),
+                buttonRowY,
+                BUTTON_WIDTH,
+                BUTTON_HEIGHT
+            );
+            mainPanel.addChild(button);
+        }
+    }
 
+    private void buildPlayerPanel(
+        UIElement window,
+        KongqiaoLayout layout,
+        UIElement playerGrid
+    ) {
+        SolidPanel playerPanel = new SolidPanel(theme);
+        int playerPanelX = (MAIN_PANEL_WIDTH - PLAYER_PANEL_WIDTH) / 2;
+        playerPanel.setFrame(
+            playerPanelX,
+            layout.mainPanelHeight() + PANEL_GAP,
+            PLAYER_PANEL_WIDTH,
+            layout.playerPanelHeight()
+        );
+        window.addChild(playerPanel);
+
+        Label playerLabel = new Label(
+            KongqiaoI18n.text(KongqiaoI18n.COMMON_PLAYER_INVENTORY),
+            theme
+        );
+        playerLabel.setFrame(
+            PLAYER_PANEL_PADDING,
+            PLAYER_PANEL_PADDING,
+            PLAYER_PANEL_WIDTH - PLAYER_PANEL_PADDING * 2,
+            PLAYER_TITLE_HEIGHT
+        );
+        playerPanel.addChild(playerLabel);
+
+        int innerPlayerWidth = PLAYER_PANEL_WIDTH - PLAYER_PANEL_PADDING * 2;
+        int playerGridX =
+            PLAYER_PANEL_PADDING +
+            (innerPlayerWidth - playerGrid.getWidth()) / 2;
         playerGrid.setFrame(
-            CONTENT_PADDING + (contentWidth - playerGrid.getWidth()) / 2,
-            buttonRowY + BUTTON_HEIGHT + PLAYER_SECTION_GAP,
+            playerGridX,
+            playerLabel.getY() + PLAYER_TITLE_HEIGHT + SECTION_GAP,
             playerGrid.getWidth(),
             playerGrid.getHeight()
         );
-        window.addChild(playerGrid);
+        playerPanel.addChild(playerGrid);
     }
 
-    private void sendAction(ServerboundKongqiaoActionPayload.Action action) {
-        PacketDistributor.sendToServer(
-            new ServerboundKongqiaoActionPayload(action)
-        );
-    }
+    private record KongqiaoLayout(
+        int viewportWidth,
+        int viewportHeight,
+        int containerInnerWidth,
+        int containerWidth,
+        int containerHeight,
+        int availableMainWidth,
+        int mainPanelHeight,
+        int playerPanelHeight,
+        int windowHeight
+    ) {}
 }

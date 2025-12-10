@@ -15,22 +15,29 @@ public final class KongqiaoMenus {
 
     private KongqiaoMenus() {}
 
-    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(
-        Registries.MENU,
-        GuzhenrenExt.MODID
+    private static final DeferredRegister<MenuType<?>> MENUS =
+        DeferredRegister.create(Registries.MENU, GuzhenrenExt.MODID);
+
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<KongqiaoMenu>
+    > KONGQIAO = MENUS.register("kongqiao", () ->
+        IMenuTypeExtension.create(KongqiaoMenu::fromNetwork)
     );
 
-    public static final DeferredHolder<MenuType<?>, MenuType<KongqiaoMenu>> KONGQIAO =
-        MENUS.register(
-            "kongqiao",
-            () -> IMenuTypeExtension.create(KongqiaoMenu::fromNetwork)
-        );
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<AttackInventoryMenu>
+    > ATTACK_INVENTORY = MENUS.register("attack_inventory", () ->
+        IMenuTypeExtension.create(AttackInventoryMenu::fromNetwork)
+    );
 
-    public static final DeferredHolder<MenuType<?>, MenuType<AttackInventoryMenu>> ATTACK_INVENTORY =
-        MENUS.register(
-            "attack_inventory",
-            () -> IMenuTypeExtension.create(AttackInventoryMenu::fromNetwork)
-        );
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<GuchongFeedMenu>
+    > GUCHONG_FEED = MENUS.register("guchong_feed", () ->
+        IMenuTypeExtension.create(GuchongFeedMenu::fromNetwork)
+    );
 
     public static void register(IEventBus bus) {
         MENUS.register(bus);
