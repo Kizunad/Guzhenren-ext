@@ -16,10 +16,8 @@ public class KongqiaoSettings {
 
     public KongqiaoSettings(int unlockedRows, int columns) {
         this.columns = columns;
-        this.unlockedRows = Math.min(
-                Math.max(unlockedRows, 1),
-                KongqiaoConstants.MAX_ROWS
-            );
+        this.unlockedRows =
+            Math.min(Math.max(unlockedRows, 0), KongqiaoConstants.MAX_ROWS);
     }
 
     /**
@@ -59,9 +57,7 @@ public class KongqiaoSettings {
      * 强制设置行数，供外部在同步/加载后写回。
      */
     public void setUnlockedRows(int rows) {
-        this.unlockedRows = Math.min(
-                Math.max(rows, 1),
-                KongqiaoConstants.MAX_ROWS
-            );
+        this.unlockedRows =
+            Math.min(Math.max(rows, 0), KongqiaoConstants.MAX_ROWS);
     }
 }

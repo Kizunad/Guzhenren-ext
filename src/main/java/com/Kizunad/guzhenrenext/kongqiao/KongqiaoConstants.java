@@ -25,6 +25,12 @@ public final class KongqiaoConstants {
     /** 最大可拓展行数，预留到 9 行覆盖整页。 */
     public static final int MAX_ROWS = 9;
 
+    /** 动态容量达到上限所需的最大真元。 */
+    public static final double FULL_CAPACITY_ZHENYUAN = 1000.0D;
+
+    /** 动态容量最大行数（4 行，总计 36 格）。 */
+    public static final int DYNAMIC_MAX_ROWS = 4;
+
     /** 攻击背包固定 4 行。 */
     public static final int ATTACK_ROWS = 4;
 

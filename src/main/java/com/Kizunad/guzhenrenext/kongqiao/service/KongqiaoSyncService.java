@@ -29,7 +29,11 @@ public final class KongqiaoSyncService {
             return;
         }
         var data = KongqiaoAttachments.getData(player);
-        if (data == null || !data.isDirty()) {
+        if (data == null) {
+            return;
+        }
+        KongqiaoCapacityService.syncCapacity(player, data);
+        if (!data.isDirty()) {
             return;
         }
         PacketDistributor.sendToPlayer(

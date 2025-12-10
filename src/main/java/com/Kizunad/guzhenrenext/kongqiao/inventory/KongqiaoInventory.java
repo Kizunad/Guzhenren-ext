@@ -3,11 +3,11 @@ package com.Kizunad.guzhenrenext.kongqiao.inventory;
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoConstants;
 import com.Kizunad.guzhenrenext.kongqiao.validator.KongqiaoSlotValidator;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.NonNullList;
 
 /**
  * 空窍物品槽容器。
@@ -92,7 +92,10 @@ public class KongqiaoInventory extends SimpleContainer {
     /**
      * 反序列化空窍内容。
      */
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+    public void deserializeNBT(
+        HolderLookup.Provider provider,
+        CompoundTag tag
+    ) {
         if (tag.contains("rows")) {
             settings.setUnlockedRows(tag.getInt("rows"));
         }

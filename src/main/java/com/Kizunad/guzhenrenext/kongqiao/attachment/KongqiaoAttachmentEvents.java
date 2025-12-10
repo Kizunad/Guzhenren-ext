@@ -2,7 +2,9 @@ package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoCapacityService;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -52,8 +54,15 @@ public final class KongqiaoAttachmentEvents {
         KongqiaoData data = KongqiaoAttachments.getData(entity);
         if (data != null) {
             data.bind(entity);
-            if (!entity.level().isClientSide() && entity instanceof Player) {
-                data.markKongqiaoDirty();
+            if (
+                !entity.level().isClientSide() &&
+                entity instanceof LivingEntity living
+            ) {
+                KongqiaoCapacityService.syncCapacity(living, data);
+                if (living instanceof Player) {
+                    // 玩家初次进入世界时依旧强制一次同步，保证客户端创建附件。
+                    data.markKongqiaoDirty();
+                }
             }
         }
     }
