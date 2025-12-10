@@ -1,10 +1,13 @@
 package com.Kizunad.guzhenrenext;
 
-import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSpawnInitializer;
-import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSecondTicker;
-import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcResourceRegeneration;
-import com.Kizunad.guzhenrenext.customNPCImpl.ai.Registery;
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Registery;
+import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcResourceRegeneration;
+import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSecondTicker;
+import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSpawnInitializer;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
+import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -21,6 +24,9 @@ public class GuzhenrenExt {
         NpcSpawnInitializer.register();
         NpcSecondTicker.register();
         NpcResourceRegeneration.register();
+        KongqiaoMenus.register(modEventBus);
+        KongqiaoAttachments.register(modEventBus);
+        GuzhenrenExtNetworking.register(modEventBus);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
     }
 
