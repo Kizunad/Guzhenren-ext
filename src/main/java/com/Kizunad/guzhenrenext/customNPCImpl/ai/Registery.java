@@ -2,8 +2,12 @@ package com.Kizunad.guzhenrenext.customNPCImpl.ai;
 
 import com.Kizunad.customNPCs.ai.NpcMindRegistry;
 import com.Kizunad.customNPCs.ai.actions.registry.AttackCompatRegistry;
+import com.Kizunad.customNPCs.ai.actions.registry.HealCompatRegistry;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuInsectAttackAction;
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuInsectHealAction;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuzhenrenPlaceholderAction;
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.CraftAttackGuInsectGoal;
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.CraftHealingGuInsectGoal;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.WenyunKongqiaoGoal;
 
 /**
@@ -52,6 +56,14 @@ public class Registery {
             "wenyun_kongqiao",
             WenyunKongqiaoGoal::new
         );
+        NpcMindRegistry.registerGoal(
+            "craft_attack_gu_insect",
+            CraftAttackGuInsectGoal::new
+        );
+        NpcMindRegistry.registerGoal(
+            "craft_healing_gu_insect",
+            CraftHealingGuInsectGoal::new
+        );
     }
 
     private static void registerSensors() {
@@ -62,5 +74,6 @@ public class Registery {
 
     private static void registerCompatHandlers() {
         AttackCompatRegistry.register(new GuInsectAttackAction());
+        HealCompatRegistry.register(new GuInsectHealAction());
     }
 }

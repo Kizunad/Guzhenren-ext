@@ -5,9 +5,9 @@ import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.common.FurnaceAction;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.executor.ActionExecutor;
+import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
-import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -102,15 +102,16 @@ public class CookGoal implements IGoal {
     }
 
     private boolean hasCookableFood(INpcMind mind, LivingEntity entity) {
-        return FurnaceAction
-            .findCookCandidate(mind.getInventory(), entity.level())
-            .isPresent();
+        return FurnaceAction.findCookCandidate(
+            mind.getInventory(),
+            entity.level()
+        ).isPresent();
     }
 
     private boolean isInDanger(INpcMind mind, LivingEntity entity) {
-        Object danger = mind.getCurrentWorldState(entity).getState(
-            WorldStateKeys.IN_DANGER
-        );
+        Object danger = mind
+            .getCurrentWorldState(entity)
+            .getState(WorldStateKeys.IN_DANGER);
         return Boolean.TRUE.equals(danger);
     }
 }

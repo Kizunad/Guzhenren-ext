@@ -3,6 +3,7 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 import com.Kizunad.customNPCs.ai.actions.ActionStatus;
 import com.Kizunad.customNPCs.ai.actions.common.UseItemAction;
 import com.Kizunad.customNPCs.ai.config.NpcCombatDefaults;
+import com.Kizunad.customNPCs.ai.actions.registry.HealCompatRegistry;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
@@ -167,7 +168,15 @@ public class HealGoal implements IGoal {
             return;
         }
         if (currentAction == null) {
-            HealingCandidate candidate = findHealingItem(mind, entity);
+            CompatResult compatResult = dispatchHealCompat(mind, entity);
+            if (compatResult.handledExternally()) {
+                return;
+            }
+
+            HealingCandidate candidate = compatResult.candidate();
+            if (candidate == null) {
+                candidate = findHealingItem(mind, entity);
+            }
 
             if (candidate == null) {
                 LOGGER.warn("[HealGoal] 找不到可用于治疗的物品");
@@ -405,6 +414,38 @@ public class HealGoal implements IGoal {
         return 0;
     }
 
+    private CompatResult dispatchHealCompat(
+        INpcMind mind,
+        LivingEntity entity
+    ) {
+        if (!(entity instanceof Mob mob)) {
+            return CompatResult.none();
+        }
+        float ratio = entity.getHealth() / entity.getMaxHealth();
+        HealCompatRegistry.HealContext context = new HealCompatRegistry.HealContext(
+            mind,
+            mob,
+            ratio
+        );
+        HealCompatRegistry.HealDecision decision =
+            HealCompatRegistry.dispatch(context);
+        if (decision == HealCompatRegistry.HealDecision.HANDLED) {
+            return CompatResult.handled();
+        }
+        HealCompatRegistry.HealCandidate candidate = context.getCandidate();
+        if (candidate == null || candidate.stack().isEmpty()) {
+            return CompatResult.none();
+        }
+        return new CompatResult(
+            new HealingCandidate(
+                candidate.stack(),
+                candidate.sourceSlot(),
+                Double.MAX_VALUE
+            ),
+            false
+        );
+    }
+
     /**
      * 准备使用治疗物品。
      * <p>
@@ -579,4 +620,14 @@ public class HealGoal implements IGoal {
      * @param score 治疗分数
      */
     private record HealingCandidate(ItemStack stack, int slot, double score) {}
+
+    private record CompatResult(HealingCandidate candidate, boolean handledExternally) {
+        private static CompatResult none() {
+            return new CompatResult(null, false);
+        }
+
+        private static CompatResult handled() {
+            return new CompatResult(null, true);
+        }
+    }
 }

@@ -18,7 +18,14 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
 
     private static final float MIN_PRIORITY = 0.25F;
     private static final float MAX_PRIORITY = 0.6F;
-    private static final int UPDATE_INTERVAL_TICKS = 20;
+    private static final int TICKS_PER_SECOND = 20;
+    private static final int UPDATE_INTERVAL_TICKS = TICKS_PER_SECOND;
+    private static final int MAX_SESSION_SECONDS = 45;
+    private static final int COOLDOWN_SECONDS = 15;
+    private static final int MAX_SESSION_TICKS =
+        MAX_SESSION_SECONDS * TICKS_PER_SECOND;
+    private static final int COOLDOWN_TICKS =
+        COOLDOWN_SECONDS * TICKS_PER_SECOND;
     private static final double BASE_PROGRESS_PER_SECOND = 50.0D;
     private static final double PRIMEVAL_COST_PER_SECOND = 15.0D;
     private static final double MIN_PRIMEVAL_RATIO = 0.15D;
@@ -26,6 +33,9 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
     private static final double RANK_BONUS_PER_TURN = 0.05D;
 
     private int tickCounter;
+    private int sessionTicks;
+    private boolean finished;
+    private long cooldownUntilGameTime;
 
     public WenyunKongqiaoGoal() {
         super("wenyun_kongqiao");
@@ -48,11 +58,12 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
         if (!GuCultivationHelper.needsCultivation(vars)) {
             return MIN_PRIORITY;
         }
-        double ratio =
-            Math.min(1.0D, vars.gushi_xiulian_dangqian / required);
+        double ratio = Math.min(1.0D, vars.gushi_xiulian_dangqian / required);
         float urgency = (float) (1.0D - ratio);
-        return MIN_PRIORITY +
-        (MAX_PRIORITY - MIN_PRIORITY) * Math.max(0.0F, urgency);
+        return (
+            MIN_PRIORITY +
+            (MAX_PRIORITY - MIN_PRIORITY) * Math.max(0.0F, urgency)
+        );
     }
 
     @Override
@@ -61,6 +72,9 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
             return false;
         }
         if (entity == null || entity.level().isClientSide()) {
+            return false;
+        }
+        if (entity.level().getGameTime() < cooldownUntilGameTime) {
             return false;
         }
         GuzhenrenModVariables.PlayerVariables vars =
@@ -72,6 +86,8 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
     public void start(INpcMind mind, LivingEntity entity) {
         super.start(mind, entity);
         tickCounter = 0;
+        sessionTicks = 0;
+        finished = false;
     }
 
     @Override
@@ -89,17 +105,35 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
             return;
         }
 
+        sessionTicks++;
+        if (sessionTicks >= MAX_SESSION_TICKS) {
+            requestStopWithCooldown(entity);
+            return;
+        }
+
+        if (!GuCultivationHelper.needsCultivation(vars)) {
+            requestStopWithCooldown(entity);
+            return;
+        }
+
+        if (!shouldConsumePrimeval(vars)) {
+            requestStopWithCooldown(entity);
+            return;
+        }
+
         tickCounter++;
         if (tickCounter >= UPDATE_INTERVAL_TICKS) {
             tickCounter = 0;
-            if (shouldConsumePrimeval(vars)) {
-                ZhenYuanHelper.modify(entity, -PRIMEVAL_COST_PER_SECOND);
-                double gain = computeProgressGain(vars);
-                GuCultivationHelper.addProgress(vars, gain);
-            }
+            ZhenYuanHelper.modify(entity, -PRIMEVAL_COST_PER_SECOND);
+            double gain = computeProgressGain(vars);
+            GuCultivationHelper.addProgress(vars, gain);
         }
 
         GuCultivationHelper.tryBreakthrough(vars);
+
+        if (!GuCultivationHelper.needsCultivation(vars)) {
+            requestStopWithCooldown(entity);
+        }
     }
 
     @Override
@@ -111,6 +145,9 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
     public boolean isFinished(INpcMind mind, LivingEntity entity) {
         GuzhenrenModVariables.PlayerVariables vars =
             GuCultivationHelper.getVariables(entity);
+        if (finished) {
+            return true;
+        }
         return vars == null || GuCultivationHelper.isAtMaxRank(vars);
     }
 
@@ -140,5 +177,20 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
             (Math.max(1.0D, Math.floor(vars.zhuanshu)) - 1.0D) *
             RANK_BONUS_PER_TURN;
         return BASE_PROGRESS_PER_SECOND * stageBonus * rankBonus;
+    }
+
+    /**
+     * 请求进入冷却期，避免长时间占用 AI。
+     */
+    private void requestStopWithCooldown(LivingEntity entity) {
+        if (finished || entity == null) {
+            finished = true;
+            return;
+        }
+        finished = true;
+        sessionTicks = 0;
+        tickCounter = 0;
+        cooldownUntilGameTime =
+            entity.level().getGameTime() + COOLDOWN_TICKS;
     }
 }
