@@ -8,6 +8,7 @@ import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuInsectHealAction;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuzhenrenPlaceholderAction;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.CraftAttackGuInsectGoal;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.CraftHealingGuInsectGoal;
+import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.EnhanceHunpoGoal;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.WenyunKongqiaoGoal;
 
 /**
@@ -63,6 +64,10 @@ public class Registery {
         NpcMindRegistry.registerGoal(
             "craft_healing_gu_insect",
             CraftHealingGuInsectGoal::new
+        );
+        NpcMindRegistry.registerGoal(
+            "enhance_hunpo",
+            EnhanceHunpoGoal::new
         );
     }
 

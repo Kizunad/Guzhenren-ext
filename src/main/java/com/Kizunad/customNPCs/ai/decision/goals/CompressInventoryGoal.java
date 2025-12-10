@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 public class CompressInventoryGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "CompressInventoryGoal: when inventory is 80%+ full, convert non-whitelisted items into material points; " +
+        "CompressInventoryGoal: when inventory is 50%+ full, convert non-whitelisted items into material points; " +
         "skip totems, potions, armor, tools, bows/crossbows, arrows.";
 
     static {
@@ -27,7 +27,7 @@ public class CompressInventoryGoal implements IGoal {
     }
 
     private static final float PRIORITY = 0.32F; // 中高优先级，避免背包爆满
-    private static final float TRIGGER_RATIO = 0.8F;
+    private static final float TRIGGER_RATIO = 0.5F;
     private static final int COOLDOWN_TICKS = 200;
 
     private long nextAllowedGameTime;

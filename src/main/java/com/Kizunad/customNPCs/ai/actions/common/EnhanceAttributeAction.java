@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class EnhanceAttributeAction extends AbstractStandardAction {
 
     public static final String LLM_USAGE_DESC =
-        "EnhanceAttributeAction: spend 10 experience to grant 2x base-value bonus to one attribute " +
+        "EnhanceAttributeAction: spend 10 experience to grant 0.2x base-value bonus to one attribute " +
         "(strength/health/speed/defense/sensor); optional direction, otherwise pick random with reduced gain.";
 
     static {
@@ -35,11 +35,12 @@ public class EnhanceAttributeAction extends AbstractStandardAction {
     );
     private static final int EXPERIENCE_COST = 10;
     private static final float TOKEN_PER_EXPERIENCE = 0.01F; // 10 exp -> 0.1 token
-    private static final float PERCENT_PER_TOKEN = 2.0F; // 每个 token 增加基准属性的 5%
+    private static final float PERCENT_PER_TOKEN = 0.2F; // 每个 token 增加基准属性的 20%
     private static final float MIN_DELTA = 0.01F;
     private static final float RANDOM_FACTOR_MIN = 0.35F;
     private static final float RANDOM_FACTOR_MAX = 0.65F;
     private static final float SPEED_FACTOR = 0.05f;
+    private static final float DEFENSE_FACTOR = 0.05f;
 
     private final AttributeDirection preferredDirection;
     private AttributeDirection resolvedDirection;
@@ -147,7 +148,7 @@ public class EnhanceAttributeAction extends AbstractStandardAction {
             case STRENGTH -> npc.addStrengthBonus(delta);
             case HEALTH -> npc.addHealthBonus(delta);
             case SPEED -> npc.addSpeedBonus(delta * SPEED_FACTOR);
-            case DEFENSE -> npc.addDefenseBonus(delta);
+            case DEFENSE -> npc.addDefenseBonus(delta * DEFENSE_FACTOR);
             case SENSOR -> npc.addSensorBonus(delta);
             default -> {}
         }
