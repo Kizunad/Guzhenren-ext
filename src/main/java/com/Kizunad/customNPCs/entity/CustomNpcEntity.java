@@ -993,7 +993,7 @@ public class CustomNpcEntity extends PathfinderMob {
             inventory.setItem(totemSlot, ItemStack.EMPTY);
         }
         this.setHealth(1.0F);
-        this.removeAllEffects();
+        this.clearEffectsSafely();
         this.addEffect(
             new MobEffectInstance(
                 MobEffects.REGENERATION,
@@ -1017,6 +1017,20 @@ public class CustomNpcEntity extends PathfinderMob {
         );
         this.level().broadcastEntityEvent(this, TOTEM_USE_EVENT);
         return true;
+    }
+
+    /**
+     * 图腾触发时需要移除全部药水效果，但 removeAllEffects 会在效果回调中修改
+     * activeEffects 导致 ConcurrentModificationException，这里复制快照后逐个移除。
+     */
+    private void clearEffectsSafely() {
+        if (this.level().isClientSide()) {
+            return;
+        }
+        List<MobEffectInstance> snapshot = new ArrayList<>(this.getActiveEffects());
+        for (MobEffectInstance effectInstance : snapshot) {
+            this.removeEffect(effectInstance.getEffect());
+        }
     }
 
     @Override
