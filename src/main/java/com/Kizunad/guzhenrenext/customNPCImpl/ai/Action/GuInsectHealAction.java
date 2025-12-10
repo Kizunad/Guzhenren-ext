@@ -20,8 +20,18 @@ public class GuInsectHealAction implements HealCompatRegistry.HealCompatHandler 
     private static final Logger LOGGER = LoggerFactory.getLogger(
         GuInsectHealAction.class
     );
+    private static final long DEFAULT_COOLDOWN_TICKS = 40L;
     private static final int MAIN_HAND_SLOT = -1;
     private static final int OFF_HAND_SLOT = -2;
+    private final NpcCooldownTracker cooldownTracker;
+
+    public GuInsectHealAction() {
+        this(DEFAULT_COOLDOWN_TICKS);
+    }
+
+    public GuInsectHealAction(long cooldownTicks) {
+        this.cooldownTracker = new NpcCooldownTracker(cooldownTicks);
+    }
 
     @Override
     public HealCompatRegistry.HealDecision handle(
@@ -31,31 +41,40 @@ public class GuInsectHealAction implements HealCompatRegistry.HealCompatHandler 
         if (patient == null || patient.level().isClientSide()) {
             return HealCompatRegistry.HealDecision.CONTINUE;
         }
+        if (cooldownTracker.shouldThrottle(patient)) {
+            return HealCompatRegistry.HealDecision.CONTINUE;
+        }
 
         // 先检查主手/副手，避免额外搬运
         ItemStack main = patient.getItemInHand(InteractionHand.MAIN_HAND);
+        boolean proposed = false;
         if (GuInsectUtil.isHealGu(main)) {
             context.propose(main, MAIN_HAND_SLOT);
-            return HealCompatRegistry.HealDecision.CONTINUE;
-        }
-        ItemStack off = patient.getItemInHand(InteractionHand.OFF_HAND);
-        if (GuInsectUtil.isHealGu(off)) {
-            context.propose(off, OFF_HAND_SLOT);
-            return HealCompatRegistry.HealDecision.CONTINUE;
-        }
-
-        NpcInventory inventory = context.getMind().getInventory();
-        for (int i = 0; i < inventory.getMainSize(); i++) {
-            ItemStack stack = inventory.getItem(i);
-            if (GuInsectUtil.isHealGu(stack)) {
-                context.propose(stack, i);
-                LOGGER.debug(
-                    "[GuInsectHealAction] 发现治疗蛊虫，槽位 {}: {}",
-                    i,
-                    stack.getHoverName().getString()
-                );
-                break;
+            proposed = true;
+        } else {
+            ItemStack off = patient.getItemInHand(InteractionHand.OFF_HAND);
+            if (GuInsectUtil.isHealGu(off)) {
+                context.propose(off, OFF_HAND_SLOT);
+                proposed = true;
+            } else {
+                NpcInventory inventory = context.getMind().getInventory();
+                for (int i = 0; i < inventory.getMainSize(); i++) {
+                    ItemStack stack = inventory.getItem(i);
+                    if (GuInsectUtil.isHealGu(stack)) {
+                        context.propose(stack, i);
+                        LOGGER.debug(
+                            "[GuInsectHealAction] 发现治疗蛊虫，槽位 {}: {}",
+                            i,
+                            stack.getHoverName().getString()
+                        );
+                        proposed = true;
+                        break;
+                    }
+                }
             }
+        }
+        if (proposed) {
+            cooldownTracker.markUsed(patient);
         }
 
         return HealCompatRegistry.HealDecision.CONTINUE;

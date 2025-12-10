@@ -2,40 +2,50 @@ package com.Kizunad.customNPCs.ai.decision.goals;
 
 import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.interaction.MaterialValueManager;
 import com.Kizunad.customNPCs.ai.inventory.NpcInventory;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
-import com.Kizunad.customNPCs.ai.interaction.MaterialValueManager;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 将背包内多余的盔甲拆解为材料点：每个部位仅保留一件最高等级，其余直接转化为材料。
+ * 压缩盔甲库存：当背包内某部位盔甲超过两件时，只保留最高品质的两件，其余拆解为材料点。
  */
-public class ArmorToMaterialGoal implements IGoal {
+public class CompressArmorGoal implements IGoal {
 
     public static final String LLM_USAGE_DESC =
-        "ArmorToMaterialGoal: keep only one best armor per slot in inventory, convert redundant armor into "
-            + "material points.";
+        "CompressArmorGoal: keep at most two best armor pieces per slot in inventory, "
+            + "recycle the rest into material points.";
 
     static {
         LlmPromptRegistry.register(LLM_USAGE_DESC);
     }
 
-    private static final float PRIORITY = 0.12F; // 低于收集/制作
+    private static final float PRIORITY = 0.16F;
     private static final int COOLDOWN_TICKS = 200;
+    private static final int MAX_ARMOR_PER_SLOT = 2;
+    private static final Comparator<ArmorEntry> ENTRY_ORDER = Comparator
+        .comparingInt(ArmorEntry::tier)
+        .reversed()
+        .thenComparingInt(ArmorEntry::damage)
+        .thenComparingInt(ArmorEntry::slotIndex);
+
     private long nextAllowedGameTime;
     private boolean finished;
 
     @Override
     public String getName() {
-        return "armor_to_material";
+        return "compress_armor";
     }
 
     @Override
@@ -57,32 +67,33 @@ public class ArmorToMaterialGoal implements IGoal {
         }
         nextAllowedGameTime = entity.level().getGameTime() + COOLDOWN_TICKS;
 
-        int salvaged = salvageExtraArmor(npc, mind.getInventory());
+        CompressResult result = compressArmor(npc, mind.getInventory());
         finished = true;
 
-        if (salvaged > 0) {
+        if (result.removed() > 0) {
             MindLog.decision(
                 MindLogLevel.INFO,
-                "ArmorToMaterialGoal 拆解多余盔甲 x{}，当前材料 {}",
-                salvaged,
+                "CompressArmorGoal 拆解多余盔甲 {} 件，返还材料 {}，当前材料 {}",
+                result.removed(),
+                result.gained(),
                 npc.getMaterial()
             );
         } else {
             MindLog.decision(
                 MindLogLevel.DEBUG,
-                "ArmorToMaterialGoal 无多余盔甲可拆解"
+                "CompressArmorGoal 未发现多余盔甲"
             );
         }
     }
 
     @Override
     public void tick(INpcMind mind, LivingEntity entity) {
-        // 一次性处理
+        // 一次性操作，无需逐 tick 逻辑
     }
 
     @Override
     public void stop(INpcMind mind, LivingEntity entity) {
-        // 无清理
+        // 无额外清理
     }
 
     @Override
@@ -90,7 +101,7 @@ public class ArmorToMaterialGoal implements IGoal {
         if (!(entity instanceof CustomNpcEntity)) {
             return true;
         }
-        return finished || !hasExtraArmor(mind.getInventory());
+        return finished || !hasOverflowArmor(mind.getInventory());
     }
 
     private boolean canEngage(INpcMind mind, LivingEntity entity) {
@@ -106,16 +117,11 @@ public class ArmorToMaterialGoal implements IGoal {
         if (mind.getMemory().hasMemory(WorldStateKeys.IN_DANGER)) {
             return false;
         }
-        return hasExtraArmor(mind.getInventory());
+        return hasOverflowArmor(mind.getInventory());
     }
 
-    /**
-     * 仅背包判定（不动已装备的盔甲）。
-     */
-    private boolean hasExtraArmor(NpcInventory inventory) {
-        Map<EquipmentSlot, Integer> bestTier = computeBestTier(inventory);
-        Map<EquipmentSlot, Integer> kept = new EnumMap<>(EquipmentSlot.class);
-
+    private boolean hasOverflowArmor(NpcInventory inventory) {
+        Map<EquipmentSlot, Integer> counts = new EnumMap<>(EquipmentSlot.class);
         for (int i = 0; i < inventory.size(); i++) {
             ItemStack stack = inventory.getItem(i);
             EquipmentSlot slot = ArmorTierHelper.slotOf(stack);
@@ -123,26 +129,46 @@ public class ArmorToMaterialGoal implements IGoal {
             if (slot == null || tier < 0) {
                 continue;
             }
-            int best = bestTier.getOrDefault(slot, -1);
-            if (tier < best) {
+            int next = counts.getOrDefault(slot, 0) + 1;
+            if (next > MAX_ARMOR_PER_SLOT) {
                 return true;
             }
-            if (tier == best) {
-                int keptCount = kept.getOrDefault(slot, 0);
-                if (keptCount >= 1) {
-                    return true;
-                }
-                kept.put(slot, keptCount + 1);
-            }
+            counts.put(slot, next);
         }
         return false;
     }
 
-    private int salvageExtraArmor(CustomNpcEntity npc, NpcInventory inventory) {
-        Map<EquipmentSlot, Integer> bestTier = computeBestTier(inventory);
-        Map<EquipmentSlot, Integer> kept = new EnumMap<>(EquipmentSlot.class);
-        int salvaged = 0;
+    private CompressResult compressArmor(
+        CustomNpcEntity npc,
+        NpcInventory inventory
+    ) {
+        Map<EquipmentSlot, List<ArmorEntry>> grouped = groupBySlot(inventory);
+        int removed = 0;
+        float gained = 0.0F;
 
+        for (List<ArmorEntry> entries : grouped.values()) {
+            entries.sort(ENTRY_ORDER);
+            for (int i = MAX_ARMOR_PER_SLOT; i < entries.size(); i++) {
+                ArmorEntry extra = entries.get(i);
+                float gain = dismantle(
+                    npc,
+                    inventory,
+                    extra.slotIndex(),
+                    extra.stack()
+                );
+                removed++;
+                gained += gain;
+            }
+        }
+        return new CompressResult(removed, gained);
+    }
+
+    private Map<EquipmentSlot, List<ArmorEntry>> groupBySlot(
+        NpcInventory inventory
+    ) {
+        Map<EquipmentSlot, List<ArmorEntry>> grouped = new EnumMap<>(
+            EquipmentSlot.class
+        );
         for (int i = 0; i < inventory.size(); i++) {
             ItemStack stack = inventory.getItem(i);
             EquipmentSlot slot = ArmorTierHelper.slotOf(stack);
@@ -150,59 +176,41 @@ public class ArmorToMaterialGoal implements IGoal {
             if (slot == null || tier < 0) {
                 continue;
             }
-
-            int best = bestTier.getOrDefault(slot, -1);
-            if (tier < best) {
-                salvaged += dismantle(npc, inventory, i, stack);
-                continue;
-            }
-
-            if (tier == best) {
-                int keptCount = kept.getOrDefault(slot, 0);
-                if (keptCount >= 1) {
-                    salvaged += dismantle(npc, inventory, i, stack);
-                } else {
-                    kept.put(slot, keptCount + 1);
-                }
-            }
+            grouped
+                .computeIfAbsent(slot, key -> new ArrayList<>())
+                .add(new ArmorEntry(i, stack, tier, stack.getDamageValue()));
         }
-        return salvaged;
+        return grouped;
     }
 
-    private int dismantle(
+    private float dismantle(
         CustomNpcEntity npc,
         NpcInventory inventory,
         int slotIndex,
         ItemStack stack
     ) {
-        inventory.setItem(slotIndex, ItemStack.EMPTY);
         float gain = MaterialValueManager
             .getInstance()
             .getMaterialValue(stack);
-        npc.addMaterial(gain);
+        inventory.setItem(slotIndex, ItemStack.EMPTY);
+        if (gain > 0.0F) {
+            npc.addMaterial(gain);
+        }
         MindLog.execution(
             MindLogLevel.INFO,
-            "ArmorToMaterialGoal 拆解盔甲槽位 {}，返还材料 {}",
+            "CompressArmorGoal 拆解槽位 {}，转化材料 {}",
             slotIndex,
             gain
         );
-        return 1;
+        return gain;
     }
 
-    private Map<EquipmentSlot, Integer> computeBestTier(NpcInventory inventory) {
-        Map<EquipmentSlot, Integer> bestTier = new EnumMap<>(EquipmentSlot.class);
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack stack = inventory.getItem(i);
-            EquipmentSlot slot = ArmorTierHelper.slotOf(stack);
-            int tier = ArmorTierHelper.tierOf(stack);
-            if (slot == null || tier < 0) {
-                continue;
-            }
-            int current = bestTier.getOrDefault(slot, -1);
-            if (tier > current) {
-                bestTier.put(slot, tier);
-            }
-        }
-        return bestTier;
-    }
+    private record ArmorEntry(
+        int slotIndex,
+        ItemStack stack,
+        int tier,
+        int damage
+    ) {}
+
+    private record CompressResult(int removed, float gained) {}
 }

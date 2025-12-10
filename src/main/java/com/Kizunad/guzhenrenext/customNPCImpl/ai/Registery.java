@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.customNPCImpl.ai;
 import com.Kizunad.customNPCs.ai.NpcMindRegistry;
 import com.Kizunad.customNPCs.ai.actions.registry.AttackCompatRegistry;
 import com.Kizunad.customNPCs.ai.actions.registry.HealCompatRegistry;
+import com.Kizunad.customNPCs.ai.decision.registry.HuntTargetRegistry;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuInsectAttackAction;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuInsectHealAction;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuzhenrenPlaceholderAction;
@@ -10,6 +11,10 @@ import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.CraftAttackGuInsectGoal;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.CraftHealingGuInsectGoal;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.EnhanceHunpoGoal;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal.WenyunKongqiaoGoal;
+import java.util.List;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 
 /**
  * 蛊真人扩展 AI 组件注册中心。
@@ -37,6 +42,7 @@ public class Registery {
         registerSensors();
 
         registerCompatHandlers();
+        registerHuntTargets();
 
         initialized = true;
     }
@@ -80,5 +86,21 @@ public class Registery {
     private static void registerCompatHandlers() {
         AttackCompatRegistry.register(new GuInsectAttackAction());
         HealCompatRegistry.register(new GuInsectHealAction());
+    }
+
+    /**
+     * 注册蛊真人敌对实体标签，避免 HuntGoal 与扩展模块耦合。
+     */
+    private static void registerHuntTargets() {
+        List<ResourceLocation> hostileTags = List.of(
+            ResourceLocation.parse("guzhenren:renzu"),
+            ResourceLocation.parse("guzhenren:shengwu"),
+            ResourceLocation.parse("guzhenren:youti"),
+            ResourceLocation.parse("guzhenren:lang")
+        );
+        hostileTags
+            .stream()
+            .map(id -> TagKey.create(Registries.ENTITY_TYPE, id))
+            .forEach(HuntTargetRegistry::registerTag);
     }
 }

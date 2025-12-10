@@ -32,8 +32,8 @@ import net.minecraft.world.item.ItemStack;
 public class CraftHealingGuInsectGoal extends AbstractGuzhenrenGoal {
 
     private static final float PRIORITY = 0.21F;
-    private static final int COOLDOWN_TICKS = 200;
-    private static final int MIN_HEAL_GU_STOCK = 1;
+    private static final int COOLDOWN_TICKS = 2000;
+    private static final int MIN_HEAL_GU_STOCK = 10;
     private static final float FALLBACK_MATERIAL_COST = 8.0F;
     private static final double TURN_COST_MULTIPLIER_BASE = 2.0D;
     private static final Map<Integer, TagKey<Item>> TURN_TAGS = Map.of(

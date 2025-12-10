@@ -10,12 +10,14 @@ import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.customNPCs.menu.NpcCraftMenu;
 import com.Kizunad.customNPCs.menu.NpcGiftMenu;
+import com.Kizunad.customNPCs.menu.NpcHireMenu;
 import com.Kizunad.customNPCs.menu.NpcMaterialMenu;
 import com.Kizunad.customNPCs.menu.NpcWorkMenu;
 import com.Kizunad.customNPCs.network.dto.DialogueOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -85,6 +87,8 @@ public record InteractActionPayload(
     private static final double POWER_TOUGHNESS_WEIGHT = 1.0D;
     private static final int OPPRESSION_MEMORY_DURATION = 120;
     private static final double OPPRESSION_MELEE_RANGE = 3.5D;
+    private static final double HIRE_COST_POWER_RATIO = 0.75D;
+    private static final double HIRE_COST_MIN = 20.0D;
 
     public static final CustomPacketPayload.Type<InteractActionPayload> TYPE =
         new CustomPacketPayload.Type<>(
@@ -273,16 +277,58 @@ public record InteractActionPayload(
         if (mind == null) {
             return;
         }
-        // 待实现：扣除金币/雇佣成本
-        mind
-            .getMemory()
-            .rememberLongTerm(WorldStateKeys.OWNER_UUID, player.getUUID());
-        mind
-            .getMemory()
-            .rememberLongTerm(WorldStateKeys.RELATIONSHIP_TYPE, "HIRED");
+        var memory = mind.getMemory();
+        UUID ownerId = memory.getMemory(WorldStateKeys.OWNER_UUID, UUID.class);
+        if (ownerId != null) {
+            if (ownerId.equals(player.getUUID())) {
+                player.displayClientMessage(
+                    Component.literal(
+                        npc.getDisplayName().getString() + " already works for you."
+                    ),
+                    false
+                );
+            } else {
+                player.displayClientMessage(
+                    Component.literal("This NPC already serves another player."),
+                    false
+                );
+            }
+            return;
+        }
+        UUID pendingCandidate = memory.getMemory(
+            WorldStateKeys.HIRE_CANDIDATE,
+            UUID.class
+        );
+        if (
+            pendingCandidate != null &&
+            !pendingCandidate.equals(player.getUUID())
+        ) {
+            player.displayClientMessage(
+                Component.literal("Another player is negotiating right now."),
+                false
+            );
+            return;
+        }
+
+        double requiredValue = calculateHireRequirement(npc);
+        memory.rememberLongTerm(WorldStateKeys.HIRE_REQUIRED_VALUE, requiredValue);
+        memory.rememberLongTerm(WorldStateKeys.HIRE_CANDIDATE, player.getUUID());
+        memory.rememberLongTerm(WorldStateKeys.HIRE_PENDING, true);
+
+        player.openMenu(
+            new SimpleMenuProvider(
+                (id, inv, p) -> new NpcHireMenu(id, inv, npc, mind.getInventory()),
+                npc.getDisplayName()
+            ),
+            buf -> buf.writeVarInt(npc.getId())
+        );
         player.displayClientMessage(
             Component.literal(
-                "You hired " + npc.getDisplayName().getString() + "!"
+                String.format(
+                    "Offer items worth at least %.1f to hire %s.",
+                    requiredValue,
+                    npc.getDisplayName().getString()
+                )
             ),
             false
         );
@@ -468,6 +514,11 @@ public record InteractActionPayload(
             attack * POWER_ATTACK_WEIGHT +
             armor * POWER_ARMOR_WEIGHT +
             toughness * POWER_TOUGHNESS_WEIGHT;
+    }
+
+    private static double calculateHireRequirement(CustomNpcEntity npc) {
+        double base = calculatePower(npc);
+        return Math.max(HIRE_COST_MIN, base * HIRE_COST_POWER_RATIO);
     }
 
     private static void rememberThreat(

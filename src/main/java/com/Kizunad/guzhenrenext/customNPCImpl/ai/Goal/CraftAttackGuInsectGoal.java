@@ -29,8 +29,8 @@ import net.minecraft.world.item.ItemStack;
 public class CraftAttackGuInsectGoal extends AbstractGuzhenrenGoal {
 
     private static final float PRIORITY = 0.22F;
-    private static final int COOLDOWN_TICKS = 200;
-    private static final int MIN_ATTACK_GU_STOCK = 1;
+    private static final int COOLDOWN_TICKS = 2000;
+    private static final int MIN_ATTACK_GU_STOCK = 10;
     private static final float FALLBACK_MATERIAL_COST = 8.0F;
     private static final double TURN_COST_MULTIPLIER_BASE = 2.0D;
     private static final Map<Integer, TagKey<Item>> TURN_TAGS = Map.of(
@@ -176,10 +176,7 @@ public class CraftAttackGuInsectGoal extends AbstractGuzhenrenGoal {
         return false;
     }
 
-    private CraftOption findCraftOption(
-        LivingEntity entity,
-        INpcMind mind
-    ) {
+    private CraftOption findCraftOption(LivingEntity entity, INpcMind mind) {
         GuzhenrenModVariables.PlayerVariables vars =
             GuCultivationHelper.getVariables(entity);
         int turn = clampTurn(vars);
@@ -200,16 +197,17 @@ public class CraftAttackGuInsectGoal extends AbstractGuzhenrenGoal {
 
         MaterialValueManager valueManager = MaterialValueManager.getInstance();
         List<CraftOption> options = new ArrayList<>();
-        double multiplier =
-            Math.pow(TURN_COST_MULTIPLIER_BASE, Math.max(0, turn - 1));
+        double multiplier = Math.pow(
+            TURN_COST_MULTIPLIER_BASE,
+            Math.max(0, turn - 1)
+        );
         for (Item item : candidates) {
             ItemStack stack = new ItemStack(item);
             float rawCost = valueManager.getMaterialValue(stack);
-            float effectiveCost =
-                (float) (
-                    (rawCost > 0.0F ? rawCost : FALLBACK_MATERIAL_COST) *
-                    multiplier
-                );
+            float effectiveCost = (float) ((rawCost > 0.0F
+                    ? rawCost
+                    : FALLBACK_MATERIAL_COST) *
+                multiplier);
             options.add(new CraftOption(item, tag, effectiveCost));
         }
 
@@ -218,8 +216,7 @@ public class CraftAttackGuInsectGoal extends AbstractGuzhenrenGoal {
     }
 
     private List<Item> getItemsByTag(TagKey<Item> tag) {
-        return BuiltInRegistries.ITEM
-            .getTag(tag)
+        return BuiltInRegistries.ITEM.getTag(tag)
             .map(holderSet ->
                 holderSet
                     .stream()
@@ -237,10 +234,7 @@ public class CraftAttackGuInsectGoal extends AbstractGuzhenrenGoal {
     }
 
     private static TagKey<Item> tag(String id) {
-        return TagKey.create(
-            Registries.ITEM,
-            ResourceLocation.parse(id)
-        );
+        return TagKey.create(Registries.ITEM, ResourceLocation.parse(id));
     }
 
     private boolean canStore(INpcMind mind, Item item) {

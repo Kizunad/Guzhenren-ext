@@ -17,6 +17,7 @@ import com.Kizunad.customNPCs.ai.decision.goals.GatherMaterialGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CommandGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.BrewHealingPotionGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.UpgradeArmorGoal;
+import com.Kizunad.customNPCs.ai.decision.goals.CompressArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftArmorGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftSwordGoal;
 import com.Kizunad.customNPCs.ai.decision.goals.CraftUndyingTotemGoal;
@@ -79,6 +80,7 @@ public final class NpcMindRegistry {
         registerGoal("idle", IdleGoal::new);
         registerGoal("gather_material", GatherMaterialGoal::new);
         registerGoal("compress_inventory", CompressInventoryGoal::new);
+        registerGoal("compress_armor", CompressArmorGoal::new);
         registerGoal("craft_armor", CraftArmorGoal::new);
         registerGoal("upgrade_armor", UpgradeArmorGoal::new);
         registerGoal("enchant_armor", EnchantArmorGoal::new);

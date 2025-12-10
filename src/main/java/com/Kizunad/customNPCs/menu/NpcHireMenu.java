@@ -155,6 +155,7 @@ public class NpcHireMenu extends AbstractContainerMenu {
     public void removed(Player player) {
         super.removed(player);
         if (!hireCompleted) {
+            clearHireState(player);
             returnItemsToPlayer(player);
         }
     }
@@ -237,6 +238,29 @@ public class NpcHireMenu extends AbstractContainerMenu {
             } else if (npc != null) {
                 npc.spawnAtLocation(stack);
             }
+        }
+    }
+
+    private void clearHireState(Player player) {
+        if (
+            npc == null ||
+            player == null ||
+            player.level().isClientSide() ||
+            !(player instanceof ServerPlayer serverPlayer)
+        ) {
+            return;
+        }
+        var mind = npc.getData(NpcMindAttachment.NPC_MIND);
+        if (mind == null) {
+            return;
+        }
+        java.util.UUID candidate = mind
+            .getMemory()
+            .getMemory(WorldStateKeys.HIRE_CANDIDATE, java.util.UUID.class);
+        if (candidate == null || candidate.equals(serverPlayer.getUUID())) {
+            mind.getMemory().forget(WorldStateKeys.HIRE_PENDING);
+            mind.getMemory().forget(WorldStateKeys.HIRE_REQUIRED_VALUE);
+            mind.getMemory().forget(WorldStateKeys.HIRE_CANDIDATE);
         }
     }
 

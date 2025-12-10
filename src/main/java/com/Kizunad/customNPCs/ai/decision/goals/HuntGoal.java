@@ -8,6 +8,7 @@ import com.Kizunad.customNPCs.ai.actions.common.RangedAttackItemAction;
 import com.Kizunad.customNPCs.ai.actions.config.ActionConfig;
 import com.Kizunad.customNPCs.ai.actions.util.NavigationUtil;
 import com.Kizunad.customNPCs.ai.decision.IGoal;
+import com.Kizunad.customNPCs.ai.decision.registry.HuntTargetRegistry;
 import com.Kizunad.customNPCs.ai.llm.LlmPromptRegistry;
 import com.Kizunad.customNPCs.ai.util.EntityRelationUtil;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
@@ -323,7 +324,8 @@ public class HuntGoal implements IGoal {
         if (hunter == target || !target.isAlive()) {
             return false;
         }
-        if (EntityRelationUtil.isAlly(hunter, target)) {
+        boolean registeredHostile = isRegisteredTarget(target);
+        if (!registeredHostile && EntityRelationUtil.isAlly(hunter, target)) {
             return false;
         }
         if (
@@ -360,6 +362,10 @@ public class HuntGoal implements IGoal {
         }
         double ratio = target.getHealth() / max;
         return ratio <= LOW_VALUE_HP_RATIO;
+    }
+
+    private boolean isRegisteredTarget(LivingEntity target) {
+        return HuntTargetRegistry.isRegistered(target);
     }
 
 }

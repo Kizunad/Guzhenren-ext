@@ -26,15 +26,30 @@ public class GuInsectAttackAction
     private static final Logger LOGGER = LoggerFactory.getLogger(
         GuInsectAttackAction.class
     );
+    private static final long DEFAULT_COOLDOWN_TICKS = 40L;
+
+    private final NpcCooldownTracker cooldownTracker;
+
+    public GuInsectAttackAction() {
+        this(DEFAULT_COOLDOWN_TICKS);
+    }
+
+    public GuInsectAttackAction(long cooldownTicks) {
+        this.cooldownTracker = new NpcCooldownTracker(cooldownTicks);
+    }
 
     @Override
     public AttackCompatRegistry.AttackDecision handle(
         AttackCompatRegistry.AttackContext context
     ) {
+        if (cooldownTracker.shouldThrottle(context.getAttacker())) {
+            return AttackCompatRegistry.AttackDecision.CONTINUE;
+        }
         if (!ensureAttackGuEquipped(context)) {
             return AttackCompatRegistry.AttackDecision.CONTINUE;
         }
         if (triggerGuItemUse(context)) {
+            cooldownTracker.markUsed(context.getAttacker());
             return AttackCompatRegistry.AttackDecision.HANDLED;
         }
         return AttackCompatRegistry.AttackDecision.CONTINUE;
