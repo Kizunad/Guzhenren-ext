@@ -6,6 +6,10 @@ import com.Kizunad.guzhenrenext.customNPCImpl.util.GuInsectUtil;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.generated.itemUse.GuzhenrenItemDispatcher;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,29 +43,36 @@ public class GuInsectAttackAction
     private boolean ensureAttackGuEquipped(
         AttackCompatRegistry.AttackContext context
     ) {
+        NpcInventory inventory = context.getMind().getInventory();
+        List<Integer> validSlots = new ArrayList<>();
+        for (int i = 0; i < inventory.getMainSize(); i++) {
+            if (GuInsectUtil.isAttackGu(inventory.getItem(i))) {
+                validSlots.add(i);
+            }
+        }
+
+        if (!validSlots.isEmpty()) {
+            int slot = validSlots.get(new Random().nextInt(validSlots.size()));
+            ItemStack guStack = inventory.getItem(slot);
+            ItemStack previous = context.getAttacker().getMainHandItem().copy();
+            context
+                .getAttacker()
+                .setItemInHand(InteractionHand.MAIN_HAND, guStack);
+            inventory.setItem(slot, previous);
+            context.updateWeapon(context.getAttacker().getMainHandItem());
+
+            LOGGER.info(
+                "[GuInsectAttackAction] 随机切换主手蛊虫以执行攻击: {}",
+                guStack.getHoverName().getString()
+            );
+            return true;
+        }
+
         if (GuInsectUtil.isAttackGu(context.getWeapon())) {
             return true;
         }
 
-        NpcInventory inventory = context.getMind().getInventory();
-        int slot = findAttackGuSlot(inventory);
-        if (slot == -1) {
-            return false;
-        }
-
-        ItemStack guStack = inventory.getItem(slot);
-        ItemStack previous = context.getAttacker().getMainHandItem().copy();
-        context
-            .getAttacker()
-            .setItemInHand(InteractionHand.MAIN_HAND, guStack);
-        inventory.setItem(slot, previous);
-        context.updateWeapon(context.getAttacker().getMainHandItem());
-
-        LOGGER.info(
-            "[GuInsectAttackAction] 切换主手蛊虫以执行攻击: {}",
-            guStack.getHoverName().getString()
-        );
-        return true;
+        return false;
     }
 
     private boolean triggerGuItemUse(
@@ -71,6 +82,15 @@ public class GuInsectAttackAction
         if (weapon.isEmpty() || !GuInsectUtil.isAttackGu(weapon)) {
             return false;
         }
+
+        // 强制瞄准目标眼部，防止攻击错位
+        if (context.getTarget() != null) {
+            context.getAttacker().lookAt(
+                EntityAnchorArgument.Anchor.EYES, 
+                context.getTarget().getEyePosition()
+            );
+        }
+
         try {
             boolean success =
                 GuzhenrenItemDispatcher.dispatch(context.getAttacker(), weapon);
@@ -85,14 +105,5 @@ public class GuInsectAttackAction
             LOGGER.error("[GuInsectAttackAction] 调用蛊虫分发表失败", e);
             return false;
         }
-    }
-
-    private int findAttackGuSlot(NpcInventory inventory) {
-        for (int i = 0; i < inventory.getMainSize(); i++) {
-            if (GuInsectUtil.isAttackGu(inventory.getItem(i))) {
-                return i;
-            }
-        }
-        return -1;
     }
 }
