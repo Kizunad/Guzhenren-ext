@@ -9,11 +9,10 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
  * 蛊虫战斗逻辑服务。
@@ -27,7 +26,7 @@ public final class GuCombatService {
     private GuCombatService() {}
 
     @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void onLivingHurt(LivingIncomingDamageEvent event) {
         if (event.getEntity().level().isClientSide()) {
             return;
         }
@@ -43,16 +42,27 @@ public final class GuCombatService {
             KongqiaoData attackerData = KongqiaoAttachments.getData(attacker);
             // 只有当攻击者拥有空窍数据时才触发
             if (attackerData != null) {
-                float newDamage = handleAttackEffects(attacker, victim, event.getAmount(), attackerData.getKongqiaoInventory());
+                float newDamage = handleAttackEffects(
+                    attacker,
+                    victim,
+                    event.getAmount(),
+                    attackerData.getKongqiaoInventory()
+                );
                 event.setAmount(newDamage);
             }
         }
 
         // 2. 处理受害者触发 (如果受害者拥有空窍)
-        // 注意：这里使用的是更新后的 event.getAmount()，即如果攻击者增加了伤害，受害者是在增加后的基础上进行减免
+        // 注意：使用的是更新后的 event.getAmount()；若攻击者增加了伤害，
+        // 受害者以新伤害为基础进行减免
         KongqiaoData victimData = KongqiaoAttachments.getData(victim);
         if (victimData != null) {
-            float finalDamage = handleHurtEffects(victim, event.getSource(), event.getAmount(), victimData.getKongqiaoInventory());
+            float finalDamage = handleHurtEffects(
+                victim,
+                event.getSource(),
+                event.getAmount(),
+                victimData.getKongqiaoInventory()
+            );
             event.setAmount(finalDamage);
         }
     }
@@ -60,23 +70,38 @@ public final class GuCombatService {
     /**
      * 执行攻击特效。
      */
-    private static float handleAttackEffects(LivingEntity attacker, LivingEntity target, float damage, KongqiaoInventory inventory) {
+    private static float handleAttackEffects(
+        LivingEntity attacker,
+        LivingEntity target,
+        float damage,
+        KongqiaoInventory inventory
+    ) {
         float currentDamage = damage;
         int unlockedSlots = inventory.getSettings().getUnlockedSlots();
 
         for (int i = 0; i < unlockedSlots; i++) {
             ItemStack stack = inventory.getItem(i);
-            if (stack.isEmpty()) continue;
+            if (stack.isEmpty()) {
+                continue;
+            }
 
             NianTouData data = NianTouDataManager.getData(stack);
-            if (data == null || data.usages() == null) continue;
+            if (data == null || data.usages() == null) {
+                continue;
+            }
 
             for (NianTouData.Usage usage : data.usages()) {
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
                 if (effect != null) {
                     try {
                         // TODO: 可以在此处添加真元消耗判定
-                        currentDamage = effect.onAttack(attacker, target, currentDamage, stack, usage);
+                        currentDamage = effect.onAttack(
+                            attacker,
+                            target,
+                            currentDamage,
+                            stack,
+                            usage
+                        );
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -89,23 +114,38 @@ public final class GuCombatService {
     /**
      * 执行受伤特效。
      */
-    private static float handleHurtEffects(LivingEntity victim, net.minecraft.world.damagesource.DamageSource source, float damage, KongqiaoInventory inventory) {
+    private static float handleHurtEffects(
+        LivingEntity victim,
+        net.minecraft.world.damagesource.DamageSource source,
+        float damage,
+        KongqiaoInventory inventory
+    ) {
         float currentDamage = damage;
         int unlockedSlots = inventory.getSettings().getUnlockedSlots();
 
         for (int i = 0; i < unlockedSlots; i++) {
             ItemStack stack = inventory.getItem(i);
-            if (stack.isEmpty()) continue;
+            if (stack.isEmpty()) {
+                continue;
+            }
 
             NianTouData data = NianTouDataManager.getData(stack);
-            if (data == null || data.usages() == null) continue;
+            if (data == null || data.usages() == null) {
+                continue;
+            }
 
             for (NianTouData.Usage usage : data.usages()) {
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
                 if (effect != null) {
                     try {
                         // TODO: 可以在此处添加真元消耗判定
-                        currentDamage = effect.onHurt(victim, source, currentDamage, stack, usage);
+                        currentDamage = effect.onHurt(
+                            victim,
+                            source,
+                            currentDamage,
+                            stack,
+                            usage
+                        );
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

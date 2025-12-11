@@ -1,21 +1,27 @@
 package com.Kizunad.guzhenrenext.kongqiao.client.ui;
 
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoI18n;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.menu.NianTouMenu;
+import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
+import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.InventoryUI;
 import com.Kizunad.tinyUI.controls.Label;
 import com.Kizunad.tinyUI.controls.ScrollContainer;
-import com.Kizunad.tinyUI.controls.SolidPanel;
 import com.Kizunad.tinyUI.controls.UISlot;
 import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
-import com.Kizunad.tinyUI.layout.GridLayout;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
 import com.Kizunad.tinyUI.theme.Theme;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 
@@ -30,7 +36,33 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     private static final int PANEL_PADDING = 10;
     private static final int LEFT_WIDTH = 200;
     private static final int RIGHT_WIDTH = 200;
-    private static final int CENTER_WIDTH = 200; // Reduced to fit typical screen if needed, but 750 is fine for Large GUI.
+    // Reduced以适配常规屏幕宽度，750 在大界面下仍可接受
+    private static final int CENTER_WIDTH = 200;
+    private static final int TITLE_HEIGHT = 16;
+    private static final int CONTENT_Y = 40;
+    private static final int CONTENT_HEIGHT = 250;
+    private static final int PLAYER_INV_GAP_Y = 20;
+    private static final int PLAYER_INV_START_INDEX = 1;
+    private static final int PLAYER_SLOT_SIZE = 18;
+    private static final int PLAYER_SLOT_GAP = 2;
+    private static final int PLAYER_SLOT_PADDING = 0;
+    private static final int SMALL_PADDING = 5;
+    private static final int DOUBLE_PADDING = 10;
+    private static final int LABEL_HEIGHT = 12;
+    private static final int SCROLL_TOP = 20;
+    private static final int SCROLL_BOTTOM_MARGIN = 25;
+    private static final int CONTENT_MIN_HEIGHT = 10;
+    private static final int SLOT_SIZE = 18;
+    private static final int SLOT_Y = 40;
+    private static final int BUTTON_WIDTH = 80;
+    private static final int BUTTON_HEIGHT = 20;
+    private static final int BUTTON_GAP = 20;
+    private static final int TIME_OFFSET = 30;
+    private static final int COST_OFFSET = 15;
+    private static final int RESULT_TEXT_TOP = 50;
+    private static final int OUTPUT_BOTTOM_MARGIN = 30;
+    private static final int HISTORY_ITEM_HEIGHT = 12;
+    private static final int HISTORY_ITEM_STEP = 14;
 
     // Actually 750 is quite wide (MC default is often 427 for large scale).
     // If GUI scale is Auto, 750 might be too big for smaller screens.
@@ -50,6 +82,12 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
         Component title
     ) {
         super(menu, playerInventory, title);
+    }
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        updateData();
     }
 
     @Override
@@ -85,24 +123,28 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
             PANEL_PADDING,
             PANEL_PADDING,
             WINDOW_WIDTH - PANEL_PADDING * 2,
-            16
+            TITLE_HEIGHT
         );
         mainPanel.addChild(titleLabel);
 
-        int contentY = 40;
-        int contentHeight = 250;
+        int contentY = CONTENT_Y;
+        int contentHeight = CONTENT_HEIGHT;
+
+        // Calculate total content width including padding between panels
+        int totalContentWidth = LEFT_WIDTH + CENTER_WIDTH + RIGHT_WIDTH + (PANEL_PADDING * 2);
+        int startX = (WINDOW_WIDTH - totalContentWidth) / 2;
 
         // Left Panel: History
         buildHistoryPanel(
             mainPanel,
-            PANEL_PADDING,
+            startX,
             contentY,
             LEFT_WIDTH,
             contentHeight
         );
 
         // Center Panel: Slot + Controls
-        int centerX = PANEL_PADDING + LEFT_WIDTH + PANEL_PADDING;
+        int centerX = startX + LEFT_WIDTH + PANEL_PADDING;
         buildCenterPanel(
             mainPanel,
             centerX,
@@ -123,12 +165,12 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 
         // Player Inventory (Bottom)
         // Positioned below content
-        int playerInvY = contentY + contentHeight + 20;
+        int playerInvY = contentY + contentHeight + PLAYER_INV_GAP_Y;
         UIElement playerGrid = InventoryUI.playerInventoryGrid(
-            1, // Start index for player slots
-            18, // Slot size
-            2, // Gap
-            0, // Padding
+            PLAYER_INV_START_INDEX,
+            PLAYER_SLOT_SIZE,
+            PLAYER_SLOT_GAP,
+            PLAYER_SLOT_PADDING,
             theme
         );
         // Center player inventory
@@ -140,6 +182,8 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
             playerGrid.getHeight()
         );
         mainPanel.addChild(playerGrid);
+
+        updateData();
     }
 
     private void buildHistoryPanel(
@@ -157,16 +201,58 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
             KongqiaoI18n.text(KongqiaoI18n.NIANTOU_HISTORY_LABEL),
             theme
         );
-        label.setFrame(5, 5, w - 10, 12);
+        label.setFrame(
+            SMALL_PADDING,
+            SMALL_PADDING,
+            w - DOUBLE_PADDING,
+            LABEL_HEIGHT
+        );
         panel.addChild(label);
 
         ScrollContainer scroll = new ScrollContainer(theme);
-        scroll.setFrame(5, 20, w - 10, h - 25);
+        scroll.setFrame(
+            SMALL_PADDING,
+            SCROLL_TOP,
+            w - DOUBLE_PADDING,
+            h - SCROLL_BOTTOM_MARGIN
+        );
 
-        // Placeholder content for history
+        // Content container
         UIElement content = new UIElement() {};
-        content.setFrame(0, 0, w - 20, 10); // Expands with children
-        // Add some dummy labels or leave empty for now
+        
+        // Populate history
+        if (this.minecraft != null && this.minecraft.player != null) {
+            NianTouUnlocks unlocks =
+                KongqiaoAttachments.getUnlocks(this.minecraft.player);
+
+            if (unlocks != null) {
+                int itemY = 0;
+                for (ResourceLocation id : unlocks.getUnlockedItems()) {
+                    Item item = BuiltInRegistries.ITEM.get(id);
+                    if (item != Items.AIR) {
+                        Label itemLabel = new Label(item.getDescription(), theme);
+                        itemLabel.setFrame(
+                            0,
+                            itemY,
+                            w - DOUBLE_PADDING * 2,
+                            HISTORY_ITEM_HEIGHT
+                        );
+                        content.addChild(itemLabel);
+                        itemY += HISTORY_ITEM_STEP;
+                    }
+                }
+                content.setFrame(
+                    0,
+                    0,
+                    w - DOUBLE_PADDING * 2,
+                    Math.max(CONTENT_MIN_HEIGHT, itemY)
+                );
+            } else {
+                content.setFrame(0, 0, w - DOUBLE_PADDING * 2, CONTENT_MIN_HEIGHT);
+            }
+        } else {
+            content.setFrame(0, 0, w - DOUBLE_PADDING * 2, CONTENT_MIN_HEIGHT);
+        }
 
         scroll.setContent(content);
         panel.addChild(scroll);
@@ -179,39 +265,36 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
         int w,
         int h
     ) {
-        // Transparent container for center
-        UIElement container = new UIElement() {};
-        container.setFrame(x, y, w, h);
-        parent.addChild(container);
+        SolidPanel panel = new SolidPanel(theme);
+        panel.setFrame(x, y, w, h);
+        parent.addChild(panel);
 
-        // Slot in the middle of this area
-        UISlot slot = new UISlot(0, theme);
-        int slotSize = 18;
-        // Scale slot up visually? TinyUI slot is fixed size typically unless scaled.
-        // Diagram shows a 30x30 box. Let's just center the 18x18 slot or use a background.
-        int slotX = (w - slotSize) / 2;
-        int slotY = 40;
-        slot.setFrame(slotX, slotY, slotSize, slotSize);
-        container.addChild(slot);
+        UISlot inputSlot = new UISlot(0, theme);
+        int slotX = x + (w - SLOT_SIZE) / 2;
+        inputSlot.setFrame(slotX - x, SLOT_Y, SLOT_SIZE, SLOT_SIZE);
+        panel.addChild(inputSlot);
 
-        // Identify Button
-        identifyButton = new Button(
-            KongqiaoI18n.text(KongqiaoI18n.NIANTOU_BUTTON_IDENTIFY),
-            theme
+        identifyButton =
+            new Button(
+                KongqiaoI18n.text(KongqiaoI18n.NIANTOU_BUTTON_IDENTIFY),
+                theme
+            );
+        int buttonX = (w - BUTTON_WIDTH) / 2;
+        identifyButton.setFrame(
+            buttonX,
+            SLOT_Y + SLOT_SIZE + BUTTON_GAP,
+            BUTTON_WIDTH,
+            BUTTON_HEIGHT
         );
-        identifyButton.setFrame((w - 80) / 2, slotY + slotSize + 20, 80, 20);
-        identifyButton.setOnClick(this::onIdentifyClick);
-        container.addChild(identifyButton);
-
-        // Time Label
-        timeLabel = new Label(Component.literal("Time: --"), theme);
-        timeLabel.setFrame(10, identifyButton.getY() + 30, w - 20, 12);
-        container.addChild(timeLabel);
-
-        // Cost Label
-        costLabel = new Label(Component.literal("Cost: --"), theme);
-        costLabel.setFrame(10, timeLabel.getY() + 15, w - 20, 12);
-        container.addChild(costLabel);
+        identifyButton.setOnClick(() -> {
+            if (this.minecraft != null && this.minecraft.gameMode != null) {
+                this.minecraft.gameMode.handleInventoryButtonClick(
+                    this.menu.containerId,
+                    NianTouMenu.IDENTIFY_BUTTON_ID
+                );
+            }
+        });
+        panel.addChild(identifyButton);
     }
 
     private void buildOutputPanel(
@@ -225,44 +308,50 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
         panel.setFrame(x, y, w, h);
         parent.addChild(panel);
 
-        Label label = new Label(
-            KongqiaoI18n.text(KongqiaoI18n.NIANTOU_OUTPUT_LABEL),
-            theme
-        );
-        label.setFrame(5, 5, w - 10, 12);
-        panel.addChild(label);
-
-        resultLabel = new Label(
-            KongqiaoI18n.text(KongqiaoI18n.NIANTOU_RESULT_LABEL),
-            theme
-        );
-        resultLabel.setFrame(5, 25, w - 10, h - 30);
-        panel.addChild(resultLabel);
-    }
-
-    private void onIdentifyClick() {
-        if (this.minecraft != null && this.minecraft.gameMode != null) {
-            // Send click to container. ID 99 for identify action.
-            this.minecraft.gameMode.handleInventoryButtonClick(
-                menu.containerId,
-                99
+        resultLabel =
+            new Label(
+                KongqiaoI18n.text(KongqiaoI18n.NIANTOU_RESULT_LABEL),
+                theme
             );
-        }
-    }
+        resultLabel.setFrame(
+            SMALL_PADDING,
+            RESULT_TEXT_TOP,
+            w - DOUBLE_PADDING,
+            h - OUTPUT_BOTTOM_MARGIN
+        );
+        panel.addChild(resultLabel);
 
-    @Override
-    public void render(
-        net.minecraft.client.gui.GuiGraphics guiGraphics,
-        int mouseX,
-        int mouseY,
-        float partialTick
-    ) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        updateData();
+        timeLabel =
+            new Label(
+                KongqiaoI18n.text(KongqiaoI18n.NIANTOU_TIME_LABEL),
+                theme
+            );
+        timeLabel.setFrame(
+            SMALL_PADDING,
+            SMALL_PADDING,
+            w - DOUBLE_PADDING,
+            LABEL_HEIGHT
+        );
+        panel.addChild(timeLabel);
+
+        costLabel =
+            new Label(
+                KongqiaoI18n.text(KongqiaoI18n.NIANTOU_COST_LABEL),
+                theme
+            );
+        costLabel.setFrame(
+            SMALL_PADDING,
+            SMALL_PADDING + LABEL_HEIGHT + SMALL_PADDING,
+            w - DOUBLE_PADDING,
+            LABEL_HEIGHT
+        );
+        panel.addChild(costLabel);
     }
 
     private void updateData() {
-        if (menu == null) return;
+        if (menu == null) {
+            return;
+        }
 
         int progress = menu.getProgress();
         int total = menu.getTotalTime();
@@ -270,17 +359,94 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 
         String timeStr = total > 0 ? (progress + " / " + total) : "--";
         timeLabel.setText(
-            Component.translatable(KongqiaoI18n.NIANTOU_TIME_LABEL).append(
-                ": " + timeStr
-            )
+            Component
+                .translatable(KongqiaoI18n.NIANTOU_TIME_LABEL)
+                .append(": " + timeStr)
         );
 
         costLabel.setText(
-            Component.translatable(KongqiaoI18n.NIANTOU_COST_LABEL).append(
-                ": " + cost
-            )
+            Component
+                .translatable(KongqiaoI18n.NIANTOU_COST_LABEL)
+                .append(": " + cost)
         );
 
-        // Update result text based on item if needed, or via separate packet/capability
+        // Update result text based on item in slot 0
+        if (menu.getContainer().getContainerSize() > 0) {
+            net.minecraft.world.item.ItemStack stack =
+                menu.getContainer().getItem(0);
+            if (!stack.isEmpty()) {
+                NianTouData data = NianTouDataManager.getData(stack);
+
+                if (data != null && data.usages() != null) {
+                    // Check unlocked status
+                    boolean unlocked = false;
+                    if (this.minecraft != null && this.minecraft.player != null) {
+                        NianTouUnlocks unlocks =
+                            KongqiaoAttachments.getUnlocks(this.minecraft.player);
+                        if (unlocks != null) {
+                            ResourceLocation id =
+                                BuiltInRegistries.ITEM.getKey(stack.getItem());
+                            unlocked = unlocks.isUnlocked(id);
+                        }
+                    }
+
+                    StringBuilder sb = new StringBuilder();
+                    if (unlocked) {
+                        sb.append(
+                                KongqiaoI18n
+                                    .text(KongqiaoI18n.NIANTOU_OUTPUT_LABEL)
+                                    .getString()
+                            )
+                            .append("\n");
+
+                        for (NianTouData.Usage usage : data.usages()) {
+                            sb.append("- ")
+                                .append(usage.usageTitle())
+                                .append(" (")
+                                .append(usage.usageID())
+                                .append(")")
+                                .append("\n");
+                            sb.append("  描述: ")
+                                .append(usage.usageDesc())
+                                .append("\n");
+                            sb.append("  信息: ")
+                                .append(usage.getFormattedInfo())
+                                .append("\n");
+                            sb.append("  耗时: ")
+                                .append(usage.costDuration())
+                                .append("\n");
+                            sb.append("  消耗: ")
+                                .append(usage.costTotalNiantou())
+                                .append("\n");
+                            if (usage.metadata() != null && !usage.metadata().isEmpty()) {
+                                sb.append("  元数据:\n");
+                                usage.metadata()
+                                    .forEach((k, v) ->
+                                        sb.append("    ")
+                                            .append(k)
+                                            .append(": ")
+                                            .append(v)
+                                            .append("\n")
+                                    );
+                            }
+                            sb.append("\n");
+                        }
+                        resultLabel.setText(Component.literal(sb.toString().trim()));
+                    } else {
+                        resultLabel.setText(
+                            KongqiaoI18n.text(
+                                KongqiaoI18n.NIANTOU_RESULT_LABEL
+                            )
+                        );
+                    }
+                    return;
+                }
+                resultLabel.setText(Component.literal("未找到该物品的念头配置。"));
+                return;
+            }
+        }
+        
+        // Fallback or empty
+        resultLabel.setText(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_RESULT_LABEL));
     }
 }

@@ -27,10 +27,16 @@ public class GuzhenrenExt {
         KongqiaoMenus.register(modEventBus);
         KongqiaoAttachments.register(modEventBus);
         GuzhenrenExtNetworking.register(modEventBus);
+        com.Kizunad.guzhenrenext.kongqiao.logic.GuModEffects.registerAll();
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
+        NeoForge.EVENT_BUS.addListener(this::onAddReloadListeners);
     }
 
     private void registerCommands(RegisterCommandsEvent event) {
         GuzhenrenDebugCommand.register(event.getDispatcher());
+    }
+
+    private void onAddReloadListeners(net.neoforged.neoforge.event.AddReloadListenerEvent event) {
+        event.addListener(new com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataLoader());
     }
 }

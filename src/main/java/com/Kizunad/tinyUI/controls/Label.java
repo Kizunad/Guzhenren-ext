@@ -110,27 +110,29 @@ public final class Label extends UIElement {
         final double mouseY,
         final float partialTicks
     ) {
-        final int width = getWidth();
-        int drawX = getAbsoluteX() + DEFAULT_PADDING;
-        if (horizontalAlign == HorizontalAlign.CENTER) {
-            drawX = getAbsoluteX() + (width - DEFAULT_PADDING * 2) / 2;
-        } else if (horizontalAlign == HorizontalAlign.RIGHT) {
-            drawX = getAbsoluteX() + width - DEFAULT_PADDING;
-        }
-
-        // Support multi-line text by splitting on \n
-        // Note: Component splitting is complex without font context,
-        //  here we do a basic string check for backward compat
-        // or just draw the component directly.
-        // Since we now use Component primarily.
-        // If it was created from String with \n,
-        // Component.literal will effectively hide the structure unless we parse it.
-        // However, standard Component rendering doesn't auto-split on \n usually.
-        // For I18n, we assume single line components usually, or we rely on font.split if we had width.
-        // Given current usage, we'll try to draw as is.
-        // If the component text contains newlines, they might render as symbols or break.
-        // Let's stick to simple drawing for now as per plan.
+        final int availableWidth = getWidth() - DEFAULT_PADDING * 2;
         int drawY = getAbsoluteY() + DEFAULT_PADDING;
-        context.drawText(text, drawX, drawY, color);
+        int lineHeight = Math.max(DEFAULT_FONT_LINE_HEIGHT, context.getFontLineHeight());
+
+        // 简单按换行符拆分逐行绘制，确保多行文本正常换行显示
+        String[] lines = text.getString().split("\n", -1);
+        for (String line : lines) {
+            Component lineComponent = Component.literal(line);
+            int drawX = getAbsoluteX() + DEFAULT_PADDING;
+            if (horizontalAlign == HorizontalAlign.CENTER) {
+                drawX =
+                    getAbsoluteX()
+                        + DEFAULT_PADDING
+                        + (availableWidth - context.measureTextWidth(lineComponent))
+                            / 2;
+            } else if (horizontalAlign == HorizontalAlign.RIGHT) {
+                drawX =
+                    getAbsoluteX()
+                        + DEFAULT_PADDING
+                        + (availableWidth - context.measureTextWidth(lineComponent));
+            }
+            context.drawText(lineComponent, drawX, drawY, color);
+            drawY += lineHeight;
+        }
     }
 }

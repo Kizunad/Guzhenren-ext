@@ -26,6 +26,12 @@ public final class KongqiaoAttachments {
             () -> AttachmentType.serializable(KongqiaoData::new).build()
         );
 
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<NianTouUnlocks>> NIANTOU_UNLOCKS =
+        ATTACHMENT_TYPES.register(
+            "niantou_unlocks",
+            () -> AttachmentType.serializable(NianTouUnlocks::new).build()
+        );
+
     public static void register(IEventBus bus) {
         ATTACHMENT_TYPES.register(bus);
     }
@@ -35,5 +41,12 @@ public final class KongqiaoAttachments {
             return null;
         }
         return entity.getData(KONGQIAO.get());
+    }
+
+    public static NianTouUnlocks getUnlocks(Entity entity) {
+        if (entity == null || !entity.hasData(NIANTOU_UNLOCKS.get())) {
+            return null;
+        }
+        return entity.getData(NIANTOU_UNLOCKS.get());
     }
 }

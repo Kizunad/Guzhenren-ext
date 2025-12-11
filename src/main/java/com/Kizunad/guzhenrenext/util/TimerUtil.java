@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class TimerUtil {
 
-    private static final Map<Long, TimerTask> tasks = new ConcurrentHashMap<>();
-    private static final AtomicLong idGenerator = new AtomicLong(0);
+    private static final Map<Long, TimerTask> TASKS = new ConcurrentHashMap<>();
+    private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
 
     private TimerUtil() {}
 
@@ -34,8 +34,8 @@ public class TimerUtil {
      * @return 计时器 ID (可用于后续操作)
      */
     public static long start(int durationTicks, Runnable callback) {
-        long id = idGenerator.incrementAndGet();
-        tasks.put(id, new TimerTask(durationTicks, callback));
+        long id = ID_GENERATOR.incrementAndGet();
+        TASKS.put(id, new TimerTask(durationTicks, callback));
         return id;
     }
 
@@ -45,7 +45,7 @@ public class TimerUtil {
      * @param id 计时器 ID
      */
     public static void stop(long id) {
-        tasks.remove(id);
+        TASKS.remove(id);
     }
 
     /**
@@ -55,7 +55,7 @@ public class TimerUtil {
      * @return 剩余 Tick 数，若不存在则返回 -1
      */
     public static int getRemaining(long id) {
-        TimerTask task = tasks.get(id);
+        TimerTask task = TASKS.get(id);
         return task != null ? task.remainingTicks : -1;
     }
     
@@ -66,7 +66,7 @@ public class TimerUtil {
      * @return 总 Tick 数，若不存在则返回 -1
      */
     public static int getTotal(long id) {
-        TimerTask task = tasks.get(id);
+        TimerTask task = TASKS.get(id);
         return task != null ? task.totalTicks : -1;
     }
 
@@ -77,7 +77,7 @@ public class TimerUtil {
      * @param durationTicks 新的持续时间
      */
     public static void set(long id, int durationTicks) {
-        TimerTask task = tasks.get(id);
+        TimerTask task = TASKS.get(id);
         if (task != null) {
             task.remainingTicks = durationTicks;
             task.totalTicks = durationTicks;
@@ -88,16 +88,16 @@ public class TimerUtil {
      * 判断计时器是否存在且正在运行。
      */
     public static boolean isRunning(long id) {
-        return tasks.containsKey(id);
+        return TASKS.containsKey(id);
     }
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-        if (tasks.isEmpty()) {
+        if (TASKS.isEmpty()) {
             return;
         }
 
-        Iterator<Map.Entry<Long, TimerTask>> iterator = tasks.entrySet().iterator();
+        Iterator<Map.Entry<Long, TimerTask>> iterator = TASKS.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Long, TimerTask> entry = iterator.next();
             TimerTask task = entry.getValue();

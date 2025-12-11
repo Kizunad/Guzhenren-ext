@@ -35,16 +35,8 @@ public final class KongqiaoAttachmentEvents {
         if (clone.level().isClientSide()) {
             return;
         }
-        KongqiaoData originalData = KongqiaoAttachments.getData(original);
-        if (originalData == null) {
-            return;
-        }
-        KongqiaoData newData = new KongqiaoData();
-        var provider = clone.level().registryAccess();
-        newData.deserializeNBT(provider, originalData.serializeNBT(provider));
-        clone.setData(KongqiaoAttachments.KONGQIAO.get(), newData);
-        newData.bind(clone);
-        newData.markKongqiaoDirty();
+        copyKongqiaoData(original, clone);
+        copyNianTouUnlocks(original, clone);
     }
 
     private static void ensureAttachment(Entity entity) {
@@ -65,5 +57,34 @@ public final class KongqiaoAttachmentEvents {
                 }
             }
         }
+        if (entity instanceof Player && !entity.hasData(KongqiaoAttachments.NIANTOU_UNLOCKS.get())) {
+            entity.setData(
+                KongqiaoAttachments.NIANTOU_UNLOCKS.get(),
+                new NianTouUnlocks()
+            );
+        }
+    }
+
+    private static void copyKongqiaoData(Player original, Player clone) {
+        KongqiaoData originalData = KongqiaoAttachments.getData(original);
+        if (originalData == null) {
+            return;
+        }
+        KongqiaoData newData = new KongqiaoData();
+        var provider = clone.level().registryAccess();
+        newData.deserializeNBT(provider, originalData.serializeNBT(provider));
+        clone.setData(KongqiaoAttachments.KONGQIAO.get(), newData);
+        newData.bind(clone);
+        newData.markKongqiaoDirty();
+    }
+
+    private static void copyNianTouUnlocks(Player original, Player clone) {
+        NianTouUnlocks originalUnlocks = KongqiaoAttachments.getUnlocks(original);
+        if (originalUnlocks == null) {
+            return;
+        }
+        NianTouUnlocks newUnlocks = new NianTouUnlocks();
+        newUnlocks.setUnlockedItems(originalUnlocks.getUnlockedItems());
+        clone.setData(KongqiaoAttachments.NIANTOU_UNLOCKS.get(), newUnlocks);
     }
 }

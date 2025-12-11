@@ -24,6 +24,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
 public final class GuRunningService {
 
+    private static final int TICKS_PER_SECOND = 20;
+
     private GuRunningService() {}
 
     @SubscribeEvent
@@ -35,24 +37,19 @@ public final class GuRunningService {
             return;
         }
 
-        // 简单频率控制：每 20 tick (1秒) 执行一次被动逻辑，避免性能开销过大
-        // 如果需要更实时的效果，可以去掉这个判断或针对特定效果优化
-        if (player.tickCount % 20 != 0) {
-            return;
-        }
-
         KongqiaoData data = KongqiaoAttachments.getData(player);
         if (data == null) {
             return;
         }
 
-        tickKongqiaoEffects(player, data.getKongqiaoInventory());
+        boolean isSecond = (player.tickCount % TICKS_PER_SECOND == 0);
+        tickKongqiaoEffects(player, data.getKongqiaoInventory(), isSecond);
     }
 
     /**
      * 遍历空窍，执行所有物品的被动逻辑。
      */
-    public static void tickKongqiaoEffects(LivingEntity user, KongqiaoInventory inventory) {
+    public static void tickKongqiaoEffects(LivingEntity user, KongqiaoInventory inventory, boolean isSecond) {
         int unlockedSlots = inventory.getSettings().getUnlockedSlots();
         for (int i = 0; i < unlockedSlots; i++) {
             ItemStack stack = inventory.getItem(i);
@@ -70,8 +67,15 @@ public final class GuRunningService {
                 if (effect != null) {
                     try {
                         // TODO: 可以在这里添加真元消耗判定 (costDuration, costTotalNiantou)
-                        // 如果是持续消耗型被动，需要检查并扣除资源，资源不足则跳过
+                        
+                        // 每 Tick 逻辑
                         effect.onTick(user, stack, usage);
+                        
+                        // 每秒逻辑
+                        if (isSecond) {
+                            effect.onSecond(user, stack, usage);
+                        }
+                        
                     } catch (Exception e) {
                         // 防止单个蛊虫逻辑崩溃影响整个循环
                         e.printStackTrace();
@@ -91,7 +95,9 @@ public final class GuRunningService {
      */
     public static boolean activateEffect(LivingEntity user, ItemStack stack, String usageId) {
         NianTouData data = NianTouDataManager.getData(stack);
-        if (data == null) return false;
+        if (data == null) {
+            return false;
+        }
 
         for (NianTouData.Usage usage : data.usages()) {
             if (usage.usageID().equals(usageId)) {

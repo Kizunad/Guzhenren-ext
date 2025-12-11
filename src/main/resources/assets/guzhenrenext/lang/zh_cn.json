@@ -13,5 +13,14 @@
     "key.categories.guzhenrenext": "蛊真人扩展",
     "key.guzhenrenext.kongqiao": "打开空窍界面",
     "key.guzhenrenext.attack_swap": "交换攻击背包",
-    "key.guzhenrenext.attack_inventory": "打开攻击背包"
+  "itemGroup.guzhenrenext": "蛊真人扩展",
+  "key.categories.guzhenrenext": "蛊真人扩展",
+  "key.guzhenrenext.open_niantou": "打开念头鉴定界面",
+  "screen.guzhenrenext.niantou.title": "念头鉴定",
+  "screen.guzhenrenext.niantou.history_label": "历史记录",
+  "screen.guzhenrenext.niantou.output_label": "鉴定结果",
+  "screen.guzhenrenext.niantou.result_label": "等待鉴定...",
+  "screen.guzhenrenext.niantou.button.identify": "鉴定",
+  "screen.guzhenrenext.niantou.time_label": "耗时",
+  "screen.guzhenrenext.niantou.cost_label": "消耗"
 }

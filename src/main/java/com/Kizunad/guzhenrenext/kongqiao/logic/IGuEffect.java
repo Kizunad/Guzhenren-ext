@@ -34,6 +34,19 @@ public interface IGuEffect {
     }
 
     /**
+     * 被动效果：每秒 (20 Ticks) 调用一次。
+     * <p>
+     * 适用于资源回复（如魂魄、真元）、Buff刷新等低频逻辑，节省性能。
+     * </p>
+     *
+     * @param user      持有空窍的实体
+     * @param stack     蛊虫物品堆
+     * @param usageInfo 该用途的配置数据
+     */
+    default void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+    }
+
+    /**
      * 主动效果：当玩家激活时调用。
      * <p>
      * 通常由 UI 按钮点击或快捷键触发。
@@ -75,7 +88,13 @@ public interface IGuEffect {
      * @param usageInfo 该用途的配置数据
      * @return 修改后的伤害值。如果不修改，请返回原 damage。
      */
-    default float onAttack(LivingEntity attacker, LivingEntity target, float damage, ItemStack stack, NianTouData.Usage usageInfo) {
+    default float onAttack(
+        LivingEntity attacker,
+        LivingEntity target,
+        float damage,
+        ItemStack stack,
+        NianTouData.Usage usageInfo
+    ) {
         return damage;
     }
 
@@ -92,7 +111,13 @@ public interface IGuEffect {
      * @param usageInfo 该用途的配置数据
      * @return 修改后的伤害值。如果不修改，请返回原 damage。
      */
-    default float onHurt(LivingEntity victim, DamageSource source, float damage, ItemStack stack, NianTouData.Usage usageInfo) {
+    default float onHurt(
+        LivingEntity victim,
+        DamageSource source,
+        float damage,
+        ItemStack stack,
+        NianTouData.Usage usageInfo
+    ) {
         return damage;
     }
 }

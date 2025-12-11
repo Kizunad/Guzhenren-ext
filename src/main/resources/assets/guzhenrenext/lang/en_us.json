@@ -13,5 +13,13 @@
     "key.categories.guzhenrenext": "Guzhenren Extension",
     "key.guzhenrenext.kongqiao": "Open Kongqiao Window",
     "key.guzhenrenext.attack_swap": "Swap Attack Inventory",
-    "key.guzhenrenext.attack_inventory": "Open Attack Inventory"
+    "key.guzhenrenext.attack_inventory": "Open Attack Inventory",
+    "key.guzhenrenext.open_niantou": "Open Nian Tou GUI",
+    "screen.guzhenrenext.niantou.title": "Nian Tou Identify",
+    "screen.guzhenrenext.niantou.history_label": "History",
+    "screen.guzhenrenext.niantou.output_label": "Output",
+    "screen.guzhenrenext.niantou.result_label": "Waiting...",
+    "screen.guzhenrenext.niantou.button.identify": "Identify",
+    "screen.guzhenrenext.niantou.time_label": "Time",
+    "screen.guzhenrenext.niantou.cost_label": "Cost"
 }
