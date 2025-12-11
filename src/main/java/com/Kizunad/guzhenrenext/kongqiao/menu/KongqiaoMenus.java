@@ -39,6 +39,13 @@ public final class KongqiaoMenus {
         IMenuTypeExtension.create(GuchongFeedMenu::fromNetwork)
     );
 
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<NianTouMenu>
+    > NIANTOU = MENUS.register("niantou", () ->
+        IMenuTypeExtension.create(NianTouMenu::fromNetwork)
+    );
+
     public static void register(IEventBus bus) {
         MENUS.register(bus);
     }

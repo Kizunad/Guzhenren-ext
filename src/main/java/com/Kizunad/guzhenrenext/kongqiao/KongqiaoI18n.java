@@ -29,6 +29,20 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.feed.title";
     public static final String FEED_BUTTON_AUTO =
         "screen.guzhenrenext.feed.button.auto";
+    public static final String NIANTOU_TITLE =
+        "screen.guzhenrenext.niantou.title";
+    public static final String NIANTOU_RESULT_LABEL =
+        "screen.guzhenrenext.niantou.result_label";
+    public static final String NIANTOU_HISTORY_LABEL =
+        "screen.guzhenrenext.niantou.history_label";
+    public static final String NIANTOU_OUTPUT_LABEL =
+        "screen.guzhenrenext.niantou.output_label";
+    public static final String NIANTOU_BUTTON_IDENTIFY =
+        "screen.guzhenrenext.niantou.button.identify";
+    public static final String NIANTOU_TIME_LABEL =
+        "screen.guzhenrenext.niantou.time_label";
+    public static final String NIANTOU_COST_LABEL =
+        "screen.guzhenrenext.niantou.cost_label";
 
     private KongqiaoI18n() {}
 

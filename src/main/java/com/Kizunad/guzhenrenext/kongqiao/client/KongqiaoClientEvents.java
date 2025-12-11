@@ -30,6 +30,10 @@ public final class KongqiaoClientEvents {
             KongqiaoMenus.GUCHONG_FEED.get(),
             GuchongFeedScreen::new
         );
+        event.register(
+            KongqiaoMenus.NIANTOU.get(),
+            com.Kizunad.guzhenrenext.kongqiao.client.ui.NianTouScreen::new
+        );
     }
 
     @SubscribeEvent
