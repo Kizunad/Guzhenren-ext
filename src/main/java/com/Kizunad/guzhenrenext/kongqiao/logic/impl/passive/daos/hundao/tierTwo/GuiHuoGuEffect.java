@@ -101,49 +101,18 @@ public class GuiHuoGuEffect implements IGuEffect {
         double multiplier = DaoHenCalculator.calculateMultiplier(victim, attacker, DaoHenHelper.DaoType.HUN_DAO);
         double finalDmg = baseDmg * multiplier;
 
-        // 4. 执行伤害逻辑：优先扣抗性
-        double targetResistance = HunPoHelper.getResistance(attacker);
-        double remainingDmg = finalDmg;
+        // 4. 执行伤害逻辑：混合机制
+        // 优先扣除魂魄；如果无魂魄或魂魄耗尽，则造成生命值伤害
+        double targetSoul = HunPoHelper.getAmount(attacker);
 
-        if (targetResistance > 0) {
-            if (targetResistance >= remainingDmg) {
-                // 抗性足够，只扣抗性
-                HunPoHelper.modifyResistance(attacker, -remainingDmg);
-                remainingDmg = 0;
-            } else {
-                // 抗性破碎，扣光抗性，剩余伤害扣魂魄
-                HunPoHelper.modifyResistance(attacker, -targetResistance); // 清零
-                remainingDmg -= targetResistance;
-                
-                // 破盾特效
-                if (attacker.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(
-                        ParticleTypes.CRIT,
-                        attacker.getX(),
-                        attacker.getY() + attacker.getEyeHeight(),
-                        attacker.getZ(),
-                        CRIT_PARTICLE_COUNT,
-                        CRIT_PARTICLE_SPREAD,
-                        CRIT_PARTICLE_SPREAD,
-                        CRIT_PARTICLE_SPREAD,
-                        CRIT_PARTICLE_SPEED
-                    );
-                }
-            }
-        }
-
-        // 扣除剩余伤害的魂魄
-        if (remainingDmg > 0) {
-            HunPoHelper.modify(attacker, -remainingDmg);
-            
-            // 剧痛特效 (如果真的伤到了魂魄)
-            attacker.addEffect(
-                new MobEffectInstance(
-                    MobEffects.MOVEMENT_SLOWDOWN,
-                    PAIN_EFFECT_BASE_DURATION + (int) (remainingDmg),
-                    1
-                )
-            );
+        if (targetSoul > 0) {
+            // 敌人有魂魄：攻击灵魂
+            HunPoHelper.modify(attacker, -finalDmg);
+            // 检查是否致死（触发模组原本的魂魄消散逻辑）
+            HunPoHelper.checkAndKill(attacker);
+        } else {
+            // 敌人无魂魄（如普通怪物或魂魄已归零）：转化为魔法伤害扣除 HP
+            attacker.hurt(victim.damageSources().magic(), (float) finalDmg);
         }
 
         // 5. 视觉反馈：幽蓝鬼火
@@ -160,6 +129,15 @@ public class GuiHuoGuEffect implements IGuEffect {
                 SOUL_FIRE_SPEED
             );
         }
+        
+        // 6. 剧痛特效 (减速)
+        attacker.addEffect(
+            new MobEffectInstance(
+                MobEffects.MOVEMENT_SLOWDOWN,
+                PAIN_EFFECT_BASE_DURATION + (int) (finalDmg), // 伤害越高，减速越久
+                1
+            )
+        );
 
         return damage;
     }

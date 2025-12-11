@@ -49,4 +49,15 @@ public final class NianTouDataManager {
     public static void clear() {
         DATA_MAP.clear();
     }
+
+    /**
+     * 按物品直接获取念头数据。
+     */
+    @Nullable
+    public static NianTouData getData(Item item) {
+        if (item == null) {
+            return null;
+        }
+        return DATA_MAP.get(item);
+    }
 }

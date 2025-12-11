@@ -1,6 +1,10 @@
 package com.Kizunad.guzhenrenext.guzhenrenBridge;
 
 import net.guzhenren.network.GuzhenrenModVariables;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -12,6 +16,8 @@ import net.minecraft.world.entity.LivingEntity;
 public final class HunPoHelper {
 
     private HunPoHelper() {}
+
+    private static final float DAMAGE = 1f;
 
     /**
      * 获取当前魂魄值。
@@ -110,7 +116,9 @@ public final class HunPoHelper {
             double original = vars.hunpo_kangxing;
             // 抗性上限似乎默认为0(未开启?)，或者根据逻辑动态变化。这里暂不强制限制上限，只保证下限>=0，除非有明确上限逻辑。
             // 查阅原代码习惯，通常会检查 hunpo_kangxing_shangxian
-            double max = vars.hunpo_kangxing_shangxian > 0 ? vars.hunpo_kangxing_shangxian : Double.MAX_VALUE;
+            double max = vars.hunpo_kangxing_shangxian > 0
+                ? vars.hunpo_kangxing_shangxian
+                : Double.MAX_VALUE;
 
             double newValue = Math.max(0, Math.min(max, original + amount));
 
@@ -124,7 +132,38 @@ public final class HunPoHelper {
         }
     }
 
-    private static GuzhenrenModVariables.PlayerVariables getVariables(LivingEntity entity) {
+    /**
+     * 检查实体魂魄是否耗尽，若耗尽则执行处死逻辑（模仿原模组行为）。
+     */
+    public static void checkAndKill(LivingEntity entity) {
+        if (entity == null) {
+            return;
+        }
+        if (getAmount(entity) <= 0) {
+            // 造成 1 亿点魂魄消散伤害
+            entity.hurt(
+                new DamageSource(
+                    entity
+                        .level()
+                        .registryAccess()
+                        .registryOrThrow(Registries.DAMAGE_TYPE)
+                        .getHolderOrThrow(
+                            ResourceKey.create(
+                                Registries.DAMAGE_TYPE,
+                                ResourceLocation.parse(
+                                    "guzhenren:hunpoxiaosuan"
+                                )
+                            )
+                        )
+                ),
+                DAMAGE
+            );
+        }
+    }
+
+    private static GuzhenrenModVariables.PlayerVariables getVariables(
+        LivingEntity entity
+    ) {
         return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
     }
 }

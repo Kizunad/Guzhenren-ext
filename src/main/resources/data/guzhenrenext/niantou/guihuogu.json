@@ -1,16 +1,16 @@
 {
-  "itemID": "guzhenren:gushiguchong2_1",
-  "usages": [
-    {
-      "usageID": "guzhenren:guihuogu_passive_thorns",
-      "usageTitle": "离魂阴火",
-      "usageDesc": "遭遇攻击时，反扑敌人灵魂，造成魂魄伤害。",
-      "usageInfo": "基础反伤: {soul_damage} | 优先破除抗性 | 持续消耗魂魄",
-      "cost_duration": 0,
-      "cost_total_niantou": 0,
-      "metadata": {
-        "soul_damage": "10.0"
-      }
-    }
-  ]
+    "itemID": "guzhenren:guihuo",
+    "usages": [
+        {
+            "usageID": "guzhenren:guihuogu_passive_thorns",
+            "usageTitle": "离魂阴火",
+            "usageDesc": "遭遇攻击时，反扑敌人灵魂，造成魂魄伤害。",
+            "usageInfo": "基础反伤: {soul_damage} | 优先破除抗性 | 持续消耗魂魄",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "soul_damage": "10.0"
+            }
+        }
+    ]
 }

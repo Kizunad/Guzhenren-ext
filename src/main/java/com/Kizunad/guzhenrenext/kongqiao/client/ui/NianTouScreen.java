@@ -63,6 +63,8 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     private static final int OUTPUT_BOTTOM_MARGIN = 30;
     private static final int HISTORY_ITEM_HEIGHT = 12;
     private static final int HISTORY_ITEM_STEP = 14;
+    private static final int HISTORY_BUTTON_PADDING = 4;
+    private static final String FALLBACK_NO_DATA = "未找到该物品的念头配置。";
 
     // Actually 750 is quite wide (MC default is often 427 for large scale).
     // If GUI scale is Auto, 750 might be too big for smaller screens.
@@ -72,6 +74,8 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     private Label resultLabel;
     private Label timeLabel;
     private Label costLabel;
+    private NianTouData previewData;
+    private ResourceLocation previewItemId;
 
     // Components for update
     private Button identifyButton;
@@ -230,14 +234,22 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
                 for (ResourceLocation id : unlocks.getUnlockedItems()) {
                     Item item = BuiltInRegistries.ITEM.get(id);
                     if (item != Items.AIR) {
-                        Label itemLabel = new Label(item.getDescription(), theme);
-                        itemLabel.setFrame(
+                        Button itemButton = new Button(item.getDescription(), theme);
+                        itemButton.setFrame(
                             0,
                             itemY,
                             w - DOUBLE_PADDING * 2,
-                            HISTORY_ITEM_HEIGHT
+                            HISTORY_ITEM_HEIGHT + HISTORY_BUTTON_PADDING
                         );
-                        content.addChild(itemLabel);
+                        itemButton.setOnClick(() -> {
+                            NianTouData data = NianTouDataManager.getData(item);
+                            if (data != null) {
+                                previewData = data;
+                                previewItemId = id;
+                                showResult(data, true);
+                            }
+                        });
+                        content.addChild(itemButton);
                         itemY += HISTORY_ITEM_STEP;
                     }
                 }
@@ -370,6 +382,31 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
                 .append(": " + cost)
         );
 
+        // 若当前槽放入不同物品，则退出历史预览模式
+        ResourceLocation slotItemId = null;
+        if (menu.getContainer().getContainerSize() > 0) {
+            net.minecraft.world.item.ItemStack stack =
+                menu.getContainer().getItem(0);
+            if (!stack.isEmpty()) {
+                slotItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            }
+        }
+        if (
+            previewData != null &&
+            slotItemId != null &&
+            previewItemId != null &&
+            !slotItemId.equals(previewItemId)
+        ) {
+            previewData = null;
+            previewItemId = null;
+        }
+
+        // 若有历史预览，优先显示
+        if (previewData != null) {
+            showResult(previewData, true);
+            return;
+        }
+
         // Update result text based on item in slot 0
         if (menu.getContainer().getContainerSize() > 0) {
             net.minecraft.world.item.ItemStack stack =
@@ -391,62 +428,70 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
                     }
 
                     StringBuilder sb = new StringBuilder();
-                    if (unlocked) {
-                        sb.append(
-                                KongqiaoI18n
-                                    .text(KongqiaoI18n.NIANTOU_OUTPUT_LABEL)
-                                    .getString()
-                            )
-                            .append("\n");
-
-                        for (NianTouData.Usage usage : data.usages()) {
-                            sb.append("- ")
-                                .append(usage.usageTitle())
-                                .append(" (")
-                                .append(usage.usageID())
-                                .append(")")
-                                .append("\n");
-                            sb.append("  描述: ")
-                                .append(usage.usageDesc())
-                                .append("\n");
-                            sb.append("  信息: ")
-                                .append(usage.getFormattedInfo())
-                                .append("\n");
-                            sb.append("  耗时: ")
-                                .append(usage.costDuration())
-                                .append("\n");
-                            sb.append("  消耗: ")
-                                .append(usage.costTotalNiantou())
-                                .append("\n");
-                            if (usage.metadata() != null && !usage.metadata().isEmpty()) {
-                                sb.append("  元数据:\n");
-                                usage.metadata()
-                                    .forEach((k, v) ->
-                                        sb.append("    ")
-                                            .append(k)
-                                            .append(": ")
-                                            .append(v)
-                                            .append("\n")
-                                    );
-                            }
-                            sb.append("\n");
-                        }
-                        resultLabel.setText(Component.literal(sb.toString().trim()));
-                    } else {
-                        resultLabel.setText(
-                            KongqiaoI18n.text(
-                                KongqiaoI18n.NIANTOU_RESULT_LABEL
-                            )
-                        );
-                    }
+                    showResult(data, unlocked);
                     return;
                 }
-                resultLabel.setText(Component.literal("未找到该物品的念头配置。"));
+                resultLabel.setText(Component.literal(FALLBACK_NO_DATA));
                 return;
             }
         }
         
         // Fallback or empty
         resultLabel.setText(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_RESULT_LABEL));
+    }
+
+    private void showResult(NianTouData data, boolean unlocked) {
+        if (data == null || data.usages() == null) {
+            resultLabel.setText(Component.literal(FALLBACK_NO_DATA));
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (unlocked) {
+            sb.append(
+                    KongqiaoI18n
+                        .text(KongqiaoI18n.NIANTOU_OUTPUT_LABEL)
+                        .getString()
+                )
+                .append("\n");
+
+            for (NianTouData.Usage usage : data.usages()) {
+                sb.append("- ")
+                    .append(usage.usageTitle())
+                    .append(" (")
+                    .append(usage.usageID())
+                    .append(")")
+                    .append("\n");
+                sb.append("  描述: ")
+                    .append(usage.usageDesc())
+                    .append("\n");
+                sb.append("  信息: ")
+                    .append(usage.getFormattedInfo())
+                    .append("\n");
+                sb.append("  耗时: ")
+                    .append(usage.costDuration())
+                    .append("\n");
+                sb.append("  消耗: ")
+                    .append(usage.costTotalNiantou())
+                    .append("\n");
+                if (usage.metadata() != null && !usage.metadata().isEmpty()) {
+                    sb.append("  元数据:\n");
+                    usage.metadata()
+                        .forEach((k, v) ->
+                            sb.append("    ")
+                                .append(k)
+                                .append(": ")
+                                .append(v)
+                                .append("\n")
+                        );
+                }
+                sb.append("\n");
+            }
+            resultLabel.setText(Component.literal(sb.toString().trim()));
+        } else {
+            resultLabel.setText(
+                KongqiaoI18n.text(KongqiaoI18n.NIANTOU_RESULT_LABEL)
+            );
+        }
     }
 }
