@@ -4,6 +4,8 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.CultivationHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.particles.ParticleTypes;
@@ -46,6 +48,10 @@ public class DaHunGuEffect implements IGuEffect {
 
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            return;
+        }
         // 1. 读取 Metadata 配置
         double baseCost = getMetaDouble(usageInfo, "zhenyuan_base_cost", DEFAULT_BASE_COST);
         double soulRegenBase = getMetaDouble(usageInfo, "soul_regen", DEFAULT_SOUL_REGEN);

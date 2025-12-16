@@ -2,7 +2,7 @@
     "itemID": "guzhenren:xiao_hun_gu",
     "usages": [
         {
-            "usageID": "guzhenren:xiaohungu_passive",
+            "usageID": "guzhenren:xiaohungu_passive_regen",
             "usageTitle": "滋养魂魄",
             "usageDesc": "小魂蛊寄宿于空窍之中，能够持续滋养蛊师魂魄。",
             "usageInfo": "每秒回复 {regen} 点魂魄",

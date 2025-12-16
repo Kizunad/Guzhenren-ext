@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierOne;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class XiaoHunGuEffect implements IGuEffect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XiaoHunGuEffect.class);
-    public static final String USAGE_ID = "guzhenren:xiaohungu_passive";
+    public static final String USAGE_ID = "guzhenren:xiaohungu_passive_regen";
     private static final double DEFAULT_REGEN = 2.0; // 每秒回复 2 点
 
     @Override
@@ -24,6 +26,10 @@ public class XiaoHunGuEffect implements IGuEffect {
 
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            return;
+        }
         double amount = DEFAULT_REGEN;
         
         if (usageInfo.metadata() != null && usageInfo.metadata().containsKey("regen")) {

@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThr
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.component.DataComponents;
@@ -40,6 +41,11 @@ public class GuiQiGuEffect implements IGuEffect {
         ItemStack stack,
         NianTouData.Usage usageInfo
     ) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
+            return;
+        }
         // 1. 消耗真元
         double baseCost = getMetaDouble(
             usageInfo,

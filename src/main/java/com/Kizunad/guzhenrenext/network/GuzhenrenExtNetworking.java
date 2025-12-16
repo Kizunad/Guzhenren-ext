@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.network;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncTweakConfig;
+import com.Kizunad.guzhenrenext.kongqiao.network.ServerboundTweakConfigUpdatePayload;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -33,6 +35,16 @@ public final class GuzhenrenExtNetworking {
             ServerboundKongqiaoActionPayload.STREAM_CODEC,
             ServerboundKongqiaoActionPayload::handle
         );
+        registrar.playToServer(
+            ServerboundSkillWheelSelectPayload.TYPE,
+            ServerboundSkillWheelSelectPayload.STREAM_CODEC,
+            ServerboundSkillWheelSelectPayload::handle
+        );
+        registrar.playToServer(
+            ServerboundTweakConfigUpdatePayload.TYPE,
+            ServerboundTweakConfigUpdatePayload.STREAM_CODEC,
+            ServerboundTweakConfigUpdatePayload::handle
+        );
         registrar.playToClient(
             ClientboundKongqiaoSyncPayload.TYPE,
             ClientboundKongqiaoSyncPayload.STREAM_CODEC,
@@ -43,6 +55,11 @@ public final class GuzhenrenExtNetworking {
             PacketSyncNianTouUnlocks.TYPE,
             PacketSyncNianTouUnlocks.STREAM_CODEC,
             PacketSyncNianTouUnlocks::handle
+        );
+        registrar.playToClient(
+            PacketSyncTweakConfig.TYPE,
+            PacketSyncTweakConfig.STREAM_CODEC,
+            PacketSyncTweakConfig::handle
         );
     }
 }

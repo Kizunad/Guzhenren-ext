@@ -21,7 +21,8 @@ import org.joml.Vector3f;
  */
 public class LangHunGuGreedyDevourEffect implements IGuEffect {
 
-    public static final String USAGE_ID = "guzhenren:langhungu_skill_greedy_devour";
+    public static final String USAGE_ID =
+        "guzhenren:langhungu_active_greedy_devour";
 
     private static final float DEFAULT_HEALTH_THRESHOLD = 0.3f;
     private static final float DEFAULT_CRIT_MULTIPLIER = 1.5f;
@@ -32,16 +33,24 @@ public class LangHunGuGreedyDevourEffect implements IGuEffect {
     private static final double HALF = 0.5;
     private static final double SMOOTH_STEP_FACTOR = 3.0;
 
-    private static final Vector3f CLAW_COLOR_OUTER = new Vector3f(0.05f, 0.4f, 0.15f);
-    private static final Vector3f CLAW_COLOR_INNER = new Vector3f(0.2f, 1.0f, 0.4f);
+    private static final Vector3f CLAW_COLOR_OUTER = new Vector3f(
+        0.05f,
+        0.4f,
+        0.15f
+    );
+    private static final Vector3f CLAW_COLOR_INNER = new Vector3f(
+        0.2f,
+        1.0f,
+        0.4f
+    );
     private static final float CLAW_SCALE_OUTER = 1.6f;
     private static final float CLAW_SCALE_INNER = 1.1f;
 
     private static final int CLAW_LINE_COUNT = 3;
     private static final int CLAW_POINTS_PER_LINE = 18;
-    private static final double CLAW_LINE_SPACING = 0.28;
+    private static final double CLAW_LINE_SPACING = 0.5;
     private static final double CLAW_LINE_HEIGHT_SPACING = 0.06;
-    private static final double CLAW_LINE_PLANE_TILT_RADIANS = 0.22;
+    private static final double CLAW_LINE_PLANE_TILT_RADIANS = 0.8;
     private static final double CLAW_FORWARD_OFFSET = 0.6;
     private static final double CLAW_LENGTH = 1.4;
     private static final double CLAW_ARC_HEIGHT = 0.35;
@@ -65,13 +74,25 @@ public class LangHunGuGreedyDevourEffect implements IGuEffect {
             return damage;
         }
 
-        float threshold = getMetaFloat(usageInfo, "health_threshold", DEFAULT_HEALTH_THRESHOLD);
+        float threshold = getMetaFloat(
+            usageInfo,
+            "health_threshold",
+            DEFAULT_HEALTH_THRESHOLD
+        );
         if (!isLowHealth(target, threshold)) {
             return damage;
         }
 
-        float critMultiplier = getMetaFloat(usageInfo, "crit_multiplier", DEFAULT_CRIT_MULTIPLIER);
-        double daoMultiplier = DaoHenCalculator.calculateMultiplier(attacker, target, DaoHenHelper.DaoType.HUN_DAO);
+        float critMultiplier = getMetaFloat(
+            usageInfo,
+            "crit_multiplier",
+            DEFAULT_CRIT_MULTIPLIER
+        );
+        double daoMultiplier = DaoHenCalculator.calculateMultiplier(
+            attacker,
+            target,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
         double finalMultiplier = 1.0 + (critMultiplier - 1.0) * daoMultiplier;
 
         restoreResources(attacker, usageInfo);
@@ -79,8 +100,15 @@ public class LangHunGuGreedyDevourEffect implements IGuEffect {
         return (float) (damage * finalMultiplier);
     }
 
-    private void restoreResources(LivingEntity attacker, NianTouData.Usage usageInfo) {
-        double restorePercent = getMetaDouble(usageInfo, "restore_percent", DEFAULT_RESTORE_PERCENT);
+    private void restoreResources(
+        LivingEntity attacker,
+        NianTouData.Usage usageInfo
+    ) {
+        double restorePercent = getMetaDouble(
+            usageInfo,
+            "restore_percent",
+            DEFAULT_RESTORE_PERCENT
+        );
         double soulMax = HunPoHelper.getMaxAmount(attacker);
         double staminaMax = JingLiHelper.getMaxAmount(attacker);
         HunPoHelper.modify(attacker, soulMax * restorePercent);
@@ -105,18 +133,26 @@ public class LangHunGuGreedyDevourEffect implements IGuEffect {
         }
         right = right.normalize();
 
-        Vec3 origin = attacker.position()
+        Vec3 origin = attacker
+            .position()
             .add(0, attacker.getBbHeight() * ORIGIN_HEIGHT_FACTOR, 0)
             .add(direction.scale(CLAW_FORWARD_OFFSET));
 
-        DustParticleOptions outer = new DustParticleOptions(CLAW_COLOR_OUTER, CLAW_SCALE_OUTER);
-        DustParticleOptions inner = new DustParticleOptions(CLAW_COLOR_INNER, CLAW_SCALE_INNER);
+        DustParticleOptions outer = new DustParticleOptions(
+            CLAW_COLOR_OUTER,
+            CLAW_SCALE_OUTER
+        );
+        DustParticleOptions inner = new DustParticleOptions(
+            CLAW_COLOR_INNER,
+            CLAW_SCALE_INNER
+        );
 
         int centerIndex = (CLAW_LINE_COUNT - 1) / 2;
         for (int line = 0; line < CLAW_LINE_COUNT; line++) {
             int indexFromCenter = line - centerIndex;
             double lineOffset = indexFromCenter * CLAW_LINE_SPACING;
-            double lineHeightOffset = indexFromCenter * CLAW_LINE_HEIGHT_SPACING;
+            double lineHeightOffset =
+                indexFromCenter * CLAW_LINE_HEIGHT_SPACING;
 
             double tilt = indexFromCenter * CLAW_LINE_PLANE_TILT_RADIANS;
             double cos = Math.cos(tilt);
@@ -132,9 +168,12 @@ public class LangHunGuGreedyDevourEffect implements IGuEffect {
                 double vertical = Math.sin(Math.PI * ease) * CLAW_ARC_HEIGHT;
                 double bend = (ease - HALF) * CLAW_SIDE_BEND;
 
-                double jitterX = (serverLevel.random.nextDouble() - HALF) * CLAW_JITTER;
-                double jitterY = (serverLevel.random.nextDouble() - HALF) * CLAW_JITTER;
-                double jitterZ = (serverLevel.random.nextDouble() - HALF) * CLAW_JITTER;
+                double jitterX =
+                    (serverLevel.random.nextDouble() - HALF) * CLAW_JITTER;
+                double jitterY =
+                    (serverLevel.random.nextDouble() - HALF) * CLAW_JITTER;
+                double jitterZ =
+                    (serverLevel.random.nextDouble() - HALF) * CLAW_JITTER;
 
                 Vec3 pos = origin
                     .add(direction.scale(forward))
@@ -142,8 +181,28 @@ public class LangHunGuGreedyDevourEffect implements IGuEffect {
                     .add(lineUp.scale(vertical + lineHeightOffset))
                     .add(jitterX, jitterY, jitterZ);
 
-                serverLevel.sendParticles(outer, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
-                serverLevel.sendParticles(inner, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+                serverLevel.sendParticles(
+                    outer,
+                    pos.x,
+                    pos.y,
+                    pos.z,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                );
+                serverLevel.sendParticles(
+                    inner,
+                    pos.x,
+                    pos.y,
+                    pos.z,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                );
             }
         }
     }
@@ -161,22 +220,28 @@ public class LangHunGuGreedyDevourEffect implements IGuEffect {
         return clamped * clamped * (SMOOTH_STEP_FACTOR - 2.0 * clamped);
     }
 
-    private static float getMetaFloat(NianTouData.Usage usage, String key, float defaultValue) {
+    private static float getMetaFloat(
+        NianTouData.Usage usage,
+        String key,
+        float defaultValue
+    ) {
         if (usage.metadata() != null && usage.metadata().containsKey(key)) {
             try {
                 return Float.parseFloat(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
+            } catch (NumberFormatException ignored) {}
         }
         return defaultValue;
     }
 
-    private static double getMetaDouble(NianTouData.Usage usage, String key, double defaultValue) {
+    private static double getMetaDouble(
+        NianTouData.Usage usage,
+        String key,
+        double defaultValue
+    ) {
         if (usage.metadata() != null && usage.metadata().containsKey(key)) {
             try {
                 return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
+            } catch (NumberFormatException ignored) {}
         }
         return defaultValue;
     }

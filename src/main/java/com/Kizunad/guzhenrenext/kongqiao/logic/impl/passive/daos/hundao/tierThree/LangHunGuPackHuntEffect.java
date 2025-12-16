@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -36,6 +38,11 @@ public class LangHunGuPackHuntEffect implements IGuEffect {
 
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            removeAttackModifier(user);
+            return;
+        }
         double radius = getMetaDouble(usageInfo, "radius", DEFAULT_RADIUS);
         int ownedCount = countOwnedEntities(user, radius);
         if (ownedCount <= 0) {
@@ -112,4 +119,3 @@ public class LangHunGuPackHuntEffect implements IGuEffect {
         return defaultValue;
     }
 }
-

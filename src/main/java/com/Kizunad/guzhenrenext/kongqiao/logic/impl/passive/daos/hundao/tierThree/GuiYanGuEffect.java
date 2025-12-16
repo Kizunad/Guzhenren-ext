@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -88,6 +89,13 @@ public class GuiYanGuEffect implements IGuEffect {
         NianTouData.Usage usageInfo
     ) {
         Level level = user.level();
+
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            removeAttribute(user);
+            KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
+            return;
+        }
 
         // 1. 检查停滞状态
         int stasisTimer = getStasisTimer(stack);

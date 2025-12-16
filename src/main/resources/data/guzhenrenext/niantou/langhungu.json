@@ -26,7 +26,7 @@
             }
         },
         {
-            "usageID": "guzhenren:langhungu_skill_greedy_devour",
+            "usageID": "guzhenren:langhungu_active_greedy_devour",
             "usageTitle": "战斗技能【贪狼吞噬】",
             "usageDesc": "敌弱则噬，趁势夺命。攻击生命值低于阈值的敌人时，必定暴击，并回复少量魂魄与精力。",
             "usageInfo": "阈值：<{health_threshold} | 暴击倍率：x{crit_multiplier} | 回复：{restore_percent}% 魂魄/精力",

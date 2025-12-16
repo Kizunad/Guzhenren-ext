@@ -25,11 +25,15 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  * 负责在服务端 Tick 时遍历玩家空窍内的物品，并触发相应的被动逻辑。
  * </p>
  */
-@EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(
+    modid = GuzhenrenExt.MODID,
+    bus = EventBusSubscriber.Bus.GAME
+)
 public final class GuRunningService {
 
     private static final int TICKS_PER_SECOND = 20;
-    private static final Map<UUID, ItemStack[]> LAST_KONGQIAO_SNAPSHOT = new HashMap<>();
+    private static final Map<UUID, ItemStack[]> LAST_KONGQIAO_SNAPSHOT =
+        new HashMap<>();
 
     private GuRunningService() {}
 
@@ -55,7 +59,11 @@ public final class GuRunningService {
     /**
      * 遍历空窍，执行所有物品的被动逻辑。
      */
-    public static void tickKongqiaoEffects(LivingEntity user, KongqiaoInventory inventory, boolean isSecond) {
+    public static void tickKongqiaoEffects(
+        LivingEntity user,
+        KongqiaoInventory inventory,
+        boolean isSecond
+    ) {
         int unlockedSlots = inventory.getSettings().getUnlockedSlots();
         for (int i = 0; i < unlockedSlots; i++) {
             ItemStack stack = inventory.getItem(i);
@@ -69,22 +77,27 @@ public final class GuRunningService {
             }
 
             for (NianTouData.Usage usage : niantouData.usages()) {
-                if (!NianTouUnlockChecker.isUsageUnlocked(user, stack, usage.usageID())) {
+                if (
+                    !NianTouUnlockChecker.isUsageUnlocked(
+                        user,
+                        stack,
+                        usage.usageID()
+                    )
+                ) {
                     continue;
                 }
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
                 if (effect != null) {
                     try {
                         // TODO: 可以在这里添加真元消耗判定 (costDuration, costTotalNiantou)
-                        
+
                         // 每 Tick 逻辑
                         effect.onTick(user, stack, usage);
-                        
+
                         // 每秒逻辑
                         if (isSecond) {
                             effect.onSecond(user, stack, usage);
                         }
-                        
                     } catch (Exception e) {
                         // 防止单个蛊虫逻辑崩溃影响整个循环
                         e.printStackTrace();
@@ -102,7 +115,11 @@ public final class GuRunningService {
      * @param usageId  要触发的用途ID
      * @return 是否成功触发
      */
-    public static boolean activateEffect(LivingEntity user, ItemStack stack, String usageId) {
+    public static boolean activateEffect(
+        LivingEntity user,
+        ItemStack stack,
+        String usageId
+    ) {
         NianTouData data = NianTouDataManager.getData(stack);
         if (data == null) {
             return false;
@@ -110,7 +127,9 @@ public final class GuRunningService {
 
         for (NianTouData.Usage usage : data.usages()) {
             if (usage.usageID().equals(usageId)) {
-                if (!NianTouUnlockChecker.isUsageUnlocked(user, stack, usageId)) {
+                if (
+                    !NianTouUnlockChecker.isUsageUnlocked(user, stack, usageId)
+                ) {
                     return false;
                 }
                 IGuEffect effect = GuEffectRegistry.get(usageId);
@@ -123,7 +142,10 @@ public final class GuRunningService {
         return false;
     }
 
-    private static void handleEquipChanges(ServerPlayer player, KongqiaoInventory inventory) {
+    private static void handleEquipChanges(
+        ServerPlayer player,
+        KongqiaoInventory inventory
+    ) {
         int size = inventory.getContainerSize();
         ItemStack[] previous = LAST_KONGQIAO_SNAPSHOT.computeIfAbsent(
             player.getUUID(),
@@ -136,10 +158,14 @@ public final class GuRunningService {
 
         for (int i = 0; i < size; i++) {
             ItemStack current = inventory.getItem(i);
-            ItemStack last = previous[i] == null ? ItemStack.EMPTY : previous[i];
+            ItemStack last = previous[i] == null
+                ? ItemStack.EMPTY
+                : previous[i];
 
             if (isSameItem(last, current)) {
-                previous[i] = current.isEmpty() ? ItemStack.EMPTY : current.copy();
+                previous[i] = current.isEmpty()
+                    ? ItemStack.EMPTY
+                    : current.copy();
                 continue;
             }
 
@@ -169,7 +195,13 @@ public final class GuRunningService {
             return;
         }
         for (NianTouData.Usage usage : data.usages()) {
-            if (!NianTouUnlockChecker.isUsageUnlocked(user, stack, usage.usageID())) {
+            if (
+                !NianTouUnlockChecker.isUsageUnlocked(
+                    user,
+                    stack,
+                    usage.usageID()
+                )
+            ) {
                 continue;
             }
             IGuEffect effect = GuEffectRegistry.get(usage.usageID());

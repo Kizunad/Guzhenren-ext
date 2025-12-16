@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -47,6 +48,16 @@ public class NianTouDataLoader extends SimpleJsonResourceReloadListener {
                 // 使用 Codec 解析 JSON
                 NianTouData data = NianTouData.CODEC.parse(JsonOps.INSTANCE, json)
                     .getOrThrow(error -> new IllegalStateException("Error parsing NianTouData: " + error));
+
+                List<String> errors = NianTouDataValidator.validate(data);
+                if (!errors.isEmpty()) {
+                    LOGGER.error(
+                        "念头数据命名规范校验失败，将跳过加载: {} | errors={}",
+                        location,
+                        String.join(" | ", errors)
+                    );
+                    continue;
+                }
 
                 // 注册到管理器
                 NianTouDataManager.register(data);

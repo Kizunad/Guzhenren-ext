@@ -38,6 +38,12 @@ public final class KongqiaoAttachments {
             () -> AttachmentType.serializable(ActivePassives::new).copyOnDeath().build()
         );
 
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<TweakConfig>> TWEAK_CONFIG =
+        ATTACHMENT_TYPES.register(
+            "tweak_config",
+            () -> AttachmentType.serializable(TweakConfig::new).copyOnDeath().build()
+        );
+
     public static void register(IEventBus bus) {
         ATTACHMENT_TYPES.register(bus);
     }
@@ -64,5 +70,15 @@ public final class KongqiaoAttachments {
             entity.setData(ACTIVE_PASSIVES.get(), new ActivePassives());
         }
         return entity.getData(ACTIVE_PASSIVES.get());
+    }
+
+    public static TweakConfig getTweakConfig(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(TWEAK_CONFIG.get())) {
+            entity.setData(TWEAK_CONFIG.get(), new TweakConfig());
+        }
+        return entity.getData(TWEAK_CONFIG.get());
     }
 }

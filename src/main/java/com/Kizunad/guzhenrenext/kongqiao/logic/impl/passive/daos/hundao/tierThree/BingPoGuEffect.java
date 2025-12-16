@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThr
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -45,6 +46,12 @@ public class BingPoGuEffect implements IGuEffect {
 
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
+            removeAttribute(user);
+            return;
+        }
         // 1. 消耗真元
         double baseCost = getMetaDouble(usageInfo, "zhenyuan_base_cost", DEFAULT_BASE_COST);
         double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);

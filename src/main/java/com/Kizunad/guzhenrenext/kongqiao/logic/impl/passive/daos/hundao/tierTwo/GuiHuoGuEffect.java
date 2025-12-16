@@ -2,6 +2,8 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierTwo
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -49,6 +51,10 @@ public class GuiHuoGuEffect implements IGuEffect {
      */
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            return;
+        }
         double daoHen = DaoHenHelper.getDaoHen(user, DaoHenHelper.DaoType.HUN_DAO);
         double amplifier = 1.0 + (daoHen / DAO_HEN_DIVISOR);
         double cost = PASSIVE_COST_BASE * amplifier;
@@ -73,6 +79,10 @@ public class GuiHuoGuEffect implements IGuEffect {
         ItemStack stack,
         NianTouData.Usage usageInfo
     ) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(victim);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            return damage;
+        }
         // 1. 检查攻击者是否有效
         if (!(source.getEntity() instanceof LivingEntity attacker) || attacker == victim) {
             return damage;

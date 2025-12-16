@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -35,6 +37,11 @@ public class LangHunGuNightWalkerEffect implements IGuEffect {
 
     @Override
     public void onTick(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
+        if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            removeSpeedModifier(user);
+            return;
+        }
         if (shouldBoost(user, usageInfo)) {
             double bonus = getMetaDouble(usageInfo, "speed_bonus", DEFAULT_SPEED_BONUS);
             double multiplier = DaoHenCalculator.calculateSelfMultiplier(user, DaoHenHelper.DaoType.HUN_DAO);
@@ -106,4 +113,3 @@ public class LangHunGuNightWalkerEffect implements IGuEffect {
         return defaultValue;
     }
 }
-

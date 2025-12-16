@@ -13,7 +13,7 @@ JSON 结构示例:
   "itemID": "minecraft:apple",
   "usages": [
     {
-      "usageID": "guzhenren:xiaohungu_passive",
+      "usageID": "guzhenren:xiaohungu_passive_regen",
       "usageTitle": "滋养魂魄",
       "usageDesc": "存放在空窍中时，持续滋养魂魄。",
       "usageInfo": "每秒回复 {regen} 点魂魄",
