@@ -41,6 +41,8 @@ public class EnhanceAttributeAction extends AbstractStandardAction {
     private static final float RANDOM_FACTOR_MAX = 0.65F;
     private static final float SPEED_FACTOR = 0.05f;
     private static final float DEFENSE_FACTOR = 0.05f;
+    private static final float ATTACK_FACTOR = 0.5f;
+    private static final float HEALTH_FACTOR = 50.0f;
 
     private final AttributeDirection preferredDirection;
     private AttributeDirection resolvedDirection;
@@ -145,8 +147,8 @@ public class EnhanceAttributeAction extends AbstractStandardAction {
         float delta
     ) {
         switch (direction) {
-            case STRENGTH -> npc.addStrengthBonus(delta);
-            case HEALTH -> npc.addHealthBonus(delta);
+            case STRENGTH -> npc.addStrengthBonus(delta * ATTACK_FACTOR);
+            case HEALTH -> npc.addHealthBonus(delta * HEALTH_FACTOR);
             case SPEED -> npc.addSpeedBonus(delta * SPEED_FACTOR);
             case DEFENSE -> npc.addDefenseBonus(delta * DEFENSE_FACTOR);
             case SENSOR -> npc.addSensorBonus(delta);

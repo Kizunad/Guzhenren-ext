@@ -1,12 +1,10 @@
 package com.Kizunad.customNPCs.network;
 
 import com.Kizunad.customNPCs.CustomNPCsMod;
-import com.Kizunad.customNPCs.client.ui.task.NpcTaskBoardScreen;
 import com.Kizunad.customNPCs.tasks.TaskType;
 import com.Kizunad.customNPCs.tasks.objective.TaskObjectiveType;
 import com.Kizunad.customNPCs.tasks.data.TaskProgressState;
 import java.util.List;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -53,13 +51,8 @@ public record OpenTaskBoardPayload(
         OpenTaskBoardPayload payload,
         IPayloadContext context
     ) {
-        context.enqueueWork(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.level == null) {
-                return;
-            }
-            mc.setScreen(new NpcTaskBoardScreen(payload));
-        });
+        // 客户端处理在 ModNetworking 中按 Dist 注册；
+        // 服务端不会接收该包，这里保持空实现避免错误引用客户端类。
     }
 
     private static void write(

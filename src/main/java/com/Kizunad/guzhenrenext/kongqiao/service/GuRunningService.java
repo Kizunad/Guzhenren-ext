@@ -8,6 +8,10 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
+import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUnlockChecker;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +29,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class GuRunningService {
 
     private static final int TICKS_PER_SECOND = 20;
+    private static final Map<UUID, ItemStack[]> LAST_KONGQIAO_SNAPSHOT = new HashMap<>();
 
     private GuRunningService() {}
 
@@ -43,6 +48,7 @@ public final class GuRunningService {
         }
 
         boolean isSecond = (player.tickCount % TICKS_PER_SECOND == 0);
+        handleEquipChanges(player, data.getKongqiaoInventory());
         tickKongqiaoEffects(player, data.getKongqiaoInventory(), isSecond);
     }
 
@@ -63,6 +69,9 @@ public final class GuRunningService {
             }
 
             for (NianTouData.Usage usage : niantouData.usages()) {
+                if (!NianTouUnlockChecker.isUsageUnlocked(user, stack, usage.usageID())) {
+                    continue;
+                }
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
                 if (effect != null) {
                     try {
@@ -101,6 +110,9 @@ public final class GuRunningService {
 
         for (NianTouData.Usage usage : data.usages()) {
             if (usage.usageID().equals(usageId)) {
+                if (!NianTouUnlockChecker.isUsageUnlocked(user, stack, usageId)) {
+                    return false;
+                }
                 IGuEffect effect = GuEffectRegistry.get(usageId);
                 if (effect != null) {
                     // TODO: 检查并扣除一次性消耗 (costTotalNiantou等)
@@ -109,5 +121,82 @@ public final class GuRunningService {
             }
         }
         return false;
+    }
+
+    private static void handleEquipChanges(ServerPlayer player, KongqiaoInventory inventory) {
+        int size = inventory.getContainerSize();
+        ItemStack[] previous = LAST_KONGQIAO_SNAPSHOT.computeIfAbsent(
+            player.getUUID(),
+            id -> new ItemStack[size]
+        );
+        if (previous.length != size) {
+            previous = new ItemStack[size];
+            LAST_KONGQIAO_SNAPSHOT.put(player.getUUID(), previous);
+        }
+
+        for (int i = 0; i < size; i++) {
+            ItemStack current = inventory.getItem(i);
+            ItemStack last = previous[i] == null ? ItemStack.EMPTY : previous[i];
+
+            if (isSameItem(last, current)) {
+                previous[i] = current.isEmpty() ? ItemStack.EMPTY : current.copy();
+                continue;
+            }
+
+            if (!last.isEmpty()) {
+                triggerUnequip(player, last);
+            }
+            if (!current.isEmpty()) {
+                triggerEquip(player, current);
+            }
+            previous[i] = current.isEmpty() ? ItemStack.EMPTY : current.copy();
+        }
+    }
+
+    private static boolean isSameItem(ItemStack left, ItemStack right) {
+        if (left.isEmpty() && right.isEmpty()) {
+            return true;
+        }
+        if (left.isEmpty() != right.isEmpty()) {
+            return false;
+        }
+        return left.getItem() == right.getItem();
+    }
+
+    private static void triggerEquip(LivingEntity user, ItemStack stack) {
+        NianTouData data = NianTouDataManager.getData(stack);
+        if (data == null || data.usages() == null) {
+            return;
+        }
+        for (NianTouData.Usage usage : data.usages()) {
+            if (!NianTouUnlockChecker.isUsageUnlocked(user, stack, usage.usageID())) {
+                continue;
+            }
+            IGuEffect effect = GuEffectRegistry.get(usage.usageID());
+            if (effect != null) {
+                try {
+                    effect.onEquip(user, stack, usage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static void triggerUnequip(LivingEntity user, ItemStack stack) {
+        NianTouData data = NianTouDataManager.getData(stack);
+        if (data == null || data.usages() == null) {
+            return;
+        }
+        for (NianTouData.Usage usage : data.usages()) {
+            IGuEffect effect = GuEffectRegistry.get(usage.usageID());
+            if (effect != null) {
+                try {
+                    effect.onUnequip(user, stack, usage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

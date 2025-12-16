@@ -25,7 +25,6 @@ import java.util.UUID;
 /**
  * NpcMind 默认实现
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
 
     private final MemoryModule memory;
@@ -140,6 +139,11 @@ public class NpcMind implements INpcMind, INBTSerializable<CompoundTag> {
     @Override
     public com.Kizunad.customNPCs.ai.personality.PersonalityModule getPersonality() {
         return personality;
+    }
+
+    @Override
+    public com.Kizunad.customNPCs.ai.personality.EmotionManager getEmotionManager() {
+        return personality.getEmotionManager();
     }
 
     @Override

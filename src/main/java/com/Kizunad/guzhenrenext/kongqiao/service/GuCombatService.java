@@ -8,6 +8,7 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
+import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUnlockChecker;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -91,6 +92,9 @@ public final class GuCombatService {
             }
 
             for (NianTouData.Usage usage : data.usages()) {
+                if (!NianTouUnlockChecker.isUsageUnlocked(attacker, stack, usage.usageID())) {
+                    continue;
+                }
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
                 if (effect != null) {
                     try {
@@ -135,6 +139,9 @@ public final class GuCombatService {
             }
 
             for (NianTouData.Usage usage : data.usages()) {
+                if (!NianTouUnlockChecker.isUsageUnlocked(victim, stack, usage.usageID())) {
+                    continue;
+                }
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
                 if (effect != null) {
                     try {

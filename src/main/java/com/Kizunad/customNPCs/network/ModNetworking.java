@@ -2,6 +2,8 @@ package com.Kizunad.customNPCs.network;
 
 //import com.Kizunad.customNPCs.network.ServerboundRefreshTaskBoardPayload;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -16,16 +18,31 @@ public final class ModNetworking {
 
     public static void register(final RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
-        registrar.playToClient(
-            OpenInteractGuiPayload.TYPE,
-            OpenInteractGuiPayload.STREAM_CODEC,
-            OpenInteractGuiPayload::handle
-        );
-        registrar.playToClient(
-            OpenTaskBoardPayload.TYPE,
-            OpenTaskBoardPayload.STREAM_CODEC,
-            OpenTaskBoardPayload::handle
-        );
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            registrar.playToClient(
+                OpenInteractGuiPayload.TYPE,
+                OpenInteractGuiPayload.STREAM_CODEC,
+                (payload, context) -> com.Kizunad.customNPCs.client.network.OpenInteractGuiClientHandler
+                    .handle(payload)
+            );
+            registrar.playToClient(
+                OpenTaskBoardPayload.TYPE,
+                OpenTaskBoardPayload.STREAM_CODEC,
+                (payload, context) -> com.Kizunad.customNPCs.client.network.OpenTaskBoardClientHandler
+                    .handle(payload)
+            );
+        } else {
+            registrar.playToClient(
+                OpenInteractGuiPayload.TYPE,
+                OpenInteractGuiPayload.STREAM_CODEC,
+                OpenInteractGuiPayload::handle
+            );
+            registrar.playToClient(
+                OpenTaskBoardPayload.TYPE,
+                OpenTaskBoardPayload.STREAM_CODEC,
+                OpenTaskBoardPayload::handle
+            );
+        }
         registrar.playToServer(
             InteractActionPayload.TYPE,
             InteractActionPayload.STREAM_CODEC,

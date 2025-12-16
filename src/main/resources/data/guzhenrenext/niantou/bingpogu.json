@@ -1,0 +1,19 @@
+{
+    "itemID": "guzhenren:bingpogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bingpogu_passive_guard",
+            "usageTitle": "冰魄护身",
+            "usageDesc": "魂魄如万年玄冰般死寂凝练。提升盔甲韧性，受击时反噬寒气冻结敌人。若敌人已受寒，则其造成的伤害大幅降低。",
+            "usageInfo": "真元: 基数{zhenyuan_base_cost}/s | 韧性: +{toughness_bonus} | 反噬: +{freeze_ticks}冻结 | 减伤: 冻结者伤害-{damage_reduction}%",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "3840.0",
+                "toughness_bonus": "4.0",
+                "freeze_ticks": "140",
+                "damage_reduction": "0.3"
+            }
+        }
+    ]
+}

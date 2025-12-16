@@ -8,6 +8,7 @@ import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.tinyUI.demo.TinyUISlot;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -20,6 +21,9 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NianTouMenu extends AbstractContainerMenu {
 
@@ -107,6 +111,16 @@ public class NianTouMenu extends AbstractContainerMenu {
 
     @Override
     public void removed(Player player) {
+        // 关闭界面时将蛊物返还给玩家，背包满则掉落
+        if (!player.level().isClientSide) {
+            ItemStack stack = container.removeItemNoUpdate(0);
+            if (!stack.isEmpty()) {
+                boolean added = player.getInventory().add(stack);
+                if (!added) {
+                    player.drop(stack, false);
+                }
+            }
+        }
         super.removed(player);
         container.stopOpen(player);
     }
@@ -120,30 +134,57 @@ public class NianTouMenu extends AbstractContainerMenu {
             }
 
             NianTouData data = NianTouDataManager.getData(stack);
-            if (data == null) {
+            if (data == null || data.usages() == null || data.usages().isEmpty()) {
                 return false;
             }
 
-            // TODO: 检查消耗 (真元/魂魄)
-            // if (!consumeResources(player, data)) return false;
-
             if (player instanceof ServerPlayer serverPlayer) {
-                NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(
-                    serverPlayer
-                );
+                NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(serverPlayer);
                 if (unlocks != null) {
-                    ResourceLocation itemId =
-                        BuiltInRegistries.ITEM.getKey(stack.getItem());
-                    if (!unlocks.isUnlocked(itemId)) {
-                        unlocks.unlock(itemId);
-                        // 同步给客户端
-                        PacketDistributor.sendToPlayer(
-                            serverPlayer,
-                            new PacketSyncNianTouUnlocks(
-                                unlocks.getUnlockedItems()
-                            )
+                    if (unlocks.isProcessing()) {
+                        serverPlayer.displayClientMessage(
+                            Component.literal("已有鉴定正在进行"),
+                            true
                         );
+                        return false;
                     }
+
+                    ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                    List<NianTouData.Usage> lockedUsages = new ArrayList<>();
+                    for (NianTouData.Usage usage : data.usages()) {
+                        if (usage == null) {
+                            continue;
+                        }
+                        if (!unlocks.isUsageUnlocked(itemId, usage.usageID())) {
+                            lockedUsages.add(usage);
+                        }
+                    }
+
+                    if (lockedUsages.isEmpty()) {
+                        serverPlayer.displayClientMessage(
+                            Component.literal("所有用途均已鉴定"),
+                            true
+                        );
+                        return false;
+                    }
+
+                    NianTouData.Usage selected =
+                        lockedUsages.get(serverPlayer.getRandom().nextInt(lockedUsages.size()));
+                    int duration = selected.costDuration();
+                    int cost = selected.costTotalNiantou();
+                    if (duration <= 0) {
+                        duration = 1;
+                    }
+                    if (cost < 0) {
+                        cost = 0;
+                    }
+                    unlocks.startProcess(itemId, selected.usageID(), duration, cost);
+
+                    // Sync immediately
+                    PacketDistributor.sendToPlayer(
+                        serverPlayer,
+                        new PacketSyncNianTouUnlocks(unlocks)
+                    );
                 }
             }
             return true;

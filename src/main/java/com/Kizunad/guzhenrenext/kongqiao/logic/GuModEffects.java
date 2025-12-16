@@ -32,6 +32,8 @@ public final class GuModEffects {
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierTwo.TierTwoHunDaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree.TierThreeHunDaoRegistry
+            .registerAll();
 
         registered = true;
     }

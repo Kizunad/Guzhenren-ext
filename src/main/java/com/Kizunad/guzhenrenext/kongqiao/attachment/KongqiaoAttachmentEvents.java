@@ -84,7 +84,7 @@ public final class KongqiaoAttachmentEvents {
             return;
         }
         NianTouUnlocks newUnlocks = new NianTouUnlocks();
-        newUnlocks.setUnlockedItems(originalUnlocks.getUnlockedItems());
+        newUnlocks.setUnlockedUsageMap(originalUnlocks.getUnlockedUsageMap());
         clone.setData(KongqiaoAttachments.NIANTOU_UNLOCKS.get(), newUnlocks);
     }
 }

@@ -6,6 +6,7 @@ import com.Kizunad.customNPCs.events.NpcMindEvents;
 import com.Kizunad.customNPCs.events.MaterialValueEvents;
 import com.Kizunad.customNPCs.config.ModGameRules;
 import com.Kizunad.customNPCs.config.CustomNpcConfigs;
+import com.Kizunad.customNPCs.config.SpawnConfigs;
 import com.Kizunad.customNPCs.network.ModNetworking;
 import com.Kizunad.customNPCs.menu.ModMenus;
 import com.Kizunad.customNPCs.client.ClientScreens;
@@ -41,6 +42,8 @@ public class CustomNPCsMod {
         ModGameRules.register();
         // 加载配置文件（config/customnpcs-llm.json）
         CustomNpcConfigs.load();
+        // 加载生成配置文件（config/customnpcs-spawn.json），覆盖旧版 llm 配置中的生成字段
+        SpawnConfigs.load();
         if (FMLEnvironment.dist == Dist.CLIENT) {
         modEventBus.addListener(ClientScreens::registerScreens);
         }

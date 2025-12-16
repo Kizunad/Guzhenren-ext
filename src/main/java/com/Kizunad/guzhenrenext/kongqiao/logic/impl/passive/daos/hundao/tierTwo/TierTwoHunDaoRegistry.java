@@ -11,6 +11,6 @@ public final class TierTwoHunDaoRegistry {
 
     public static void registerAll() {
         GuEffectRegistry.register(new GuiHuoGuEffect());
-        // 后续添加更多二转魂道蛊虫...
+        GuEffectRegistry.register(new DaHunGuEffect());
     }
 }

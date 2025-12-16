@@ -20,7 +20,7 @@ public final class NianTouSyncEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(player);
             if (unlocks != null) {
-                PacketDistributor.sendToPlayer(player, new PacketSyncNianTouUnlocks(unlocks.getUnlockedItems()));
+                PacketDistributor.sendToPlayer(player, new PacketSyncNianTouUnlocks(unlocks));
             }
         }
     }

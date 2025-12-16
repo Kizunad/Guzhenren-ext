@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:langhungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:langhungu_passive_nightwalker",
+            "usageTitle": "被动·夜行者",
+            "usageDesc": "游击夜战之道，贵在隐匿与疾行。当处于夜晚或低光照区域时，狼魂悄然附体，步伐无声而迅捷。",
+            "usageInfo": "触发条件：夜晚/低光照 | 移速：+{speed_bonus}% | 低光阈值：≤{low_light_threshold}",
+            "cost_duration": 600,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "speed_bonus": "0.2",
+                "low_light_threshold": "7"
+            }
+        },
+        {
+            "usageID": "guzhenren:langhungu_passive_pack_hunt",
+            "usageTitle": "被动·群猎",
+            "usageDesc": "狼性群猎，围猎而不蛮冲。周围每有一头归属己身的驯服兽类，便为主人添一分杀机。",
+            "usageInfo": "半径：{radius}格 | 每只同伴：+{attack_bonus_per_entity} 攻击力 | 关键词：游击、夜战、精力",
+            "cost_duration": 900,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "radius": "12.0",
+                "attack_bonus_per_entity": "10.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:langhungu_skill_greedy_devour",
+            "usageTitle": "战斗技能【贪狼吞噬】",
+            "usageDesc": "敌弱则噬，趁势夺命。攻击生命值低于阈值的敌人时，必定暴击，并回复少量魂魄与精力。",
+            "usageInfo": "阈值：<{health_threshold} | 暴击倍率：x{crit_multiplier} | 回复：{restore_percent}% 魂魄/精力",
+            "cost_duration": 1200,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "health_threshold": "0.3",
+                "crit_multiplier": "1.5",
+                "restore_percent": "0.01"
+            }
+        }
+    ]
+}

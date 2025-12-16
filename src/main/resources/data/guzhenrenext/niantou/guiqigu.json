@@ -1,0 +1,20 @@
+{
+    "itemID": "guzhenren:guiqigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:guiqigu_passive_evasion",
+            "usageTitle": "鬼气森森",
+            "usageDesc": "周身鬼气弥漫，受击时有概率化为鬼影规避部分伤害。\n规避会消耗蛊虫耐久与自身魂魄。",
+            "usageInfo": "真元: 基数{zhenyuan_base_cost}/s 三转一阶真元 50.0/s |\n 概率: {evasion_chance}% |\n 上限: {max_mitigation}点/50% |\n 魂魄消耗: 减免量的{soul_cost_percent}%",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "38400.0",
+                "evasion_chance": "20.0",
+                "max_mitigation": "300.0",
+                "max_percentage": "0.5",
+                "soul_cost_percent": "0.1"
+            }
+        }
+    ]
+}

@@ -4,6 +4,8 @@ import com.Kizunad.customNPCs.ai.WorldStateKeys;
 import com.Kizunad.customNPCs.ai.logging.MindLog;
 import com.Kizunad.customNPCs.ai.logging.MindLogLevel;
 import com.Kizunad.customNPCs.ai.memory.MemoryModule;
+import com.Kizunad.customNPCs.ai.personality.EmotionManager;
+import com.Kizunad.customNPCs.ai.personality.EmotionType;
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
@@ -57,13 +59,13 @@ public class DamageSensor implements ISensor {
                 // 汇总威胁状态写入，避免内联重复逻辑
                 rememberThreat(mind, attackerUuid, attackerDistance);
 
-                // FUTURE:情绪需要单独集成
                 // 触发情绪：怒（基础 +0.2）
                 mind
-                    .getPersonality()
-                    .triggerEmotion(
-                        com.Kizunad.customNPCs.ai.personality.EmotionType.ANGER,
-                        0.2f
+                    .getEmotionManager()
+                    .applyDelta(
+                        EmotionType.ANGER,
+                        0.2f,
+                        EmotionManager.Cause.DAMAGE
                     );
 
                 // 如果攻击者很强（血量差距大），触发惧
@@ -74,18 +76,20 @@ public class DamageSensor implements ISensor {
                 if (attackerHealthRatio > healthRatio + 0.3f) {
                     // 对手明显更强，触发恐惧
                     mind
-                        .getPersonality()
-                        .triggerEmotion(
-                            com.Kizunad.customNPCs.ai.personality.EmotionType.FEAR,
-                            0.3f
+                        .getEmotionManager()
+                        .applyDelta(
+                            EmotionType.FEAR,
+                            0.3f,
+                            EmotionManager.Cause.DAMAGE
                         );
                 } else {
                     // 旗鼓相当或占优，减少恐惧（如果有的话）
                     mind
-                        .getPersonality()
-                        .triggerEmotion(
-                            com.Kizunad.customNPCs.ai.personality.EmotionType.FEAR,
-                            -0.1f
+                        .getEmotionManager()
+                        .applyDelta(
+                            EmotionType.FEAR,
+                            -0.1f,
+                            EmotionManager.Cause.DAMAGE
                         );
                 }
 

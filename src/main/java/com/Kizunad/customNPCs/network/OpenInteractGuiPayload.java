@@ -1,12 +1,10 @@
 package com.Kizunad.customNPCs.network;
 
 import com.Kizunad.customNPCs.CustomNPCsMod;
-import com.Kizunad.customNPCs.client.ui.interact.NpcInteractScreen;
 import com.Kizunad.customNPCs.network.dto.DialogueOption;
 import com.Kizunad.customNPCs.network.dto.NpcStatusEntry;
 import java.util.List;
 import java.util.Objects;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -116,23 +114,7 @@ public record OpenInteractGuiPayload(
         OpenInteractGuiPayload payload,
         IPayloadContext context
     ) {
-        context.enqueueWork(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.level == null) {
-                return;
-            }
-            mc.setScreen(
-                new NpcInteractScreen(new NpcInteractScreen.InteractData(
-                    payload.npcEntityId(),
-                    payload.displayName(),
-                    payload.health(),
-                    payload.maxHealth(),
-                    payload.isOwner(),
-                    payload.startInDialogueMode(),
-                    payload.statusEntries(),
-                    payload.dialogueOptions()
-                ))
-            );
-        });
+        // 客户端处理在 ModNetworking 中按 Dist 注册；
+        // 服务端不会接收该包，这里保持空实现避免错误引用客户端类。
     }
 }

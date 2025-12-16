@@ -32,6 +32,12 @@ public final class KongqiaoAttachments {
             () -> AttachmentType.serializable(NianTouUnlocks::new).build()
         );
 
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<ActivePassives>> ACTIVE_PASSIVES =
+        ATTACHMENT_TYPES.register(
+            "active_passives",
+            () -> AttachmentType.serializable(ActivePassives::new).copyOnDeath().build()
+        );
+
     public static void register(IEventBus bus) {
         ATTACHMENT_TYPES.register(bus);
     }
@@ -48,5 +54,15 @@ public final class KongqiaoAttachments {
             return null;
         }
         return entity.getData(NIANTOU_UNLOCKS.get());
+    }
+
+    public static ActivePassives getActivePassives(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(ACTIVE_PASSIVES.get())) {
+            entity.setData(ACTIVE_PASSIVES.get(), new ActivePassives());
+        }
+        return entity.getData(ACTIVE_PASSIVES.get());
     }
 }

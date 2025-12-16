@@ -1,9 +1,10 @@
 package com.Kizunad.customNPCs.config;
 
 public class SpawnConfig {
+
     private static final SpawnConfig INSTANCE = new SpawnConfig();
     public static final int DEFAULT_MAX_NATURAL_SPAWNS = 5;
-    
+
     private boolean naturalSpawnEnabled = true;
     private int maxNaturalSpawns = DEFAULT_MAX_NATURAL_SPAWNS;
 

@@ -75,6 +75,15 @@ public interface INpcMind {
     com.Kizunad.customNPCs.ai.personality.PersonalityModule getPersonality();
 
     /**
+     * 获取情绪管理器（集中式）。
+     * <p>
+     * 该接口用于统一情绪写入/衰减/触发入口，避免情绪逻辑分散在各个传感器/动作中。
+     *
+     * @return 情绪管理器
+     */
+    com.Kizunad.customNPCs.ai.personality.EmotionManager getEmotionManager();
+
+    /**
      * 获取 NPC 自有背包。
      * @return 背包实例
      */

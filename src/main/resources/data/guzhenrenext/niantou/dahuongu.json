@@ -1,0 +1,19 @@
+{
+    "itemID": "guzhenren:dahungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dahuongu_passive_strengthen",
+            "usageTitle": "壮魂",
+            "usageDesc": "消耗真元，持续滋养魂魄，并被动提升修为。\n若魂魄圆满，则凝练魂魄抗性。",
+            "usageInfo": "真元: 基数{zhenyuan_base_cost}/s (2转1阶约5.0/s) |\n 回魂: {soul_regen}/s |\n 增抗: {resistance_gain}/s |\n 修为: +{cultivation_gain}/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "160.0",
+                "soul_regen": "5.0",
+                "resistance_gain": "0.5",
+                "cultivation_gain": "5.0"
+            }
+        }
+    ]
+}

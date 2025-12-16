@@ -1,0 +1,19 @@
+{
+    "itemID": "guzhenren:gui_yan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:guiyangu_passive_shield",
+            "usageTitle": "鬼炎护体",
+            "usageDesc": "在周身唤起青色鬼炎，对近身之敌造成魂火双重伤害，\n并提供盔甲值。若遭受重创(>100点)，\n鬼炎将溃散进入停滞期。",
+            "usageInfo": "真元: 基数{zhenyuan_base_cost}/s (3转1阶约5.0/s) |\n 盔甲: +{armor_bonus} |\n 伤害: {damage_amount}/s |\n 停滞期: 魂魄-1/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "3840.0",
+                "armor_bonus": "8.0",
+                "aoe_radius": "4.0",
+                "damage_amount": "20.0"
+            }
+        }
+    ]
+}

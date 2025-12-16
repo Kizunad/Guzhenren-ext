@@ -11,17 +11,13 @@ import net.minecraft.nbt.Tag;
  * <p>
  * 管理 NPC 的情绪状态（动态）和性格特征（静态）
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 public class PersonalityModule {
 
-    // 七情 (动态情绪)
-    private final Map<EmotionType, Float> emotions;
+    // 七情 (动态情绪) - 由集中式管理器统一维护
+    private final EmotionManager emotionManager;
 
     // 六欲 (静态性格)
     private final Map<DriveType, Float> drives;
-
-    // 情绪衰减速率 (每 tick)
-    private static final float EMOTION_DECAY_RATE = 0.001f; // 约 1000 ticks (50秒) 完全衰减
 
     /**
      * 创建随机性格的 NPC
@@ -34,13 +30,8 @@ public class PersonalityModule {
      * 创建指定随机种子的 NPC（用于测试）
      */
     public PersonalityModule(Random random) {
-        emotions = new EnumMap<>(EmotionType.class);
+        emotionManager = new EmotionManager();
         drives = new EnumMap<>(DriveType.class);
-
-        // 初始化情绪为 0
-        for (EmotionType emotion : EmotionType.values()) {
-            emotions.put(emotion, 0.0f);
-        }
 
         // 随机生成六欲（倾向于中等值，使用高斯分布）
         for (DriveType drive : DriveType.values()) {
@@ -56,13 +47,8 @@ public class PersonalityModule {
      * 创建指定性格的 NPC（手动配置）
      */
     public PersonalityModule(Map<DriveType, Float> customDrives) {
-        emotions = new EnumMap<>(EmotionType.class);
+        emotionManager = new EmotionManager();
         drives = new EnumMap<>(DriveType.class);
-
-        // 初始化情绪为 0
-        for (EmotionType emotion : EmotionType.values()) {
-            emotions.put(emotion, 0.0f);
-        }
 
         // 使用自定义六欲
         for (DriveType drive : DriveType.values()) {
@@ -74,16 +60,7 @@ public class PersonalityModule {
      * 每 tick 更新（主要用于情绪衰减）
      */
     public void tick() {
-        // 所有情绪自然衰减
-        for (EmotionType emotion : EmotionType.values()) {
-            float current = emotions.get(emotion);
-            if (current > 0) {
-                emotions.put(
-                    emotion,
-                    Math.max(0, current - EMOTION_DECAY_RATE)
-                );
-            }
-        }
+        emotionManager.tick();
     }
 
     /**
@@ -92,16 +69,37 @@ public class PersonalityModule {
      * @param delta 变化量 (-1.0 ~ +1.0)
      */
     public void triggerEmotion(EmotionType emotion, float delta) {
-        float current = emotions.get(emotion);
-        float newValue = Math.max(0.0f, Math.min(1.0f, current + delta));
-        emotions.put(emotion, newValue);
+        triggerEmotion(emotion, delta, EmotionManager.Cause.UNKNOWN);
+    }
+
+    /**
+     * 触发情绪变化（带来源）
+     * @param emotion 情绪类型
+     * @param delta 变化量（允许为负，最终会被 clamp 到 [0,1]）
+     * @param cause 变化来源
+     */
+    public void triggerEmotion(
+        EmotionType emotion,
+        float delta,
+        EmotionManager.Cause cause
+    ) {
+        emotionManager.applyDelta(emotion, delta, cause);
     }
 
     /**
      * 获取情绪值
      */
     public float getEmotion(EmotionType emotion) {
-        return emotions.get(emotion);
+        return emotionManager.get(emotion);
+    }
+
+    /**
+     * 获取情绪管理器（集中式）。
+     * <p>
+     * 外部模块应优先通过该接口写入/读取情绪，避免在各处实现分散逻辑。
+     */
+    public EmotionManager getEmotionManager() {
+        return emotionManager;
     }
 
     /**
@@ -136,42 +134,42 @@ public class PersonalityModule {
             case "flee":
                 // 生存/逃跑受 "生" 欲和 "惧" 情绪正向影响，"怒" 和 "名"（荣誉）负向影响 - 愤怒和自尊心让NPC不愿逃跑
                 modifier += drives.get(DriveType.SURVIVAL) * 0.5f;
-                modifier += emotions.get(EmotionType.FEAR) * 0.4f;
-                modifier -= emotions.get(EmotionType.ANGER) * 0.3f;
+                modifier += emotionManager.get(EmotionType.FEAR) * 0.4f;
+                modifier -= emotionManager.get(EmotionType.ANGER) * 0.3f;
                 modifier -= drives.get(DriveType.PRIDE) * 0.8f; // Pride 强烈抑制逃跑
                 break;
             case "attack":
             case "combat":
                 // 攻击受 "名" 欲和 "怒" 情绪正向影响，"惧" 和 "哀" 负向影响
                 modifier += drives.get(DriveType.PRIDE) * 0.4f;
-                modifier += emotions.get(EmotionType.ANGER) * 0.5f;
-                modifier -= emotions.get(EmotionType.FEAR) * 0.5f;
-                modifier -= emotions.get(EmotionType.SORROW) * 0.3f;
+                modifier += emotionManager.get(EmotionType.ANGER) * 0.5f;
+                modifier -= emotionManager.get(EmotionType.FEAR) * 0.5f;
+                modifier -= emotionManager.get(EmotionType.SORROW) * 0.3f;
                 break;
             case "gather":
             case "loot":
                 // 采集/舔包受 "味" 欲正向影响
                 modifier += drives.get(DriveType.GREED) * 0.6f;
-                modifier += emotions.get(EmotionType.DESIRE) * 0.2f;
+                modifier += emotionManager.get(EmotionType.DESIRE) * 0.2f;
                 break;
             case "social":
             case "trade":
                 // 社交/交易受 "色" 欲和 "喜" 情绪正向影响
                 modifier += drives.get(DriveType.SOCIAL) * 0.5f;
-                modifier += emotions.get(EmotionType.JOY) * 0.3f;
-                modifier -= emotions.get(EmotionType.SORROW) * 0.4f;
+                modifier += emotionManager.get(EmotionType.JOY) * 0.3f;
+                modifier -= emotionManager.get(EmotionType.SORROW) * 0.4f;
                 break;
             case "idle":
             case "rest":
                 // 休息受 "触" 欲正向影响，"哀" 也会让人不想动
                 modifier += drives.get(DriveType.COMFORT) * 0.4f;
-                modifier += emotions.get(EmotionType.SORROW) * 0.3f;
+                modifier += emotionManager.get(EmotionType.SORROW) * 0.3f;
                 break;
             case "cultivate":
             case "explore":
                 // 修炼/探索受 "法" 欲正向影响
                 modifier += drives.get(DriveType.KNOWLEDGE) * 0.6f;
-                modifier += emotions.get(EmotionType.DESIRE) * 0.2f;
+                modifier += emotionManager.get(EmotionType.DESIRE) * 0.2f;
                 break;
         }
 
@@ -185,11 +183,7 @@ public class PersonalityModule {
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
 
-        CompoundTag emotionsTag = new CompoundTag();
-        for (EmotionType emotion : EmotionType.values()) {
-            emotionsTag.putFloat(emotion.getId(), emotions.get(emotion));
-        }
-        tag.put("emotions", emotionsTag);
+        tag.put("emotions", emotionManager.serializeNBT());
 
         CompoundTag drivesTag = new CompoundTag();
         for (DriveType drive : DriveType.values()) {
@@ -205,10 +199,7 @@ public class PersonalityModule {
      */
     public void deserializeNBT(CompoundTag tag) {
         if (tag.contains("emotions", Tag.TAG_COMPOUND)) {
-            CompoundTag emotionsTag = tag.getCompound("emotions");
-            for (EmotionType emotion : EmotionType.values()) {
-                emotions.put(emotion, emotionsTag.getFloat(emotion.getId()));
-            }
+            emotionManager.deserializeNBT(tag.getCompound("emotions"));
         }
 
         if (tag.contains("drives", Tag.TAG_COMPOUND)) {
@@ -229,7 +220,7 @@ public class PersonalityModule {
                     "    %s(%s): %.2f\n",
                     emotion.getChineseName(),
                     emotion.getId(),
-                    emotions.get(emotion)
+                    emotionManager.get(emotion)
                 )
             );
         }
