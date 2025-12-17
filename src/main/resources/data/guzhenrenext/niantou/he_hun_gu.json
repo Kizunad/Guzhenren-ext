@@ -1,0 +1,24 @@
+{
+    "itemID": "guzhenren:he_hun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:he_hun_gu_passive_soul_fusion_ward",
+            "usageTitle": "合魂护魄",
+            "usageDesc": "合魂之妙，不止在炼魄升转，更在于稳固魂躯。\n合魂蛊会把魂魄杂片重新编织成护层：持续将魂魄转化为魂魄抗性，并在受创时以抗性抵消部分伤害。\n魂道道痕越深，护层越稳，上限越高。",
+            "usageInfo": "每秒消耗：{soul_cost_per_second}魂魄(受魂道道痕增幅) | 抗性充能：{resistance_gain_per_second}/秒(受魂道道痕增幅) |\n 上限：({max_resistance_base} + 最大魂魄*{max_resistance_hunpo_ratio})*(道痕倍率) 且至少+1 |\n 减伤：基础{base_reduction_ratio} → 上限{max_reduction_ratio}（道痕系数{dao_hen_ratio_scale}） |\n 抵消消耗：{resistance_per_damage_absorbed}抗性/1伤害",
+            "cost_duration": 2000,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "soul_cost_per_second": "0.60",
+                "resistance_gain_per_second": "1.50",
+                "max_resistance_base": "1.0",
+                "max_resistance_hunpo_ratio": "0.50",
+                "base_reduction_ratio": "0.15",
+                "max_reduction_ratio": "0.40",
+                "dao_hen_ratio_scale": "0.12",
+                "resistance_per_damage_absorbed": "1.0"
+            }
+        }
+    ]
+}
+

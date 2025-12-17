@@ -1,4 +1,4 @@
-package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.tierThree;
+package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
@@ -8,12 +8,16 @@ import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.Comparator;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -65,6 +69,18 @@ public class QuanPuGuScentTrackingEffect implements IGuEffect {
     private static final Vector3f COLOR_RED = new Vector3f(1.0F, 0.15F, 0.15F);
     private static final Vector3f COLOR_GOLD = new Vector3f(1.0F, 0.85F, 0.2F);
     private static final Vector3f COLOR_GREEN = new Vector3f(0.2F, 1.0F, 0.2F);
+
+    /**
+     * 兼容蛊真人本体使用的“敌对生物”实体类型标签。
+     * <p>
+     * 某些蛊真人实体并不实现 {@link Enemy} 接口，但仍应视为敌对目标（例如人族/生物系敌对单位）。
+     * </p>
+     */
+    private static final TagKey<EntityType<?>> GUZHENREN_RENZU_TAG =
+        TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse("guzhenren:renzu"));
+
+    private static final TagKey<EntityType<?>> GUZHENREN_SHENGWU_TAG =
+        TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse("guzhenren:shengwu"));
 
     private record PathSpec(
         DustParticleOptions particle,
@@ -289,7 +305,7 @@ public class QuanPuGuScentTrackingEffect implements IGuEffect {
             e ->
                 e.isAlive()
                     && e != player
-                    && e instanceof Enemy
+                    && isEnemyEntity(e)
                     && isTrackableEntity(e)
         );
         return entities
@@ -320,6 +336,15 @@ public class QuanPuGuScentTrackingEffect implements IGuEffect {
             return entity.hasEffect(MobEffects.GLOWING);
         }
         return true;
+    }
+
+    private static boolean isEnemyEntity(LivingEntity entity) {
+        if (entity instanceof Enemy) {
+            return true;
+        }
+
+        EntityType<?> type = entity.getType();
+        return type.is(GUZHENREN_RENZU_TAG) || type.is(GUZHENREN_SHENGWU_TAG);
     }
 
     private static BlockPos findNearestTreasureOrOre(

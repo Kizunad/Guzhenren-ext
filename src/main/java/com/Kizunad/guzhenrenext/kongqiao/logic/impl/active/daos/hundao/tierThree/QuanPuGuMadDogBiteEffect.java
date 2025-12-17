@@ -1,4 +1,4 @@
-package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.tierThree;
+package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;

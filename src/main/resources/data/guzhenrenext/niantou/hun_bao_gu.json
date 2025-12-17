@@ -1,0 +1,30 @@
+{
+    "itemID": "guzhenren:hun_bao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hun_bao_gu_passive_chain_detonation",
+            "usageTitle": "魂爆连环",
+            "usageDesc": "魂爆之道，不在一瞬，而在连环。\n每次命中都会以魂魄为引，在敌魂中埋下“魂爆印”。印记叠满，或敌将殒落之际，魂爆连锁轰开，周遭皆受波及。\n五转威势极强，但代价亦重：魂道道痕越深，爆发越狠，消耗亦越大。",
+            "usageInfo": "叠印消耗：{soul_cost_per_stack}魂魄/次(受魂道道痕增幅) | 印记上限：{max_stacks}层 | 引爆阈值：{detonate_stacks}层 | 失效：{mark_timeout_ticks}tick |\n 低血引爆：≤{detonate_health_threshold} | 冷却：{detonate_cooldown_ticks}tick |\n 魂爆消耗：{soul_cost_per_detonation}魂魄/次(受魂道道痕增幅) |\n 伤害：{base_soul_damage}+{bonus_soul_damage_per_stack}*层(受魂道道痕增幅与道痕互斥计算) |\n 范围：{radius}格(距离衰减{distance_falloff}/格) | 击退：{knockback} |\n 减速：{slow_duration_ticks}tick (等级{slow_amplifier})",
+            "cost_duration": 2800,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "soul_cost_per_stack": "1.20",
+                "max_stacks": "6",
+                "detonate_stacks": "4",
+                "mark_timeout_ticks": "100",
+                "detonate_health_threshold": "0.25",
+                "detonate_cooldown_ticks": "8",
+                "soul_cost_per_detonation": "18.0",
+                "base_soul_damage": "140.0",
+                "bonus_soul_damage_per_stack": "25.0",
+                "radius": "4.5",
+                "distance_falloff": "0.12",
+                "knockback": "1.10",
+                "slow_duration_ticks": "20",
+                "slow_amplifier": "1"
+            }
+        }
+    ]
+}
+

@@ -104,6 +104,49 @@ public final class HunPoHelper {
     }
 
     /**
+     * 设置最大魂魄抗性上限。
+     * <p>
+     * 注意：原模组里该字段有时可能为 0（未启用/未初始化），因此使用方应自行决定如何解释 0 的含义。
+     * 本方法仅负责安全写入并触发同步。
+     * </p>
+     *
+     * @return 写入后的上限值
+     */
+    public static double setMaxResistance(LivingEntity entity, double value) {
+        if (entity == null) {
+            return 0.0;
+        }
+        try {
+            var vars = getVariables(entity);
+            double next = Math.max(0.0, value);
+            if (Double.compare(vars.hunpo_kangxing_shangxian, next) != 0) {
+                vars.hunpo_kangxing_shangxian = next;
+                vars.markSyncDirty();
+            }
+            return next;
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    /**
+     * 修改最大魂魄抗性上限。
+     *
+     * @return 修改后的上限值
+     */
+    public static double modifyMaxResistance(LivingEntity entity, double amount) {
+        if (entity == null) {
+            return 0.0;
+        }
+        try {
+            var vars = getVariables(entity);
+            return setMaxResistance(entity, vars.hunpo_kangxing_shangxian + amount);
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    /**
      * 修改魂魄抗性值。
      * @return 修改后的抗性值
      */

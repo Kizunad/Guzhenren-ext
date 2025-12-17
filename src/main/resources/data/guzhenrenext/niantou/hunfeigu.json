@@ -1,0 +1,19 @@
+{
+    "itemID": "guzhenren:hunfeigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hunfeigu_passive_soul_wings",
+            "usageTitle": "魂翼余势",
+            "usageDesc": "魂飞蛊既能御空，便可将魂魄凝作翼刃。\n在空中行动时，身法更轻快，亦能卸去远程暗箭的劲道。\n但魂翼越盛，越耗魂魄维持。",
+            "usageInfo": "魂魄消耗: {soul_cost_per_second}/s (受魂道道痕增幅) |\n 空中移速加成: +{air_move_speed_bonus} |\n 飞行速度加成: +{air_flying_speed_bonus} |\n 投射物伤害倍率: x{projectile_damage_multiplier} (受魂道道痕衰减)",
+            "cost_duration": 900,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "soul_cost_per_second": "0.25",
+                "air_move_speed_bonus": "0.10",
+                "air_flying_speed_bonus": "0.12",
+                "projectile_damage_multiplier": "0.90"
+            }
+        }
+    ]
+}

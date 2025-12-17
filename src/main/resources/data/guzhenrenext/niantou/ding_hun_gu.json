@@ -1,0 +1,21 @@
+{
+    "itemID": "guzhenren:ding_hun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:ding_hun_gu_passive_soul_anchor",
+            "usageTitle": "魂钉锁命",
+            "usageDesc": "定魂之妙，在于钉住魂根。\n当你遭遇足以致死的一击时，定魂蛊会以魂魄为钉，将魂躯强行“定住”，把死亡一线压回体内。\n魂道道痕越深，锁命后保留的生机越多，但维持与发动的魂魄代价也越重。",
+            "usageInfo": "维持消耗：{maintain_soul_cost_per_second}魂魄/秒(受魂道道痕增幅) |\n 致死保护：若本次伤害≥当前生命值，则将本次伤害压至仅剩{survive_health_ratio_base}~{survive_health_ratio_max}最大生命值(道痕系数{dao_hen_survive_ratio_scale}) |\n 发动消耗：{soul_cost_on_save}魂魄/次(受魂道道痕增幅) | 冷却：{save_cooldown_ticks}tick",
+            "cost_duration": 3000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "maintain_soul_cost_per_second": "0.80",
+                "soul_cost_on_save": "60.0",
+                "save_cooldown_ticks": "24000",
+                "survive_health_ratio_base": "0.06",
+                "dao_hen_survive_ratio_scale": "0.02",
+                "survive_health_ratio_max": "0.22"
+            }
+        }
+    ]
+}

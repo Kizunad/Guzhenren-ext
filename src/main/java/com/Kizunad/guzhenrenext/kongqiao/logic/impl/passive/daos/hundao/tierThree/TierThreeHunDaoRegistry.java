@@ -2,6 +2,8 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThr
 
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree.LingHunGuAntelopeHangsHornsEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree.QuanPuGuMadDogBiteEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree.QuanPuGuScentTrackingEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree.XiongHunGuEarthShatterEffect;
 
 public class TierThreeHunDaoRegistry {
@@ -20,5 +22,9 @@ public class TierThreeHunDaoRegistry {
         GuEffectRegistry.register(new LingHunGuAntelopeHangsHornsEffect());
         GuEffectRegistry.register(new XiongHunGuThickHideEffect());
         GuEffectRegistry.register(new XiongHunGuEarthShatterEffect());
+        GuEffectRegistry.register(new QuanPuGuScentTrackingEffect());
+        GuEffectRegistry.register(new QuanPuGuMadDogBiteEffect());
+        GuEffectRegistry.register(new TiPoGuBodyTemperingEffect());
+        GuEffectRegistry.register(new HunDunGuSoulShieldEffect());
     }
 }

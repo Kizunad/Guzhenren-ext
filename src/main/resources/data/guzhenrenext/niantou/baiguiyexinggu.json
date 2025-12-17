@@ -1,0 +1,24 @@
+{
+    "itemID": "guzhenren:baiguiyexinggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:baiguiyexinggu_passive_hundred_ghosts_march",
+            "usageTitle": "百鬼夜行",
+            "usageDesc": "夜色为幕，百鬼随行。\n百鬼夜行蛊并非真的召鬼成军，而是以魂道手段牵引鬼影缠身：在夜晚或低光照处，鬼影会侵扰附近的凶物，使其魂魄迟滞、力弱。\n若凶物锁定你为目标，鬼影将进一步啃噬其魂，造成魂魄伤害。\n魂道道痕越深，侵扰越狠，代价也越重。",
+            "usageInfo": "触发条件：夜晚或亮度≤{low_light_threshold} |\n 维持消耗：{maintain_soul_cost_per_second}魂魄/秒(受魂道道痕增幅) |\n 侵扰范围：{radius}格 | 额外消耗：{soul_cost_per_target}魂魄/目标/秒(受魂道道痕增幅) |\n 扰乱：缓慢{slow_amplifier}+1、虚弱{weakness_amplifier}+1（持续{debuff_duration_ticks}tick，每秒刷新） |\n 黑暗：{darkness_duration_ticks}tick |\n 魂噬：仅对锁定玩家的怪物生效，魂魄伤害 {base_soul_damage_per_second}/秒(受魂道道痕增幅与道痕互斥计算)",
+            "cost_duration": 3200,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "low_light_threshold": "4",
+                "maintain_soul_cost_per_second": "1.20",
+                "radius": "6.0",
+                "soul_cost_per_target": "0.30",
+                "debuff_duration_ticks": "25",
+                "slow_amplifier": "1",
+                "weakness_amplifier": "0",
+                "darkness_duration_ticks": "20",
+                "base_soul_damage_per_second": "56.0"
+            }
+        }
+    ]
+}

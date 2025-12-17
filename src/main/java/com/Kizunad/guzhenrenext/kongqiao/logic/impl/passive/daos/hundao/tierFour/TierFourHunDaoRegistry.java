@@ -12,9 +12,9 @@ public final class TierFourHunDaoRegistry {
     private TierFourHunDaoRegistry() {}
 
     public static void registerAll() {
+        GuEffectRegistry.register(new HeHunGuSoulFusionWardEffect());
         GuEffectRegistry.register(new HuPoGuTigerMomentumEffect());
         GuEffectRegistry.register(new HuPoGuTigerEvilWaveEffect());
         GuEffectRegistry.register(new HuPoGuBlackTigerHeartDigEffect());
     }
 }
-

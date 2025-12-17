@@ -10,6 +10,7 @@ import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUsageId;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
 import com.Kizunad.tinyUI.controls.ScrollContainer;
+import com.Kizunad.tinyUI.core.ScaleConfig;
 import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
@@ -39,9 +40,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * </p>
  */
 public final class TweakScreen extends TinyUIScreen {
-
-    private static final int DESIGN_WIDTH = 1920 / 2;
-    private static final int DESIGN_HEIGHT = 1080 / 2;
 
     // drawio 设计窗口：680x320
     private static final int WINDOW_WIDTH = 680;
@@ -110,18 +108,44 @@ public final class TweakScreen extends TinyUIScreen {
     }
 
     private static UIRoot createRoot() {
-        final UIRoot root = new UIRoot();
-        root.setDesignResolution(DESIGN_WIDTH, DESIGN_HEIGHT);
-        return root;
+        return new UIRoot();
     }
 
     @Override
     protected void init() {
         super.init();
+        applyUiScale(getRoot());
+        getRoot().clearChildren();
+        leftContent = null;
+        rightContent = null;
+        leftContentWidth = 0;
         buildUI(getRoot());
         requestSync();
         rebuildLeftContent();
         rebuildRightContent();
+    }
+
+    private void applyUiScale(final UIRoot root) {
+        final double uiScale = sanitizeScaleFactor(
+            com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get()
+        );
+        root.getScaleConfig().setScaleMode(ScaleConfig.ScaleMode.CUSTOM);
+        root.getScaleConfig().setCustomScaleFactor(uiScale);
+        root.setDesignResolution(
+            (int) Math.round((double) width / uiScale),
+            (int) Math.round((double) height / uiScale)
+        );
+        root.setViewport(width, height);
+    }
+
+    private static double sanitizeScaleFactor(final double scaleFactor) {
+        if (Double.isNaN(scaleFactor) || Double.isInfinite(scaleFactor)) {
+            return 1.0;
+        }
+        if (scaleFactor <= 0.0) {
+            return 1.0;
+        }
+        return scaleFactor;
     }
 
     @Override

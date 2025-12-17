@@ -1,0 +1,20 @@
+{
+    "itemID": "guzhenren:hundungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hundungu_passive_soul_shield",
+            "usageTitle": "魂盾护体",
+            "usageDesc": "以魂为盾，护身亦护魂。\n维持时持续消耗魂魄；受创时魂盾会吸收部分伤害，并额外耗魂抵消冲击。\n魂道道痕越深，魂盾越坚，但也越耗魂。",
+            "usageInfo": "维持消耗: {maintain_soul_cost_per_second}/s (受魂道道痕增幅) |\n 基础吸收比例: {base_reduction_ratio} |\n 吸收上限: {max_reduction_ratio} |\n 道痕增幅系数: {dao_hen_ratio_scale} |\n 吸收耗魂: {soul_cost_per_damage_absorbed}/伤害",
+            "cost_duration": 900,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "maintain_soul_cost_per_second": "0.10",
+                "base_reduction_ratio": "0.12",
+                "max_reduction_ratio": "0.35",
+                "dao_hen_ratio_scale": "0.10",
+                "soul_cost_per_damage_absorbed": "0.20"
+            }
+        }
+    ]
+}

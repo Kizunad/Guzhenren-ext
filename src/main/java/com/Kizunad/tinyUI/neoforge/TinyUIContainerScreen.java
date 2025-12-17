@@ -28,7 +28,8 @@ import org.jetbrains.annotations.Nullable;
  * 你可以使用 TinyUI 的布局（Flex/Grid/Scroll）来排版，
  * 这个 Screen 会自动将 {@link UISlot} 的位置同步给底层的 {@link Slot}。
  * <p>
- * <b>注意</b>：由于 MC 物品图标无法缩放，此 Screen 默认禁用设计分辨率缩放。
+ * <b>注意</b>：由于 MC 物品图标无法缩放，此 Screen 仅对 TinyUI 的渲染/输入应用缩放，
+ * 原版 Slot 物品仍按 16x16 像素渲染，并通过动态位置同步保持对齐。
  */
 public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
     extends AbstractContainerScreen<T> {
@@ -75,11 +76,17 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
     @Override
     protected void init() {
         super.init();
-        
-        // 启用自定义缩放模式
+
+        final double uiScale = sanitizeScaleFactor(getUiScale());
+
+        // 启用自定义缩放模式（仅作用于 TinyUI 渲染/输入）
         root.getScaleConfig().setScaleMode(ScaleConfig.ScaleMode.CUSTOM);
-        // 读取配置并应用缩放因子
-        root.getScaleConfig().setCustomScaleFactor(getUiScale());
+        root.getScaleConfig().setCustomScaleFactor(uiScale);
+        // 为保证 Anchor/居中在缩放后仍然正确，按当前窗口与缩放反推逻辑坐标系大小
+        root.setDesignResolution(
+            (int) Math.round((double) width / uiScale),
+            (int) Math.round((double) height / uiScale)
+        );
 
         // 使用全屏坐标系，消除 AbstractContainerScreen 默认的左上偏移
         this.imageWidth = this.width;
@@ -98,7 +105,7 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
         collectUISlots(root);
 
         // 初始同步一次位置
-        updateSlotPositions();
+        updateSlotPositions(root.getScaleConfig());
     }
 
     private void collectUISlots(UIElement element) {
@@ -125,15 +132,30 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
         // 1. 绘制背景 (TinyUI)
         renderBackground(graphics, mouseX, mouseY, partialTick);
 
+        final ScaleConfig scale = root.getScaleConfig();
+        final double factor = scale.getScaleFactor();
+        final boolean scaling = scale.isScalingEnabled() && factor != 1.0;
+
+        // 转换鼠标坐标到 TinyUI 的逻辑坐标系（设计分辨率空间）
+        final double scaledMouseX = scaling ? scale.unscale(mouseX) : mouseX;
+        final double scaledMouseY = scaling ? scale.unscale(mouseY) : mouseY;
+
         // 更新 Slot 位置 (处理动画或滚动)
-        updateSlotPositions();
+        updateSlotPositions(scale);
 
         // 2. 绘制 TinyUI 组件 (背景、标签、UISlot的背景等)
         UIRenderContext context = new GuiRenderContext(
             graphics,
             Minecraft.getInstance().font
         );
-        root.render(context, mouseX, mouseY, partialTick);
+        if (scaling) {
+            graphics.pose().pushPose();
+            graphics.pose().scale((float) factor, (float) factor, 1.0f);
+        }
+        root.render(context, scaledMouseX, scaledMouseY, partialTick);
+        if (scaling) {
+            graphics.pose().popPose();
+        }
 
         // 3. 绘制原生 Slot 内容 (物品) 和 Tooltip
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -141,7 +163,7 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
         renderTooltip(graphics, mouseX, mouseY);
     }
 
-    private void updateSlotPositions() {
+    private void updateSlotPositions(final ScaleConfig scale) {
         // Slot 坐标需要减去原版的 left/top 偏移以匹配全屏绝对坐标
         int guiLeft = this.leftPos;
         int guiTop = this.topPos;
@@ -152,38 +174,33 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
             setSlotPosition(slot, HIDDEN_SLOT_POS, HIDDEN_SLOT_POS);
         }
 
-        double scale = root.getScaleConfig().getScaleFactor();
-
         for (UISlot uiSlot : uiSlots) {
             int index = uiSlot.getSlotIndex();
             if (index >= 0 && index < this.menu.slots.size()) {
                 Slot mcSlot = this.menu.slots.get(index);
 
-                // 计算 UISlot 的绝对位置
-                int absX = uiSlot.getAbsoluteX();
-                int absY = uiSlot.getAbsoluteY();
-                int slotWidth = uiSlot.getWidth();
-                int slotHeight = uiSlot.getHeight();
-
                 // 检查是否在屏幕内 (处理滚动裁剪)
-                if (
-                    uiSlot.isEnabledAndVisible() &&
-                    isVisibleInHierarchy(uiSlot) &&
-                    isInsideScrollViewports(uiSlot)
-                ) {
-                    // 原版物品渲染大小固定为 16x16，不随 UI 缩放
-                    // 计算物品在缩放后的 Slot 中的居中位置
-                    // absX/absY 是已经缩放过的屏幕坐标
-                    // slotWidth/slotHeight 是已经缩放过的屏幕尺寸
-                    
-                    int itemX = absX + (slotWidth - VANILLA_SLOT_SIZE) / 2;
-                    int itemY = absY + (slotHeight - VANILLA_SLOT_SIZE) / 2;
-                    
-                    int alignedX = itemX - guiLeft;
-                    int alignedY = itemY - guiTop;
-                    
-                    setSlotPosition(mcSlot, alignedX, alignedY);
+                if (!uiSlot.isEnabledAndVisible() ||
+                    !isVisibleInHierarchy(uiSlot) ||
+                    !isInsideScrollViewports(uiSlot)) {
+                    continue;
                 }
+
+                // TinyUI 布局坐标（逻辑空间） -> 实际像素坐标
+                final int slotX = scale.scale(uiSlot.getAbsoluteX());
+                final int slotY = scale.scale(uiSlot.getAbsoluteY());
+                final int slotWidth = scale.scale(uiSlot.getWidth());
+                final int slotHeight = scale.scale(uiSlot.getHeight());
+
+                // 原版物品渲染大小固定为 16x16，不随 UI 缩放；仅重新定位到缩放后的 UISlot 中心
+                final int itemX = slotX + (slotWidth - VANILLA_SLOT_SIZE) / 2;
+                final int itemY = slotY + (slotHeight - VANILLA_SLOT_SIZE) / 2;
+
+                // AbstractContainerScreen 渲染物品时会额外偏移（通常为 +1,+1），因此反推 Slot 左上角坐标
+                final int alignedX = itemX - ITEM_RENDER_OFFSET_X - guiLeft;
+                final int alignedY = itemY - ITEM_RENDER_OFFSET_Y - guiTop;
+
+                setSlotPosition(mcSlot, alignedX, alignedY);
             }
         }
     }
@@ -240,7 +257,10 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
         int w = element.getWidth();
         int h = element.getHeight();
 
-        return x + w > 0 && y + h > 0 && x < width && y < height;
+        return x + w > 0 &&
+            y + h > 0 &&
+            x < root.getWidth() &&
+            y < root.getHeight();
     }
 
     private boolean isInsideScrollViewports(UIElement element) {
@@ -354,7 +374,11 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         // 先尝试 TinyUI 处理 (例如按钮点击)
-        if (inputRouter.mouseClick(mouseX, mouseY, button)) {
+        if (inputRouter.mouseClick(
+            toScaledMouseX(mouseX),
+            toScaledMouseY(mouseY),
+            button
+        )) {
             return true;
         }
         // 再尝试原生 Slot 处理 (例如拿起物品)
@@ -363,7 +387,11 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (inputRouter.mouseRelease(mouseX, mouseY, button)) {
+        if (inputRouter.mouseRelease(
+            toScaledMouseX(mouseX),
+            toScaledMouseY(mouseY),
+            button
+        )) {
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
@@ -377,7 +405,16 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
         double dragX,
         double dragY
     ) {
-        if (inputRouter.mouseDrag(mouseX, mouseY, button, dragX, dragY)) {
+        final ScaleConfig scale = root.getScaleConfig();
+        final double factor = scale.getScaleFactor();
+        final boolean scaling = scale.isScalingEnabled() && factor != 1.0;
+        if (inputRouter.mouseDrag(
+            scaling ? scale.unscale(mouseX) : mouseX,
+            scaling ? scale.unscale(mouseY) : mouseY,
+            button,
+            scaling ? scale.unscale(dragX) : dragX,
+            scaling ? scale.unscale(dragY) : dragY
+        )) {
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
@@ -390,7 +427,11 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
         double deltaX,
         double deltaY
     ) {
-        if (inputRouter.mouseScroll(mouseX, mouseY, deltaY)) {
+        if (inputRouter.mouseScroll(
+            toScaledMouseX(mouseX),
+            toScaledMouseY(mouseY),
+            deltaY
+        )) {
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
@@ -410,5 +451,33 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
             return true;
         }
         return super.charTyped(codePoint, modifiers);
+    }
+
+    private double toScaledMouseX(final double mouseX) {
+        final ScaleConfig scale = root.getScaleConfig();
+        final double factor = scale.getScaleFactor();
+        if (scale.isScalingEnabled() && factor != 1.0) {
+            return scale.unscale(mouseX);
+        }
+        return mouseX;
+    }
+
+    private double toScaledMouseY(final double mouseY) {
+        final ScaleConfig scale = root.getScaleConfig();
+        final double factor = scale.getScaleFactor();
+        if (scale.isScalingEnabled() && factor != 1.0) {
+            return scale.unscale(mouseY);
+        }
+        return mouseY;
+    }
+
+    private static double sanitizeScaleFactor(final double scaleFactor) {
+        if (Double.isNaN(scaleFactor) || Double.isInfinite(scaleFactor)) {
+            return 1.0;
+        }
+        if (scaleFactor <= 0.0) {
+            return 1.0;
+        }
+        return scaleFactor;
     }
 }
