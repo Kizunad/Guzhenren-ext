@@ -157,28 +157,28 @@ public final class BackPngEffectRenderer {
     ) {
         consumer.addVertex(pose, -QUAD_HALF_SIZE, -QUAD_HALF_SIZE, QUAD_Z)
             .setColor(red, green, blue, alpha)
-            .setUv(0.0F, 1.0F)
+            .setUv(1.0F, 0.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
             .setNormal(pose, 0.0F, 0.0F, 1.0F);
 
         consumer.addVertex(pose, QUAD_HALF_SIZE, -QUAD_HALF_SIZE, QUAD_Z)
             .setColor(red, green, blue, alpha)
-            .setUv(1.0F, 1.0F)
+            .setUv(0.0F, 0.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
             .setNormal(pose, 0.0F, 0.0F, 1.0F);
 
         consumer.addVertex(pose, QUAD_HALF_SIZE, QUAD_HALF_SIZE, QUAD_Z)
             .setColor(red, green, blue, alpha)
-            .setUv(1.0F, 0.0F)
+            .setUv(0.0F, 1.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
             .setNormal(pose, 0.0F, 0.0F, 1.0F);
 
         consumer.addVertex(pose, -QUAD_HALF_SIZE, QUAD_HALF_SIZE, QUAD_Z)
             .setColor(red, green, blue, alpha)
-            .setUv(0.0F, 0.0F)
+            .setUv(1.0F, 1.0F)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
             .setNormal(pose, 0.0F, 0.0F, 1.0F);

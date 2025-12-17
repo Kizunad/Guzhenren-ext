@@ -60,6 +60,11 @@ public class NpcMaterialScreen extends TinyUIContainerScreen<NpcMaterialMenu> {
     }
 
     @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
+    }
+
+    @Override
     protected void initUI(UIRoot root) {
         root.setViewport(width, height);
 

@@ -1,0 +1,20 @@
+{
+    "itemID": "guzhenren:gguiyangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:gguiyangu_passive_soul_scout",
+            "usageTitle": "窥魂索敌",
+            "usageDesc": "以魂魄为目，窥探周遭敌影。\n每秒扫描周身一定范围的敌对生物，使其短暂发光，\n隐身也无法遁形。扫描越远越耗魂。",
+            "usageInfo": "扫描半径: {scan_radius}格 (受魂道道痕增幅) |\n 发光: {glow_duration_ticks}tick |\n 魂魄消耗: {soul_cost_per_second}/s + {soul_cost_per_target}/目标",
+            "cost_duration": 1200,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "scan_radius": "16.0",
+                "glow_duration_ticks": "50",
+                "soul_cost_per_second": "0.5",
+                "soul_cost_per_target": "0.05",
+                "particle_count_per_target": "2"
+            }
+        }
+    ]
+}

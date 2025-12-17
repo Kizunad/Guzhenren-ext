@@ -50,6 +50,11 @@ public class NpcGiftScreen extends TinyUIContainerScreen<NpcGiftMenu> {
     }
 
     @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
+    }
+
+    @Override
     protected void initUI(UIRoot root) {
         root.setViewport(width, height);
 

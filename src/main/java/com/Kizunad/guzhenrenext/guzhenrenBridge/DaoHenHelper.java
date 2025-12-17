@@ -16,7 +16,11 @@ public final class DaoHenHelper {
     public enum DaoType {
         HUN_DAO("hundao"), // 魂道
         JIN_DAO("jindao"), // 金道
-        LI_DAO("lidao"),   // 力道
+        LI_DAO("lidao"), // 力道
+        TU_DAO("tudao"), // 土道
+        BIAN_HUA_DAO("bianhuadao"), // 变化道
+        FENG_DAO("fengdao"), // 风道
+        NU_DAO("nudao"), // 奴道
         // ... 根据需要添加其他流派
         GENERIC("generic"); // 通用/无属性
 
@@ -36,12 +40,21 @@ public final class DaoHenHelper {
         }
         try {
             var vars = entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
-            
+
             // 目前只针对已知变量名做映射，需根据实际 Mod 变量名完善
             switch (type) {
-                case HUN_DAO: return vars.daohen_hundao;
-                case JIN_DAO: return vars.daohen_jindao;
-                case LI_DAO:  return vars.daohen_lidao;
+                case HUN_DAO:
+                    return vars.daohen_hundao;
+                case JIN_DAO:
+                    return vars.daohen_jindao;
+                case LI_DAO:
+                    return vars.daohen_lidao;
+                case TU_DAO:
+                    return vars.daohen_tudao;
+                case BIAN_HUA_DAO:
+                    return vars.daohen_bianhuadao;
+                case FENG_DAO: return vars.daohen_fengdao;
+                case NU_DAO: return vars.dahen_nudao; // 注意：库中变量名为 dahen_nudao (少了个o)
                 default: return 0.0;
             }
         } catch (Exception e) {
@@ -57,7 +70,9 @@ public final class DaoHenHelper {
             return 0.0;
         }
         try {
-            return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES).daohen_zong;
+            return entity.getData(
+                GuzhenrenModVariables.PLAYER_VARIABLES
+            ).daohen_zong;
         } catch (Exception e) {
             return 0.0;
         }

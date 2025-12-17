@@ -68,7 +68,7 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     private Label resultLabel;
     private Label timeLabel;
     private Label costLabel;
-    private Label progressBarLabel; // Use text to simulate progress bar for now
+    private Label progressBarLabel; // 暂时用文本模拟进度条
     private Button identifyButton;
 
 	    private NianTouData previewData;
@@ -84,6 +84,13 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     @Override
     protected void containerTick() {
         super.containerTick();
+        if (progressBarLabel == null ||
+            identifyButton == null ||
+            resultLabel == null ||
+            timeLabel == null ||
+            costLabel == null) {
+            return;
+        }
         updateData();
     }
 
@@ -91,53 +98,78 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     protected void initUI(UIRoot root) {
         UIElement window = new UIElement() {};
         window.setFrame(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	        Anchor.apply(
-	            window,
-	            root.getWidth(),
-	            root.getHeight(),
-	            new Anchor.Spec(
-	                WINDOW_WIDTH,
-	                WINDOW_HEIGHT,
-	                Anchor.Horizontal.CENTER,
-	                Anchor.Vertical.CENTER,
-	                0,
-	                0
-	            )
-	        );
-	        root.addChild(window);
+        Anchor.apply(
+            window,
+            root.getWidth(),
+            root.getHeight(),
+            new Anchor.Spec(
+                WINDOW_WIDTH,
+                WINDOW_HEIGHT,
+                Anchor.Horizontal.CENTER,
+                Anchor.Vertical.CENTER,
+                0,
+                0
+            )
+        );
+        root.addChild(window);
 
-        SolidPanel mainPanel = new SolidPanel(theme);
-        mainPanel.setFrame(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        window.addChild(mainPanel);
+        SolidPanel background = new SolidPanel(theme);
+        background.setFrame(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        window.addChild(background);
 
-        Label titleLabel = new Label(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_TITLE), theme);
-        titleLabel.setFrame(PANEL_PADDING, PANEL_PADDING, WINDOW_WIDTH - PANEL_PADDING * 2, TITLE_HEIGHT);
-        mainPanel.addChild(titleLabel);
+        Label title = new Label(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_TITLE), theme);
+        title.setFrame(
+            PANEL_PADDING,
+            PANEL_PADDING,
+            WINDOW_WIDTH - PANEL_PADDING * 2,
+            TITLE_HEIGHT
+        );
+        background.addChild(title);
 
-        int contentY = CONTENT_Y;
-        int contentHeight = CONTENT_HEIGHT;
-        int totalContentWidth = LEFT_WIDTH + CENTER_WIDTH + RIGHT_WIDTH + (PANEL_PADDING * 2);
-        int startX = (WINDOW_WIDTH - totalContentWidth) / 2;
+        int panelGap = PANEL_PADDING;
+        int panelGroupWidth = LEFT_WIDTH + CENTER_WIDTH + RIGHT_WIDTH + panelGap * 2;
+        int startX = (WINDOW_WIDTH - panelGroupWidth) / 2;
 
-        buildHistoryPanel(mainPanel, startX, contentY, LEFT_WIDTH, contentHeight);
-        int centerX = startX + LEFT_WIDTH + PANEL_PADDING;
-        buildCenterPanel(mainPanel, centerX, contentY, CENTER_WIDTH, contentHeight);
-        int rightX = centerX + CENTER_WIDTH + PANEL_PADDING;
-        buildOutputPanel(mainPanel, rightX, contentY, RIGHT_WIDTH, contentHeight);
+        buildHistoryPanel(
+            background,
+            startX,
+            CONTENT_Y,
+            LEFT_WIDTH,
+            CONTENT_HEIGHT
+        );
+        buildCenterPanel(
+            background,
+            startX + LEFT_WIDTH + panelGap,
+            CONTENT_Y,
+            CENTER_WIDTH,
+            CONTENT_HEIGHT
+        );
+        buildOutputPanel(
+            background,
+            startX + LEFT_WIDTH + panelGap + CENTER_WIDTH + panelGap,
+            CONTENT_Y,
+            RIGHT_WIDTH,
+            CONTENT_HEIGHT
+        );
 
-        int playerInvY = contentY + contentHeight + PLAYER_INV_GAP_Y;
-	        UIElement playerGrid = InventoryUI.playerInventoryGrid(
-	            PLAYER_INV_START_INDEX,
-	            PLAYER_SLOT_SIZE,
-	            PLAYER_SLOT_GAP,
-	            PLAYER_SLOT_PADDING,
-	            theme
-	        );
-	        int playerX = (WINDOW_WIDTH - playerGrid.getWidth()) / 2;
-	        playerGrid.setFrame(playerX, playerInvY, playerGrid.getWidth(), playerGrid.getHeight());
-	        mainPanel.addChild(playerGrid);
+        UIElement playerGrid = InventoryUI.playerInventoryGrid(
+            PLAYER_INV_START_INDEX,
+            PLAYER_SLOT_SIZE,
+            PLAYER_SLOT_GAP,
+            PLAYER_SLOT_PADDING,
+            theme
+        );
+        int playerGridY = CONTENT_Y + CONTENT_HEIGHT + PLAYER_INV_GAP_Y;
+        int playerGridX = (WINDOW_WIDTH - playerGrid.getWidth()) / 2;
+        playerGrid.setFrame(playerGridX, playerGridY, playerGrid.getWidth(), playerGrid.getHeight());
+        background.addChild(playerGrid);
 
         updateData();
+    }
+
+    @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
     }
 
     private void buildHistoryPanel(UIElement parent, int x, int y, int w, int h) {

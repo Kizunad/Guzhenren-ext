@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.client;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.client.effect.BackPngTimedEffects;
 import com.Kizunad.guzhenrenext.client.gui.SkillWheelScreen;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.TweakScreen;
 import com.Kizunad.guzhenrenext.network.PacketOpenNianTouGui;
@@ -22,6 +23,8 @@ public final class GuClientEvents {
         if (minecraft.player == null) {
             return;
         }
+
+        BackPngTimedEffects.tick();
 
         // 检查按键是否按下，并消耗点击（防止连续触发）
         while (GuKeyBindings.OPEN_NIANTOU_GUI.consumeClick()) {

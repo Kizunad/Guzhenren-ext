@@ -37,12 +37,15 @@ public final class ScaleConfig {
         FIT_HEIGHT,
         /** 取宽高缩放比的最小值，保证内容完全可见（默认） */
         FIT_MIN,
+        /** 使用自定义缩放因子 */
+        CUSTOM,
     }
 
     private int designWidth = DEFAULT_DESIGN_WIDTH;
     private int designHeight = DEFAULT_DESIGN_HEIGHT;
     private double scaleFactor = DEFAULT_SCALE_FACTOR;
     private ScaleMode scaleMode = ScaleMode.FIT_MIN;
+    private double customScaleFactor = 1.0;
 
     /**
      * 设置设计分辨率。
@@ -53,6 +56,18 @@ public final class ScaleConfig {
     public void setDesignResolution(final int width, final int height) {
         this.designWidth = Math.max(1, width);
         this.designHeight = Math.max(1, height);
+    }
+
+    /**
+     * 设置自定义缩放因子（仅在 ScaleMode.CUSTOM 下生效）。
+     *
+     * @param factor 缩放因子
+     */
+    public void setCustomScaleFactor(double factor) {
+        this.customScaleFactor = factor;
+        if (this.scaleMode == ScaleMode.CUSTOM) {
+            this.scaleFactor = factor;
+        }
     }
 
     /**
@@ -100,6 +115,10 @@ public final class ScaleConfig {
     public void updateScale(final int actualWidth, final int actualHeight) {
         if (scaleMode == ScaleMode.NONE) {
             scaleFactor = 1.0;
+            return;
+        }
+        if (scaleMode == ScaleMode.CUSTOM) {
+            scaleFactor = customScaleFactor;
             return;
         }
         final double scaleX = (double) actualWidth / designWidth;

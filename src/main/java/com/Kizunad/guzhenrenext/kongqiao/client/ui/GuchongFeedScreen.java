@@ -182,4 +182,9 @@ public class GuchongFeedScreen extends TinyUIContainerScreen<GuchongFeedMenu> {
         );
         panel.addChild(autoFeed);
     }
+
+    @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
+    }
 }

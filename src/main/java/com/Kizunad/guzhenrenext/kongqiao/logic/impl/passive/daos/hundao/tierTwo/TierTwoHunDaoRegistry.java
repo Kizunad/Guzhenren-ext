@@ -12,5 +12,6 @@ public final class TierTwoHunDaoRegistry {
     public static void registerAll() {
         GuEffectRegistry.register(new GuiHuoGuEffect());
         GuEffectRegistry.register(new DaHunGuEffect());
+        GuEffectRegistry.register(new GuiJiaoGuSoulShriekEffect());
     }
 }

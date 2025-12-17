@@ -114,6 +114,11 @@ public class NpcTradeScreen extends TinyUIContainerScreen<NpcTradeMenu> {
     }
 
     @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
+    }
+
+    @Override
     protected void initUI(UIRoot root) {
         UIElement window = createWindow(root);
         addTitle(window);

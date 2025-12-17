@@ -26,5 +26,9 @@
   "screen.guzhenrenext.niantou.result_label": "等待鉴定...",
   "screen.guzhenrenext.niantou.button.identify": "鉴定",
   "screen.guzhenrenext.niantou.time_label": "耗时",
-  "screen.guzhenrenext.niantou.cost_label": "消耗"
+  "screen.guzhenrenext.niantou.cost_label": "消耗",
+  "death.attack.guzhenrenext.antelope_pierce": "%1$s 被羚角穿心",
+  "death.attack.guzhenrenext.antelope_pierce.player": "%1$s 被 %2$s 的羚角穿心",
+  "guzhenrenext.config.title": "蛊真人扩展配置",
+  "guzhenrenext.config.scale": "空窍UI缩放"
 }

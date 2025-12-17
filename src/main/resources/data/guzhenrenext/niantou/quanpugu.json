@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:quanpugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:quanpugu_active_scent_tracking",
+            "usageTitle": "主动·气味追踪",
+            "usageDesc": "忠犬嗅万里，气味入微。开启后以彩色粒子路径指引目标方位：红指敌、金指宝、绿指人。",
+            "usageInfo": "半径：{radius}格 | 真元：{zhenyuan_base_cost_per_second}/s | 红：敌对生物 | 金：宝箱/稀矿 | 绿：玩家",
+            "cost_duration": 600,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "radius": "20.0",
+                "zhenyuan_base_cost_per_second": "60.0",
+                "particle_spacing": "0.6",
+                "particle_scale": "0.75",
+                "particle_jitter": "0.05",
+                "max_steps": "48"
+            }
+        },
+        {
+            "usageID": "guzhenren:quanpugu_passive_substitute_sacrifice",
+            "usageTitle": "被动·代僵",
+            "usageDesc": "奴道借兽替死，以命换命。玩家遭遇致死伤害时，若周围有一只满血且归属己身的驯服狼，则以狼替死，玩家留一线生机。",
+            "usageInfo": "半径：{radius}格 | 条件：满血驯服狼(Owner=你) | 结果：狼死，你保留 1 点血 | 冷却：{cooldown_ticks} tick",
+            "cost_duration": 900,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "radius": "12.0",
+                "cooldown_ticks": "20"
+            }
+        },
+        {
+            "usageID": "guzhenren:quanpugu_active_mad_dog_bite",
+            "usageTitle": "主动·疯狗咬",
+            "usageDesc": "丧家之犬亦有牙。开启后，普攻会为敌人施加“撕裂”：敌人移动即流血，治疗减半；撕裂持续时间受奴道道痕增益。",
+            "usageInfo": "持续：{active_duration_ticks} tick | 撕裂：移动掉血 + 治疗减半 | 撕裂时长：受奴道道痕增益",
+            "cost_duration": 1200,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "active_duration_ticks": "200",
+                "activate_soul_cost": "0.0",
+                "activate_zhenyuan_base_cost": "0.0"
+            }
+        }
+    ]
+}
+

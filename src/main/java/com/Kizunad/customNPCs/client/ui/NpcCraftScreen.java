@@ -69,6 +69,11 @@ public class NpcCraftScreen extends TinyUIContainerScreen<NpcCraftMenu> {
     }
 
     @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
+    }
+
+    @Override
     protected void initUI(UIRoot root) {
         // 启用 1.5 倍缩放（此屏幕无物品槽位）
         root.getScaleConfig().setScaleMode(ScaleConfig.ScaleMode.FIT_MIN);

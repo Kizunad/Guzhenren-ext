@@ -120,27 +120,69 @@ public final class GuRunningService {
         ItemStack stack,
         String usageId
     ) {
+        return activateEffectWithResult(user, stack, usageId).success();
+    }
+
+    /**
+     * 触发物品主动逻辑，并返回失败原因（用于 UI/轮盘提示）。
+     *
+     * @param user     使用者
+     * @param stack    物品
+     * @param usageId  要触发的用途ID
+     * @return 触发结果（成功/失败原因）
+     */
+    public static ActivationResult activateEffectWithResult(
+        LivingEntity user,
+        ItemStack stack,
+        String usageId
+    ) {
+        if (stack == null || stack.isEmpty() || usageId == null || usageId.isBlank()) {
+            return new ActivationResult(false, ActivationFailureReason.INVALID_INPUT);
+        }
+
         NianTouData data = NianTouDataManager.getData(stack);
-        if (data == null) {
-            return false;
+        if (data == null || data.usages() == null) {
+            return new ActivationResult(false, ActivationFailureReason.NO_NIANTOU_DATA);
         }
 
         for (NianTouData.Usage usage : data.usages()) {
-            if (usage.usageID().equals(usageId)) {
-                if (
-                    !NianTouUnlockChecker.isUsageUnlocked(user, stack, usageId)
-                ) {
-                    return false;
-                }
-                IGuEffect effect = GuEffectRegistry.get(usageId);
-                if (effect != null) {
-                    // TODO: 检查并扣除一次性消耗 (costTotalNiantou等)
-                    return effect.onActivate(user, stack, usage);
-                }
+            if (!usageId.equals(usage.usageID())) {
+                continue;
             }
+
+            if (!NianTouUnlockChecker.isUsageUnlocked(user, stack, usageId)) {
+                return new ActivationResult(false, ActivationFailureReason.NOT_UNLOCKED);
+            }
+
+            IGuEffect effect = GuEffectRegistry.get(usageId);
+            if (effect == null) {
+                return new ActivationResult(false, ActivationFailureReason.NOT_IMPLEMENTED);
+            }
+
+            // TODO: 检查并扣除一次性消耗 (costTotalNiantou等)
+            final boolean success = effect.onActivate(user, stack, usage);
+            if (success) {
+                return new ActivationResult(true, null);
+            }
+            return new ActivationResult(false, ActivationFailureReason.CONDITION_NOT_MET);
         }
-        return false;
+
+        return new ActivationResult(false, ActivationFailureReason.USAGE_NOT_ON_ITEM);
     }
+
+    public enum ActivationFailureReason {
+        INVALID_INPUT,
+        NO_NIANTOU_DATA,
+        USAGE_NOT_ON_ITEM,
+        NOT_UNLOCKED,
+        NOT_IMPLEMENTED,
+        CONDITION_NOT_MET,
+    }
+
+    public record ActivationResult(
+        boolean success,
+        ActivationFailureReason failureReason
+    ) {}
 
     private static void handleEquipChanges(
         ServerPlayer player,

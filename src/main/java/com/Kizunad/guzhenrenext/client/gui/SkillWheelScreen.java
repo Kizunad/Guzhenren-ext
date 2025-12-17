@@ -31,8 +31,8 @@ import org.lwjgl.glfw.GLFW;
  */
 public final class SkillWheelScreen extends TinyUIScreen {
 
-    private static final int DESIGN_WIDTH = 1920;
-    private static final int DESIGN_HEIGHT = 1080;
+    private static final int DESIGN_WIDTH = 1920 / 2;
+    private static final int DESIGN_HEIGHT = 1080 / 2;
 
     private static final int MENU_INNER_RADIUS = 90;
     private static final int MENU_OUTER_RADIUS = 220;
@@ -76,7 +76,11 @@ public final class SkillWheelScreen extends TinyUIScreen {
         final WheelOptions options = buildWheelOptions(minecraft.player);
         this.optionUsageIds = options.usageIds();
         this.optionCount = options.options().size();
-        radialMenu = new RadialMenu(MENU_INNER_RADIUS, MENU_OUTER_RADIUS, options.options());
+        radialMenu = new RadialMenu(
+            MENU_INNER_RADIUS,
+            MENU_OUTER_RADIUS,
+            options.options()
+        );
     }
 
     @Override
@@ -144,7 +148,11 @@ public final class SkillWheelScreen extends TinyUIScreen {
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button) {
+    public boolean mouseClicked(
+        final double mouseX,
+        final double mouseY,
+        final int button
+    ) {
         if (button == MOUSE_BUTTON_LEFT) {
             confirmSelectionAndClose();
             return true;
@@ -153,7 +161,11 @@ public final class SkillWheelScreen extends TinyUIScreen {
     }
 
     @Override
-    public boolean keyPressed(final int keyCode, final int scanCode, final int modifiers) {
+    public boolean keyPressed(
+        final int keyCode,
+        final int scanCode,
+        final int modifiers
+    ) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             // ESC 视为取消，不触发选择。
             closeFinalized = true;
@@ -177,7 +189,9 @@ public final class SkillWheelScreen extends TinyUIScreen {
         final int hoveredIndex = radialMenu.getHoveredIndex();
         if (hoveredIndex >= 0 && hoveredIndex < optionUsageIds.size()) {
             PacketDistributor.sendToServer(
-                new ServerboundSkillWheelSelectPayload(optionUsageIds.get(hoveredIndex))
+                new ServerboundSkillWheelSelectPayload(
+                    optionUsageIds.get(hoveredIndex)
+                )
             );
         }
 
@@ -200,10 +214,15 @@ public final class SkillWheelScreen extends TinyUIScreen {
         final long window = minecraft.getWindow().getWindow();
         final InputConstants.Key boundKey = holdKey.getKey();
         if (boundKey.getType() == InputConstants.Type.MOUSE) {
-            return GLFW.glfwGetMouseButton(window, boundKey.getValue()) == GLFW.GLFW_PRESS;
+            return (
+                GLFW.glfwGetMouseButton(window, boundKey.getValue()) ==
+                GLFW.GLFW_PRESS
+            );
         }
         if (boundKey.getType() == InputConstants.Type.KEYSYM) {
-            return GLFW.glfwGetKey(window, boundKey.getValue()) == GLFW.GLFW_PRESS;
+            return (
+                GLFW.glfwGetKey(window, boundKey.getValue()) == GLFW.GLFW_PRESS
+            );
         }
         return holdKey.isDown();
     }
@@ -217,11 +236,15 @@ public final class SkillWheelScreen extends TinyUIScreen {
             return new WheelOptions(List.of(), List.of());
         }
 
-        final List<RadialMenu.Option> options = new ArrayList<>(wheelSkills.size());
+        final List<RadialMenu.Option> options = new ArrayList<>(
+            wheelSkills.size()
+        );
         final List<String> usageIds = new ArrayList<>(wheelSkills.size());
         for (String usageId : wheelSkills) {
             final ResolvedOption resolved = resolveOption(usageId);
-            options.add(new RadialMenu.Option(resolved.icon(), resolved.label()));
+            options.add(
+                new RadialMenu.Option(resolved.icon(), resolved.label())
+            );
             usageIds.add(usageId);
         }
         return new WheelOptions(List.copyOf(options), List.copyOf(usageIds));
@@ -229,16 +252,30 @@ public final class SkillWheelScreen extends TinyUIScreen {
 
     private static ResolvedOption resolveOption(final String usageId) {
         final UsageLookup lookup = NianTouDataManager.findUsageLookup(usageId);
-        if (lookup == null || lookup.item() == null || lookup.item() == Items.AIR) {
-            return new ResolvedOption(ItemStack.EMPTY, Component.literal(usageId));
+        if (
+            lookup == null ||
+            lookup.item() == null ||
+            lookup.item() == Items.AIR
+        ) {
+            return new ResolvedOption(
+                ItemStack.EMPTY,
+                Component.literal(usageId)
+            );
         }
-        final String title = lookup.usage() != null && lookup.usage().usageTitle() != null
+        final String title = lookup.usage() != null &&
+            lookup.usage().usageTitle() != null
             ? lookup.usage().usageTitle()
             : usageId;
-        return new ResolvedOption(new ItemStack(lookup.item()), Component.literal(title));
+        return new ResolvedOption(
+            new ItemStack(lookup.item()),
+            Component.literal(title)
+        );
     }
 
     private record ResolvedOption(ItemStack icon, Component label) {}
 
-    private record WheelOptions(List<RadialMenu.Option> options, List<String> usageIds) {}
+    private record WheelOptions(
+        List<RadialMenu.Option> options,
+        List<String> usageIds
+    ) {}
 }

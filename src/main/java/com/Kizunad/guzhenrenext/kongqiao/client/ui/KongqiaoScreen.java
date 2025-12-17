@@ -60,6 +60,11 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
     }
 
     @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
+    }
+
+    @Override
     protected void initUI(UIRoot root) {
         int visibleRows = Math.max(menu.getVisibleRows(), 1);
         int totalSlots = menu.getTotalSlots();

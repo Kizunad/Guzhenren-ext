@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:xionghungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xionghungu_passive_thickhide",
+            "usageTitle": "皮糙肉厚",
+            "usageDesc": "熊魂蛊被动：强化肉身防御，减少受到的所有伤害，但代价是更快的饱食度消耗并持续吞噬魂魄。",
+            "usageInfo": "基础减伤: {base_reduction_percent} | 土道防御: daohen_tudao/{tu_divisor} | 变化道防御: daohen_bianhuadao/{bianhua_divisor} | 每秒魂魄消耗: {soul_cost_per_second} | 魂魄低于{min_soul_ratio}时沉眠",
+            "cost_duration": 200,
+            "cost_total_niantou": 15,
+            "metadata": {
+                "base_reduction_percent": "0.05",
+                "tu_divisor": "500.0",
+                "bianhua_divisor": "200.0",
+                "soul_cost_per_second": "1.0",
+                "min_soul_ratio": "0.2",
+                "food_exhaustion_per_second": "0.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:xionghungu_active_earthshatter",
+            "usageTitle": "熊罴撼地",
+            "usageDesc": "熊魂蛊主动：重击地面，震荡周围敌人，造成巨量魂魄伤害与普通伤害，并短暂免疫击退。",
+            "usageInfo": "消耗: {activate_soul_cost} 魂魄 + {activate_zhenyuan_cost_sanzhuan_yijie} 三转一阶真元 | 半径: {radius} | 魂魄伤害: {soul_damage} | 普通伤害: {physical_damage} | 缓慢: II | 免疫击退: {knockback_immune_ticks} ticks",
+            "cost_duration": 120,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "activate_soul_cost": "20.0",
+                "activate_zhenyuan_cost_sanzhuan_yijie": "20.0",
+                "radius": "3.0",
+                "soul_damage": "100.0",
+                "physical_damage": "40.0",
+                "slow_duration_ticks": "60",
+                "knockback_immune_ticks": "40",
+                "png_duration_ticks": "40"
+            }
+        }
+    ]
+}

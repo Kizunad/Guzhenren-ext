@@ -95,4 +95,9 @@ public final class SimpleContainerScreen
         );
         main.addChild(playerGrid);
     }
+
+    @Override
+    protected double getUiScale() {
+        return 1.0;
+    }
 }

@@ -1,0 +1,56 @@
+{
+    "itemID": "guzhenren:hupogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hupogu_passive_tigermomentum",
+            "usageTitle": "被动·虎势",
+            "usageDesc": "力拔山兮气盖世，猛虎下山势难挡。每次命中都会攒起一分虎势，连续进攻则越战越狂，停手片刻便势散如烟。",
+            "usageInfo": "上限：{max_stacks}层 | 每层：+{attack_multiplier_per_stack}%攻击、+{attack_speed_multiplier_per_stack}%攻速 | 断档：{timeout_ticks}tick 清零 | 代价：{soul_cost_per_stack_per_second} 魂魄/层/秒",
+            "cost_duration": 1600,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "max_stacks": "5",
+                "attack_multiplier_per_stack": "0.05",
+                "attack_speed_multiplier_per_stack": "0.02",
+                "soul_damage_per_stack": "10.0",
+                "soul_cost_per_stack_per_second": "10.0",
+                "timeout_ticks": "60"
+            }
+        },
+        {
+            "usageID": "guzhenren:hupogu_active_tigerevilwave",
+            "usageTitle": "主动·【虎煞波】",
+            "usageDesc": "不以爪牙取胜，而以一啸山林震荡魂魄。蓄势而发，前方扇形冲击波打散包围，敌退如潮。",
+            "usageInfo": "蓄力：{charge_ticks}tick | 扇形：{angle_degrees}°/{range}格 | 魂伤：{soul_damage} | 缓慢IV：{slow_duration_ticks}tick | 代价：{activate_soul_cost}魂魄+{activate_zhenyuan_cost_sizhuan_yijie}四转一阶真元",
+            "cost_duration": 2000,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "charge_ticks": "18",
+                "activate_soul_cost": "20.0",
+                "activate_zhenyuan_cost_sizhuan_yijie": "20.0",
+                "range": "7.0",
+                "angle_degrees": "70.0",
+                "base_knockback": "1.6",
+                "soul_damage": "200.0",
+                "slow_duration_ticks": "20",
+                "slow_amplifier": "3"
+            }
+        },
+        {
+            "usageID": "guzhenren:hupogu_active_blacktigerheartdig",
+            "usageTitle": "技能·【黑虎掏心】",
+            "usageDesc": "一击掏心，必定暴击的重手。若当场毙命，便是掏心取命，反哺自身并带走额外战利品。",
+            "usageInfo": "范围：{range}格 | 伤害：{soul_damage}魂魄+{physical_damage}物理(必定暴击) | 冷却：{cooldown_ticks}tick | 消耗：{activate_zhenyuan_cost_sizhuan_yijie}四转一阶真元",
+            "cost_duration": 2600,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "activate_zhenyuan_cost_sizhuan_yijie": "80.0",
+                "soul_damage": "150.0",
+                "physical_damage": "150.0",
+                "crit_multiplier": "1.5",
+                "cooldown_ticks": "300",
+                "range": "4.5"
+            }
+        }
+    ]
+}

@@ -41,6 +41,7 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
     // 缓存找到的 UISlot，避免每帧遍历整棵树
     private final List<UISlot> uiSlots = new ArrayList<>();
 
+    private static final int VANILLA_SLOT_SIZE = 16;
     private static final int HIDDEN_SLOT_POS = -10000;
     private static final int ITEM_RENDER_OFFSET_X = 1;
     private static final int ITEM_RENDER_OFFSET_Y = 1;
@@ -63,11 +64,22 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
      */
     protected abstract void initUI(UIRoot root);
 
+    /**
+     * 获取 UI 缩放比例。
+     * 子类应根据具体的配置返回缩放因子。
+     *
+     * @return 缩放因子 (1.0 = 100%)
+     */
+    protected abstract double getUiScale();
+
     @Override
     protected void init() {
         super.init();
-        // Container 屏幕默认禁用缩放，因为 MC 物品图标无法缩放
-        root.getScaleConfig().setScaleMode(ScaleConfig.ScaleMode.NONE);
+        
+        // 启用自定义缩放模式
+        root.getScaleConfig().setScaleMode(ScaleConfig.ScaleMode.CUSTOM);
+        // 读取配置并应用缩放因子
+        root.getScaleConfig().setCustomScaleFactor(getUiScale());
 
         // 使用全屏坐标系，消除 AbstractContainerScreen 默认的左上偏移
         this.imageWidth = this.width;
@@ -140,6 +152,8 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
             setSlotPosition(slot, HIDDEN_SLOT_POS, HIDDEN_SLOT_POS);
         }
 
+        double scale = root.getScaleConfig().getScaleFactor();
+
         for (UISlot uiSlot : uiSlots) {
             int index = uiSlot.getSlotIndex();
             if (index >= 0 && index < this.menu.slots.size()) {
@@ -148,6 +162,8 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
                 // 计算 UISlot 的绝对位置
                 int absX = uiSlot.getAbsoluteX();
                 int absY = uiSlot.getAbsoluteY();
+                int slotWidth = uiSlot.getWidth();
+                int slotHeight = uiSlot.getHeight();
 
                 // 检查是否在屏幕内 (处理滚动裁剪)
                 if (
@@ -155,9 +171,17 @@ public abstract class TinyUIContainerScreen<T extends AbstractContainerMenu>
                     isVisibleInHierarchy(uiSlot) &&
                     isInsideScrollViewports(uiSlot)
                 ) {
-                    // Vanilla 会在绘制时对物品+1px 内缩，这里提前对 Slot 坐标做偏移保持对齐
-                    int alignedX = absX + ITEM_RENDER_OFFSET_X - guiLeft;
-                    int alignedY = absY + ITEM_RENDER_OFFSET_Y - guiTop;
+                    // 原版物品渲染大小固定为 16x16，不随 UI 缩放
+                    // 计算物品在缩放后的 Slot 中的居中位置
+                    // absX/absY 是已经缩放过的屏幕坐标
+                    // slotWidth/slotHeight 是已经缩放过的屏幕尺寸
+                    
+                    int itemX = absX + (slotWidth - VANILLA_SLOT_SIZE) / 2;
+                    int itemY = absY + (slotHeight - VANILLA_SLOT_SIZE) / 2;
+                    
+                    int alignedX = itemX - guiLeft;
+                    int alignedY = itemY - guiTop;
+                    
                     setSlotPosition(mcSlot, alignedX, alignedY);
                 }
             }

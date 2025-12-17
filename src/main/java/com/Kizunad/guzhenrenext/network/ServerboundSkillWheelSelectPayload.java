@@ -9,6 +9,8 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUsageId;
 import com.Kizunad.guzhenrenext.kongqiao.service.GuRunningService;
+import com.Kizunad.guzhenrenext.kongqiao.service.GuRunningService.ActivationFailureReason;
+import com.Kizunad.guzhenrenext.kongqiao.service.GuRunningService.ActivationResult;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -62,9 +64,9 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
                 return;
             }
             if (!NianTouUsageId.isActive(selectedUsageId)) {
-                return;
-            }
-            if (GuEffectRegistry.get(selectedUsageId) == null) {
+                serverPlayer.sendSystemMessage(
+                    Component.literal("技能轮盘：该用途不是主动技能，无法触发 (" + selectedUsageId + ")")
+                );
                 return;
             }
 
@@ -73,6 +75,13 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
             final String title = lookup != null && lookup.usage() != null
                 ? lookup.usage().usageTitle()
                 : selectedUsageId;
+
+            if (GuEffectRegistry.get(selectedUsageId) == null) {
+                serverPlayer.sendSystemMessage(
+                    Component.literal("技能轮盘：该技能尚未实现，无法触发 [" + title + "]")
+                );
+                return;
+            }
 
             TweakConfig tweakConfig = KongqiaoAttachments.getTweakConfig(serverPlayer);
             if (tweakConfig == null || !tweakConfig.isInWheel(selectedUsageId)) {
@@ -99,15 +108,40 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
             }
 
             boolean activated = false;
+            boolean matchedUsage = false;
+            boolean matchedNotUnlocked = false;
+            boolean matchedNotImplemented = false;
+            boolean matchedConditionNotMet = false;
             int unlockedSlots = inventory.getSettings().getUnlockedSlots();
             for (int i = 0; i < unlockedSlots; i++) {
                 ItemStack stack = inventory.getItem(i);
                 if (stack.isEmpty()) {
                     continue;
                 }
-                if (GuRunningService.activateEffect(serverPlayer, stack, selectedUsageId)) {
+                ActivationResult result = GuRunningService.activateEffectWithResult(
+                    serverPlayer,
+                    stack,
+                    selectedUsageId
+                );
+                if (result.success()) {
                     activated = true;
                     break;
+                }
+                if (
+                    result.failureReason() == ActivationFailureReason.USAGE_NOT_ON_ITEM
+                        || result.failureReason() == ActivationFailureReason.NO_NIANTOU_DATA
+                        || result.failureReason() == ActivationFailureReason.INVALID_INPUT
+                ) {
+                    continue;
+                }
+
+                matchedUsage = true;
+                if (result.failureReason() == ActivationFailureReason.NOT_UNLOCKED) {
+                    matchedNotUnlocked = true;
+                } else if (result.failureReason() == ActivationFailureReason.NOT_IMPLEMENTED) {
+                    matchedNotImplemented = true;
+                } else if (result.failureReason() == ActivationFailureReason.CONDITION_NOT_MET) {
+                    matchedConditionNotMet = true;
                 }
             }
 
@@ -118,9 +152,36 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
                 return;
             }
 
+            if (!matchedUsage) {
+                serverPlayer.sendSystemMessage(
+                    Component.literal("技能轮盘：该技能未放入空窍，无法触发 [" + title + "]")
+                );
+                return;
+            }
+            if (matchedNotUnlocked) {
+                serverPlayer.sendSystemMessage(
+                    Component.literal("技能轮盘：该技能尚未解锁，无法触发 [" + title + "]")
+                );
+                return;
+            }
+            if (matchedNotImplemented) {
+                serverPlayer.sendSystemMessage(
+                    Component.literal("技能轮盘：该技能尚未实现，无法触发 [" + title + "]")
+                );
+                return;
+            }
+            if (matchedConditionNotMet) {
+                serverPlayer.sendSystemMessage(
+                    Component.literal(
+                        "技能轮盘：条件不满足（资源不足/状态不符），触发失败 [" + title + "]"
+                    )
+                );
+                return;
+            }
+
             serverPlayer.sendSystemMessage(
                 Component.literal(
-                    "技能轮盘：触发失败（未解锁/未在空窍/未实现 onActivate）[" + title + "]"
+                    "技能轮盘：触发失败 [" + title + "] (" + selectedUsageId + ")"
                 )
             );
         });

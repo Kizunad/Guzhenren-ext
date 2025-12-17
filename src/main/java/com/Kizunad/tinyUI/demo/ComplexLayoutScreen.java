@@ -86,28 +86,12 @@ public class ComplexLayoutScreen
 
     @Override
     protected void initUI(UIRoot root) {
-        // Main container
-        UIElement main = new UIElement() {};
-        main.setFrame(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        root.addChild(main);
+        // ... (demo UI setup)
+    }
 
-        UIElement topSection = createTopSection();
-        UIElement bottomPanel = createBottomSection();
-
-        // --- Main Layout ---
-        main.addChild(topSection);
-        main.addChild(bottomPanel);
-
-        Map<UIElement, FlexParams> mainParams = new HashMap<>();
-        mainParams.put(topSection, new FlexParams(1, 1, 0));
-        mainParams.put(bottomPanel, new FlexParams(0, 0, BOTTOM_PANEL_HEIGHT));
-
-        new FlexLayout(FlexLayout.Direction.COLUMN, FLEX_GAP, FLEX_GAP).layout(
-            main,
-            mainParams
-        );
-        // 主布局完成后，强制重算内部网格，避免首次布局时尺寸为 0
-        relayoutContainers(topSection, bottomPanel);
+    @Override
+    protected double getUiScale() {
+        return 1.0;
     }
 
     private void relayoutContainers(UIElement topSection, UIElement bottomPanel) {

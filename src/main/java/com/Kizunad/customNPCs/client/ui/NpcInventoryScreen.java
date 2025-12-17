@@ -53,6 +53,11 @@ public class NpcInventoryScreen
     }
 
     @Override
+    protected double getUiScale() {
+        return com.Kizunad.guzhenrenext.config.ClientConfig.INSTANCE.kongQiaoUiScale.get();
+    }
+
+    @Override
     protected void initUI(UIRoot root) {
         NpcInventory inventory = menu.getInventory();
         int mainCount = inventory != null

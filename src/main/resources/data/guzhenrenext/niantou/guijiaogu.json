@@ -1,0 +1,22 @@
+{
+    "itemID": "guzhenren:guijiaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:guijiaogu_passive_soul_shriek",
+            "usageTitle": "惊啸魂震",
+            "usageDesc": "攻击命中时，鬼叫蛊以惊啸震荡魂魄。\n若冷却结束且魂魄足够，则对目标附近敌人造成魂魄冲击，\n并短暂迟滞与击退，撕开围杀空隙。",
+            "usageInfo": "冷却: {cooldown_ticks}tick |\n 范围: {radius}格 |\n 魂魄: -{soul_cost}/次 |\n 震荡: {base_soul_damage}魂魄伤害 (受魂道道痕增幅)",
+            "cost_duration": 1200,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "cooldown_ticks": "60",
+                "radius": "3.5",
+                "soul_cost": "2.0",
+                "base_soul_damage": "20.0",
+                "slow_duration_ticks": "20",
+                "slow_amplifier": "3",
+                "knockback_strength": "1.0"
+            }
+        }
+    ]
+}

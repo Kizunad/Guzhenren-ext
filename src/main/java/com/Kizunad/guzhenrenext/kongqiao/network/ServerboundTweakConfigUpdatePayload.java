@@ -2,8 +2,9 @@ package com.Kizunad.guzhenrenext.kongqiao.network;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
-import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
+import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUsageId;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -79,8 +80,13 @@ public record ServerboundTweakConfigUpdatePayload(
                 return;
             }
 
-            // 最小校验：只允许操作已注册的用途（避免任意字符串写入存档）。
-            if (GuEffectRegistry.get(idString) == null) {
+            final NianTouDataManager.UsageLookup lookup =
+                NianTouDataManager.findUsageLookup(idString);
+            if (lookup == null || lookup.data() == null || lookup.usage() == null) {
+                serverPlayer.displayClientMessage(
+                    Component.literal("未知用途ID，无法更新配置。"),
+                    true
+                );
                 return;
             }
 
@@ -98,8 +104,30 @@ public record ServerboundTweakConfigUpdatePayload(
                     }
                 }
                 case ADD_WHEEL_SKILL -> {
-                    if (!NianTouUsageId.isSkill(idString)) {
+                    if (!NianTouUsageId.isActive(idString)) {
                         return;
+                    }
+                    final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(
+                        serverPlayer
+                    );
+                    if (unlocks != null) {
+                        final String itemId = lookup.data().itemID();
+                        try {
+                            final ResourceLocation item =
+                                ResourceLocation.parse(itemId);
+                            if (!unlocks.isUsageUnlocked(item, idString)) {
+                                serverPlayer.displayClientMessage(
+                                    Component.literal(
+                                        "该技能尚未解锁，无法加入轮盘："
+                                            + lookup.usage().usageTitle()
+                                    ),
+                                    true
+                                );
+                                return;
+                            }
+                        } catch (Exception e) {
+                            // 忽略：数据异常时不阻断玩家配置，但可能在触发时表现为无效
+                        }
                     }
                     final boolean added = config.addWheelSkill(
                         idString,
@@ -110,13 +138,41 @@ public record ServerboundTweakConfigUpdatePayload(
                             Component.literal("轮盘已满或技能已存在。"),
                             true
                         );
-                    }
-                }
-                case REMOVE_WHEEL_SKILL -> {
-                    if (!NianTouUsageId.isSkill(idString)) {
                         return;
                     }
-                    config.removeWheelSkill(idString);
+                    serverPlayer.displayClientMessage(
+                        Component.literal(
+                            "已加入轮盘："
+                                + lookup.usage().usageTitle()
+                                + " ("
+                                + idString
+                                + ")"
+                        ),
+                        true
+                    );
+                }
+                case REMOVE_WHEEL_SKILL -> {
+                    if (!NianTouUsageId.isActive(idString)) {
+                        return;
+                    }
+                    final boolean removed = config.removeWheelSkill(idString);
+                    if (!removed) {
+                        serverPlayer.displayClientMessage(
+                            Component.literal("轮盘中不存在该技能。"),
+                            true
+                        );
+                        return;
+                    }
+                    serverPlayer.displayClientMessage(
+                        Component.literal(
+                            "已移出轮盘："
+                                + lookup.usage().usageTitle()
+                                + " ("
+                                + idString
+                                + ")"
+                        ),
+                        true
+                    );
                 }
                 default -> {
                 }

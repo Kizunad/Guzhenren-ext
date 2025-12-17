@@ -40,8 +40,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public final class TweakScreen extends TinyUIScreen {
 
-    private static final int DESIGN_WIDTH = 1920;
-    private static final int DESIGN_HEIGHT = 1080;
+    private static final int DESIGN_WIDTH = 1920 / 2;
+    private static final int DESIGN_HEIGHT = 1080 / 2;
 
     // drawio 设计窗口：680x320
     private static final int WINDOW_WIDTH = 680;
@@ -103,7 +103,10 @@ public final class TweakScreen extends TinyUIScreen {
     private int lastRenderHash;
 
     public TweakScreen() {
-        super(Component.translatable("screen.guzhenrenext.tweak.title"), createRoot());
+        super(
+            Component.translatable("screen.guzhenrenext.tweak.title"),
+            createRoot()
+        );
     }
 
     private static UIRoot createRoot() {
@@ -165,7 +168,12 @@ public final class TweakScreen extends TinyUIScreen {
         window.addChild(background);
 
         final SolidPanel leftPanel = new SolidPanel(theme);
-        leftPanel.setFrame(WINDOW_PADDING, WINDOW_PADDING, LEFT_WIDTH, PANEL_HEIGHT);
+        leftPanel.setFrame(
+            WINDOW_PADDING,
+            WINDOW_PADDING,
+            LEFT_WIDTH,
+            PANEL_HEIGHT
+        );
         window.addChild(leftPanel);
 
         final Label leftTitle = new Label("解锁的技能", theme);
@@ -183,7 +191,8 @@ public final class TweakScreen extends TinyUIScreen {
         leftPanel.addChild(leftScroll);
 
         leftContent = new UIElement() {};
-        leftContentWidth = LEFT_WIDTH - WINDOW_PADDING * LEFT_CONTENT_PADDING_MULTIPLIER;
+        leftContentWidth =
+            LEFT_WIDTH - WINDOW_PADDING * LEFT_CONTENT_PADDING_MULTIPLIER;
         leftScroll.setContent(leftContent);
 
         final SolidPanel divider = new SolidPanel(theme);
@@ -227,13 +236,25 @@ public final class TweakScreen extends TinyUIScreen {
         if (minecraft.player == null) {
             return 0;
         }
-        final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(minecraft.player);
-        final TweakConfig config = KongqiaoAttachments.getTweakConfig(minecraft.player);
+        final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(
+            minecraft.player
+        );
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(
+            minecraft.player
+        );
         int hash = HASH_SEED;
-        hash = HASH_MULTIPLIER * hash + (selectedItemId == null ? 0 : selectedItemId.hashCode());
-        hash = HASH_MULTIPLIER * hash + (unlocks == null ? 0 : unlocks.getUnlockedUsageMap().hashCode());
-        hash = HASH_MULTIPLIER * hash + (config == null ? 0 : config.getDisabledPassives().hashCode());
-        hash = HASH_MULTIPLIER * hash + (config == null ? 0 : config.getWheelSkills().hashCode());
+        hash =
+            HASH_MULTIPLIER * hash +
+            (selectedItemId == null ? 0 : selectedItemId.hashCode());
+        hash =
+            HASH_MULTIPLIER * hash +
+            (unlocks == null ? 0 : unlocks.getUnlockedUsageMap().hashCode());
+        hash =
+            HASH_MULTIPLIER * hash +
+            (config == null ? 0 : config.getDisabledPassives().hashCode());
+        hash =
+            HASH_MULTIPLIER * hash +
+            (config == null ? 0 : config.getWheelSkills().hashCode());
         return hash;
     }
 
@@ -249,14 +270,19 @@ public final class TweakScreen extends TinyUIScreen {
             return;
         }
 
-        final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(minecraft.player);
+        final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(
+            minecraft.player
+        );
         final Map<ResourceLocation, Set<String>> unlockedMap = unlocks != null
             ? unlocks.getUnlockedUsageMap()
             : Map.of();
 
         int y = 0;
         ResourceLocation firstSelectable = null;
-        for (Map.Entry<ResourceLocation, Set<String>> entry : unlockedMap.entrySet()) {
+        for (Map.Entry<
+            ResourceLocation,
+            Set<String>
+        > entry : unlockedMap.entrySet()) {
             final ResourceLocation id = entry.getKey();
             final Item item = BuiltInRegistries.ITEM.get(id);
             if (item == Items.AIR) {
@@ -285,7 +311,8 @@ public final class TweakScreen extends TinyUIScreen {
                 unlockedCount = entry.getValue().size();
             }
 
-            final Component label = item.getDescription()
+            final Component label = item
+                .getDescription()
                 .copy()
                 .append(" (" + unlockedCount + "/" + totalUsages + ")");
             final Button button = new Button(label, theme);
@@ -302,7 +329,12 @@ public final class TweakScreen extends TinyUIScreen {
             selectedItemId = firstSelectable;
         }
 
-        leftContent.setFrame(0, 0, leftContentWidth, Math.max(LIST_ITEM_HEIGHT, y));
+        leftContent.setFrame(
+            0,
+            0,
+            leftContentWidth,
+            Math.max(LIST_ITEM_HEIGHT, y)
+        );
     }
 
     private void rebuildRightContent() {
@@ -338,8 +370,12 @@ public final class TweakScreen extends TinyUIScreen {
             return;
         }
 
-        final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(minecraft.player);
-        final TweakConfig config = KongqiaoAttachments.getTweakConfig(minecraft.player);
+        final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(
+            minecraft.player
+        );
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(
+            minecraft.player
+        );
 
         final List<NianTouData.Usage> passives = new ArrayList<>();
         final List<NianTouData.Usage> skills = new ArrayList<>();
@@ -347,7 +383,10 @@ public final class TweakScreen extends TinyUIScreen {
             if (usage == null) {
                 continue;
             }
-            if (unlocks != null && !unlocks.isUsageUnlocked(selectedItemId, usage.usageID())) {
+            if (
+                unlocks != null &&
+                !unlocks.isUsageUnlocked(selectedItemId, usage.usageID())
+            ) {
                 continue;
             }
             if (NianTouUsageId.isPassive(usage.usageID())) {
@@ -367,7 +406,12 @@ public final class TweakScreen extends TinyUIScreen {
             y += SKILL_CARD_HEIGHT;
         }
 
-        rightContent.setFrame(0, 0, CARD_WIDTH, Math.max(PASSIVE_CARD_HEIGHT, y));
+        rightContent.setFrame(
+            0,
+            0,
+            CARD_WIDTH,
+            Math.max(PASSIVE_CARD_HEIGHT, y)
+        );
     }
 
     private void addPassiveCard(
@@ -386,7 +430,12 @@ public final class TweakScreen extends TinyUIScreen {
 
         final String desc = buildUsageDescription(usage, CARD_DESC_WIDTH);
         final Label descLabel = new Label(desc, theme);
-        descLabel.setFrame(CARD_DESC_X, CARD_DESC_Y_PASSIVE, CARD_DESC_WIDTH, CARD_DESC_HEIGHT);
+        descLabel.setFrame(
+            CARD_DESC_X,
+            CARD_DESC_Y_PASSIVE,
+            CARD_DESC_WIDTH,
+            CARD_DESC_HEIGHT
+        );
         descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         card.addChild(descLabel);
 
@@ -400,7 +449,8 @@ public final class TweakScreen extends TinyUIScreen {
         statusLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         card.addChild(statusLabel);
 
-        final boolean enabled = config == null || config.isPassiveEnabled(usage.usageID());
+        final boolean enabled =
+            config == null || config.isPassiveEnabled(usage.usageID());
         final Label statusValue = new Label(enabled ? "开启" : "关闭", theme);
         statusValue.setFrame(
             STATUS_VALUE_X,
@@ -419,7 +469,8 @@ public final class TweakScreen extends TinyUIScreen {
             ACTION_BUTTON_HEIGHT
         );
         toggle.setOnClick(() -> {
-            final boolean next = !(config == null || config.isPassiveEnabled(usage.usageID()));
+            final boolean next = !(config == null ||
+                config.isPassiveEnabled(usage.usageID()));
             PacketDistributor.sendToServer(
                 new ServerboundTweakConfigUpdatePayload(
                     ServerboundTweakConfigUpdatePayload.Action.SET_PASSIVE_ENABLED,
@@ -448,11 +499,17 @@ public final class TweakScreen extends TinyUIScreen {
 
         final String desc = buildUsageDescription(usage, CARD_DESC_WIDTH);
         final Label descLabel = new Label(desc, theme);
-        descLabel.setFrame(CARD_DESC_X, CARD_DESC_Y_SKILL, CARD_DESC_WIDTH, CARD_DESC_HEIGHT);
+        descLabel.setFrame(
+            CARD_DESC_X,
+            CARD_DESC_Y_SKILL,
+            CARD_DESC_WIDTH,
+            CARD_DESC_HEIGHT
+        );
         descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         card.addChild(descLabel);
 
-        final boolean inWheel = config != null && config.isInWheel(usage.usageID());
+        final boolean inWheel =
+            config != null && config.isInWheel(usage.usageID());
 
         final Button add = new Button("加入轮盘", theme);
         add.setFrame(
@@ -463,6 +520,17 @@ public final class TweakScreen extends TinyUIScreen {
         );
         add.setEnabled(!inWheel);
         add.setOnClick(() -> {
+            final Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.player != null) {
+                final TweakConfig localConfig =
+                    KongqiaoAttachments.getTweakConfig(minecraft.player);
+                if (localConfig != null) {
+                    localConfig.addWheelSkill(
+                        usage.usageID(),
+                        TweakConfig.DEFAULT_MAX_WHEEL_SKILLS
+                    );
+                }
+            }
             PacketDistributor.sendToServer(
                 new ServerboundTweakConfigUpdatePayload(
                     ServerboundTweakConfigUpdatePayload.Action.ADD_WHEEL_SKILL,
@@ -470,6 +538,7 @@ public final class TweakScreen extends TinyUIScreen {
                     true
                 )
             );
+            requestSync();
             rebuildRightContent();
         });
         card.addChild(add);
@@ -483,6 +552,14 @@ public final class TweakScreen extends TinyUIScreen {
         );
         remove.setEnabled(inWheel);
         remove.setOnClick(() -> {
+            final Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.player != null) {
+                final TweakConfig localConfig =
+                    KongqiaoAttachments.getTweakConfig(minecraft.player);
+                if (localConfig != null) {
+                    localConfig.removeWheelSkill(usage.usageID());
+                }
+            }
             PacketDistributor.sendToServer(
                 new ServerboundTweakConfigUpdatePayload(
                     ServerboundTweakConfigUpdatePayload.Action.REMOVE_WHEEL_SKILL,
@@ -490,6 +567,7 @@ public final class TweakScreen extends TinyUIScreen {
                     false
                 )
             );
+            requestSync();
             rebuildRightContent();
         });
         card.addChild(remove);
@@ -499,9 +577,7 @@ public final class TweakScreen extends TinyUIScreen {
         final NianTouData.Usage usage,
         final int maxWidth
     ) {
-        final String raw = usage.usageDesc()
-            + "\n"
-            + usage.getFormattedInfo();
+        final String raw = usage.usageDesc() + "\n" + usage.getFormattedInfo();
         return wrapText(raw, maxWidth);
     }
 
@@ -516,7 +592,10 @@ public final class TweakScreen extends TinyUIScreen {
         return String.join("\n", lines);
     }
 
-    private List<String> wrapParagraph(final String paragraph, final int maxWidth) {
+    private List<String> wrapParagraph(
+        final String paragraph,
+        final int maxWidth
+    ) {
         final List<String> lines = new ArrayList<>();
         if (paragraph == null || paragraph.isEmpty()) {
             lines.add("");

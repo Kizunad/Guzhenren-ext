@@ -45,6 +45,11 @@ public final class GuzhenrenExtNetworking {
             ServerboundTweakConfigUpdatePayload.STREAM_CODEC,
             ServerboundTweakConfigUpdatePayload::handle
         );
+        registrar.playToServer(
+            ServerboundLingHunGuDoubleJumpPayload.TYPE,
+            ServerboundLingHunGuDoubleJumpPayload.STREAM_CODEC,
+            ServerboundLingHunGuDoubleJumpPayload::handle
+        );
         registrar.playToClient(
             ClientboundKongqiaoSyncPayload.TYPE,
             ClientboundKongqiaoSyncPayload.STREAM_CODEC,
@@ -60,6 +65,17 @@ public final class GuzhenrenExtNetworking {
             PacketSyncTweakConfig.TYPE,
             PacketSyncTweakConfig.STREAM_CODEC,
             PacketSyncTweakConfig::handle
+        );
+
+        registrar.playToClient(
+            ClientboundBackPngEffectPayload.TYPE,
+            ClientboundBackPngEffectPayload.STREAM_CODEC,
+            ClientboundBackPngEffectPayload::handle
+        );
+        registrar.playToClient(
+            ClientboundLingHunGuIntuitionPayload.TYPE,
+            ClientboundLingHunGuIntuitionPayload.STREAM_CODEC,
+            ClientboundLingHunGuIntuitionPayload::handle
         );
     }
 }
