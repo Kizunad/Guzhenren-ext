@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.tierOne.XiaoHuiGuFrugalIdentifyEffect;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoUnlockService;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,6 +34,12 @@ public class NianTouTickHandler {
         // 但为了稳健，如果 totalTicks < 1，强制设为 1
         int effectiveTotalTicks = Math.max(1, process.totalTicks);
         double costPerTick = (double) process.totalCost / effectiveTotalTicks;
+        final var actives = KongqiaoAttachments.getActivePassives(player);
+        if (actives != null
+            && actives.isActive(XiaoHuiGuFrugalIdentifyEffect.PASSIVE_USAGE_ID)) {
+            costPerTick *=
+                XiaoHuiGuFrugalIdentifyEffect.getIdentifyCostMultiplierFromConfig();
+        }
 
         // 2. 检查念头是否足够
         double currentNianTou = NianTouHelper.getAmount(player);

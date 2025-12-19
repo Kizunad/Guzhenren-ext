@@ -1,0 +1,29 @@
+{
+    "itemID": "guzhenren:xiaohuigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xiaohuigu_passive_frugal_identify",
+            "usageTitle": "被动·省念",
+            "usageDesc": "小慧蛊寄宿空窍，念头运转更为精细；同样的鉴定过程，耗费更少的念头。",
+            "usageInfo": "鉴定念头消耗倍率：{identify_cost_multiplier}x | 真元：基数{zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 800,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "identify_cost_multiplier": "0.85",
+                "zhenyuan_base_cost_per_second": "3.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:xiaohuigu_active_guided_identify",
+            "usageTitle": "主动·引导鉴定",
+            "usageDesc": "以慧引路，直取浅显处。对手持物品发起鉴定进程，并优先选择念头消耗最低的未解锁用途。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 需要手持目标物品",
+            "cost_duration": 1200,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "cooldown_ticks": "200"
+            }
+        }
+    ]
+}
+

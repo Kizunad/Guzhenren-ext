@@ -1,0 +1,30 @@
+{
+    "itemID": "guzhenren:dadahuigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dadahuigu_passive_wisdom_deduction",
+            "usageTitle": "被动·慧悟",
+            "usageDesc": "大慧蛊寄宿空窍，心念澄明，推演更易窥得脉络。维持开启需消耗真元。",
+            "usageInfo": "真元：基数{zhenyuan_base_cost_per_second}/s（约0.2/s） | 推演加成：+{derive_chance_bonus} | 失败消耗倍率：{fail_cost_multiplier}x",
+            "cost_duration": 1200,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.4",
+                "derive_chance_bonus": "0.10",
+                "fail_cost_multiplier": "0.85"
+            }
+        },
+        {
+            "usageID": "guzhenren:dadahuigu_active_shazhao_derive",
+            "usageTitle": "主动·慧推",
+            "usageDesc": "以慧为引，推演杀招。若【慧悟】正激活，则推演成功率更高、失败消耗更低。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 结果在念头界面显示",
+            "cost_duration": 1600,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "400"
+            }
+        }
+    ]
+}
+

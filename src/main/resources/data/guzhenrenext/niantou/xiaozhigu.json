@@ -1,0 +1,30 @@
+{
+    "itemID": "guzhenren:xiaozhigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xiaozhigu_passive_enlighten",
+            "usageTitle": "被动·启智",
+            "usageDesc": "小智蛊寄宿空窍，点滴启迪心智。念头如涓流不绝，可为鉴定与推演之资。",
+            "usageInfo": "念头回复：{niantou_regen_per_second}/s |\n 真元消耗: {zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 800,
+            "cost_total_niantou": 50,
+            "metadata": {
+                "niantou_regen_per_second": "0.10",
+                "soul_cost_per_second": "0.00",
+                "zhenyuan_base_cost_per_second": "10.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:xiaozhigu_active_flash_assist_identify",
+            "usageTitle": "主动·灵光助鉴",
+            "usageDesc": "灵光一现，直指要害。若正有鉴定进程，可付出剩余念头代价，瞬间完成当前鉴定。",
+            "usageInfo": "仅在鉴定进行中可用 |\n 冷却：{cooldown_ticks}t |\n 额外倍率：{finish_cost_multiplier}x",
+            "cost_duration": 1200,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "200",
+                "finish_cost_multiplier": "1.10"
+            }
+        }
+    ]
+}

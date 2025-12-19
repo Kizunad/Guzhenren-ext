@@ -42,6 +42,12 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
     );
     public static final Type<ServerboundSkillWheelSelectPayload> TYPE = new Type<>(ID);
 
+    private static final String DADAHUIGU_DERIVE_USAGE_ID =
+        "guzhenren:dadahuigu_active_shazhao_derive";
+
+    private static final String DAZHIGU_DERIVE_BEST_USAGE_ID =
+        "guzhenren:dazhigu_active_shazhao_derive_best";
+
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerboundSkillWheelSelectPayload> STREAM_CODEC =
         StreamCodec.of(
             (buf, payload) -> buf.writeUtf(payload.selectedUsageId == null ? "" : payload.selectedUsageId),
@@ -207,6 +213,19 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
             usageId
         );
         if (summary.activated()) {
+            if (DADAHUIGU_DERIVE_USAGE_ID.equals(usageId)
+                || DAZHIGU_DERIVE_BEST_USAGE_ID.equals(usageId)) {
+                final var unlocks = KongqiaoAttachments.getUnlocks(serverPlayer);
+                if (unlocks != null) {
+                    final String message = unlocks.getShazhaoMessage();
+                    if (message != null && !message.isBlank()) {
+                        serverPlayer.sendSystemMessage(
+                            Component.literal("技能轮盘：" + message)
+                        );
+                        return;
+                    }
+                }
+            }
             serverPlayer.sendSystemMessage(
                 Component.literal(
                     "技能轮盘：成功触发 [" + title + "] (" + usageId + ")"
