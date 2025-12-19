@@ -54,6 +54,7 @@ public final class GuRunningService {
         boolean isSecond = (player.tickCount % TICKS_PER_SECOND == 0);
         handleEquipChanges(player, data.getKongqiaoInventory());
         tickKongqiaoEffects(player, data.getKongqiaoInventory(), isSecond);
+        ShazhaoRunningService.tickUnlockedEffects(player, isSecond);
     }
 
     /**

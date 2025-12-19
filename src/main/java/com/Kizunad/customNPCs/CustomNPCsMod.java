@@ -9,14 +9,13 @@ import com.Kizunad.customNPCs.config.CustomNpcConfigs;
 import com.Kizunad.customNPCs.config.SpawnConfigs;
 import com.Kizunad.customNPCs.network.ModNetworking;
 import com.Kizunad.customNPCs.menu.ModMenus;
-import com.Kizunad.customNPCs.client.ClientScreens;
 import com.Kizunad.customNPCs.ai.status.StatusProvidersBootstrap;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,7 @@ public class CustomNPCsMod {
         // 加载生成配置文件（config/customnpcs-spawn.json），覆盖旧版 llm 配置中的生成字段
         SpawnConfigs.load();
         if (FMLEnvironment.dist == Dist.CLIENT) {
-        modEventBus.addListener(ClientScreens::registerScreens);
+            runClientBootstrap(modEventBus);
         }
 
         // 注册内置状态提供者
@@ -61,6 +60,24 @@ public class CustomNPCsMod {
         NeoForge.EVENT_BUS.register(new NpcMindEvents());
         NeoForge.EVENT_BUS.register(new com.Kizunad.customNPCs.handler.NpcSpawningHandler());
         NeoForge.EVENT_BUS.register(new com.Kizunad.customNPCs.events.TaskProgressEvents());
+    }
+
+    private static void runClientBootstrap(IEventBus modEventBus) {
+        try {
+            Class<?> bootstrap = Class.forName(
+                "com.Kizunad.customNPCs.client.CustomNPCsClientBootstrap"
+            );
+            bootstrap
+                .getMethod("registerClient", IEventBus.class)
+                .invoke(null, modEventBus);
+        } catch (ClassNotFoundException e) {
+            // Dedicated Server 环境或裁剪环境下不存在客户端类，跳过即可。
+        } catch (Exception e) {
+            throw new RuntimeException(
+                "CustomNPCs 客户端初始化失败，请检查客户端依赖与加载顺序。",
+                e
+            );
+        }
     }
 
     private void registerOptionalTestContent(IEventBus modEventBus) {

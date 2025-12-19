@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.network;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncKongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncTweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.network.ServerboundTweakConfigUpdatePayload;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
@@ -60,6 +61,11 @@ public final class GuzhenrenExtNetworking {
             PacketSyncNianTouUnlocks.TYPE,
             PacketSyncNianTouUnlocks.STREAM_CODEC,
             PacketSyncNianTouUnlocks::handle
+        );
+        registrar.playToClient(
+            PacketSyncKongqiaoData.TYPE,
+            PacketSyncKongqiaoData.STREAM_CODEC,
+            PacketSyncKongqiaoData::handle
         );
         registrar.playToClient(
             PacketSyncTweakConfig.TYPE,

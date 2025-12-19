@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierFour;
 
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierFour.HeHunGuSoulReweaveEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierFour.HuPoGuBlackTigerHeartDigEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierFour.HuPoGuTigerEvilWaveEffect;
 
@@ -13,6 +14,7 @@ public final class TierFourHunDaoRegistry {
 
     public static void registerAll() {
         GuEffectRegistry.register(new HeHunGuSoulFusionWardEffect());
+        GuEffectRegistry.register(new HeHunGuSoulReweaveEffect());
         GuEffectRegistry.register(new HuPoGuTigerMomentumEffect());
         GuEffectRegistry.register(new HuPoGuTigerEvilWaveEffect());
         GuEffectRegistry.register(new HuPoGuBlackTigerHeartDigEffect());

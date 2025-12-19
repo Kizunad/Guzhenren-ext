@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -17,13 +18,15 @@ import java.util.Set;
 
 /**
  * 玩家念头鉴定解锁记录。
- * 存储玩家已经鉴定过的物品 ID，以及当前正在进行的鉴定进程。
+ * 存储玩家已经鉴定过的物品 ID、杀招解锁情况，以及当前正在进行的鉴定进程。
  */
 public class NianTouUnlocks implements INBTSerializable<CompoundTag> {
 
     private static final String ALL_USAGE_TOKEN = "*";
 
     private final Map<ResourceLocation, Set<String>> unlockedUsages = new HashMap<>();
+    private final Set<ResourceLocation> unlockedShazhao = new HashSet<>();
+    private String shazhaoMessage = "";
     private UnlockProcess currentProcess = null;
 
     // --- Process Logic ---
@@ -99,6 +102,48 @@ public class NianTouUnlocks implements INBTSerializable<CompoundTag> {
             return false;
         }
         return usages.contains(ALL_USAGE_TOKEN) || usages.contains(usageId);
+    }
+
+    public void unlockShazhao(ResourceLocation shazhaoId) {
+        if (shazhaoId == null) {
+            return;
+        }
+        unlockedShazhao.add(shazhaoId);
+    }
+
+    public boolean isShazhaoUnlocked(ResourceLocation shazhaoId) {
+        if (shazhaoId == null) {
+            return false;
+        }
+        return unlockedShazhao.contains(shazhaoId);
+    }
+
+    public Set<ResourceLocation> getUnlockedShazhao() {
+        return new HashSet<>(unlockedShazhao);
+    }
+
+    public void setUnlockedShazhao(Set<ResourceLocation> entries) {
+        unlockedShazhao.clear();
+        if (entries == null) {
+            return;
+        }
+        for (ResourceLocation id : entries) {
+            if (id != null) {
+                unlockedShazhao.add(id);
+            }
+        }
+    }
+
+    public String getShazhaoMessage() {
+        return shazhaoMessage;
+    }
+
+    public void setShazhaoMessage(String message) {
+        if (message == null) {
+            this.shazhaoMessage = "";
+            return;
+        }
+        this.shazhaoMessage = message;
     }
 
     public boolean isUnlocked(ResourceLocation item) {
@@ -183,6 +228,14 @@ public class NianTouUnlocks implements INBTSerializable<CompoundTag> {
         }
         tag.put("unlocked", list);
 
+        ListTag shazhaoList = new ListTag();
+        for (ResourceLocation id : unlockedShazhao) {
+            if (id != null) {
+                shazhaoList.add(StringTag.valueOf(id.toString()));
+            }
+        }
+        tag.put("shazhao_unlocked", shazhaoList);
+
         if (currentProcess != null) {
             CompoundTag processTag = new CompoundTag();
             processTag.putString("id", currentProcess.itemId.toString());
@@ -199,6 +252,7 @@ public class NianTouUnlocks implements INBTSerializable<CompoundTag> {
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         unlockedUsages.clear();
+        unlockedShazhao.clear();
         if (tag.contains("unlocked", Tag.TAG_LIST)) {
             ListTag compoundList = tag.getList("unlocked", Tag.TAG_COMPOUND);
             if (!compoundList.isEmpty()) {
@@ -220,6 +274,21 @@ public class NianTouUnlocks implements INBTSerializable<CompoundTag> {
                 ListTag legacyList = tag.getList("unlocked", Tag.TAG_STRING);
                 for (Tag t : legacyList) {
                     unlock(ResourceLocation.parse(t.getAsString()));
+                }
+            }
+        }
+
+        if (tag.contains("shazhao_unlocked", Tag.TAG_LIST)) {
+            ListTag list = tag.getList("shazhao_unlocked", Tag.TAG_STRING);
+            for (Tag t : list) {
+                try {
+                    ResourceLocation id = ResourceLocation.parse(t.getAsString());
+                    ResourceLocation migrated = ShazhaoId.migrateLegacyId(id);
+                    if (migrated != null) {
+                        unlockedShazhao.add(migrated);
+                    }
+                } catch (Exception e) {
+                    // 忽略非法数据
                 }
             }
         }

@@ -24,6 +24,7 @@
     "screen.guzhenrenext.niantou.output_label": "Output",
     "screen.guzhenrenext.niantou.result_label": "Waiting...",
     "screen.guzhenrenext.niantou.button.identify": "Identify",
+    "screen.guzhenrenext.niantou.button.derive_shazhao": "Derive Shazhao",
     "screen.guzhenrenext.niantou.time_label": "Time",
     "screen.guzhenrenext.niantou.cost_label": "Cost",
     "death.attack.guzhenrenext.antelope_pierce": "%1$s was pierced by antelope horns",

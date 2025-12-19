@@ -25,6 +25,7 @@
   "screen.guzhenrenext.niantou.output_label": "鉴定结果",
   "screen.guzhenrenext.niantou.result_label": "等待鉴定...",
   "screen.guzhenrenext.niantou.button.identify": "鉴定",
+  "screen.guzhenrenext.niantou.button.derive_shazhao": "推演杀招",
   "screen.guzhenrenext.niantou.time_label": "耗时",
   "screen.guzhenrenext.niantou.cost_label": "消耗",
   "death.attack.guzhenrenext.antelope_pierce": "%1$s 被羚角穿心",

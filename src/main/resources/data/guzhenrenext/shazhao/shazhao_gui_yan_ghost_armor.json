@@ -1,0 +1,16 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_gui_yan_ghost_armor",
+    "title": "幽炎护甲",
+    "desc": "鬼炎缠身，鬼气裹甲，既遮视线亦化消锋芒。\n杀招常驻，护体轻而坚。",
+    "info": "盔甲: +{armor_bonus} | 魂魄: -{soul_cost_per_second}/s",
+    "cost_total_niantou": 60,
+    "required_items": [
+        "guzhenren:gui_yan_gu",
+        "guzhenren:guiqigu",
+        "guzhenren:guihuo"
+    ],
+    "metadata": {
+        "armor_bonus": "6.0",
+        "soul_cost_per_second": "0.1"
+    }
+}

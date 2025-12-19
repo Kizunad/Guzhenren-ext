@@ -15,6 +15,23 @@
                 "dao_hen_ratio_scale": "0.10",
                 "soul_cost_per_damage_absorbed": "0.20"
             }
+        },
+        {
+            "usageID": "guzhenren:hundungu_active_soul_bulwark",
+            "usageTitle": "魂盾凝壁",
+            "usageDesc": "魂盾蛊不止能“卸劲”，亦可“立壁”。\n激活后将魂魄瞬间凝为外显护壁，短时间内获得强力护体（吸收与抗性）。\n魂道道痕越深，凝壁越厚，但也越耗魂。",
+            "usageInfo": "消耗: {activate_soul_cost}魂魄 + {activate_zhenyuan_base_cost}(基础真元) |\n 持续: {duration_ticks} ticks | 吸收等级: {absorption_base_level}~{absorption_max_level}(随魂道道痕) |\n 抗性等级: {resistance_amplifier} | 冷却: {cooldown_ticks} ticks",
+            "cost_duration": 360,
+            "cost_total_niantou": 55,
+            "metadata": {
+                "activate_soul_cost": "8.0",
+                "activate_zhenyuan_base_cost": "120.0",
+                "duration_ticks": "80",
+                "absorption_base_level": "0",
+                "absorption_max_level": "2",
+                "resistance_amplifier": "0",
+                "cooldown_ticks": "160"
+            }
         }
     ]
 }

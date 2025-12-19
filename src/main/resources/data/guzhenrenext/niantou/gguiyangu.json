@@ -15,6 +15,23 @@
                 "soul_cost_per_target": "0.05",
                 "particle_count_per_target": "2"
             }
+        },
+        {
+            "usageID": "guzhenren:gguiyangu_active_soul_valuation",
+            "usageTitle": "估魂取魄",
+            "usageDesc": "鬼眼所见，皆为魂价。\n激活后瞬间评估周遭凶物魂息，按“目标数量”凝取一缕魂魄补充自身。\n此法取巧，所得有限，但胜在迅速与稳定。",
+            "usageInfo": "消耗: {activate_soul_cost}魂魄 + {activate_zhenyuan_base_cost}(基础真元) |\n 范围: {radius}格 |\n 获得魂魄: 目标数*{hunpo_gain_per_target} (上限 {max_gain_per_activation}) |\n 发光: {glow_duration_ticks}tick | 冷却: {cooldown_ticks}tick",
+            "cost_duration": 420,
+            "cost_total_niantou": 70,
+            "metadata": {
+                "activate_soul_cost": "2.0",
+                "activate_zhenyuan_base_cost": "320.0",
+                "radius": "10.0",
+                "hunpo_gain_per_target": "1.5",
+                "max_gain_per_activation": "18.0",
+                "glow_duration_ticks": "80",
+                "cooldown_ticks": "200"
+            }
         }
     ]
 }

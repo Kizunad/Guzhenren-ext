@@ -18,7 +18,20 @@
                 "dao_hen_ratio_scale": "0.12",
                 "resistance_per_damage_absorbed": "1.0"
             }
+        },
+        {
+            "usageID": "guzhenren:he_hun_gu_active_soul_reweave",
+            "usageTitle": "合魂返照",
+            "usageDesc": "护层既成，亦可逆转回用。\n激活后消耗一定魂魄抗性，瞬间“返照”魂躯：清理负面状态、回复少量生命与魂魄。\n用于脱困与续航，但过度返照会让护层变薄。",
+            "usageInfo": "消耗: {resistance_cost}魂魄抗性 |\n 回复生命: 最大生命*{heal_ratio} | 回复魂魄: 最大魂魄*{soul_restore_ratio} |\n 冷却: {cooldown_ticks} ticks",
+            "cost_duration": 420,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "resistance_cost": "15.0",
+                "heal_ratio": "0.08",
+                "soul_restore_ratio": "0.03",
+                "cooldown_ticks": "200"
+            }
         }
     ]
 }
-

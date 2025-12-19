@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.niantou;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +98,13 @@ public final class NianTouDataManager {
      */
     public static void clear() {
         DATA_MAP.clear();
+    }
+
+    /**
+     * 获取全部念头数据（用于客户端同步）。
+     */
+    public static Collection<NianTouData> getAll() {
+        return List.copyOf(DATA_MAP.values());
     }
 
     /**

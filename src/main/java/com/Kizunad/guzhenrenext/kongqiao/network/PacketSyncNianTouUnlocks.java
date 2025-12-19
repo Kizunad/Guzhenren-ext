@@ -47,6 +47,15 @@ public record PacketSyncNianTouUnlocks(NianTouUnlocks data) implements CustomPac
                 // 覆盖 remaining (startProcess 会重置 remaining 为 total)
                 unlocks.getCurrentProcess().remainingTicks = remaining;
             }
+
+            // 3. Shazhao Unlocks
+            int shazhaoCount = buf.readVarInt();
+            for (int i = 0; i < shazhaoCount; i++) {
+                unlocks.unlockShazhao(buf.readResourceLocation());
+            }
+
+            // 4. Shazhao Message
+            unlocks.setShazhaoMessage(buf.readUtf());
             
             return new PacketSyncNianTouUnlocks(unlocks);
         }
@@ -80,6 +89,16 @@ public record PacketSyncNianTouUnlocks(NianTouUnlocks data) implements CustomPac
             } else {
                 buf.writeBoolean(false);
             }
+
+            // 3. Shazhao Unlocks
+            Set<ResourceLocation> shazhao = unlocks.getUnlockedShazhao();
+            buf.writeVarInt(shazhao.size());
+            for (ResourceLocation id : shazhao) {
+                buf.writeResourceLocation(id);
+            }
+
+            // 4. Shazhao Message
+            buf.writeUtf(unlocks.getShazhaoMessage());
         }
     };
 

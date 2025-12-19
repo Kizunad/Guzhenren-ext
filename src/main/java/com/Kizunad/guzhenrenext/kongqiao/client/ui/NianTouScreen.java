@@ -55,7 +55,7 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     private static final int BUTTON_WIDTH = 100;
     private static final int BUTTON_HEIGHT = 20;
     private static final int BUTTON_GAP = 20;
-    private static final int RESULT_TEXT_TOP = 50;
+    private static final int DERIVE_BUTTON_GAP = 6;
     private static final int OUTPUT_BOTTOM_MARGIN = 30;
 	private static final int HISTORY_ITEM_HEIGHT = 12;
 	private static final int HISTORY_ITEM_STEP = 14;
@@ -69,7 +69,9 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
     private Label timeLabel;
     private Label costLabel;
     private Label progressBarLabel; // 暂时用文本模拟进度条
+    private Label shazhaoMessageLabel;
     private Button identifyButton;
+    private Button deriveShazhaoButton;
 
 	    private NianTouData previewData;
 	    private ResourceLocation previewItemId;
@@ -88,7 +90,9 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
             identifyButton == null ||
             resultLabel == null ||
             timeLabel == null ||
-            costLabel == null) {
+            costLabel == null ||
+            shazhaoMessageLabel == null ||
+            deriveShazhaoButton == null) {
             return;
         }
         updateData();
@@ -204,28 +208,55 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 	        inputSlot.setFrame(slotX - x, SLOT_Y, SLOT_SIZE, SLOT_SIZE);
 	        panel.addChild(inputSlot);
 
-	        identifyButton = new Button(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_BUTTON_IDENTIFY), theme);
-	        int buttonX = (w - BUTTON_WIDTH) / 2;
-	        identifyButton.setFrame(buttonX, SLOT_Y + SLOT_SIZE + BUTTON_GAP, BUTTON_WIDTH, BUTTON_HEIGHT);
-	        identifyButton.setOnClick(() -> {
-	            if (this.minecraft != null && this.minecraft.gameMode != null) {
-	                this.minecraft.gameMode.handleInventoryButtonClick(
-	                    this.menu.containerId,
-	                    NianTouMenu.IDENTIFY_BUTTON_ID
-	                );
-	            }
-	        });
-	        panel.addChild(identifyButton);
-	        
-	        progressBarLabel = new Label(Component.literal(""), theme);
-	        progressBarLabel.setFrame(
-	            SMALL_PADDING,
-	            SLOT_Y + SLOT_SIZE + BUTTON_GAP + BUTTON_HEIGHT + PROGRESS_BAR_EXTRA_Y,
-	            w - DOUBLE_PADDING,
-	            LABEL_HEIGHT
-	        );
-	        panel.addChild(progressBarLabel);
-	    }
+        identifyButton = new Button(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_BUTTON_IDENTIFY), theme);
+        int buttonX = (w - BUTTON_WIDTH) / 2;
+        int identifyButtonY = SLOT_Y + SLOT_SIZE + BUTTON_GAP;
+        identifyButton.setFrame(
+            buttonX,
+            identifyButtonY,
+            BUTTON_WIDTH,
+            BUTTON_HEIGHT
+        );
+        identifyButton.setOnClick(() -> {
+            if (this.minecraft != null && this.minecraft.gameMode != null) {
+                this.minecraft.gameMode.handleInventoryButtonClick(
+                    this.menu.containerId,
+                    NianTouMenu.IDENTIFY_BUTTON_ID
+                );
+            }
+        });
+        panel.addChild(identifyButton);
+
+        deriveShazhaoButton = new Button(
+            KongqiaoI18n.text(KongqiaoI18n.NIANTOU_BUTTON_DERIVE_SHAZHAO),
+            theme
+        );
+        int deriveButtonY = identifyButtonY + BUTTON_HEIGHT + DERIVE_BUTTON_GAP;
+        deriveShazhaoButton.setFrame(
+            buttonX,
+            deriveButtonY,
+            BUTTON_WIDTH,
+            BUTTON_HEIGHT
+        );
+        deriveShazhaoButton.setOnClick(() -> {
+            if (this.minecraft != null && this.minecraft.gameMode != null) {
+                this.minecraft.gameMode.handleInventoryButtonClick(
+                    this.menu.containerId,
+                    NianTouMenu.DERIVE_SHAZHAO_BUTTON_ID
+                );
+            }
+        });
+        panel.addChild(deriveShazhaoButton);
+        
+        progressBarLabel = new Label(Component.literal(""), theme);
+        progressBarLabel.setFrame(
+            SMALL_PADDING,
+            deriveButtonY + BUTTON_HEIGHT + PROGRESS_BAR_EXTRA_Y,
+            w - DOUBLE_PADDING,
+            LABEL_HEIGHT
+        );
+        panel.addChild(progressBarLabel);
+    }
 
     private void buildOutputPanel(UIElement parent, int x, int y, int w, int h) {
         SolidPanel panel = new SolidPanel(theme);
@@ -233,9 +264,6 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
         parent.addChild(panel);
 
         resultLabel = new Label(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_RESULT_LABEL), theme);
-        resultLabel.setFrame(SMALL_PADDING, RESULT_TEXT_TOP, w - DOUBLE_PADDING, h - OUTPUT_BOTTOM_MARGIN);
-        panel.addChild(resultLabel);
-
         timeLabel = new Label(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_TIME_LABEL), theme);
         timeLabel.setFrame(SMALL_PADDING, SMALL_PADDING, w - DOUBLE_PADDING, LABEL_HEIGHT);
 	        panel.addChild(timeLabel);
@@ -248,6 +276,27 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 	            LABEL_HEIGHT
 	        );
 	        panel.addChild(costLabel);
+
+        int shazhaoMessageY =
+            SMALL_PADDING + (LABEL_HEIGHT + SMALL_PADDING) * 2;
+        shazhaoMessageLabel = new Label(Component.literal(""), theme);
+        shazhaoMessageLabel.setFrame(
+            SMALL_PADDING,
+            shazhaoMessageY,
+            w - DOUBLE_PADDING,
+            LABEL_HEIGHT
+        );
+        panel.addChild(shazhaoMessageLabel);
+
+        int resultTop = shazhaoMessageY + LABEL_HEIGHT + SMALL_PADDING;
+        int resultHeight = h - OUTPUT_BOTTOM_MARGIN - resultTop;
+        resultLabel.setFrame(
+            SMALL_PADDING,
+            resultTop,
+            w - DOUBLE_PADDING,
+            resultHeight
+        );
+        panel.addChild(resultLabel);
 	    }
 
 	    private void updateData() {
@@ -256,6 +305,16 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 	        }
 
 	        NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(this.minecraft.player);
+            if (unlocks != null) {
+                String message = unlocks.getShazhaoMessage();
+                if (message == null || message.isBlank()) {
+                    shazhaoMessageLabel.setText(Component.literal(""));
+                } else {
+                    shazhaoMessageLabel.setText(Component.literal(message));
+                }
+            } else {
+                shazhaoMessageLabel.setText(Component.literal(""));
+            }
 	        boolean isProcessing = unlocks != null && unlocks.isProcessing();
 	        if (lastProcessing && !isProcessing) {
 	            rebuildHistoryContent();
@@ -355,19 +414,24 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
             );
         }
 
+        boolean hasItemInSlot = slotItemId != null;
         if (isProcessing) {
             if (slotItemId != null && process != null && !slotItemId.equals(process.itemId)) {
                 identifyButton.setText(Component.literal("其他鉴定中"));
             }
-        } else if (slotData == null) {
+        } else if (!hasItemInSlot) {
             identifyButton.setEnabled(false);
         } else if (
             unlocks != null &&
-            slotItemId != null &&
+            slotData != null &&
             !unlocks.hasLockedUsage(slotItemId, slotData.usages())
         ) {
             identifyButton.setEnabled(false);
             identifyButton.setText(Component.literal("全部鉴定完成"));
+        } else {
+            // 客户端未加载到念头数据时也允许点击，由服务端决定是否可鉴定。
+            identifyButton.setEnabled(true);
+            identifyButton.setText(KongqiaoI18n.text(KongqiaoI18n.NIANTOU_BUTTON_IDENTIFY));
         }
 
         if (previewData != null) {

@@ -14,6 +14,21 @@
                 "freeze_ticks": "140",
                 "damage_reduction": "0.3"
             }
+        },
+        {
+            "usageID": "guzhenren:bingpogu_active_cold_refine",
+            "usageTitle": "寒魄凝炼",
+            "usageDesc": "借寒炼魄，凝而不散。\n激活后在短时间内以真元催动冰魄之力：将周身寒意化作魂魄补充，并暂时压制冻伤。\n若身处寒冷环境或自身已被冻伤，凝炼效率更高。",
+            "usageInfo": "消耗: {activate_zhenyuan_base_cost}(基础真元) |\n 回复魂魄: {base_hunpo_gain} + (环境加成*{bonus_hunpo_gain}) |\n 清除冻伤: {clear_frozen_ticks}tick |\n 冷却: {cooldown_ticks}tick",
+            "cost_duration": 360,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "activate_zhenyuan_base_cost": "480.0",
+                "base_hunpo_gain": "8.0",
+                "bonus_hunpo_gain": "10.0",
+                "clear_frozen_ticks": "120",
+                "cooldown_ticks": "240"
+            }
         }
     ]
 }

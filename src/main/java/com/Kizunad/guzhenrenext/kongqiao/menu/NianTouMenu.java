@@ -1,11 +1,15 @@
 package com.Kizunad.guzhenrenext.kongqiao.menu;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoUnlockService;
 import com.Kizunad.tinyUI.demo.TinyUISlot;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -21,6 +25,7 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +38,8 @@ public class NianTouMenu extends AbstractContainerMenu {
     private static final int HIDDEN_POS = -10000;
     private static final int DATA_FIELDS = 3;
     public static final int IDENTIFY_BUTTON_ID = 99;
+    public static final int DERIVE_SHAZHAO_BUTTON_ID = 100;
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int PLAYER_FIRST_SLOT = 1;
     private static final int PLAYER_LAST_SLOT_EXCLUSIVE =
         PLAYER_FIRST_SLOT + PLAYER_INV_ROWS * PLAYER_INV_COLS + HOTBAR_COLS;
@@ -187,6 +194,86 @@ public class NianTouMenu extends AbstractContainerMenu {
                     );
                 }
             }
+            return true;
+        }
+        if (id == DERIVE_SHAZHAO_BUTTON_ID) {
+            if (!(player instanceof ServerPlayer serverPlayer)) {
+                return false;
+            }
+
+            LOGGER.info(
+                "推演杀招按钮点击 | player={} containerId={}",
+                serverPlayer.getGameProfile().getName(),
+                this.containerId
+            );
+            NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(serverPlayer);
+            if (unlocks == null) {
+                LOGGER.info(
+                    "推演杀招失败：unlocks 为空 | player={}",
+                    serverPlayer.getGameProfile().getName()
+                );
+                return false;
+            }
+
+            List<ShazhaoUnlockService.UnlockCandidate> candidates =
+                ShazhaoUnlockService.listUnlockCandidates(unlocks);
+            LOGGER.info(
+                "推演杀招候选数量={} | player={}",
+                candidates.size(),
+                serverPlayer.getGameProfile().getName()
+            );
+            if (candidates.isEmpty()) {
+                unlocks.setShazhaoMessage("无可解锁杀招");
+                PacketDistributor.sendToPlayer(
+                    serverPlayer,
+                    new PacketSyncNianTouUnlocks(unlocks)
+                );
+                return true;
+            }
+
+            ShazhaoUnlockService.UnlockCandidate candidate =
+                candidates.get(serverPlayer.getRandom().nextInt(candidates.size()));
+            ShazhaoData data = candidate.data();
+            double chance = candidate.chance();
+            double roll = serverPlayer.getRandom().nextDouble();
+            boolean success = roll <= chance;
+            LOGGER.info(
+                "推演杀招判定 | player={} shazhaoID={} chance={} roll={}",
+                serverPlayer.getGameProfile().getName(),
+                data != null ? data.shazhaoID() : "null",
+                chance,
+                roll
+            );
+            if (success) {
+                unlocks.unlockShazhao(ResourceLocation.parse(data.shazhaoID()));
+                String info = data.getFormattedInfo();
+                StringBuilder message = new StringBuilder("推演成功：")
+                    .append(data.title());
+                if (info != null && !info.isBlank()) {
+                    message.append(" | ").append(info);
+                }
+                unlocks.setShazhaoMessage(message.toString());
+            } else {
+                int cost = Math.max(0, data.costTotalNiantou());
+                double currentNianTou = NianTouHelper.getAmount(serverPlayer);
+                if (cost > 0 && currentNianTou < cost) {
+                    unlocks.setShazhaoMessage("念头不足，无法推演杀招");
+                    PacketDistributor.sendToPlayer(
+                        serverPlayer,
+                        new PacketSyncNianTouUnlocks(unlocks)
+                    );
+                    return true;
+                }
+                if (cost > 0) {
+                    NianTouHelper.modify(serverPlayer, -cost);
+                }
+                unlocks.setShazhaoMessage("推演失败，消耗 " + cost + " 念头");
+            }
+
+            PacketDistributor.sendToPlayer(
+                serverPlayer,
+                new PacketSyncNianTouUnlocks(unlocks)
+            );
             return true;
         }
         return super.clickMenuButton(player, id);

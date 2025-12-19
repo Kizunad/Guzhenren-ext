@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoUnlockService;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -45,6 +46,8 @@ public class NianTouTickHandler {
             if (process.remainingTicks <= 0) {
                 // 完成！
                 unlocks.unlock(process.itemId, process.usageId);
+                // 额外惊喜：满足条件时尝试推演杀招
+                ShazhaoUnlockService.tryUnlockRandom(player.getRandom(), unlocks);
                 unlocks.clearProcess();
                 
                 // 播放音效或提示 (可选)

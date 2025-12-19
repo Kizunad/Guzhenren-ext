@@ -14,6 +14,22 @@
                 "air_flying_speed_bonus": "0.12",
                 "projectile_damage_multiplier": "0.90"
             }
+        },
+        {
+            "usageID": "guzhenren:hunfeigu_active_soul_dash",
+            "usageTitle": "魂翼疾掠",
+            "usageDesc": "以魂为翼，借势疾掠。\n激活后在空中瞬间前冲并微微抬升，配合缓降稳住身形。\n适用于空战拉扯与地形穿插，但需魂魄与真元支撑。",
+            "usageInfo": "消耗: {activate_soul_cost}魂魄 + {activate_zhenyuan_base_cost}(基础真元) |\n 前冲速度: {dash_forward_speed} | 抬升速度: {dash_up_speed} |\n 缓降: {slow_falling_ticks} ticks | 冷却: {cooldown_ticks} ticks",
+            "cost_duration": 300,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "activate_soul_cost": "1.50",
+                "activate_zhenyuan_base_cost": "80.0",
+                "dash_forward_speed": "1.25",
+                "dash_up_speed": "0.25",
+                "slow_falling_ticks": "60",
+                "cooldown_ticks": "80"
+            }
         }
     ]
 }

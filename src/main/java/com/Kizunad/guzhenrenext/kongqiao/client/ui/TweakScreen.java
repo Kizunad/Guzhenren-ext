@@ -7,6 +7,9 @@ import com.Kizunad.guzhenrenext.kongqiao.network.ServerboundTweakConfigUpdatePay
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUsageId;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
 import com.Kizunad.tinyUI.controls.ScrollContainer;
@@ -97,6 +100,7 @@ public final class TweakScreen extends TinyUIScreen {
     private int leftContentWidth;
 
     private ResourceLocation selectedItemId;
+    private ResourceLocation selectedShazhaoId;
 
     private int lastRenderHash;
 
@@ -119,6 +123,8 @@ public final class TweakScreen extends TinyUIScreen {
         leftContent = null;
         rightContent = null;
         leftContentWidth = 0;
+        selectedItemId = null;
+        selectedShazhaoId = null;
         buildUI(getRoot());
         requestSync();
         rebuildLeftContent();
@@ -200,7 +206,7 @@ public final class TweakScreen extends TinyUIScreen {
         );
         window.addChild(leftPanel);
 
-        final Label leftTitle = new Label("解锁的技能", theme);
+        final Label leftTitle = new Label("已解锁念头/杀招", theme);
         leftTitle.setFrame(0, TITLE_MARGIN, LEFT_WIDTH, TITLE_HEIGHT);
         leftTitle.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         leftPanel.addChild(leftTitle);
@@ -272,7 +278,13 @@ public final class TweakScreen extends TinyUIScreen {
             (selectedItemId == null ? 0 : selectedItemId.hashCode());
         hash =
             HASH_MULTIPLIER * hash +
+            (selectedShazhaoId == null ? 0 : selectedShazhaoId.hashCode());
+        hash =
+            HASH_MULTIPLIER * hash +
             (unlocks == null ? 0 : unlocks.getUnlockedUsageMap().hashCode());
+        hash =
+            HASH_MULTIPLIER * hash +
+            (unlocks == null ? 0 : unlocks.getUnlockedShazhao().hashCode());
         hash =
             HASH_MULTIPLIER * hash +
             (config == null ? 0 : config.getDisabledPassives().hashCode());
@@ -300,57 +312,123 @@ public final class TweakScreen extends TinyUIScreen {
         final Map<ResourceLocation, Set<String>> unlockedMap = unlocks != null
             ? unlocks.getUnlockedUsageMap()
             : Map.of();
+        final Set<ResourceLocation> unlockedShazhao = unlocks != null
+            ? unlocks.getUnlockedShazhao()
+            : Set.of();
 
-        int y = 0;
-        ResourceLocation firstSelectable = null;
-        for (Map.Entry<
-            ResourceLocation,
-            Set<String>
-        > entry : unlockedMap.entrySet()) {
-            final ResourceLocation id = entry.getKey();
-            final Item item = BuiltInRegistries.ITEM.get(id);
-            if (item == Items.AIR) {
-                continue;
-            }
-
-            if (firstSelectable == null) {
-                firstSelectable = id;
-            }
-
-            final NianTouData data = NianTouDataManager.getData(item);
-            final int totalUsages = (data != null && data.usages() != null)
-                ? data.usages().size()
-                : entry.getValue().size();
-            int unlockedCount = 0;
-            if (data != null && data.usages() != null && unlocks != null) {
-                for (NianTouData.Usage usage : data.usages()) {
-                    if (usage == null) {
-                        continue;
-                    }
-                    if (unlocks.isUsageUnlocked(id, usage.usageID())) {
-                        unlockedCount++;
-                    }
-                }
-            } else {
-                unlockedCount = entry.getValue().size();
-            }
-
-            final Component label = item
-                .getDescription()
-                .copy()
-                .append(" (" + unlockedCount + "/" + totalUsages + ")");
-            final Button button = new Button(label, theme);
-            button.setFrame(0, y, leftContentWidth, LIST_ITEM_HEIGHT);
-            button.setOnClick(() -> {
-                selectedItemId = id;
-                rebuildRightContent();
-            });
-            leftContent.addChild(button);
-            y += LIST_ITEM_STEP;
+        if (selectedItemId != null && !unlockedMap.containsKey(selectedItemId)) {
+            selectedItemId = null;
+        }
+        if (
+            selectedShazhaoId != null &&
+            !unlockedShazhao.contains(selectedShazhaoId)
+        ) {
+            selectedShazhaoId = null;
         }
 
-        if (selectedItemId == null && firstSelectable != null) {
-            selectedItemId = firstSelectable;
+        int y = 0;
+        ResourceLocation firstItem = null;
+        ResourceLocation firstShazhao = null;
+
+        if (!unlockedMap.isEmpty()) {
+            final Label section = new Label("念头", theme);
+            section.setFrame(0, y, leftContentWidth, LIST_ITEM_HEIGHT);
+            leftContent.addChild(section);
+            y += LIST_ITEM_STEP;
+
+            final List<ResourceLocation> sortedItems =
+                new ArrayList<>(unlockedMap.keySet());
+            sortedItems.sort((a, b) -> a.toString().compareTo(b.toString()));
+            for (ResourceLocation id : sortedItems) {
+                final Item item = BuiltInRegistries.ITEM.get(id);
+                if (item == Items.AIR) {
+                    continue;
+                }
+
+                if (firstItem == null) {
+                    firstItem = id;
+                }
+
+                final NianTouData data = NianTouDataManager.getData(item);
+                final int totalUsages = (data != null && data.usages() != null)
+                    ? data.usages().size()
+                    : unlockedMap.get(id).size();
+                int unlockedCount = 0;
+                if (data != null && data.usages() != null && unlocks != null) {
+                    for (NianTouData.Usage usage : data.usages()) {
+                        if (usage == null) {
+                            continue;
+                        }
+                        if (unlocks.isUsageUnlocked(id, usage.usageID())) {
+                            unlockedCount++;
+                        }
+                    }
+                } else {
+                    unlockedCount = unlockedMap.get(id).size();
+                }
+
+                final Component label = item
+                    .getDescription()
+                    .copy()
+                    .append(" (" + unlockedCount + "/" + totalUsages + ")");
+                final Button button = new Button(label, theme);
+                button.setFrame(0, y, leftContentWidth, LIST_ITEM_HEIGHT);
+                button.setOnClick(() -> {
+                    selectedItemId = id;
+                    selectedShazhaoId = null;
+                    rebuildRightContent();
+                });
+                leftContent.addChild(button);
+                y += LIST_ITEM_STEP;
+            }
+        }
+
+        if (!unlockedShazhao.isEmpty()) {
+            if (y > 0) {
+                y += LIST_ITEM_STEP / 2;
+            }
+            final Label section = new Label("杀招", theme);
+            section.setFrame(0, y, leftContentWidth, LIST_ITEM_HEIGHT);
+            leftContent.addChild(section);
+            y += LIST_ITEM_STEP;
+
+            final List<ResourceLocation> sortedShazhao =
+                new ArrayList<>(unlockedShazhao);
+            sortedShazhao.sort((a, b) -> a.toString().compareTo(b.toString()));
+            for (ResourceLocation id : sortedShazhao) {
+                if (firstShazhao == null) {
+                    firstShazhao = id;
+                }
+                final ShazhaoData data = ShazhaoDataManager.get(id);
+                final String title = data != null && data.title() != null
+                    ? data.title()
+                    : id.toString();
+                final Button button =
+                    new Button(Component.literal(title), theme);
+                button.setFrame(0, y, leftContentWidth, LIST_ITEM_HEIGHT);
+                button.setOnClick(() -> {
+                    selectedShazhaoId = id;
+                    selectedItemId = null;
+                    rebuildRightContent();
+                });
+                leftContent.addChild(button);
+                y += LIST_ITEM_STEP;
+            }
+        }
+
+        if (y == 0) {
+            final Label label = new Label("暂无解锁内容。", theme);
+            label.setFrame(0, 0, leftContentWidth, LIST_ITEM_HEIGHT);
+            leftContent.addChild(label);
+            y = LIST_ITEM_HEIGHT;
+        }
+
+        if (selectedItemId == null && selectedShazhaoId == null) {
+            if (firstItem != null) {
+                selectedItemId = firstItem;
+            } else if (firstShazhao != null) {
+                selectedShazhaoId = firstShazhao;
+            }
         }
 
         leftContent.setFrame(
@@ -368,9 +446,55 @@ public final class TweakScreen extends TinyUIScreen {
         rightContent.clearChildren();
 
         final Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null || selectedItemId == null) {
+        if (minecraft.player == null) {
             rightContent.setFrame(0, 0, CARD_WIDTH, PASSIVE_CARD_HEIGHT);
-            final Label label = new Label("请选择左侧已解锁的物品。", theme);
+            final Label label = new Label("请选择左侧已解锁的内容。", theme);
+            label.setFrame(0, 0, CARD_WIDTH, TITLE_HEIGHT * 2);
+            rightContent.addChild(label);
+            return;
+        }
+
+        final TweakConfig config = KongqiaoAttachments.getTweakConfig(
+            minecraft.player
+        );
+
+        if (selectedShazhaoId != null) {
+            final ShazhaoData data = ShazhaoDataManager.get(selectedShazhaoId);
+            if (data == null) {
+                rightContent.setFrame(0, 0, CARD_WIDTH, PASSIVE_CARD_HEIGHT);
+                final Label label = new Label("未找到该杀招配置。", theme);
+                label.setFrame(0, 0, CARD_WIDTH, TITLE_HEIGHT * 2);
+                rightContent.addChild(label);
+                return;
+            }
+
+            int y = 0;
+            if (ShazhaoId.isPassive(data.shazhaoID())) {
+                addShazhaoPassiveCard(config, data, y);
+                y += PASSIVE_CARD_HEIGHT;
+            } else if (ShazhaoId.isActive(data.shazhaoID())) {
+                addShazhaoActiveCard(config, data, y);
+                y += SKILL_CARD_HEIGHT;
+            } else {
+                rightContent.setFrame(0, 0, CARD_WIDTH, PASSIVE_CARD_HEIGHT);
+                final Label label = new Label("杀招命名不符合规范。", theme);
+                label.setFrame(0, 0, CARD_WIDTH, TITLE_HEIGHT * 2);
+                rightContent.addChild(label);
+                return;
+            }
+
+            rightContent.setFrame(
+                0,
+                0,
+                CARD_WIDTH,
+                Math.max(PASSIVE_CARD_HEIGHT, y)
+            );
+            return;
+        }
+
+        if (selectedItemId == null) {
+            rightContent.setFrame(0, 0, CARD_WIDTH, PASSIVE_CARD_HEIGHT);
+            final Label label = new Label("请选择左侧已解锁的内容。", theme);
             label.setFrame(0, 0, CARD_WIDTH, TITLE_HEIGHT * 2);
             rightContent.addChild(label);
             return;
@@ -395,9 +519,6 @@ public final class TweakScreen extends TinyUIScreen {
         }
 
         final NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(
-            minecraft.player
-        );
-        final TweakConfig config = KongqiaoAttachments.getTweakConfig(
             minecraft.player
         );
 
@@ -597,12 +718,186 @@ public final class TweakScreen extends TinyUIScreen {
         card.addChild(remove);
     }
 
+    private void addShazhaoPassiveCard(
+        final TweakConfig config,
+        final ShazhaoData data,
+        final int y
+    ) {
+        final SolidPanel card = new SolidPanel(theme);
+        card.setFrame(0, y, CARD_WIDTH, PASSIVE_CARD_HEIGHT);
+        rightContent.addChild(card);
+
+        final Label title = new Label("被动杀招：" + data.title(), theme);
+        title.setFrame(0, CARD_TITLE_Y, CARD_WIDTH, CARD_TITLE_HEIGHT);
+        title.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(title);
+
+        final String desc = buildShazhaoDescription(data, CARD_DESC_WIDTH);
+        final Label descLabel = new Label(desc, theme);
+        descLabel.setFrame(
+            CARD_DESC_X,
+            CARD_DESC_Y_PASSIVE,
+            CARD_DESC_WIDTH,
+            CARD_DESC_HEIGHT
+        );
+        descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(descLabel);
+
+        final Label statusLabel = new Label("当前状态:", theme);
+        statusLabel.setFrame(
+            STATUS_LABEL_X,
+            STATUS_LABEL_Y,
+            STATUS_LABEL_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        statusLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(statusLabel);
+
+        final boolean enabled =
+            config == null || config.isPassiveEnabled(data.shazhaoID());
+        final Label statusValue = new Label(enabled ? "开启" : "关闭", theme);
+        statusValue.setFrame(
+            STATUS_VALUE_X,
+            STATUS_LABEL_Y,
+            STATUS_LABEL_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        statusValue.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(statusValue);
+
+        final Button toggle = new Button("开启/关闭", theme);
+        toggle.setFrame(
+            ACTION_BUTTON_X,
+            TOGGLE_BUTTON_Y,
+            ACTION_BUTTON_WIDTH,
+            ACTION_BUTTON_HEIGHT
+        );
+        toggle.setOnClick(() -> {
+            final boolean next = !(config == null ||
+                config.isPassiveEnabled(data.shazhaoID()));
+            PacketDistributor.sendToServer(
+                new ServerboundTweakConfigUpdatePayload(
+                    ServerboundTweakConfigUpdatePayload.Action.SET_PASSIVE_ENABLED,
+                    data.shazhaoID(),
+                    next
+                )
+            );
+            rebuildRightContent();
+        });
+        card.addChild(toggle);
+    }
+
+    private void addShazhaoActiveCard(
+        final TweakConfig config,
+        final ShazhaoData data,
+        final int y
+    ) {
+        final SolidPanel card = new SolidPanel(theme);
+        card.setFrame(0, y, CARD_WIDTH, SKILL_CARD_HEIGHT);
+        rightContent.addChild(card);
+
+        final Label title = new Label("主动杀招：" + data.title(), theme);
+        title.setFrame(0, CARD_TITLE_Y, CARD_WIDTH, CARD_TITLE_HEIGHT);
+        title.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(title);
+
+        final String desc = buildShazhaoDescription(data, CARD_DESC_WIDTH);
+        final Label descLabel = new Label(desc, theme);
+        descLabel.setFrame(
+            CARD_DESC_X,
+            CARD_DESC_Y_SKILL,
+            CARD_DESC_WIDTH,
+            CARD_DESC_HEIGHT
+        );
+        descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(descLabel);
+
+        final boolean inWheel =
+            config != null && config.isInWheel(data.shazhaoID());
+
+        final Button add = new Button("加入轮盘", theme);
+        add.setFrame(
+            ACTION_BUTTON_X,
+            ACTION_BUTTON_Y_ADD,
+            ACTION_BUTTON_WIDTH,
+            ACTION_BUTTON_HEIGHT
+        );
+        add.setEnabled(!inWheel);
+        add.setOnClick(() -> {
+            final Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.player != null) {
+                final TweakConfig localConfig =
+                    KongqiaoAttachments.getTweakConfig(minecraft.player);
+                if (localConfig != null) {
+                    localConfig.addWheelSkill(
+                        data.shazhaoID(),
+                        TweakConfig.DEFAULT_MAX_WHEEL_SKILLS
+                    );
+                }
+            }
+            PacketDistributor.sendToServer(
+                new ServerboundTweakConfigUpdatePayload(
+                    ServerboundTweakConfigUpdatePayload.Action.ADD_WHEEL_SKILL,
+                    data.shazhaoID(),
+                    true
+                )
+            );
+            requestSync();
+            rebuildRightContent();
+        });
+        card.addChild(add);
+
+        final Button remove = new Button("移出轮盘", theme);
+        remove.setFrame(
+            ACTION_BUTTON_X,
+            ACTION_BUTTON_Y_REMOVE,
+            ACTION_BUTTON_WIDTH,
+            ACTION_BUTTON_HEIGHT
+        );
+        remove.setEnabled(inWheel);
+        remove.setOnClick(() -> {
+            final Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.player != null) {
+                final TweakConfig localConfig =
+                    KongqiaoAttachments.getTweakConfig(minecraft.player);
+                if (localConfig != null) {
+                    localConfig.removeWheelSkill(data.shazhaoID());
+                }
+            }
+            PacketDistributor.sendToServer(
+                new ServerboundTweakConfigUpdatePayload(
+                    ServerboundTweakConfigUpdatePayload.Action.REMOVE_WHEEL_SKILL,
+                    data.shazhaoID(),
+                    false
+                )
+            );
+            requestSync();
+            rebuildRightContent();
+        });
+        card.addChild(remove);
+    }
+
     private String buildUsageDescription(
         final NianTouData.Usage usage,
         final int maxWidth
     ) {
         final String raw = usage.usageDesc() + "\n" + usage.getFormattedInfo();
         return wrapText(raw, maxWidth);
+    }
+
+    private String buildShazhaoDescription(
+        final ShazhaoData data,
+        final int maxWidth
+    ) {
+        final StringBuilder raw = new StringBuilder();
+        if (data.desc() != null) {
+            raw.append(data.desc());
+        }
+        final String info = data.getFormattedInfo();
+        if (info != null && !info.isBlank()) {
+            raw.append("\n").append(info);
+        }
+        return wrapText(raw.toString(), maxWidth);
     }
 
     private String wrapText(final String raw, final int maxWidth) {

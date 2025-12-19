@@ -1,6 +1,5 @@
 package com.Kizunad.guzhenrenext;
 
-import com.Kizunad.guzhenrenext.client.gui.GuzhenrenConfigScreen;
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Registery;
@@ -16,7 +15,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
@@ -34,6 +32,7 @@ public class GuzhenrenExt {
         KongqiaoAttachments.register(modEventBus);
         GuzhenrenExtNetworking.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.logic.GuModEffects.registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.ShazhaoModEffects.registerAll();
         com.Kizunad.guzhenrenext.registry.ModMobEffects.register(modEventBus);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onAddReloadListeners);
@@ -41,8 +40,25 @@ public class GuzhenrenExt {
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            modContainer.registerExtensionPoint(IConfigScreenFactory.class, 
-                (minecraft, screen) -> new GuzhenrenConfigScreen(screen));
+            runClientBootstrap(modContainer);
+        }
+    }
+
+    private static void runClientBootstrap(ModContainer modContainer) {
+        try {
+            Class<?> bootstrap = Class.forName(
+                "com.Kizunad.guzhenrenext.client.GuzhenrenExtClient"
+            );
+            bootstrap
+                .getMethod("registerConfigScreen", ModContainer.class)
+                .invoke(null, modContainer);
+        } catch (ClassNotFoundException e) {
+            // Dedicated Server 环境或裁剪环境下不存在客户端类，跳过即可。
+        } catch (Exception e) {
+            throw new RuntimeException(
+                "GuzhenrenExt 客户端初始化失败，请检查客户端依赖与加载顺序。",
+                e
+            );
         }
     }
 
@@ -52,5 +68,6 @@ public class GuzhenrenExt {
 
     private void onAddReloadListeners(net.neoforged.neoforge.event.AddReloadListenerEvent event) {
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataLoader());
+        event.addListener(new com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataLoader());
     }
 }

@@ -4,6 +4,9 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager.UsageLookup;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
+import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
 import com.Kizunad.guzhenrenext.network.ServerboundSkillWheelSelectPayload;
 import com.Kizunad.tinyUI.component.RadialMenu;
 import com.Kizunad.tinyUI.core.ScaleConfig;
@@ -15,8 +18,11 @@ import java.util.List;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -251,6 +257,12 @@ public final class SkillWheelScreen extends TinyUIScreen {
     }
 
     private static ResolvedOption resolveOption(final String usageId) {
+        if (ShazhaoId.isActive(usageId)) {
+            final ResolvedOption resolved = resolveShazhaoOption(usageId);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
         final UsageLookup lookup = NianTouDataManager.findUsageLookup(usageId);
         if (
             lookup == null ||
@@ -270,6 +282,45 @@ public final class SkillWheelScreen extends TinyUIScreen {
             new ItemStack(lookup.item()),
             Component.literal(title)
         );
+    }
+
+    private static ResolvedOption resolveShazhaoOption(final String shazhaoId) {
+        final ResourceLocation id;
+        try {
+            id = ResourceLocation.parse(shazhaoId);
+        } catch (Exception e) {
+            return null;
+        }
+        final ShazhaoData data = ShazhaoDataManager.get(id);
+        if (data == null) {
+            return null;
+        }
+        final String title = data.title() != null ? data.title() : shazhaoId;
+        return new ResolvedOption(
+            resolveShazhaoIcon(data),
+            Component.literal(title)
+        );
+    }
+
+    private static ItemStack resolveShazhaoIcon(final ShazhaoData data) {
+        if (data.requiredItems() == null || data.requiredItems().isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        final String itemId = data.requiredItems().get(0);
+        if (itemId == null || itemId.isBlank()) {
+            return ItemStack.EMPTY;
+        }
+        final ResourceLocation id;
+        try {
+            id = ResourceLocation.parse(itemId);
+        } catch (Exception e) {
+            return ItemStack.EMPTY;
+        }
+        final Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(Items.AIR);
+        if (item == Items.AIR) {
+            return ItemStack.EMPTY;
+        }
+        return new ItemStack(item);
     }
 
     private record ResolvedOption(ItemStack icon, Component label) {}
