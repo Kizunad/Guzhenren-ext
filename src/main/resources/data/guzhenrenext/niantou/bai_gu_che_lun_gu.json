@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:bai_gu_che_lun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bai_gu_che_lun_gu_passive_white_wheel",
+            "usageTitle": "被动·白骨疾轮",
+            "usageDesc": "白骨车轮蛊加持身法，行走如轮，持续提升移动速度。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "attribute_amount": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:bai_gu_che_lun_gu_active_wheel_charge",
+            "usageTitle": "主动·白骨冲轮",
+            "usageDesc": "化身白骨之轮猛冲而出，碾压路径上的敌人并令其迟缓。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 2500,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "range": "16.0",
+                "dash_strength": "2.0",
+                "hit_radius": "1.4",
+                "niantou_cost": "34.0",
+                "zhenyuan_base_cost": "420.0",
+                "magic_damage": "16.0",
+                "slow_duration_ticks": "80",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}
+

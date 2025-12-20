@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:doukonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:doukonggu_passive_battle_void",
+            "usageTitle": "被动·斗空",
+            "usageDesc": "斗空蛊以战养战，攻击时有概率汲取生机/念头/真元，并附带法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 治疗：{heal_amount} |\n 念头：+{niantou_gain} |\n 真元：+{zhenyuan_gain} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 5600,
+            "cost_total_niantou": 1500,
+            "metadata": {
+                "proc_chance": "0.16",
+                "niantou_cost": "3.00",
+                "heal_amount": "1.20",
+                "niantou_gain": "2.0",
+                "zhenyuan_gain": "12.0",
+                "extra_magic_damage": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:doukonggu_active_void_burst",
+            "usageTitle": "主动·斗空崩裂",
+            "usageDesc": "以斗空之势崩裂周身，造成范围法术伤害与击退，并施加虚弱。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 击退：{knockback_strength}",
+            "cost_duration": 12000,
+            "cost_total_niantou": 3200,
+            "metadata": {
+                "radius": "10.0",
+                "cooldown_ticks": "650",
+                "niantou_cost": "260.0",
+                "zhenyuan_base_cost": "2000.0",
+                "extra_magic_damage": "18.0",
+                "knockback_strength": "1.00",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

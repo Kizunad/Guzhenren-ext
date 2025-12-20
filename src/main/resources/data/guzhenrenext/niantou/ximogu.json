@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:ximogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:ximogu_passive_mana_leech",
+            "usageTitle": "被动·吸魔",
+            "usageDesc": "吸魔蛊趁势汲取生机与真元，攻击时有概率回复少量生命与真元。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 治疗：{heal_amount} |\n 真元：+{zhenyuan_gain}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.15",
+                "niantou_cost": "2.00",
+                "heal_amount": "1.50",
+                "zhenyuan_gain": "5.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:ximogu_active_siphon",
+            "usageTitle": "主动·牵引吸摄",
+            "usageDesc": "锁定目标后强行牵引其身形，令其虚弱并造成法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 牵引力度：{force} |\n 伤害：{extra_magic_damage}",
+            "cost_duration": 3600,
+            "cost_total_niantou": 360,
+            "metadata": {
+                "range": "12.0",
+                "cooldown_ticks": "360",
+                "niantou_cost": "60.0",
+                "zhenyuan_base_cost": "520.0",
+                "force": "1.10",
+                "extra_magic_damage": "4.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:fei_gu_dun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:fei_gu_dun_gu_passive_flying_guard",
+            "usageTitle": "被动·飞骨护主",
+            "usageDesc": "飞骨盾蛊令骨盾环绕护体，受击时有概率削弱敌人并减免伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier}",
+            "cost_duration": 1500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.20",
+                "niantou_cost": "2.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "damage_multiplier": "0.80"
+            }
+        },
+        {
+            "usageID": "guzhenren:fei_gu_dun_gu_active_bone_orbit",
+            "usageTitle": "主动·飞骨锁敌",
+            "usageDesc": "飞骨盾短暂锁定目标，使其虚弱，并以骨意附伤压制其反击。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "range": "12.0",
+                "niantou_cost": "18.0",
+                "zhenyuan_base_cost": "210.0",
+                "extra_magic_damage": "7.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

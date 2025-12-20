@@ -1,0 +1,32 @@
+{
+    "itemID": "guzhenren:yuanqigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yuanqigu_passive_yuanqi_flow",
+            "usageTitle": "被动·元气流转",
+            "usageDesc": "元气蛊引元气流转，缓慢回复念头与真元，但需真元维持其运转。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 念头：+{niantou_gain}/s |\n 真元：+{zhenyuan_gain}/s",
+            "cost_duration": 4200,
+            "cost_total_niantou": 680,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "niantou_gain": "0.50",
+                "zhenyuan_gain": "8.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yuanqigu_active_yuanqi_surge",
+            "usageTitle": "主动·元气涌动",
+            "usageDesc": "消耗念头，将其转化为真元，快速回补修为续航。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元回复：{zhenyuan_gain}",
+            "cost_duration": 7600,
+            "cost_total_niantou": 1500,
+            "metadata": {
+                "cooldown_ticks": "700",
+                "niantou_cost": "180.0",
+                "zhenyuan_gain": "600.0"
+            }
+        }
+    ]
+}
+

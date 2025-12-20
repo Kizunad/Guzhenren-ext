@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:zhanjugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zhanjugu_passive_space_seize",
+            "usageTitle": "被动·夺位",
+            "usageDesc": "占据蛊于战中夺势，攻击时有概率削弱敌人，并附带法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 虚弱：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 3600,
+            "cost_total_niantou": 460,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "2.00",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "1.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:zhanjugu_active_occupy",
+            "usageTitle": "主动·占据",
+            "usageDesc": "锁定目标后与其换位，占据其位并令其虚弱，自身短暂强化。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 5600,
+            "cost_total_niantou": 900,
+            "metadata": {
+                "range": "15.0",
+                "cooldown_ticks": "600",
+                "niantou_cost": "160.0",
+                "zhenyuan_base_cost": "1100.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

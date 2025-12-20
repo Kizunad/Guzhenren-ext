@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:wei_lian_hua_gu_zhu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wei_lian_hua_gu_zhu_gu_passive_bamboo_guard",
+            "usageTitle": "被动·骨竹护身",
+            "usageDesc": "骨竹蛊寄宿空窍，以竹骨之韧稳住身形，增强抗冲撞能力。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 抗击退：{attribute_amount}",
+            "cost_duration": 800,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "attribute_amount": "0.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:wei_lian_hua_gu_zhu_gu_active_bamboo_bind",
+            "usageTitle": "主动·骨竹缠足",
+            "usageDesc": "以骨竹之节缠住敌人四肢，使其行动迟缓，并以骨意刺入筋骨。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1000,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "range": "10.0",
+                "niantou_cost": "10.0",
+                "zhenyuan_base_cost": "120.0",
+                "extra_magic_damage": "4.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:di_yu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:di_yu_gu_passive_earth_lock",
+            "usageTitle": "被动·地缚",
+            "usageDesc": "地宇蛊引地势锁敌，攻击时有概率使敌人虚弱，并附带少量法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 虚弱：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.20",
+                "niantou_cost": "2.00",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "1.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:di_yu_gu_active_earth_burst",
+            "usageTitle": "主动·地宇崩裂",
+            "usageDesc": "引地宇之力震荡周身，小范围造成法术伤害并施加迟缓。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 击退：{knockback_strength}",
+            "cost_duration": 3400,
+            "cost_total_niantou": 340,
+            "metadata": {
+                "radius": "6.0",
+                "cooldown_ticks": "420",
+                "niantou_cost": "60.0",
+                "zhenyuan_base_cost": "450.0",
+                "extra_magic_damage": "6.0",
+                "knockback_strength": "0.40",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

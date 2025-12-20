@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:buxigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:buxigu_passive_unending_breath",
+            "usageTitle": "被动·不息",
+            "usageDesc": "不息蛊护持气机，受击时有概率卸力减伤并挪移闪避，触发后伴随短暂回春。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 减伤倍率：{damage_multiplier} |\n 挪移距离：{blink_distance}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "proc_chance": "0.22",
+                "cooldown_ticks": "200",
+                "niantou_cost": "3.00",
+                "damage_multiplier": "0.70",
+                "blink_distance": "4.0",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:buxigu_active_last_stand",
+            "usageTitle": "主动·续命",
+            "usageDesc": "强行稳固自身气机，短时间获得再生与抗性，并立即治疗少量生命。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 3600,
+            "cost_total_niantou": 400,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "niantou_cost": "80.0",
+                "zhenyuan_base_cost": "700.0",
+                "heal_amount": "6.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

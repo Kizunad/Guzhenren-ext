@@ -1,0 +1,32 @@
+{
+    "itemID": "guzhenren:daduwa",
+    "usages": [
+        {
+            "usageID": "guzhenren:daduwa_passive_pocket_belly",
+            "usageTitle": "被动·口袋腹囊",
+            "usageDesc": "大肚蛙腹中自成小域，能以真元稳固其界，使体魄更强。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 生命上限：+{attribute_amount}",
+            "cost_duration": 1600,
+            "cost_total_niantou": 130,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.0",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:daduwa_active_belly_shield",
+            "usageTitle": "主动·腹囊护体",
+            "usageDesc": "引腹中小域护体，短时间获得吸收与抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "cooldown_ticks": "400",
+                "niantou_cost": "35.0",
+                "zhenyuan_base_cost": "260.0",
+                "effect_duration_ticks": "200"
+            }
+        }
+    ]
+}
+

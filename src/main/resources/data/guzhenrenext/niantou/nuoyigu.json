@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:nuoyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:nuoyigu_passive_moving_space",
+            "usageTitle": "被动·挪移身法",
+            "usageDesc": "挪移蛊常驻助行，以真元维持更高移速。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1200,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "attribute_amount": "0.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:nuoyigu_active_long_blink",
+            "usageTitle": "主动·长距挪移",
+            "usageDesc": "长距挪移至视线前方，并获得短暂迅捷与抗性。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 10000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "distance": "18.0",
+                "cooldown_ticks": "300",
+                "niantou_cost": "220.0",
+                "zhenyuan_base_cost": "1500.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

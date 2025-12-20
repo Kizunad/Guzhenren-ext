@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jinrenhugugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jinrenhugugu_passive_golden_bone_cut",
+            "usageTitle": "被动·金刃噬骨",
+            "usageDesc": "金刃虎骨蛊锋锐如刃，攻击时更易割裂骨肉，造成持续侵蚀。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 1400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "proc_chance": "0.20",
+                "niantou_cost": "2.2",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jinrenhugugu_active_golden_sweep",
+            "usageTitle": "主动·金刃横扫",
+            "usageDesc": "骨刃横扫四方，以骨道法术伤害震慑周身敌人并削弱其力。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1700,
+            "cost_total_niantou": 130,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "radius": "4.5",
+                "niantou_cost": "22.0",
+                "zhenyuan_base_cost": "240.0",
+                "magic_damage": "10.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

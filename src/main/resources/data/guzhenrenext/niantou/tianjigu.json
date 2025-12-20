@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:tianjigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tianjigu_passive_heavenly_gears",
+            "usageTitle": "被动·天机运转",
+            "usageDesc": "天机蛊促使气机运转更快，提升出手频率，但需以真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻速加成：{attribute_amount}",
+            "cost_duration": 3200,
+            "cost_total_niantou": 320,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "attribute_amount": "0.06"
+            }
+        },
+        {
+            "usageID": "guzhenren:tianjigu_active_fate_pierce",
+            "usageTitle": "主动·破机",
+            "usageDesc": "锁定目标窥其破绽，以天机一击破之，使其虚弱并暴露行迹，同时造成法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 5200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "range": "20.0",
+                "cooldown_ticks": "700",
+                "niantou_cost": "110.0",
+                "zhenyuan_base_cost": "900.0",
+                "extra_magic_damage": "16.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

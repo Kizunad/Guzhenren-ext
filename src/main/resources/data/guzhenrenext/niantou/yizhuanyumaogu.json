@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:yizhuanyumaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yizhuanyumaogu_passive_space_stride",
+            "usageTitle": "被动·宇步",
+            "usageDesc": "以宇道道痕润足，步伐更轻更快，但需持续以真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "cost_duration": 1600,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "attribute_amount": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:yizhuanyumaogu_active_blink_step",
+            "usageTitle": "主动·闪步",
+            "usageDesc": "短距挪移至视线前方，令身法更显灵动。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 180,
+            "metadata": {
+                "distance": "6.0",
+                "cooldown_ticks": "220",
+                "niantou_cost": "25.0",
+                "zhenyuan_base_cost": "200.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

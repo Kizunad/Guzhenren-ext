@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:wuchanggugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wuchanggugu_passive_impermanence",
+            "usageTitle": "被动·无常蚀骨",
+            "usageDesc": "无常骨蛊蕴含衰败之意，攻击时有概率令敌人骨肉枯败并附带骨道伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 1700,
+            "cost_total_niantou": 130,
+            "metadata": {
+                "proc_chance": "0.25",
+                "niantou_cost": "2.5",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "5.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:wuchanggugu_active_bone_decay",
+            "usageTitle": "主动·枯骨封目",
+            "usageDesc": "以无常之意侵染目标，令其枯败并短暂失明，骨道伤害更甚。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1900,
+            "cost_total_niantou": 170,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "range": "14.0",
+                "niantou_cost": "30.0",
+                "zhenyuan_base_cost": "320.0",
+                "extra_magic_damage": "14.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1",
+                "blind_duration_ticks": "60",
+                "blind_amplifier": "0"
+            }
+        }
+    ]
+}
+

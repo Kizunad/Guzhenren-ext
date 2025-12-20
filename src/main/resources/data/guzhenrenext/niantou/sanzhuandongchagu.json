@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:sanzhuandongchagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sanzhuandongchagu_passive_deep_insight",
+            "usageTitle": "被动·深度洞察",
+            "usageDesc": "三转洞察蛊更胜一筹，常驻洞察更稳，需真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 效果持续：{effect_duration_ticks}t",
+            "cost_duration": 3200,
+            "cost_total_niantou": 360,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:sanzhuandongchagu_active_star_map",
+            "usageTitle": "主动·星图显形",
+            "usageDesc": "以洞察牵引星图之势，使周遭敌人现形（发光）。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 5200,
+            "cost_total_niantou": 760,
+            "metadata": {
+                "radius": "10.0",
+                "cooldown_ticks": "600",
+                "niantou_cost": "100.0",
+                "zhenyuan_base_cost": "800.0",
+                "extra_magic_damage": "0.0",
+                "knockback_strength": "0.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

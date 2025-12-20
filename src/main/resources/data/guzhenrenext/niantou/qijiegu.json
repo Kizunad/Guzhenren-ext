@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:qijiegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qijiegu_passive_sevenfold_bind",
+            "usageTitle": "被动·七界缠身",
+            "usageDesc": "七界蛊以界力缠绕敌身，攻击时有概率令其迟缓，并附带少量法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 迟缓：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 2800,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "proc_chance": "0.16",
+                "niantou_cost": "2.00",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "0.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:qijiegu_active_world_press",
+            "usageTitle": "主动·界压",
+            "usageDesc": "锁定目标引七界之力压制其身，使其失衡浮空并虚弱，同时造成较强法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 4200,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "range": "18.0",
+                "cooldown_ticks": "700",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "900.0",
+                "extra_magic_damage": "14.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

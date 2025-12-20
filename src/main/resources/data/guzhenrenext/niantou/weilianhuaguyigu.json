@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:weilianhuaguyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:weilianhuaguyigu_passive_unrefined_wing",
+            "usageTitle": "被动·未炼骨翼",
+            "usageDesc": "未炼化骨翼蛊虽不完美，但仍可提升身法，便于游走。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "5.0",
+                "attribute_amount": "0.08"
+            }
+        },
+        {
+            "usageID": "guzhenren:weilianhuaguyigu_active_unrefined_dash",
+            "usageTitle": "主动·骨翼急掠",
+            "usageDesc": "骨翼借势一掠，快速穿越战场，并对路径附近敌人造成轻微冲击。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 2000,
+            "cost_total_niantou": 190,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "range": "13.0",
+                "dash_strength": "1.8",
+                "hit_radius": "1.2",
+                "niantou_cost": "24.0",
+                "zhenyuan_base_cost": "280.0",
+                "magic_damage": "5.0",
+                "slow_duration_ticks": "40",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:wuwanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wuwanggu_passive_stabilize",
+            "usageTitle": "被动·稳空",
+            "usageDesc": "无妄蛊稳固周身空间，受击时有概率卸力减伤并短暂坚韧。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 减伤倍率：{damage_multiplier}",
+            "cost_duration": 4000,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "160",
+                "niantou_cost": "3.00",
+                "damage_multiplier": "0.65",
+                "blink_distance": "0.0",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:wuwanggu_active_stabilize_field",
+            "usageTitle": "主动·稳空护体",
+            "usageDesc": "强行稳固自身界面，获得抗性与吸收，并伴随短暂回春。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount}",
+            "cost_duration": 6800,
+            "cost_total_niantou": 1200,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "niantou_cost": "200.0",
+                "zhenyuan_base_cost": "1400.0",
+                "heal_amount": "6.0",
+                "effect_duration_ticks": "240"
+            }
+        }
+    ]
+}
+

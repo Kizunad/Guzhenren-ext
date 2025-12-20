@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:yubenggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yubenggu_passive_space_collapse",
+            "usageTitle": "被动·宇坍",
+            "usageDesc": "宇崩蛊令界面不稳，攻击时有概率施加凋零并附带较高法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 凋零：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 5600,
+            "cost_total_niantou": 1400,
+            "metadata": {
+                "proc_chance": "0.20",
+                "niantou_cost": "3.50",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "3.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:yubenggu_active_space_collapse",
+            "usageTitle": "主动·宇崩坍缩",
+            "usageDesc": "强行坍缩周遭界面，造成高额范围法术伤害与击退，并施加凋零。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 击退：{knockback_strength}",
+            "cost_duration": 13000,
+            "cost_total_niantou": 3200,
+            "metadata": {
+                "radius": "12.0",
+                "cooldown_ticks": "900",
+                "niantou_cost": "320.0",
+                "zhenyuan_base_cost": "2400.0",
+                "extra_magic_damage": "26.0",
+                "knockback_strength": "1.20",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

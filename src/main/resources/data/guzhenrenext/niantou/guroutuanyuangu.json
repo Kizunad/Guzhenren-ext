@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:guroutuanyuangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:guroutuanyuangu_passive_reunion_knit",
+            "usageTitle": "被动·骨肉团圆",
+            "usageDesc": "骨肉团圆蛊调和骨与肉，持续修补伤势并滋养气血。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 生命回复：{health_regen_per_second}/s |\n 气运：{qiyun_regen_per_second}/s",
+            "cost_duration": 1700,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "5.0",
+                "health_regen_per_second": "0.70",
+                "qiyun_regen_per_second": "0.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:guroutuanyuangu_active_reunion_blessing",
+            "usageTitle": "主动·团圆福泽",
+            "usageDesc": "短时间内强行缝合伤势，恢复更快，并获得更厚的骨肉护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
+            "cost_duration": 2000,
+            "cost_total_niantou": 190,
+            "metadata": {
+                "cooldown_ticks": "500",
+                "niantou_cost": "32.0",
+                "zhenyuan_base_cost": "340.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "1",
+                "absorption_duration_ticks": "200",
+                "absorption_amplifier": "1"
+            }
+        }
+    ]
+}
+

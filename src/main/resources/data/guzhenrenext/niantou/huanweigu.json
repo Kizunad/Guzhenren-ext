@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:huanweigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huanweigu_passive_prepared_shift",
+            "usageTitle": "被动·预备换位",
+            "usageDesc": "换位蛊先行蓄势，以真元维持身法，提升移速。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "cost_duration": 3600,
+            "cost_total_niantou": 460,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "attribute_amount": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:huanweigu_active_swap",
+            "usageTitle": "主动·换位",
+            "usageDesc": "视线锁定目标与其换位，双方短暂失衡（迟缓/迅捷）。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 820,
+            "metadata": {
+                "range": "16.0",
+                "cooldown_ticks": "450",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "900.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

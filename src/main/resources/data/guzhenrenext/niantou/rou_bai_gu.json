@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:rou_bai_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:rou_bai_gu_passive_flesh_knit",
+            "usageTitle": "被动·肉白缝骨",
+            "usageDesc": "肉白骨蛊以肉养骨，缓慢修补体表创口，滋养肉身。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 生命回复：{health_regen_per_second}/s",
+            "cost_duration": 1400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "health_regen_per_second": "0.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:rou_bai_gu_active_white_marrow",
+            "usageTitle": "主动·白髓回春",
+            "usageDesc": "以白髓化生机，短时间内大幅增强恢复，并获得护体吸收。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
+            "cost_duration": 1700,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "cooldown_ticks": "400",
+                "niantou_cost": "20.0",
+                "zhenyuan_base_cost": "220.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1",
+                "absorption_duration_ticks": "160",
+                "absorption_amplifier": "0"
+            }
+        }
+    ]
+}
+

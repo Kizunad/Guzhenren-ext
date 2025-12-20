@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:mo_di_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:mo_di_gu_passive_end_step",
+            "usageTitle": "被动·踏虚",
+            "usageDesc": "末地蛊令身形更轻，常驻缓降以免坠损，但需真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 效果持续：{effect_duration_ticks}t",
+            "cost_duration": 2800,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:mo_di_gu_active_end_blink",
+            "usageTitle": "主动·踏虚挪移",
+            "usageDesc": "向视线前方挪移一段距离，短暂隐匿行迹以避锋芒。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 3800,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "distance": "10.0",
+                "cooldown_ticks": "320",
+                "niantou_cost": "70.0",
+                "zhenyuan_base_cost": "600.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

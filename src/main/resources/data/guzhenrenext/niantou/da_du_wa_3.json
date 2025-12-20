@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:da_du_wa_3",
+    "usages": [
+        {
+            "usageID": "guzhenren:da_du_wa_3_passive_pocket_belly",
+            "usageTitle": "被动·口袋腹囊(三)",
+            "usageDesc": "三阶腹囊更广，提升更高生命上限，但需真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 生命上限：+{attribute_amount}",
+            "cost_duration": 3400,
+            "cost_total_niantou": 460,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "attribute_amount": "5.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:da_du_wa_3_active_belly_slam",
+            "usageTitle": "主动·腹囊崩震",
+            "usageDesc": "以腹囊之界崩震周身，造成范围法术伤害与击退，并附带迟缓。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 击退：{knockback_strength}",
+            "cost_duration": 5600,
+            "cost_total_niantou": 860,
+            "metadata": {
+                "radius": "7.0",
+                "cooldown_ticks": "550",
+                "niantou_cost": "150.0",
+                "zhenyuan_base_cost": "1000.0",
+                "extra_magic_damage": "8.0",
+                "knockback_strength": "1.00",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

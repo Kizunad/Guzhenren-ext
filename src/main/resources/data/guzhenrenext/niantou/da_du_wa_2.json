@@ -1,0 +1,32 @@
+{
+    "itemID": "guzhenren:da_du_wa_2",
+    "usages": [
+        {
+            "usageID": "guzhenren:da_du_wa_2_passive_pocket_belly",
+            "usageTitle": "被动·口袋腹囊(二)",
+            "usageDesc": "二阶腹囊更稳，能以真元维持更大的小域，提升生命上限。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 生命上限：+{attribute_amount}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.5",
+                "attribute_amount": "3.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:da_du_wa_2_active_belly_shield",
+            "usageTitle": "主动·腹囊护体(二)",
+            "usageDesc": "短时间获得更强的吸收护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 3600,
+            "cost_total_niantou": 360,
+            "metadata": {
+                "cooldown_ticks": "480",
+                "niantou_cost": "70.0",
+                "zhenyuan_base_cost": "600.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}

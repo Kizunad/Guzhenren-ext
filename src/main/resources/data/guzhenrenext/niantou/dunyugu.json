@@ -1,0 +1,32 @@
+{
+    "itemID": "guzhenren:dunyugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dunyugu_passive_space_shield",
+            "usageTitle": "被动·盾宇",
+            "usageDesc": "盾宇蛊以真元编织护盾界面，提升护甲。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 护甲：+{attribute_amount}",
+            "cost_duration": 3400,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:dunyugu_active_space_barrier",
+            "usageTitle": "主动·空间壁垒",
+            "usageDesc": "展开短暂空间壁垒，获得吸收与抗性护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 5200,
+            "cost_total_niantou": 760,
+            "metadata": {
+                "cooldown_ticks": "500",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "900.0",
+                "effect_duration_ticks": "240"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:wuzhuanyumaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wuzhuanyumaogu_passive_space_hunt",
+            "usageTitle": "被动·猎空(五)",
+            "usageDesc": "五转宇猫蛊猎空无痕，持续提升攻速，但需真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻速加成：{attribute_amount}",
+            "cost_duration": 6000,
+            "cost_total_niantou": 1700,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "attribute_amount": "0.15"
+            }
+        },
+        {
+            "usageID": "guzhenren:wuzhuanyumaogu_active_space_hunt",
+            "usageTitle": "主动·换位猎杀",
+            "usageDesc": "锁定目标后换位，夺其位而乱其势，自身短暂强化。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 14000,
+            "cost_total_niantou": 3600,
+            "metadata": {
+                "range": "24.0",
+                "cooldown_ticks": "450",
+                "niantou_cost": "320.0",
+                "zhenyuan_base_cost": "2400.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

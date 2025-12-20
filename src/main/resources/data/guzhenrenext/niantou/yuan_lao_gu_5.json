@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:yuan_lao_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:yuan_lao_gu_5_passive_elder_nurture",
+            "usageTitle": "被动·元老滋养(五)",
+            "usageDesc": "五转元老蛊护持最稳，持续滋养身心，提供极强续航。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 治疗：{heal_amount}/s |\n 念头：+{niantou_gain}/s",
+            "cost_duration": 6000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "heal_amount": "1.50",
+                "niantou_gain": "1.20"
+            }
+        },
+        {
+            "usageID": "guzhenren:yuan_lao_gu_5_active_elder_support",
+            "usageTitle": "主动·元老扶持(五)",
+            "usageDesc": "展开极大的护持领域，治疗盟友并净化负面状态，持续施加再生与抗性。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 净化：{cleanse_negative}",
+            "cost_duration": 14000,
+            "cost_total_niantou": 3600,
+            "metadata": {
+                "radius": "18.0",
+                "cooldown_ticks": "1100",
+                "niantou_cost": "320.0",
+                "zhenyuan_base_cost": "2500.0",
+                "heal_amount": "18.0",
+                "cleanse_negative": "true",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:yuzenggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yuzenggu_passive_space_amplify",
+            "usageTitle": "被动·宇增",
+            "usageDesc": "宇增蛊以真元扩张界面，使攻击更具穿透（提升攻击力）。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1100,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "attribute_amount": "0.08"
+            }
+        },
+        {
+            "usageID": "guzhenren:yuzenggu_active_space_overload",
+            "usageTitle": "主动·空间过载",
+            "usageDesc": "将扩张之界瞬间过载，造成范围法术伤害与击退，并附带迟缓。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 击退：{knockback_strength}",
+            "cost_duration": 10000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "radius": "10.0",
+                "cooldown_ticks": "800",
+                "niantou_cost": "260.0",
+                "zhenyuan_base_cost": "1900.0",
+                "extra_magic_damage": "20.0",
+                "knockback_strength": "1.00",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

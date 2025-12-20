@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:yuan_lao_gu_1",
+    "usages": [
+        {
+            "usageID": "guzhenren:yuan_lao_gu_1_passive_elder_nurture",
+            "usageTitle": "被动·元老滋养",
+            "usageDesc": "元老蛊稳固空窍气机，缓慢滋养身心，提供续航。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 治疗：{heal_amount}/s |\n 念头：+{niantou_gain}/s",
+            "cost_duration": 1800,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.0",
+                "heal_amount": "0.50",
+                "niantou_gain": "0.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:yuan_lao_gu_1_active_elder_support",
+            "usageTitle": "主动·元老扶持",
+            "usageDesc": "元老蛊开辟小幅护持领域，为盟友回血并施加再生与抗性。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 2600,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "radius": "6.0",
+                "cooldown_ticks": "600",
+                "niantou_cost": "40.0",
+                "zhenyuan_base_cost": "320.0",
+                "heal_amount": "4.0",
+                "cleanse_negative": "false",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

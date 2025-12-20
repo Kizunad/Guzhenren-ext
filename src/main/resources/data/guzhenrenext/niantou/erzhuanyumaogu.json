@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:erzhuanyumaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:erzhuanyumaogu_passive_space_stride",
+            "usageTitle": "被动·宇步(二)",
+            "usageDesc": "二转宇猫蛊步法更疾，需以真元持续供养。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "attribute_amount": "0.08"
+            }
+        },
+        {
+            "usageID": "guzhenren:erzhuanyumaogu_active_blink_dash",
+            "usageTitle": "主动·疾闪",
+            "usageDesc": "短距疾闪至视线前方，配合迅捷加成用于追击或脱离。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
+            "cost_duration": 3000,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "distance": "8.0",
+                "cooldown_ticks": "200",
+                "niantou_cost": "30.0",
+                "zhenyuan_base_cost": "220.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:weilianhuaxiangyaibaijiagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:weilianhuaxiangyaibaijiagu_passive_ivory_plate",
+            "usageTitle": "被动·象牙白甲",
+            "usageDesc": "象牙白甲蛊凝成白甲护体，提升护甲韧性，抵御重击。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 护甲韧性：{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "5.5",
+                "attribute_amount": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:weilianhuaxiangyaibaijiagu_active_ivory_bulwark",
+            "usageTitle": "主动·白甲壁垒",
+            "usageDesc": "白甲合拢成壁垒，短时间内大幅增强抗性与吸收，但行动变慢。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "niantou_cost": "36.0",
+                "zhenyuan_base_cost": "360.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "1",
+                "absorption_duration_ticks": "200",
+                "absorption_amplifier": "1",
+                "slow_duration_ticks": "120",
+                "slow_amplifier": "1"
+            }
+        }
+    ]
+}
+

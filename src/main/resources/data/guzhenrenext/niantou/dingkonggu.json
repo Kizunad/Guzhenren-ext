@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:dingkonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dingkonggu_passive_space_fix",
+            "usageTitle": "被动·定空压制",
+            "usageDesc": "定空蛊锁住敌身，攻击时有概率施加迟缓，并附带少量法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 迟缓：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1200,
+            "metadata": {
+                "proc_chance": "0.22",
+                "niantou_cost": "3.00",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "1",
+                "extra_magic_damage": "0.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:dingkonggu_active_space_lockdown",
+            "usageTitle": "主动·定空领域",
+            "usageDesc": "展开定空领域，小范围强力迟缓敌人，适合控场。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 12000,
+            "cost_total_niantou": 2800,
+            "metadata": {
+                "radius": "12.0",
+                "cooldown_ticks": "900",
+                "niantou_cost": "280.0",
+                "zhenyuan_base_cost": "2100.0",
+                "extra_magic_damage": "0.0",
+                "knockback_strength": "0.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "2"
+            }
+        }
+    ]
+}
+

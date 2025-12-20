@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:sanzhuanyumaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sanzhuanyumaogu_passive_space_hunt",
+            "usageTitle": "被动·狩猎",
+            "usageDesc": "三转宇猫蛊善于追猎，攻击时有概率汲取生机/念头/真元，并附带少量法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 治疗：{heal_amount} |\n 念头：+{niantou_gain} |\n 真元：+{zhenyuan_gain} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 3600,
+            "cost_total_niantou": 500,
+            "metadata": {
+                "proc_chance": "0.14",
+                "niantou_cost": "2.00",
+                "heal_amount": "1.50",
+                "niantou_gain": "1.0",
+                "zhenyuan_gain": "8.0",
+                "extra_magic_damage": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:sanzhuanyumaogu_active_blink_strike",
+            "usageTitle": "主动·挪移突击",
+            "usageDesc": "挪移至前方并短暂强化攻击，用于追击爆发。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 5600,
+            "cost_total_niantou": 920,
+            "metadata": {
+                "distance": "10.0",
+                "cooldown_ticks": "360",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "900.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

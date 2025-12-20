@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:yugougu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yugougu_passive_rift_groove",
+            "usageTitle": "被动·宇沟",
+            "usageDesc": "宇沟蛊在敌身开沟，攻击时有概率强力迟缓并附带法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 迟缓：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 4400,
+            "cost_total_niantou": 820,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "2.50",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "1",
+                "extra_magic_damage": "1.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:yugougu_active_rift_burst",
+            "usageTitle": "主动·沟壑崩裂",
+            "usageDesc": "引宇沟崩裂周身界面，造成范围法术伤害与击退，并附带迟缓。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 击退：{knockback_strength} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "radius": "9.0",
+                "cooldown_ticks": "650",
+                "niantou_cost": "180.0",
+                "zhenyuan_base_cost": "1400.0",
+                "extra_magic_damage": "14.0",
+                "knockback_strength": "0.80",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

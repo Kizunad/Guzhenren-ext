@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:chikonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:chikonggu_passive_void_devour",
+            "usageTitle": "被动·吞空",
+            "usageDesc": "吃空蛊吞噬虚空余势，攻击时有概率汲取真元与生机，并附带法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 治疗：{heal_amount} |\n 真元：+{zhenyuan_gain} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "proc_chance": "0.16",
+                "niantou_cost": "3.00",
+                "heal_amount": "1.00",
+                "zhenyuan_gain": "10.0",
+                "extra_magic_damage": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:chikonggu_active_void_pull",
+            "usageTitle": "主动·虚空牵引",
+            "usageDesc": "锁定目标后将其强行牵引，并施加凋零与法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 牵引力度：{force} |\n 伤害：{extra_magic_damage}",
+            "cost_duration": 7600,
+            "cost_total_niantou": 1500,
+            "metadata": {
+                "range": "20.0",
+                "cooldown_ticks": "700",
+                "niantou_cost": "200.0",
+                "zhenyuan_base_cost": "1500.0",
+                "force": "1.20",
+                "extra_magic_damage": "10.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

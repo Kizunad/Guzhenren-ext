@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:shuoyugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuoyugu_passive_spatial_command",
+            "usageTitle": "被动·号令",
+            "usageDesc": "说宇蛊以言令界，攻击时有概率使敌人虚弱并附带法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 虚弱：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1200,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "3.00",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "2.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuoyugu_active_spatial_order",
+            "usageTitle": "主动·空间律令",
+            "usageDesc": "锁定目标后施加空间律令，将其推斥远离并附带虚弱与法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 推斥力度：{force} |\n 伤害：{extra_magic_damage}",
+            "cost_duration": 10000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "range": "24.0",
+                "cooldown_ticks": "600",
+                "niantou_cost": "240.0",
+                "zhenyuan_base_cost": "1800.0",
+                "force": "1.30",
+                "extra_magic_damage": "12.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

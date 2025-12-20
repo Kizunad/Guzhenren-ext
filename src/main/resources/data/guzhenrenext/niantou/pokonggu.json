@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:pokonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:pokonggu_passive_void_edge",
+            "usageTitle": "被动·虚刃",
+            "usageDesc": "破空蛊以虚刃割裂界面，攻击时有概率令敌人虚弱并附带法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 虚弱：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 4000,
+            "cost_total_niantou": 560,
+            "metadata": {
+                "proc_chance": "0.20",
+                "niantou_cost": "3.00",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "2.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:pokonggu_active_void_pierce",
+            "usageTitle": "主动·破空贯穿",
+            "usageDesc": "锁定目标，以破空之力贯穿其界面，造成高额法术伤害并施加强力压制。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 7600,
+            "cost_total_niantou": 1500,
+            "metadata": {
+                "range": "24.0",
+                "cooldown_ticks": "850",
+                "niantou_cost": "220.0",
+                "zhenyuan_base_cost": "1600.0",
+                "extra_magic_damage": "24.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

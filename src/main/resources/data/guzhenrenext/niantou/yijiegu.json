@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:yijiegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yijiegu_passive_otherworld_shift",
+            "usageTitle": "被动·异界闪避",
+            "usageDesc": "异界蛊于受击瞬间错开界面，有概率卸力减伤并挪移闪避。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 减伤倍率：{damage_multiplier} |\n 挪移距离：{blink_distance}",
+            "cost_duration": 3400,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "proc_chance": "0.20",
+                "cooldown_ticks": "160",
+                "niantou_cost": "3.00",
+                "damage_multiplier": "0.75",
+                "blink_distance": "6.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yijiegu_active_phase_form",
+            "usageTitle": "主动·虚界形态",
+            "usageDesc": "短时间隐匿身形并提高抗性，用于穿行与避战。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 5200,
+            "cost_total_niantou": 760,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "850.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

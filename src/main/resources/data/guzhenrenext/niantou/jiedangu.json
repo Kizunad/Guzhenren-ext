@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:jiedangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiedangu_passive_deflect",
+            "usageTitle": "被动·解弹",
+            "usageDesc": "解弹蛊偏折弹道，对投射物伤害有概率卸力减伤（仅投射物）。",
+            "usageInfo": "仅投射物：{projectile_only} |\n 触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 减伤倍率：{damage_multiplier}",
+            "cost_duration": 3400,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "projectile_only": "true",
+                "proc_chance": "0.25",
+                "cooldown_ticks": "100",
+                "niantou_cost": "2.00",
+                "damage_multiplier": "0.60",
+                "blink_distance": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiedangu_active_repulse",
+            "usageTitle": "主动·周身斥力",
+            "usageDesc": "以宇道斥力震开周遭敌人，造成强击退并附带短暂迟缓。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 击退：{knockback_strength}",
+            "cost_duration": 4800,
+            "cost_total_niantou": 620,
+            "metadata": {
+                "radius": "7.0",
+                "cooldown_ticks": "400",
+                "niantou_cost": "80.0",
+                "zhenyuan_base_cost": "650.0",
+                "extra_magic_damage": "0.0",
+                "knockback_strength": "1.20",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jieyungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jieyungu_passive_clear_mist",
+            "usageTitle": "被动·解云",
+            "usageDesc": "解云蛊散去迷雾，常驻明见（夜视），需真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 效果持续：{effect_duration_ticks}t",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1100,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jieyungu_active_purify_mist",
+            "usageTitle": "主动·净云",
+            "usageDesc": "净化盟友身上负面状态并治疗，适合团战与探索。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 净化：{cleanse_negative}",
+            "cost_duration": 12000,
+            "cost_total_niantou": 2800,
+            "metadata": {
+                "radius": "16.0",
+                "cooldown_ticks": "1000",
+                "niantou_cost": "280.0",
+                "zhenyuan_base_cost": "2000.0",
+                "heal_amount": "14.0",
+                "cleanse_negative": "true",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

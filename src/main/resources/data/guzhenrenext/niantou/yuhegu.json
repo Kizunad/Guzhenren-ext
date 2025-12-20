@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:yuhegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yuhegu_passive_harmony",
+            "usageTitle": "被动·宇合",
+            "usageDesc": "宇合蛊调和气机，缓慢治疗并回复念头，提供稳定续航。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 治疗：{heal_amount}/s |\n 念头：+{niantou_gain}/s",
+            "cost_duration": 4200,
+            "cost_total_niantou": 680,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "heal_amount": "0.60",
+                "niantou_gain": "0.80"
+            }
+        },
+        {
+            "usageID": "guzhenren:yuhegu_active_harmony_support",
+            "usageTitle": "主动·和合扶持",
+            "usageDesc": "展开和合领域，治疗盟友并净化负面状态。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 净化：{cleanse_negative}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1700,
+            "metadata": {
+                "radius": "12.0",
+                "cooldown_ticks": "900",
+                "niantou_cost": "220.0",
+                "zhenyuan_base_cost": "1500.0",
+                "heal_amount": "10.0",
+                "cleanse_negative": "true",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

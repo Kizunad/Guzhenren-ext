@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:sanzhuanyuanlaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sanzhuanyuanlaogu_passive_elder_nurture",
+            "usageTitle": "被动·元老滋养(三)",
+            "usageDesc": "三转元老蛊稳态更强，持续滋养身心，提供较强续航。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 治疗：{heal_amount}/s |\n 念头：+{niantou_gain}/s",
+            "cost_duration": 3800,
+            "cost_total_niantou": 560,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "heal_amount": "1.00",
+                "niantou_gain": "0.80"
+            }
+        },
+        {
+            "usageID": "guzhenren:sanzhuanyuanlaogu_active_elder_support",
+            "usageTitle": "主动·元老扶持(三)",
+            "usageDesc": "展开更大的护持领域，治疗盟友并净化负面状态，持续施加再生与抗性。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 净化：{cleanse_negative}",
+            "cost_duration": 6200,
+            "cost_total_niantou": 1100,
+            "metadata": {
+                "radius": "10.0",
+                "cooldown_ticks": "800",
+                "niantou_cost": "160.0",
+                "zhenyuan_base_cost": "1200.0",
+                "heal_amount": "8.0",
+                "cleanse_negative": "true",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:kongsuogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:kongsuogu_passive_spatial_lock",
+            "usageTitle": "被动·空锁",
+            "usageDesc": "空锁蛊牵扯空间之缝，攻击时有概率锁住敌人步伐，使其迟缓。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 迟缓：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 1600,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "1.50",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "0.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:kongsuogu_active_space_chain",
+            "usageTitle": "主动·空链牵引",
+            "usageDesc": "以空锁为引，牵动敌身。锁定目标后将其牵引至身前，并附带迟缓与法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 牵引力度：{force} |\n 伤害：{extra_magic_damage}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 180,
+            "metadata": {
+                "range": "10.0",
+                "cooldown_ticks": "240",
+                "niantou_cost": "30.0",
+                "zhenyuan_base_cost": "250.0",
+                "force": "0.90",
+                "extra_magic_damage": "2.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

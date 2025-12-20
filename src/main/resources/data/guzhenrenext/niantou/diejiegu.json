@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:diejiegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:diejiegu_passive_layered_boundary",
+            "usageTitle": "被动·叠界",
+            "usageDesc": "叠界蛊将界障层层叠加，以真元维持后可提升生命上限。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 生命上限：+{attribute_amount}",
+            "cost_duration": 3400,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "attribute_amount": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:diejiegu_active_swap_boundary",
+            "usageTitle": "主动·换界",
+            "usageDesc": "视线锁定目标，与其换位并扰乱其身形。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 5200,
+            "cost_total_niantou": 760,
+            "metadata": {
+                "range": "14.0",
+                "cooldown_ticks": "500",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "900.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:dongchagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dongchagu_passive_spatial_insight",
+            "usageTitle": "被动·洞察",
+            "usageDesc": "洞察蛊常驻开明，令目力穿透阴翳，但需以真元维持。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 效果持续：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:dongchagu_active_reveal",
+            "usageTitle": "主动·显形",
+            "usageDesc": "以洞察照彻周遭，使附近敌人暴露行迹（发光）。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 3000,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "radius": "8.0",
+                "cooldown_ticks": "360",
+                "niantou_cost": "50.0",
+                "zhenyuan_base_cost": "420.0",
+                "extra_magic_damage": "0.0",
+                "knockback_strength": "0.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+
