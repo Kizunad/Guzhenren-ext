@@ -9,18 +9,18 @@
             "cost_duration": 1300,
             "cost_total_niantou": 135,
             "metadata": {
-                "niantou_cost_per_second": "3.0",
-                "jingli_cost_per_second": "2.5",
-                "hunpo_cost_per_second": "1.8",
-                "zhenyuan_base_cost_per_second": "0.45",
+                "niantou_cost_per_second": "320",
+                "jingli_cost_per_second": "280",
+                "hunpo_cost_per_second": "220",
+                "zhenyuan_base_cost_per_second": "7864320",
                 "attribute_amount": "0.25"
             }
         },
         {
             "usageID": "guzhenren:sizhuanfengligu_active_wind_crash",
             "usageTitle": "主动·风力轰坠",
-            "usageDesc": "以风力轰然冲撞前方，命中敌人造成风道伤害并迟滞。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{magic_damage}",
+            "usageDesc": "以风力轰然冲撞前方，命中敌人造成迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
             "cost_duration": 1750,
             "cost_total_niantou": 175,
             "metadata": {
@@ -28,11 +28,11 @@
                 "range": "10.5",
                 "dash_strength": "1.60",
                 "hit_radius": "1.2",
-                "niantou_cost": "260.0",
-                "jingli_cost": "220.0",
-                "hunpo_cost": "190.0",
-                "zhenyuan_base_cost": "780.0",
-                "magic_damage": "2200.0",
+                "niantou_cost": "420",
+                "jingli_cost": "360",
+                "hunpo_cost": "300",
+                "zhenyuan_base_cost": "11796480",
+                "magic_damage": "0",
                 "slow_duration_ticks": "140",
                 "slow_amplifier": "0"
             }

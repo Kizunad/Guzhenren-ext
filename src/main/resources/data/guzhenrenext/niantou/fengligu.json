@@ -9,18 +9,18 @@
             "cost_duration": 950,
             "cost_total_niantou": 65,
             "metadata": {
-                "niantou_cost_per_second": "1.8",
-                "jingli_cost_per_second": "1.5",
-                "hunpo_cost_per_second": "0.9",
-                "zhenyuan_base_cost_per_second": "0.20",
+                "niantou_cost_per_second": "260",
+                "jingli_cost_per_second": "220",
+                "hunpo_cost_per_second": "180",
+                "zhenyuan_base_cost_per_second": "61440",
                 "attribute_amount": "2.0"
             }
         },
         {
             "usageID": "guzhenren:fengligu_active_gale_charge",
             "usageTitle": "主动·疾风冲撞",
-            "usageDesc": "借风势突进冲撞，命中前方敌人造成风道伤害并附带迟滞。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{magic_damage}",
+            "usageDesc": "借风势突进冲撞，命中前方敌人造成迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
             "cost_duration": 1200,
             "cost_total_niantou": 95,
             "metadata": {
@@ -28,11 +28,11 @@
                 "range": "9.0",
                 "dash_strength": "1.40",
                 "hit_radius": "1.1",
-                "niantou_cost": "110.0",
-                "jingli_cost": "80.0",
-                "hunpo_cost": "65.0",
-                "zhenyuan_base_cost": "320.0",
-                "magic_damage": "220.0",
+                "niantou_cost": "280",
+                "jingli_cost": "220",
+                "hunpo_cost": "190",
+                "zhenyuan_base_cost": "122880",
+                "magic_damage": "0",
                 "slow_duration_ticks": "80",
                 "slow_amplifier": "0"
             }

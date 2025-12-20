@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +27,9 @@ public final class NianTouDataValidator {
 
     private static final String ID_PATTERN = "^[a-z0-9_]+$";
     private static final String METADATA_KEY_PATTERN = "^[a-z0-9_]+$";
+    private static final Pattern METADATA_SCIENTIFIC_NOTATION_PATTERN = Pattern.compile(
+        ".*\\d+(?:\\.\\d+)?[eE][+-]?\\d+.*"
+    );
 
     private NianTouDataValidator() {}
 
@@ -151,7 +155,8 @@ public final class NianTouDataValidator {
         if (metadata == null || metadata.isEmpty()) {
             return;
         }
-        for (String key : metadata.keySet()) {
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            final String key = entry.getKey();
             if (key == null || key.isBlank()) {
                 errors.add(prefix + "metadata key 不能为空");
                 continue;
@@ -161,6 +166,20 @@ public final class NianTouDataValidator {
             }
             if (!key.matches(METADATA_KEY_PATTERN)) {
                 errors.add(prefix + "metadata key 必须为 snake_case: " + key);
+            }
+
+            final String value = entry.getValue();
+            if (
+                value != null
+                    && METADATA_SCIENTIFIC_NOTATION_PATTERN.matcher(value).matches()
+            ) {
+                errors.add(
+                    prefix +
+                        "metadata value 禁止使用科学计数法: " +
+                        key +
+                        "=" +
+                        value
+                );
             }
         }
     }

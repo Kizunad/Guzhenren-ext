@@ -9,10 +9,10 @@
             "cost_duration": 1300,
             "cost_total_niantou": 135,
             "metadata": {
-                "niantou_cost_per_second": "2.6",
-                "jingli_cost_per_second": "2.2",
-                "hunpo_cost_per_second": "1.6",
-                "zhenyuan_base_cost_per_second": "0.35",
+                "niantou_cost_per_second": "340",
+                "jingli_cost_per_second": "300",
+                "hunpo_cost_per_second": "240",
+                "zhenyuan_base_cost_per_second": "7864320",
                 "attribute_amount": "0.14"
             }
         },
@@ -27,10 +27,10 @@
                 "cooldown_ticks": "800",
                 "distance": "8.0",
                 "max_distance": "20.0",
-                "niantou_cost": "240.0",
-                "jingli_cost": "200.0",
-                "hunpo_cost": "170.0",
-                "zhenyuan_base_cost": "780.0",
+                "niantou_cost": "420",
+                "jingli_cost": "360",
+                "hunpo_cost": "300",
+                "zhenyuan_base_cost": "10485760",
                 "effect_duration_ticks": "120",
                 "effect_amplifier": "0"
             }

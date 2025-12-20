@@ -9,28 +9,28 @@
             "cost_duration": 900,
             "cost_total_niantou": 50,
             "metadata": {
-                "niantou_cost_per_second": "1.2",
-                "jingli_cost_per_second": "1.0",
-                "hunpo_cost_per_second": "0.6",
-                "zhenyuan_base_cost_per_second": "0.12",
+                "niantou_cost_per_second": "180",
+                "jingli_cost_per_second": "160",
+                "hunpo_cost_per_second": "130",
+                "zhenyuan_base_cost_per_second": "960",
                 "attribute_amount": "0.07"
             }
         },
         {
             "usageID": "guzhenren:bufenggu_active_wind_bind",
             "usageTitle": "主动·捕风束缚",
-            "usageDesc": "以风缚锁定目标，令其行动迟缓，并造成少量风道伤害。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
+            "usageDesc": "以风缚锁定目标，令其行动迟缓。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
             "cost_duration": 1150,
             "cost_total_niantou": 75,
             "metadata": {
                 "cooldown_ticks": "300",
                 "range": "13.0",
-                "niantou_cost": "75.0",
-                "jingli_cost": "65.0",
-                "hunpo_cost": "45.0",
-                "zhenyuan_base_cost": "200.0",
-                "extra_magic_damage": "25.0",
+                "niantou_cost": "180",
+                "jingli_cost": "150",
+                "hunpo_cost": "120",
+                "zhenyuan_base_cost": "1600",
+                "extra_magic_damage": "0",
                 "effect_duration_ticks": "90",
                 "effect_amplifier": "0"
             }

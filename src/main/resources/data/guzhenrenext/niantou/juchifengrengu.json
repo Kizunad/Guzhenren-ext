@@ -4,20 +4,20 @@
         {
             "usageID": "guzhenren:juchifengrengu_passive_serrated_wind",
             "usageTitle": "被动·巨齿风刃",
-            "usageDesc": "巨齿风刃蛊锋芒更盛，攻击时有概率削弱目标，并附带风道伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
+            "usageDesc": "巨齿风刃蛊锋芒更盛，攻击时有概率削弱目标。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
             "cost_duration": 1450,
             "cost_total_niantou": 160,
             "metadata": {
                 "proc_chance": "0.05",
                 "cooldown_ticks": "160",
-                "niantou_cost": "38.0",
-                "jingli_cost": "32.0",
-                "hunpo_cost": "28.0",
-                "zhenyuan_base_cost": "260.0",
+                "niantou_cost": "300",
+                "jingli_cost": "260",
+                "hunpo_cost": "220",
+                "zhenyuan_base_cost": "7864320",
                 "effect_duration_ticks": "160",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "1200.0"
+                "extra_magic_damage": "0"
             }
         },
         {
@@ -30,11 +30,11 @@
             "metadata": {
                 "cooldown_ticks": "1400",
                 "range": "17.0",
-                "niantou_cost": "360.0",
-                "jingli_cost": "300.0",
-                "hunpo_cost": "280.0",
-                "zhenyuan_base_cost": "980.0",
-                "extra_magic_damage": "7500.0",
+                "niantou_cost": "520",
+                "jingli_cost": "460",
+                "hunpo_cost": "380",
+                "zhenyuan_base_cost": "12451840",
+                "extra_magic_damage": "2500",
                 "effect_duration_ticks": "220",
                 "effect_amplifier": "0",
                 "slow_duration_ticks": "220",
