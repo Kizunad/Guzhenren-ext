@@ -5,11 +5,12 @@
             "usageID": "guzhenren:tie_gu_gu_passive_iron_bone",
             "usageTitle": "被动·铁骨",
             "usageDesc": "铁骨蛊淬炼骨质，提升骨架强度与抗打击能力。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 护甲韧性：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 护甲韧性：{attribute_amount}",
             "cost_duration": 1500,
             "cost_total_niantou": 120,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "4.6",
+                "zhenyuan_base_cost_per_second": "5.2",
+                "jingli_cost_per_second": "0.65",
                 "attribute_amount": "3.0"
             }
         },
@@ -23,7 +24,7 @@
             "metadata": {
                 "cooldown_ticks": "400",
                 "niantou_cost": "24.0",
-                "zhenyuan_base_cost": "260.0",
+                "zhenyuan_base_cost": "360.0",
                 "effect_duration_ticks": "200",
                 "effect_amplifier": "0",
                 "strength_duration_ticks": "120",
@@ -32,4 +33,3 @@
         }
     ]
 }
-

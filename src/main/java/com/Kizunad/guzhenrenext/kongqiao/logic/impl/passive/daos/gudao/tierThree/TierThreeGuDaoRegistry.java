@@ -6,9 +6,9 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuD
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveSelfBuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveTargetDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoAttackProcDebuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoHurtProcDebuffAttackerEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedAttributeModifierEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedRegenEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoHurtProcDebuffAttackerEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoSustainedRegenEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -39,7 +39,7 @@ public final class TierThreeGuDaoRegistry {
             "GuzhenrenExtCooldown_wu_zu_nian_active_bone_dash";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
@@ -84,7 +84,7 @@ public final class TierThreeGuDaoRegistry {
         final String cooldownKey =
             "GuzhenrenExtCooldown_rou_bai_gu_active_white_marrow";
 
-        GuEffectRegistry.register(new ZhiDaoSustainedRegenEffect(passive));
+        GuEffectRegistry.register(new GuDaoSustainedRegenEffect(passive));
         GuEffectRegistry.register(
             new GuDaoActiveSelfBuffEffect(
                 active,
@@ -116,7 +116,7 @@ public final class TierThreeGuDaoRegistry {
             "GuzhenrenExtCooldown_gu_ci_gu_active_spike_burst";
 
         GuEffectRegistry.register(
-            new ZhiDaoHurtProcDebuffAttackerEffect(
+            new GuDaoHurtProcDebuffAttackerEffect(
                 passive,
                 MobEffects.MOVEMENT_SLOWDOWN
             )
@@ -145,7 +145,7 @@ public final class TierThreeGuDaoRegistry {
             "GuzhenrenExtCooldown_le_gu_dun_gu_active_rib_bulwark";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ARMOR,
                 AttributeModifier.Operation.ADD_VALUE,
@@ -184,7 +184,7 @@ public final class TierThreeGuDaoRegistry {
             "GuzhenrenExtCooldown_bi_gu_yi_gu_active_wing_dash";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ATTACK_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
@@ -202,7 +202,7 @@ public final class TierThreeGuDaoRegistry {
             "GuzhenrenExtCooldown_tie_gu_gu_active_iron_hide";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ARMOR_TOUGHNESS,
                 AttributeModifier.Operation.ADD_VALUE,
@@ -241,7 +241,7 @@ public final class TierThreeGuDaoRegistry {
             "GuzhenrenExtCooldown_fei_gu_dun_gu_active_bone_orbit";
 
         GuEffectRegistry.register(
-            new ZhiDaoHurtProcDebuffAttackerEffect(passive, MobEffects.WEAKNESS)
+            new GuDaoHurtProcDebuffAttackerEffect(passive, MobEffects.WEAKNESS)
         );
         GuEffectRegistry.register(
             new GuDaoActiveTargetDebuffEffect(
@@ -260,4 +260,3 @@ public final class TierThreeGuDaoRegistry {
         );
     }
 }
-

@@ -5,11 +5,12 @@
             "usageID": "guzhenren:le_gu_dun_gu_passive_rib_shield",
             "usageTitle": "被动·肋骨护盾",
             "usageDesc": "肋骨盾蛊凝成骨盾护体，持续提升护甲以抵御打击。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 护甲：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 护甲：{attribute_amount}",
             "cost_duration": 1500,
             "cost_total_niantou": 110,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "4.5",
+                "zhenyuan_base_cost_per_second": "5.2",
+                "jingli_cost_per_second": "0.65",
                 "attribute_amount": "6.0"
             }
         },
@@ -23,7 +24,7 @@
             "metadata": {
                 "cooldown_ticks": "360",
                 "niantou_cost": "20.0",
-                "zhenyuan_base_cost": "240.0",
+                "zhenyuan_base_cost": "320.0",
                 "effect_duration_ticks": "160",
                 "effect_amplifier": "0",
                 "absorption_duration_ticks": "160",
@@ -32,4 +33,3 @@
         }
     ]
 }
-

@@ -1,10 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenEffectScalingHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -14,7 +14,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -30,8 +32,7 @@ public class GuDaoActiveChargeEffect implements IGuEffect {
     private static final String META_RANGE = "range";
     private static final String META_DASH_STRENGTH = "dash_strength";
     private static final String META_HIT_RADIUS = "hit_radius";
-    private static final String META_NIANTOU_COST = "niantou_cost";
-    private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
+    private static final String META_PHYSICAL_DAMAGE = "physical_damage";
     private static final String META_MAGIC_DAMAGE = "magic_damage";
     private static final String META_SLOW_DURATION_TICKS = "slow_duration_ticks";
     private static final String META_SLOW_AMPLIFIER = "slow_amplifier";
@@ -81,33 +82,8 @@ public class GuDaoActiveChargeEffect implements IGuEffect {
             return false;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(Component.literal("念头不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
-        }
-
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
-            return false;
-        }
-
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
         }
 
         final Vec3 start = player.getEyePosition();
@@ -136,7 +112,11 @@ public class GuDaoActiveChargeEffect implements IGuEffect {
             )
         );
 
-        final double baseDamage = Math.max(
+        final double physicalDamage = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(usageInfo, META_PHYSICAL_DAMAGE, 0.0)
+        );
+        final double magicDamage = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_MAGIC_DAMAGE, 0.0)
         );
@@ -165,22 +145,29 @@ public class GuDaoActiveChargeEffect implements IGuEffect {
                 continue;
             }
 
-            if (baseDamage > 0.0) {
-                final double multiplier = DaoHenCalculator.calculateMultiplier(
-                    user,
-                    victim,
-                    DaoHenHelper.DaoType.GU_DAO
-                );
+            final double multiplier = DaoHenCalculator.calculateMultiplier(
+                user,
+                victim,
+                DaoHenHelper.DaoType.GU_DAO
+            );
+
+            if (physicalDamage > 0.0) {
+                final DamageSource source = buildPhysicalDamageSource(user);
+                victim.hurt(source, (float) (physicalDamage * multiplier));
+            } else if (magicDamage > 0.0) {
                 victim.hurt(
                     user.damageSources().magic(),
-                    (float) (baseDamage * multiplier)
+                    (float) (magicDamage * multiplier)
                 );
             }
-            if (slowDuration > 0) {
+
+            final int scaledSlowDuration = DaoHenEffectScalingHelper
+                .scaleDurationTicks(slowDuration, multiplier);
+            if (scaledSlowDuration > 0) {
                 victim.addEffect(
                     new MobEffectInstance(
                         MobEffects.MOVEMENT_SLOWDOWN,
-                        slowDuration,
+                        scaledSlowDuration,
                         slowAmplifier,
                         true,
                         true
@@ -245,5 +232,12 @@ public class GuDaoActiveChargeEffect implements IGuEffect {
         t = UsageMetadataHelper.clamp(t, 0.0, 1.0);
         final Vec3 projection = start.add(ab.scale(t));
         return point.subtract(projection).lengthSqr();
+    }
+
+    private static DamageSource buildPhysicalDamageSource(final LivingEntity user) {
+        if (user instanceof Player player) {
+            return user.damageSources().playerAttack(player);
+        }
+        return user.damageSources().mobAttack(user);
     }
 }

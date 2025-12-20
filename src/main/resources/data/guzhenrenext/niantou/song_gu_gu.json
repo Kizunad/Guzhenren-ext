@@ -5,11 +5,12 @@
             "usageID": "guzhenren:song_gu_gu_passive_pine_marrow",
             "usageTitle": "被动·松髓回元",
             "usageDesc": "松骨蛊使骨髓如松脂般绵长，缓慢滋养肉身，并少量回补念头。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 生命回复：{health_regen_per_second}/s |\n 念头：{niantou_regen_per_second}/s",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 魂魄：{hunpo_cost_per_second}/s |\n 生命回复：{health_regen_per_second}/s |\n 念头：{niantou_regen_per_second}/s",
             "cost_duration": 2100,
             "cost_total_niantou": 180,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "6.0",
+                "zhenyuan_base_cost_per_second": "7.2",
+                "hunpo_cost_per_second": "0.80",
                 "health_regen_per_second": "0.80",
                 "niantou_regen_per_second": "0.40"
             }
@@ -17,16 +18,17 @@
         {
             "usageID": "guzhenren:song_gu_gu_active_pine_storm",
             "usageTitle": "主动·松骨风暴",
-            "usageDesc": "骨意如松针乱落，扫荡周身敌人，造成骨道法术伤害并压制其行动。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "骨意如松针乱落，扫荡周身敌人并压制其行动。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{physical_damage}",
             "cost_duration": 2400,
             "cost_total_niantou": 240,
             "metadata": {
                 "cooldown_ticks": "520",
                 "radius": "6.0",
-                "niantou_cost": "40.0",
-                "zhenyuan_base_cost": "400.0",
-                "magic_damage": "18.0",
+                "niantou_cost": "55.0",
+                "zhenyuan_base_cost": "620.0",
+                "physical_damage": "24.0",
+                "magic_damage": "0.0",
                 "effect_duration_ticks": "120",
                 "effect_amplifier": "1",
                 "weakness_duration_ticks": "120",
@@ -35,4 +37,3 @@
         }
     ]
 }
-

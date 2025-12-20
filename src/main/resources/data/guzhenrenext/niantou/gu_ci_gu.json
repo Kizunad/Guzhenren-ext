@@ -5,34 +5,35 @@
             "usageID": "guzhenren:gu_ci_gu_passive_spike_counter",
             "usageTitle": "被动·骨刺反噬",
             "usageDesc": "骨刺蛊反应敏锐，受击时有概率反制攻击者，使其迟缓并减免部分伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier}",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害倍率：{damage_multiplier}",
             "cost_duration": 1400,
             "cost_total_niantou": 100,
             "metadata": {
-                "proc_chance": "0.25",
-                "niantou_cost": "2.0",
+                "proc_chance": "0.06",
+                "niantou_cost": "1.6",
+                "zhenyuan_base_cost": "120.0",
                 "effect_duration_ticks": "80",
                 "effect_amplifier": "0",
-                "damage_multiplier": "0.85"
+                "damage_multiplier": "0.92"
             }
         },
         {
             "usageID": "guzhenren:gu_ci_gu_active_spike_burst",
             "usageTitle": "主动·刺骨爆发",
-            "usageDesc": "骨刺四起，震退近身之敌，造成骨道法术伤害并令其迟缓。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "骨刺四起，震退近身之敌并令其迟缓。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{physical_damage}",
             "cost_duration": 1700,
             "cost_total_niantou": 130,
             "metadata": {
                 "cooldown_ticks": "320",
                 "radius": "4.0",
                 "niantou_cost": "18.0",
-                "zhenyuan_base_cost": "220.0",
-                "magic_damage": "8.0",
+                "zhenyuan_base_cost": "280.0",
+                "physical_damage": "12.0",
+                "magic_damage": "0.0",
                 "effect_duration_ticks": "100",
                 "effect_amplifier": "1"
             }
         }
     ]
 }
-

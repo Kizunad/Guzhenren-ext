@@ -5,11 +5,12 @@
             "usageID": "guzhenren:rou_bai_gu_passive_flesh_knit",
             "usageTitle": "被动·肉白缝骨",
             "usageDesc": "肉白骨蛊以肉养骨，缓慢修补体表创口，滋养肉身。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 生命回复：{health_regen_per_second}/s",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 生命回复：{health_regen_per_second}/s",
             "cost_duration": 1400,
             "cost_total_niantou": 100,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "4.0",
+                "zhenyuan_base_cost_per_second": "5.0",
+                "jingli_cost_per_second": "0.60",
                 "health_regen_per_second": "0.50"
             }
         },
@@ -23,7 +24,7 @@
             "metadata": {
                 "cooldown_ticks": "400",
                 "niantou_cost": "20.0",
-                "zhenyuan_base_cost": "220.0",
+                "zhenyuan_base_cost": "300.0",
                 "effect_duration_ticks": "160",
                 "effect_amplifier": "1",
                 "absorption_duration_ticks": "160",
@@ -32,4 +33,3 @@
         }
     ]
 }
-

@@ -5,34 +5,36 @@
             "usageID": "guzhenren:gu_qiang_gu_passive_bone_impale",
             "usageTitle": "被动·骨枪穿刺",
             "usageDesc": "骨枪蛊以骨意凝锋，攻击时有概率令敌人被刺穿而行动迟缓。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_physical_damage}",
             "cost_duration": 900,
             "cost_total_niantou": 50,
             "metadata": {
-                "proc_chance": "0.18",
-                "niantou_cost": "1.5",
+                "proc_chance": "0.04",
+                "niantou_cost": "1.2",
+                "zhenyuan_base_cost": "60.0",
                 "effect_duration_ticks": "60",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "2.0"
+                "extra_physical_damage": "1.5",
+                "extra_magic_damage": "0.0"
             }
         },
         {
             "usageID": "guzhenren:gu_qiang_gu_active_bone_spear",
             "usageTitle": "主动·骨枪点杀",
-            "usageDesc": "凝出骨枪意贯一点，削弱目标并造成骨道法术伤害。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "凝出骨枪意贯一点，削弱目标并附带骨意伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_physical_damage}",
             "cost_duration": 1100,
             "cost_total_niantou": 70,
             "metadata": {
                 "cooldown_ticks": "200",
                 "range": "12.0",
                 "niantou_cost": "12.0",
-                "zhenyuan_base_cost": "140.0",
-                "extra_magic_damage": "6.0",
+                "zhenyuan_base_cost": "150.0",
+                "extra_physical_damage": "4.0",
+                "extra_magic_damage": "0.0",
                 "effect_duration_ticks": "100",
                 "effect_amplifier": "0"
             }
         }
     ]
 }
-

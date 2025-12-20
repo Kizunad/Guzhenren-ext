@@ -4,7 +4,7 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveSelfBuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveTargetDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoAttackProcDebuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoSustainedAttributeModifierEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -65,7 +65,7 @@ public final class TierTwoGuDaoRegistry {
             "GuzhenrenExtCooldown_yu_gu_gu_active_jade_guard";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ARMOR_TOUGHNESS,
                 AttributeModifier.Operation.ADD_VALUE,
@@ -104,7 +104,7 @@ public final class TierTwoGuDaoRegistry {
             "GuzhenrenExtCooldown_hugugu_active_tiger_fury";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_VALUE,
@@ -136,4 +136,3 @@ public final class TierTwoGuDaoRegistry {
         );
     }
 }
-

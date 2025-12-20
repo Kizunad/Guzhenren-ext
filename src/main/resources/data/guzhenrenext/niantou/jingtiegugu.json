@@ -5,31 +5,32 @@
             "usageID": "guzhenren:jingtiegugu_passive_refined_bone",
             "usageTitle": "被动·精铁骨",
             "usageDesc": "精铁骨蛊以精铁淬骨，护甲更厚，适合正面硬抗。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 护甲：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 护甲：{attribute_amount}",
             "cost_duration": 1800,
             "cost_total_niantou": 150,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "5.2",
+                "zhenyuan_base_cost_per_second": "6.2",
+                "jingli_cost_per_second": "0.75",
                 "attribute_amount": "8.0"
             }
         },
         {
             "usageID": "guzhenren:jingtiegugu_active_iron_shrapnel",
             "usageTitle": "主动·铁骨碎片",
-            "usageDesc": "爆散骨碎铁片，震慑周身敌人，造成骨道法术伤害并削弱其力。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "爆散骨碎铁片，震慑周身敌人并削弱其力。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{physical_damage}",
             "cost_duration": 2100,
             "cost_total_niantou": 200,
             "metadata": {
                 "cooldown_ticks": "420",
                 "radius": "5.0",
-                "niantou_cost": "28.0",
-                "zhenyuan_base_cost": "320.0",
-                "magic_damage": "14.0",
+                "niantou_cost": "40.0",
+                "zhenyuan_base_cost": "520.0",
+                "physical_damage": "18.0",
+                "magic_damage": "0.0",
                 "effect_duration_ticks": "140",
                 "effect_amplifier": "0"
             }
         }
     ]
 }
-

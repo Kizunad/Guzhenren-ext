@@ -5,11 +5,12 @@
             "usageID": "guzhenren:hugugu_passive_tiger_bone",
             "usageTitle": "被动·虎骨强力",
             "usageDesc": "虎骨蛊炼骨成虎，筋骨爆发更强，提升出手之力。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 额外攻击：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 额外攻击：{attribute_amount}",
             "cost_duration": 1200,
             "cost_total_niantou": 80,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "3.5",
+                "zhenyuan_base_cost_per_second": "3.8",
+                "jingli_cost_per_second": "0.45",
                 "attribute_amount": "1.0"
             }
         },
@@ -23,7 +24,7 @@
             "metadata": {
                 "cooldown_ticks": "360",
                 "niantou_cost": "18.0",
-                "zhenyuan_base_cost": "200.0",
+                "zhenyuan_base_cost": "220.0",
                 "effect_duration_ticks": "160",
                 "effect_amplifier": "0",
                 "speed_duration_ticks": "160",
@@ -32,4 +33,3 @@
         }
     ]
 }
-

@@ -6,8 +6,8 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuD
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveSelfBuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveTargetDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoAttackProcDebuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedAttributeModifierEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedRegenEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoSustainedRegenEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -69,7 +69,7 @@ public final class TierFourGuDaoRegistry {
         final String cooldownKey =
             "GuzhenrenExtCooldown_guroutuanyuangu_active_reunion_blessing";
 
-        GuEffectRegistry.register(new ZhiDaoSustainedRegenEffect(passive));
+        GuEffectRegistry.register(new GuDaoSustainedRegenEffect(passive));
         GuEffectRegistry.register(
             new GuDaoActiveSelfBuffEffect(
                 active,
@@ -101,7 +101,7 @@ public final class TierFourGuDaoRegistry {
             "GuzhenrenExtCooldown_jingtiegugu_active_iron_shrapnel";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ARMOR,
                 AttributeModifier.Operation.ADD_VALUE,
@@ -135,7 +135,7 @@ public final class TierFourGuDaoRegistry {
             "GuzhenrenExtCooldown_weilianhuaguyigu_active_unrefined_dash";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
@@ -155,7 +155,7 @@ public final class TierFourGuDaoRegistry {
             "GuzhenrenExtCooldown_weilianhuaxiangyaibaijiagu_active_ivory_bulwark";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new GuDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ARMOR_TOUGHNESS,
                 AttributeModifier.Operation.ADD_VALUE,
@@ -194,4 +194,3 @@ public final class TierFourGuDaoRegistry {
         );
     }
 }
-

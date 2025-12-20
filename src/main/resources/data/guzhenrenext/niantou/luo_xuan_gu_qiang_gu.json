@@ -5,30 +5,33 @@
             "usageID": "guzhenren:luo_xuan_gu_qiang_gu_passive_spiral_pierce",
             "usageTitle": "被动·螺旋破骨",
             "usageDesc": "螺旋骨枪蛊附带旋劲，命中时更易撕裂骨架，使敌人虚弱。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_physical_damage}",
             "cost_duration": 1100,
             "cost_total_niantou": 70,
             "metadata": {
-                "proc_chance": "0.22",
-                "niantou_cost": "2.0",
+                "proc_chance": "0.05",
+                "niantou_cost": "1.6",
+                "zhenyuan_base_cost": "90.0",
                 "effect_duration_ticks": "80",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "3.5"
+                "extra_physical_damage": "2.5",
+                "extra_magic_damage": "0.0"
             }
         },
         {
             "usageID": "guzhenren:luo_xuan_gu_qiang_gu_active_spiral_shot",
             "usageTitle": "主动·螺旋激射",
             "usageDesc": "以旋劲贯穿目标，令其虚弱并迟缓，骨道伤害更甚。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_physical_damage}",
             "cost_duration": 1300,
             "cost_total_niantou": 90,
             "metadata": {
                 "cooldown_ticks": "240",
                 "range": "14.0",
                 "niantou_cost": "16.0",
-                "zhenyuan_base_cost": "170.0",
-                "extra_magic_damage": "9.0",
+                "zhenyuan_base_cost": "190.0",
+                "extra_physical_damage": "6.0",
+                "extra_magic_damage": "0.0",
                 "effect_duration_ticks": "120",
                 "effect_amplifier": "0",
                 "slow_duration_ticks": "80",
@@ -37,4 +40,3 @@
         }
     ]
 }
-

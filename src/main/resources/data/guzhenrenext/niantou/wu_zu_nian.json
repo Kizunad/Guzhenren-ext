@@ -5,11 +5,12 @@
             "usageID": "guzhenren:wu_zu_nian_passive_bone_stride",
             "usageTitle": "被动·骨行踏风",
             "usageDesc": "无足鸟蛊寄宿空窍，骨意托身，令身法更轻快。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 移速加成：{attribute_amount}",
             "cost_duration": 1400,
             "cost_total_niantou": 90,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "4.0",
+                "zhenyuan_base_cost_per_second": "4.6",
+                "jingli_cost_per_second": "0.55",
                 "attribute_amount": "0.06"
             }
         },
@@ -17,7 +18,7 @@
             "usageID": "guzhenren:wu_zu_nian_active_bone_dash",
             "usageTitle": "主动·骨风突进",
             "usageDesc": "借无足之意猛然突进，冲撞前方敌人并短暂迟缓。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost}",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{physical_damage}",
             "cost_duration": 1500,
             "cost_total_niantou": 120,
             "metadata": {
@@ -26,12 +27,12 @@
                 "dash_strength": "1.4",
                 "hit_radius": "1.2",
                 "niantou_cost": "16.0",
-                "zhenyuan_base_cost": "180.0",
-                "magic_damage": "6.0",
+                "zhenyuan_base_cost": "240.0",
+                "physical_damage": "10.0",
+                "magic_damage": "0.0",
                 "slow_duration_ticks": "60",
                 "slow_amplifier": "0"
             }
         }
     ]
 }
-

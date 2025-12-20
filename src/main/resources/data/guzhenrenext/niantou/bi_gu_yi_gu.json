@@ -5,11 +5,12 @@
             "usageID": "guzhenren:bi_gu_yi_gu_passive_bone_wing",
             "usageTitle": "被动·臂骨翼",
             "usageDesc": "臂骨翼蛊使前臂生出骨翼，扇动骨翼可提升出手速度。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 攻速加成：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 攻速加成：{attribute_amount}",
             "cost_duration": 1500,
             "cost_total_niantou": 110,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "4.2",
+                "zhenyuan_base_cost_per_second": "4.8",
+                "jingli_cost_per_second": "0.55",
                 "attribute_amount": "0.15"
             }
         },
@@ -17,7 +18,7 @@
             "usageID": "guzhenren:bi_gu_yi_gu_active_wing_dash",
             "usageTitle": "主动·骨翼突击",
             "usageDesc": "骨翼一振，瞬间突进接近目标，便于追击与换位。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost}",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{physical_damage}",
             "cost_duration": 1700,
             "cost_total_niantou": 140,
             "metadata": {
@@ -26,7 +27,8 @@
                 "dash_strength": "1.6",
                 "hit_radius": "1.0",
                 "niantou_cost": "18.0",
-                "zhenyuan_base_cost": "220.0",
+                "zhenyuan_base_cost": "260.0",
+                "physical_damage": "8.0",
                 "magic_damage": "0.0",
                 "slow_duration_ticks": "0",
                 "slow_amplifier": "0"
@@ -34,4 +36,3 @@
         }
     ]
 }
-

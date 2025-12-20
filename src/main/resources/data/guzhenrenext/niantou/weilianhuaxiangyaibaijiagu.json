@@ -5,11 +5,12 @@
             "usageID": "guzhenren:weilianhuaxiangyaibaijiagu_passive_ivory_plate",
             "usageTitle": "被动·象牙白甲",
             "usageDesc": "象牙白甲蛊凝成白甲护体，提升护甲韧性，抵御重击。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 护甲韧性：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 护甲韧性：{attribute_amount}",
             "cost_duration": 1800,
             "cost_total_niantou": 160,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "5.5",
+                "zhenyuan_base_cost_per_second": "6.6",
+                "jingli_cost_per_second": "0.85",
                 "attribute_amount": "4.0"
             }
         },
@@ -23,7 +24,7 @@
             "metadata": {
                 "cooldown_ticks": "520",
                 "niantou_cost": "36.0",
-                "zhenyuan_base_cost": "360.0",
+                "zhenyuan_base_cost": "540.0",
                 "effect_duration_ticks": "200",
                 "effect_amplifier": "1",
                 "absorption_duration_ticks": "200",
@@ -34,4 +35,3 @@
         }
     ]
 }
-

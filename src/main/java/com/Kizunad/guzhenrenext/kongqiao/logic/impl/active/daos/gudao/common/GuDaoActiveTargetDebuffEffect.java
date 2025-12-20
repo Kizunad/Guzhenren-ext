@@ -1,10 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenEffectScalingHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -15,19 +15,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * 骨道通用主动：视线锁定目标并施加 debuff，可附带法术伤害。
+ * 骨道通用主动：视线锁定目标并施加 debuff，可附带伤害。
  */
 public class GuDaoActiveTargetDebuffEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_RANGE = "range";
-    private static final String META_NIANTOU_COST = "niantou_cost";
-    private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
+    private static final String META_EXTRA_PHYSICAL_DAMAGE = "extra_physical_damage";
     private static final String META_EXTRA_MAGIC_DAMAGE = "extra_magic_damage";
 
     private static final int DEFAULT_COOLDOWN_TICKS = 200;
@@ -95,34 +96,15 @@ public class GuDaoActiveTargetDebuffEffect implements IGuEffect {
             return false;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(Component.literal("念头不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
+        final double multiplier = DaoHenCalculator.calculateMultiplier(
             user,
-            zhenyuanBaseCost
+            target,
+            DaoHenHelper.DaoType.GU_DAO
         );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
-            return false;
-        }
-
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
-        }
 
         if (effects != null) {
             for (EffectSpec spec : effects) {
@@ -137,6 +119,8 @@ public class GuDaoActiveTargetDebuffEffect implements IGuEffect {
                         spec.defaultDurationTicks()
                     )
                 );
+                final int scaledDuration = DaoHenEffectScalingHelper
+                    .scaleDurationTicks(duration, multiplier);
                 final int amplifier = Math.max(
                     0,
                     UsageMetadataHelper.getInt(
@@ -145,11 +129,11 @@ public class GuDaoActiveTargetDebuffEffect implements IGuEffect {
                         spec.defaultAmplifier()
                     )
                 );
-                if (duration > 0) {
+                if (scaledDuration > 0) {
                     target.addEffect(
                         new MobEffectInstance(
                             spec.effect(),
-                            duration,
+                            scaledDuration,
                             amplifier,
                             true,
                             true
@@ -159,16 +143,25 @@ public class GuDaoActiveTargetDebuffEffect implements IGuEffect {
             }
         }
 
+        final double extraPhysicalDamage = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                META_EXTRA_PHYSICAL_DAMAGE,
+                0.0
+            )
+        );
         final double extraMagicDamage = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_EXTRA_MAGIC_DAMAGE, 0.0)
         );
-        if (extraMagicDamage > 0.0) {
-            final double multiplier = DaoHenCalculator.calculateMultiplier(
-                user,
-                target,
-                DaoHenHelper.DaoType.GU_DAO
+        if (extraPhysicalDamage > 0.0) {
+            final DamageSource source = buildPhysicalDamageSource(user);
+            target.hurt(
+                source,
+                (float) (extraPhysicalDamage * multiplier)
             );
+        } else if (extraMagicDamage > 0.0) {
             target.hurt(
                 user.damageSources().magic(),
                 (float) (extraMagicDamage * multiplier)
@@ -237,5 +230,12 @@ public class GuDaoActiveTargetDebuffEffect implements IGuEffect {
         t = UsageMetadataHelper.clamp(t, 0.0, 1.0);
         final Vec3 projection = start.add(ab.scale(t));
         return point.subtract(projection).lengthSqr();
+    }
+
+    private static DamageSource buildPhysicalDamageSource(final LivingEntity user) {
+        if (user instanceof Player player) {
+            return user.damageSources().playerAttack(player);
+        }
+        return user.damageSources().mobAttack(user);
     }
 }

@@ -5,11 +5,12 @@
             "usageID": "guzhenren:yu_gu_gu_passive_jade_bone",
             "usageTitle": "被动·玉骨坚韧",
             "usageDesc": "玉骨蛊化骨如玉，骨质坚韧，提升抗打击能力。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 护甲韧性：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 精力：{jingli_cost_per_second}/s |\n 护甲韧性：{attribute_amount}",
             "cost_duration": 1200,
             "cost_total_niantou": 70,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "3.5",
+                "zhenyuan_base_cost_per_second": "3.8",
+                "jingli_cost_per_second": "0.40",
                 "attribute_amount": "2.0"
             }
         },
@@ -23,7 +24,7 @@
             "metadata": {
                 "cooldown_ticks": "320",
                 "niantou_cost": "16.0",
-                "zhenyuan_base_cost": "180.0",
+                "zhenyuan_base_cost": "200.0",
                 "effect_duration_ticks": "160",
                 "effect_amplifier": "0",
                 "regen_duration_ticks": "120",
@@ -32,4 +33,3 @@
         }
     ]
 }
-
