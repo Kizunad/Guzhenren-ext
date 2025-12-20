@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:weifenggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:weifenggu_passive_soft_fall",
+            "usageTitle": "被动·微风缓落",
+            "usageDesc": "微风蛊托身如羽，常驻给予缓降效果（真元不足则自动停效）。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 刷新时长：{effect_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 55,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.05",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:weifenggu_active_soft_fall",
+            "usageTitle": "主动·缓风护体",
+            "usageDesc": "主动引微风护体，短时间缓降并加速，适合脱战或空中调整身位。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 95,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "niantou_cost": "14.0",
+                "zhenyuan_base_cost": "200.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "speed_duration_ticks": "160",
+                "speed_amplifier": "1"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:xing_men_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xing_men_gu_passive_star_gaze",
+            "usageTitle": "被动·观星",
+            "usageDesc": "以星门之意观照星象，夜行不昧，视野更明。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 夜视：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xing_men_gu_active_star_gate",
+            "usageTitle": "主动·开星门",
+            "usageDesc": "引星辰之力开门挪移。若需夜晚与露天见星，可在参数中启用约束。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 需夜晚：{requires_night} |\n 需露天：{requires_open_sky} |\n 隐匿加速：{effect_duration_ticks}t",
+            "cost_duration": 3000,
+            "cost_total_niantou": 920,
+            "metadata": {
+                "distance": "36.0",
+                "cooldown_ticks": "1200",
+                "niantou_cost": "150.0",
+                "zhenyuan_base_cost": "1200.0",
+                "requires_night": "true",
+                "requires_open_sky": "true",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

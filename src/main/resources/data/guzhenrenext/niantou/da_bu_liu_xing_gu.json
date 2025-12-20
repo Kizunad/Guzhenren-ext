@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:da_bu_liu_xing_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:da_bu_liu_xing_gu_passive_meteor_stride",
+            "usageTitle": "被动·流星脚力",
+            "usageDesc": "步移似流星白尾相随，久而久之，脚力愈发迅疾。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount}",
+            "cost_duration": 2000,
+            "cost_total_niantou": 180,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10.0",
+                "attribute_amount": "0.18"
+            }
+        },
+        {
+            "usageID": "guzhenren:da_bu_liu_xing_gu_active_meteor_step",
+            "usageTitle": "主动·流星大步",
+            "usageDesc": "踏出一步，身形如流星掠空，瞬息挪移至前方。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 加速：{effect_duration_ticks}t",
+            "cost_duration": 2600,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "distance": "12.0",
+                "cooldown_ticks": "260",
+                "niantou_cost": "40.0",
+                "zhenyuan_base_cost": "360.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

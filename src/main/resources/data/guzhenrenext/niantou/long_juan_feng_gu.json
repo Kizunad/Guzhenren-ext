@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:long_juan_feng_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:long_juan_feng_gu_passive_wind_shelter",
+            "usageTitle": "被动·风幕护身",
+            "usageDesc": "龙卷风蛊以风幕护体，受伤时有概率触发风障减伤并推开攻击者。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 减伤倍率：{damage_multiplier} |\n 风压：{push_strength}",
+            "cost_duration": 950,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "proc_chance": "0.20",
+                "cooldown_ticks": "120",
+                "niantou_cost": "1.5",
+                "damage_multiplier": "0.85",
+                "push_strength": "0.35",
+                "speed_duration_ticks": "60",
+                "speed_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:long_juan_feng_gu_active_tornado_field",
+            "usageTitle": "主动·龙卷风场",
+            "usageDesc": "以自身为眼卷起风场，对周围敌人造成风道法术伤害并迟滞，附带推斥。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1250,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "radius": "4.5",
+                "push_strength": "0.45",
+                "niantou_cost": "16.0",
+                "zhenyuan_base_cost": "190.0",
+                "magic_damage": "4.5",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

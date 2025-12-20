@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jiuxinggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiuxinggu_passive_rescue_aura",
+            "usageTitle": "被动·救星余辉",
+            "usageDesc": "星辉常伴，稳态滋养自身，缓缓修复伤势并滋生念头。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 回复生命：{heal_amount}/s |\n 回复念头：{niantou_gain}/s |\n 回复真元：{zhenyuan_gain}/s",
+            "cost_duration": 2000,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10.0",
+                "heal_amount": "0.6",
+                "niantou_gain": "0.5",
+                "zhenyuan_gain": "0.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiuxinggu_active_rescue_star",
+            "usageTitle": "主动·救星",
+            "usageDesc": "星光垂落，优先照拂最危急的盟友：其伤势越重，救治越强。",
+            "usageInfo": "范围：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 基础治疗：{heal_base} |\n 缺失生命倍率：{heal_missing_multiplier} |\n 净化负面：{cleanse_negative}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "radius": "12.0",
+                "cooldown_ticks": "600",
+                "niantou_cost": "70.0",
+                "zhenyuan_base_cost": "620.0",
+                "heal_base": "2.0",
+                "heal_missing_multiplier": "0.35",
+                "cleanse_negative": "true"
+            }
+        }
+    ]
+}
+

@@ -68,6 +68,16 @@ public final class GuModEffects {
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.tierFive.TierFiveGuDaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierOne.TierOneFengDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierTwo.TierTwoFengDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierThree.TierThreeFengDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierFour.TierFourFengDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierFive.TierFiveFengDaoRegistry
+            .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierOne.TierOneYuDaoRegistry
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierTwo.TierTwoYuDaoRegistry
@@ -77,6 +87,16 @@ public final class GuModEffects {
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierFour.TierFourYuDaoRegistry
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierFive.TierFiveYuDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierOne.TierOneXingDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierTwo.TierTwoXingDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierThree.TierThreeXingDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierFour.TierFourXingDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierFive.TierFiveXingDaoRegistry
             .registerAll();
 
         registered = true;

@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:bifenglungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bifenglungu_passive_wind_barrier",
+            "usageTitle": "被动·避风障",
+            "usageDesc": "避风轮蛊凝风成障，受伤时有概率减伤并推开攻击者，同时自身短暂提速。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 减伤倍率：{damage_multiplier} |\n 风压：{push_strength}",
+            "cost_duration": 1050,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.22",
+                "cooldown_ticks": "110",
+                "niantou_cost": "2.0",
+                "damage_multiplier": "0.82",
+                "push_strength": "0.40",
+                "speed_duration_ticks": "60",
+                "speed_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:bifenglungu_active_wind_barrier",
+            "usageTitle": "主动·风障护体",
+            "usageDesc": "主动凝成风障，短时间内获得抗性提升并提速。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1350,
+            "cost_total_niantou": 115,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "niantou_cost": "18.0",
+                "zhenyuan_base_cost": "240.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "1"
+            }
+        }
+    ]
+}
+

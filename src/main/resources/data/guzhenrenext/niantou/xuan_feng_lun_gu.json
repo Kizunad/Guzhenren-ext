@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:xuan_feng_lun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xuan_feng_lun_gu_passive_swirl_cut",
+            "usageTitle": "被动·旋刃余风",
+            "usageDesc": "旋风轮蛊以风刃萦绕，攻击时有概率让目标迟滞，并附带少量风道法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 850,
+            "cost_total_niantou": 45,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "1.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "1.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:xuan_feng_lun_gu_active_swirl_blast",
+            "usageTitle": "主动·旋风震圈",
+            "usageDesc": "爆发旋风之力，以自身为中心席卷四周，造成风道法术伤害并推斥敌人。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1050,
+            "cost_total_niantou": 70,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "radius": "4.0",
+                "push_strength": "0.40",
+                "niantou_cost": "12.0",
+                "zhenyuan_base_cost": "140.0",
+                "magic_damage": "3.5",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

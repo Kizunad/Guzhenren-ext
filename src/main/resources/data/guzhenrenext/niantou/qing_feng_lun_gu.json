@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:qing_feng_lun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qing_feng_lun_gu_passive_gentle_breeze",
+            "usageTitle": "被动·清风随身",
+            "usageDesc": "清风轮蛊化风入体，身法更轻，常驻提升移动速度（真元不足则自动停效）。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 速度加成：{attribute_amount}",
+            "cost_duration": 750,
+            "cost_total_niantou": 35,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.05",
+                "attribute_amount": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:qing_feng_lun_gu_active_wind_step",
+            "usageTitle": "主动·清风踏步",
+            "usageDesc": "借清风之势短距挪移，距离受风道道痕增幅，落点自动寻安全位置。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 基础距离：{distance} |\n 上限距离：{max_distance} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 950,
+            "cost_total_niantou": 55,
+            "metadata": {
+                "cooldown_ticks": "180",
+                "distance": "5.5",
+                "max_distance": "10.0",
+                "niantou_cost": "6.0",
+                "zhenyuan_base_cost": "80.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

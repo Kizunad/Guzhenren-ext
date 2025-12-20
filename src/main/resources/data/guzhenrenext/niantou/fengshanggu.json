@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:fengshanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:fengshanggu_passive_wind_wound",
+            "usageTitle": "被动·风伤侵体",
+            "usageDesc": "风伤蛊以风刃割裂，攻击时有概率令敌人迟滞，并附带风道法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 1300,
+            "cost_total_niantou": 125,
+            "metadata": {
+                "proc_chance": "0.20",
+                "niantou_cost": "3.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "3.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:fengshanggu_active_wind_wound",
+            "usageTitle": "主动·风伤点杀",
+            "usageDesc": "锁定目标以风伤加深，令其迟滞并虚弱，同时造成风道法术伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1750,
+            "cost_total_niantou": 175,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "range": "15.0",
+                "niantou_cost": "26.0",
+                "zhenyuan_base_cost": "320.0",
+                "extra_magic_damage": "8.0",
+                "slow_duration_ticks": "100",
+                "slow_amplifier": "0",
+                "weak_duration_ticks": "100",
+                "weak_amplifier": "0"
+            }
+        }
+    ]
+}
+

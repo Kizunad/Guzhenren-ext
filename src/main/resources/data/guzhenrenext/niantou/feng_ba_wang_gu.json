@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:feng_ba_wang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:feng_ba_wang_gu_passive_wind_emperor",
+            "usageTitle": "被动·风皇之障",
+            "usageDesc": "风霸王蛊统御风势，受伤时有概率触发强风障，显著减伤并推开攻击者。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 减伤倍率：{damage_multiplier} |\n 风压：{push_strength}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "proc_chance": "0.25",
+                "cooldown_ticks": "100",
+                "niantou_cost": "4.0",
+                "damage_multiplier": "0.75",
+                "push_strength": "0.60",
+                "speed_duration_ticks": "80",
+                "speed_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:feng_ba_wang_gu_active_wind_emperor",
+            "usageTitle": "主动·风皇领域",
+            "usageDesc": "爆发风皇之势，领域内敌人被风压推斥并受风道法术伤害，部分目标会被抬升。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 300,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "radius": "7.0",
+                "push_strength": "0.75",
+                "niantou_cost": "40.0",
+                "zhenyuan_base_cost": "480.0",
+                "magic_damage": "10.0",
+                "levitation_duration_ticks": "60",
+                "levitation_amplifier": "0",
+                "slow_duration_ticks": "140",
+                "slow_amplifier": "1"
+            }
+        }
+    ]
+}
+

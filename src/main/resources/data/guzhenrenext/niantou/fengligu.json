@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:fengligu",
+    "usages": [
+        {
+            "usageID": "guzhenren:fengligu_passive_wind_force",
+            "usageTitle": "被动·风力加持",
+            "usageDesc": "风力蛊借风增力，常驻提升攻击力（真元不足则自动停效）。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
+            "cost_duration": 950,
+            "cost_total_niantou": 65,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.10",
+                "attribute_amount": "0.75"
+            }
+        },
+        {
+            "usageID": "guzhenren:fengligu_active_gale_charge",
+            "usageTitle": "主动·疾风冲撞",
+            "usageDesc": "借风势突进冲撞，命中前方敌人造成风道法术伤害并附带迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 伤害：{magic_damage}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 95,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "range": "8.5",
+                "dash_strength": "1.25",
+                "hit_radius": "1.1",
+                "niantou_cost": "14.0",
+                "zhenyuan_base_cost": "180.0",
+                "magic_damage": "5.0",
+                "slow_duration_ticks": "60",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}
+

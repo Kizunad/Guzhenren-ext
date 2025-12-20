@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:dalongjuanfenggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dalongjuanfenggu_passive_wind_lift",
+            "usageTitle": "被动·风举",
+            "usageDesc": "大龙卷风蛊借风托举，攻击时有概率令敌人失衡腾空，并附带风道伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 1250,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "3.0",
+                "effect_duration_ticks": "35",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "3.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:dalongjuanfenggu_active_dragon_tornado",
+            "usageTitle": "主动·大龙卷",
+            "usageDesc": "卷起龙卷之势，范围内敌人被风压推斥并受风道法术伤害，部分目标会被短暂抬升。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1700,
+            "cost_total_niantou": 165,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "radius": "6.0",
+                "push_strength": "0.65",
+                "niantou_cost": "28.0",
+                "zhenyuan_base_cost": "320.0",
+                "magic_damage": "7.0",
+                "levitation_duration_ticks": "45",
+                "levitation_amplifier": "0",
+                "slow_duration_ticks": "100",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}
+

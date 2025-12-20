@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:xing_jian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xing_jian_gu_passive_star_draw",
+            "usageTitle": "被动·引星为箭",
+            "usageDesc": "引星成矢，势如连珠，出手更快。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻速加成：{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.0",
+                "attribute_amount": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:xing_jian_gu_active_star_volley",
+            "usageTitle": "主动·星矢连发",
+            "usageDesc": "锁定目标，星矢如雨倾泻，令其显形并迟滞。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 300,
+            "metadata": {
+                "range": "16.0",
+                "cooldown_ticks": "280",
+                "niantou_cost": "30.0",
+                "zhenyuan_base_cost": "260.0",
+                "extra_magic_damage": "3.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

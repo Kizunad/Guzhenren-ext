@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:kuangfenggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:kuangfenggu_passive_wild_gale",
+            "usageTitle": "被动·狂风催刃",
+            "usageDesc": "狂风蛊鼓荡气流，常驻提升攻击速度（真元不足则自动停效）。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 攻速加成：{attribute_amount}",
+            "cost_duration": 1000,
+            "cost_total_niantou": 70,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.12",
+                "attribute_amount": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:kuangfenggu_active_wild_gale",
+            "usageTitle": "主动·狂风爆发",
+            "usageDesc": "引狂风加身，短时间内大幅提升移动速度与挖掘速度（战斗中也更易抢位）。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
+            "cost_duration": 1300,
+            "cost_total_niantou": 105,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "niantou_cost": "18.0",
+                "zhenyuan_base_cost": "220.0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "1",
+                "haste_duration_ticks": "120",
+                "haste_amplifier": "0"
+            }
+        }
+    ]
+}
+

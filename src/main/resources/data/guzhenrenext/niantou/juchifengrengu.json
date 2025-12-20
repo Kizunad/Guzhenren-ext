@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:juchifengrengu",
+    "usages": [
+        {
+            "usageID": "guzhenren:juchifengrengu_passive_serrated_wind",
+            "usageTitle": "被动·巨齿风刃",
+            "usageDesc": "巨齿风刃蛊锋芒更盛，攻击时有概率削弱目标，并附带风道法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 1450,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "proc_chance": "0.22",
+                "niantou_cost": "3.5",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:juchifengrengu_active_serrated_wind",
+            "usageTitle": "主动·巨齿斩杀",
+            "usageDesc": "锁定目标斩出巨齿风刃，强力削弱并迟滞对方，造成较高风道法术伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1900,
+            "cost_total_niantou": 210,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "range": "16.0",
+                "niantou_cost": "30.0",
+                "zhenyuan_base_cost": "360.0",
+                "extra_magic_damage": "9.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0",
+                "slow_duration_ticks": "140",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}
+

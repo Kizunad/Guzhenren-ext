@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:liang_xing_hui_ying_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:liang_xing_hui_ying_gu_passive_twin_star_power",
+            "usageTitle": "被动·辉映增幅",
+            "usageDesc": "两星互照，星势相生，令杀伐之力更盛。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0",
+                "attribute_amount": "0.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:liang_xing_hui_ying_gu_active_twin_swap",
+            "usageTitle": "主动·辉映换位",
+            "usageDesc": "借辉映之势，锁定敌身换位扰阵，使其虚弱并显形。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "range": "12.0",
+                "cooldown_ticks": "320",
+                "niantou_cost": "34.0",
+                "zhenyuan_base_cost": "280.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

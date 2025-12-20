@@ -1,0 +1,33 @@
+{
+    "itemID": "guzhenren:xing_ban_dian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xing_ban_dian_gu_passive_star_boost",
+            "usageTitle": "被动·半点增幅",
+            "usageDesc": "一点星芒亦可燎原，常驻增幅攻势。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
+            "cost_duration": 1600,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "attribute_amount": "0.06"
+            }
+        },
+        {
+            "usageID": "guzhenren:xing_ban_dian_gu_active_star_spark",
+            "usageTitle": "主动·星芒爆发",
+            "usageDesc": "点燃星芒，短时间提升攻势与身法。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 2200,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "niantou_cost": "28.0",
+                "zhenyuan_base_cost": "200.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

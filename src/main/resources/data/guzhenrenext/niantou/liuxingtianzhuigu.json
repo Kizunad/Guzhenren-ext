@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:liuxingtianzhuigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:liuxingtianzhuigu_passive_meteor_fragment",
+            "usageTitle": "被动·陨屑坠落",
+            "usageDesc": "每次出手，都可能引来陨屑砸落，迟滞敌势并附带法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 迟缓：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "cost_duration": 2000,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "proc_chance": "0.20",
+                "niantou_cost": "1.8",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:liuxingtianzhuigu_active_meteor_fall",
+            "usageTitle": "主动·天外陨落",
+            "usageDesc": "从天外召引流星坠落，轰击周遭敌人，造成重创与强力击退。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 击退：{knockback_strength}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "radius": "8.0",
+                "cooldown_ticks": "520",
+                "niantou_cost": "80.0",
+                "zhenyuan_base_cost": "680.0",
+                "extra_magic_damage": "6.5",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.8"
+            }
+        }
+    ]
+}
+

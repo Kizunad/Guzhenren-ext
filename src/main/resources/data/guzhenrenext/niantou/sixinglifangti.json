@@ -1,0 +1,33 @@
+{
+    "itemID": "guzhenren:sixinglifangti",
+    "usages": [
+        {
+            "usageID": "guzhenren:sixinglifangti_passive_four_star_frame",
+            "usageTitle": "被动·立方星阵",
+            "usageDesc": "四星立方，阵势稳固，令攻势更加沉稳有力。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 360,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "18.0",
+                "attribute_amount": "0.22"
+            }
+        },
+        {
+            "usageID": "guzhenren:sixinglifangti_active_four_star_array",
+            "usageTitle": "主动·四星护阵",
+            "usageDesc": "催动立方星阵护体，短暂强化攻守，稳压敌阵。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 2800,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "cooldown_ticks": "700",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "950.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

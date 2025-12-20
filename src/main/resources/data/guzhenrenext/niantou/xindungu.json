@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:xindungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xindungu_passive_star_shield",
+            "usageTitle": "被动·群星护盾",
+            "usageDesc": "群星为盾，受击时有概率化解来势，尤其克制飞矢暗器。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 减伤倍率：{damage_multiplier} |\n 仅投射物：{projectile_only}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 180,
+            "metadata": {
+                "proc_chance": "0.22",
+                "cooldown_ticks": "120",
+                "niantou_cost": "1.2",
+                "damage_multiplier": "0.65",
+                "projectile_only": "true",
+                "blink_distance": "0.0",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xindungu_active_constellation_guard",
+            "usageTitle": "主动·星阵护体",
+            "usageDesc": "凝聚星辰护体，短时间内获得护盾与抗性，稳住阵脚。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 320,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "niantou_cost": "40.0",
+                "zhenyuan_base_cost": "380.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

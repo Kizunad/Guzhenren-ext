@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:nifengzhangu_4",
+    "usages": [
+        {
+            "usageID": "guzhenren:nifengzhangu_4_passive_counter_wind",
+            "usageTitle": "被动·逆风守势",
+            "usageDesc": "逆风斩蛊以逆势护身，受伤时有概率触发风障减伤并推开攻击者。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 减伤倍率：{damage_multiplier} |\n 风压：{push_strength}",
+            "cost_duration": 1350,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "proc_chance": "0.22",
+                "cooldown_ticks": "110",
+                "niantou_cost": "2.5",
+                "damage_multiplier": "0.80",
+                "push_strength": "0.45",
+                "speed_duration_ticks": "70",
+                "speed_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:nifengzhangu_4_active_counter_wind",
+            "usageTitle": "主动·逆风斩",
+            "usageDesc": "锁定目标逆风斩击，削弱其行动与出手速度，并造成风道法术伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 190,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "range": "15.0",
+                "niantou_cost": "26.0",
+                "zhenyuan_base_cost": "320.0",
+                "extra_magic_damage": "7.0",
+                "fatigue_duration_ticks": "120",
+                "fatigue_amplifier": "0",
+                "weak_duration_ticks": "120",
+                "weak_amplifier": "0"
+            }
+        }
+    ]
+}
+
