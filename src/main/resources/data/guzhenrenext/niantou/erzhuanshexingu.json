@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:erzhuanshexingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:erzhuanshexingu_passive_mind_counter",
+            "usageTitle": "被动·摄心反制",
+            "usageDesc": "二转摄心蛊更为阴沉，受击之时反摄来者心神，使其虚弱，并略减伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier}",
+            "cost_duration": 1000,
+            "cost_total_niantou": 75,
+            "metadata": {
+                "proc_chance": "0.25",
+                "niantou_cost": "1.00",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "damage_multiplier": "0.90"
+            }
+        },
+        {
+            "usageID": "guzhenren:erzhuanshexingu_active_mind_bind",
+            "usageTitle": "主动·摄心缚",
+            "usageDesc": "摄心之力化作枷锁，锁定目标并大幅迟缓，辅以虚弱。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1600,
+            "cost_total_niantou": 115,
+            "metadata": {
+                "range": "12.0",
+                "cooldown_ticks": "360",
+                "niantou_cost": "16.0",
+                "zhenyuan_base_cost": "160.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1",
+                "weakness_duration_ticks": "120",
+                "weakness_amplifier": "0"
+            }
+        }
+    ]
+}
+

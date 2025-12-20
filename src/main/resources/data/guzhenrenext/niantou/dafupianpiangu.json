@@ -1,0 +1,33 @@
+{
+    "itemID": "guzhenren:dafupianpiangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dafupianpiangu_passive_fat_shield",
+            "usageTitle": "被动·厚脂护体",
+            "usageDesc": "大腹便便蛊脂厚如甲。受击时可消耗饱食抵消部分伤害，饱食不足则难以生效。",
+            "usageInfo": "减伤：{reduction_ratio}% | 代价：{hunger_cost}(饱食)/次 | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 1200,
+            "cost_total_niantou": 95,
+            "metadata": {
+                "reduction_ratio": "0.25",
+                "hunger_cost": "1",
+                "cooldown_ticks": "20"
+            }
+        },
+        {
+            "usageID": "guzhenren:dafupianpiangu_active_full_belly_shield",
+            "usageTitle": "主动·暴食成盾",
+            "usageDesc": "一口气吞下饱食，化作护体脂盾。立刻消耗所有饱食度并获得大量吸收护盾，短时间内更抗打。",
+            "usageInfo": "吸收：{absorption_per_hunger}/饱食 | 上限：{max_absorption} | 抗性：{resistance_seconds}s | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 1500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "absorption_per_hunger": "1.0",
+                "max_absorption": "18.0",
+                "resistance_seconds": "6",
+                "cooldown_ticks": "500"
+            }
+        }
+    ]
+}
+

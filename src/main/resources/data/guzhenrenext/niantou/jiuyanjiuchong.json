@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:jiuyanjiuchong",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiuyanjiuchong_passive_nine_eyes_refine",
+            "usageTitle": "被动·九眼观元",
+            "usageDesc": "九眼观微，真元自明。持续以饱和化真元，并微量滋养念头。饱食不足则观元不成。",
+            "usageInfo": "条件：饱食度≥{min_hunger} | 消耗：{sat_cost}/s(饱和) | 真元+{zhenyuan_gain}/s | 念头+{niantou_regen}/s",
+            "cost_duration": 1500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "min_hunger": "8",
+                "sat_cost": "0.3",
+                "zhenyuan_gain": "10.0",
+                "niantou_regen": "0.08"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiuyanjiuchong_active_nine_eyes_insight",
+            "usageTitle": "主动·九眼洞察",
+            "usageDesc": "九眼齐开，洞察四方。短时间内标记周围敌人并令其显形，同时令自身出手更狠更准。",
+            "usageInfo": "半径：{radius}格 | 持续：{duration_ticks}tick | 额外伤害：+{bonus_damage} | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 1800,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "radius": "10.0",
+                "duration_ticks": "240",
+                "bonus_damage": "3.0",
+                "activate_zhenyuan_base_cost": "720.0",
+                "cooldown_ticks": "600"
+            }
+        }
+    ]
+}
+

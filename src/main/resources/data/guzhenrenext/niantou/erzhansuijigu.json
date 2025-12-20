@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:erzhansuijigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:erzhansuijigu_passive_adapt_guard",
+            "usageTitle": "被动·随意应变",
+            "usageDesc": "随意蛊善于应变，受击之时有概率迟滞来者，并略减所受伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 95,
+            "metadata": {
+                "proc_chance": "0.30",
+                "niantou_cost": "1.20",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "damage_multiplier": "0.88"
+            }
+        },
+        {
+            "usageID": "guzhenren:erzhansuijigu_active_adapt_shift",
+            "usageTitle": "主动·随意变招",
+            "usageDesc": "随意一变，化险为夷。短时间内提升速度与抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "cooldown_ticks": "480",
+                "niantou_cost": "26.0",
+                "zhenyuan_base_cost": "240.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1",
+                "resistance_duration_ticks": "160",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+

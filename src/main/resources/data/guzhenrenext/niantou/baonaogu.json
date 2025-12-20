@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:baonaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:baonaogu_passive_brain_shock",
+            "usageTitle": "被动·震脑(爆脑)",
+            "usageDesc": "爆脑蛊阴狠无比，攻击时有概率震荡敌脑，使其迟缓，并附带可观法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 1900,
+            "cost_total_niantou": 170,
+            "metadata": {
+                "proc_chance": "0.25",
+                "niantou_cost": "2.50",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "1",
+                "extra_magic_damage": "5.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:baonaogu_active_brain_burst",
+            "usageTitle": "主动·爆脑",
+            "usageDesc": "凝念一点，爆其心智。锁定目标造成强力法术伤害并施加虚弱。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害：{extra_magic_damage}",
+            "cost_duration": 3200,
+            "cost_total_niantou": 300,
+            "metadata": {
+                "range": "20.0",
+                "cooldown_ticks": "800",
+                "niantou_cost": "80.0",
+                "zhenyuan_base_cost": "800.0",
+                "extra_magic_damage": "20.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

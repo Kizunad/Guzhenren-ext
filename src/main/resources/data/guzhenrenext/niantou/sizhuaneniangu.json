@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:sizhuaneniangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sizhuaneniangu_passive_evil_wither",
+            "usageTitle": "被动·恶念凋萎(四转)",
+            "usageDesc": "四转恶念蛊阴毒入骨，攻击时更易凋萎敌身，并附带额外法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 凋零：{effect_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "proc_chance": "0.32",
+                "niantou_cost": "2.20",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "4.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:sizhuaneniangu_active_evil_curse",
+            "usageTitle": "主动·恶念咒(四转)",
+            "usageDesc": "恶念化咒，咒敌衰败。锁定目标施加凋零与迟缓，并造成强力法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害：{extra_magic_damage}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "range": "18.0",
+                "cooldown_ticks": "600",
+                "niantou_cost": "58.0",
+                "zhenyuan_base_cost": "560.0",
+                "extra_magic_damage": "12.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "slow_duration_ticks": "160",
+                "slow_amplifier": "1"
+            }
+        }
+    ]
+}
+

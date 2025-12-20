@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:kong_nian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:kong_nian_gu_passive_empty_thought",
+            "usageTitle": "被动·空念生机",
+            "usageDesc": "空念蛊寄宿空窍，念头不足时可由“空念”转化出少量念头，但会消耗真元并折损气运。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 阈值：{niantou_threshold} |\n 念头：+{niantou_gain_per_second}/s |\n 气运消耗：{qiyun_cost_per_second}/s",
+            "cost_duration": 2400,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "niantou_threshold": "80.0",
+                "niantou_gain_per_second": "0.80",
+                "qiyun_cost_per_second": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:kong_nian_gu_active_sever_thought",
+            "usageTitle": "主动·断思",
+            "usageDesc": "清空念头，断绝杂思。清理常见负面状态，并获得短暂抗性与隐匿。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 持续：{duration_ticks}t |\n 真元消耗：{zhenyuan_base_cost}",
+            "cost_duration": 3200,
+            "cost_total_niantou": 320,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "1000.0",
+                "duration_ticks": "200",
+                "amplifier": "1"
+            }
+        }
+    ]
+}
+

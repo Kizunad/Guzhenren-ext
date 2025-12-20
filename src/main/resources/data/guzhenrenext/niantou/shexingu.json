@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:shexingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shexingu_passive_mind_slow",
+            "usageTitle": "被动·摄心迟滞",
+            "usageDesc": "摄心蛊寄宿空窍，出手之际扰人心神，使敌步伐迟缓。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "0.60",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "0.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:shexingu_active_mind_lock",
+            "usageTitle": "主动·摄心锁",
+            "usageDesc": "以目为引，摄敌心神。锁定视线前方目标，令其虚弱并暴露。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 900,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "range": "12.0",
+                "cooldown_ticks": "240",
+                "niantou_cost": "8.0",
+                "zhenyuan_base_cost": "80.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "glowing_duration_ticks": "100",
+                "glowing_amplifier": "0",
+                "extra_magic_damage": "0.0"
+            }
+        }
+    ]
+}
+

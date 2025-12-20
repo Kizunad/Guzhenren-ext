@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:sanzhuanshexinggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sanzhuanshexinggu_passive_mind_fray",
+            "usageTitle": "被动·摄心裂意",
+            "usageDesc": "三转摄心蛊手段更狠，攻击时更易撕裂敌人意志，使其虚弱。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 虚弱：{effect_duration_ticks}t",
+            "cost_duration": 1300,
+            "cost_total_niantou": 105,
+            "metadata": {
+                "proc_chance": "0.28",
+                "niantou_cost": "1.40",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "1.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:sanzhuanshexinggu_active_mind_shatter",
+            "usageTitle": "主动·摄心碎念",
+            "usageDesc": "锁定目标，碎其心念。施加强力迟缓与虚弱，并造成法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "range": "16.0",
+                "cooldown_ticks": "500",
+                "niantou_cost": "30.0",
+                "zhenyuan_base_cost": "260.0",
+                "extra_magic_damage": "6.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "slow_duration_ticks": "160",
+                "slow_amplifier": "1"
+            }
+        }
+    ]
+}
+

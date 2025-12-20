@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:yangshenggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yangshenggu_passive_health_nourish",
+            "usageTitle": "被动·养生滋补",
+            "usageDesc": "养生蛊如茶盏漂浮，润养血肉。持续获得生命恢复，并小幅提升最大生命，但需要稳定真元供给。",
+            "usageInfo": "生命上限：+{max_health_bonus} | 生命恢复：{regen_amplifier}级 | 真元：{zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 1200,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "max_health_bonus": "6.0",
+                "regen_amplifier": "0",
+                "zhenyuan_base_cost_per_second": "180.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yangshenggu_active_longevity_brew",
+            "usageTitle": "主动·延寿清茶",
+            "usageDesc": "一口清茶入腹，邪祟浊气尽退。立刻回复生命并净化部分负面状态，短时间内强化养生效果。",
+            "usageInfo": "治疗：{heal_amount} | 净化：{cleanse_count}种负面 | 强化：{buff_seconds}s | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 1500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "heal_amount": "6.0",
+                "cleanse_count": "2",
+                "buff_seconds": "10",
+                "activate_zhenyuan_base_cost": "480.0",
+                "cooldown_ticks": "420"
+            }
+        }
+    ]
+}
+

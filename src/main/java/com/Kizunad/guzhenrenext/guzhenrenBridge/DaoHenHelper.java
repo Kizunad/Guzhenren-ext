@@ -15,6 +15,7 @@ public final class DaoHenHelper {
 
     public enum DaoType {
         HUN_DAO("hundao"), // 魂道
+        ZHI_DAO("zhidao"), // 智道
         JIN_DAO("jindao"), // 金道
         LI_DAO("lidao"), // 力道
         TU_DAO("tudao"), // 土道
@@ -45,6 +46,9 @@ public final class DaoHenHelper {
             switch (type) {
                 case HUN_DAO:
                     return vars.daohen_hundao;
+                case ZHI_DAO:
+                    // 注意：库中变量名为 dahen_zhidao（少了一个 o）
+                    return vars.dahen_zhidao;
                 case JIN_DAO:
                     return vars.daohen_jindao;
                 case LI_DAO:

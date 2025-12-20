@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:zhi_lu_gu_4",
+    "usages": [
+        {
+            "usageID": "guzhenren:zhi_lu_gu_4_passive_wisdom_reserve",
+            "usageTitle": "被动·智颅蓄念(四转)",
+            "usageDesc": "四转智颅蛊蓄念更盛，念头与智道念头增长更快，并更易汇聚气运。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 念头：{niantou_regen_per_second}/s |\n 智道念头：{zhida_niantou_regen_per_second}/s |\n 气运：{qiyun_regen_per_second}/s",
+            "cost_duration": 1600,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0",
+                "niantou_regen_per_second": "0.30",
+                "zhida_niantou_regen_per_second": "0.20",
+                "qiyun_regen_per_second": "0.15"
+            }
+        },
+        {
+            "usageID": "guzhenren:zhi_lu_gu_4_active_insight_cultivation",
+            "usageTitle": "主动·顿悟推演(四转)",
+            "usageDesc": "四转智颅蛊顿悟更深，一次推演可大幅推进修为进度。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 修为进度：+{cultivation_progress_gain}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "cooldown_ticks": "700",
+                "niantou_cost": "60.0",
+                "zhenyuan_base_cost": "480.0",
+                "cultivation_progress_gain": "60.0"
+            }
+        }
+    ]
+}
+

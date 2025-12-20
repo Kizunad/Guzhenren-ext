@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:suiyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:suiyigu_passive_random_blessing",
+            "usageTitle": "被动·随意赐福",
+            "usageDesc": "随意蛊性情不定，时而赐福，时而无常。维持真元时，随机获得短暂增益。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 持续：{buff_duration_ticks}t |\n 等级：{buff_amplifier}",
+            "cost_duration": 500,
+            "cost_total_niantou": 35,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "buff_duration_ticks": "40",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:suiyigu_active_random_shift",
+            "usageTitle": "主动·随意转机",
+            "usageDesc": "以念为引，求得一线转机。随机获得迅捷/坚韧/回春之一。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 持续：{buff_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 70,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "niantou_cost": "10.0",
+                "zhenyuan_base_cost": "60.0",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "1",
+                "heal_amount": "4.0"
+            }
+        }
+    ]
+}
+

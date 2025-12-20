@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:wo_yi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wo_yi_gu_passive_resolve",
+            "usageTitle": "被动·我意自持",
+            "usageDesc": "我意蛊寄宿空窍，心志自持。真元维持下，每秒清理一项常见负面状态。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 2200,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:wo_yi_gu_active_iron_will",
+            "usageTitle": "主动·我意如铁",
+            "usageDesc": "我意如铁，不惧万法。短时间获得强力抗性与回春。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost}",
+            "cost_duration": 3200,
+            "cost_total_niantou": 320,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "niantou_cost": "90.0",
+                "jingli_cost": "30.0",
+                "zhenyuan_base_cost": "900.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "1",
+                "regen_duration_ticks": "260",
+                "regen_amplifier": "1"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:zhi_lu_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:zhi_lu_gu_5_passive_wisdom_reserve",
+            "usageTitle": "被动·智颅蓄念(五转)",
+            "usageDesc": "五转智颅蛊蓄念如海，念头、智道念头与气运皆可大幅汇聚，但真元消耗亦大。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 念头：{niantou_regen_per_second}/s |\n 智道念头：{zhida_niantou_regen_per_second}/s |\n 气运：{qiyun_regen_per_second}/s |\n 生命回复：{health_regen_per_second}/s",
+            "cost_duration": 2000,
+            "cost_total_niantou": 180,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "niantou_regen_per_second": "0.50",
+                "zhida_niantou_regen_per_second": "0.35",
+                "qiyun_regen_per_second": "0.20",
+                "health_regen_per_second": "0.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:zhi_lu_gu_5_active_insight_cultivation",
+            "usageTitle": "主动·顿悟推演(五转)",
+            "usageDesc": "五转智颅蛊顿悟惊人，一次推演可飞速推进修为进度。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 修为进度：+{cultivation_progress_gain}",
+            "cost_duration": 2800,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "1200.0",
+                "cultivation_progress_gain": "150.0"
+            }
+        }
+    ]
+}
+

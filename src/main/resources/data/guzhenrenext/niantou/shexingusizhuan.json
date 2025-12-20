@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:shexingusizhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:shexingusizhuan_passive_mind_pressure",
+            "usageTitle": "被动·摄心压迫(四转)",
+            "usageDesc": "四转摄心蛊心压如山，攻击时更易压垮敌志，附带额外法术伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 持续：{effect_duration_ticks}t",
+            "cost_duration": 1700,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "proc_chance": "0.30",
+                "niantou_cost": "2.00",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "1",
+                "extra_magic_damage": "3.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:shexingusizhuan_active_mind_domain",
+            "usageTitle": "主动·摄心领域(四转)",
+            "usageDesc": "以身为域，摄敌心神。范围内敌人迟缓并虚弱，同时造成法术伤害。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害：{magic_damage}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "radius": "5.5",
+                "cooldown_ticks": "650",
+                "niantou_cost": "55.0",
+                "zhenyuan_base_cost": "520.0",
+                "magic_damage": "8.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1",
+                "weakness_duration_ticks": "120",
+                "weakness_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -42,7 +42,21 @@ public final class GuModEffects {
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.tierTwo.TierTwoZhiDaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.tierThree.TierThreeZhiDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.tierFour.TierFourZhiDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.tierFive.TierFiveZhiDaoRegistry
+            .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierThree.TierThreeBianHuaDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierOne.TierOneShiDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierTwo.TierTwoShiDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierThree.TierThreeShiDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierFour.TierFourShiDaoRegistry
             .registerAll();
 
         registered = true;

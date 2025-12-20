@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:e_nian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:e_nian_gu_passive_evil_wither",
+            "usageTitle": "被动·恶念凋萎",
+            "usageDesc": "恶念蛊寄宿空窍，出手之时引凋萎之力侵蚀敌体。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 凋零：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 95,
+            "metadata": {
+                "proc_chance": "0.25",
+                "niantou_cost": "1.80",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "2.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:e_nian_gu_active_evil_burst",
+            "usageTitle": "主动·恶念爆",
+            "usageDesc": "恶念一爆，四方皆惊。以自身为中心爆发一次法术冲击，并附带凋零。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害：{magic_damage}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "radius": "4.5",
+                "cooldown_ticks": "500",
+                "niantou_cost": "28.0",
+                "zhenyuan_base_cost": "240.0",
+                "magic_damage": "6.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

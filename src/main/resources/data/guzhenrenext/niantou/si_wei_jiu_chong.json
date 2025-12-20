@@ -1,0 +1,33 @@
+{
+    "itemID": "guzhenren:si_wei_jiu_chong",
+    "usages": [
+        {
+            "usageID": "guzhenren:si_wei_jiu_chong_passive_four_flavors_meditate",
+            "usageTitle": "被动·四味调息",
+            "usageDesc": "酸甜苦辣四味入腹，气机更顺。持续小幅恢复真元与念头，作为修行续航之底。",
+            "usageInfo": "每秒：真元+{zhenyuan_regen}/s | 念头+{niantou_regen}/s | 真元：{zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 720,
+            "cost_total_niantou": 50,
+            "metadata": {
+                "zhenyuan_regen": "4.0",
+                "niantou_regen": "0.05",
+                "zhenyuan_base_cost_per_second": "72.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:si_wei_jiu_chong_active_four_flavors_fury",
+            "usageTitle": "主动·四味催战",
+            "usageDesc": "四味齐上，血气翻涌。短时间内普攻附带额外伤害，并带有轻微的眩晕与迟缓。",
+            "usageInfo": "持续：{duration_ticks}tick | 额外伤害：+{bonus_damage} | 每击真元：{zhenyuan_base_cost_per_hit}(基础) | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 900,
+            "cost_total_niantou": 70,
+            "metadata": {
+                "duration_ticks": "240",
+                "bonus_damage": "2.0",
+                "zhenyuan_base_cost_per_hit": "120.0",
+                "cooldown_ticks": "320"
+            }
+        }
+    ]
+}
+

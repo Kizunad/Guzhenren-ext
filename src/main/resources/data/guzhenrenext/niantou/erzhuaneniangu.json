@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:erzhuaneniangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:erzhuaneniangu_passive_evil_wither",
+            "usageTitle": "被动·恶念侵蚀",
+            "usageDesc": "二转恶念蛊更为阴毒，攻击时有概率侵蚀敌人，令其衰败。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 凋零：{effect_duration_ticks}t",
+            "cost_duration": 1100,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.22",
+                "niantou_cost": "1.20",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "1.50"
+            }
+        },
+        {
+            "usageID": "guzhenren:erzhuaneniangu_active_evil_spike",
+            "usageTitle": "主动·恶念刺",
+            "usageDesc": "凝恶念为刺，贯穿敌心。锁定目标施加凋零与迟缓，并造成法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1600,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "range": "14.0",
+                "cooldown_ticks": "360",
+                "niantou_cost": "18.0",
+                "zhenyuan_base_cost": "180.0",
+                "extra_magic_damage": "4.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "slow_duration_ticks": "100",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}
+

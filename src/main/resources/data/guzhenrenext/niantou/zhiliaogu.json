@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:zhiliaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zhiliaogu_passive_wisdom_heal",
+            "usageTitle": "被动·智疗润身",
+            "usageDesc": "智疗蛊寄宿空窍，以慧理调和气血，缓慢滋养肉身。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 生命回复：{health_regen_per_second}/s",
+            "cost_duration": 900,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.5",
+                "health_regen_per_second": "0.40"
+            }
+        },
+        {
+            "usageID": "guzhenren:zhiliaogu_active_wisdom_mend",
+            "usageTitle": "主动·慧理回春",
+            "usageDesc": "以念为针，以慧为药。短时间内大幅加速恢复，并获得少量护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 1400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "cooldown_ticks": "400",
+                "niantou_cost": "20.0",
+                "zhenyuan_base_cost": "160.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1",
+                "absorption_duration_ticks": "120",
+                "absorption_amplifier": "0"
+            }
+        }
+    ]
+}
+

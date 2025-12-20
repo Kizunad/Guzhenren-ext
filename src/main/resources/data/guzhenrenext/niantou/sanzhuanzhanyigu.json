@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:sanzhuanzhanyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sanzhuanzhanyigu_passive_iron_will",
+            "usageTitle": "被动·铁壁战心",
+            "usageDesc": "三转战意蛊战心如铁，久战不退。真元维持下，获得额外护甲。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 护甲：+{attribute_amount}",
+            "cost_duration": 1400,
+            "cost_total_niantou": 110,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.8",
+                "attribute_amount": "3.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:sanzhuanzhanyigu_active_war_banner",
+            "usageTitle": "主动·战旗高扬",
+            "usageDesc": "战意化旗，高扬不坠。短时间内提升力量，并获得吸收护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 2000,
+            "cost_total_niantou": 170,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "niantou_cost": "32.0",
+                "zhenyuan_base_cost": "280.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "absorption_duration_ticks": "200",
+                "absorption_amplifier": "1"
+            }
+        }
+    ]
+}
+

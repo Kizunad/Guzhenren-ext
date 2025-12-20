@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jizhigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jizhigu_passive_clear_mind",
+            "usageTitle": "被动·澄心极智",
+            "usageDesc": "极智蛊寄宿空窍，心念澄明，念头与气运增长更快，但需真元维持。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 念头：{niantou_regen_per_second}/s |\n 气运：{qiyun_regen_per_second}/s",
+            "cost_duration": 1500,
+            "cost_total_niantou": 130,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "7.2",
+                "niantou_regen_per_second": "0.20",
+                "qiyun_regen_per_second": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:jizhigu_active_flaw_insight",
+            "usageTitle": "主动·洞悉破绽",
+            "usageDesc": "以极智洞悉敌之破绽，令其虚弱暴露，并造成法术伤害。",
+            "usageInfo": "范围：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害：{extra_magic_damage}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "range": "18.0",
+                "cooldown_ticks": "600",
+                "niantou_cost": "40.0",
+                "zhenyuan_base_cost": "320.0",
+                "extra_magic_damage": "10.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "1",
+                "glowing_duration_ticks": "200",
+                "glowing_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:zhanyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zhanyigu_passive_battle_fervor",
+            "usageTitle": "被动·战意炽盛",
+            "usageDesc": "战意蛊寄宿空窍，战心炽盛，出手更重。但需真元维持。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 攻击力：+{attribute_amount}",
+            "cost_duration": 700,
+            "cost_total_niantou": 45,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "attribute_amount": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:zhanyigu_active_war_cry",
+            "usageTitle": "主动·战意怒号",
+            "usageDesc": "战意一催，气血翻涌。短时间内提升力量与速度。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost}",
+            "cost_duration": 1000,
+            "cost_total_niantou": 75,
+            "metadata": {
+                "cooldown_ticks": "280",
+                "niantou_cost": "12.0",
+                "jingli_cost": "10.0",
+                "zhenyuan_base_cost": "100.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "0"
+            }
+        }
+    ]
+}
+

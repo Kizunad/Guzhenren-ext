@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:fan_dai_cao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:fan_dai_cao_gu_passive_rice_supply",
+            "usageTitle": "被动·米香续命",
+            "usageDesc": "饭袋草在空窍中缓慢生长，维持最低饱食。饥饿时会自动回补少量饱食与饱和，但需要真元灌注。",
+            "usageInfo": "触发：饱食度≤{trigger_hunger} | 每秒回复：+{hunger_gain}(饱食) +{saturation_gain}(饱和) | 真元：{zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 540,
+            "cost_total_niantou": 30,
+            "metadata": {
+                "trigger_hunger": "8",
+                "hunger_gain": "1",
+                "saturation_gain": "0.1",
+                "zhenyuan_base_cost_per_second": "36.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:fan_dai_cao_gu_active_rice_feast",
+            "usageTitle": "主动·饭袋急食",
+            "usageDesc": "催发饭袋草一口气长出香饭，迅速填饱肚腹。暴食之下行动迟缓，但可获得一层护体。",
+            "usageInfo": "回复：+{hunger_restore}(饱食) +{saturation_restore}(饱和) | 迟缓：{slowness_seconds}s | 护体：{absorption}点吸收 | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 720,
+            "cost_total_niantou": 55,
+            "metadata": {
+                "hunger_restore": "10",
+                "saturation_restore": "6.0",
+                "slowness_seconds": "6",
+                "absorption": "4.0",
+                "cooldown_ticks": "260"
+            }
+        }
+    ]
+}
+

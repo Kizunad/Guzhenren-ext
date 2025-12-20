@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:sizhuanzhanyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sizhuanzhanyigu_passive_battle_rage",
+            "usageTitle": "被动·战意狂潮(四转)",
+            "usageDesc": "四转战意蛊狂潮更盛，真元维持下，攻击更重。",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 攻击力：+{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.5",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:sizhuanzhanyigu_active_battle_breakthrough",
+            "usageTitle": "主动·战意破阵(四转)",
+            "usageDesc": "战意破阵，强势突进。短时间内提升力量与抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "650",
+                "niantou_cost": "60.0",
+                "zhenyuan_base_cost": "600.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "1",
+                "resistance_duration_ticks": "220",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+

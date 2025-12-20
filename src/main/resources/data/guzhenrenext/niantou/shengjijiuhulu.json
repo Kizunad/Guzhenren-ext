@@ -1,0 +1,33 @@
+{
+    "itemID": "guzhenren:shengjijiuhulu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shengjijiuhulu_passive_vitality_wine",
+            "usageTitle": "被动·生机酒润体",
+            "usageDesc": "生机酒葫芦缓慢酿出一缕生机酒意。持续小幅治疗并回补真元，但需要真元催生。",
+            "usageInfo": "每秒：治疗{heal_per_second} + 真元{zhenyuan_regen}/s | 真元：{zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 1200,
+            "cost_total_niantou": 85,
+            "metadata": {
+                "heal_per_second": "0.3",
+                "zhenyuan_regen": "3.0",
+                "zhenyuan_base_cost_per_second": "150.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shengjijiuhulu_active_vitality_surge",
+            "usageTitle": "主动·生机灌顶",
+            "usageDesc": "一口生机酒灌下，血肉复苏。立刻大幅治疗并获得生命恢复，适合在危急时刻稳住局面。",
+            "usageInfo": "治疗：{heal_amount} | 生命恢复：{regen_seconds}s | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 1500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "heal_amount": "10.0",
+                "regen_seconds": "10",
+                "activate_zhenyuan_base_cost": "540.0",
+                "cooldown_ticks": "520"
+            }
+        }
+    ]
+}
+

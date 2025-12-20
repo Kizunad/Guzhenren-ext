@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:yangjianhu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yangjianhu_passive_sword_wine_aura",
+            "usageTitle": "被动·剑酒养锋",
+            "usageDesc": "剑酒入喉，锋芒自生。持续提升攻击速度与少量攻击力，但需要真元供养剑意。",
+            "usageInfo": "攻速：+{attack_speed_bonus} | 攻击：+{attack_damage_bonus} | 真元：{zhenyuan_base_cost_per_second}/s",
+            "cost_duration": 1500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "attack_speed_bonus": "0.10",
+                "attack_damage_bonus": "1.0",
+                "zhenyuan_base_cost_per_second": "210.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yangjianhu_active_sword_wine_overdrive",
+            "usageTitle": "主动·剑酒催锋",
+            "usageDesc": "饮一口剑酒，剑意爆发。短时间内大幅强化输出，并在受击时以剑意卸力。",
+            "usageInfo": "持续：{duration_ticks}tick | 增伤：+{bonus_damage} | 卸力：受击伤害*{hurt_multiplier} | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "cost_duration": 1800,
+            "cost_total_niantou": 150,
+            "metadata": {
+                "duration_ticks": "240",
+                "bonus_damage": "4.0",
+                "hurt_multiplier": "0.85",
+                "activate_zhenyuan_base_cost": "720.0",
+                "cooldown_ticks": "620"
+            }
+        }
+    ]
+}
+
