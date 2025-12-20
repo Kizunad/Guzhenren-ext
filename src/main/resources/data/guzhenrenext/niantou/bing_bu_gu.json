@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:bing_bu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bing_bu_gu_passive_frost_cloth",
+            "usageTitle": "被动·冰布护身",
+            "usageDesc": "在身边凝出一层淡蓝半透明冰布，受击时聚散成障，抵消部分伤害，并将寒意反噬给敌人。",
+            "usageInfo": "触发率：{proc_chance} | 冷却：{cooldown_ticks}t | 念头：{niantou_cost}/次 | 精力：{jingli_cost}/次 | 魂魄：{hunpo_cost}/次 | 减伤：x{damage_multiplier} | 反噬冻结：{retaliate_freeze_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.12",
+                "cooldown_ticks": "160",
+                "niantou_cost": "20.0",
+                "jingli_cost": "5.0",
+                "hunpo_cost": "2.0",
+                "damage_multiplier": "0.88",
+                "retaliate_freeze_ticks": "80",
+                "retaliate_slow_duration_ticks": "60",
+                "retaliate_slow_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:bing_bu_gu_active_frost_shroud",
+            "usageTitle": "主动·冰布成衣",
+            "usageDesc": "催动冰布蛊，使冰布裹身成衣，短时间内大幅提升生存能力。",
+            "usageInfo": "消耗：{zhenyuan_base_cost}(基础真元) + {niantou_cost}(念头) + {jingli_cost}(精力) + {hunpo_cost}(魂魄) | 抗性：{resistance_duration_ticks}t | 伤害吸收：{absorption_duration_ticks}t | 冷却：{cooldown_ticks}t",
+            "cost_duration": 200,
+            "cost_total_niantou": 30,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "niantou_cost": "40.0",
+                "jingli_cost": "12.0",
+                "hunpo_cost": "6.0",
+                "zhenyuan_base_cost": "10800.0",
+                "resistance_duration_ticks": "160",
+                "resistance_amplifier": "0",
+                "absorption_duration_ticks": "160",
+                "absorption_amplifier": "0"
+            }
+        }
+    ]
+}

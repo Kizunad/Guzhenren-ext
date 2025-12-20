@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierThree;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
@@ -32,14 +34,11 @@ public class YangShengGuLongevityBrewEffect implements IGuEffect {
     private static final String META_HEAL_AMOUNT = "heal_amount";
     private static final String META_CLEANSE_COUNT = "cleanse_count";
     private static final String META_BUFF_SECONDS = "buff_seconds";
-    private static final String META_ACTIVATE_ZHENYUAN_BASE_COST =
-        "activate_zhenyuan_base_cost";
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
 
     private static final double DEFAULT_HEAL_AMOUNT = 6.0;
     private static final int DEFAULT_CLEANSE_COUNT = 2;
     private static final int DEFAULT_BUFF_SECONDS = 10;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 480.0;
     private static final int DEFAULT_COOLDOWN_TICKS = 420;
     private static final int TICKS_PER_SECOND = 20;
 
@@ -83,24 +82,14 @@ public class YangShengGuLongevityBrewEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(
-                usageInfo,
-                META_ACTIVATE_ZHENYUAN_BASE_COST,
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
-
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         final double heal = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -108,7 +97,7 @@ public class YangShengGuLongevityBrewEffect implements IGuEffect {
                 META_HEAL_AMOUNT,
                 DEFAULT_HEAL_AMOUNT
             )
-        );
+        ) * multiplier;
         if (heal > 0.0) {
             user.heal((float) heal);
         }
@@ -125,7 +114,7 @@ public class YangShengGuLongevityBrewEffect implements IGuEffect {
             cleanseNegatives(user, cleanseCount);
         }
 
-        final int buffSeconds = Math.max(
+        final int baseBuffSeconds = Math.max(
             0,
             UsageMetadataHelper.getInt(
                 usageInfo,
@@ -133,6 +122,7 @@ public class YangShengGuLongevityBrewEffect implements IGuEffect {
                 DEFAULT_BUFF_SECONDS
             )
         );
+        final int buffSeconds = (int) Math.round(baseBuffSeconds * multiplier);
         if (buffSeconds > 0) {
             user.addEffect(
                 new MobEffectInstance(

@@ -5,31 +5,35 @@
             "usageID": "guzhenren:bufenggu_passive_wind_capture",
             "usageTitle": "被动·捕风身法",
             "usageDesc": "捕风蛊收拢周身气流，持续提升移动速度（真元不足则自动停效）。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 速度加成：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 念头消耗：{niantou_cost_per_second}/s |\n 精力消耗：{jingli_cost_per_second}/s |\n 魂魄消耗：{hunpo_cost_per_second}/s |\n 速度加成：{attribute_amount}",
             "cost_duration": 900,
             "cost_total_niantou": 50,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "0.06",
-                "attribute_amount": "0.06"
+                "niantou_cost_per_second": "1.2",
+                "jingli_cost_per_second": "1.0",
+                "hunpo_cost_per_second": "0.6",
+                "zhenyuan_base_cost_per_second": "0.12",
+                "attribute_amount": "0.07"
             }
         },
         {
             "usageID": "guzhenren:bufenggu_active_wind_bind",
             "usageTitle": "主动·捕风束缚",
-            "usageDesc": "以风缚锁定目标，令其行动迟缓，并造成少量风道法术伤害。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "以风缚锁定目标，令其行动迟缓，并造成少量风道伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
             "cost_duration": 1150,
             "cost_total_niantou": 75,
             "metadata": {
-                "cooldown_ticks": "220",
-                "range": "12.0",
-                "niantou_cost": "12.0",
-                "zhenyuan_base_cost": "150.0",
-                "extra_magic_damage": "3.5",
+                "cooldown_ticks": "300",
+                "range": "13.0",
+                "niantou_cost": "75.0",
+                "jingli_cost": "65.0",
+                "hunpo_cost": "45.0",
+                "zhenyuan_base_cost": "200.0",
+                "extra_magic_damage": "25.0",
                 "effect_duration_ticks": "90",
                 "effect_amplifier": "0"
             }
         }
     ]
 }
-

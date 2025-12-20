@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:gang_zong_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:gang_zong_gu_passive_steel_bristle",
+            "usageTitle": "被动·钢鬃护反",
+            "usageDesc": "受击时钢鬃护体并借力反攻，概率减伤并获得短暂强力。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier} |\n 闪避距离：{blink_distance} |\n 仅投射物：{projectile_only} |\n 受击增益：{buff_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "210",
+                "niantou_cost": "200",
+                "damage_multiplier": "0.75",
+                "blink_distance": "0",
+                "projectile_only": "false",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0",
+                "jingli_cost": "40",
+                "hunpo_cost": "20",
+                "zhenyuan_base_cost": "1000000"
+            }
+        },
+        {
+            "usageID": "guzhenren:gang_zong_gu_active_bristle_burst",
+            "usageTitle": "主动·钢鬃爆散",
+            "usageDesc": "钢鬃四散，范围震退并令敌人虚弱。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "radius": "10.2",
+                "cooldown_ticks": "540",
+                "niantou_cost": "620",
+                "zhenyuan_base_cost": "52000",
+                "effect_duration_ticks": "180",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.45",
+                "jingli_cost": "310",
+                "hunpo_cost": "124"
+            }
+        }
+    ]
+}

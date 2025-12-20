@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierFour;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
@@ -31,17 +33,16 @@ public class YouLongGuBlackOilBreathEffect implements IGuEffect {
     private static final String META_RADIUS = "radius";
     private static final String META_DAMAGE = "damage";
     private static final String META_BURN_SECONDS = "burn_seconds";
-    private static final String META_ACTIVATE_ZHENYUAN_BASE_COST =
-        "activate_zhenyuan_base_cost";
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
 
     private static final double DEFAULT_RADIUS = 6.0;
     private static final double DEFAULT_DAMAGE = 3.0;
     private static final int DEFAULT_BURN_SECONDS = 5;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 540.0;
     private static final int DEFAULT_COOLDOWN_TICKS = 520;
 
     private static final int DEFAULT_OIL_DURATION_TICKS = 200;
+    private static final double MAX_RADIUS = 64.0;
+    private static final double MAX_MAGIC_DAMAGE = 2000.0;
 
     @Override
     public String getUsageId() {
@@ -73,28 +74,16 @@ public class YouLongGuBlackOilBreathEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(
-                usageInfo,
-                META_ACTIVATE_ZHENYUAN_BASE_COST,
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
 
-        final double radius = Math.max(
+        final double radius = UsageMetadataHelper.clamp(
+            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS),
             0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS)
+            MAX_RADIUS
         );
-        final double damage = Math.max(
+        final double baseDamage = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_DAMAGE, DEFAULT_DAMAGE)
         );
@@ -118,8 +107,23 @@ public class YouLongGuBlackOilBreathEffect implements IGuEffect {
                 if (burnSeconds > 0) {
                     target.igniteForSeconds(burnSeconds);
                 }
-                if (damage > 0.0) {
-                    target.hurt(user.damageSources().magic(), (float) damage);
+                if (baseDamage > 0.0) {
+                    final double multiplier = DaoHenCalculator.calculateMultiplier(
+                        user,
+                        target,
+                        DaoHenHelper.DaoType.SHI_DAO
+                    );
+                    final double damage = UsageMetadataHelper.clamp(
+                        baseDamage * multiplier,
+                        0.0,
+                        MAX_MAGIC_DAMAGE
+                    );
+                    if (damage > 0.0) {
+                        target.hurt(
+                            user.damageSources().magic(),
+                            (float) damage
+                        );
+                    }
                 }
             }
         }

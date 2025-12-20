@@ -5,30 +5,35 @@
             "usageID": "guzhenren:jiu_nang_hua_gu_passive_brew_scent",
             "usageTitle": "被动·花酿回甘",
             "usageDesc": "酒囊花缓慢吐出回甘酒香，润而不腻。每隔一段时间，自动回补少量饱食与饱和，并以真元维持。",
-            "usageInfo": "间隔：{interval_seconds}s | 回复：+{hunger_gain}(饱食) +{saturation_gain}(饱和) | 真元：{zhenyuan_base_cost_per_second}/s",
+            "usageInfo": "间隔：{interval_seconds}s | 回复：+{hunger_gain}(饱食) +{saturation_gain}(饱和) | 每秒消耗：{niantou_cost_per_second}(念头)+{jingli_cost_per_second}(精力)+{hunpo_cost_per_second}(魂魄)+{zhenyuan_base_cost_per_second}(基础真元)",
             "cost_duration": 540,
             "cost_total_niantou": 30,
             "metadata": {
                 "interval_seconds": "6",
                 "hunger_gain": "1",
                 "saturation_gain": "0.2",
-                "zhenyuan_base_cost_per_second": "48.0"
+                "niantou_cost_per_second": "1.0",
+                "jingli_cost_per_second": "0.5",
+                "hunpo_cost_per_second": "0.2",
+                "zhenyuan_base_cost_per_second": "5000000.0"
             }
         },
         {
             "usageID": "guzhenren:jiu_nang_hua_gu_active_wine_mist",
             "usageTitle": "主动·酒雾迷魂",
             "usageDesc": "喷吐酒雾，酒香入鼻，敌人脚下发软、神智恍惚。对周围敌对生灵施加迟缓与反胃。",
-            "usageInfo": "半径：{radius}格 | 持续：{effect_seconds}s | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "半径：{radius}格 | 持续：{effect_seconds}s | 冷却：{cooldown_ticks}tick | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 720,
             "cost_total_niantou": 55,
             "metadata": {
                 "radius": "6.0",
                 "effect_seconds": "8",
-                "activate_zhenyuan_base_cost": "240.0",
-                "cooldown_ticks": "240"
+                "cooldown_ticks": "240",
+                "niantou_cost": "120.0",
+                "jingli_cost": "60.0",
+                "hunpo_cost": "30.0",
+                "zhenyuan_base_cost": "18000000.0"
             }
         }
     ]
 }
-

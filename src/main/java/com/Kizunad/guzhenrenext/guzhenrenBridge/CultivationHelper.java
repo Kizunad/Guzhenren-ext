@@ -43,7 +43,7 @@ public final class CultivationHelper {
 
             if (Double.compare(original, newValue) != 0) {
                 vars.gushi_xiulian_dangqian = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {

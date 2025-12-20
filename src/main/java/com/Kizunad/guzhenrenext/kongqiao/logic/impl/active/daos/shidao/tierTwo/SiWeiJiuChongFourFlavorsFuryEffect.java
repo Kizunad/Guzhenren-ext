@@ -1,8 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierTwo;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.network.chat.Component;
@@ -69,6 +72,10 @@ public class SiWeiJiuChongFourFlavorsFuryEffect implements IGuEffect {
                 Component.literal("四味催战冷却中，剩余 " + remain + "t"),
                 true
             );
+            return false;
+        }
+
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
@@ -143,6 +150,11 @@ public class SiWeiJiuChongFourFlavorsFuryEffect implements IGuEffect {
                 DEFAULT_BONUS_DAMAGE
             )
         );
+        final double multiplier = DaoHenCalculator.calculateMultiplier(
+            attacker,
+            target,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         if (bonusDamage > 0.0 && target != null && target.isAlive()) {
             target.addEffect(
                 new MobEffectInstance(
@@ -154,7 +166,6 @@ public class SiWeiJiuChongFourFlavorsFuryEffect implements IGuEffect {
                 )
             );
         }
-        return (float) (damage + bonusDamage);
+        return (float) (damage + (bonusDamage * multiplier));
     }
 }
-

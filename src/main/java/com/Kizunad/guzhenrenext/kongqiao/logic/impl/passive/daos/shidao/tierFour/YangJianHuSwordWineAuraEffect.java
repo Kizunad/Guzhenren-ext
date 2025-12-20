@@ -1,10 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierFour;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.resources.ResourceLocation;
@@ -26,8 +28,6 @@ public class YangJianHuSwordWineAuraEffect implements IGuEffect {
 
     private static final String META_ATTACK_SPEED_BONUS = "attack_speed_bonus";
     private static final String META_ATTACK_DAMAGE_BONUS = "attack_damage_bonus";
-    private static final String META_ZHENYUAN_BASE_COST_PER_SECOND =
-        "zhenyuan_base_cost_per_second";
 
     private static final double DEFAULT_ATTACK_SPEED_BONUS = 0.10;
     private static final double DEFAULT_ATTACK_DAMAGE_BONUS = 1.0;
@@ -59,23 +59,55 @@ public class YangJianHuSwordWineAuraEffect implements IGuEffect {
             return;
         }
 
-        final double baseCost = Math.max(
+        final double niantouCostPerSecond = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
                 usageInfo,
-                META_ZHENYUAN_BASE_COST_PER_SECOND,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
                 DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
             )
         );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             deactivate(user);
             return;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
 
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         final double attackSpeedBonus = UsageMetadataHelper.clamp(
             UsageMetadataHelper.getDouble(
                 usageInfo,
@@ -96,13 +128,13 @@ public class YangJianHuSwordWineAuraEffect implements IGuEffect {
         applyOrUpdateModifier(
             user.getAttribute(Attributes.ATTACK_SPEED),
             ATTACK_SPEED_MODIFIER_ID,
-            attackSpeedBonus,
+            UsageMetadataHelper.clamp(attackSpeedBonus * multiplier, 0.0, 2.0),
             AttributeModifier.Operation.ADD_MULTIPLIED_BASE
         );
         applyOrUpdateModifier(
             user.getAttribute(Attributes.ATTACK_DAMAGE),
             ATTACK_DAMAGE_MODIFIER_ID,
-            attackDamageBonus,
+            attackDamageBonus * multiplier,
             AttributeModifier.Operation.ADD_VALUE
         );
 
@@ -163,4 +195,3 @@ public class YangJianHuSwordWineAuraEffect implements IGuEffect {
         }
     }
 }
-

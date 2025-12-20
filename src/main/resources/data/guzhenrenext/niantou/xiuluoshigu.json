@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:xiuluoshigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xiuluoshigu_passive_asura_fury",
+            "usageTitle": "被动·修罗怒",
+            "usageDesc": "修罗尸形态以杀伐见长，提升攻击强度。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount} |",
+            "cost_duration": 26000000,
+            "cost_total_niantou": 6400000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "140000",
+                "attribute_amount": "0.72"
+            }
+        },
+        {
+            "usageID": "guzhenren:xiuluoshigu_active_asura_rampage",
+            "usageTitle": "主动·修罗狂战",
+            "usageDesc": "短时间进入狂战状态，攻速、移速与抗性同步提升。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 32000000,
+            "cost_total_niantou": 13000000,
+            "metadata": {
+                "cooldown_ticks": "1800",
+                "niantou_cost": "180",
+                "zhenyuan_base_cost": "16000000",
+                "heal_amount": "0",
+                "effect_duration_ticks": "520",
+                "effect_amplifier": "0",
+                "jingli_cost": "900",
+                "hunpo_cost": "360"
+            }
+        }
+    ]
+}

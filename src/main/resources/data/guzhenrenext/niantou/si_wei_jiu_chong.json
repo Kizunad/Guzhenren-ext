@@ -5,29 +5,35 @@
             "usageID": "guzhenren:si_wei_jiu_chong_passive_four_flavors_meditate",
             "usageTitle": "被动·四味调息",
             "usageDesc": "酸甜苦辣四味入腹，气机更顺。持续小幅恢复真元与念头，作为修行续航之底。",
-            "usageInfo": "每秒：真元+{zhenyuan_regen}/s | 念头+{niantou_regen}/s | 真元：{zhenyuan_base_cost_per_second}/s",
+            "usageInfo": "每秒：真元+{zhenyuan_regen}/s | 念头+{niantou_regen}/s | 每秒消耗：{niantou_cost_per_second}(念头)+{jingli_cost_per_second}(精力)+{hunpo_cost_per_second}(魂魄)+{zhenyuan_base_cost_per_second}(基础真元)",
             "cost_duration": 720,
             "cost_total_niantou": 50,
             "metadata": {
-                "zhenyuan_regen": "4.0",
-                "niantou_regen": "0.05",
-                "zhenyuan_base_cost_per_second": "72.0"
+                "zhenyuan_regen": "12.0",
+                "niantou_regen": "1.0",
+                "niantou_cost_per_second": "2.0",
+                "jingli_cost_per_second": "1.0",
+                "hunpo_cost_per_second": "0.4",
+                "zhenyuan_base_cost_per_second": "10000000.0"
             }
         },
         {
             "usageID": "guzhenren:si_wei_jiu_chong_active_four_flavors_fury",
             "usageTitle": "主动·四味催战",
             "usageDesc": "四味齐上，血气翻涌。短时间内普攻附带额外伤害，并带有轻微的眩晕与迟缓。",
-            "usageInfo": "持续：{duration_ticks}tick | 额外伤害：+{bonus_damage} | 每击真元：{zhenyuan_base_cost_per_hit}(基础) | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "持续：{duration_ticks}tick | 额外伤害：+{bonus_damage} | 每击真元：{zhenyuan_base_cost_per_hit}(基础) | 冷却：{cooldown_ticks}tick | 激活消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 900,
             "cost_total_niantou": 70,
             "metadata": {
                 "duration_ticks": "240",
-                "bonus_damage": "2.0",
-                "zhenyuan_base_cost_per_hit": "120.0",
-                "cooldown_ticks": "320"
+                "bonus_damage": "60.0",
+                "zhenyuan_base_cost_per_hit": "6000000.0",
+                "cooldown_ticks": "320",
+                "niantou_cost": "240.0",
+                "jingli_cost": "120.0",
+                "hunpo_cost": "60.0",
+                "zhenyuan_base_cost": "45000000.0"
             }
         }
     ]
 }
-

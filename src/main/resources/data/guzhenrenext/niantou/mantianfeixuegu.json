@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:mantianfeixuegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:mantianfeixuegu_passive_snow_domain",
+            "usageTitle": "被动·飞雪余韵",
+            "usageDesc": "漫天飞雪蛊残留的雪意化为光环，持续压制周围敌对生物，使其行动迟缓并逐步冻结。",
+            "usageInfo": "维持消耗：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 半径：{radius} | 缓慢：{slow_duration_ticks}t | 冻结：+{freeze_ticks}t/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "niantou_cost_per_second": "70.0",
+                "jingli_cost_per_second": "30.0",
+                "hunpo_cost_per_second": "14.0",
+                "zhenyuan_base_cost_per_second": "900000000.0",
+                "radius": "12.0",
+                "slow_duration_ticks": "60",
+                "slow_amplifier": "4",
+                "freeze_ticks": "40"
+            }
+        },
+        {
+            "usageID": "guzhenren:mantianfeixuegu_active_snow_domain",
+            "usageTitle": "主动·漫天飞雪",
+            "usageDesc": "一旦催动，周围将有鹅毛大雪狂暴飞舞，短时间内化作寒冷冰域。领域维持期间每秒消耗资源并持续压制敌人。",
+            "usageInfo": "持续：{duration_ticks}t | 半径：{radius} | 每秒伤害：{magic_damage_per_second} | 每秒冻结：{freeze_ticks_per_second}t | 缓慢：{slow_duration_ticks}t | 冷却：{cooldown_ticks}t | 维持消耗：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 500,
+            "cost_total_niantou": 300,
+            "metadata": {
+                "cooldown_ticks": "1800",
+                "radius": "16.0",
+                "duration_ticks": "500",
+                "niantou_cost_per_second": "180.0",
+                "jingli_cost_per_second": "100.0",
+                "hunpo_cost_per_second": "100.0",
+                "zhenyuan_base_cost_per_second": "2200000000.0",
+                "magic_damage_per_second": "2000.0",
+                "freeze_ticks_per_second": "120",
+                "slow_duration_ticks": "60",
+                "slow_amplifier": "2"
+            }
+        }
+    ]
+}

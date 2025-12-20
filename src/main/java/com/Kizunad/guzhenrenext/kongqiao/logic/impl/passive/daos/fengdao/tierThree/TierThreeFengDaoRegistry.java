@@ -4,11 +4,11 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveAoEBurstEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveChargeEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveTargetDebuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveSelfBuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveSelfBuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoAttackProcDebuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoSustainedMobEffectEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoWindBarrierOnHurtEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedMobEffectEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedAttributeModifierEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -69,7 +69,7 @@ public final class TierThreeFengDaoRegistry {
             "GuzhenrenExtCooldown_fengligu_active_gale_charge";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new FengDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_VALUE,
@@ -113,7 +113,7 @@ public final class TierThreeFengDaoRegistry {
             "GuzhenrenExtCooldown_kuangfenggu_active_wild_gale";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new FengDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ATTACK_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -122,18 +122,18 @@ public final class TierThreeFengDaoRegistry {
             )
         );
         GuEffectRegistry.register(
-            new GuDaoActiveSelfBuffEffect(
+            new FengDaoActiveSelfBuffEffect(
                 active,
                 cooldownKey,
                 List.of(
-                    new GuDaoActiveSelfBuffEffect.EffectSpec(
+                    new FengDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.MOVEMENT_SPEED,
                         "speed_duration_ticks",
                         0,
                         "speed_amplifier",
                         0
                     ),
-                    new GuDaoActiveSelfBuffEffect.EffectSpec(
+                    new FengDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.DIG_SPEED,
                         "haste_duration_ticks",
                         0,
@@ -157,18 +157,18 @@ public final class TierThreeFengDaoRegistry {
             new FengDaoWindBarrierOnHurtEffect(passive, barrierCooldownKey)
         );
         GuEffectRegistry.register(
-            new GuDaoActiveSelfBuffEffect(
+            new FengDaoActiveSelfBuffEffect(
                 active,
                 cooldownKey,
                 List.of(
-                    new GuDaoActiveSelfBuffEffect.EffectSpec(
+                    new FengDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.DAMAGE_RESISTANCE,
                         "effect_duration_ticks",
                         0,
                         "effect_amplifier",
                         0
                     ),
-                    new GuDaoActiveSelfBuffEffect.EffectSpec(
+                    new FengDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.MOVEMENT_SPEED,
                         "speed_duration_ticks",
                         0,
@@ -251,24 +251,24 @@ public final class TierThreeFengDaoRegistry {
             "GuzhenrenExtCooldown_weifenggu_active_soft_fall";
 
         GuEffectRegistry.register(
-            new YuDaoSustainedMobEffectEffect(
+            new FengDaoSustainedMobEffectEffect(
                 passive,
                 MobEffects.SLOW_FALLING
             )
         );
         GuEffectRegistry.register(
-            new GuDaoActiveSelfBuffEffect(
+            new FengDaoActiveSelfBuffEffect(
                 active,
                 cooldownKey,
                 List.of(
-                    new GuDaoActiveSelfBuffEffect.EffectSpec(
+                    new FengDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.SLOW_FALLING,
                         "effect_duration_ticks",
                         0,
                         "effect_amplifier",
                         0
                     ),
-                    new GuDaoActiveSelfBuffEffect.EffectSpec(
+                    new FengDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.MOVEMENT_SPEED,
                         "speed_duration_ticks",
                         0,

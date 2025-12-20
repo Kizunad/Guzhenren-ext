@@ -4,35 +4,40 @@
         {
             "usageID": "guzhenren:fengrengu_passive_wind_edge",
             "usageTitle": "被动·风刃余波",
-            "usageDesc": "风刃蛊化刃于风，攻击时有概率削弱目标，并附带少量风道法术伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageDesc": "风刃蛊化刃于风，攻击时有概率削弱目标，并附带少量风道伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
             "cost_duration": 950,
             "cost_total_niantou": 60,
             "metadata": {
-                "proc_chance": "0.20",
-                "niantou_cost": "1.5",
+                "proc_chance": "0.10",
+                "cooldown_ticks": "60",
+                "niantou_cost": "15.0",
+                "jingli_cost": "12.0",
+                "hunpo_cost": "10.0",
+                "zhenyuan_base_cost": "70.0",
                 "effect_duration_ticks": "80",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "2.0"
+                "extra_magic_damage": "120.0"
             }
         },
         {
             "usageID": "guzhenren:fengrengu_active_wind_slash",
             "usageTitle": "主动·风刃点杀",
-            "usageDesc": "锁定目标斩出风刃，削弱对方并造成风道法术伤害。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "锁定目标斩出风刃，削弱对方并造成风道伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage}",
             "cost_duration": 1250,
             "cost_total_niantou": 95,
             "metadata": {
-                "cooldown_ticks": "220",
-                "range": "14.0",
-                "niantou_cost": "16.0",
-                "zhenyuan_base_cost": "200.0",
-                "extra_magic_damage": "6.0",
-                "effect_duration_ticks": "100",
+                "cooldown_ticks": "500",
+                "range": "15.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "110.0",
+                "hunpo_cost": "90.0",
+                "zhenyuan_base_cost": "420.0",
+                "extra_magic_damage": "350.0",
+                "effect_duration_ticks": "120",
                 "effect_amplifier": "0"
             }
         }
     ]
 }
-

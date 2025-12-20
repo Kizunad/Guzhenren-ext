@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:shilongqunjiagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shilongqunjiagu_passive_stone_dragon_plate",
+            "usageTitle": "被动·石龙裙甲",
+            "usageDesc": "石龙裙甲厚重，提升护甲韧性。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 护甲韧性：{attribute_amount} |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10000",
+                "attribute_amount": "500"
+            }
+        },
+        {
+            "usageID": "guzhenren:shilongqunjiagu_active_stone_dragon_shock",
+            "usageTitle": "主动·石龙震荡",
+            "usageDesc": "石龙裙甲爆发震荡，范围减速。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "radius": "12.25",
+                "cooldown_ticks": "1085",
+                "niantou_cost": "120",
+                "zhenyuan_base_cost": "980000",
+                "effect_duration_ticks": "350",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.4375",
+                "jingli_cost": "600",
+                "hunpo_cost": "240"
+            }
+        }
+    ]
+}

@@ -1,0 +1,51 @@
+{
+    "itemID": "guzhenren:chun_guang_wu_xian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:chun_guang_wu_xian_gu_passive_endless_spring",
+            "usageTitle": "被动·春光绵绵",
+            "usageDesc": "春光不绝，持续治疗友方并大幅回复修行资源；强度随光道道痕提升（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 半径：{radius} |\n 治疗：{heal_amount}/s |\n 真元：+{zhenyuan_restore}/s |\n 精力：+{jingli_restore}/s |\n 魂魄：+{hunpo_restore}/s",
+            "cost_duration": 8800,
+            "cost_total_niantou": 3000,
+            "metadata": {
+                "niantou_cost_per_second": "26.0",
+                "jingli_cost_per_second": "36.0",
+                "hunpo_cost_per_second": "18.0",
+                "zhenyuan_base_cost_per_second": "9.0",
+                "radius": "8.0",
+                "heal_amount": "1.5",
+                "zhenyuan_restore": "200.0",
+                "jingli_restore": "80.0",
+                "hunpo_restore": "40.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:chun_guang_wu_xian_gu_active_endless_spring",
+            "usageTitle": "主动·春光无限",
+            "usageDesc": "爆发春光普照，瞬间治疗并净化友方负面，附加再生与吸收护体。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 治疗：{heal_amount} |\n 真元：+{zhenyuan_restore} |\n 精力：+{jingli_restore} |\n 魂魄：+{hunpo_restore} |\n 净化负面：{cleanse_harmful} |\n 再生：{regen_duration_ticks}t |\n 吸收：{absorption_duration_ticks}t",
+            "cost_duration": 9800,
+            "cost_total_niantou": 4200,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "radius": "10.0",
+                "ignore_walls": "false",
+                "heal_amount": "8.0",
+                "zhenyuan_restore": "650.0",
+                "jingli_restore": "200.0",
+                "hunpo_restore": "100.0",
+                "cleanse_harmful": "true",
+                "niantou_cost": "620.0",
+                "jingli_cost": "780.0",
+                "hunpo_cost": "420.0",
+                "zhenyuan_base_cost": "260000.0",
+                "regen_duration_ticks": "220",
+                "regen_amplifier": "0",
+                "absorption_duration_ticks": "220",
+                "absorption_amplifier": "1"
+            }
+        }
+    ]
+}
+

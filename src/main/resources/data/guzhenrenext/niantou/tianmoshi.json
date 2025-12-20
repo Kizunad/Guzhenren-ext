@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:tianmoshi",
+    "usages": [
+        {
+            "usageID": "guzhenren:tianmoshi_passive_sky_demon_wind",
+            "usageTitle": "被动·天魔风行",
+            "usageDesc": "天魔尸机动惊人，提升移速。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount} |",
+            "cost_duration": 26000000,
+            "cost_total_niantou": 6400000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "130000",
+                "attribute_amount": "0.6"
+            }
+        },
+        {
+            "usageID": "guzhenren:tianmoshi_active_sky_demon_dash",
+            "usageTitle": "主动·天魔遁空",
+            "usageDesc": "长距挪移并获得缓降与加速，适合追击与撤退。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 后续增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 32000000,
+            "cost_total_niantou": 13000000,
+            "metadata": {
+                "distance": "56",
+                "cooldown_ticks": "1520",
+                "niantou_cost": "150",
+                "zhenyuan_base_cost": "14000000",
+                "effect_duration_ticks": "520",
+                "effect_amplifier": "0",
+                "jingli_cost": "750",
+                "hunpo_cost": "300"
+            }
+        }
+    ]
+}

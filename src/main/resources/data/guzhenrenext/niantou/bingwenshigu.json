@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:bingwenshigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bingwenshigu_passive_plague_touch",
+            "usageTitle": "被动·瘟触",
+            "usageDesc": "病瘟尸形态带有瘟毒，攻击时概率令敌中毒。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 26000000,
+            "cost_total_niantou": 6400000,
+            "metadata": {
+                "proc_chance": "0.18",
+                "niantou_cost": "320",
+                "effect_duration_ticks": "360",
+                "effect_amplifier": "0",
+                "jingli_cost": "640",
+                "hunpo_cost": "320",
+                "zhenyuan_base_cost": "160000000"
+            }
+        },
+        {
+            "usageID": "guzhenren:bingwenshigu_active_plague_mist",
+            "usageTitle": "主动·瘟雾",
+            "usageDesc": "释放瘟雾，范围中毒。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 32000000,
+            "cost_total_niantou": 13000000,
+            "metadata": {
+                "radius": "15",
+                "cooldown_ticks": "1440",
+                "niantou_cost": "170",
+                "zhenyuan_base_cost": "15000000",
+                "effect_duration_ticks": "440",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.4",
+                "jingli_cost": "850",
+                "hunpo_cost": "340"
+            }
+        }
+    ]
+}

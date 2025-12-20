@@ -4,37 +4,42 @@
         {
             "usageID": "guzhenren:nianfengzhangu_passive_mind_wind",
             "usageTitle": "被动·念风侵蚀",
-            "usageDesc": "念风斩蛊以念化风，攻击时有概率削弱目标，并附带风道法术伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageDesc": "念风斩蛊以念化风，攻击时有概率削弱目标，并附带风道伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
             "cost_duration": 1050,
             "cost_total_niantou": 90,
             "metadata": {
-                "proc_chance": "0.22",
-                "niantou_cost": "2.5",
-                "effect_duration_ticks": "100",
+                "proc_chance": "0.08",
+                "cooldown_ticks": "80",
+                "niantou_cost": "20.0",
+                "jingli_cost": "15.0",
+                "hunpo_cost": "15.0",
+                "zhenyuan_base_cost": "100.0",
+                "effect_duration_ticks": "110",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "3.0"
+                "extra_magic_damage": "150.0"
             }
         },
         {
             "usageID": "guzhenren:nianfengzhangu_active_mind_slash",
             "usageTitle": "主动·念风斩",
-            "usageDesc": "锁定目标斩出念风，短暂致盲并削弱对方，同时造成风道法术伤害。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "锁定目标斩出念风，短暂致盲并削弱对方，同时造成风道伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage}",
             "cost_duration": 1500,
             "cost_total_niantou": 130,
             "metadata": {
-                "cooldown_ticks": "260",
-                "range": "15.0",
-                "niantou_cost": "22.0",
-                "zhenyuan_base_cost": "260.0",
-                "extra_magic_damage": "7.0",
-                "blind_duration_ticks": "50",
+                "cooldown_ticks": "650",
+                "range": "16.0",
+                "niantou_cost": "220.0",
+                "jingli_cost": "180.0",
+                "hunpo_cost": "150.0",
+                "zhenyuan_base_cost": "550.0",
+                "extra_magic_damage": "450.0",
+                "blind_duration_ticks": "80",
                 "blind_amplifier": "0",
-                "effect_duration_ticks": "120",
+                "effect_duration_ticks": "160",
                 "effect_amplifier": "0"
             }
         }
     ]
 }
-

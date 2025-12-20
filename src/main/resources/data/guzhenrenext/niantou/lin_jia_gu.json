@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:lin_jia_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:lin_jia_gu_passive_scale_vitality",
+            "usageTitle": "被动·鳞甲养血",
+            "usageDesc": "鳞甲纹路常驻，稳固气血提升生命上限。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 生命上限：{attribute_amount} |",
+            "cost_duration": 18000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "30",
+                "attribute_amount": "40"
+            }
+        },
+        {
+            "usageID": "guzhenren:lin_jia_gu_active_scale_fortify",
+            "usageTitle": "主动·鳞甲固体",
+            "usageDesc": "鳞甲瞬间加厚，获得吸收与抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 24000,
+            "cost_total_niantou": 4800,
+            "metadata": {
+                "cooldown_ticks": "525",
+                "niantou_cost": "260",
+                "zhenyuan_base_cost": "2200",
+                "heal_amount": "0",
+                "effect_duration_ticks": "250",
+                "effect_amplifier": "0",
+                "jingli_cost": "130",
+                "hunpo_cost": "52"
+            }
+        }
+    ]
+}

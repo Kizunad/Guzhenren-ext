@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:chong_zhi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:chong_zhi_gu_passive_insect_mind",
+            "usageTitle": "被动·虫脑",
+            "usageDesc": "虫头改造带来更强思绪，持续回复念头。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 治疗：{heal_amount} |\n 念头回复：{niantou_gain} |\n 真元回复：{zhenyuan_gain} |",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "500",
+                "heal_amount": "0",
+                "niantou_gain": "100",
+                "zhenyuan_gain": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:chong_zhi_gu_active_insect_hex",
+            "usageTitle": "主动·虫咒",
+            "usageDesc": "锁定目标施加虫瘟，致盲并中毒。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "range": "21",
+                "cooldown_ticks": "570",
+                "niantou_cost": "560",
+                "zhenyuan_base_cost": "48000",
+                "extra_magic_damage": "120",
+                "effect_duration_ticks": "210",
+                "effect_amplifier": "0",
+                "jingli_cost": "280",
+                "hunpo_cost": "112"
+            }
+        }
+    ]
+}

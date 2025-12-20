@@ -1,8 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierFour;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.entity.LivingEntity;
@@ -54,23 +57,38 @@ public class YouLongGuOilIgniteEffect implements IGuEffect {
             return damage;
         }
 
-        final int oilDuration = Math.max(
-            1,
-            UsageMetadataHelper.getInt(
-                usageInfo,
-                META_OIL_DURATION_TICKS,
-                DEFAULT_OIL_DURATION_TICKS
+        final double multiplier = DaoHenCalculator.calculateMultiplier(
+            attacker,
+            target,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+        final int oilDuration = Math.min(
+            2400,
+            (int) Math.round(
+                Math.max(
+                    1,
+                    UsageMetadataHelper.getInt(
+                        usageInfo,
+                        META_OIL_DURATION_TICKS,
+                        DEFAULT_OIL_DURATION_TICKS
+                    )
+                ) * multiplier
             )
         );
         target.getPersistentData()
             .putInt(TAG_OIL_UNTIL_TICK, target.tickCount + oilDuration);
 
-        final int burnSeconds = Math.max(
-            0,
-            UsageMetadataHelper.getInt(
-                usageInfo,
-                META_BURN_SECONDS,
-                DEFAULT_BURN_SECONDS
+        final int burnSeconds = Math.min(
+            30,
+            (int) Math.round(
+                Math.max(
+                    0,
+                    UsageMetadataHelper.getInt(
+                        usageInfo,
+                        META_BURN_SECONDS,
+                        DEFAULT_BURN_SECONDS
+                    )
+                ) * multiplier
             )
         );
         if (burnSeconds > 0) {
@@ -93,7 +111,10 @@ public class YouLongGuOilIgniteEffect implements IGuEffect {
         final boolean burning = target.isOnFire();
         final boolean oiled = target.getPersistentData().getInt(TAG_OIL_UNTIL_TICK) > target.tickCount;
         if (burning && oiled) {
-            return (float) (damage * (1.0 + bonusRatio));
+            if (!GuEffectCostHelper.tryConsumeOnce(null, attacker, usageInfo)) {
+                return damage;
+            }
+            return (float) (damage * (1.0 + (bonusRatio * multiplier)));
         }
         return damage;
     }

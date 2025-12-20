@@ -41,7 +41,7 @@ public final class NianTouCapacityHelper {
             final double newValue = Math.max(0.0, original + amount);
             if (Double.compare(original, newValue) != 0) {
                 vars.niantou_rongliang = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {
@@ -79,7 +79,7 @@ public final class NianTouCapacityHelper {
             final double newValue = original + amount;
             if (Double.compare(original, newValue) != 0) {
                 vars.niantou_zhida = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {
@@ -93,4 +93,3 @@ public final class NianTouCapacityHelper {
         return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
     }
 }
-

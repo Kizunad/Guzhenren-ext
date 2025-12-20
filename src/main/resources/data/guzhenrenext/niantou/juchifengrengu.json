@@ -4,37 +4,42 @@
         {
             "usageID": "guzhenren:juchifengrengu_passive_serrated_wind",
             "usageTitle": "被动·巨齿风刃",
-            "usageDesc": "巨齿风刃蛊锋芒更盛，攻击时有概率削弱目标，并附带风道法术伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageDesc": "巨齿风刃蛊锋芒更盛，攻击时有概率削弱目标，并附带风道伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
             "cost_duration": 1450,
             "cost_total_niantou": 160,
             "metadata": {
-                "proc_chance": "0.22",
-                "niantou_cost": "3.5",
-                "effect_duration_ticks": "120",
+                "proc_chance": "0.05",
+                "cooldown_ticks": "160",
+                "niantou_cost": "38.0",
+                "jingli_cost": "32.0",
+                "hunpo_cost": "28.0",
+                "zhenyuan_base_cost": "260.0",
+                "effect_duration_ticks": "160",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "4.0"
+                "extra_magic_damage": "1200.0"
             }
         },
         {
             "usageID": "guzhenren:juchifengrengu_active_serrated_wind",
             "usageTitle": "主动·巨齿斩杀",
-            "usageDesc": "锁定目标斩出巨齿风刃，强力削弱并迟滞对方，造成较高风道法术伤害。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "锁定目标斩出巨齿风刃，强力削弱并迟滞对方，造成较高风道伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage}",
             "cost_duration": 1900,
             "cost_total_niantou": 210,
             "metadata": {
-                "cooldown_ticks": "320",
-                "range": "16.0",
-                "niantou_cost": "30.0",
-                "zhenyuan_base_cost": "360.0",
-                "extra_magic_damage": "9.0",
-                "effect_duration_ticks": "140",
+                "cooldown_ticks": "1400",
+                "range": "17.0",
+                "niantou_cost": "360.0",
+                "jingli_cost": "300.0",
+                "hunpo_cost": "280.0",
+                "zhenyuan_base_cost": "980.0",
+                "extra_magic_damage": "7500.0",
+                "effect_duration_ticks": "220",
                 "effect_amplifier": "0",
-                "slow_duration_ticks": "140",
+                "slow_duration_ticks": "220",
                 "slow_amplifier": "0"
             }
         }
     ]
 }
-

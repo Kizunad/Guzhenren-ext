@@ -44,6 +44,15 @@ public final class KongqiaoAttachments {
             () -> AttachmentType.serializable(TweakConfig::new).copyOnDeath().build()
         );
 
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<GuzhenrenVariableModifiers>
+    > GUZHENREN_VARIABLE_MODIFIERS =
+        ATTACHMENT_TYPES.register(
+            "guzhenren_variable_modifiers",
+            () -> AttachmentType.serializable(GuzhenrenVariableModifiers::new).copyOnDeath().build()
+        );
+
     public static void register(IEventBus bus) {
         ATTACHMENT_TYPES.register(bus);
     }
@@ -80,5 +89,20 @@ public final class KongqiaoAttachments {
             entity.setData(TWEAK_CONFIG.get(), new TweakConfig());
         }
         return entity.getData(TWEAK_CONFIG.get());
+    }
+
+    public static GuzhenrenVariableModifiers getGuzhenrenVariableModifiers(
+        Entity entity
+    ) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(GUZHENREN_VARIABLE_MODIFIERS.get())) {
+            entity.setData(
+                GUZHENREN_VARIABLE_MODIFIERS.get(),
+                new GuzhenrenVariableModifiers()
+            );
+        }
+        return entity.getData(GUZHENREN_VARIABLE_MODIFIERS.get());
     }
 }

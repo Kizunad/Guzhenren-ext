@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.customNPCImpl.ai.Goal;
 
 import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.PlayerVariablesSyncHelper;
 import com.Kizunad.guzhenrenext.customNPCImpl.util.GuCultivationHelper;
 import net.guzhenren.network.GuzhenrenModVariables;
 import net.minecraft.world.entity.LivingEntity;
@@ -168,13 +169,13 @@ public class EnhanceHunpoGoal extends AbstractGuzhenrenGoal {
         double current = Math.max(0.0D, vars.hunpo);
         if (current < HUNPO_COST_PER_SECOND) {
             vars.hunpo = 0.0D;
-            vars.markSyncDirty();
+            PlayerVariablesSyncHelper.markSyncDirty(vars);
             return false;
         }
         double next = current - HUNPO_COST_PER_SECOND;
         if (Double.compare(current, next) != 0) {
             vars.hunpo = next;
-            vars.markSyncDirty();
+            PlayerVariablesSyncHelper.markSyncDirty(vars);
         }
         return true;
     }
@@ -198,7 +199,7 @@ public class EnhanceHunpoGoal extends AbstractGuzhenrenGoal {
         double next = current + gain;
         if (Double.compare(current, next) != 0) {
             vars.zuida_hunpo = next;
-            vars.markSyncDirty();
+            PlayerVariablesSyncHelper.markSyncDirty(vars);
         }
     }
 

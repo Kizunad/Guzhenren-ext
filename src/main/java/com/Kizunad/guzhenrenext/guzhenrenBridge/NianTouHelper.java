@@ -30,7 +30,7 @@ public final class NianTouHelper {
             
             if (Double.compare(original, newValue) != 0) {
                 vars.niantou = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
         } catch (Exception e) {
             // ignore

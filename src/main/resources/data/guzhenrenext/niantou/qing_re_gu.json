@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:qing_re_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qing_re_gu_passive_clear_heat",
+            "usageTitle": "被动·清热解毒",
+            "usageDesc": "清热蛊如清凉玉石，常驻于空窍时可缓慢驱散体内毒火与负面效果。",
+            "usageInfo": "维持消耗：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 每秒驱散：{max_removed_per_second}个负面效果",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "niantou_cost_per_second": "8.0",
+                "jingli_cost_per_second": "3.0",
+                "hunpo_cost_per_second": "1.5",
+                "zhenyuan_base_cost_per_second": "16000.0",
+                "max_removed_per_second": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:qing_re_gu_active_clear_heat",
+            "usageTitle": "主动·寒息清毒",
+            "usageDesc": "催动清热蛊，寒息贯体，瞬间清除多种负面效果并小幅治疗，同时熄灭火焰与清空冻结。",
+            "usageInfo": "驱散：{max_removed}个负面效果 | 治疗：{heal_amount} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 240,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "niantou_cost": "120.0",
+                "jingli_cost": "40.0",
+                "hunpo_cost": "20.0",
+                "zhenyuan_base_cost": "420000.0",
+                "heal_amount": "8.0",
+                "max_removed": "3",
+                "clear_fire": "true",
+                "clear_freeze": "true"
+            }
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:baiyugu_2",
+    "usages": [
+        {
+            "usageID": "guzhenren:baiyugu_2_passive_broken_feather_dodge",
+            "usageTitle": "被动·败羽闪避",
+            "usageDesc": "败羽护身善于躲避，受投射物伤害时概率闪避减伤并小幅位移。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier} |\n 闪避距离：{blink_distance} |\n 仅投射物：{projectile_only} |\n 受击增益：{buff_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "proc_chance": "0.2",
+                "cooldown_ticks": "180",
+                "niantou_cost": "180",
+                "damage_multiplier": "0.72",
+                "blink_distance": "5.25",
+                "projectile_only": "true",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0",
+                "jingli_cost": "36",
+                "hunpo_cost": "18",
+                "zhenyuan_base_cost": "900000"
+            }
+        },
+        {
+            "usageID": "guzhenren:baiyugu_2_active_feather_leap",
+            "usageTitle": "主动·败羽跃空",
+            "usageDesc": "短距跃迁并获得缓降与加速，便于脱离包围。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 后续增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "distance": "21",
+                "cooldown_ticks": "540",
+                "niantou_cost": "580",
+                "zhenyuan_base_cost": "52000",
+                "effect_duration_ticks": "330",
+                "effect_amplifier": "0",
+                "jingli_cost": "290",
+                "hunpo_cost": "116"
+            }
+        }
+    ]
+}

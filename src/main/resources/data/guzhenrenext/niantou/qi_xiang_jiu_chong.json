@@ -5,29 +5,34 @@
             "usageID": "guzhenren:qi_xiang_jiu_chong_passive_fragrant_breath",
             "usageTitle": "被动·七香提炼",
             "usageDesc": "七香入息，步履轻快。持续提升移动速度，并以真元维系香息不散。",
-            "usageInfo": "移速：+{speed_bonus}% | 真元：{zhenyuan_base_cost_per_second}/s",
+            "usageInfo": "移速：+{speed_bonus}% | 每秒消耗：{niantou_cost_per_second}(念头)+{jingli_cost_per_second}(精力)+{hunpo_cost_per_second}(魂魄)+{zhenyuan_base_cost_per_second}(基础真元)",
             "cost_duration": 960,
             "cost_total_niantou": 65,
             "metadata": {
-                "speed_bonus": "0.08",
-                "zhenyuan_base_cost_per_second": "120.0"
+                "speed_bonus": "0.15",
+                "niantou_cost_per_second": "4.0",
+                "jingli_cost_per_second": "2.0",
+                "hunpo_cost_per_second": "0.8",
+                "zhenyuan_base_cost_per_second": "30000000.0"
             }
         },
         {
             "usageID": "guzhenren:qi_xiang_jiu_chong_active_fragrant_dash",
             "usageTitle": "主动·七香醉风",
             "usageDesc": "踏风一纵，香息裹身。向前突进并在落点洒下香雾，令敌人迟缓、反胃。",
-            "usageInfo": "突进：{dash_strength} | 半径：{radius}格 | 香雾：{effect_seconds}s | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "突进：{dash_strength} | 半径：{radius}格 | 香雾：{effect_seconds}s | 冷却：{cooldown_ticks}tick | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 1200,
             "cost_total_niantou": 90,
             "metadata": {
-                "dash_strength": "1.2",
+                "dash_strength": "1.6",
                 "radius": "5.0",
                 "effect_seconds": "6",
-                "activate_zhenyuan_base_cost": "360.0",
-                "cooldown_ticks": "360"
+                "cooldown_ticks": "360",
+                "niantou_cost": "480.0",
+                "jingli_cost": "240.0",
+                "hunpo_cost": "120.0",
+                "zhenyuan_base_cost": "150000000.0"
             }
         }
     ]
 }
-

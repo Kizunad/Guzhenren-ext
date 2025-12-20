@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:lvyaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:lvyaogu_passive_emerald_aegis",
+            "usageTitle": "被动·绿耀护魂",
+            "usageDesc": "绿光滋养魂魄并拓展魂魄抗性上限，同时扩容念头容量（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 魂魄抗性上限：+{hunpo_resistance_max_bonus} |\n 念头容量：+{niantou_capacity_bonus} |\n 魂魄抗性回复：+{hunpo_resistance_restore}/s",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1100,
+            "metadata": {
+                "niantou_cost_per_second": "10.0",
+                "jingli_cost_per_second": "16.0",
+                "hunpo_cost_per_second": "7.0",
+                "zhenyuan_base_cost_per_second": "4.8",
+                "hunpo_resistance_max_bonus": "50.0",
+                "niantou_capacity_bonus": "200.0",
+                "hunpo_resistance_restore": "1.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:lvyaogu_active_emerald_restoration",
+            "usageTitle": "主动·绿耀回春",
+            "usageDesc": "以绿耀之光修补伤势与元气，治疗并净化负面状态，随后短暂获得抗性。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 治疗：{heal_amount} |\n 真元：+{zhenyuan_restore} |\n 精力：+{jingli_restore} |\n 魂魄：+{hunpo_restore} |\n 净化负面：{cleanse_harmful} |\n 再生：{regen_duration_ticks}t |\n 抗性：{resistance_duration_ticks}t",
+            "cost_duration": 6500,
+            "cost_total_niantou": 1500,
+            "metadata": {
+                "cooldown_ticks": "980",
+                "range": "12.0",
+                "heal_amount": "5.0",
+                "zhenyuan_restore": "220.0",
+                "jingli_restore": "80.0",
+                "hunpo_restore": "45.0",
+                "cleanse_harmful": "true",
+                "niantou_cost": "420.0",
+                "jingli_cost": "520.0",
+                "hunpo_cost": "280.0",
+                "zhenyuan_base_cost": "65000.0",
+                "regen_duration_ticks": "160",
+                "regen_amplifier": "0",
+                "resistance_duration_ticks": "120",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+

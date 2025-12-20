@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xun_dian_liu_guang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xun_dian_liu_guang_gu_passive_swift_current",
+            "usageTitle": "被动·迅电快手",
+            "usageDesc": "迅电流光贯通经络，提升攻速与出手效率；增益随光道道痕提升（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 攻速加成：{attribute_amount}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 2500,
+            "metadata": {
+                "niantou_cost_per_second": "22.0",
+                "jingli_cost_per_second": "30.0",
+                "hunpo_cost_per_second": "14.0",
+                "zhenyuan_base_cost_per_second": "7.0",
+                "attribute_amount": "0.15"
+            }
+        },
+        {
+            "usageID": "guzhenren:xun_dian_liu_guang_gu_active_swift_flash",
+            "usageTitle": "主动·迅电流光",
+            "usageDesc": "高速光遁挪移至前方安全落点，并在到达时以强光扰敌。",
+            "usageInfo": "基础距离：{distance} |\n 到达半径：{arrival_radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 加速：{speed_duration_ticks}t |\n 到达致盲：{arrival_blind_duration_ticks}t",
+            "cost_duration": 9500,
+            "cost_total_niantou": 3600,
+            "metadata": {
+                "cooldown_ticks": "720",
+                "distance": "10.0",
+                "arrival_radius": "5.0",
+                "ignore_walls": "false",
+                "knockback_strength": "0.25",
+                "knockback_vertical": "0.08",
+                "niantou_cost": "520.0",
+                "jingli_cost": "650.0",
+                "hunpo_cost": "320.0",
+                "zhenyuan_base_cost": "150000.0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "2",
+                "arrival_blind_duration_ticks": "50",
+                "arrival_blind_amplifier": "0"
+            }
+        }
+    ]
+}
+

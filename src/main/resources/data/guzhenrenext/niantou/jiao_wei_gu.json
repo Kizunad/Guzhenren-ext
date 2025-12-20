@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jiao_wei_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiao_wei_gu_passive_mermaid_tail",
+            "usageTitle": "被动·鲛尾",
+            "usageDesc": "鲛尾带来更强的水下机动，维持水下冲刺。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 水下加速：{effect_duration_ticks}t |",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "400",
+                "effect_duration_ticks": "180",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiao_wei_gu_active_aqua_support",
+            "usageTitle": "主动·水息扶持",
+            "usageDesc": "为周围盟友附加水下能力并治疗。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 净化负面：{cleanse_negative} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "radius": "12",
+                "cooldown_ticks": "780",
+                "niantou_cost": "720",
+                "zhenyuan_base_cost": "56000",
+                "heal_amount": "400",
+                "cleanse_negative": "false",
+                "effect_duration_ticks": "300",
+                "effect_amplifier": "0",
+                "jingli_cost": "360",
+                "hunpo_cost": "144"
+            }
+        }
+    ]
+}

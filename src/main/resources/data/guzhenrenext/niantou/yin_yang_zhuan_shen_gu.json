@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:yin_yang_zhuan_shen_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yin_yang_zhuan_shen_gu_passive_rebirth_flow",
+            "usageTitle": "被动·阴阳流转",
+            "usageDesc": "阴阳流转维持气机，少量回复生命、念头与真元。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 治疗：{heal_amount} |\n 念头回复：{niantou_gain} |\n 真元回复：{zhenyuan_gain} |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9000",
+                "heal_amount": "1000",
+                "niantou_gain": "1000",
+                "zhenyuan_gain": "12000"
+            }
+        },
+        {
+            "usageID": "guzhenren:yin_yang_zhuan_shen_gu_active_turn_over",
+            "usageTitle": "主动·转身易位",
+            "usageDesc": "与目标换位并短暂影响双方状态。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "range": "28",
+                "cooldown_ticks": "1400",
+                "niantou_cost": "130",
+                "zhenyuan_base_cost": "1100000",
+                "effect_duration_ticks": "350",
+                "effect_amplifier": "0",
+                "jingli_cost": "650",
+                "hunpo_cost": "260"
+            }
+        }
+    ]
+}

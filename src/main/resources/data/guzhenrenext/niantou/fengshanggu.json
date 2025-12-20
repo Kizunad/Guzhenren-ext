@@ -4,37 +4,42 @@
         {
             "usageID": "guzhenren:fengshanggu_passive_wind_wound",
             "usageTitle": "被动·风伤侵体",
-            "usageDesc": "风伤蛊以风刃割裂，攻击时有概率令敌人迟滞，并附带风道法术伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageDesc": "风伤蛊以风刃割裂，攻击时有概率令敌人迟滞，并附带风道伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
             "cost_duration": 1300,
             "cost_total_niantou": 125,
             "metadata": {
-                "proc_chance": "0.20",
-                "niantou_cost": "3.0",
+                "proc_chance": "0.06",
+                "cooldown_ticks": "120",
+                "niantou_cost": "28.0",
+                "jingli_cost": "22.0",
+                "hunpo_cost": "20.0",
+                "zhenyuan_base_cost": "180.0",
                 "effect_duration_ticks": "80",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "3.5"
+                "extra_magic_damage": "950.0"
             }
         },
         {
             "usageID": "guzhenren:fengshanggu_active_wind_wound",
             "usageTitle": "主动·风伤点杀",
-            "usageDesc": "锁定目标以风伤加深，令其迟滞并虚弱，同时造成风道法术伤害。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "锁定目标以风伤加深，令其迟滞并虚弱，同时造成风道伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 范围：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage}",
             "cost_duration": 1750,
             "cost_total_niantou": 175,
             "metadata": {
-                "cooldown_ticks": "300",
-                "range": "15.0",
-                "niantou_cost": "26.0",
-                "zhenyuan_base_cost": "320.0",
-                "extra_magic_damage": "8.0",
-                "slow_duration_ticks": "100",
+                "cooldown_ticks": "1200",
+                "range": "16.0",
+                "niantou_cost": "320.0",
+                "jingli_cost": "260.0",
+                "hunpo_cost": "240.0",
+                "zhenyuan_base_cost": "950.0",
+                "extra_magic_damage": "4200.0",
+                "slow_duration_ticks": "200",
                 "slow_amplifier": "0",
-                "weak_duration_ticks": "100",
+                "weak_duration_ticks": "200",
                 "weak_amplifier": "0"
             }
         }
     ]
 }
-

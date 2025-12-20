@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:bei_jia_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bei_jia_gu_passive_backplate_guard",
+            "usageTitle": "被动·背甲守御",
+            "usageDesc": "背甲护住要害，提升护甲。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 护甲：{attribute_amount} |",
+            "cost_duration": 18000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "32",
+                "attribute_amount": "30"
+            }
+        },
+        {
+            "usageID": "guzhenren:bei_jia_gu_active_backplate_shockwave",
+            "usageTitle": "主动·背甲震荡",
+            "usageDesc": "震荡背甲，冲击周围敌人并令其虚弱。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 24000,
+            "cost_total_niantou": 4800,
+            "metadata": {
+                "radius": "6.875",
+                "cooldown_ticks": "450",
+                "niantou_cost": "300",
+                "zhenyuan_base_cost": "2400",
+                "effect_duration_ticks": "125",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.1875",
+                "jingli_cost": "150",
+                "hunpo_cost": "60"
+            }
+        }
+    ]
+}

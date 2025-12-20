@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:liao_guang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:liao_guang_gu_passive_white_stream",
+            "usageTitle": "被动·白流疗光",
+            "usageDesc": "持续涌出温暖白光，缓慢治疗自己与友方，并回复部分修行资源（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 半径：{radius} |\n 治疗：{heal_amount}/s |\n 真元：+{zhenyuan_restore}/s |\n 精力：+{jingli_restore}/s |\n 魂魄：+{hunpo_restore}/s",
+            "cost_duration": 2600,
+            "cost_total_niantou": 360,
+            "metadata": {
+                "niantou_cost_per_second": "4.0",
+                "jingli_cost_per_second": "5.0",
+                "hunpo_cost_per_second": "2.0",
+                "zhenyuan_base_cost_per_second": "1.2",
+                "radius": "6.0",
+                "heal_amount": "1.0",
+                "zhenyuan_restore": "20.0",
+                "jingli_restore": "8.0",
+                "hunpo_restore": "5.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:liao_guang_gu_active_white_stream",
+            "usageTitle": "主动·群体疗光",
+            "usageDesc": "释放更强的疗光涌流，瞬间治疗并为友方附加再生，强度随光道道痕提升。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 治疗：{heal_amount} |\n 真元：+{zhenyuan_restore} |\n 精力：+{jingli_restore} |\n 魂魄：+{hunpo_restore} |\n 再生：{regen_duration_ticks}t",
+            "cost_duration": 3600,
+            "cost_total_niantou": 560,
+            "metadata": {
+                "cooldown_ticks": "760",
+                "radius": "8.0",
+                "ignore_walls": "false",
+                "heal_amount": "6.0",
+                "zhenyuan_restore": "160.0",
+                "jingli_restore": "55.0",
+                "hunpo_restore": "30.0",
+                "cleanse_harmful": "false",
+                "niantou_cost": "180.0",
+                "jingli_cost": "240.0",
+                "hunpo_cost": "120.0",
+                "zhenyuan_base_cost": "5000.0",
+                "regen_duration_ticks": "160",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}
+

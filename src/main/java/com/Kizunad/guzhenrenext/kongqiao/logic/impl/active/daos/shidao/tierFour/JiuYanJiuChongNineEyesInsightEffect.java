@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierFour;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
@@ -34,15 +36,13 @@ public class JiuYanJiuChongNineEyesInsightEffect implements IGuEffect {
     private static final String META_RADIUS = "radius";
     private static final String META_DURATION_TICKS = "duration_ticks";
     private static final String META_BONUS_DAMAGE = "bonus_damage";
-    private static final String META_ACTIVATE_ZHENYUAN_BASE_COST =
-        "activate_zhenyuan_base_cost";
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
 
     private static final double DEFAULT_RADIUS = 10.0;
     private static final int DEFAULT_DURATION_TICKS = 240;
     private static final double DEFAULT_BONUS_DAMAGE = 3.0;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 720.0;
     private static final int DEFAULT_COOLDOWN_TICKS = 600;
+    private static final double MAX_RADIUS = 64.0;
 
     @Override
     public String getUsageId() {
@@ -74,28 +74,20 @@ public class JiuYanJiuChongNineEyesInsightEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(
-                usageInfo,
-                META_ACTIVATE_ZHENYUAN_BASE_COST,
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
 
-        final double radius = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS)
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
         );
-        final int durationTicks = Math.max(
+        final double radius = UsageMetadataHelper.clamp(
+            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS),
+            0.0,
+            MAX_RADIUS
+        );
+        final int baseDurationTicks = Math.max(
             1,
             UsageMetadataHelper.getInt(
                 usageInfo,
@@ -103,6 +95,8 @@ public class JiuYanJiuChongNineEyesInsightEffect implements IGuEffect {
                 DEFAULT_DURATION_TICKS
             )
         );
+        final int durationTicks =
+            (int) Math.round(baseDurationTicks * selfMultiplier);
         user.getPersistentData()
             .putInt(TAG_ACTIVE_UNTIL_TICK, user.tickCount + durationTicks);
 
@@ -166,7 +160,12 @@ public class JiuYanJiuChongNineEyesInsightEffect implements IGuEffect {
                 DEFAULT_BONUS_DAMAGE
             )
         );
-        return (float) (damage + bonus);
+        final double multiplier = DaoHenCalculator.calculateMultiplier(
+            attacker,
+            target,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+        return (float) (damage + (bonus * multiplier));
     }
 
     private static List<LivingEntity> findTargets(
@@ -181,4 +180,3 @@ public class JiuYanJiuChongNineEyesInsightEffect implements IGuEffect {
         );
     }
 }
-

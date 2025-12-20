@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:yingyanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yingyanggu_passive_eagle_surge",
+            "usageTitle": "被动·鹰扬之势",
+            "usageDesc": "鹰扬之势使攻势更凌厉，提升攻速。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻速加成：{attribute_amount} |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9000",
+                "attribute_amount": "0.451"
+            }
+        },
+        {
+            "usageID": "guzhenren:yingyanggu_active_eagle_dive",
+            "usageTitle": "主动·鹰扑",
+            "usageDesc": "锁定目标将其推离，附带虚弱。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 力度：{force} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "range": "28",
+                "cooldown_ticks": "735",
+                "niantou_cost": "880",
+                "zhenyuan_base_cost": "760000",
+                "force": "2.275",
+                "effect_duration_ticks": "245",
+                "effect_amplifier": "0",
+                "jingli_cost": "440",
+                "hunpo_cost": "176"
+            }
+        }
+    ]
+}

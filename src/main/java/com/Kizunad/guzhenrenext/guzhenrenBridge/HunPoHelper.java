@@ -67,7 +67,7 @@ public final class HunPoHelper {
 
             if (Double.compare(original, newValue) != 0) {
                 vars.hunpo = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {
@@ -121,7 +121,7 @@ public final class HunPoHelper {
             double next = Math.max(0.0, value);
             if (Double.compare(vars.hunpo_kangxing_shangxian, next) != 0) {
                 vars.hunpo_kangxing_shangxian = next;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return next;
         } catch (Exception e) {
@@ -167,7 +167,7 @@ public final class HunPoHelper {
 
             if (Double.compare(original, newValue) != 0) {
                 vars.hunpo_kangxing = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {

@@ -5,29 +5,34 @@
             "usageID": "guzhenren:jiu_chong_passive_refine_zhenyuan",
             "usageTitle": "被动·酒酿精元",
             "usageDesc": "酒虫以酒水为食，寄宿空窍时会把饱和化作更精纯的真元。饱食不足则酿造乏力。",
-            "usageInfo": "条件：饱食度≥{min_hunger} | 消耗：{sat_cost}/s(饱和) | 回复：{zhenyuan_gain}/s(真元)",
+            "usageInfo": "条件：饱食度≥{min_hunger} | 消耗：{sat_cost}/s(饱和) +{niantou_cost_per_second}(念头)+{jingli_cost_per_second}(精力)+{hunpo_cost_per_second}(魂魄) | 回复：{zhenyuan_gain}/s(真元)",
             "cost_duration": 480,
             "cost_total_niantou": 25,
             "metadata": {
                 "min_hunger": "6",
                 "sat_cost": "0.2",
-                "zhenyuan_gain": "6.0"
+                "zhenyuan_gain": "8.0",
+                "niantou_cost_per_second": "2.0",
+                "jingli_cost_per_second": "1.0",
+                "hunpo_cost_per_second": "0.5"
             }
         },
         {
             "usageID": "guzhenren:jiu_chong_active_warm_brew",
             "usageTitle": "主动·温酒化元",
             "usageDesc": "温酒入喉，气血微热，真元随之翻涌。立刻以饱食为引，化出一口真元，并短暂提速。",
-            "usageInfo": "消耗：{hunger_cost}(饱食度) | 回复：{zhenyuan_gain}(真元) | 速度：{speed_seconds}s | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "消耗：{hunger_cost}(饱食度) +{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 回复：{zhenyuan_gain}(真元) | 速度：{speed_seconds}s | 冷却：{cooldown_ticks}tick",
             "cost_duration": 600,
             "cost_total_niantou": 40,
             "metadata": {
                 "hunger_cost": "2",
-                "zhenyuan_gain": "60.0",
+                "zhenyuan_gain": "120.0",
                 "speed_seconds": "6",
-                "cooldown_ticks": "200"
+                "cooldown_ticks": "200",
+                "niantou_cost": "150.0",
+                "jingli_cost": "70.0",
+                "hunpo_cost": "30.0"
             }
         }
     ]
 }
-

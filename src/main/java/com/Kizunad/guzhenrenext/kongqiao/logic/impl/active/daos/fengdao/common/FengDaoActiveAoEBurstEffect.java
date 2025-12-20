@@ -1,11 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
@@ -20,7 +19,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * 风道通用主动：范围爆发（以自身为中心），可造成法术伤害并施加 debuff，附带风压推斥。
+ * 风道通用主动：范围爆发（以自身为中心），造成普通伤害并施加 debuff，附带风压推斥。
  */
 public class FengDaoActiveAoEBurstEffect implements IGuEffect {
 
@@ -35,6 +34,7 @@ public class FengDaoActiveAoEBurstEffect implements IGuEffect {
     private static final double DEFAULT_RADIUS = 4.0;
     private static final double DEFAULT_PUSH_STRENGTH = 0.35;
     private static final double DIRECTION_EPSILON_SQR = 1.0E-6;
+    private static final int MAX_EFFECT_DURATION_TICKS = 20 * 30;
 
     public record EffectSpec(
         Holder<MobEffect> effect,
@@ -93,33 +93,8 @@ public class FengDaoActiveAoEBurstEffect implements IGuEffect {
             UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS)
         );
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(Component.literal("念头不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
-        }
-
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
-            return false;
-        }
-
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
         }
 
         final double baseDamage = Math.max(
@@ -149,12 +124,12 @@ public class FengDaoActiveAoEBurstEffect implements IGuEffect {
                     DaoHenHelper.DaoType.FENG_DAO
                 );
                 victim.hurt(
-                    user.damageSources().magic(),
+                    user.damageSources().mobAttack(user),
                     (float) (baseDamage * multiplier)
                 );
             }
 
-            applyEffects(victim, usageInfo);
+            applyEffects(user, victim, usageInfo);
             applyPush(user, victim, pushStrength);
         }
 
@@ -178,12 +153,17 @@ public class FengDaoActiveAoEBurstEffect implements IGuEffect {
     }
 
     private void applyEffects(
+        final LivingEntity user,
         final LivingEntity victim,
         final NianTouData.Usage usageInfo
     ) {
         if (effects == null) {
             return;
         }
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.FENG_DAO
+        );
         for (EffectSpec spec : effects) {
             if (spec == null || spec.effect() == null) {
                 continue;
@@ -204,11 +184,15 @@ public class FengDaoActiveAoEBurstEffect implements IGuEffect {
                     spec.defaultAmplifier()
                 )
             );
-            if (duration > 0) {
+            final int scaledDuration = (int) Math.min(
+                MAX_EFFECT_DURATION_TICKS,
+                Math.round(duration * multiplier)
+            );
+            if (scaledDuration > 0) {
                 victim.addEffect(
                     new MobEffectInstance(
                         spec.effect(),
-                        duration,
+                        scaledDuration,
                         amplifier,
                         true,
                         true

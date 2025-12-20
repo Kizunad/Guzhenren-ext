@@ -1,9 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierThree;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.damagesource.DamageSource;
@@ -84,12 +87,25 @@ public class DaFuPianPianGuFatShieldEffect implements IGuEffect {
             player.causeFoodExhaustion(hungerCost * EXHAUSTION_PER_HUNGER);
         }
 
-        final double ratio = UsageMetadataHelper.clamp(
+        if (!GuEffectCostHelper.tryConsumeOnce(null, victim, usageInfo)) {
+            return damage;
+        }
+
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            victim,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+        final double baseRatio = UsageMetadataHelper.clamp(
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_REDUCTION_RATIO,
                 DEFAULT_REDUCTION_RATIO
             ),
+            0.0,
+            0.90
+        );
+        final double ratio = UsageMetadataHelper.clamp(
+            baseRatio * multiplier,
             0.0,
             0.90
         );
@@ -113,4 +129,3 @@ public class DaFuPianPianGuFatShieldEffect implements IGuEffect {
         return (float) (damage * (1.0 - ratio));
     }
 }
-

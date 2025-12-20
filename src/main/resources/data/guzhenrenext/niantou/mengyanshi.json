@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:mengyanshi",
+    "usages": [
+        {
+            "usageID": "guzhenren:mengyanshi_passive_nightmare_hide",
+            "usageTitle": "被动·梦魇之躯",
+            "usageDesc": "梦魇尸形态对多种伤害更耐受，维持抗性。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 抗性：{effect_duration_ticks}t |",
+            "cost_duration": 26000000,
+            "cost_total_niantou": 6400000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "140000",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:mengyanshi_active_nightmare_strike",
+            "usageTitle": "主动·梦魇侵袭",
+            "usageDesc": "锁定目标以梦魇侵袭，致盲并减速。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 32000000,
+            "cost_total_niantou": 13000000,
+            "metadata": {
+                "range": "32",
+                "cooldown_ticks": "1520",
+                "niantou_cost": "160",
+                "zhenyuan_base_cost": "13000000",
+                "effect_duration_ticks": "480",
+                "effect_amplifier": "0",
+                "jingli_cost": "800",
+                "hunpo_cost": "320"
+            }
+        }
+    ]
+}

@@ -48,7 +48,15 @@ public final class GuModEffects {
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.tierFive.TierFiveZhiDaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierOne.TierOneBianHuaDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierTwo.TierTwoBianHuaDaoRegistry
+            .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierThree.TierThreeBianHuaDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierFour.TierFourBianHuaDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierFive.TierFiveBianHuaDaoRegistry
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierOne.TierOneShiDaoRegistry
             .registerAll();
@@ -77,6 +85,24 @@ public final class GuModEffects {
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierFour.TierFourFengDaoRegistry
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierFive.TierFiveFengDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.guangdao.tierOne.TierOneGuangDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.guangdao.tierThree.TierThreeGuangDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.guangdao.tierFour.TierFourGuangDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.guangdao.tierFive.TierFiveGuangDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.tierOne.TierOneBingXueDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.tierTwo.TierTwoBingXueDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.tierThree.TierThreeBingXueDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.tierFour.TierFourBingXueDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.tierFive.TierFiveBingXueDaoRegistry
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierOne.TierOneYuDaoRegistry
             .registerAll();

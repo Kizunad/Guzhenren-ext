@@ -61,7 +61,7 @@ public final class JingLiHelper {
             double newValue = Math.max(0, Math.min(max, original + amount));
             if (Double.compare(original, newValue) != 0) {
                 vars.jingli = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {

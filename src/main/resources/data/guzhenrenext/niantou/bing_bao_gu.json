@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:bing_bao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bing_bao_gu_passive_ice_charge",
+            "usageTitle": "被动·冰爆护体",
+            "usageDesc": "冰爆蛊在体内沉凝寒意，遇爆炸之力时可骤然泄压，减免部分爆炸伤害。",
+            "usageInfo": "触发率：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)/次 | 爆炸减伤：x{damage_multiplier}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.20",
+                "cooldown_ticks": "200",
+                "niantou_cost": "60.0",
+                "jingli_cost": "18.0",
+                "hunpo_cost": "10.0",
+                "zhenyuan_base_cost": "6000000.0",
+                "damage_multiplier": "0.65"
+            }
+        },
+        {
+            "usageID": "guzhenren:bing_bao_gu_active_ice_explosion",
+            "usageTitle": "主动·引冰成爆",
+            "usageDesc": "锁定目标，以寒意引爆周围冰雪之气，冰块越多爆发越强，但不破坏地形。",
+            "usageInfo": "距离：{range} | 半径：{radius} | 基础伤害：{base_magic_damage} | 冰块增幅：+{per_ice_block_bonus}/块(上限{max_ice_blocks}块) | 冻结：+{freeze_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 360,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "range": "14.0",
+                "radius": "4.5",
+                "scan_radius": "5",
+                "max_ice_blocks": "80",
+                "niantou_cost": "280.0",
+                "jingli_cost": "90.0",
+                "hunpo_cost": "40.0",
+                "zhenyuan_base_cost": "24000000.0",
+                "base_magic_damage": "80.0",
+                "per_ice_block_bonus": "0.40",
+                "freeze_ticks": "80"
+            }
+        }
+    ]
+}

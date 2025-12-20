@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:yu_lin_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_lin_gu_passive_fish_scale_vigor",
+            "usageTitle": "被动·鱼鳞生机",
+            "usageDesc": "以鱼鳞滋养皮肉，提升生命上限。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 生命上限：{attribute_amount} |",
+            "cost_duration": 1600,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.8",
+                "attribute_amount": "2"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_lin_gu_active_aqua_skin",
+            "usageTitle": "主动·水皮",
+            "usageDesc": "唤起水性皮膜，短时间水下不滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "niantou_cost": "18",
+                "zhenyuan_base_cost": "140",
+                "heal_amount": "2",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "jingli_cost": "9",
+                "hunpo_cost": "3.6"
+            }
+        }
+    ]
+}

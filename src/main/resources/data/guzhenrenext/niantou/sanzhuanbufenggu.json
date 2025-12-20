@@ -5,35 +5,40 @@
             "usageID": "guzhenren:sanzhuanbufenggu_passive_wind_net",
             "usageTitle": "被动·风网缠身",
             "usageDesc": "三转捕风蛊以风丝成网，攻击时有概率令目标迟滞，并附带少量风道伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
             "cost_duration": 1050,
             "cost_total_niantou": 85,
             "metadata": {
-                "proc_chance": "0.22",
-                "niantou_cost": "2.0",
+                "proc_chance": "0.10",
+                "cooldown_ticks": "60",
+                "niantou_cost": "14.0",
+                "jingli_cost": "10.0",
+                "hunpo_cost": "8.0",
+                "zhenyuan_base_cost": "70.0",
                 "effect_duration_ticks": "80",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "2.5"
+                "extra_magic_damage": "100.0"
             }
         },
         {
             "usageID": "guzhenren:sanzhuanbufenggu_active_wind_net",
             "usageTitle": "主动·风网扩散",
-            "usageDesc": "以自身为中心撒开风网，造成风道法术伤害并迟滞周围敌人，附带推斥。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "以自身为中心撒开风网，造成风道伤害并迟滞周围敌人，附带推斥。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{magic_damage}",
             "cost_duration": 1400,
             "cost_total_niantou": 120,
             "metadata": {
-                "cooldown_ticks": "260",
-                "radius": "5.0",
-                "push_strength": "0.50",
-                "niantou_cost": "20.0",
-                "zhenyuan_base_cost": "250.0",
-                "magic_damage": "5.0",
-                "effect_duration_ticks": "100",
+                "cooldown_ticks": "550",
+                "radius": "5.5",
+                "push_strength": "0.55",
+                "niantou_cost": "180.0",
+                "jingli_cost": "130.0",
+                "hunpo_cost": "110.0",
+                "zhenyuan_base_cost": "480.0",
+                "magic_damage": "320.0",
+                "effect_duration_ticks": "120",
                 "effect_amplifier": "0"
             }
         }
     ]
 }
-

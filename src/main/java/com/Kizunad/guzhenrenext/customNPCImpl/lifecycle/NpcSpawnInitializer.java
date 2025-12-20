@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.customNPCImpl.lifecycle;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.PlayerVariablesSyncHelper;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.customNPCs.registry.NpcSpawnRegistry;
 import javax.annotation.Nullable;
@@ -57,7 +58,7 @@ public final class NpcSpawnInitializer {
             variables.zhuanshu = DEFAULT_STAGE_VALUE;
             variables.jieduan = DEFAULT_STAGE_VALUE;
 
-            variables.markSyncDirty();
+            PlayerVariablesSyncHelper.markSyncDirty(variables);
         } catch (Exception ignored) {
             // 读取/写入失败时直接跳过，避免阻塞实体生成
         }

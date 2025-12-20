@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:hu_yao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hu_yao_gu_passive_fox_grace",
+            "usageTitle": "被动·狐行",
+            "usageDesc": "狐妖形态更轻灵，提升移速。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount} |",
+            "cost_duration": 18000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "30",
+                "attribute_amount": "0.135"
+            }
+        },
+        {
+            "usageID": "guzhenren:hu_yao_gu_active_fox_pounce",
+            "usageTitle": "主动·狐扑",
+            "usageDesc": "锁定目标突进牵引，打乱站位。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 力度：{force} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 24000,
+            "cost_total_niantou": 4800,
+            "metadata": {
+                "range": "12.5",
+                "cooldown_ticks": "300",
+                "niantou_cost": "220",
+                "zhenyuan_base_cost": "1800",
+                "force": "1.125",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "jingli_cost": "110",
+                "hunpo_cost": "44"
+            }
+        }
+    ]
+}

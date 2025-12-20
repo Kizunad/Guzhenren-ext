@@ -48,7 +48,7 @@ public final class QiyunHelper {
             final double newValue = max > 0.0 ? Math.min(raw, max) : raw;
             if (Double.compare(original, newValue) != 0) {
                 vars.qiyun = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {
@@ -62,4 +62,3 @@ public final class QiyunHelper {
         return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
     }
 }
-

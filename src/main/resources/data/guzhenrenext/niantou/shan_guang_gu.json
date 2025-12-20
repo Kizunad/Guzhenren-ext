@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:shan_guang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shan_guang_gu_passive_dazzling_guard",
+            "usageTitle": "被动·耀目护体",
+            "usageDesc": "维持周身微光护罩，受击时以强光反制来犯者并削减部分伤害（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 触发冷却：{proc_cooldown_ticks}t |\n 减伤：{damage_reduction_ratio}（上限 {max_reduction_ratio}） |\n 反制致盲：{blind_duration_ticks}t",
+            "cost_duration": 800,
+            "cost_total_niantou": 50,
+            "metadata": {
+                "niantou_cost_per_second": "0.8",
+                "jingli_cost_per_second": "0.9",
+                "hunpo_cost_per_second": "0.4",
+                "zhenyuan_base_cost_per_second": "0.12",
+                "proc_cooldown_ticks": "60",
+                "projectile_only": "false",
+                "damage_reduction_ratio": "0.08",
+                "max_reduction_ratio": "0.50",
+                "blind_duration_ticks": "40",
+                "blind_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shan_guang_gu_active_flash_burst",
+            "usageTitle": "主动·闪光爆",
+            "usageDesc": "爆发一团刺眼白光，短暂致盲范围内敌人并令其显形；强度随光道道痕提升。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 致盲：{blind_duration_ticks}t |\n 显形：{glowing_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "cooldown_ticks": "400",
+                "radius": "6.0",
+                "ignore_walls": "false",
+                "knockback_strength": "0.0",
+                "knockback_vertical": "0.0",
+                "niantou_cost": "40.0",
+                "jingli_cost": "55.0",
+                "hunpo_cost": "25.0",
+                "zhenyuan_base_cost": "500.0",
+                "blind_duration_ticks": "80",
+                "blind_amplifier": "0",
+                "glowing_duration_ticks": "160",
+                "glowing_amplifier": "0"
+            }
+        }
+    ]
+}
+

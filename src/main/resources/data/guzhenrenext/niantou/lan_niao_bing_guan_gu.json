@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:lan_niao_bing_guan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:lan_niao_bing_guan_gu_passive_lock_on",
+            "usageTitle": "被动·蓝芒锁敌",
+            "usageDesc": "蓝鸟冰棺蛊可在出手瞬间锁定敌人，触发时爆发寒气并强化对受寒目标的压制。",
+            "usageInfo": "触发率：{proc_chance} | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)/次 | 缓慢：{effect_duration_ticks}t | 冻结：+{freeze_ticks}t | 追加伤害：{extra_magic_damage} | 受寒增伤：+{damage_bonus_vs_frozen}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.03",
+                "niantou_cost": "110.0",
+                "jingli_cost": "30.0",
+                "hunpo_cost": "15.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "1",
+                "freeze_ticks": "140",
+                "extra_magic_damage": "20.0",
+                "damage_bonus_vs_frozen": "0.20"
+            }
+        },
+        {
+            "usageID": "guzhenren:lan_niao_bing_guan_gu_active_ice_coffin",
+            "usageTitle": "主动·冰棺封印",
+            "usageDesc": "锁定目标，蓝芒暴涨，寒气化作半透明冰棺将其封印，强制冻结并削弱其力量。",
+            "usageInfo": "距离：{range} | 冻结：+{freeze_ticks}t | 缓慢：{slowness_duration_ticks}t | 虚弱：{weakness_duration_ticks}t | 伤害：{magic_damage} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 520,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "cooldown_ticks": "1000",
+                "range": "20.0",
+                "niantou_cost": "420.0",
+                "jingli_cost": "140.0",
+                "hunpo_cost": "60.0",
+                "zhenyuan_base_cost": "36000000.0",
+                "freeze_ticks": "320",
+                "slowness_duration_ticks": "140",
+                "slowness_amplifier": "4",
+                "weakness_duration_ticks": "140",
+                "weakness_amplifier": "1",
+                "magic_damage": "150.0"
+            }
+        }
+    ]
+}

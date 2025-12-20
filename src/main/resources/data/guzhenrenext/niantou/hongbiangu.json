@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:hongbiangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hongbiangu_passive_spectrum_edge",
+            "usageTitle": "被动·虹锋附焰",
+            "usageDesc": "虹边凝作锋芒，攻击时附带灼烧并提升输出（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 触发冷却：{proc_cooldown_ticks}t |\n 增伤乘区：{damage_multiplier} |\n 附加伤害：{bonus_damage} |\n 点燃：{burn_seconds}s",
+            "cost_duration": 5200,
+            "cost_total_niantou": 980,
+            "metadata": {
+                "niantou_cost_per_second": "9.0",
+                "jingli_cost_per_second": "14.0",
+                "hunpo_cost_per_second": "6.0",
+                "zhenyuan_base_cost_per_second": "4.2",
+                "proc_cooldown_ticks": "50",
+                "damage_multiplier": "0.16",
+                "bonus_damage": "2.0",
+                "burn_seconds": "2",
+                "glowing_duration_ticks": "0",
+                "weakness_duration_ticks": "0",
+                "weakness_amplifier": "0",
+                "slow_duration_ticks": "0",
+                "slow_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:hongbiangu_active_spectrum_burst",
+            "usageTitle": "主动·虹爆斩",
+            "usageDesc": "爆发虹光斩击周围敌人，造成物理伤害并点燃、致盲。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 伤害：{damage} |\n 点燃：{burn_seconds}s |\n 致盲：{blind_duration_ticks}t",
+            "cost_duration": 6500,
+            "cost_total_niantou": 1300,
+            "metadata": {
+                "cooldown_ticks": "920",
+                "radius": "6.0",
+                "ignore_walls": "false",
+                "damage": "5.0",
+                "burn_seconds": "4",
+                "blind_duration_ticks": "60",
+                "niantou_cost": "360.0",
+                "jingli_cost": "420.0",
+                "hunpo_cost": "260.0",
+                "zhenyuan_base_cost": "45000.0"
+            }
+        }
+    ]
+}
+

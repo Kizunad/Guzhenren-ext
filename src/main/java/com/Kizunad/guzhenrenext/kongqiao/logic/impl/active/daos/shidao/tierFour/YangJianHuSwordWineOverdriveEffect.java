@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierFour;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.network.chat.Component;
@@ -29,14 +31,11 @@ public class YangJianHuSwordWineOverdriveEffect implements IGuEffect {
     private static final String META_DURATION_TICKS = "duration_ticks";
     private static final String META_BONUS_DAMAGE = "bonus_damage";
     private static final String META_HURT_MULTIPLIER = "hurt_multiplier";
-    private static final String META_ACTIVATE_ZHENYUAN_BASE_COST =
-        "activate_zhenyuan_base_cost";
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
 
     private static final int DEFAULT_DURATION_TICKS = 240;
     private static final double DEFAULT_BONUS_DAMAGE = 4.0;
     private static final double DEFAULT_HURT_MULTIPLIER = 0.85;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 720.0;
     private static final int DEFAULT_COOLDOWN_TICKS = 620;
 
     @Override
@@ -69,24 +68,15 @@ public class YangJianHuSwordWineOverdriveEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(
-                usageInfo,
-                META_ACTIVATE_ZHENYUAN_BASE_COST,
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
 
-        final int durationTicks = Math.max(
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+        final int baseDurationTicks = Math.max(
             1,
             UsageMetadataHelper.getInt(
                 usageInfo,
@@ -94,6 +84,8 @@ public class YangJianHuSwordWineOverdriveEffect implements IGuEffect {
                 DEFAULT_DURATION_TICKS
             )
         );
+        final int durationTicks =
+            (int) Math.round(baseDurationTicks * selfMultiplier);
         user.getPersistentData()
             .putInt(TAG_ACTIVE_UNTIL_TICK, user.tickCount + durationTicks);
 
@@ -139,7 +131,12 @@ public class YangJianHuSwordWineOverdriveEffect implements IGuEffect {
                 DEFAULT_BONUS_DAMAGE
             )
         );
-        return (float) (damage + bonus);
+        final double multiplier = DaoHenCalculator.calculateMultiplier(
+            attacker,
+            target,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+        return (float) (damage + (bonus * multiplier));
     }
 
     @Override
@@ -157,7 +154,7 @@ public class YangJianHuSwordWineOverdriveEffect implements IGuEffect {
             return damage;
         }
 
-        final double multiplier = UsageMetadataHelper.clamp(
+        final double baseMultiplier = UsageMetadataHelper.clamp(
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_HURT_MULTIPLIER,
@@ -166,11 +163,19 @@ public class YangJianHuSwordWineOverdriveEffect implements IGuEffect {
             0.0,
             1.0
         );
-        return (float) (damage * multiplier);
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            victim,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+        final double enhancedMultiplier = UsageMetadataHelper.clamp(
+            1.0 - ((1.0 - baseMultiplier) * selfMultiplier),
+            0.05,
+            1.0
+        );
+        return (float) (damage * enhancedMultiplier);
     }
 
     private static boolean isActive(final LivingEntity user) {
         return user.getPersistentData().getInt(TAG_ACTIVE_UNTIL_TICK) > user.tickCount;
     }
 }
-

@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.customNPCImpl.lifecycle;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.PlayerVariablesSyncHelper;
 import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import net.guzhenren.network.GuzhenrenModVariables;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public final class NpcResourceRegeneration {
             }
 
             // 标记变量已修改，确保同步
-            variables.markSyncDirty();
+            PlayerVariablesSyncHelper.markSyncDirty(variables);
         } catch (Exception e) {
             LOGGER.warn(
                 "Failed to regenerate Guzhenren resources for NPC {}: {}",

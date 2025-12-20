@@ -1,0 +1,52 @@
+{
+    "itemID": "guzhenren:xiaoguanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xiaoguanggu_passive_twinkling_assist",
+            "usageTitle": "被动·微光助攻",
+            "usageDesc": "微光牵引命中要害，攻击时更易削弱敌人并附带少量增伤（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 触发冷却：{proc_cooldown_ticks}t |\n 增伤乘区：{damage_multiplier} |\n 附加伤害：{bonus_damage} |\n 虚弱：{weakness_duration_ticks}t",
+            "cost_duration": 850,
+            "cost_total_niantou": 55,
+            "metadata": {
+                "niantou_cost_per_second": "0.9",
+                "jingli_cost_per_second": "1.1",
+                "hunpo_cost_per_second": "0.5",
+                "zhenyuan_base_cost_per_second": "0.15",
+                "proc_cooldown_ticks": "40",
+                "damage_multiplier": "0.08",
+                "bonus_damage": "0.50",
+                "burn_seconds": "0",
+                "glowing_duration_ticks": "80",
+                "weakness_duration_ticks": "60",
+                "weakness_amplifier": "0",
+                "slow_duration_ticks": "0",
+                "slow_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xiaoguanggu_active_warm_glimmer",
+            "usageTitle": "主动·温光回护",
+            "usageDesc": "引微光入体，治疗并净化负面状态；若锁定目标则优先治疗目标。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 治疗：{heal_amount} |\n 净化负面：{cleanse_harmful} |\n 再生：{regen_duration_ticks}t",
+            "cost_duration": 1300,
+            "cost_total_niantou": 110,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "range": "12.0",
+                "heal_amount": "4.0",
+                "zhenyuan_restore": "120.0",
+                "jingli_restore": "40.0",
+                "hunpo_restore": "20.0",
+                "cleanse_harmful": "true",
+                "niantou_cost": "65.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "35.0",
+                "zhenyuan_base_cost": "900.0",
+                "regen_duration_ticks": "120",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}
+

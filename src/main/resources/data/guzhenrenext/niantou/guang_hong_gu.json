@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:guang_hong_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:guang_hong_gu_passive_rainbow_stride",
+            "usageTitle": "被动·虹行轻身",
+            "usageDesc": "身化光虹，步履轻快，常驻提升移动速度；速度随光道道痕提升（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 速度加成：{attribute_amount}",
+            "cost_duration": 3000,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "niantou_cost_per_second": "5.5",
+                "jingli_cost_per_second": "7.0",
+                "hunpo_cost_per_second": "3.5",
+                "zhenyuan_base_cost_per_second": "2.2",
+                "attribute_amount": "0.06"
+            }
+        },
+        {
+            "usageID": "guzhenren:guang_hong_gu_active_light_escape",
+            "usageTitle": "主动·光虹遁走",
+            "usageDesc": "化虹挪移至前方安全落点，并在落地时以余光扰敌。",
+            "usageInfo": "基础距离：{distance} |\n 到达半径：{arrival_radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 加速：{speed_duration_ticks}t |\n 缓降：{slow_fall_duration_ticks}t |\n 到达致盲：{arrival_blind_duration_ticks}t",
+            "cost_duration": 4200,
+            "cost_total_niantou": 760,
+            "metadata": {
+                "cooldown_ticks": "720",
+                "distance": "8.0",
+                "arrival_radius": "4.0",
+                "ignore_walls": "false",
+                "knockback_strength": "0.20",
+                "knockback_vertical": "0.06",
+                "niantou_cost": "220.0",
+                "jingli_cost": "280.0",
+                "hunpo_cost": "140.0",
+                "zhenyuan_base_cost": "10000.0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "1",
+                "slow_fall_duration_ticks": "160",
+                "slow_fall_amplifier": "0",
+                "arrival_blind_duration_ticks": "40",
+                "arrival_blind_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:bing_ji_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bing_ji_gu_passive_ice_body",
+            "usageTitle": "被动·冰肌玉骨",
+            "usageDesc": "改造蛊师身躯，将身体练成冰肌，可耐冰霜寒冷，防御卓绝，并在维持时清空冻结。",
+            "usageInfo": "维持消耗：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 护甲：+{armor_bonus} | 韧性：+{toughness_bonus} | 生命：+{max_health_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "niantou_cost_per_second": "15.0",
+                "jingli_cost_per_second": "6.0",
+                "hunpo_cost_per_second": "3.0",
+                "zhenyuan_base_cost_per_second": "240000.0",
+                "armor_bonus": "4.0",
+                "toughness_bonus": "2.0",
+                "max_health_bonus": "6.0",
+                "clear_freeze": "true"
+            }
+        },
+        {
+            "usageID": "guzhenren:bing_ji_gu_active_ice_body",
+            "usageTitle": "主动·寒肌凝甲",
+            "usageDesc": "短时间内将冰肌玉骨催动至极致，硬化成甲，持续恢复并提升抗性。",
+            "usageInfo": "抗性：{resistance_duration_ticks}t | 再生：{regen_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "niantou_cost": "320.0",
+                "jingli_cost": "100.0",
+                "hunpo_cost": "50.0",
+                "zhenyuan_base_cost": "28000000.0",
+                "resistance_duration_ticks": "200",
+                "resistance_amplifier": "0",
+                "regen_duration_ticks": "200",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}

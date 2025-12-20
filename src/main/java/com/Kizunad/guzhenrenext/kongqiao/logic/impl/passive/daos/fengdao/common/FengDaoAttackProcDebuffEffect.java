@@ -1,38 +1,41 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import net.minecraft.core.Holder;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 风道通用被动：攻击触发（概率）对目标施加 debuff，并可附带额外法术伤害。
+ * 风道通用被动：攻击触发（概率）对目标施加 debuff，并可附带额外普通伤害。
  */
 public class FengDaoAttackProcDebuffEffect implements IGuEffect {
 
     private static final String META_PROC_CHANCE = "proc_chance";
-    private static final String META_NIANTOU_COST = "niantou_cost";
+    private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_EFFECT_DURATION_TICKS = "effect_duration_ticks";
     private static final String META_EFFECT_AMPLIFIER = "effect_amplifier";
     private static final String META_EXTRA_MAGIC_DAMAGE = "extra_magic_damage";
 
     private static final double DEFAULT_PROC_CHANCE = 0.15;
+    private static final int DEFAULT_COOLDOWN_TICKS = 0;
     private static final int DEFAULT_EFFECT_DURATION_TICKS = 60;
     private static final int DEFAULT_EFFECT_AMPLIFIER = 0;
     private static final double DEFAULT_EXTRA_MAGIC_DAMAGE = 0.0;
+    private static final int MAX_EFFECT_DURATION_TICKS = 20 * 30;
 
     private final String usageId;
     private final Holder<MobEffect> debuff;
+    private final String nbtCooldownKey;
 
     public FengDaoAttackProcDebuffEffect(
         final String usageId,
@@ -40,6 +43,7 @@ public class FengDaoAttackProcDebuffEffect implements IGuEffect {
     ) {
         this.usageId = usageId;
         this.debuff = debuff;
+        this.nbtCooldownKey = buildCooldownKey(usageId);
     }
 
     @Override
@@ -64,6 +68,14 @@ public class FengDaoAttackProcDebuffEffect implements IGuEffect {
             return damage;
         }
 
+        final int remain = GuEffectCooldownHelper.getRemainingTicks(
+            attacker,
+            nbtCooldownKey
+        );
+        if (remain > 0) {
+            return damage;
+        }
+
         final double chance = UsageMetadataHelper.clamp(
             UsageMetadataHelper.getDouble(
                 usageInfo,
@@ -77,15 +89,8 @@ public class FengDaoAttackProcDebuffEffect implements IGuEffect {
             return damage;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(attacker) < niantouCost) {
+        if (!GuEffectCostHelper.tryConsumeOnce(null, attacker, usageInfo)) {
             return damage;
-        }
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(attacker, -niantouCost);
         }
 
         final int duration = Math.max(
@@ -104,9 +109,23 @@ public class FengDaoAttackProcDebuffEffect implements IGuEffect {
                 DEFAULT_EFFECT_AMPLIFIER
             )
         );
-        if (debuff != null && duration > 0) {
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            attacker,
+            DaoHenHelper.DaoType.FENG_DAO
+        );
+        final int scaledDuration = (int) Math.min(
+            MAX_EFFECT_DURATION_TICKS,
+            Math.round(duration * selfMultiplier)
+        );
+        if (debuff != null && scaledDuration > 0) {
             target.addEffect(
-                new MobEffectInstance(debuff, duration, amplifier, true, true)
+                new MobEffectInstance(
+                    debuff,
+                    scaledDuration,
+                    amplifier,
+                    true,
+                    true
+                )
             );
         }
 
@@ -124,10 +143,35 @@ public class FengDaoAttackProcDebuffEffect implements IGuEffect {
                 target,
                 DaoHenHelper.DaoType.FENG_DAO
             );
-            final DamageSource source = attacker.damageSources().magic();
-            target.hurt(source, (float) (extraMagicDamage * multiplier));
+            target.hurt(
+                attacker.damageSources().mobAttack(attacker),
+                (float) (extraMagicDamage * multiplier)
+            );
+        }
+
+        final int cooldownTicks = Math.max(
+            0,
+            UsageMetadataHelper.getInt(
+                usageInfo,
+                META_COOLDOWN_TICKS,
+                DEFAULT_COOLDOWN_TICKS
+            )
+        );
+        if (cooldownTicks > 0) {
+            GuEffectCooldownHelper.setCooldownUntilTick(
+                attacker,
+                nbtCooldownKey,
+                attacker.tickCount + cooldownTicks
+            );
         }
 
         return damage;
+    }
+
+    private static String buildCooldownKey(final String usageId) {
+        final String rawUsageId = usageId == null ? "unknown" : usageId;
+        return "GuzhenrenExtCooldown_"
+            + rawUsageId.replace(':', '_').replace('/', '_')
+            + "_attack_proc";
     }
 }

@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:guang_zha_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:guang_zha_gu_passive_prism_barrier",
+            "usageTitle": "被动·光栅壁障",
+            "usageDesc": "以光栅凝为护壁，常驻提高护甲；增益随光道道痕提升（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 护甲加成：{attribute_amount}",
+            "cost_duration": 2800,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "niantou_cost_per_second": "5.0",
+                "jingli_cost_per_second": "6.0",
+                "hunpo_cost_per_second": "3.0",
+                "zhenyuan_base_cost_per_second": "1.8",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:guang_zha_gu_active_prism_wall",
+            "usageTitle": "主动·立栅成墙",
+            "usageDesc": "短时间内大幅强化防御并震退周围敌人，随后护壁消散。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 自身抗性：{self_resistance_duration_ticks}t |\n 自身吸收：{self_absorption_duration_ticks}t |\n 敌方致盲：{blind_duration_ticks}t |\n 击退：{knockback_strength}",
+            "cost_duration": 4200,
+            "cost_total_niantou": 700,
+            "metadata": {
+                "cooldown_ticks": "920",
+                "radius": "7.0",
+                "ignore_walls": "false",
+                "knockback_strength": "0.35",
+                "knockback_vertical": "0.10",
+                "niantou_cost": "260.0",
+                "jingli_cost": "320.0",
+                "hunpo_cost": "180.0",
+                "zhenyuan_base_cost": "12000.0",
+                "self_resistance_duration_ticks": "140",
+                "self_resistance_amplifier": "0",
+                "self_absorption_duration_ticks": "200",
+                "self_absorption_amplifier": "1",
+                "blind_duration_ticks": "60",
+                "blind_amplifier": "0",
+                "slow_duration_ticks": "80",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}
+

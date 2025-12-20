@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:tiaojianggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tiaojianggu_passive_hopping_jiang",
+            "usageTitle": "被动·跳僵",
+            "usageDesc": "以跳僵形态改造下肢，获得更强跳跃。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 跳跃：{effect_duration_ticks}t |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "7500",
+                "effect_duration_ticks": "210",
+                "effect_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:tiaojianggu_active_jiang_slam",
+            "usageTitle": "主动·跳僵震地",
+            "usageDesc": "落地震荡，范围减速并击退敌人。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "radius": "12.25",
+                "cooldown_ticks": "910",
+                "niantou_cost": "920",
+                "zhenyuan_base_cost": "720000",
+                "effect_duration_ticks": "245",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.7",
+                "jingli_cost": "460",
+                "hunpo_cost": "184"
+            }
+        }
+    ]
+}

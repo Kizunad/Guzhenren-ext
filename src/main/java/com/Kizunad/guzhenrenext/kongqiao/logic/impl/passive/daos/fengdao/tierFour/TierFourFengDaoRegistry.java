@@ -6,8 +6,8 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.F
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveTargetDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveWindStepEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoAttackProcDebuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoSustainedAttributeModifierEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoWindBarrierOnHurtEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedAttributeModifierEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -72,7 +72,7 @@ public final class TierFourFengDaoRegistry {
             "GuzhenrenExtCooldown_sizhuanfengligu_active_wind_crash";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new FengDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -126,7 +126,7 @@ public final class TierFourFengDaoRegistry {
             "GuzhenrenExtCooldown_zhui_feng_gu_active_chase_wind";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new FengDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -223,4 +223,3 @@ public final class TierFourFengDaoRegistry {
         );
     }
 }
-

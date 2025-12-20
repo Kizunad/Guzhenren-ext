@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:huo_guang_zhu_tian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huo_guang_zhu_tian_gu_passive_candle_sky",
+            "usageTitle": "被动·烛天余焰",
+            "usageDesc": "火光随身，攻击时更易点燃敌人并提高输出（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 触发冷却：{proc_cooldown_ticks}t |\n 增伤乘区：{damage_multiplier} |\n 附加伤害：{bonus_damage} |\n 点燃：{burn_seconds}s",
+            "cost_duration": 9000,
+            "cost_total_niantou": 3200,
+            "metadata": {
+                "niantou_cost_per_second": "28.0",
+                "jingli_cost_per_second": "40.0",
+                "hunpo_cost_per_second": "20.0",
+                "zhenyuan_base_cost_per_second": "10.0",
+                "proc_cooldown_ticks": "40",
+                "damage_multiplier": "0.18",
+                "bonus_damage": "3.0",
+                "burn_seconds": "3",
+                "glowing_duration_ticks": "0",
+                "weakness_duration_ticks": "0",
+                "weakness_amplifier": "0",
+                "slow_duration_ticks": "0",
+                "slow_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:huo_guang_zhu_tian_gu_active_candle_sky",
+            "usageTitle": "主动·火光烛天",
+            "usageDesc": "爆发火光灼天，重创周围敌人并点燃、致盲（伤害走物理结算）。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 伤害：{damage} |\n 点燃：{burn_seconds}s |\n 致盲：{blind_duration_ticks}t",
+            "cost_duration": 9800,
+            "cost_total_niantou": 4500,
+            "metadata": {
+                "cooldown_ticks": "1080",
+                "radius": "8.0",
+                "ignore_walls": "false",
+                "damage": "7.0",
+                "burn_seconds": "6",
+                "blind_duration_ticks": "40",
+                "niantou_cost": "680.0",
+                "jingli_cost": "820.0",
+                "hunpo_cost": "460.0",
+                "zhenyuan_base_cost": "320000.0"
+            }
+        }
+    ]
+}
+

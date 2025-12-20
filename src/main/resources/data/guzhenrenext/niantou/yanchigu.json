@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:yanchigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yanchigu_passive_swallow_wing",
+            "usageTitle": "被动·燕翼轻身",
+            "usageDesc": "燕翼形态更轻灵，提升移速。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount} |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8000",
+                "attribute_amount": "0.369"
+            }
+        },
+        {
+            "usageID": "guzhenren:yanchigu_active_swallow_flight",
+            "usageTitle": "主动·燕翅翔",
+            "usageDesc": "短距飞掠挪移并获得缓降。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 后续增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "distance": "31.5",
+                "cooldown_ticks": "840",
+                "niantou_cost": "900",
+                "zhenyuan_base_cost": "760000",
+                "effect_duration_ticks": "385",
+                "effect_amplifier": "0",
+                "jingli_cost": "450",
+                "hunpo_cost": "180"
+            }
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:shuang_xi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuang_xi_gu_passive_frost_breath",
+            "usageTitle": "被动·霜息缠身",
+            "usageDesc": "霜息蛊吐出寒霜之气附着于攻击之上，令敌人冻伤迟缓，受寒者更易被压制。",
+            "usageInfo": "触发率：{proc_chance} | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)/次 | 缓慢：{effect_duration_ticks}t | 冻结：+{freeze_ticks}t | 受寒增伤：+{damage_bonus_vs_frozen} | 追加伤害：{extra_magic_damage}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.06",
+                "niantou_cost": "90.0",
+                "jingli_cost": "24.0",
+                "hunpo_cost": "12.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "freeze_ticks": "80",
+                "extra_magic_damage": "6.0",
+                "damage_bonus_vs_frozen": "0.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuang_xi_gu_active_frost_breath",
+            "usageTitle": "主动·吐霜寒息",
+            "usageDesc": "霜息蛊吐出大片寒息，瞬间冻结周围敌人并造成冰雪道伤害。",
+            "usageInfo": "半径：{radius} | 伤害：{magic_damage} | 冻结：+{freeze_ticks}t | 缓慢：{effect_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 320,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "650",
+                "radius": "5.5",
+                "niantou_cost": "240.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "35.0",
+                "zhenyuan_base_cost": "20000000.0",
+                "magic_damage": "70.0",
+                "freeze_ticks": "160",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}

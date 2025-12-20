@@ -5,31 +5,35 @@
             "usageID": "guzhenren:zhui_feng_gu_passive_chase_wind",
             "usageTitle": "被动·追风身法",
             "usageDesc": "追风蛊善于疾行，常驻提升移动速度（真元不足则自动停效）。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 速度加成：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 念头消耗：{niantou_cost_per_second}/s |\n 精力消耗：{jingli_cost_per_second}/s |\n 魂魄消耗：{hunpo_cost_per_second}/s |\n 速度加成：{attribute_amount}",
             "cost_duration": 1300,
             "cost_total_niantou": 135,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "0.12",
-                "attribute_amount": "0.10"
+                "niantou_cost_per_second": "2.6",
+                "jingli_cost_per_second": "2.2",
+                "hunpo_cost_per_second": "1.6",
+                "zhenyuan_base_cost_per_second": "0.35",
+                "attribute_amount": "0.14"
             }
         },
         {
             "usageID": "guzhenren:zhui_feng_gu_active_chase_wind",
             "usageTitle": "主动·追风踏步",
             "usageDesc": "借追风之势短距挪移，距离受风道道痕增幅，适合追击与脱离。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 基础距离：{distance} |\n 上限距离：{max_distance} |\n 念头消耗：{niantou_cost}",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 基础距离：{distance} |\n 上限距离：{max_distance} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost}",
             "cost_duration": 1750,
             "cost_total_niantou": 180,
             "metadata": {
-                "cooldown_ticks": "260",
-                "distance": "7.0",
-                "max_distance": "16.0",
-                "niantou_cost": "24.0",
-                "zhenyuan_base_cost": "300.0",
-                "effect_duration_ticks": "100",
+                "cooldown_ticks": "800",
+                "distance": "8.0",
+                "max_distance": "20.0",
+                "niantou_cost": "240.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "170.0",
+                "zhenyuan_base_cost": "780.0",
+                "effect_duration_ticks": "120",
                 "effect_amplifier": "0"
             }
         }
     ]
 }
-

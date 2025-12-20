@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:yunfengkuigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yunfengkuigu_passive_cloud_helm_glide",
+            "usageTitle": "被动·云凤滑翔",
+            "usageDesc": "云凤盔凝云托身，维持缓降。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 缓降：{effect_duration_ticks}t |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9000",
+                "effect_duration_ticks": "245",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yunfengkuigu_active_cloud_dash",
+            "usageTitle": "主动·云冲",
+            "usageDesc": "远距挪移并获得短暂缓降与加速。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 后续增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "distance": "38.5",
+                "cooldown_ticks": "1085",
+                "niantou_cost": "120",
+                "zhenyuan_base_cost": "980000",
+                "effect_duration_ticks": "455",
+                "effect_amplifier": "0",
+                "jingli_cost": "600",
+                "hunpo_cost": "240"
+            }
+        }
+    ]
+}

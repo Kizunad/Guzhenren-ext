@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:hei_zong_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hei_zong_gu_passive_black_mane_guard",
+            "usageTitle": "被动·黑鬃护体",
+            "usageDesc": "受击时黑鬃自动护体，概率性减伤并短暂获得抗性。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier} |\n 闪避距离：{blink_distance} |\n 仅投射物：{projectile_only} |\n 受击增益：{buff_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 18000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "proc_chance": "0.22",
+                "cooldown_ticks": "175",
+                "niantou_cost": "16",
+                "damage_multiplier": "0.82",
+                "blink_distance": "0",
+                "projectile_only": "false",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0",
+                "jingli_cost": "3.2",
+                "hunpo_cost": "1.6",
+                "zhenyuan_base_cost": "80000"
+            }
+        },
+        {
+            "usageID": "guzhenren:hei_zong_gu_active_mane_bristle",
+            "usageTitle": "主动·鬃刺爆散",
+            "usageDesc": "黑鬃竖立外放，范围震退并减速敌人。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 24000,
+            "cost_total_niantou": 4800,
+            "metadata": {
+                "radius": "7.5",
+                "cooldown_ticks": "525",
+                "niantou_cost": "340",
+                "zhenyuan_base_cost": "2800",
+                "effect_duration_ticks": "150",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.25",
+                "jingli_cost": "170",
+                "hunpo_cost": "68"
+            }
+        }
+    ]
+}

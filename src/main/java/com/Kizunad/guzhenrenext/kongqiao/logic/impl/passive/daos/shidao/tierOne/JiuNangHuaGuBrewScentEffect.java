@@ -1,10 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierOne;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,8 +30,6 @@ public class JiuNangHuaGuBrewScentEffect implements IGuEffect {
     private static final String META_INTERVAL_SECONDS = "interval_seconds";
     private static final String META_HUNGER_GAIN = "hunger_gain";
     private static final String META_SATURATION_GAIN = "saturation_gain";
-    private static final String META_ZHENYUAN_BASE_COST_PER_SECOND =
-        "zhenyuan_base_cost_per_second";
 
     private static final int DEFAULT_INTERVAL_SECONDS = 6;
     private static final int DEFAULT_HUNGER_GAIN = 1;
@@ -63,21 +63,49 @@ public class JiuNangHuaGuBrewScentEffect implements IGuEffect {
             return;
         }
 
-        final double baseCost = Math.max(
+        final double niantouCostPerSecond = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
                 usageInfo,
-                META_ZHENYUAN_BASE_COST_PER_SECOND,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
                 DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
             )
         );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             return;
-        }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
         }
 
         final ActivePassives actives = KongqiaoAttachments.getActivePassives(user);
@@ -99,7 +127,11 @@ public class JiuNangHuaGuBrewScentEffect implements IGuEffect {
             return;
         }
 
-        final int hungerGain = Math.max(
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+        final int baseHungerGain = Math.max(
             0,
             UsageMetadataHelper.getInt(
                 usageInfo,
@@ -107,6 +139,7 @@ public class JiuNangHuaGuBrewScentEffect implements IGuEffect {
                 DEFAULT_HUNGER_GAIN
             )
         );
+        final int hungerGain = (int) Math.round(baseHungerGain * multiplier);
         final double saturationGain = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -114,7 +147,7 @@ public class JiuNangHuaGuBrewScentEffect implements IGuEffect {
                 META_SATURATION_GAIN,
                 DEFAULT_SATURATION_GAIN
             )
-        );
+        ) * multiplier;
 
         if (hungerGain > 0 || saturationGain > 0.0) {
             player.getFoodData().eat(hungerGain, (float) saturationGain);
@@ -138,4 +171,3 @@ public class JiuNangHuaGuBrewScentEffect implements IGuEffect {
         }
     }
 }
-

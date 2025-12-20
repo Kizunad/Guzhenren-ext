@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierThree;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
@@ -32,17 +34,15 @@ public class QiXiangJiuChongFragrantDashEffect implements IGuEffect {
     private static final String META_DASH_STRENGTH = "dash_strength";
     private static final String META_RADIUS = "radius";
     private static final String META_EFFECT_SECONDS = "effect_seconds";
-    private static final String META_ACTIVATE_ZHENYUAN_BASE_COST =
-        "activate_zhenyuan_base_cost";
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
 
     private static final double DEFAULT_DASH_STRENGTH = 1.2;
     private static final double DEFAULT_RADIUS = 5.0;
     private static final int DEFAULT_EFFECT_SECONDS = 6;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 360.0;
     private static final int DEFAULT_COOLDOWN_TICKS = 360;
 
     private static final double FORWARD_EPSILON_SQR = 1.0E-6;
+    private static final double MAX_RADIUS = 32.0;
 
     @Override
     public String getUsageId() {
@@ -74,23 +74,14 @@ public class QiXiangJiuChongFragrantDashEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(
-                usageInfo,
-                META_ACTIVATE_ZHENYUAN_BASE_COST,
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
-            player.displayClientMessage(Component.literal("真元不足。"), true);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
 
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         final double dashStrength = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -98,14 +89,15 @@ public class QiXiangJiuChongFragrantDashEffect implements IGuEffect {
                 META_DASH_STRENGTH,
                 DEFAULT_DASH_STRENGTH
             )
-        );
+        ) * multiplier;
         applyDash(player, dashStrength);
 
-        final double radius = Math.max(
+        final double radius = UsageMetadataHelper.clamp(
+            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS),
             0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS)
+            MAX_RADIUS
         );
-        final int effectSeconds = Math.max(
+        final int baseEffectSeconds = Math.max(
             0,
             UsageMetadataHelper.getInt(
                 usageInfo,
@@ -113,6 +105,7 @@ public class QiXiangJiuChongFragrantDashEffect implements IGuEffect {
                 DEFAULT_EFFECT_SECONDS
             )
         );
+        final int effectSeconds = (int) Math.round(baseEffectSeconds * multiplier);
         if (radius > 0.0 && effectSeconds > 0) {
             final int duration = effectSeconds * 20;
             final List<LivingEntity> targets = findTargets(user, radius);
@@ -190,4 +183,3 @@ public class QiXiangJiuChongFragrantDashEffect implements IGuEffect {
         );
     }
 }
-

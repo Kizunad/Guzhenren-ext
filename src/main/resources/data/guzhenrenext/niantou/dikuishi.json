@@ -1,0 +1,32 @@
+{
+    "itemID": "guzhenren:dikuishi",
+    "usages": [
+        {
+            "usageID": "guzhenren:dikuishi_passive_earth_kui_shell",
+            "usageTitle": "被动·地魁铁壁",
+            "usageDesc": "地魁尸形态坚不可摧，提升护甲韧性。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 护甲韧性：{attribute_amount} |",
+            "cost_duration": 26000000,
+            "cost_total_niantou": 6400000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "140000",
+                "attribute_amount": "60000"
+            }
+        },
+        {
+            "usageID": "guzhenren:dikuishi_active_earth_sustain",
+            "usageTitle": "主动·地魁养气",
+            "usageDesc": "以念头换取真元，提供高转续航按钮。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元回复：{zhenyuan_gain} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 32000000,
+            "cost_total_niantou": 13000000,
+            "metadata": {
+                "cooldown_ticks": "1800",
+                "niantou_cost": "180",
+                "zhenyuan_gain": "14000000",
+                "jingli_cost": "900",
+                "hunpo_cost": "360"
+            }
+        }
+    ]
+}

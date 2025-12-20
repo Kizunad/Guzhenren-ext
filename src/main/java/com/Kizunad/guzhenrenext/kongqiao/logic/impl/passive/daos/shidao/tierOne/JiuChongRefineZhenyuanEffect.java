@@ -1,10 +1,13 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.entity.LivingEntity;
@@ -75,6 +78,43 @@ public class JiuChongRefineZhenyuanEffect implements IGuEffect {
             return;
         }
 
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                0.0
+            )
+        ) {
+            KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
+            return;
+        }
+
         final double satCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -97,8 +137,12 @@ public class JiuChongRefineZhenyuanEffect implements IGuEffect {
                 DEFAULT_ZHENYUAN_GAIN
             )
         );
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         if (gain > 0.0) {
-            ZhenYuanHelper.modify(user, gain);
+            ZhenYuanHelper.modify(user, gain * multiplier);
         }
 
         final ActivePassives actives = KongqiaoAttachments.getActivePassives(user);
@@ -119,4 +163,3 @@ public class JiuChongRefineZhenyuanEffect implements IGuEffect {
         }
     }
 }
-

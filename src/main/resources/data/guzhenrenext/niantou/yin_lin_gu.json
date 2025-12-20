@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:yin_lin_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yin_lin_gu_passive_hidden_scale",
+            "usageTitle": "被动·隐鳞",
+            "usageDesc": "隐鳞遮蔽身形，维持隐身。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 隐身：{effect_duration_ticks}t |",
+            "cost_duration": 18000,
+            "cost_total_niantou": 2400,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "40",
+                "effect_duration_ticks": "150",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yin_lin_gu_active_hidden_step",
+            "usageTitle": "主动·隐步",
+            "usageDesc": "短距挪移并加深隐匿，适合脱战与切入。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 后续增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 24000,
+            "cost_total_niantou": 4800,
+            "metadata": {
+                "distance": "12.5",
+                "cooldown_ticks": "450",
+                "niantou_cost": "320",
+                "zhenyuan_base_cost": "2600",
+                "effect_duration_ticks": "250",
+                "effect_amplifier": "0",
+                "jingli_cost": "160",
+                "hunpo_cost": "64"
+            }
+        }
+    ]
+}

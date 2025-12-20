@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:yin_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yin_gu_passive_yin_drain",
+            "usageTitle": "被动·阴蚀",
+            "usageDesc": "攻击时有概率侵蚀敌体，令其虚弱。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "proc_chance": "0.16",
+                "niantou_cost": "180",
+                "effect_duration_ticks": "150",
+                "effect_amplifier": "0",
+                "jingli_cost": "36",
+                "hunpo_cost": "18",
+                "zhenyuan_base_cost": "900000"
+            }
+        },
+        {
+            "usageID": "guzhenren:yin_gu_active_yin_soothe",
+            "usageTitle": "主动·阴抚",
+            "usageDesc": "以阴柔之意安抚盟友，治疗并净化部分负面状态。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 净化负面：{cleanse_negative} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "radius": "10.5",
+                "cooldown_ticks": "960",
+                "niantou_cost": "600",
+                "zhenyuan_base_cost": "52000",
+                "heal_amount": "300",
+                "cleanse_negative": "true",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "jingli_cost": "300",
+                "hunpo_cost": "120"
+            }
+        }
+    ]
+}

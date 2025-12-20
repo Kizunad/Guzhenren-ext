@@ -5,30 +5,35 @@
             "usageID": "guzhenren:yangshenggu_passive_health_nourish",
             "usageTitle": "被动·养生滋补",
             "usageDesc": "养生蛊如茶盏漂浮，润养血肉。持续获得生命恢复，并小幅提升最大生命，但需要稳定真元供给。",
-            "usageInfo": "生命上限：+{max_health_bonus} | 生命恢复：{regen_amplifier}级 | 真元：{zhenyuan_base_cost_per_second}/s",
+            "usageInfo": "生命上限：+{max_health_bonus} | 生命恢复：{regen_amplifier}级 | 每秒消耗：{niantou_cost_per_second}(念头)+{jingli_cost_per_second}(精力)+{hunpo_cost_per_second}(魂魄)+{zhenyuan_base_cost_per_second}(基础真元)",
             "cost_duration": 1200,
             "cost_total_niantou": 90,
             "metadata": {
-                "max_health_bonus": "6.0",
-                "regen_amplifier": "0",
-                "zhenyuan_base_cost_per_second": "180.0"
+                "max_health_bonus": "500.0",
+                "regen_amplifier": "1",
+                "niantou_cost_per_second": "4.0",
+                "jingli_cost_per_second": "2.0",
+                "hunpo_cost_per_second": "0.8",
+                "zhenyuan_base_cost_per_second": "40000000.0"
             }
         },
         {
             "usageID": "guzhenren:yangshenggu_active_longevity_brew",
             "usageTitle": "主动·延寿清茶",
             "usageDesc": "一口清茶入腹，邪祟浊气尽退。立刻回复生命并净化部分负面状态，短时间内强化养生效果。",
-            "usageInfo": "治疗：{heal_amount} | 净化：{cleanse_count}种负面 | 强化：{buff_seconds}s | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "治疗：{heal_amount} | 净化：{cleanse_count}种负面 | 强化：{buff_seconds}s | 冷却：{cooldown_ticks}tick | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 1500,
             "cost_total_niantou": 120,
             "metadata": {
-                "heal_amount": "6.0",
+                "heal_amount": "450.0",
                 "cleanse_count": "2",
-                "buff_seconds": "10",
-                "activate_zhenyuan_base_cost": "480.0",
-                "cooldown_ticks": "420"
+                "buff_seconds": "12",
+                "cooldown_ticks": "420",
+                "niantou_cost": "480.0",
+                "jingli_cost": "240.0",
+                "hunpo_cost": "120.0",
+                "zhenyuan_base_cost": "180000000.0"
             }
         }
     ]
 }
-

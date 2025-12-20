@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:bai_xiang_she_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bai_xiang_she_gu_passive_serpent_aegis",
+            "usageTitle": "被动·仙蛇护体",
+            "usageDesc": "白相仙蛇之寒意缠绕周身，持续提供抗性，并在受击时以冰雪反噬来犯之敌。",
+            "usageInfo": "维持消耗：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 抗性：{resistance_duration_ticks}t | 反噬冻结：{retaliate_freeze_ticks}t | 反噬虚弱：{retaliate_weakness_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "niantou_cost_per_second": "60.0",
+                "jingli_cost_per_second": "25.0",
+                "hunpo_cost_per_second": "12.0",
+                "zhenyuan_base_cost_per_second": "800000000.0",
+                "resistance_duration_ticks": "40",
+                "resistance_amplifier": "1",
+                "retaliate_freeze_ticks": "160",
+                "retaliate_weakness_duration_ticks": "100",
+                "retaliate_weakness_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:bai_xiang_she_gu_active_summon_serpent",
+            "usageTitle": "主动·唤蛇临世",
+            "usageDesc": "以真元与念头为引，召唤白相仙蛇协战。召唤物为临时存在，到期自动消散。",
+            "usageInfo": "持续：{duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "niantou_cost": "1600.0",
+                "jingli_cost": "600.0",
+                "hunpo_cost": "300.0",
+                "zhenyuan_base_cost": "33000000000.0",
+                "duration_ticks": "1200"
+            }
+        }
+    ]
+}

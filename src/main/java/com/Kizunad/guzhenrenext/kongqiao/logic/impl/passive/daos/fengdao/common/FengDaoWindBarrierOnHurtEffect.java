@@ -1,12 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.Holder;
@@ -31,7 +31,6 @@ public class FengDaoWindBarrierOnHurtEffect implements IGuEffect {
 
     private static final String META_PROC_CHANCE = "proc_chance";
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
-    private static final String META_NIANTOU_COST = "niantou_cost";
     private static final String META_DAMAGE_MULTIPLIER = "damage_multiplier";
     private static final String META_PUSH_STRENGTH = "push_strength";
     private static final String META_SPEED_DURATION_TICKS = "speed_duration_ticks";
@@ -46,6 +45,7 @@ public class FengDaoWindBarrierOnHurtEffect implements IGuEffect {
 
     private static final double MIN_DAMAGE_MULTIPLIER = 0.35;
     private static final double DIRECTION_EPSILON_SQR = 1.0E-6;
+    private static final int MAX_EFFECT_DURATION_TICKS = 20 * 30;
 
     private final String usageId;
     private final String nbtCooldownKey;
@@ -101,15 +101,8 @@ public class FengDaoWindBarrierOnHurtEffect implements IGuEffect {
             return damage;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(victim) < niantouCost) {
+        if (!GuEffectCostHelper.tryConsumeOnce(null, victim, usageInfo)) {
             return damage;
-        }
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(victim, -niantouCost);
         }
 
         final int cooldownTicks = Math.max(
@@ -129,7 +122,11 @@ public class FengDaoWindBarrierOnHurtEffect implements IGuEffect {
         }
 
         applyPushBack(victim, source, usageInfo);
-        applySpeedBuff(victim, usageInfo);
+        final double fengDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            victim,
+            DaoHenHelper.DaoType.FENG_DAO
+        );
+        applySpeedBuff(victim, usageInfo, fengDaoMultiplier);
 
         final double baseMultiplier = UsageMetadataHelper.clamp(
             UsageMetadataHelper.getDouble(
@@ -139,10 +136,6 @@ public class FengDaoWindBarrierOnHurtEffect implements IGuEffect {
             ),
             0.0,
             1.0
-        );
-        final double fengDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
-            victim,
-            DaoHenHelper.DaoType.FENG_DAO
         );
         final double scaledMultiplier = UsageMetadataHelper.clamp(
             1.0 - (1.0 - baseMultiplier) * fengDaoMultiplier,
@@ -181,7 +174,8 @@ public class FengDaoWindBarrierOnHurtEffect implements IGuEffect {
 
     private static void applySpeedBuff(
         final LivingEntity victim,
-        final NianTouData.Usage usageInfo
+        final NianTouData.Usage usageInfo,
+        final double multiplier
     ) {
         final Holder<MobEffect> speed = MobEffects.MOVEMENT_SPEED;
         if (speed == null) {
@@ -203,9 +197,19 @@ public class FengDaoWindBarrierOnHurtEffect implements IGuEffect {
                 DEFAULT_SPEED_AMPLIFIER
             )
         );
-        if (duration > 0) {
+        final int scaledDuration = (int) Math.min(
+            MAX_EFFECT_DURATION_TICKS,
+            Math.round(duration * multiplier)
+        );
+        if (scaledDuration > 0) {
             victim.addEffect(
-                new MobEffectInstance(speed, duration, amplifier, true, true)
+                new MobEffectInstance(
+                    speed,
+                    scaledDuration,
+                    amplifier,
+                    true,
+                    true
+                )
             );
         }
     }

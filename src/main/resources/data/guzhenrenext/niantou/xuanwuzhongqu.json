@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:xuanwuzhongqu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xuanwuzhongqu_passive_xuanwu_heavy_shell",
+            "usageTitle": "被动·玄武重躯",
+            "usageDesc": "玄武重躯稳如山岳，提升击退抗性。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 击退抗性：{attribute_amount} |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10000",
+                "attribute_amount": "0.7175"
+            }
+        },
+        {
+            "usageID": "guzhenren:xuanwuzhongqu_active_shell_quake",
+            "usageTitle": "主动·龟甲震荡",
+            "usageDesc": "以龟甲之势震荡周围，范围减速。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "radius": "11.375",
+                "cooldown_ticks": "980",
+                "niantou_cost": "980",
+                "zhenyuan_base_cost": "840000",
+                "effect_duration_ticks": "280",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.35",
+                "jingli_cost": "490",
+                "hunpo_cost": "196"
+            }
+        }
+    ]
+}

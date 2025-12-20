@@ -1,10 +1,13 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierThree;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,8 +25,6 @@ public class ShengJiJiuHuLuVitalityWineEffect implements IGuEffect {
 
     private static final String META_HEAL_PER_SECOND = "heal_per_second";
     private static final String META_ZHENYUAN_REGEN = "zhenyuan_regen";
-    private static final String META_ZHENYUAN_BASE_COST_PER_SECOND =
-        "zhenyuan_base_cost_per_second";
 
     private static final double DEFAULT_HEAL_PER_SECOND = 0.3;
     private static final double DEFAULT_ZHENYUAN_REGEN = 3.0;
@@ -50,23 +51,55 @@ public class ShengJiJiuHuLuVitalityWineEffect implements IGuEffect {
             return;
         }
 
-        final double baseCost = Math.max(
+        final double niantouCostPerSecond = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
                 usageInfo,
-                META_ZHENYUAN_BASE_COST_PER_SECOND,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
                 DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
             )
         );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             return;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
 
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         final double heal = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -74,7 +107,7 @@ public class ShengJiJiuHuLuVitalityWineEffect implements IGuEffect {
                 META_HEAL_PER_SECOND,
                 DEFAULT_HEAL_PER_SECOND
             )
-        );
+        ) * multiplier;
         if (heal > 0.0 && user.getHealth() < user.getMaxHealth()) {
             user.heal((float) heal);
         }
@@ -88,7 +121,7 @@ public class ShengJiJiuHuLuVitalityWineEffect implements IGuEffect {
             )
         );
         if (zhenyuan > 0.0) {
-            ZhenYuanHelper.modify(user, zhenyuan);
+            ZhenYuanHelper.modify(user, zhenyuan * multiplier);
         }
 
         final ActivePassives actives = KongqiaoAttachments.getActivePassives(user);
@@ -109,4 +142,3 @@ public class ShengJiJiuHuLuVitalityWineEffect implements IGuEffect {
         }
     }
 }
-

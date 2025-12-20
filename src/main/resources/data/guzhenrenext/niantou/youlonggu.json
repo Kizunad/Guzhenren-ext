@@ -5,30 +5,36 @@
             "usageID": "guzhenren:youlonggu_passive_oil_ignite",
             "usageTitle": "被动·油火增伤",
             "usageDesc": "油龙蛊黑油附体。普攻会为敌人涂上油火：若目标燃烧，则你的伤害更高；并延长其燃烧时间。",
-            "usageInfo": "油火：{oil_duration_ticks}tick | 燃烧：+{burn_seconds}s | 增伤：燃烧目标伤害*{burning_bonus_ratio}",
+            "usageInfo": "油火：{oil_duration_ticks}tick | 燃烧：+{burn_seconds}s | 增伤：燃烧目标伤害*{burning_bonus_ratio} | 触发消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 1500,
             "cost_total_niantou": 120,
             "metadata": {
-                "oil_duration_ticks": "200",
-                "burn_seconds": "4",
-                "burning_bonus_ratio": "0.20"
+                "oil_duration_ticks": "240",
+                "burn_seconds": "6",
+                "burning_bonus_ratio": "0.35",
+                "niantou_cost": "200.0",
+                "jingli_cost": "100.0",
+                "hunpo_cost": "50.0",
+                "zhenyuan_base_cost": "90000000.0"
             }
         },
         {
             "usageID": "guzhenren:youlonggu_active_black_oil_breath",
             "usageTitle": "主动·黑油喷吐",
             "usageDesc": "喷吐黑油，沾者难逃。对周围敌人施加“油火”，并造成一次小幅灼伤。",
-            "usageInfo": "半径：{radius}格 | 伤害：{damage} | 燃烧：{burn_seconds}s | 真元：{activate_zhenyuan_base_cost}(基础) | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "半径：{radius}格 | 伤害：{damage} | 燃烧：{burn_seconds}s | 冷却：{cooldown_ticks}tick | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 1800,
             "cost_total_niantou": 150,
             "metadata": {
-                "radius": "6.0",
-                "damage": "3.0",
-                "burn_seconds": "5",
-                "activate_zhenyuan_base_cost": "540.0",
-                "cooldown_ticks": "520"
+                "radius": "8.0",
+                "damage": "150.0",
+                "burn_seconds": "8",
+                "cooldown_ticks": "520",
+                "niantou_cost": "900.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "220.0",
+                "zhenyuan_base_cost": "450000000.0"
             }
         }
     ]
 }
-

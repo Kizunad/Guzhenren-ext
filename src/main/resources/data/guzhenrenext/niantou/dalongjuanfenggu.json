@@ -5,37 +5,42 @@
             "usageID": "guzhenren:dalongjuanfenggu_passive_wind_lift",
             "usageTitle": "被动·风举",
             "usageDesc": "大龙卷风蛊借风托举，攻击时有概率令敌人失衡腾空，并附带风道伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 附伤：{extra_magic_damage}",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 附伤：{extra_magic_damage}",
             "cost_duration": 1250,
             "cost_total_niantou": 120,
             "metadata": {
-                "proc_chance": "0.18",
-                "niantou_cost": "3.0",
-                "effect_duration_ticks": "35",
+                "proc_chance": "0.06",
+                "cooldown_ticks": "120",
+                "niantou_cost": "30.0",
+                "jingli_cost": "25.0",
+                "hunpo_cost": "20.0",
+                "zhenyuan_base_cost": "150.0",
+                "effect_duration_ticks": "45",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "3.5"
+                "extra_magic_damage": "800.0"
             }
         },
         {
             "usageID": "guzhenren:dalongjuanfenggu_active_dragon_tornado",
             "usageTitle": "主动·大龙卷",
-            "usageDesc": "卷起龙卷之势，范围内敌人被风压推斥并受风道法术伤害，部分目标会被短暂抬升。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost}",
+            "usageDesc": "卷起龙卷之势，范围内敌人被风压推斥并受风道伤害，部分目标会被短暂抬升。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 半径：{radius} |\n 风压：{push_strength} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{magic_damage}",
             "cost_duration": 1700,
             "cost_total_niantou": 165,
             "metadata": {
-                "cooldown_ticks": "300",
-                "radius": "6.0",
-                "push_strength": "0.65",
-                "niantou_cost": "28.0",
-                "zhenyuan_base_cost": "320.0",
-                "magic_damage": "7.0",
-                "levitation_duration_ticks": "45",
+                "cooldown_ticks": "900",
+                "radius": "7.0",
+                "push_strength": "0.75",
+                "niantou_cost": "280.0",
+                "jingli_cost": "230.0",
+                "hunpo_cost": "200.0",
+                "zhenyuan_base_cost": "800.0",
+                "magic_damage": "3200.0",
+                "levitation_duration_ticks": "80",
                 "levitation_amplifier": "0",
-                "slow_duration_ticks": "100",
+                "slow_duration_ticks": "160",
                 "slow_amplifier": "0"
             }
         }
     ]
 }
-

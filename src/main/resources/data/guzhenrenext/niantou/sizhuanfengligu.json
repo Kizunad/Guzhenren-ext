@@ -5,33 +5,37 @@
             "usageID": "guzhenren:sizhuanfengligu_passive_wind_might",
             "usageTitle": "被动·风力洪增",
             "usageDesc": "四转风力蛊以风增势，常驻提升基础攻击倍率（真元不足则自动停效）。",
-            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 增伤倍率：{attribute_amount}",
+            "usageInfo": "真元消耗：{zhenyuan_base_cost_per_second}/s |\n 念头消耗：{niantou_cost_per_second}/s |\n 精力消耗：{jingli_cost_per_second}/s |\n 魂魄消耗：{hunpo_cost_per_second}/s |\n 增伤倍率：{attribute_amount}",
             "cost_duration": 1300,
             "cost_total_niantou": 135,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "0.20",
-                "attribute_amount": "0.20"
+                "niantou_cost_per_second": "3.0",
+                "jingli_cost_per_second": "2.5",
+                "hunpo_cost_per_second": "1.8",
+                "zhenyuan_base_cost_per_second": "0.45",
+                "attribute_amount": "0.25"
             }
         },
         {
             "usageID": "guzhenren:sizhuanfengligu_active_wind_crash",
             "usageTitle": "主动·风力轰坠",
-            "usageDesc": "以风力轰然冲撞前方，命中敌人造成风道法术伤害并迟滞。",
-            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 伤害：{magic_damage}",
+            "usageDesc": "以风力轰然冲撞前方，命中敌人造成风道伤害并迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 距离：{range} |\n 念头消耗：{niantou_cost} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{magic_damage}",
             "cost_duration": 1750,
             "cost_total_niantou": 175,
             "metadata": {
-                "cooldown_ticks": "300",
-                "range": "9.5",
-                "dash_strength": "1.35",
+                "cooldown_ticks": "900",
+                "range": "10.5",
+                "dash_strength": "1.60",
                 "hit_radius": "1.2",
-                "niantou_cost": "26.0",
-                "zhenyuan_base_cost": "320.0",
-                "magic_damage": "7.5",
-                "slow_duration_ticks": "80",
+                "niantou_cost": "260.0",
+                "jingli_cost": "220.0",
+                "hunpo_cost": "190.0",
+                "zhenyuan_base_cost": "780.0",
+                "magic_damage": "2200.0",
+                "slow_duration_ticks": "140",
                 "slow_amplifier": "0"
             }
         }
     ]
 }
-

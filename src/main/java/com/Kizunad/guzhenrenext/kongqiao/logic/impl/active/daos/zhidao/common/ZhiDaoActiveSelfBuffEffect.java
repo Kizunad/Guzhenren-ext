@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.zhidao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.JingLiHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
@@ -25,6 +26,7 @@ public class ZhiDaoActiveSelfBuffEffect implements IGuEffect {
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_NIANTOU_COST = "niantou_cost";
     private static final String META_JINGLI_COST = "jingli_cost";
+    private static final String META_HUNPO_COST = "hunpo_cost";
     private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
 
     private static final int DEFAULT_COOLDOWN_TICKS = 200;
@@ -107,6 +109,18 @@ public class ZhiDaoActiveSelfBuffEffect implements IGuEffect {
             return false;
         }
 
+        final double hunpoCost = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(usageInfo, META_HUNPO_COST, 0.0)
+        );
+        if (hunpoCost > 0.0 && HunPoHelper.getAmount(user) < hunpoCost) {
+            player.displayClientMessage(
+                net.minecraft.network.chat.Component.literal("魂魄不足。"),
+                true
+            );
+            return false;
+        }
+
         final double zhenyuanBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
@@ -128,6 +142,9 @@ public class ZhiDaoActiveSelfBuffEffect implements IGuEffect {
         }
         if (jingliCost > 0.0) {
             JingLiHelper.modify(user, -jingliCost);
+        }
+        if (hunpoCost > 0.0) {
+            HunPoHelper.modify(user, -hunpoCost);
         }
         if (zhenyuanCost > 0.0) {
             ZhenYuanHelper.modify(user, -zhenyuanCost);

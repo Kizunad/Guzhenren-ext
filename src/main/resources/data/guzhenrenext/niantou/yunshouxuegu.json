@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:yunshouxuegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yunshouxuegu_passive_cloud_beast_dodge",
+            "usageTitle": "被动·云兽闪避",
+            "usageDesc": "云兽靴强化身法，被投射物命中时概率减伤并闪避位移。",
+            "usageInfo": "触发概率：{proc_chance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 伤害倍率：{damage_multiplier} |\n 闪避距离：{blink_distance} |\n 仅投射物：{projectile_only} |\n 受击增益：{buff_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "proc_chance": "0.22",
+                "cooldown_ticks": "280",
+                "niantou_cost": "300",
+                "damage_multiplier": "0.7",
+                "blink_distance": "7",
+                "projectile_only": "true",
+                "buff_duration_ticks": "160",
+                "buff_amplifier": "0",
+                "jingli_cost": "600",
+                "hunpo_cost": "300",
+                "zhenyuan_base_cost": "15000000"
+            }
+        },
+        {
+            "usageID": "guzhenren:yunshouxuegu_active_cloud_step",
+            "usageTitle": "主动·踏云步",
+            "usageDesc": "短距挪移并获得加速，适合快速走位。",
+            "usageInfo": "距离：{distance} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 后续增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "distance": "21",
+                "cooldown_ticks": "735",
+                "niantou_cost": "900",
+                "zhenyuan_base_cost": "760000",
+                "effect_duration_ticks": "350",
+                "effect_amplifier": "0",
+                "jingli_cost": "450",
+                "hunpo_cost": "180"
+            }
+        }
+    ]
+}

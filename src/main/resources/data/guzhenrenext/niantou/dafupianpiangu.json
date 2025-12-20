@@ -5,29 +5,36 @@
             "usageID": "guzhenren:dafupianpiangu_passive_fat_shield",
             "usageTitle": "被动·厚脂护体",
             "usageDesc": "大腹便便蛊脂厚如甲。受击时可消耗饱食抵消部分伤害，饱食不足则难以生效。",
-            "usageInfo": "减伤：{reduction_ratio}% | 代价：{hunger_cost}(饱食)/次 | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "减伤：{reduction_ratio}% | 代价：{hunger_cost}(饱食)/次 | 冷却：{cooldown_ticks}tick | 触发消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 1200,
             "cost_total_niantou": 95,
             "metadata": {
-                "reduction_ratio": "0.25",
+                "reduction_ratio": "0.08",
                 "hunger_cost": "1",
-                "cooldown_ticks": "20"
+                "cooldown_ticks": "20",
+                "niantou_cost": "180.0",
+                "jingli_cost": "90.0",
+                "hunpo_cost": "45.0",
+                "zhenyuan_base_cost": "60000000.0"
             }
         },
         {
             "usageID": "guzhenren:dafupianpiangu_active_full_belly_shield",
             "usageTitle": "主动·暴食成盾",
             "usageDesc": "一口气吞下饱食，化作护体脂盾。立刻消耗所有饱食度并获得大量吸收护盾，短时间内更抗打。",
-            "usageInfo": "吸收：{absorption_per_hunger}/饱食 | 上限：{max_absorption} | 抗性：{resistance_seconds}s | 冷却：{cooldown_ticks}tick",
+            "usageInfo": "吸收：{absorption_per_hunger}/饱食 | 上限：{max_absorption} | 抗性：{resistance_seconds}s | 冷却：{cooldown_ticks}tick | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{zhenyuan_base_cost}(基础真元)",
             "cost_duration": 1500,
             "cost_total_niantou": 120,
             "metadata": {
-                "absorption_per_hunger": "1.0",
-                "max_absorption": "18.0",
-                "resistance_seconds": "6",
-                "cooldown_ticks": "500"
+                "absorption_per_hunger": "40.0",
+                "max_absorption": "600.0",
+                "resistance_seconds": "8",
+                "cooldown_ticks": "500",
+                "niantou_cost": "480.0",
+                "jingli_cost": "240.0",
+                "hunpo_cost": "120.0",
+                "zhenyuan_base_cost": "150000000.0"
             }
         }
     ]
 }
-

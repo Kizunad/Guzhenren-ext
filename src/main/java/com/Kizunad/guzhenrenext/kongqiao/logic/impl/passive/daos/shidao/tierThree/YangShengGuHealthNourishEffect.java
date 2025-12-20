@@ -1,10 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shidao.tierThree;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.resources.ResourceLocation;
@@ -29,8 +31,6 @@ public class YangShengGuHealthNourishEffect implements IGuEffect {
 
     private static final String META_MAX_HEALTH_BONUS = "max_health_bonus";
     private static final String META_REGEN_AMPLIFIER = "regen_amplifier";
-    private static final String META_ZHENYUAN_BASE_COST_PER_SECOND =
-        "zhenyuan_base_cost_per_second";
 
     private static final double DEFAULT_MAX_HEALTH_BONUS = 6.0;
     private static final int DEFAULT_REGEN_AMPLIFIER = 0;
@@ -62,23 +62,55 @@ public class YangShengGuHealthNourishEffect implements IGuEffect {
             return;
         }
 
-        final double baseCost = Math.max(
+        final double niantouCostPerSecond = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
                 usageInfo,
-                META_ZHENYUAN_BASE_COST_PER_SECOND,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
                 DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
             )
         );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             deactivate(user);
             return;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
 
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         final double maxHealthBonus = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -86,7 +118,7 @@ public class YangShengGuHealthNourishEffect implements IGuEffect {
                 META_MAX_HEALTH_BONUS,
                 DEFAULT_MAX_HEALTH_BONUS
             )
-        );
+        ) * multiplier;
         applyMaxHealth(user, maxHealthBonus);
 
         final int regenAmplifier = Math.max(
@@ -97,11 +129,15 @@ public class YangShengGuHealthNourishEffect implements IGuEffect {
                 DEFAULT_REGEN_AMPLIFIER
             )
         );
+        final int scaledRegenAmplifier = Math.min(
+            10,
+            Math.max(0, regenAmplifier + (int) Math.floor(multiplier - 1.0))
+        );
         user.addEffect(
             new MobEffectInstance(
                 MobEffects.REGENERATION,
                 EFFECT_REFRESH_TICKS,
-                regenAmplifier,
+                scaledRegenAmplifier,
                 true,
                 false,
                 true
@@ -166,4 +202,3 @@ public class YangShengGuHealthNourishEffect implements IGuEffect {
         }
     }
 }
-

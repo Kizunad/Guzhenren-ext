@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:shuixiangjia",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuixiangjia_passive_water_elephant_armor",
+            "usageTitle": "被动·水象甲",
+            "usageDesc": "水象之甲护体，提升护甲。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 护甲：{attribute_amount} |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10000",
+                "attribute_amount": "200"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuixiangjia_active_water_elephant_blessing",
+            "usageTitle": "主动·水象祝福",
+            "usageDesc": "为周围盟友施加守护与水下能力，并净化负面。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 净化负面：{cleanse_negative} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "radius": "17.5",
+                "cooldown_ticks": "1505",
+                "niantou_cost": "140",
+                "zhenyuan_base_cost": "1200000",
+                "heal_amount": "4000",
+                "cleanse_negative": "true",
+                "effect_duration_ticks": "420",
+                "effect_amplifier": "0",
+                "jingli_cost": "700",
+                "hunpo_cost": "280"
+            }
+        }
+    ]
+}

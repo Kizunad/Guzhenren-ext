@@ -1,7 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.network.chat.Component;
@@ -67,7 +70,16 @@ public class FanDaiCaoGuRiceFeastEffect implements IGuEffect {
             return false;
         }
 
-        final int hunger = Math.max(
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
+        }
+
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
+
+        final int baseHunger = Math.max(
             0,
             UsageMetadataHelper.getInt(
                 usageInfo,
@@ -75,6 +87,7 @@ public class FanDaiCaoGuRiceFeastEffect implements IGuEffect {
                 DEFAULT_HUNGER_RESTORE
             )
         );
+        final int hunger = (int) Math.round(baseHunger * multiplier);
         final double saturation = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -82,7 +95,7 @@ public class FanDaiCaoGuRiceFeastEffect implements IGuEffect {
                 META_SATURATION_RESTORE,
                 DEFAULT_SATURATION_RESTORE
             )
-        );
+        ) * multiplier;
         if (hunger > 0 || saturation > 0.0) {
             player.getFoodData().eat(hunger, (float) saturation);
         }
@@ -94,7 +107,7 @@ public class FanDaiCaoGuRiceFeastEffect implements IGuEffect {
                 META_ABSORPTION,
                 DEFAULT_ABSORPTION
             )
-        );
+        ) * multiplier;
         if (absorption > 0.0) {
             player.setAbsorptionAmount(
                 (float) (player.getAbsorptionAmount() + absorption)

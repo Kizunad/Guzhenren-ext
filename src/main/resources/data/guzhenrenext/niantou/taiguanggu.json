@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:taiguanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:taiguanggu_passive_ancient_sun",
+            "usageTitle": "被动·太光照世",
+            "usageDesc": "太古烈日之光透过隔膜，持续令附近敌人显形，并扩容念头容量与精力上限（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 半径：{radius} |\n 显形：{glowing_duration_ticks}t |\n 念头容量：+{niantou_capacity_bonus} |\n 精力上限：+{jingli_max_bonus}",
+            "cost_duration": 9200,
+            "cost_total_niantou": 3400,
+            "metadata": {
+                "niantou_cost_per_second": "30.0",
+                "jingli_cost_per_second": "42.0",
+                "hunpo_cost_per_second": "22.0",
+                "zhenyuan_base_cost_per_second": "11.0",
+                "radius": "14.0",
+                "glowing_duration_ticks": "60",
+                "ignore_walls": "true",
+                "niantou_capacity_bonus": "400.0",
+                "jingli_max_bonus": "120.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:taiguanggu_active_ancient_sun",
+            "usageTitle": "主动·太光普照",
+            "usageDesc": "爆发太光，短时间内大范围令敌显形（无视隔膜）。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 显形：{glowing_duration_ticks}t",
+            "cost_duration": 9800,
+            "cost_total_niantou": 4600,
+            "metadata": {
+                "cooldown_ticks": "1400",
+                "radius": "24.0",
+                "ignore_walls": "true",
+                "knockback_strength": "0.0",
+                "knockback_vertical": "0.0",
+                "niantou_cost": "720.0",
+                "jingli_cost": "850.0",
+                "hunpo_cost": "520.0",
+                "zhenyuan_base_cost": "380000.0",
+                "glowing_duration_ticks": "200",
+                "glowing_amplifier": "0"
+            }
+        }
+    ]
+}
+

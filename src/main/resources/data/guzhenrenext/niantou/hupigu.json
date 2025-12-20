@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:hupigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hupigu_passive_tiger_strength",
+            "usageTitle": "被动·虎皮猛力",
+            "usageDesc": "虎皮骨架改造，提升攻击强度。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount} |",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "480",
+                "attribute_amount": "0.306"
+            }
+        },
+        {
+            "usageID": "guzhenren:hupigu_active_tiger_rend",
+            "usageTitle": "主动·虎裂",
+            "usageDesc": "锁定目标撕裂其势，造成法术伤害并施加虚弱。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "range": "21",
+                "cooldown_ticks": "480",
+                "niantou_cost": "480",
+                "zhenyuan_base_cost": "40000",
+                "extra_magic_damage": "150",
+                "effect_duration_ticks": "150",
+                "effect_amplifier": "0",
+                "jingli_cost": "240",
+                "hunpo_cost": "960"
+            }
+        }
+    ]
+}

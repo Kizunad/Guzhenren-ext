@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:di_xiong_zhua_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:di_xiong_zhua_gu_passive_ground_wolf_stride",
+            "usageTitle": "被动·地狼踏",
+            "usageDesc": "地狼爪令步伐更稳健，提升移速。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 移速加成：{attribute_amount} |",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "400",
+                "attribute_amount": "0.204"
+            }
+        },
+        {
+            "usageID": "guzhenren:di_xiong_zhua_gu_active_wolf_grab",
+            "usageTitle": "主动·地狼擒",
+            "usageDesc": "锁定目标牵引拉扯，令其减速。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 力度：{force} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "range": "18",
+                "cooldown_ticks": "390",
+                "niantou_cost": "400",
+                "zhenyuan_base_cost": "32000",
+                "force": "1.65",
+                "effect_duration_ticks": "150",
+                "effect_amplifier": "0",
+                "jingli_cost": "200",
+                "hunpo_cost": "800"
+            }
+        }
+    ]
+}

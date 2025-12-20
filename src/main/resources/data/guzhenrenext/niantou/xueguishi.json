@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:xueguishi",
+    "usages": [
+        {
+            "usageID": "guzhenren:xueguishi_passive_blood_leech",
+            "usageTitle": "被动·血噬",
+            "usageDesc": "血鬼尸形态以战养战，攻击时概率汲血回气。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 回复：{heal_amount} |\n 念头：+{niantou_gain} |\n 真元：+{zhenyuan_gain} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 26000000,
+            "cost_total_niantou": 6400000,
+            "metadata": {
+                "proc_chance": "0.16",
+                "niantou_cost": "350",
+                "heal_amount": "18000",
+                "niantou_gain": "10000",
+                "zhenyuan_gain": "180000",
+                "jingli_cost": "700",
+                "hunpo_cost": "350",
+                "zhenyuan_base_cost": "175000000"
+            }
+        },
+        {
+            "usageID": "guzhenren:xueguishi_active_blood_mark",
+            "usageTitle": "主动·血印",
+            "usageDesc": "锁定目标刻下血印，造成法术伤害并附带衰竭。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 效果：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 32000000,
+            "cost_total_niantou": 13000000,
+            "metadata": {
+                "range": "36",
+                "cooldown_ticks": "1360",
+                "niantou_cost": "150",
+                "zhenyuan_base_cost": "13000000",
+                "extra_magic_damage": "1800",
+                "effect_duration_ticks": "320",
+                "effect_amplifier": "0",
+                "jingli_cost": "750",
+                "hunpo_cost": "300"
+            }
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:shuang_jian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuang_jian_gu_passive_frost_arrow",
+            "usageTitle": "被动·霜箭加持",
+            "usageDesc": "霜箭蛊擅长以极少真元凝出霜箭，寄宿空窍时可为远程攻击附加寒意与冻结。",
+            "usageInfo": "触发率：{proc_chance} | 触发时消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 远程增伤：+{damage_bonus} | 冻结：+{freeze_ticks}t | 缓慢：{slow_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.10",
+                "niantou_cost": "80.0",
+                "jingli_cost": "24.0",
+                "hunpo_cost": "12.0",
+                "zhenyuan_base_cost": "35000000.0",
+                "damage_bonus": "0.18",
+                "freeze_ticks": "80",
+                "slow_duration_ticks": "120",
+                "slow_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuang_jian_gu_active_frost_arrow",
+            "usageTitle": "主动·霜箭锁魂",
+            "usageDesc": "锁定视线目标，霜气凝成箭矢直射而去，使其冻结、显形，并造成额外伤害。",
+            "usageInfo": "距离：{range} | 伤害：{extra_magic_damage} | 冻结：+{freeze_ticks}t | 缓慢：{effect_duration_ticks}t | 发光：{glowing_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 420,
+            "cost_total_niantou": 110,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "range": "30.0",
+                "niantou_cost": "800.0",
+                "jingli_cost": "260.0",
+                "hunpo_cost": "120.0",
+                "zhenyuan_base_cost": "650000000.0",
+                "extra_magic_damage": "800.0",
+                "freeze_ticks": "180",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "2",
+                "glowing_duration_ticks": "120",
+                "glowing_amplifier": "0"
+            }
+        }
+    ]
+}

@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.customNPCImpl.util;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.PlayerVariablesSyncHelper;
 import net.guzhenren.network.GuzhenrenModVariables;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -76,7 +77,7 @@ public final class GuCultivationHelper {
                 (stage - 1) * STAGE_STEP_REQUIREMENT +
                 (rank - 1) * RANK_STEP_REQUIREMENT;
             vars.gushi_xiulian_jindu = requirement;
-            vars.markSyncDirty();
+            PlayerVariablesSyncHelper.markSyncDirty(vars);
         }
         return requirement;
     }
@@ -117,7 +118,7 @@ public final class GuCultivationHelper {
         double next = current + amount;
         if (Double.compare(current, next) != 0) {
             vars.gushi_xiulian_dangqian = next;
-            vars.markSyncDirty();
+            PlayerVariablesSyncHelper.markSyncDirty(vars);
         }
     }
 
@@ -150,6 +151,6 @@ public final class GuCultivationHelper {
 
         double nextRequirement = requirement + STAGE_STEP_REQUIREMENT;
         vars.gushi_xiulian_jindu = nextRequirement;
-        vars.markSyncDirty();
+        PlayerVariablesSyncHelper.markSyncDirty(vars);
     }
 }

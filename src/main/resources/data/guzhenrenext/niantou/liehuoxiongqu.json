@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:liehuoxiongqu",
+    "usages": [
+        {
+            "usageID": "guzhenren:liehuoxiongqu_passive_flame_bear_armor",
+            "usageTitle": "被动·烈焰熊躯",
+            "usageDesc": "烈焰熊躯厚重，提升护甲。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 护甲：{attribute_amount} |",
+            "cost_duration": 2400000,
+            "cost_total_niantou": 520000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10000",
+                "attribute_amount": "100"
+            }
+        },
+        {
+            "usageID": "guzhenren:liehuoxiongqu_active_flame_bear_roar",
+            "usageTitle": "主动·熊吼",
+            "usageDesc": "烈焰熊躯爆发怒吼，短时间攻防俱增并免疫火焰。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 3000000,
+            "cost_total_niantou": 1000000,
+            "metadata": {
+                "cooldown_ticks": "1190",
+                "niantou_cost": "110",
+                "zhenyuan_base_cost": "920000",
+                "heal_amount": "0",
+                "effect_duration_ticks": "420",
+                "effect_amplifier": "0",
+                "jingli_cost": "550",
+                "hunpo_cost": "220"
+            }
+        }
+    ]
+}

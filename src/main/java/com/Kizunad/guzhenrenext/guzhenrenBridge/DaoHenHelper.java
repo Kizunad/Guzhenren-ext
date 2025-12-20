@@ -20,8 +20,11 @@ public final class DaoHenHelper {
         JIN_DAO("jindao"), // 金道
         LI_DAO("lidao"), // 力道
         TU_DAO("tudao"), // 土道
+        SHI_DAO("shidao"), // 食道
+        BING_XUE_DAO("bingxuedao"), // 冰雪道
         BIAN_HUA_DAO("bianhuadao"), // 变化道
         FENG_DAO("fengdao"), // 风道
+        GUANG_DAO("guangdao"), // 光道
         NU_DAO("nudao"), // 奴道
         // ... 根据需要添加其他流派
         GENERIC("generic"); // 通用/无属性
@@ -58,9 +61,12 @@ public final class DaoHenHelper {
                     return vars.daohen_lidao;
                 case TU_DAO:
                     return vars.daohen_tudao;
+                case BING_XUE_DAO:
+                    return vars.daohen_bingxuedao;
                 case BIAN_HUA_DAO:
                     return vars.daohen_bianhuadao;
                 case FENG_DAO: return vars.daohen_fengdao;
+                case GUANG_DAO: return vars.daohen_guangdao;
                 case NU_DAO: return vars.dahen_nudao; // 注意：库中变量名为 dahen_nudao (少了个o)
                 default: return 0.0;
             }

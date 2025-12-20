@@ -1,7 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierThree;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.network.chat.Component;
@@ -77,6 +80,14 @@ public class DaFuPianPianGuFullBellyShieldEffect implements IGuEffect {
             return false;
         }
 
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
+        }
+
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         final double per = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -84,7 +95,7 @@ public class DaFuPianPianGuFullBellyShieldEffect implements IGuEffect {
                 META_ABSORPTION_PER_HUNGER,
                 DEFAULT_ABSORPTION_PER_HUNGER
             )
-        );
+        ) * multiplier;
         final double max = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -92,7 +103,7 @@ public class DaFuPianPianGuFullBellyShieldEffect implements IGuEffect {
                 META_MAX_ABSORPTION,
                 DEFAULT_MAX_ABSORPTION
             )
-        );
+        ) * multiplier;
         final double gained = Math.min(max, hunger * per);
         if (gained > 0.0) {
             player.setAbsorptionAmount(

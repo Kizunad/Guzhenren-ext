@@ -1,0 +1,51 @@
+{
+    "itemID": "guzhenren:jiangherixiagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiangherixiagu_passive_falling_river",
+            "usageTitle": "被动·江河日下",
+            "usageDesc": "光意压制敌势，攻击时更易令敌迟滞与虚弱（真元或多资源不足则停效）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s |\n 触发冷却：{proc_cooldown_ticks}t |\n 迟缓：{slow_duration_ticks}t |\n 虚弱：{weakness_duration_ticks}t",
+            "cost_duration": 9400,
+            "cost_total_niantou": 3600,
+            "metadata": {
+                "niantou_cost_per_second": "28.0",
+                "jingli_cost_per_second": "38.0",
+                "hunpo_cost_per_second": "20.0",
+                "zhenyuan_base_cost_per_second": "10.5",
+                "proc_cooldown_ticks": "55",
+                "damage_multiplier": "0.0",
+                "bonus_damage": "0.0",
+                "burn_seconds": "0",
+                "glowing_duration_ticks": "0",
+                "slow_duration_ticks": "100",
+                "slow_amplifier": "1",
+                "weakness_duration_ticks": "100",
+                "weakness_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiangherixiagu_active_falling_river",
+            "usageTitle": "主动·日下沉势",
+            "usageDesc": "锁定单一目标，以强光压制其行动与战力，令其陷入迟缓、虚弱与短暂致盲。",
+            "usageInfo": "距离：{range} |\n 冷却：{cooldown_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 迟缓：{slow_duration_ticks}t |\n 虚弱：{weakness_duration_ticks}t |\n 致盲：{blind_duration_ticks}t",
+            "cost_duration": 9800,
+            "cost_total_niantou": 4600,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "range": "18.0",
+                "niantou_cost": "680.0",
+                "jingli_cost": "820.0",
+                "hunpo_cost": "460.0",
+                "zhenyuan_base_cost": "300000.0",
+                "slow_duration_ticks": "220",
+                "slow_amplifier": "2",
+                "weakness_duration_ticks": "220",
+                "weakness_amplifier": "1",
+                "blind_duration_ticks": "60",
+                "blind_amplifier": "0"
+            }
+        }
+    ]
+}
+

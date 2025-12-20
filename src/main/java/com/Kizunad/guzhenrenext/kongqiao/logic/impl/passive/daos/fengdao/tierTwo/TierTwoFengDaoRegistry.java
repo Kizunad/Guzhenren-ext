@@ -4,7 +4,7 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveAoEBurstEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveTargetDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoAttackProcDebuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common.ZhiDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoSustainedAttributeModifierEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -58,7 +58,7 @@ public final class TierTwoFengDaoRegistry {
             "GuzhenrenExtCooldown_bufenggu_active_wind_bind";
 
         GuEffectRegistry.register(
-            new ZhiDaoSustainedAttributeModifierEffect(
+            new FengDaoSustainedAttributeModifierEffect(
                 passive,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -83,4 +83,3 @@ public final class TierTwoFengDaoRegistry {
         );
     }
 }
-

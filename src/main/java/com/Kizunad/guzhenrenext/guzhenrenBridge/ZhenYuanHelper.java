@@ -61,7 +61,7 @@ public final class ZhenYuanHelper {
 
             if (Double.compare(original, newValue) != 0) {
                 vars.zhenyuan = newValue;
-                vars.markSyncDirty();
+                PlayerVariablesSyncHelper.markSyncDirty(vars);
             }
             return newValue;
         } catch (Exception e) {

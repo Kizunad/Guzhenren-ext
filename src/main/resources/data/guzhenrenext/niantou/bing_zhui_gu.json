@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:bing_zhui_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bing_zhui_gu_passive_ice_spike",
+            "usageTitle": "被动·冰锥暗伤",
+            "usageDesc": "每次出手都暗藏一缕寒锋，概率在敌人体内凝出冰锥，令其行动迟缓并逐步冻结。",
+            "usageInfo": "触发率：{proc_chance} | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)/次 | 缓慢：{effect_duration_ticks}t | 冻结：+{freeze_ticks}t | 追加伤害：{extra_magic_damage}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.08",
+                "niantou_cost": "30.0",
+                "jingli_cost": "8.0",
+                "hunpo_cost": "4.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "1",
+                "freeze_ticks": "60",
+                "extra_magic_damage": "6.0",
+                "damage_bonus_vs_frozen": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:bing_zhui_gu_active_ice_spike",
+            "usageTitle": "主动·冰锥穿刺",
+            "usageDesc": "锁定视线目标，将寒气凝为尖锐冰锥飞射而出，造成伤害并施加冻结。",
+            "usageInfo": "距离：{range} | 伤害：{extra_magic_damage} | 冻结：+{freeze_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 220,
+            "cost_total_niantou": 35,
+            "metadata": {
+                "cooldown_ticks": "400",
+                "range": "16.0",
+                "niantou_cost": "90.0",
+                "jingli_cost": "24.0",
+                "hunpo_cost": "12.0",
+                "zhenyuan_base_cost": "480000.0",
+                "extra_magic_damage": "15.0",
+                "freeze_ticks": "120",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}

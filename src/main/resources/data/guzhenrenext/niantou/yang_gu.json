@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:yang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yang_gu_passive_yang_leech",
+            "usageTitle": "被动·阳噬",
+            "usageDesc": "以阳势借力，攻击时概率汲取气血并回复少量念头与真元。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 回复：{heal_amount} |\n 念头：+{niantou_gain} |\n 真元：+{zhenyuan_gain} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "proc_chance": "0.14",
+                "niantou_cost": "220",
+                "heal_amount": "120",
+                "niantou_gain": "100",
+                "zhenyuan_gain": "800",
+                "jingli_cost": "44",
+                "hunpo_cost": "22",
+                "zhenyuan_base_cost": "1100000"
+            }
+        },
+        {
+            "usageID": "guzhenren:yang_gu_active_yang_surge",
+            "usageTitle": "主动·阳爆",
+            "usageDesc": "阳势爆发，短时间提升输出并自愈。",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 增益：{effect_duration_ticks}t |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "cooldown_ticks": "780",
+                "niantou_cost": "540",
+                "zhenyuan_base_cost": "46000",
+                "heal_amount": "200",
+                "effect_duration_ticks": "270",
+                "effect_amplifier": "0",
+                "jingli_cost": "270",
+                "hunpo_cost": "108"
+            }
+        }
+    ]
+}

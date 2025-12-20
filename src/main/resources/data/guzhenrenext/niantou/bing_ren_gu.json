@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:bing_ren_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bing_ren_gu_passive_ice_blade",
+            "usageTitle": "被动·冰刃寒锋",
+            "usageDesc": "冰刃蛊以寒锋入体，斩击时更易削弱敌人。若敌人已受寒，刀势更盛。",
+            "usageInfo": "触发率：{proc_chance} | 消耗：{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)/次 | 虚弱：{effect_duration_ticks}t | 冻结：+{freeze_ticks}t | 受寒增伤：+{damage_bonus_vs_frozen} | 追加伤害：{extra_magic_damage}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.06",
+                "niantou_cost": "35.0",
+                "jingli_cost": "10.0",
+                "hunpo_cost": "5.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "freeze_ticks": "50",
+                "extra_magic_damage": "6.0",
+                "damage_bonus_vs_frozen": "0.18"
+            }
+        },
+        {
+            "usageID": "guzhenren:bing_ren_gu_active_ice_blade",
+            "usageTitle": "主动·冰晶战刀",
+            "usageDesc": "将真元灌注冰刃蛊，短时间内凝成冰晶战刀，攻势与身法同时提升。",
+            "usageInfo": "消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 力量：{strength_duration_ticks}t | 速度：{speed_duration_ticks}t | 冷却：{cooldown_ticks}t",
+            "cost_duration": 260,
+            "cost_total_niantou": 45,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "niantou_cost": "110.0",
+                "jingli_cost": "30.0",
+                "hunpo_cost": "14.0",
+                "zhenyuan_base_cost": "520000.0",
+                "strength_duration_ticks": "200",
+                "strength_amplifier": "0",
+                "speed_duration_ticks": "200",
+                "speed_amplifier": "0"
+            }
+        }
+    ]
+}

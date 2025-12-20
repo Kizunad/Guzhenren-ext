@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:mao_jiang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:mao_jiang_gu_passive_mao_jiang_hide",
+            "usageTitle": "被动·毛僵皮",
+            "usageDesc": "僵皮坚韧，提升护甲。",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 护甲：{attribute_amount} |",
+            "cost_duration": 200000,
+            "cost_total_niantou": 34000,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "45000",
+                "attribute_amount": "400"
+            }
+        },
+        {
+            "usageID": "guzhenren:mao_jiang_gu_active_jiang_slam",
+            "usageTitle": "主动·僵扑震地",
+            "usageDesc": "僵力爆发震地，范围减速。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 效果：{effect_duration_ticks}t |\n 击退：{knockback_strength} |\n 精力消耗：{jingli_cost} |\n 魂魄消耗：{hunpo_cost}",
+            "cost_duration": 260000,
+            "cost_total_niantou": 68000,
+            "metadata": {
+                "radius": "9",
+                "cooldown_ticks": "510",
+                "niantou_cost": "440",
+                "zhenyuan_base_cost": "36000",
+                "effect_duration_ticks": "180",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.42",
+                "jingli_cost": "220",
+                "hunpo_cost": "880"
+            }
+        }
+    ]
+}

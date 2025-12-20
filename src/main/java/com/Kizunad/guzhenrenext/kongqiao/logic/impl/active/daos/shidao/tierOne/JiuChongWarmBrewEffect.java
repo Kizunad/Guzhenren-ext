@@ -1,8 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shidao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.network.chat.Component;
@@ -85,10 +88,18 @@ public class JiuChongWarmBrewEffect implements IGuEffect {
             return false;
         }
 
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
+        }
+
         if (hungerCost > 0) {
             player.causeFoodExhaustion(hungerCost * EXHAUSTION_PER_HUNGER);
         }
 
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.SHI_DAO
+        );
         final double gain = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -96,7 +107,7 @@ public class JiuChongWarmBrewEffect implements IGuEffect {
                 META_ZHENYUAN_GAIN,
                 DEFAULT_ZHENYUAN_GAIN
             )
-        );
+        ) * multiplier;
         if (gain > 0.0) {
             ZhenYuanHelper.modify(user, gain);
         }
