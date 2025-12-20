@@ -5,11 +5,14 @@
             "usageID": "guzhenren:tipogu_passive_body_tempering",
             "usageTitle": "炼体强魄",
             "usageDesc": "以魂炼体，以体载魂。\n体魄蛊在空窍内持续温养肉身：强化最大生命、攻击力与击退抗性。\n维持时每秒消耗少量魂魄；魂魄不足则暂时失效。\n力道道痕越深，炼体越显；魂道道痕越深，维持消耗越高。",
-            "usageInfo": "维持消耗: {soul_cost_per_second}/s (受魂道道痕增幅) |\n 最大生命加成: {max_health_bonus_percent} (受力道道痕增幅) |\n 攻击力加成: {attack_damage_bonus_percent} (受力道道痕增幅) |\n 击退抗性加成: {knockback_resistance_bonus} (受力道道痕增幅)",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s（魂魄维持受魂道道痕增幅） |\n 最大生命加成: {max_health_bonus_percent} (受力道道痕增幅) |\n 攻击力加成: {attack_damage_bonus_percent} (受力道道痕增幅) |\n 击退抗性加成: {knockback_resistance_bonus} (受力道道痕增幅)",
             "cost_duration": 720,
             "cost_total_niantou": 60,
             "metadata": {
-                "soul_cost_per_second": "0.35",
+                "zhenyuan_base_cost_per_second": "180.0",
+                "niantou_cost_per_second": "1.1",
+                "jingli_cost_per_second": "0.9",
+                "hunpo_cost_per_second": "0.25",
                 "max_health_bonus_percent": "0.12",
                 "attack_damage_bonus_percent": "0.10",
                 "knockback_resistance_bonus": "0.10"

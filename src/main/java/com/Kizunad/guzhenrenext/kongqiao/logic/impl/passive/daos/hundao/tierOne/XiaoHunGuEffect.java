@@ -1,9 +1,13 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +21,7 @@ public class XiaoHunGuEffect implements IGuEffect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XiaoHunGuEffect.class);
     public static final String USAGE_ID = "guzhenren:xiaohungu_passive_regen";
-    private static final double DEFAULT_REGEN = 2.0; // 每秒回复 2 点
+    private static final double DEFAULT_REGEN = 0.2; // 每秒回复 0.2 点
 
     @Override
     public String getUsageId() {
@@ -26,19 +30,60 @@ public class XiaoHunGuEffect implements IGuEffect {
 
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        if (user.level().isClientSide()) {
+            return;
+        }
+
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
             return;
         }
-        double amount = DEFAULT_REGEN;
-        
-        if (usageInfo.metadata() != null && usageInfo.metadata().containsKey("regen")) {
-            try {
-                amount = Double.parseDouble(usageInfo.metadata().get("regen"));
-            } catch (NumberFormatException ignored) {
-                // 使用默认值
-            }
+
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                0.0
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                0.0,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
+            return;
         }
+
+        final double amountBase = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(usageInfo, "regen", DEFAULT_REGEN)
+        );
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+        final double amount = amountBase * multiplier;
 
         double current = HunPoHelper.getAmount(user);
         double max = HunPoHelper.getMaxAmount(user);

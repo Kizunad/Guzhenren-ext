@@ -4,9 +4,10 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import java.util.List;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -33,8 +34,9 @@ public class GuiYanGuGhostEyeEffect implements IGuEffect {
 
     private static final double DEFAULT_RADIUS = 16.0;
     private static final int DEFAULT_GLOW_DURATION_TICKS = 50;
-    private static final double DEFAULT_SOUL_COST_PER_SECOND = 0.5;
-    private static final double DEFAULT_SOUL_COST_PER_TARGET = 0.05;
+    private static final double DEFAULT_HUNPO_COST_PER_SECOND = 0.5;
+    private static final double DEFAULT_HUNPO_COST_PER_TARGET = 0.05;
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 180.0;
 
     private static final int DEFAULT_PARTICLE_COUNT_PER_TARGET = 2;
     private static final double PARTICLE_SPREAD = 0.2;
@@ -65,7 +67,11 @@ public class GuiYanGuGhostEyeEffect implements IGuEffect {
             return;
         }
 
-        double baseRadius = getMetaDouble(usageInfo, "scan_radius", DEFAULT_RADIUS);
+        double baseRadius = UsageMetadataHelper.getDouble(
+            usageInfo,
+            "scan_radius",
+            DEFAULT_RADIUS
+        );
         double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
             user,
             DaoHenHelper.DaoType.HUN_DAO
@@ -79,30 +85,73 @@ public class GuiYanGuGhostEyeEffect implements IGuEffect {
             e -> e.isAlive() && e != user && !isAlly(user, e)
         );
 
-        double baseCost = getMetaDouble(
+        double baseHunpoCostPerSecond = UsageMetadataHelper.getDouble(
             usageInfo,
-            "soul_cost_per_second",
-            DEFAULT_SOUL_COST_PER_SECOND
+            GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+            DEFAULT_HUNPO_COST_PER_SECOND
         );
-        double perTargetCost = getMetaDouble(
+        double hunpoCostPerTarget = UsageMetadataHelper.getDouble(
             usageInfo,
-            "soul_cost_per_target",
-            DEFAULT_SOUL_COST_PER_TARGET
+            "hunpo_cost_per_target",
+            DEFAULT_HUNPO_COST_PER_TARGET
         );
 
-        // “看得越远越费力”：既增幅侦察半径，也同步提高魂魄维持消耗。
-        double cost = (baseCost + perTargetCost * targets.size()) * selfMultiplier;
-        if (HunPoHelper.getAmount(user) < cost) {
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double niantouCostPerTarget = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(usageInfo, "niantou_cost_per_target", 0.0)
+        );
+        final double jingliCostPerTarget = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(usageInfo, "jingli_cost_per_target", 0.0)
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            (baseHunpoCostPerSecond + hunpoCostPerTarget * targets.size()) * selfMultiplier
+        );
+
+        // “看得越远越费力”：既增幅侦察半径，也同步提高维持消耗。
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond + niantouCostPerTarget * targets.size(),
+                jingliCostPerSecond + jingliCostPerTarget * targets.size(),
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             return;
         }
-        HunPoHelper.modify(user, -cost);
 
-        int glowDuration = getMetaInt(
+        int glowDuration = UsageMetadataHelper.getInt(
             usageInfo,
             "glow_duration_ticks",
             DEFAULT_GLOW_DURATION_TICKS
         );
-        int particleCount = getMetaInt(
+        int particleCount = UsageMetadataHelper.getInt(
             usageInfo,
             "particle_count_per_target",
             DEFAULT_PARTICLE_COUNT_PER_TARGET
@@ -146,33 +195,5 @@ public class GuiYanGuGhostEyeEffect implements IGuEffect {
             return true;
         }
         return false;
-    }
-
-    private static double getMetaDouble(
-        NianTouData.Usage usage,
-        String key,
-        double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
-    private static int getMetaInt(
-        NianTouData.Usage usage,
-        String key,
-        int defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
     }
 }

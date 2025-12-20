@@ -6,6 +6,8 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -37,7 +39,8 @@ public class HunDunGuSoulShieldEffect implements IGuEffect {
     private static final String NBT_LAST_PARTICLE_TICK =
         "HunDunGuLastShieldParticleTick";
 
-    private static final double DEFAULT_MAINTAIN_SOUL_COST_PER_SECOND = 0.10;
+    private static final double DEFAULT_HUNPO_COST_PER_SECOND = 0.10;
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 200.0;
     private static final double DEFAULT_BASE_REDUCTION_RATIO = 0.12;
     private static final double DEFAULT_MAX_REDUCTION_RATIO = 0.35;
     private static final double DEFAULT_SOUL_COST_PER_DAMAGE_ABSORBED = 0.20;
@@ -80,19 +83,50 @@ public class HunDunGuSoulShieldEffect implements IGuEffect {
             player,
             DaoHenHelper.DaoType.HUN_DAO
         );
-        final double baseCost = getMetaDouble(
-            usageInfo,
-            "maintain_soul_cost_per_second",
-            DEFAULT_MAINTAIN_SOUL_COST_PER_SECOND
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
         );
-        final double maintainCost = Math.max(0.0, baseCost * selfMultiplier);
-
-        if (HunPoHelper.getAmount(player) < maintainCost) {
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                DEFAULT_HUNPO_COST_PER_SECOND
+            ) * selfMultiplier
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                player,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             setActive(player, false);
             return;
         }
-
-        HunPoHelper.modify(player, -maintainCost);
         setActive(player, true);
     }
 
@@ -123,13 +157,13 @@ public class HunDunGuSoulShieldEffect implements IGuEffect {
             player,
             DaoHenHelper.DaoType.HUN_DAO
         );
-        final double ratioScale = getMetaDouble(
+        final double ratioScale = UsageMetadataHelper.getDouble(
             usageInfo,
             "dao_hen_ratio_scale",
             DEFAULT_DAO_HEN_RATIO_SCALE
         );
         final double baseRatio = clamp(
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "base_reduction_ratio",
                 DEFAULT_BASE_REDUCTION_RATIO
@@ -138,7 +172,7 @@ public class HunDunGuSoulShieldEffect implements IGuEffect {
             1.0
         );
         final double maxRatio = clamp(
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "max_reduction_ratio",
                 DEFAULT_MAX_REDUCTION_RATIO
@@ -160,7 +194,7 @@ public class HunDunGuSoulShieldEffect implements IGuEffect {
 
         final double costPerAbsorbed = Math.max(
             0.0,
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "soul_cost_per_damage_absorbed",
                 DEFAULT_SOUL_COST_PER_DAMAGE_ABSORBED
@@ -249,16 +283,4 @@ public class HunDunGuSoulShieldEffect implements IGuEffect {
         return value;
     }
 
-    private static double getMetaDouble(
-        final NianTouData.Usage usage,
-        final String key,
-        final double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {}
-        }
-        return defaultValue;
-    }
 }

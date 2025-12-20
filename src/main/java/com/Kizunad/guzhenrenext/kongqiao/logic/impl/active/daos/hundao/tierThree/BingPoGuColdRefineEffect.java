@@ -1,8 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,7 +33,6 @@ public class BingPoGuColdRefineEffect implements IGuEffect {
 
     private static final int TICKS_PER_SECOND = 20;
 
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 480.0;
     private static final double DEFAULT_BASE_HUNPO_GAIN = 8.0;
     private static final double DEFAULT_BONUS_HUNPO_GAIN = 10.0;
     private static final int DEFAULT_CLEAR_FROZEN_TICKS = 120;
@@ -75,24 +77,11 @@ public class BingPoGuColdRefineEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            getMetaDouble(
-                usageInfo,
-                "activate_zhenyuan_base_cost",
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (realCost > 0.0 && !ZhenYuanHelper.hasEnough(user, realCost)) {
-            player.displayClientMessage(
-                Component.literal("真元不足，冰魄难以凝炼。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
-        final int cooldownTicks = getMetaInt(
+        final int cooldownTicks = UsageMetadataHelper.getInt(
             usageInfo,
             "cooldown_ticks",
             DEFAULT_COOLDOWN_TICKS
@@ -101,27 +90,36 @@ public class BingPoGuColdRefineEffect implements IGuEffect {
             setCooldownUntilTick(user, currentTick + cooldownTicks);
         }
 
-        if (realCost > 0.0) {
-            ZhenYuanHelper.modify(user, -realCost);
-        }
-
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
         final boolean isColdContext = isColdContext(user);
         final double baseGain = Math.max(
             0.0,
-            getMetaDouble(usageInfo, "base_hunpo_gain", DEFAULT_BASE_HUNPO_GAIN)
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                "base_hunpo_gain",
+                DEFAULT_BASE_HUNPO_GAIN
+            )
         );
         final double bonusGain = Math.max(
             0.0,
-            getMetaDouble(usageInfo, "bonus_hunpo_gain", DEFAULT_BONUS_HUNPO_GAIN)
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                "bonus_hunpo_gain",
+                DEFAULT_BONUS_HUNPO_GAIN
+            )
         );
-        final double gain = baseGain + (isColdContext ? bonusGain : 0.0);
+        final double gain =
+            (baseGain + (isColdContext ? bonusGain : 0.0)) * selfMultiplier;
         if (gain > 0.0) {
             HunPoHelper.modify(user, gain);
         }
 
         final int clearFrozenTicks = Math.max(
             0,
-            getMetaInt(
+            UsageMetadataHelper.getInt(
                 usageInfo,
                 "clear_frozen_ticks",
                 DEFAULT_CLEAR_FROZEN_TICKS
@@ -195,33 +193,4 @@ public class BingPoGuColdRefineEffect implements IGuEffect {
     ) {
         user.getPersistentData().putInt(NBT_COOLDOWN_UNTIL_TICK, untilTick);
     }
-
-    private static double getMetaDouble(
-        final NianTouData.Usage usage,
-        final String key,
-        final double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
-    private static int getMetaInt(
-        final NianTouData.Usage usage,
-        final String key,
-        final int defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
 }
-

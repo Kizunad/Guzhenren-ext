@@ -4,6 +4,8 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
@@ -34,7 +36,6 @@ public class GuiLianGuSoulImpactEffect implements IGuEffect {
 
     private static final String NBT_LAST_TICK = "GuilianLastImpactTick";
 
-    private static final double DEFAULT_SOUL_COST = 3.0;
     private static final double DEFAULT_BASE_SOUL_DAMAGE = 40.0;
     private static final int DEFAULT_TRIGGER_INTERVAL_TICKS = 20;
     private static final double DEFAULT_LEECH_PERCENT = 0.15;
@@ -84,23 +85,16 @@ public class GuiLianGuSoulImpactEffect implements IGuEffect {
             return damage;
         }
 
-        double soulCost = getMetaDouble(
-            usageInfo,
-            "soul_cost",
-            DEFAULT_SOUL_COST
-        );
-        if (HunPoHelper.getAmount(attacker) < soulCost) {
-            return damage;
-        }
-
         if (!(attacker.level() instanceof ServerLevel serverLevel)) {
             return damage;
         }
 
-        HunPoHelper.modify(attacker, -soulCost);
+        if (!GuEffectCostHelper.tryConsumeOnce(null, attacker, usageInfo)) {
+            return damage;
+        }
         nbt.putInt(NBT_LAST_TICK, attacker.tickCount);
 
-        double baseSoulDamage = getMetaDouble(
+        double baseSoulDamage = UsageMetadataHelper.getDouble(
             usageInfo,
             "base_soul_damage",
             DEFAULT_BASE_SOUL_DAMAGE
@@ -113,7 +107,7 @@ public class GuiLianGuSoulImpactEffect implements IGuEffect {
         double finalSoulDamage = baseSoulDamage * multiplier;
         applySoulImpact(attacker, target, finalSoulDamage);
 
-        double leechPercent = getMetaDouble(
+        double leechPercent = UsageMetadataHelper.getDouble(
             usageInfo,
             "leech_percent",
             DEFAULT_LEECH_PERCENT
@@ -122,12 +116,12 @@ public class GuiLianGuSoulImpactEffect implements IGuEffect {
             HunPoHelper.modify(attacker, finalSoulDamage * leechPercent);
         }
 
-        int weaknessDuration = getMetaInt(
+        int weaknessDuration = UsageMetadataHelper.getInt(
             usageInfo,
             "weakness_duration_ticks",
             DEFAULT_WEAKNESS_DURATION_TICKS
         );
-        int weaknessAmplifier = getMetaInt(
+        int weaknessAmplifier = UsageMetadataHelper.getInt(
             usageInfo,
             "weakness_amplifier",
             DEFAULT_WEAKNESS_AMPLIFIER
@@ -196,22 +190,8 @@ public class GuiLianGuSoulImpactEffect implements IGuEffect {
             return;
         }
 
-        DamageSource src = attacker.damageSources().magic();
+        DamageSource src = attacker.damageSources().mobAttack(attacker);
         target.hurt(src, (float) soulDamage);
-    }
-
-    private static double getMetaDouble(
-        NianTouData.Usage usage,
-        String key,
-        double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
     }
 
     private static int getMetaInt(
@@ -219,12 +199,6 @@ public class GuiLianGuSoulImpactEffect implements IGuEffect {
         String key,
         int defaultValue
     ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
+        return UsageMetadataHelper.getInt(usage, key, defaultValue);
     }
 }

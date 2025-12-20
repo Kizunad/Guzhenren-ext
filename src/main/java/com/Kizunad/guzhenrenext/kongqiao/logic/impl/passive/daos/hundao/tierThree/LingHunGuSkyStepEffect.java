@@ -5,6 +5,8 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -26,13 +28,24 @@ import net.minecraft.world.phys.Vec3;
  * 2) 地形适应：在雪地/冰面/灵魂沙上行走更“平”，体感上不被拖慢与滑行。
  * </p>
  * <p>
- * 风道道痕（daohen_fengdao）用于提升“身法”相关的强度（跳跃与地形适应均属于自身效果）。
+ * 魂道道痕用于提升“身法”相关的强度（跳跃与地形适应均属于自身效果）。
  * </p>
  */
 public class LingHunGuSkyStepEffect implements IGuEffect {
 
     public static final String USAGE_ID =
         "guzhenren:linghungu_passive_sky_step";
+
+    /**
+     * 玩家 PersistentData：踏空当前是否处于“付费启用”状态。
+     * <p>
+     * 用于服务端二段跳校验，避免资源不足时仍可触发二段跳。
+     * </p>
+     */
+    public static final String NBT_SKY_STEP_ENABLED = "LingHunGuSkyStepEnabled";
+
+    private static final String NBT_SKY_STEP_LAST_COST_GAME_TIME =
+        "LingHunGuSkyStepLastCostGameTime";
 
     /**
      * 玩家 PersistentData：是否已消耗过本次腾空中的“二段跳”。
@@ -44,6 +57,9 @@ public class LingHunGuSkyStepEffect implements IGuEffect {
 
     private static final ResourceLocation SURFACE_SPEED_MODIFIER_ID =
         ResourceLocation.parse("guzhenrenext:linghungu_surface_speed");
+
+    private static final int COST_INTERVAL_TICKS = 20;
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 180.0;
 
     private static final double DEFAULT_SLOW_SURFACE_SPEED_BONUS = 1.5;
     private static final double DEFAULT_ICE_SLIP_DAMPEN = 0.65;
@@ -63,12 +79,16 @@ public class LingHunGuSkyStepEffect implements IGuEffect {
 
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
-            removeSurfaceSpeedModifier(user);
-            resetDoubleJump(user);
+            disableSkyStep(user);
             return;
         }
 
         if (!(user instanceof Player player)) {
+            return;
+        }
+
+        if (!tryConsumeSustain(player, usageInfo)) {
+            disableSkyStep(user);
             return;
         }
 
@@ -85,9 +105,9 @@ public class LingHunGuSkyStepEffect implements IGuEffect {
 
         final BlockPos onPos = player.getOnPos();
         final BlockState onState = player.level().getBlockState(onPos);
-        final double fengDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+        final double hunDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
             player,
-            DaoHenHelper.DaoType.FENG_DAO
+            DaoHenHelper.DaoType.HUN_DAO
         );
 
         if (isSlowSurface(onState)) {
@@ -96,7 +116,7 @@ public class LingHunGuSkyStepEffect implements IGuEffect {
                 "slow_surface_speed_bonus",
                 DEFAULT_SLOW_SURFACE_SPEED_BONUS
             );
-            applySurfaceSpeedModifier(user, bonus * fengDaoMultiplier);
+            applySurfaceSpeedModifier(user, bonus * hunDaoMultiplier);
         } else {
             removeSurfaceSpeedModifier(user);
         }
@@ -108,7 +128,7 @@ public class LingHunGuSkyStepEffect implements IGuEffect {
                 DEFAULT_ICE_SLIP_DAMPEN
             );
             final double dampen = clamp(
-                baseDampen / Math.max(1.0, fengDaoMultiplier),
+                baseDampen / Math.max(1.0, hunDaoMultiplier),
                 MIN_ICE_DAMPEN,
                 MAX_ICE_DAMPEN
             );
@@ -119,8 +139,98 @@ public class LingHunGuSkyStepEffect implements IGuEffect {
 
     @Override
     public void onUnequip(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        disableSkyStep(user);
+    }
+
+    private static boolean tryConsumeSustain(
+        final Player player,
+        final NianTouData.Usage usageInfo
+    ) {
+        final long gameTime = player.level().getGameTime();
+        if (!shouldConsumeThisTick(player, gameTime)) {
+            return isSkyStepEnabled(player);
+        }
+
+        markConsumedThisTick(player, gameTime);
+
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            player,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            ) * selfMultiplier
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+
+        final boolean enabled = GuEffectCostHelper.tryConsumeSustain(
+            player,
+            niantouCostPerSecond,
+            jingliCostPerSecond,
+            hunpoCostPerSecond,
+            zhenyuanBaseCostPerSecond
+        );
+        setSkyStepEnabled(player, enabled);
+        return enabled;
+    }
+
+    private static boolean shouldConsumeThisTick(
+        final Player player,
+        final long gameTime
+    ) {
+        if (!player.getPersistentData().contains(NBT_SKY_STEP_LAST_COST_GAME_TIME)) {
+            return true;
+        }
+        final long last = player.getPersistentData().getLong(NBT_SKY_STEP_LAST_COST_GAME_TIME);
+        return gameTime - last >= COST_INTERVAL_TICKS;
+    }
+
+    private static void markConsumedThisTick(final Player player, final long gameTime) {
+        player.getPersistentData().putLong(NBT_SKY_STEP_LAST_COST_GAME_TIME, gameTime);
+    }
+
+    private static void disableSkyStep(final LivingEntity user) {
         removeSurfaceSpeedModifier(user);
         resetDoubleJump(user);
+        if (user instanceof Player player) {
+            setSkyStepEnabled(player, false);
+        }
+    }
+
+    public static boolean isSkyStepEnabled(final Player player) {
+        return player.getPersistentData().getBoolean(NBT_SKY_STEP_ENABLED);
+    }
+
+    public static void setSkyStepEnabled(final Player player, final boolean enabled) {
+        player.getPersistentData().putBoolean(NBT_SKY_STEP_ENABLED, enabled);
     }
 
     private static boolean shouldResetDoubleJump(final Player player) {

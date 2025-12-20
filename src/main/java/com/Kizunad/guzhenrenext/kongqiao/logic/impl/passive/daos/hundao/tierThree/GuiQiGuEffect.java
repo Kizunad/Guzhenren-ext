@@ -1,9 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -27,7 +30,7 @@ public class GuiQiGuEffect implements IGuEffect {
     private static final String NBT_REPAIR_TIMER = "GuiQiRepairTimer";
 
     // Config
-    private static final double DEFAULT_BASE_COST = 38400.00; // 3转1阶约 50.0/s
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 220.0;
     private static final int REPAIR_INTERVAL_SECONDS = 60;
 
     @Override
@@ -41,25 +44,64 @@ public class GuiQiGuEffect implements IGuEffect {
         ItemStack stack,
         NianTouData.Usage usageInfo
     ) {
+        if (user.level().isClientSide()) {
+            return;
+        }
+
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
             KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             return;
         }
-        // 1. 消耗真元
-        double baseCost = getMetaDouble(
-            usageInfo,
-            "zhenyuan_base_cost",
-            DEFAULT_BASE_COST
-        );
-        double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
 
-        if (!ZhenYuanHelper.hasEnough(user, realCost)) {
-            // 真元不足，从激活列表移除
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            ) * selfMultiplier
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             return;
         }
-        ZhenYuanHelper.modify(user, -realCost);
 
         // 2. 标记为激活 (供 DamageHandler 使用)
         KongqiaoAttachments.getActivePassives(user).add(USAGE_ID);
@@ -94,16 +136,4 @@ public class GuiQiGuEffect implements IGuEffect {
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
-    private double getMetaDouble(
-        NianTouData.Usage usage,
-        String key,
-        double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {}
-        }
-        return defaultValue;
-    }
 }

@@ -1,11 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -29,7 +30,7 @@ public class BingPoGuEffect implements IGuEffect {
     public static final String USAGE_ID = "guzhenren:bingpogu_passive_guard";
     
     // Config
-    private static final double DEFAULT_BASE_COST = 3840.0;
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 240.0;
     private static final double DEFAULT_TOUGHNESS = 4.0;
     private static final float SNOWFLAKE_CHANCE = 0.3f;
     private static final int SNOWFLAKE_COUNT = 1;
@@ -46,33 +47,77 @@ public class BingPoGuEffect implements IGuEffect {
 
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        if (user.level().isClientSide()) {
+            return;
+        }
+
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
             KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             removeAttribute(user);
             return;
         }
-        // 1. 消耗真元
-        double baseCost = getMetaDouble(usageInfo, "zhenyuan_base_cost", DEFAULT_BASE_COST);
-        double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        
-        if (!ZhenYuanHelper.hasEnough(user, realCost)) {
+
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            ) * selfMultiplier
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             removeAttribute(user);
             return;
         }
-        ZhenYuanHelper.modify(user, -realCost);
 
         // 2. 激活状态
         KongqiaoAttachments.getActivePassives(user).add(USAGE_ID);
 
         // 3. 属性修饰 (韧性)
-        double toughness = getMetaDouble(usageInfo, "toughness_bonus", DEFAULT_TOUGHNESS);
-        double toughnessMultiplier = DaoHenCalculator.calculateSelfMultiplier(
-            user,
-            DaoHenHelper.DaoType.HUN_DAO
+        double toughness = UsageMetadataHelper.getDouble(
+            usageInfo,
+            "toughness_bonus",
+            DEFAULT_TOUGHNESS
         );
-        applyAttribute(user, toughness * toughnessMultiplier);
+        applyAttribute(user, toughness * selfMultiplier);
         
         // 4. 环境特效
         if (
@@ -124,14 +169,5 @@ public class BingPoGuEffect implements IGuEffect {
         if (attr != null && attr.getModifier(TOUGHNESS_MODIFIER_ID) != null) {
             attr.removeModifier(TOUGHNESS_MODIFIER_ID);
         }
-    }
-
-    private double getMetaDouble(NianTouData.Usage usage, String key, double defaultValue) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {}
-        }
-        return defaultValue;
     }
 }

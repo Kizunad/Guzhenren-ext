@@ -1,9 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -37,9 +38,8 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
 
     private static final int TICKS_PER_SECOND = 20;
 
-    private static final double DEFAULT_ACTIVATE_SOUL_COST = 8.0;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 120.0;
     private static final int DEFAULT_DURATION_TICKS = 80;
+    private static final int MAX_DURATION_TICKS = 20 * 30;
     private static final int DEFAULT_COOLDOWN_TICKS = 160;
 
     private static final int DEFAULT_ABSORPTION_BASE_LEVEL = 0;
@@ -87,34 +87,11 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
             return false;
         }
 
-        final double soulCost = Math.max(
-            0.0,
-            getMetaDouble(
-                usageInfo,
-                "activate_soul_cost",
-                DEFAULT_ACTIVATE_SOUL_COST
-            )
-        );
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            getMetaDouble(
-                usageInfo,
-                "activate_zhenyuan_base_cost",
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double realZhenyuanCost =
-            ZhenYuanHelper.calculateGuCost(user, zhenyuanBaseCost);
-
-        if (!hasEnoughCost(user, soulCost, realZhenyuanCost)) {
-            player.displayClientMessage(
-                Component.literal("魂魄/真元不足，魂盾难凝。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
-        final int cooldownTicks = getMetaInt(
+        final int cooldownTicks = UsageMetadataHelper.getInt(
             usageInfo,
             "cooldown_ticks",
             DEFAULT_COOLDOWN_TICKS
@@ -123,11 +100,22 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
             setCooldownUntilTick(user, currentTick + cooldownTicks);
         }
 
-        consumeCost(user, soulCost, realZhenyuanCost);
-
-        final int duration = Math.max(
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+        final int durationBase = Math.max(
             1,
-            getMetaInt(usageInfo, "duration_ticks", DEFAULT_DURATION_TICKS)
+            UsageMetadataHelper.getInt(
+                usageInfo,
+                "duration_ticks",
+                DEFAULT_DURATION_TICKS
+            )
+        );
+        final int duration = (int) UsageMetadataHelper.clamp(
+            Math.round(durationBase * selfMultiplier),
+            1,
+            MAX_DURATION_TICKS
         );
 
         final int absorptionAmplifier = calculateAbsorptionAmplifier(
@@ -136,7 +124,7 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
         );
         final int resistanceAmplifier = Math.max(
             0,
-            getMetaInt(
+            UsageMetadataHelper.getInt(
                 usageInfo,
                 "resistance_amplifier",
                 DEFAULT_RESISTANCE_AMPLIFIER
@@ -177,7 +165,7 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
     ) {
         final int base = Math.max(
             0,
-            getMetaInt(
+            UsageMetadataHelper.getInt(
                 usageInfo,
                 "absorption_base_level",
                 DEFAULT_ABSORPTION_BASE_LEVEL
@@ -185,7 +173,7 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
         );
         final int max = Math.max(
             base,
-            getMetaInt(
+            UsageMetadataHelper.getInt(
                 usageInfo,
                 "absorption_max_level",
                 DEFAULT_ABSORPTION_MAX_LEVEL
@@ -228,33 +216,6 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
         );
     }
 
-    private static boolean hasEnoughCost(
-        final LivingEntity user,
-        final double soulCost,
-        final double zhenyuanCost
-    ) {
-        if (soulCost > 0.0 && HunPoHelper.getAmount(user) < soulCost) {
-            return false;
-        }
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            return false;
-        }
-        return true;
-    }
-
-    private static void consumeCost(
-        final LivingEntity user,
-        final double soulCost,
-        final double zhenyuanCost
-    ) {
-        if (soulCost > 0.0) {
-            HunPoHelper.modify(user, -soulCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
-        }
-    }
-
     private static int getCooldownUntilTick(final LivingEntity user) {
         return user.getPersistentData().getInt(NBT_COOLDOWN_UNTIL_TICK);
     }
@@ -266,31 +227,4 @@ public class HunDunGuSoulBulwarkEffect implements IGuEffect {
         user.getPersistentData().putInt(NBT_COOLDOWN_UNTIL_TICK, untilTick);
     }
 
-    private static double getMetaDouble(
-        final NianTouData.Usage usage,
-        final String key,
-        final double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
-    private static int getMetaInt(
-        final NianTouData.Usage usage,
-        final String key,
-        final int defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
 }

@@ -1,8 +1,9 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierTwo;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +46,6 @@ public class DaHunGuHunPoMaterialIngestEffect implements IGuEffect {
     private static final int TICKS_PER_SECOND = 20;
     private static final int MAX_HUNPO_VALUE_ENTRIES = 64;
 
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 120.0;
     private static final int DEFAULT_COOLDOWN_TICKS = 40;
     private static final int DEFAULT_CONSUME_COUNT = 1;
 
@@ -104,26 +104,9 @@ public class DaHunGuHunPoMaterialIngestEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            getMetaDouble(
-                usageInfo,
-                "activate_zhenyuan_base_cost",
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (realCost > 0.0 && !ZhenYuanHelper.hasEnough(user, realCost)) {
-            player.displayClientMessage(
-                Component.literal("真元不足，难以吞材炼魄。"),
-                true
-            );
-            return false;
-        }
-
         final int consumeCount = Math.max(
             1,
-            getMetaInt(usageInfo, "consume_count", DEFAULT_CONSUME_COUNT)
+            UsageMetadataHelper.getInt(usageInfo, "consume_count", DEFAULT_CONSUME_COUNT)
         );
         final Candidate candidate = findBestCandidate(player, usageInfo);
         if (candidate == null) {
@@ -134,6 +117,15 @@ public class DaHunGuHunPoMaterialIngestEffect implements IGuEffect {
             return false;
         }
 
+        final int actualConsume = Math.min(consumeCount, candidate.stack().getCount());
+        if (actualConsume <= 0) {
+            return false;
+        }
+
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
+        }
+
         final int cooldownTicks = getMetaInt(
             usageInfo,
             "cooldown_ticks",
@@ -141,15 +133,6 @@ public class DaHunGuHunPoMaterialIngestEffect implements IGuEffect {
         );
         if (cooldownTicks > 0) {
             setCooldownUntilTick(user, currentTick + cooldownTicks);
-        }
-
-        if (realCost > 0.0) {
-            ZhenYuanHelper.modify(user, -realCost);
-        }
-
-        final int actualConsume = Math.min(consumeCount, candidate.stack().getCount());
-        if (actualConsume <= 0) {
-            return false;
         }
 
         final double perItemValue = candidate.hunpoValue();
@@ -272,32 +255,12 @@ public class DaHunGuHunPoMaterialIngestEffect implements IGuEffect {
         user.getPersistentData().putInt(NBT_COOLDOWN_UNTIL_TICK, untilTick);
     }
 
-    private static double getMetaDouble(
-        final NianTouData.Usage usage,
-        final String key,
-        final double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
     private static int getMetaInt(
         final NianTouData.Usage usage,
         final String key,
         final int defaultValue
     ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
+        return UsageMetadataHelper.getInt(usage, key, defaultValue);
     }
 
     private record Candidate(String itemId, ItemStack stack, double hunpoValue) {}

@@ -3,11 +3,11 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThre
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.Objects;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -55,10 +55,6 @@ public class LingHunGuAntelopeHangsHornsEffect implements IGuEffect {
     private static final float DEFAULT_PHYSICAL_DAMAGE = 100.0F;
     private static final double DEFAULT_SOUL_DAMAGE = 100.0;
 
-    private static final double DEFAULT_ACTIVATE_SOUL_COST = 10.0;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_COST_SANZHUAN_YIJIE = 10.0;
-    private static final double ZHENYUAN_SANZHUAN_YIJIE_DENOMINATOR = 0.3;
-
     private static final String NBT_PARRY_UNTIL_GAME_TIME = "LingHunGuParryUntilGameTime";
     private static final float ACTIVATE_SOUND_VOLUME = 0.6F;
     private static final float ACTIVATE_SOUND_PITCH = 1.6F;
@@ -92,37 +88,9 @@ public class LingHunGuAntelopeHangsHornsEffect implements IGuEffect {
             return false;
         }
 
-        final double soulCost = getMetaDouble(
-            usageInfo,
-            "activate_soul_cost",
-            DEFAULT_ACTIVATE_SOUL_COST
-        );
-        final double zhenyuanCostSanzhuanYijie = getMetaDouble(
-            usageInfo,
-            "activate_zhenyuan_cost_sanzhuan_yijie",
-            DEFAULT_ACTIVATE_ZHENYUAN_COST_SANZHUAN_YIJIE
-        );
-        final double zhenyuanBaseCost =
-            zhenyuanCostSanzhuanYijie * ZHENYUAN_SANZHUAN_YIJIE_DENOMINATOR;
-        final double realZhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-
-        if (!hasEnoughCost(user, soulCost, realZhenyuanCost)) {
-            serverPlayer.displayClientMessage(
-                Component.literal(
-                    "消耗不足：需要 "
-                        + soulCost
-                        + " 魂魄 + "
-                        + zhenyuanCostSanzhuanYijie
-                        + " 三转一阶真元"
-                ),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(serverPlayer, user, usageInfo)) {
             return false;
         }
-        consumeCost(user, soulCost, realZhenyuanCost);
 
         final int windowTicks = getMetaInt(
             usageInfo,
@@ -296,33 +264,6 @@ public class LingHunGuAntelopeHangsHornsEffect implements IGuEffect {
         return defender.position();
     }
 
-    private static boolean hasEnoughCost(
-        final LivingEntity user,
-        final double soulCost,
-        final double zhenyuanCost
-    ) {
-        if (soulCost > 0 && HunPoHelper.getAmount(user) < soulCost) {
-            return false;
-        }
-        if (zhenyuanCost > 0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            return false;
-        }
-        return true;
-    }
-
-    private static void consumeCost(
-        final LivingEntity user,
-        final double soulCost,
-        final double zhenyuanCost
-    ) {
-        if (soulCost > 0) {
-            HunPoHelper.modify(user, -soulCost);
-        }
-        if (zhenyuanCost > 0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
-        }
-    }
-
     private static void applySoulDamage(
         final LivingEntity attacker,
         final LivingEntity target,
@@ -336,7 +277,7 @@ public class LingHunGuAntelopeHangsHornsEffect implements IGuEffect {
             HunPoHelper.modify(target, -amount);
             HunPoHelper.checkAndKill(target);
         } else {
-            target.hurt(attacker.damageSources().magic(), (float) amount);
+            target.hurt(attacker.damageSources().mobAttack(attacker), (float) amount);
         }
     }
 

@@ -5,11 +5,20 @@
             "usageID": "guzhenren:guihuogu_passive_thorns",
             "usageTitle": "离魂阴火",
             "usageDesc": "遭遇攻击时，反扑敌人灵魂，造成魂魄伤害。",
-            "usageInfo": "基础反伤: {soul_damage} | 优先破除抗性 | 持续消耗魂魄",
+            "usageInfo": "冷却：{cooldown_ticks}t |\n 维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s（魂魄维持受魂道道痕增幅） |\n 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 反伤：{soul_damage}魂魄伤害（受魂道道痕增幅与道痕互斥计算）",
             "cost_duration": 0,
             "cost_total_niantou": 0,
             "metadata": {
-                "soul_damage": "10.0"
+                "cooldown_ticks": "20",
+                "soul_damage": "8.0",
+                "zhenyuan_base_cost_per_second": "90.0",
+                "niantou_cost_per_second": "0.8",
+                "jingli_cost_per_second": "0.6",
+                "hunpo_cost_per_second": "0.4",
+                "zhenyuan_base_cost": "180.0",
+                "niantou_cost": "28.0",
+                "jingli_cost": "22.0",
+                "hunpo_cost": "18.0"
             }
         }
     ]

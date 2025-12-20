@@ -3,10 +3,12 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierTwo
 import com.Kizunad.guzhenrenext.guzhenrenBridge.CultivationHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -26,12 +28,10 @@ public class DaHunGuEffect implements IGuEffect {
     public static final String USAGE_ID = "guzhenren:dahuongu_passive_strengthen";
 
     // 默认数值
-    private static final double DEFAULT_BASE_COST = 100.0; // 基础消耗，经模组公式计算后降低
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 120.0;
     private static final double DEFAULT_SOUL_REGEN = 5.0;
     private static final double DEFAULT_RES_GAIN = 0.5;
     private static final double DEFAULT_CULTIVATION_GAIN = 5.0;
-
-    private static final double DAO_HEN_DIVISOR = 1000.0;
 
     private static final int SOUL_PARTICAL_COUNT = 3;
     private static final int SOUL_RESISTANCE_PARTICAL_COUNT = 2;
@@ -48,15 +48,80 @@ public class DaHunGuEffect implements IGuEffect {
 
     @Override
     public void onSecond(LivingEntity user, ItemStack stack, NianTouData.Usage usageInfo) {
+        if (user.level().isClientSide()) {
+            return;
+        }
+
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
             return;
         }
-        // 1. 读取 Metadata 配置
-        double baseCost = getMetaDouble(usageInfo, "zhenyuan_base_cost", DEFAULT_BASE_COST);
-        double soulRegenBase = getMetaDouble(usageInfo, "soul_regen", DEFAULT_SOUL_REGEN);
-        double resGainBase = getMetaDouble(usageInfo, "resistance_gain", DEFAULT_RES_GAIN);
-        double cultivationBase = getMetaDouble(usageInfo, "cultivation_gain", DEFAULT_CULTIVATION_GAIN);
+
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
+            return;
+        }
+
+        final double soulRegenBase = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(usageInfo, "soul_regen", DEFAULT_SOUL_REGEN)
+        );
+        final double resGainBase = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(usageInfo, "resistance_gain", DEFAULT_RES_GAIN)
+        );
+        final double cultivationBase = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                "cultivation_gain",
+                DEFAULT_CULTIVATION_GAIN
+            )
+        );
 
         // 2. 获取基础数据
         double currentSoul = HunPoHelper.getAmount(user);
@@ -64,43 +129,18 @@ public class DaHunGuEffect implements IGuEffect {
         double currentRes = HunPoHelper.getResistance(user);
         double maxRes = HunPoHelper.getMaxResistance(user);
 
-        // 3. 计算消耗 (使用模组标准转数/阶段算法)
-        double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
+        // 3. 执行逻辑（道痕仅增幅产出效果）
+        CultivationHelper.modifyProgress(user, cultivationBase * selfMultiplier);
 
-        // 4. 计算道痕增幅 (仅增幅产出效果)
-        double daoHen = DaoHenHelper.getDaoHen(user, DaoHenHelper.DaoType.HUN_DAO);
-        double multiplier = 1.0 + (daoHen / DAO_HEN_DIVISOR);
-
-        // 5. 执行逻辑 (如果有足够真元)
-        if (ZhenYuanHelper.hasEnough(user, realCost)) {
-            ZhenYuanHelper.modify(user, -realCost);
-
-            // A. 修为提升 (始终生效)
-            double cultGain = cultivationBase * multiplier;
-            CultivationHelper.modifyProgress(user, cultGain);
-
-            // B. 魂魄/抗性提升
-            if (currentSoul < maxSoul) {
-                // 修复魂魄
-                double healAmount = soulRegenBase * multiplier;
-                HunPoHelper.modify(user, healAmount);
-                spawnParticles(user, ParticleTypes.HAPPY_VILLAGER, SOUL_PARTICAL_COUNT);
-            } else if (currentRes < maxRes) {
-                // 壮大抗性
-                double gainAmount = resGainBase * multiplier;
-                HunPoHelper.modifyResistance(user, gainAmount);
-                spawnParticles(user, ParticleTypes.SOUL, SOUL_RESISTANCE_PARTICAL_COUNT);
-            }
+        if (currentSoul < maxSoul) {
+            HunPoHelper.modify(user, soulRegenBase * selfMultiplier);
+            spawnParticles(user, ParticleTypes.HAPPY_VILLAGER, SOUL_PARTICAL_COUNT);
+            return;
         }
-    }
-
-    private double getMetaDouble(NianTouData.Usage usage, String key, double defaultValue) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {}
+        if (currentRes < maxRes) {
+            HunPoHelper.modifyResistance(user, resGainBase * selfMultiplier);
+            spawnParticles(user, ParticleTypes.SOUL, SOUL_RESISTANCE_PARTICAL_COUNT);
         }
-        return defaultValue;
     }
 
     private void spawnParticles(LivingEntity entity, net.minecraft.core.particles.SimpleParticleType type, int count) {

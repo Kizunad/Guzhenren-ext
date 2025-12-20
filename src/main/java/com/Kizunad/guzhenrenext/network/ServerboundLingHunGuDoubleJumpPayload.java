@@ -1,11 +1,13 @@
 package com.Kizunad.guzhenrenext.network;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoInventory;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree.LingHunGuSkyStepEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUnlockChecker;
@@ -45,6 +47,9 @@ public record ServerboundLingHunGuDoubleJumpPayload() implements CustomPacketPay
 
     private static final double DEFAULT_JUMP_Y_VELOCITY = 0.42;
     private static final double DEFAULT_FORWARD_BOOST = 0.05;
+    private static final double MIN_JUMP_Y_VELOCITY = 0.20;
+    private static final double MAX_JUMP_Y_VELOCITY = 0.75;
+    private static final double MAX_FORWARD_BOOST = 0.12;
     private static final int DEFAULT_PARTICLE_COUNT = 10;
     private static final double DEFAULT_PARTICLE_SPREAD = 0.15;
     private static final double PARTICLE_Y_OFFSET = 0.1;
@@ -79,6 +84,10 @@ public record ServerboundLingHunGuDoubleJumpPayload() implements CustomPacketPay
                 return;
             }
 
+            final double hunDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+                player,
+                DaoHenHelper.DaoType.HUN_DAO
+            );
             final double yVelocity = getMetaDouble(
                 usageInfo,
                 "double_jump_y_velocity",
@@ -89,7 +98,11 @@ public record ServerboundLingHunGuDoubleJumpPayload() implements CustomPacketPay
                 "double_jump_forward_boost",
                 DEFAULT_FORWARD_BOOST
             );
-            applyDoubleJump(player, yVelocity, forwardBoost);
+            applyDoubleJump(
+                player,
+                clamp(yVelocity * hunDaoMultiplier, MIN_JUMP_Y_VELOCITY, MAX_JUMP_Y_VELOCITY),
+                clamp(forwardBoost * hunDaoMultiplier, 0.0, MAX_FORWARD_BOOST)
+            );
             LingHunGuSkyStepEffect.setDoubleJumpUsed(player, true);
 
             if (player.level() instanceof ServerLevel serverLevel) {
@@ -115,6 +128,9 @@ public record ServerboundLingHunGuDoubleJumpPayload() implements CustomPacketPay
     private static boolean isSkyStepEnabled(final ServerPlayer player) {
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(player);
         if (config != null && !config.isPassiveEnabled(LingHunGuSkyStepEffect.USAGE_ID)) {
+            return false;
+        }
+        if (!LingHunGuSkyStepEffect.isSkyStepEnabled(player)) {
             return false;
         }
         return findUsageInfo(player, LingHunGuSkyStepEffect.USAGE_ID) != null;
@@ -205,6 +221,20 @@ public record ServerboundLingHunGuDoubleJumpPayload() implements CustomPacketPay
             }
         }
         return defaultValue;
+    }
+
+    private static double clamp(
+        final double value,
+        final double min,
+        final double max
+    ) {
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
     }
 
     private static int getMetaInt(

@@ -1,9 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.network.ClientboundBackPngEffectPayload;
 import java.util.List;
@@ -57,17 +59,6 @@ public class XiongHunGuEarthShatterEffect implements IGuEffect {
     private static final float DEFAULT_PHYSICAL_DAMAGE = 40.0F;
     private static final int DEFAULT_SLOW_DURATION_TICKS = 60;
     private static final int DEFAULT_KNOCKBACK_IMMUNE_TICKS = 40;
-    private static final double DEFAULT_ACTIVATE_SOUL_COST = 20.0;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_COST_SANZHUAN_YIJIE = 20.0;
-    /**
-     * 三转一阶真元到 baseCost 的换算分母。
-     * <p>
-     * 来自 {@link ZhenYuanHelper#calculateGuCost} 的反推：三转一阶（zhuanshu=3, jieduan=1）时，
-     * denominator = (2^(1 + 3*4) * 3 * 3) / 96 = 768。
-     * 设定“消耗 20 三转一阶真元”则 baseCost = 20 * 768 = 15360，再按玩家当前转数/阶段换算实际消耗。
-     * </p>
-     */
-    private static final double ZHENYUAN_SANZHUAN_YIJIE_DENOMINATOR = 768.0;
 
     private static final ResourceLocation BEAR_PHANTOM_TEXTURE =
         ResourceLocation.fromNamespaceAndPath(
@@ -139,54 +130,28 @@ public class XiongHunGuEarthShatterEffect implements IGuEffect {
         if (user.level().isClientSide()) {
             return false;
         }
+        if (!(user instanceof ServerPlayer serverPlayer)) {
+            return false;
+        }
+
         if (!isSoulSufficient(user)) {
-            if (user instanceof ServerPlayer serverPlayer) {
-                serverPlayer.displayClientMessage(
-                    Component.literal("魂魄不足，熊魂蛊沉眠"),
-                    true
-                );
-            }
+            serverPlayer.displayClientMessage(
+                Component.literal("魂魄不足，熊魂蛊沉眠"),
+                true
+            );
             return false;
         }
-
-        double soulCost = getMetaDouble(
-            usageInfo,
-            "activate_soul_cost",
-            DEFAULT_ACTIVATE_SOUL_COST
-        );
-        double zhenyuanCostSanzhuanYijie = getMetaDouble(
-            usageInfo,
-            "activate_zhenyuan_cost_sanzhuan_yijie",
-            DEFAULT_ACTIVATE_ZHENYUAN_COST_SANZHUAN_YIJIE
-        );
-        double zhenyuanBaseCost = zhenyuanCostSanzhuanYijie
-            * ZHENYUAN_SANZHUAN_YIJIE_DENOMINATOR;
-        double realZhenyuanCost = ZhenYuanHelper.calculateGuCost(user, zhenyuanBaseCost);
-
-        if (!hasEnoughCost(user, soulCost, realZhenyuanCost)) {
-            if (user instanceof ServerPlayer serverPlayer) {
-                serverPlayer.displayClientMessage(
-                    Component.literal(
-                        "消耗不足：需要 "
-                            + soulCost
-                            + " 魂魄 + "
-                            + zhenyuanCostSanzhuanYijie
-                            + " 三转一阶真元"
-                    ),
-                    true
-                );
-            }
+        if (!GuEffectCostHelper.tryConsumeOnce(serverPlayer, user, usageInfo)) {
             return false;
         }
-        consumeCost(user, soulCost, realZhenyuanCost);
 
         double radius = getMetaDouble(usageInfo, "radius", DEFAULT_RADIUS);
-        double soulDamage = getMetaDouble(
+        final double baseSoulDamage = getMetaDouble(
             usageInfo,
             "soul_damage",
             DEFAULT_SOUL_DAMAGE
         );
-        float physicalDamage = getMetaFloat(
+        final float basePhysicalDamage = getMetaFloat(
             usageInfo,
             "physical_damage",
             DEFAULT_PHYSICAL_DAMAGE
@@ -219,6 +184,12 @@ public class XiongHunGuEarthShatterEffect implements IGuEffect {
                 continue;
             }
 
+            final double hunDaoMultiplier = DaoHenCalculator.calculateMultiplier(
+                serverPlayer,
+                target,
+                DaoHenHelper.DaoType.HUN_DAO
+            );
+
             target.addEffect(
                 new MobEffectInstance(
                     MobEffects.MOVEMENT_SLOWDOWN,
@@ -226,8 +197,11 @@ public class XiongHunGuEarthShatterEffect implements IGuEffect {
                     1
                 )
             );
-            applySoulDamage(user, target, soulDamage);
-            target.hurt(user.damageSources().mobAttack(user), physicalDamage);
+            applySoulDamage(serverPlayer, target, baseSoulDamage * hunDaoMultiplier);
+            target.hurt(
+                serverPlayer.damageSources().mobAttack(serverPlayer),
+                (float) (basePhysicalDamage * hunDaoMultiplier)
+            );
         }
 
         // 3) 裂纹粒子（以脚下方块作为材质）
@@ -255,33 +229,6 @@ public class XiongHunGuEarthShatterEffect implements IGuEffect {
         return true;
     }
 
-    private static boolean hasEnoughCost(
-        LivingEntity user,
-        double soulCost,
-        double zhenyuanCost
-    ) {
-        if (soulCost > 0 && HunPoHelper.getAmount(user) < soulCost) {
-            return false;
-        }
-        if (zhenyuanCost > 0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            return false;
-        }
-        return true;
-    }
-
-    private static void consumeCost(
-        LivingEntity user,
-        double soulCost,
-        double zhenyuanCost
-    ) {
-        if (soulCost > 0) {
-            HunPoHelper.modify(user, -soulCost);
-        }
-        if (zhenyuanCost > 0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
-        }
-    }
-
     private static boolean isSoulSufficient(LivingEntity user) {
         double max = HunPoHelper.getMaxAmount(user);
         if (max <= 0) {
@@ -304,7 +251,7 @@ public class XiongHunGuEarthShatterEffect implements IGuEffect {
             HunPoHelper.modify(target, -amount);
             HunPoHelper.checkAndKill(target);
         } else {
-            target.hurt(attacker.damageSources().magic(), (float) amount);
+            target.hurt(attacker.damageSources().mobAttack(attacker), (float) amount);
         }
     }
 

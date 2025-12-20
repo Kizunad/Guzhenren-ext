@@ -1,11 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
@@ -39,7 +40,7 @@ public class TiPoGuBodyTemperingEffect implements IGuEffect {
     private static final ResourceLocation KNOCKBACK_RESISTANCE_MODIFIER_ID =
         ResourceLocation.parse("guzhenrenext:tipogu_knockback_resistance");
 
-    private static final double DEFAULT_SOUL_COST_PER_SECOND = 0.35;
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 180.0;
     private static final double DEFAULT_MAX_HEALTH_BONUS_PERCENT = 0.12;
     private static final double DEFAULT_ATTACK_DAMAGE_BONUS_PERCENT = 0.10;
     private static final double DEFAULT_KNOCKBACK_RESISTANCE_BONUS = 0.10;
@@ -145,22 +146,54 @@ public class TiPoGuBodyTemperingEffect implements IGuEffect {
             user,
             DaoHenHelper.DaoType.HUN_DAO
         );
-        final double cost = Math.max(
+
+        final double niantouCostPerSecond = Math.max(
             0.0,
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
-                "soul_cost_per_second",
-                DEFAULT_SOUL_COST_PER_SECOND
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
             ) * hunDaoMultiplier
         );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
 
-        if (HunPoHelper.getAmount(user) < cost) {
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             setActive(user, false);
             removeAllModifiers(user);
             return;
         }
 
-        HunPoHelper.modify(user, -cost);
         setActive(user, true);
     }
 
@@ -285,4 +318,3 @@ public class TiPoGuBodyTemperingEffect implements IGuEffect {
         return defaultValue;
     }
 }
-

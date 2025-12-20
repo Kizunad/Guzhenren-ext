@@ -5,10 +5,14 @@
             "usageID": "guzhenren:linghungu_passive_sky_step",
             "usageTitle": "被动·踏空",
             "usageDesc": "身轻如燕，踏空而行。羚魂附体后，腾空之际亦可借风再跃一步；落于雪地、冰面与灵魂沙上，步伐稳健如履平地。",
-            "usageInfo": "二段跳 | 灵魂沙/细雪不减速 | 冰面滑行衰减",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s（魂魄维持受魂道道痕增幅） |\n 二段跳 | 灵魂沙/细雪不减速 | 冰面滑行衰减（受魂道道痕影响）",
             "cost_duration": 800,
             "cost_total_niantou": 60,
             "metadata": {
+                "zhenyuan_base_cost_per_second": "180.0",
+                "niantou_cost_per_second": "1.2",
+                "jingli_cost_per_second": "1.0",
+                "hunpo_cost_per_second": "0.08",
                 "double_jump_y_velocity": "0.42",
                 "double_jump_forward_boost": "0.05",
                 "double_jump_particle_count": "10",
@@ -20,33 +24,37 @@
             "usageID": "guzhenren:linghungu_active_antelope_hangs_horns",
             "usageTitle": "主动·【羚羊挂角】",
             "usageDesc": "羚羊挂角无迹寻，守中有攻、攻中有退。短暂招架之隙，借风遁影至敌身后，一击穿心。",
-            "usageInfo": "招架窗口：{parry_window_ticks}t | 反击：{physical_damage} 穿刺 + {soul_damage} 魂魄",
+            "usageInfo": "招架窗口：{parry_window_ticks}t | 反击：{physical_damage} 戳刺 + {soul_damage} 魂魄 |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
             "cost_duration": 1200,
             "cost_total_niantou": 90,
             "metadata": {
+                "zhenyuan_base_cost": "300.0",
+                "niantou_cost": "95.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "140.0",
                 "parry_window_ticks": "10",
                 "teleport_back_distance": "1.2",
                 "physical_damage": "100.0",
-                "soul_damage": "100.0",
-                "activate_soul_cost": "10.0",
-                "activate_zhenyuan_cost_sanzhuan_yijie": "10.0"
+                "soul_damage": "100.0"
             }
         },
         {
             "usageID": "guzhenren:linghungu_passive_spiritual_intuition",
             "usageTitle": "被动·灵觉",
             "usageDesc": "风起于青萍之末，杀机亦有先兆。若有视线外之敌锁定你，灵觉便在屏幕边缘泛起微光，指向危机来处。",
-            "usageInfo": "半径：{radius}格 | 视线外锁定提示（方向白光）",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s + {hunpo_cost_per_threat}*威胁（魂魄维持受魂道道痕增幅） |\n 半径：{radius}格 | 视线外锁定提示（方向白光）",
             "cost_duration": 900,
             "cost_total_niantou": 70,
             "metadata": {
+                "zhenyuan_base_cost_per_second": "140.0",
+                "niantou_cost_per_second": "1.0",
+                "jingli_cost_per_second": "0.9",
+                "hunpo_cost_per_second": "0.04",
                 "radius": "24.0",
                 "fov_dot_threshold": "0.45",
                 "hint_duration_ticks": "8",
-                "base_soul_cost": "0.0",
-                "soul_cost_per_threat": "0.0"
+                "hunpo_cost_per_threat": "0.03"
             }
         }
     ]
 }
-

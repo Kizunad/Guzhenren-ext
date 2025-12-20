@@ -1,8 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierTwo;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -26,7 +29,6 @@ public class DaHunGuSoulSurgeEffect implements IGuEffect {
 
     private static final int TICKS_PER_SECOND = 20;
 
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 640.0;
     private static final double DEFAULT_SOUL_RESTORE_RATIO = 0.20;
     private static final double DEFAULT_SOUL_RESTORE_FLAT = 10.0;
     private static final double DEFAULT_RESISTANCE_GAIN_FLAT = 2.0;
@@ -71,20 +73,7 @@ public class DaHunGuSoulSurgeEffect implements IGuEffect {
             return false;
         }
 
-        final double baseCost = Math.max(
-            0.0,
-            getMetaDouble(
-                usageInfo,
-                "activate_zhenyuan_base_cost",
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (realCost > 0.0 && !ZhenYuanHelper.hasEnough(user, realCost)) {
-            player.displayClientMessage(
-                Component.literal("真元不足，难以聚魂返照。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
@@ -97,13 +86,14 @@ public class DaHunGuSoulSurgeEffect implements IGuEffect {
             setCooldownUntilTick(user, currentTick + cooldownTicks);
         }
 
-        if (realCost > 0.0) {
-            ZhenYuanHelper.modify(user, -realCost);
-        }
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
 
         final double maxSoul = HunPoHelper.getMaxAmount(user);
-        final double soulRatio = clamp(
-            getMetaDouble(
+        final double soulRatio = UsageMetadataHelper.clamp(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "soul_restore_ratio",
                 DEFAULT_SOUL_RESTORE_RATIO
@@ -113,24 +103,27 @@ public class DaHunGuSoulSurgeEffect implements IGuEffect {
         );
         final double soulFlat = Math.max(
             0.0,
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "soul_restore_flat",
                 DEFAULT_SOUL_RESTORE_FLAT
             )
         );
-        final double soulGain = Math.max(0.0, maxSoul * soulRatio + soulFlat);
+        final double soulGain = Math.max(
+            0.0,
+            (maxSoul * soulRatio + soulFlat) * multiplier
+        );
         if (soulGain > 0.0) {
             HunPoHelper.modify(user, soulGain);
         }
 
         final double resistanceGain = Math.max(
             0.0,
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "resistance_gain_flat",
                 DEFAULT_RESISTANCE_GAIN_FLAT
-            )
+            ) * multiplier
         );
         if (resistanceGain > 0.0) {
             HunPoHelper.modifyResistance(user, resistanceGain);
@@ -157,20 +150,6 @@ public class DaHunGuSoulSurgeEffect implements IGuEffect {
         );
     }
 
-    private static double clamp(
-        final double value,
-        final double min,
-        final double max
-    ) {
-        if (value < min) {
-            return min;
-        }
-        if (value > max) {
-            return max;
-        }
-        return value;
-    }
-
     private static int getCooldownUntilTick(final LivingEntity user) {
         return user.getPersistentData().getInt(NBT_COOLDOWN_UNTIL_TICK);
     }
@@ -182,32 +161,11 @@ public class DaHunGuSoulSurgeEffect implements IGuEffect {
         user.getPersistentData().putInt(NBT_COOLDOWN_UNTIL_TICK, untilTick);
     }
 
-    private static double getMetaDouble(
-        final NianTouData.Usage usage,
-        final String key,
-        final double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
     private static int getMetaInt(
         final NianTouData.Usage usage,
         final String key,
         final int defaultValue
     ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
+        return UsageMetadataHelper.getInt(usage, key, defaultValue);
     }
 }
-

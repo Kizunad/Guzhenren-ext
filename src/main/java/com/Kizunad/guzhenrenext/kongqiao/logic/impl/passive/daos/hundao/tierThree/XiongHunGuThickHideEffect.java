@@ -5,6 +5,9 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,7 +31,7 @@ public class XiongHunGuThickHideEffect implements IGuEffect {
     private static final double DEFAULT_BASE_REDUCTION = 0.05;
     private static final double DEFAULT_TU_DIVISOR = 500.0;
     private static final double DEFAULT_BIANHUA_DIVISOR = 200.0;
-    private static final double DEFAULT_SOUL_COST_PER_SECOND = 1.0;
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 160.0;
     private static final double DEFAULT_MIN_SOUL_RATIO = 0.2;
 
     /**
@@ -57,24 +60,65 @@ public class XiongHunGuThickHideEffect implements IGuEffect {
 
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             return;
         }
 
         if (!isActive(user, usageInfo)) {
+            KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             return;
         }
 
-        double soulCost = getMetaDouble(
-            usageInfo,
-            "soul_cost_per_second",
-            DEFAULT_SOUL_COST_PER_SECOND
+        final double hunDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
         );
-        if (soulCost > 0) {
-            double current = HunPoHelper.getAmount(user);
-            if (current >= soulCost) {
-                HunPoHelper.modify(user, -soulCost);
-            }
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            ) * hunDaoMultiplier
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
+            KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
+            return;
         }
+
+        KongqiaoAttachments.getActivePassives(user).add(USAGE_ID);
 
         if (user instanceof Player player) {
             float exhaustion = getMetaFloat(
@@ -102,6 +146,9 @@ public class XiongHunGuThickHideEffect implements IGuEffect {
 
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(victim);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
+            return damage;
+        }
+        if (!KongqiaoAttachments.getActivePassives(victim).isActive(USAGE_ID)) {
             return damage;
         }
 
@@ -134,10 +181,14 @@ public class XiongHunGuThickHideEffect implements IGuEffect {
             DaoHenHelper.DaoType.BIAN_HUA_DAO
         );
 
-        // 最终伤害 = 原伤害 * (1 - base - (tudao/500) - (bianhuadao/200))
+        // 最终伤害 = 原伤害 * (1 - base * hundao_multiplier - (tudao/500) - (bianhuadao/200))
+        final double hunDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            victim,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
         double multiplier =
             1.0 -
-            baseReduction -
+            baseReduction * hunDaoMultiplier -
             safeDiv(tuDaoHen, tuDivisor) -
             safeDiv(bianhuaDaoHen, bianhuaDivisor);
 

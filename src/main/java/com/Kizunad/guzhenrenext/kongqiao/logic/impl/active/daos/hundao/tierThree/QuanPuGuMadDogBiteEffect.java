@@ -1,15 +1,16 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.registry.ModMobEffects;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -29,8 +30,7 @@ public class QuanPuGuMadDogBiteEffect implements IGuEffect {
         "guzhenren:quanpugu_active_mad_dog_bite";
 
     private static final int DEFAULT_ACTIVE_DURATION_TICKS = 200;
-    private static final double DEFAULT_SOUL_COST = 0.0;
-    private static final double DEFAULT_ZHENYUAN_BASE_COST = 0.0;
+    private static final int MAX_DURATION_TICKS = 20 * 60;
 
     @Override
     public String getUsageId() {
@@ -46,35 +46,11 @@ public class QuanPuGuMadDogBiteEffect implements IGuEffect {
         if (user.level().isClientSide()) {
             return false;
         }
-        if (!(user instanceof Player player)) {
+        if (!(user instanceof ServerPlayer player)) {
             return false;
         }
         if (!(user.level() instanceof ServerLevel)) {
             return false;
-        }
-
-        double soulCost = getMetaDouble(usageInfo, "activate_soul_cost", DEFAULT_SOUL_COST);
-        if (soulCost > 0 && HunPoHelper.getAmount(player) < soulCost) {
-            player.sendSystemMessage(Component.literal("魂魄不足，无法施展【疯狗咬】。"));
-            return false;
-        }
-
-        double baseCost = getMetaDouble(
-            usageInfo,
-            "activate_zhenyuan_base_cost",
-            DEFAULT_ZHENYUAN_BASE_COST
-        );
-        double realZhenyuanCost = ZhenYuanHelper.calculateGuCost(player, baseCost);
-        if (realZhenyuanCost > 0 && !ZhenYuanHelper.hasEnough(player, realZhenyuanCost)) {
-            player.sendSystemMessage(Component.literal("真元不足，无法施展【疯狗咬】。"));
-            return false;
-        }
-
-        if (soulCost > 0) {
-            HunPoHelper.modify(player, -soulCost);
-        }
-        if (realZhenyuanCost > 0) {
-            ZhenYuanHelper.modify(player, -realZhenyuanCost);
         }
 
         int duration = getMetaInt(
@@ -84,6 +60,15 @@ public class QuanPuGuMadDogBiteEffect implements IGuEffect {
         );
         if (duration <= 0) {
             duration = DEFAULT_ACTIVE_DURATION_TICKS;
+        }
+        final double hunDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            player,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+        duration = (int) Math.min(MAX_DURATION_TICKS, Math.round(duration * hunDaoMultiplier));
+
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
         }
 
         player.addEffect(

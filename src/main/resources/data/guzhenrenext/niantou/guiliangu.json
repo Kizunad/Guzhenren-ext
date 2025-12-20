@@ -5,14 +5,17 @@
             "usageID": "guzhenren:guiliangu_passive_soul_impact",
             "usageTitle": "狰狞噬魂",
             "usageDesc": "鬼脸蛊以狰狞鬼面撕咬魂魄。\n攻击命中时，周期性对目标追加强力魂魄冲击，\n并回收少量魂渣滋养自身魂魄。",
-            "usageInfo": "触发间隔: {trigger_interval_ticks}tick |\n 魂魄: -{soul_cost}/次 |\n 冲击: {base_soul_damage}魂魄伤害 (受魂道道痕增幅) |\n 回收: {leech_percent}比例",
+            "usageInfo": "触发间隔：{trigger_interval_ticks}t |\n 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)/次 |\n 冲击：{base_soul_damage}魂魄伤害（受魂道道痕增幅与道痕互斥计算） |\n 回收：{leech_percent}比例",
             "cost_duration": 1200,
             "cost_total_niantou": 100,
             "metadata": {
                 "trigger_interval_ticks": "20",
-                "soul_cost": "3.0",
-                "base_soul_damage": "40.0",
-                "leech_percent": "0.15",
+                "zhenyuan_base_cost": "220.0",
+                "niantou_cost": "42.0",
+                "jingli_cost": "36.0",
+                "hunpo_cost": "60.0",
+                "base_soul_damage": "60.0",
+                "leech_percent": "0.12",
                 "weakness_duration_ticks": "20",
                 "weakness_amplifier": "0"
             }

@@ -2,11 +2,12 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThr
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
 import net.minecraft.core.component.DataComponents;
@@ -23,7 +24,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -47,7 +47,7 @@ public class GuiYanGuEffect implements IGuEffect {
     public static final String NBT_STASIS_TIMER = "GuiYanStasisTimer";
 
     // 配置常量
-    private static final double DEFAULT_BASE_COST = 3840.0; // 3转1阶约 5.0/s
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 240.0;
     private static final double DEFAULT_ARMOR_BONUS = 8.0; // 增加的盔甲值
     private static final double DEFAULT_AOE_DAMAGE = 20.0; // 总伤害
     private static final double DEFAULT_AOE_RADIUS = 4.0; // 半径
@@ -88,7 +88,9 @@ public class GuiYanGuEffect implements IGuEffect {
         ItemStack stack,
         NianTouData.Usage usageInfo
     ) {
-        Level level = user.level();
+        if (user.level().isClientSide()) {
+            return;
+        }
 
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(USAGE_ID)) {
@@ -109,22 +111,56 @@ public class GuiYanGuEffect implements IGuEffect {
         }
 
         // --- 正常逻辑 ---
-
-        // 2. 消耗真元
-        double baseCost = getMetaDouble(
-            usageInfo,
-            "zhenyuan_base_cost",
-            DEFAULT_BASE_COST
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
         );
-        double realCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
 
-        if (!ZhenYuanHelper.hasEnough(user, realCost)) {
-            // 真元不足，移除属性修饰并返回
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            ) * selfMultiplier
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             removeAttribute(user);
             KongqiaoAttachments.getActivePassives(user).remove(USAGE_ID);
             return;
         }
-        ZhenYuanHelper.modify(user, -realCost);
 
         // 标记为激活 (用于事件监听器快速查询)
         KongqiaoAttachments.getActivePassives(user).add(USAGE_ID);
@@ -135,11 +171,7 @@ public class GuiYanGuEffect implements IGuEffect {
             "armor_bonus",
             DEFAULT_ARMOR_BONUS
         );
-        double armorMultiplier = DaoHenCalculator.calculateSelfMultiplier(
-            user,
-            DaoHenHelper.DaoType.HUN_DAO
-        );
-        applyAttribute(user, armorBonus * armorMultiplier);
+        applyAttribute(user, armorBonus * selfMultiplier);
 
         // 4. 视觉特效 (青色羊毛鬼火)
         double radius = getMetaDouble(
@@ -164,7 +196,10 @@ public class GuiYanGuEffect implements IGuEffect {
         removeAttribute(user);
 
         // 扣除魂魄
-        HunPoHelper.modify(user, -STASIS_SOUL_COST);
+        final double currentSoul = HunPoHelper.getAmount(user);
+        if (currentSoul > 0.0) {
+            HunPoHelper.modify(user, -Math.min(currentSoul, STASIS_SOUL_COST));
+        }
 
         // 减少计时器
         setStasisTimer(stack, timer - 1);
@@ -223,6 +258,7 @@ public class GuiYanGuEffect implements IGuEffect {
             // 1. 魂道伤害 (利用之前的 Helper，如果有) 或 魔法伤害模拟
             // target.hurt(attacker.damageSources().indirectMagic(attacker, attacker), halfDmg);
             HunPoHelper.modify(target, -soulDamage); // 魂道部分受道痕增幅
+            HunPoHelper.checkAndKill(target);
 
             // 2. 火焰伤害
             // 使用带来源的伤害源，保证中立生物能识别为玩家/施法者攻击

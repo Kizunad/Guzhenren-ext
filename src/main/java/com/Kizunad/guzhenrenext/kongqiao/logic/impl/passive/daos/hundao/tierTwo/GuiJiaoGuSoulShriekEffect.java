@@ -4,6 +4,8 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
@@ -36,7 +38,6 @@ public class GuiJiaoGuSoulShriekEffect implements IGuEffect {
 
     private static final String NBT_LAST_TICK = "GuijiaoLastShriekTick";
 
-    private static final double DEFAULT_SOUL_COST = 2.0;
     private static final double DEFAULT_BASE_SOUL_DAMAGE = 20.0;
     private static final double DEFAULT_RADIUS = 3.5;
     private static final int DEFAULT_COOLDOWN_TICKS = 60;
@@ -85,40 +86,37 @@ public class GuiJiaoGuSoulShriekEffect implements IGuEffect {
             return damage;
         }
 
-        double soulCost = getMetaDouble(
-            usageInfo,
-            "soul_cost",
-            DEFAULT_SOUL_COST
-        );
-        if (HunPoHelper.getAmount(attacker) < soulCost) {
-            return damage;
-        }
-
         if (!(attacker.level() instanceof ServerLevel serverLevel)) {
             return damage;
         }
 
-        // 扣除魂魄并写入冷却（先扣费再效果，避免因异常导致“白嫖”）
-        HunPoHelper.modify(attacker, -soulCost);
+        // 扣除消耗并写入冷却（先扣费再效果，避免因异常导致“白嫖”）
+        if (!GuEffectCostHelper.tryConsumeOnce(null, attacker, usageInfo)) {
+            return damage;
+        }
         nbt.putInt(NBT_LAST_TICK, attacker.tickCount);
 
-        double radius = getMetaDouble(usageInfo, "radius", DEFAULT_RADIUS);
-        double baseSoulDamage = getMetaDouble(
+        double radius = UsageMetadataHelper.getDouble(
+            usageInfo,
+            "radius",
+            DEFAULT_RADIUS
+        );
+        double baseSoulDamage = UsageMetadataHelper.getDouble(
             usageInfo,
             "base_soul_damage",
             DEFAULT_BASE_SOUL_DAMAGE
         );
-        int slowDuration = getMetaInt(
+        int slowDuration = UsageMetadataHelper.getInt(
             usageInfo,
             "slow_duration_ticks",
             DEFAULT_SLOW_DURATION_TICKS
         );
-        int slowAmplifier = getMetaInt(
+        int slowAmplifier = UsageMetadataHelper.getInt(
             usageInfo,
             "slow_amplifier",
             DEFAULT_SLOW_AMPLIFIER
         );
-        double knockbackStrength = getMetaDouble(
+        double knockbackStrength = UsageMetadataHelper.getDouble(
             usageInfo,
             "knockback_strength",
             DEFAULT_KNOCKBACK_STRENGTH
@@ -219,7 +217,7 @@ public class GuiJiaoGuSoulShriekEffect implements IGuEffect {
             return;
         }
 
-        DamageSource src = attacker.damageSources().magic();
+        DamageSource src = attacker.damageSources().mobAttack(attacker);
         victim.hurt(src, (float) soulDamage);
     }
 
@@ -233,31 +231,11 @@ public class GuiJiaoGuSoulShriekEffect implements IGuEffect {
         return false;
     }
 
-    private static double getMetaDouble(
-        NianTouData.Usage usage,
-        String key,
-        double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
     private static int getMetaInt(
         NianTouData.Usage usage,
         String key,
         int defaultValue
     ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
+        return UsageMetadataHelper.getInt(usage, key, defaultValue);
     }
 }

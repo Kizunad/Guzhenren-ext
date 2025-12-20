@@ -1,11 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.tierThree;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.network.ClientboundLingHunGuIntuitionPayload;
 import java.util.List;
@@ -36,8 +37,8 @@ public class LingHunGuSpiritualIntuitionEffect implements IGuEffect {
     private static final double DEFAULT_FOV_DOT_THRESHOLD = 0.45;
     private static final int DEFAULT_HINT_DURATION_TICKS = 8;
 
-    private static final double DEFAULT_BASE_SOUL_COST = 0.0;
-    private static final double DEFAULT_SOUL_COST_PER_THREAT = 0.0;
+    private static final double DEFAULT_HUNPO_COST_PER_THREAT = 0.0;
+    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 160.0;
     private static final double DIRECTION_EPSILON_SQR = 0.0001;
 
     @Override
@@ -63,23 +64,23 @@ public class LingHunGuSpiritualIntuitionEffect implements IGuEffect {
             return;
         }
 
-        final double baseRadius = getMetaDouble(
+        final double baseRadius = UsageMetadataHelper.getDouble(
             usageInfo,
             "radius",
             DEFAULT_RADIUS
         );
-        final double fengDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+        final double hunDaoMultiplier = DaoHenCalculator.calculateSelfMultiplier(
             player,
-            DaoHenHelper.DaoType.FENG_DAO
+            DaoHenHelper.DaoType.HUN_DAO
         );
-        final double radius = baseRadius * fengDaoMultiplier;
+        final double radius = baseRadius * hunDaoMultiplier;
 
-        final double dotThreshold = getMetaDouble(
+        final double dotThreshold = UsageMetadataHelper.getDouble(
             usageInfo,
             "fov_dot_threshold",
             DEFAULT_FOV_DOT_THRESHOLD
         );
-        final int duration = getMetaInt(
+        final int duration = UsageMetadataHelper.getInt(
             usageInfo,
             "hint_duration_ticks",
             DEFAULT_HINT_DURATION_TICKS
@@ -129,7 +130,7 @@ public class LingHunGuSpiritualIntuitionEffect implements IGuEffect {
             return;
         }
 
-        if (!tryConsumeSoul(player, usageInfo, threatCount, fengDaoMultiplier)) {
+        if (!tryConsumeSustain(player, usageInfo, threatCount, hunDaoMultiplier)) {
             return;
         }
 
@@ -148,31 +149,64 @@ public class LingHunGuSpiritualIntuitionEffect implements IGuEffect {
         );
     }
 
-    private static boolean tryConsumeSoul(
+    private static boolean tryConsumeSustain(
         final ServerPlayer player,
         final NianTouData.Usage usageInfo,
         final int threatCount,
-        final double fengDaoMultiplier
+        final double hunDaoMultiplier
     ) {
-        final double base = getMetaDouble(
-            usageInfo,
-            "base_soul_cost",
-            DEFAULT_BASE_SOUL_COST
+        final double niantouCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+                0.0
+            )
         );
-        final double perThreat = getMetaDouble(
-            usageInfo,
-            "soul_cost_per_threat",
-            DEFAULT_SOUL_COST_PER_THREAT
+        final double jingliCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+                0.0
+            )
         );
-        final double cost = (base + perThreat * threatCount) * fengDaoMultiplier;
-        if (cost <= 0) {
-            return true;
-        }
-        if (HunPoHelper.getAmount(player) < cost) {
-            return false;
-        }
-        HunPoHelper.modify(player, -cost);
-        return true;
+        final double hunpoCostPerSecondBase = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+                0.0
+            )
+        );
+        final double hunpoCostPerThreat = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                "hunpo_cost_per_threat",
+                DEFAULT_HUNPO_COST_PER_THREAT
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            0.0,
+            (hunpoCostPerSecondBase + hunpoCostPerThreat * threatCount)
+                * hunDaoMultiplier
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND,
+                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+            )
+        );
+        return GuEffectCostHelper.tryConsumeSustain(
+            player,
+            niantouCostPerSecond,
+            jingliCostPerSecond,
+            hunpoCostPerSecond,
+            zhenyuanBaseCostPerSecond
+        );
     }
 
     private static double clamp01(final double value) {
@@ -198,31 +232,4 @@ public class LingHunGuSpiritualIntuitionEffect implements IGuEffect {
         return wrapped;
     }
 
-    private static double getMetaDouble(
-        final NianTouData.Usage usage,
-        final String key,
-        final double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
-    private static int getMetaInt(
-        final NianTouData.Usage usage,
-        final String key,
-        final int defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
 }

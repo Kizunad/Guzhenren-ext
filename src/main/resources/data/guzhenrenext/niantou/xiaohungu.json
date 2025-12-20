@@ -5,11 +5,14 @@
             "usageID": "guzhenren:xiaohungu_passive_regen",
             "usageTitle": "滋养魂魄",
             "usageDesc": "小魂蛊寄宿于空窍之中，能够持续滋养蛊师魂魄。",
-            "usageInfo": "每秒回复 {regen} 点魂魄",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{niantou_cost_per_second}(念头)+{jingli_cost_per_second}(精力) |\n 每秒回复：{regen}魂魄（受魂道道痕增幅）",
             "cost_duration": 0,
             "cost_total_niantou": 0,
             "metadata": {
-                "regen": "0.2"
+                "regen": "0.2",
+                "zhenyuan_base_cost_per_second": "60.0",
+                "niantou_cost_per_second": "0.6",
+                "jingli_cost_per_second": "0.4"
             }
         }
     ]

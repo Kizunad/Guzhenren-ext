@@ -1,8 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.tierThree;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,8 +34,6 @@ public class GuiYanGuSoulValuationEffect implements IGuEffect {
 
     private static final int TICKS_PER_SECOND = 20;
 
-    private static final double DEFAULT_ACTIVATE_SOUL_COST = 2.0;
-    private static final double DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST = 320.0;
     private static final double DEFAULT_RADIUS = 10.0;
     private static final double DEFAULT_HUNPO_GAIN_PER_TARGET = 1.5;
     private static final double DEFAULT_MAX_GAIN_PER_ACTIVATION = 18.0;
@@ -80,33 +81,11 @@ public class GuiYanGuSoulValuationEffect implements IGuEffect {
             return false;
         }
 
-        final double soulCost = Math.max(
-            0.0,
-            getMetaDouble(
-                usageInfo,
-                "activate_soul_cost",
-                DEFAULT_ACTIVATE_SOUL_COST
-            )
-        );
-        final double baseCost = Math.max(
-            0.0,
-            getMetaDouble(
-                usageInfo,
-                "activate_zhenyuan_base_cost",
-                DEFAULT_ACTIVATE_ZHENYUAN_BASE_COST
-            )
-        );
-        final double realZhenyuanCost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-
-        if (!hasEnoughCost(user, soulCost, realZhenyuanCost)) {
-            player.displayClientMessage(
-                Component.literal("魂魄/真元不足，鬼眼难估魂。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
-        final int cooldownTicks = getMetaInt(
+        final int cooldownTicks = UsageMetadataHelper.getInt(
             usageInfo,
             "cooldown_ticks",
             DEFAULT_COOLDOWN_TICKS
@@ -115,15 +94,17 @@ public class GuiYanGuSoulValuationEffect implements IGuEffect {
             setCooldownUntilTick(user, currentTick + cooldownTicks);
         }
 
-        consumeCost(user, soulCost, realZhenyuanCost);
-
         final double radius = Math.max(
             0.0,
-            getMetaDouble(usageInfo, "radius", DEFAULT_RADIUS)
+            UsageMetadataHelper.getDouble(usageInfo, "radius", DEFAULT_RADIUS)
         );
         final int glowDuration = Math.max(
             0,
-            getMetaInt(usageInfo, "glow_duration_ticks", DEFAULT_GLOW_DURATION_TICKS)
+            UsageMetadataHelper.getInt(
+                usageInfo,
+                "glow_duration_ticks",
+                DEFAULT_GLOW_DURATION_TICKS
+            )
         );
 
         final List<LivingEntity> targets = findTargets(user, radius);
@@ -144,7 +125,7 @@ public class GuiYanGuSoulValuationEffect implements IGuEffect {
 
         final double gainPerTarget = Math.max(
             0.0,
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "hunpo_gain_per_target",
                 DEFAULT_HUNPO_GAIN_PER_TARGET
@@ -152,13 +133,20 @@ public class GuiYanGuSoulValuationEffect implements IGuEffect {
         );
         final double maxGain = Math.max(
             0.0,
-            getMetaDouble(
+            UsageMetadataHelper.getDouble(
                 usageInfo,
                 "max_gain_per_activation",
                 DEFAULT_MAX_GAIN_PER_ACTIVATION
             )
         );
-        final double gain = Math.min(maxGain, gainPerTarget * targets.size());
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.HUN_DAO
+        );
+        final double gain = Math.min(
+            maxGain,
+            gainPerTarget * targets.size()
+        ) * multiplier;
         if (gain > 0.0) {
             HunPoHelper.modify(user, gain);
         }
@@ -216,33 +204,6 @@ public class GuiYanGuSoulValuationEffect implements IGuEffect {
         return value;
     }
 
-    private static boolean hasEnoughCost(
-        final LivingEntity user,
-        final double soulCost,
-        final double zhenyuanCost
-    ) {
-        if (soulCost > 0.0 && HunPoHelper.getAmount(user) < soulCost) {
-            return false;
-        }
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            return false;
-        }
-        return true;
-    }
-
-    private static void consumeCost(
-        final LivingEntity user,
-        final double soulCost,
-        final double zhenyuanCost
-    ) {
-        if (soulCost > 0.0) {
-            HunPoHelper.modify(user, -soulCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
-        }
-    }
-
     private static int getCooldownUntilTick(final LivingEntity user) {
         return user.getPersistentData().getInt(NBT_COOLDOWN_UNTIL_TICK);
     }
@@ -254,31 +215,4 @@ public class GuiYanGuSoulValuationEffect implements IGuEffect {
         user.getPersistentData().putInt(NBT_COOLDOWN_UNTIL_TICK, untilTick);
     }
 
-    private static double getMetaDouble(
-        final NianTouData.Usage usage,
-        final String key,
-        final double defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Double.parseDouble(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
-    private static int getMetaInt(
-        final NianTouData.Usage usage,
-        final String key,
-        final int defaultValue
-    ) {
-        if (usage.metadata() != null && usage.metadata().containsKey(key)) {
-            try {
-                return Integer.parseInt(usage.metadata().get(key));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
 }

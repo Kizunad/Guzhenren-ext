@@ -32,16 +32,17 @@
         {
             "usageID": "guzhenren:quanpugu_active_mad_dog_bite",
             "usageTitle": "主动·疯狗咬",
-            "usageDesc": "丧家之犬亦有牙。开启后，普攻会为敌人施加“撕裂”：敌人移动即流血，治疗减半；撕裂持续时间受奴道道痕增益。",
-            "usageInfo": "持续：{active_duration_ticks} tick | 撕裂：移动掉血 + 治疗减半 | 撕裂时长：受奴道道痕增益",
+            "usageDesc": "丧家之犬亦有牙。开启后，普攻会为敌人施加“撕裂”：敌人移动即流血，治疗减半；持续时间受魂道道痕增益。",
+            "usageInfo": "消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) |\n 持续：{active_duration_ticks} tick（受魂道道痕增益） |\n 撕裂：移动掉血 + 治疗减半",
             "cost_duration": 1200,
             "cost_total_niantou": 80,
             "metadata": {
-                "active_duration_ticks": "200",
-                "activate_soul_cost": "0.0",
-                "activate_zhenyuan_base_cost": "0.0"
+                "zhenyuan_base_cost": "260.0",
+                "niantou_cost": "85.0",
+                "jingli_cost": "75.0",
+                "hunpo_cost": "100.0",
+                "active_duration_ticks": "200"
             }
         }
     ]
 }
-
