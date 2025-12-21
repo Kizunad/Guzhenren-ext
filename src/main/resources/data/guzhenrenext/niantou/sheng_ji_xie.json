@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:sheng_ji_xie",
+    "usages": [
+        {
+            "usageID": "guzhenren:sheng_ji_xie_passive_leaf_breath",
+            "usageTitle": "被动·叶息",
+            "usageDesc": "以木道生机温养身躯，缓慢恢复并滋养念头。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 回复：+{heal_amount}/s | 念头：+{niantou_gain}/s",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "niantou_cost_per_second": "0.5",
+                "heal_amount": "0.5",
+                "niantou_gain": "0.02"
+            }
+        },
+        {
+            "usageID": "guzhenren:sheng_ji_xie_active_life_sprout",
+            "usageTitle": "主动·生芽",
+            "usageDesc": "催发体内生机，短时间自愈。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 再生：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "60.0",
+                "jingli_cost": "8.0",
+                "heal_amount": "4.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

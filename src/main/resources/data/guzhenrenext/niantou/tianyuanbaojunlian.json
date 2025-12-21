@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:tianyuanbaojunlian",
+    "usages": [
+        {
+            "usageID": "guzhenren:tianyuanbaojunlian_passive_junlian_sanctuary",
+            "usageTitle": "被动·宝君净域",
+            "usageDesc": "宝君莲息护体，持续恢复并缓慢回补多资源。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 回复：+{heal_amount}/s | 念头：+{niantou_gain}/s | 魂魄：+{hunpo_gain}/s",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "14.0",
+                "hunpo_cost_per_second": "3.0",
+                "heal_amount": "3.0",
+                "niantou_gain": "0.8",
+                "hunpo_gain": "0.4"
+            }
+        },
+        {
+            "usageID": "guzhenren:tianyuanbaojunlian_active_junlian_favor",
+            "usageTitle": "主动·宝君赐福",
+            "usageDesc": "为周围友方提供治疗，并赋予再生与吸收护盾。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 治疗：{heal_amount} | 再生：{effect_duration_ticks}t | 吸收：{absorption_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "radius": "10.0",
+                "cooldown_ticks": "1500",
+                "zhenyuan_base_cost": "520.0",
+                "hunpo_cost": "220.0",
+                "heal_amount": "60.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "0",
+                "absorption_duration_ticks": "260",
+                "absorption_amplifier": "0"
+            }
+        }
+    ]
+}
+

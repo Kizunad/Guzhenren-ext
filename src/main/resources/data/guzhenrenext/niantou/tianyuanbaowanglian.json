@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:tianyuanbaowanglian",
+    "usages": [
+        {
+            "usageID": "guzhenren:tianyuanbaowanglian_passive_wanglian_eternity",
+            "usageTitle": "被动·王莲长存",
+            "usageDesc": "王莲之意绵延，持续恢复并回补多资源。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 回复：+{heal_amount}/s | 念头：+{niantou_gain}/s | 精力：+{jingli_gain}/s | 魂魄：+{hunpo_gain}/s",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "18.0",
+                "niantou_cost_per_second": "4.0",
+                "heal_amount": "4.0",
+                "niantou_gain": "1.5",
+                "jingli_gain": "1.0",
+                "hunpo_gain": "0.8"
+            }
+        },
+        {
+            "usageID": "guzhenren:tianyuanbaowanglian_active_wanglian_mandate",
+            "usageTitle": "主动·王莲敕令",
+            "usageDesc": "王莲敕令一出，治疗并强固周围友方。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 抗性：{effect_duration_ticks}t | 再生：{regen_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "radius": "12.0",
+                "cooldown_ticks": "2000",
+                "zhenyuan_base_cost": "580.0",
+                "niantou_cost": "260.0",
+                "heal_amount": "80.0",
+                "effect_duration_ticks": "320",
+                "effect_amplifier": "0",
+                "regen_duration_ticks": "320",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}
+

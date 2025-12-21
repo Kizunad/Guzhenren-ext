@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:luohugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:luohugu_passive_falling_petals",
+            "usageTitle": "被动·落花避锋",
+            "usageDesc": "受击时有概率卸力并退避，获得短暂加速。",
+            "usageInfo": "触发率：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害倍率：*{damage_multiplier} | 退避：{blink_distance} | 加速：{buff_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "proc_chance": "0.20",
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "220.0",
+                "jingli_cost": "70.0",
+                "damage_multiplier": "0.80",
+                "projectile_only": "false",
+                "blink_distance": "10.0",
+                "buff_duration_ticks": "200",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:luohugu_active_petal_step",
+            "usageTitle": "主动·花影步",
+            "usageDesc": "以花影挪移短距位移，并获得加速/再生后效。",
+            "usageInfo": "距离：{distance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 加速：{effect_duration_ticks}t | 再生：{regen_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "distance": "10.0",
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "360.0",
+                "jingli_cost": "140.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "regen_duration_ticks": "120",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}
+

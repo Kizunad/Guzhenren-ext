@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jiu_xie_sheng_ji_cao",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiu_xie_sheng_ji_cao_passive_nineleaf_vigor",
+            "usageTitle": "被动·九叶回生",
+            "usageDesc": "维持草息于体，持续获得再生效果。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 再生：{effect_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "jingli_cost_per_second": "0.8",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiu_xie_sheng_ji_cao_active_vitality_bloom",
+            "usageTitle": "主动·生机绽放",
+            "usageDesc": "散发草息，治疗周围友方并赋予短暂再生。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 再生：{effect_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "radius": "6.0",
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "140.0",
+                "jingli_cost": "30.0",
+                "heal_amount": "10.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0",
+                "regen_duration_ticks": "140",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:mugangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:mugangu_passive_wood_liver_endurance",
+            "usageTitle": "被动·木肝养元",
+            "usageDesc": "木肝温养体魄，持续提升生命上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 生命上限：+{attribute_amount}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "jingli_cost_per_second": "1.2",
+                "attribute_amount": "40.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:mugangu_active_liver_renewal",
+            "usageTitle": "主动·回肝生",
+            "usageDesc": "凝聚生机，自愈并短暂提振力量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 再生：{effect_duration_ticks}t | 力量：{boost_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "540",
+                "zhenyuan_base_cost": "240.0",
+                "jingli_cost": "60.0",
+                "heal_amount": "150.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "boost_duration_ticks": "200",
+                "boost_amplifier": "0"
+            }
+        }
+    ]
+}

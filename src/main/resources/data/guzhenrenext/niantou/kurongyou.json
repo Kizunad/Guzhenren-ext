@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:kurongyou",
+    "usages": [
+        {
+            "usageID": "guzhenren:kurongyou_passive_wither_bloom",
+            "usageTitle": "被动·枯荣卸力",
+            "usageDesc": "受击时有概率卸去部分伤害，并短暂获得再生。",
+            "usageInfo": "触发率：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 伤害倍率：*{damage_multiplier} | 退避：{blink_distance} | 再生：{buff_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "proc_chance": "0.15",
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "240.0",
+                "niantou_cost": "60.0",
+                "damage_multiplier": "0.70",
+                "projectile_only": "false",
+                "blink_distance": "8.0",
+                "buff_duration_ticks": "200",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:kurongyou_active_wither_strike",
+            "usageTitle": "主动·枯荣打击",
+            "usageDesc": "锁定目标施以枯荣之击，造成大量普通伤害并附带凋零，同时自愈少量。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 伤害：{extra_physical_damage} | 凋零：{wither_duration_ticks}t | 自愈：{self_heal_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "range": "7.0",
+                "cooldown_ticks": "1100",
+                "zhenyuan_base_cost": "520.0",
+                "niantou_cost": "160.0",
+                "extra_physical_damage": "3500.0",
+                "extra_magic_damage": "0.0",
+                "wither_duration_ticks": "160",
+                "wither_amplifier": "0",
+                "self_heal_amount": "20.0"
+            }
+        }
+    ]
+}
+

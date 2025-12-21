@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:caoqungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:caoqungu_passive_grass_skirt_guard",
+            "usageTitle": "被动·草裙护体",
+            "usageDesc": "以草气结成护裙，持续增加护甲。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 护甲：+{attribute_amount}",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "hunpo_cost_per_second": "1.0",
+                "attribute_amount": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:caoqungu_active_barkskin_wrap",
+            "usageTitle": "主动·树皮裹身",
+            "usageDesc": "以树皮护体，短时间获得抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 抗性：{effect_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "480",
+                "zhenyuan_base_cost": "200.0",
+                "hunpo_cost": "36.0",
+                "heal_amount": "0.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

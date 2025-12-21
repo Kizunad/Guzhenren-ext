@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:huhuagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huhuagu_passive_flower_guard",
+            "usageTitle": "被动·护花",
+            "usageDesc": "以花意护身，持续获得抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 抗性：{effect_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "niantou_cost_per_second": "3.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:huhuagu_active_flower_bulwark",
+            "usageTitle": "主动·花护阵",
+            "usageDesc": "为周围友方提供治疗与短暂抗性/再生。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 抗性：{effect_duration_ticks}t | 再生：{regen_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "radius": "8.0",
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "460.0",
+                "niantou_cost": "180.0",
+                "heal_amount": "40.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "regen_duration_ticks": "240",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}
+

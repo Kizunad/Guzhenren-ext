@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:liandaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:liandaogu_passive_reaping_edge",
+            "usageTitle": "被动·割生",
+            "usageDesc": "挥击时更易割裂生机，附带毒素与少量附伤。",
+            "usageInfo": "触发率：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 中毒：{effect_duration_ticks}t | 附加伤害：{extra_physical_damage}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "proc_chance": "0.12",
+                "zhenyuan_base_cost": "40.0",
+                "hunpo_cost": "6.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "2.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:liandaogu_active_crescent_reap",
+            "usageTitle": "主动·弦月割",
+            "usageDesc": "锁定前方目标，以镰刃割裂其行动。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 伤害：{extra_physical_damage} | 缓慢：{slow_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "range": "4.0",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "80.0",
+                "hunpo_cost": "10.0",
+                "extra_physical_damage": "5.0",
+                "extra_magic_damage": "0.0",
+                "slow_duration_ticks": "80",
+                "slow_amplifier": "0",
+                "self_heal_amount": "0.0"
+            }
+        }
+    ]
+}
+

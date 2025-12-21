@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:changqinggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:changqinggu_passive_evergreen_regrowth",
+            "usageTitle": "被动·长青回流",
+            "usageDesc": "长青之意绵延不绝，持续恢复并滋养念头。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 回复：+{heal_amount}/s | 念头：+{niantou_gain}/s",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10.0",
+                "jingli_cost_per_second": "2.0",
+                "heal_amount": "2.5",
+                "niantou_gain": "0.25"
+            }
+        },
+        {
+            "usageID": "guzhenren:changqinggu_active_evergreen_blessing",
+            "usageTitle": "主动·长青赐福",
+            "usageDesc": "短时间内强化体魄，获得再生与吸收护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 再生：{effect_duration_ticks}t | 吸收：{absorption_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "420.0",
+                "jingli_cost": "120.0",
+                "heal_amount": "30.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "absorption_duration_ticks": "240",
+                "absorption_amplifier": "0"
+            }
+        }
+    ]
+}
+

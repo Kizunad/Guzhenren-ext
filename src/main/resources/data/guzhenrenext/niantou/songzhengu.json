@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:songzhengu",
+    "usages": [
+        {
+            "usageID": "guzhenren:songzhengu_passive_pine_needle_poison",
+            "usageTitle": "被动·松针毒刺",
+            "usageDesc": "攻击时有概率以松针染毒，追加少量附伤。",
+            "usageInfo": "触发率：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 中毒：{effect_duration_ticks}t | 附伤：{extra_physical_damage}",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.15",
+                "zhenyuan_base_cost": "90.0",
+                "niantou_cost": "18.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "20.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:songzhengu_active_pine_needle_volley",
+            "usageTitle": "主动·松针雨",
+            "usageDesc": "以念头驱使松针成雨，范围内敌人受伤并中毒。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 伤害：{extra_physical_damage} | 中毒：{effect_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "radius": "4.5",
+                "cooldown_ticks": "420",
+                "zhenyuan_base_cost": "180.0",
+                "niantou_cost": "40.0",
+                "extra_physical_damage": "50.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.25"
+            }
+        }
+    ]
+}
+

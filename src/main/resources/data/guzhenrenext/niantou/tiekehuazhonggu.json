@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:tiekehuazhonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tiekehuazhonggu_passive_iron_seed_shell",
+            "usageTitle": "被动·铁壳护身",
+            "usageDesc": "受击时有概率以铁壳卸力，降低本次伤害并获得短暂抗性。",
+            "usageInfo": "触发率：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害倍率：*{damage_multiplier} | 抗性：{buff_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.14",
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "120.0",
+                "jingli_cost": "30.0",
+                "damage_multiplier": "0.75",
+                "projectile_only": "false",
+                "blink_distance": "0.0",
+                "buff_duration_ticks": "160",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:tiekehuazhonggu_active_iron_seed_spike",
+            "usageTitle": "主动·铁种穿刺",
+            "usageDesc": "锁定前方目标，以铁壳尖刺穿透其防御并施加虚弱。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{extra_physical_damage} | 虚弱：{weakness_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "range": "6.0",
+                "cooldown_ticks": "720",
+                "zhenyuan_base_cost": "340.0",
+                "jingli_cost": "80.0",
+                "extra_physical_damage": "350.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "0.0",
+                "weakness_duration_ticks": "160",
+                "weakness_amplifier": "0"
+            }
+        }
+    ]
+}
+

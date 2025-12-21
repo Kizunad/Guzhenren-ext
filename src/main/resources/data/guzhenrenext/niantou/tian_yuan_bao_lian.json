@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:tian_yuan_bao_lian",
+    "usages": [
+        {
+            "usageID": "guzhenren:tian_yuan_bao_lian_passive_lotus_aura",
+            "usageTitle": "被动·莲息",
+            "usageDesc": "以莲意守中，持续恢复并缓慢滋养念头。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 回复：+{heal_amount}/s | 念头：+{niantou_gain}/s",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "niantou_cost_per_second": "1.5",
+                "heal_amount": "1.5",
+                "niantou_gain": "0.15"
+            }
+        },
+        {
+            "usageID": "guzhenren:tian_yuan_bao_lian_active_lotus_shelter",
+            "usageTitle": "主动·莲庇",
+            "usageDesc": "莲息外放，治疗并为周围友方提供抗性与再生。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 抗性：{effect_duration_ticks}t | 再生：{regen_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "radius": "7.0",
+                "cooldown_ticks": "600",
+                "zhenyuan_base_cost": "260.0",
+                "niantou_cost": "70.0",
+                "heal_amount": "25.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "regen_duration_ticks": "200",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}
+

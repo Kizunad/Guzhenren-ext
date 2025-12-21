@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:shimuyi",
+    "usages": [
+        {
+            "usageID": "guzhenren:shimuyi_passive_rotting_sap",
+            "usageTitle": "被动·蚀木毒汁",
+            "usageDesc": "攻击时有概率使敌人凋零，并追加附伤。",
+            "usageInfo": "触发率：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 凋零：{effect_duration_ticks}t | 附伤：{extra_physical_damage}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "proc_chance": "0.18",
+                "zhenyuan_base_cost": "320.0",
+                "jingli_cost": "90.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "800.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shimuyi_active_rotwood_pierce",
+            "usageTitle": "主动·蚀木穿刺",
+            "usageDesc": "锁定目标以蚀木之刺贯穿，造成高额普通伤害并附带凋零与虚弱。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{extra_physical_damage} | 凋零：{wither_duration_ticks}t | 虚弱：{weakness_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "range": "8.0",
+                "cooldown_ticks": "1400",
+                "zhenyuan_base_cost": "500.0",
+                "jingli_cost": "200.0",
+                "extra_physical_damage": "5000.0",
+                "extra_magic_damage": "0.0",
+                "wither_duration_ticks": "240",
+                "wither_amplifier": "0",
+                "weakness_duration_ticks": "240",
+                "weakness_amplifier": "0",
+                "self_heal_amount": "0.0"
+            }
+        }
+    ]
+}
+

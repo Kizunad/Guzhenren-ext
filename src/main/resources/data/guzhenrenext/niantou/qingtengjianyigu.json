@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:qingtengjianyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qingtengjianyigu_passive_vine_cocoon_armor",
+            "usageTitle": "被动·藤茧护体",
+            "usageDesc": "以藤茧之意护身，持续增加护甲韧性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 护甲韧性：+{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "hunpo_cost_per_second": "2.5",
+                "attribute_amount": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:qingtengjianyigu_active_vine_cocoon",
+            "usageTitle": "主动·青藤缠身",
+            "usageDesc": "以青藤之力缠绕周身，获得抗性与吸收护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 抗性：{effect_duration_ticks}t | 吸收：{absorption_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "440.0",
+                "hunpo_cost": "160.0",
+                "heal_amount": "0.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "0",
+                "absorption_duration_ticks": "260",
+                "absorption_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -124,6 +124,16 @@ public final class GuModEffects {
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierFive.TierFiveXingDaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.mudao.tierOne.TierOneMuDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.mudao.tierTwo.TierTwoMuDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.mudao.tierThree.TierThreeMuDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.mudao.tierFour.TierFourMuDaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.mudao.tierFive.TierFiveMuDaoRegistry
+            .registerAll();
 
         registered = true;
     }
