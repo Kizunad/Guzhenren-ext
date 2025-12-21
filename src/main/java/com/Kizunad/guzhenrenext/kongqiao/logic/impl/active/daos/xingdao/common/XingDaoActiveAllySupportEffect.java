@@ -10,8 +10,8 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,34 +19,43 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 
 /**
- * 星道主动：救星。
+ * 星道通用主动：群体扶持。
  * <p>
- * 在指定半径内寻找“最需要治疗”的盟友（缺失生命最多），并按“基础治疗 + 缺失生命倍率”进行治疗。
- * 可选净化负面状态。
+ * - 资源消耗：真元折算 +（念头/精力/魂魄任选其一即可）。
+ * - 效果强度：治疗与增益持续时间随星道道痕动态变化（倍率裁剪防止失控）。
  * </p>
  */
-public class XingDaoActiveRescueStarEffect implements IGuEffect {
+public class XingDaoActiveAllySupportEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_RADIUS = "radius";
-    private static final String META_HEAL_BASE = "heal_base";
-    private static final String META_HEAL_MISSING_MULTIPLIER =
-        "heal_missing_multiplier";
+    private static final String META_HEAL_AMOUNT = "heal_amount";
     private static final String META_CLEANSE_NEGATIVE = "cleanse_negative";
 
     private static final int DEFAULT_COOLDOWN_TICKS = 600;
-    private static final double DEFAULT_RADIUS = 10.0;
-    private static final double MIN_MISSING_HEALTH = 0.0001;
+    private static final double DEFAULT_RADIUS = 8.0;
+    private static final double DEFAULT_HEAL_AMOUNT = 0.0;
+
+    public record EffectSpec(
+        Holder<MobEffect> effect,
+        String durationKey,
+        int defaultDurationTicks,
+        String amplifierKey,
+        int defaultAmplifier
+    ) {}
 
     private final String usageId;
     private final String nbtCooldownKey;
+    private final List<EffectSpec> effects;
 
-    public XingDaoActiveRescueStarEffect(
+    public XingDaoActiveAllySupportEffect(
         final String usageId,
-        final String nbtCooldownKey
+        final String nbtCooldownKey,
+        final List<EffectSpec> effects
     ) {
-        this.usageId = Objects.requireNonNull(usageId, "usageId");
-        this.nbtCooldownKey = Objects.requireNonNull(nbtCooldownKey, "nbtCooldownKey");
+        this.usageId = usageId;
+        this.nbtCooldownKey = nbtCooldownKey;
+        this.effects = effects;
     }
 
     @Override
@@ -81,68 +90,50 @@ public class XingDaoActiveRescueStarEffect implements IGuEffect {
             return false;
         }
 
-        final double radius = Math.max(
-            1.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS)
-        );
-        final LivingEntity target = findMostInjuredAlly(user, radius);
-        if (target == null) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("附近没有可治疗目标。"),
-                true
-            );
-            return false;
-        }
-
-        final double missing = Math.max(0.0, target.getMaxHealth() - target.getHealth());
-        if (missing <= MIN_MISSING_HEALTH) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("无需治疗。"),
-                true
-            );
-            return false;
-        }
-
         if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
-        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
-            user,
-            DaoHenHelper.DaoType.XING_DAO
+        final double radius = Math.max(
+            1.0,
+            UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS)
         );
-        final double healBase = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_HEAL_BASE, 0.0)
-        );
-        final double healMissingMultiplier = Math.max(
+        final double baseHeal = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
                 usageInfo,
-                META_HEAL_MISSING_MULTIPLIER,
-                0.0
+                META_HEAL_AMOUNT,
+                DEFAULT_HEAL_AMOUNT
             )
         );
-        final double scaledHealBase = DaoHenEffectScalingHelper.scaleValue(
-            healBase,
-            selfMultiplier
-        );
-        final double scaledMissingMultiplier = DaoHenEffectScalingHelper.scaleValue(
-            healMissingMultiplier,
-            selfMultiplier
-        );
-        final double healAmount = scaledHealBase + missing * scaledMissingMultiplier;
-        if (healAmount > 0.0) {
-            target.heal((float) healAmount);
-        }
-
         final boolean cleanseNegative = UsageMetadataHelper.getBoolean(
             usageInfo,
             META_CLEANSE_NEGATIVE,
             false
         );
-        if (cleanseNegative) {
-            cleanseNegativeEffects(target);
+
+        final AABB box = user.getBoundingBox().inflate(radius);
+        for (LivingEntity ally : user.level().getEntitiesOfClass(
+            LivingEntity.class,
+            box,
+            e -> e.isAlive() && (e == user || user.isAlliedTo(e))
+        )) {
+            final double multiplier = DaoHenCalculator.calculateMultiplier(
+                user,
+                ally,
+                DaoHenHelper.DaoType.XING_DAO
+            );
+            final double healAmount = DaoHenEffectScalingHelper.scaleValue(
+                baseHeal,
+                multiplier
+            );
+            if (healAmount > 0.0) {
+                ally.heal((float) healAmount);
+            }
+            if (cleanseNegative) {
+                cleanseNegativeEffects(ally);
+            }
+            applyBuffs(ally, usageInfo, multiplier);
         }
 
         final int cooldownTicks = Math.max(
@@ -164,27 +155,50 @@ public class XingDaoActiveRescueStarEffect implements IGuEffect {
         return true;
     }
 
-    private static LivingEntity findMostInjuredAlly(
-        final LivingEntity user,
-        final double radius
+    private void applyBuffs(
+        final LivingEntity ally,
+        final NianTouData.Usage usageInfo,
+        final double multiplier
     ) {
-        final AABB box = user.getBoundingBox().inflate(radius);
-        LivingEntity best = null;
-        double bestMissing = 0.0;
-
-        for (LivingEntity ally : user.level().getEntitiesOfClass(
-            LivingEntity.class,
-            box,
-            e -> e.isAlive() && (e == user || user.isAlliedTo(e))
-        )) {
-            final double missing = Math.max(0.0, ally.getMaxHealth() - ally.getHealth());
-            if (missing > bestMissing) {
-                bestMissing = missing;
-                best = ally;
+        if (effects == null || effects.isEmpty()) {
+            return;
+        }
+        for (EffectSpec spec : effects) {
+            if (spec == null || spec.effect() == null) {
+                continue;
+            }
+            final int duration = Math.max(
+                0,
+                UsageMetadataHelper.getInt(
+                    usageInfo,
+                    spec.durationKey(),
+                    spec.defaultDurationTicks()
+                )
+            );
+            final int scaledDuration = DaoHenEffectScalingHelper.scaleDurationTicks(
+                duration,
+                multiplier
+            );
+            final int amplifier = Math.max(
+                0,
+                UsageMetadataHelper.getInt(
+                    usageInfo,
+                    spec.amplifierKey(),
+                    spec.defaultAmplifier()
+                )
+            );
+            if (scaledDuration > 0) {
+                ally.addEffect(
+                    new MobEffectInstance(
+                        spec.effect(),
+                        scaledDuration,
+                        amplifier,
+                        true,
+                        true
+                    )
+                );
             }
         }
-
-        return best;
     }
 
     private static void cleanseNegativeEffects(final LivingEntity ally) {

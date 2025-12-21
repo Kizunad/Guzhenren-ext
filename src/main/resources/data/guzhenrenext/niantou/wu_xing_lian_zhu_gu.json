@@ -5,12 +5,13 @@
             "usageID": "guzhenren:wu_xing_lian_zhu_gu_passive_five_star_link",
             "usageTitle": "被动·连珠星势",
             "usageDesc": "五星连珠，星势贯通，杀伐之力随之暴涨。",
-            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 念头维持：{niantou_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
             "cost_duration": 2400,
             "cost_total_niantou": 520,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "26.0",
-                "attribute_amount": "0.28"
+                "zhenyuan_base_cost_per_second": "20.0",
+                "niantou_cost_per_second": "3.0",
+                "attribute_amount": "0.26"
             }
         },
         {
@@ -23,9 +24,9 @@
             "metadata": {
                 "radius": "12.0",
                 "cooldown_ticks": "900",
-                "niantou_cost": "180.0",
-                "zhenyuan_base_cost": "1350.0",
-                "heal_amount": "4.0",
+                "niantou_cost": "120.0",
+                "zhenyuan_base_cost": "520.0",
+                "heal_amount": "10000.0",
                 "cleanse_negative": "true",
                 "effect_duration_ticks": "240",
                 "effect_amplifier": "0"
@@ -33,4 +34,3 @@
         }
     ]
 }
-

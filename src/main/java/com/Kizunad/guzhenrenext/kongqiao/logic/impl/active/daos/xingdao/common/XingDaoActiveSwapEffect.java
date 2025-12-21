@@ -6,15 +6,13 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenEffectScalingHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.LineOfSightTargetHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.SafeTeleportHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
-import java.util.Objects;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,22 +20,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * 星道主动：星门。
+ * 星道通用主动：换位/占据。
  * <p>
- * 长距挪移（沿视线方向），可选要求夜晚与露天；并可附带传送后的自增益。
+ * - 资源消耗：真元折算 +（念头/精力/魂魄任选其一即可）。
+ * - 范围与增益持续时间：随星道道痕动态变化（倍率裁剪防止失控）。
  * </p>
  */
-public class XingDaoActiveStarGateEffect implements IGuEffect {
+public class XingDaoActiveSwapEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
-    private static final String META_DISTANCE = "distance";
-    private static final String META_REQUIRES_NIGHT = "requires_night";
-    private static final String META_REQUIRES_OPEN_SKY = "requires_open_sky";
+    private static final String META_RANGE = "range";
 
-    private static final int DEFAULT_COOLDOWN_TICKS = 900;
-    private static final double DEFAULT_DISTANCE = 24.0;
-    private static final double MAX_DISTANCE = 48.0;
-    private static final double MIN_DISTANCE_SQR = 0.0001;
+    private static final int DEFAULT_COOLDOWN_TICKS = 360;
+    private static final double DEFAULT_RANGE = 12.0;
+    private static final double MAX_RANGE = 24.0;
 
     public record EffectSpec(
         Holder<MobEffect> effect,
@@ -49,16 +45,19 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
 
     private final String usageId;
     private final String nbtCooldownKey;
-    private final List<EffectSpec> afterEffects;
+    private final List<EffectSpec> selfEffects;
+    private final List<EffectSpec> targetEffects;
 
-    public XingDaoActiveStarGateEffect(
+    public XingDaoActiveSwapEffect(
         final String usageId,
         final String nbtCooldownKey,
-        final List<EffectSpec> afterEffects
+        final List<EffectSpec> selfEffects,
+        final List<EffectSpec> targetEffects
     ) {
-        this.usageId = Objects.requireNonNull(usageId, "usageId");
-        this.nbtCooldownKey = Objects.requireNonNull(nbtCooldownKey, "nbtCooldownKey");
-        this.afterEffects = Objects.requireNonNull(afterEffects, "afterEffects");
+        this.usageId = usageId;
+        this.nbtCooldownKey = nbtCooldownKey;
+        this.selfEffects = selfEffects;
+        this.targetEffects = targetEffects;
     }
 
     @Override
@@ -93,53 +92,27 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
             return false;
         }
 
-        if (UsageMetadataHelper.getBoolean(usageInfo, META_REQUIRES_NIGHT, false)) {
-            if (player.level().isDay()) {
-                player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("白日无星，难以催发。"),
-                    true
-                );
-                return false;
-            }
-        }
-
-        if (UsageMetadataHelper.getBoolean(usageInfo, META_REQUIRES_OPEN_SKY, false)) {
-            if (!(player.level() instanceof ServerLevel level)) {
-                return false;
-            }
-            final BlockPos pos = player.blockPosition();
-            if (!level.canSeeSky(pos)) {
-                player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("需露天见星，方可开门。"),
-                    true
-                );
-                return false;
-            }
-        }
-
-        final double baseDistance = Math.max(
+        final double baseRange = Math.max(
             1.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_DISTANCE, DEFAULT_DISTANCE)
+            UsageMetadataHelper.getDouble(usageInfo, META_RANGE, DEFAULT_RANGE)
         );
         final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
             user,
             DaoHenHelper.DaoType.XING_DAO
         );
-        final double scaledDistance = DaoHenEffectScalingHelper.scaleValue(
-            baseDistance,
+        final double scaledRange = DaoHenEffectScalingHelper.scaleValue(
+            baseRange,
             selfMultiplier
         );
-        final double distance = UsageMetadataHelper.clamp(
-            scaledDistance,
-            1.0,
-            MAX_DISTANCE
+        final double range = UsageMetadataHelper.clamp(scaledRange, 1.0, MAX_RANGE);
+
+        final LivingEntity target = LineOfSightTargetHelper.findTarget(
+            player,
+            range
         );
-        final Vec3 base = player.position()
-            .add(player.getLookAngle().normalize().scale(distance));
-        final Vec3 safe = SafeTeleportHelper.findSafeTeleportPos(player, base);
-        if (safe.distanceToSqr(player.position()) <= MIN_DISTANCE_SQR) {
+        if (target == null) {
             player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("星门未能定位到安全落点。"),
+                net.minecraft.network.chat.Component.literal("未找到可换位目标。"),
                 true
             );
             return false;
@@ -149,8 +122,30 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
             return false;
         }
 
-        SafeTeleportHelper.teleportSafely(player, safe);
-        applyAfterEffects(player, usageInfo, selfMultiplier);
+        final Vec3 userPos = player.position();
+        final Vec3 targetPos = target.position();
+
+        final Vec3 safeUserDest = SafeTeleportHelper.findSafeTeleportPos(
+            player,
+            targetPos
+        );
+        final Vec3 safeTargetDest = SafeTeleportHelper.findSafeTeleportPos(
+            target,
+            userPos
+        );
+
+        player.teleportTo(safeUserDest.x, safeUserDest.y, safeUserDest.z);
+        player.resetFallDistance();
+        target.teleportTo(safeTargetDest.x, safeTargetDest.y, safeTargetDest.z);
+        target.resetFallDistance();
+
+        applyBuffs(player, usageInfo, selfEffects, selfMultiplier);
+        final double targetMultiplier = DaoHenCalculator.calculateMultiplier(
+            user,
+            target,
+            DaoHenHelper.DaoType.XING_DAO
+        );
+        applyBuffs(target, usageInfo, targetEffects, targetMultiplier);
 
         final int cooldownTicks = Math.max(
             0,
@@ -171,15 +166,16 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
         return true;
     }
 
-    private void applyAfterEffects(
-        final LivingEntity user,
+    private static void applyBuffs(
+        final LivingEntity entity,
         final NianTouData.Usage usageInfo,
-        final double selfMultiplier
+        final List<EffectSpec> effects,
+        final double multiplier
     ) {
-        if (afterEffects.isEmpty()) {
+        if (effects == null || effects.isEmpty()) {
             return;
         }
-        for (EffectSpec spec : afterEffects) {
+        for (EffectSpec spec : effects) {
             if (spec == null || spec.effect() == null) {
                 continue;
             }
@@ -193,7 +189,7 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
             );
             final int scaledDuration = DaoHenEffectScalingHelper.scaleDurationTicks(
                 duration,
-                selfMultiplier
+                multiplier
             );
             final int amplifier = Math.max(
                 0,
@@ -203,18 +199,17 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
                     spec.defaultAmplifier()
                 )
             );
-            if (scaledDuration <= 0) {
-                continue;
+            if (scaledDuration > 0) {
+                entity.addEffect(
+                    new MobEffectInstance(
+                        spec.effect(),
+                        scaledDuration,
+                        amplifier,
+                        true,
+                        true
+                    )
+                );
             }
-            user.addEffect(
-                new MobEffectInstance(
-                    spec.effect(),
-                    scaledDuration,
-                    amplifier,
-                    true,
-                    true
-                )
-            );
         }
     }
 }

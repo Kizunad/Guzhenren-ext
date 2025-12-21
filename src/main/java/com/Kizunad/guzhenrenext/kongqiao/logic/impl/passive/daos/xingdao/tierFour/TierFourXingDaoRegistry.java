@@ -1,8 +1,8 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierFour;
 
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveSelfBuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveSelfBuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoSustainedAttributeModifierEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -18,7 +18,7 @@ public final class TierFourXingDaoRegistry {
     public static void registerAll() {
         // 四星立方蛊：大幅增幅 + 立方护阵
         GuEffectRegistry.register(
-            new YuDaoSustainedAttributeModifierEffect(
+            new XingDaoSustainedAttributeModifierEffect(
                 "guzhenren:sixinglifangti_passive_four_star_frame",
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -27,18 +27,18 @@ public final class TierFourXingDaoRegistry {
             )
         );
         GuEffectRegistry.register(
-            new YuDaoActiveSelfBuffEffect(
+            new XingDaoActiveSelfBuffEffect(
                 "guzhenren:sixinglifangti_active_four_star_array",
                 cooldownKey("guzhenren:sixinglifangti_active_four_star_array"),
                 List.of(
-                    new YuDaoActiveSelfBuffEffect.EffectSpec(
+                    new XingDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.DAMAGE_BOOST,
                         "effect_duration_ticks",
                         0,
                         "effect_amplifier",
                         0
                     ),
-                    new YuDaoActiveSelfBuffEffect.EffectSpec(
+                    new XingDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.DAMAGE_RESISTANCE,
                         "effect_duration_ticks",
                         0,
@@ -54,4 +54,3 @@ public final class TierFourXingDaoRegistry {
         return "GuzhenrenExtCooldown_" + usageId;
     }
 }
-

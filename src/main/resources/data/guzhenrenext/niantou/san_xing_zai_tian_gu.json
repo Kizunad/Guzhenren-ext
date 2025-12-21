@@ -5,27 +5,28 @@
             "usageID": "guzhenren:san_xing_zai_tian_gu_passive_three_star_power",
             "usageTitle": "被动·三星增势",
             "usageDesc": "三星在天，星势成列，令星道之力更为凝练。",
-            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
+            "usageInfo": "真元维持：{zhenyuan_base_cost_per_second}/s |\n 魂魄维持：{hunpo_cost_per_second}/s |\n 攻击加成：{attribute_amount}",
             "cost_duration": 2000,
             "cost_total_niantou": 240,
             "metadata": {
-                "zhenyuan_base_cost_per_second": "12.0",
-                "attribute_amount": "0.16"
+                "zhenyuan_base_cost_per_second": "10.0",
+                "hunpo_cost_per_second": "1.2",
+                "attribute_amount": "0.14"
             }
         },
         {
             "usageID": "guzhenren:san_xing_zai_tian_gu_active_three_star_blessing",
             "usageTitle": "主动·三星祝福",
             "usageDesc": "以三星为引，祝福周遭盟友，短时间内提升杀伐并缓解伤势。",
-            "usageInfo": "范围：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 持续：{effect_duration_ticks}t",
+            "usageInfo": "范围：{radius} |\n 冷却：{cooldown_ticks}t |\n 精力消耗：{jingli_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 治疗：{heal_amount} |\n 持续：{effect_duration_ticks}t",
             "cost_duration": 2600,
             "cost_total_niantou": 460,
             "metadata": {
                 "radius": "10.0",
                 "cooldown_ticks": "520",
-                "niantou_cost": "60.0",
-                "zhenyuan_base_cost": "520.0",
-                "heal_amount": "1.5",
+                "jingli_cost": "60.0",
+                "zhenyuan_base_cost": "320.0",
+                "heal_amount": "500.0",
                 "cleanse_negative": "false",
                 "effect_duration_ticks": "160",
                 "effect_amplifier": "0"
@@ -33,4 +34,3 @@
         }
     ]
 }
-

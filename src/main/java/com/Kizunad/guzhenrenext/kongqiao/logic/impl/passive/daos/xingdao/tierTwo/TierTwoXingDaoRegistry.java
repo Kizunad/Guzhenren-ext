@@ -1,13 +1,13 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierTwo;
 
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveAoEBurstEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveSelfBuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveSwapEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveTargetNukeEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoAttackProcDebuffEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoHurtProcReductionEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveAoEBurstEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveSelfBuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveSwapEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveTargetNukeEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoAttackProcDebuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoHurtProcReductionEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoSustainedAttributeModifierEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -30,7 +30,7 @@ public final class TierTwoXingDaoRegistry {
     private static void registerXingJianGu() {
         // 星箭蛊：箭势（攻速）+ 视线锁定打击
         GuEffectRegistry.register(
-            new YuDaoSustainedAttributeModifierEffect(
+            new XingDaoSustainedAttributeModifierEffect(
                 "guzhenren:xing_jian_gu_passive_star_draw",
                 Attributes.ATTACK_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -39,18 +39,18 @@ public final class TierTwoXingDaoRegistry {
             )
         );
         GuEffectRegistry.register(
-            new YuDaoActiveTargetNukeEffect(
+            new XingDaoActiveTargetNukeEffect(
                 "guzhenren:xing_jian_gu_active_star_volley",
                 cooldownKey("guzhenren:xing_jian_gu_active_star_volley"),
                 List.of(
-                    new YuDaoActiveTargetNukeEffect.EffectSpec(
+                    new XingDaoActiveTargetNukeEffect.EffectSpec(
                         MobEffects.GLOWING,
                         "effect_duration_ticks",
                         0,
                         "effect_amplifier",
                         0
                     ),
-                    new YuDaoActiveTargetNukeEffect.EffectSpec(
+                    new XingDaoActiveTargetNukeEffect.EffectSpec(
                         MobEffects.MOVEMENT_SLOWDOWN,
                         "effect_duration_ticks",
                         0,
@@ -65,7 +65,7 @@ public final class TierTwoXingDaoRegistry {
     private static void registerLiangXingHuiYingGu() {
         // 两星辉映蛊：增幅（攻强）+ 换位扰阵
         GuEffectRegistry.register(
-            new YuDaoSustainedAttributeModifierEffect(
+            new XingDaoSustainedAttributeModifierEffect(
                 "guzhenren:liang_xing_hui_ying_gu_passive_twin_star_power",
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -74,11 +74,11 @@ public final class TierTwoXingDaoRegistry {
             )
         );
         GuEffectRegistry.register(
-            new YuDaoActiveSwapEffect(
+            new XingDaoActiveSwapEffect(
                 "guzhenren:liang_xing_hui_ying_gu_active_twin_swap",
                 cooldownKey("guzhenren:liang_xing_hui_ying_gu_active_twin_swap"),
                 List.of(
-                    new YuDaoActiveSwapEffect.EffectSpec(
+                    new XingDaoActiveSwapEffect.EffectSpec(
                         MobEffects.MOVEMENT_SPEED,
                         "effect_duration_ticks",
                         0,
@@ -87,14 +87,14 @@ public final class TierTwoXingDaoRegistry {
                     )
                 ),
                 List.of(
-                    new YuDaoActiveSwapEffect.EffectSpec(
+                    new XingDaoActiveSwapEffect.EffectSpec(
                         MobEffects.WEAKNESS,
                         "effect_duration_ticks",
                         0,
                         "effect_amplifier",
                         0
                     ),
-                    new YuDaoActiveSwapEffect.EffectSpec(
+                    new XingDaoActiveSwapEffect.EffectSpec(
                         MobEffects.GLOWING,
                         "effect_duration_ticks",
                         0,
@@ -109,13 +109,13 @@ public final class TierTwoXingDaoRegistry {
     private static void registerXingHuoGu() {
         // 星火蛊：星火灼身（攻击触发）+ 星火爆焰（范围）
         GuEffectRegistry.register(
-            new YuDaoAttackProcDebuffEffect(
+            new XingDaoAttackProcDebuffEffect(
                 "guzhenren:xinghuogu_passive_starfire_burn",
                 MobEffects.WITHER
             )
         );
         GuEffectRegistry.register(
-            new YuDaoActiveAoEBurstEffect(
+            new XingDaoActiveAoEBurstEffect(
                 "guzhenren:xinghuogu_active_starfire_wave",
                 cooldownKey("guzhenren:xinghuogu_active_starfire_wave"),
                 MobEffects.WITHER
@@ -126,24 +126,24 @@ public final class TierTwoXingDaoRegistry {
     private static void registerXinDunGu() {
         // 星盾蛊：受击触发减伤 + 护体爆发
         GuEffectRegistry.register(
-            new YuDaoHurtProcReductionEffect(
+            new XingDaoHurtProcReductionEffect(
                 "guzhenren:xindungu_passive_star_shield",
                 MobEffects.DAMAGE_RESISTANCE
             )
         );
         GuEffectRegistry.register(
-            new YuDaoActiveSelfBuffEffect(
+            new XingDaoActiveSelfBuffEffect(
                 "guzhenren:xindungu_active_constellation_guard",
                 cooldownKey("guzhenren:xindungu_active_constellation_guard"),
                 List.of(
-                    new YuDaoActiveSelfBuffEffect.EffectSpec(
+                    new XingDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.ABSORPTION,
                         "effect_duration_ticks",
                         0,
                         "effect_amplifier",
                         0
                     ),
-                    new YuDaoActiveSelfBuffEffect.EffectSpec(
+                    new XingDaoActiveSelfBuffEffect.EffectSpec(
                         MobEffects.DAMAGE_RESISTANCE,
                         "effect_duration_ticks",
                         0,
@@ -159,4 +159,3 @@ public final class TierTwoXingDaoRegistry {
         return "GuzhenrenExtCooldown_" + usageId;
     }
 }
-

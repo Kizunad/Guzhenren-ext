@@ -4,36 +4,38 @@
         {
             "usageID": "guzhenren:xingguanggu_passive_starlight_mark",
             "usageTitle": "被动·星辉显形",
-            "usageDesc": "星辉照耀敌身，攻击时有概率令其显形，并附带少量法术伤害。",
-            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 显形：{effect_duration_ticks}t |\n 附伤：{extra_magic_damage}",
+            "usageDesc": "星辉照耀敌身，攻击时有概率令其显形，并附带少量物理伤害。",
+            "usageInfo": "触发概率：{proc_chance} |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 显形：{effect_duration_ticks}t |\n 附伤：{extra_physical_damage}",
             "cost_duration": 1600,
             "cost_total_niantou": 140,
             "metadata": {
-                "proc_chance": "0.16",
-                "niantou_cost": "1.2",
+                "proc_chance": "0.12",
+                "niantou_cost": "1.5",
+                "zhenyuan_base_cost": "60.0",
                 "effect_duration_ticks": "60",
                 "effect_amplifier": "0",
-                "extra_magic_damage": "0.6"
+                "extra_physical_damage": "6.0",
+                "extra_magic_damage": "0.0"
             }
         },
         {
             "usageID": "guzhenren:xingguanggu_active_starlight_burst",
             "usageTitle": "主动·星光爆闪",
-            "usageDesc": "爆发星光，灼亮周遭敌人，造成法术伤害并令其显形。",
-            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_magic_damage} |\n 显形：{effect_duration_ticks}t |\n 击退：{knockback_strength}",
+            "usageDesc": "爆发星光，灼亮周遭敌人，造成伤害并令其显形。",
+            "usageInfo": "半径：{radius} |\n 冷却：{cooldown_ticks}t |\n 念头消耗：{niantou_cost} |\n 真元基础消耗：{zhenyuan_base_cost} |\n 伤害：{extra_physical_damage} |\n 显形：{effect_duration_ticks}t |\n 击退：{knockback_strength}",
             "cost_duration": 2200,
             "cost_total_niantou": 240,
             "metadata": {
                 "radius": "6.0",
                 "cooldown_ticks": "220",
-                "niantou_cost": "24.0",
-                "zhenyuan_base_cost": "180.0",
-                "extra_magic_damage": "2.4",
+                "niantou_cost": "22.0",
+                "zhenyuan_base_cost": "120.0",
+                "extra_physical_damage": "12.0",
+                "extra_magic_damage": "0.0",
                 "effect_duration_ticks": "100",
                 "effect_amplifier": "0",
-                "knockback_strength": "0.2"
+                "knockback_strength": "0.18"
             }
         }
     ]
 }
-

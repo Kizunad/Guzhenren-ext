@@ -10,11 +10,8 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.util.SafeTeleportHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.List;
-import java.util.Objects;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,22 +19,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * 星道主动：星门。
+ * 星道通用主动：挪移。
  * <p>
- * 长距挪移（沿视线方向），可选要求夜晚与露天；并可附带传送后的自增益。
+ * - 资源消耗：真元折算 +（念头/精力/魂魄任选其一即可）。
+ * - 位移距离与后续增益持续时间：随星道道痕动态变化（倍率裁剪防止失控）。
  * </p>
  */
-public class XingDaoActiveStarGateEffect implements IGuEffect {
+public class XingDaoActiveBlinkEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_DISTANCE = "distance";
-    private static final String META_REQUIRES_NIGHT = "requires_night";
-    private static final String META_REQUIRES_OPEN_SKY = "requires_open_sky";
 
-    private static final int DEFAULT_COOLDOWN_TICKS = 900;
-    private static final double DEFAULT_DISTANCE = 24.0;
-    private static final double MAX_DISTANCE = 48.0;
-    private static final double MIN_DISTANCE_SQR = 0.0001;
+    private static final int DEFAULT_COOLDOWN_TICKS = 220;
+    private static final double DEFAULT_DISTANCE = 6.0;
+    private static final double MAX_DISTANCE = 32.0;
 
     public record EffectSpec(
         Holder<MobEffect> effect,
@@ -51,14 +46,14 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
     private final String nbtCooldownKey;
     private final List<EffectSpec> afterEffects;
 
-    public XingDaoActiveStarGateEffect(
+    public XingDaoActiveBlinkEffect(
         final String usageId,
         final String nbtCooldownKey,
         final List<EffectSpec> afterEffects
     ) {
-        this.usageId = Objects.requireNonNull(usageId, "usageId");
-        this.nbtCooldownKey = Objects.requireNonNull(nbtCooldownKey, "nbtCooldownKey");
-        this.afterEffects = Objects.requireNonNull(afterEffects, "afterEffects");
+        this.usageId = usageId;
+        this.nbtCooldownKey = nbtCooldownKey;
+        this.afterEffects = afterEffects;
     }
 
     @Override
@@ -93,28 +88,8 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
             return false;
         }
 
-        if (UsageMetadataHelper.getBoolean(usageInfo, META_REQUIRES_NIGHT, false)) {
-            if (player.level().isDay()) {
-                player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("白日无星，难以催发。"),
-                    true
-                );
-                return false;
-            }
-        }
-
-        if (UsageMetadataHelper.getBoolean(usageInfo, META_REQUIRES_OPEN_SKY, false)) {
-            if (!(player.level() instanceof ServerLevel level)) {
-                return false;
-            }
-            final BlockPos pos = player.blockPosition();
-            if (!level.canSeeSky(pos)) {
-                player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("需露天见星，方可开门。"),
-                    true
-                );
-                return false;
-            }
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
         }
 
         final double baseDistance = Math.max(
@@ -134,22 +109,11 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
             1.0,
             MAX_DISTANCE
         );
-        final Vec3 base = player.position()
-            .add(player.getLookAngle().normalize().scale(distance));
-        final Vec3 safe = SafeTeleportHelper.findSafeTeleportPos(player, base);
-        if (safe.distanceToSqr(player.position()) <= MIN_DISTANCE_SQR) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("星门未能定位到安全落点。"),
-                true
-            );
-            return false;
-        }
 
-        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
-            return false;
-        }
-
-        SafeTeleportHelper.teleportSafely(player, safe);
+        final Vec3 target = player.position().add(
+            player.getViewVector(1.0F).scale(distance)
+        );
+        SafeTeleportHelper.teleportSafely(player, target);
         applyAfterEffects(player, usageInfo, selfMultiplier);
 
         final int cooldownTicks = Math.max(
@@ -172,11 +136,11 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
     }
 
     private void applyAfterEffects(
-        final LivingEntity user,
+        final ServerPlayer player,
         final NianTouData.Usage usageInfo,
         final double selfMultiplier
     ) {
-        if (afterEffects.isEmpty()) {
+        if (afterEffects == null || afterEffects.isEmpty()) {
             return;
         }
         for (EffectSpec spec : afterEffects) {
@@ -203,18 +167,17 @@ public class XingDaoActiveStarGateEffect implements IGuEffect {
                     spec.defaultAmplifier()
                 )
             );
-            if (scaledDuration <= 0) {
-                continue;
+            if (scaledDuration > 0) {
+                player.addEffect(
+                    new MobEffectInstance(
+                        spec.effect(),
+                        scaledDuration,
+                        amplifier,
+                        true,
+                        true
+                    )
+                );
             }
-            user.addEffect(
-                new MobEffectInstance(
-                    spec.effect(),
-                    scaledDuration,
-                    amplifier,
-                    true,
-                    true
-                )
-            );
         }
     }
 }

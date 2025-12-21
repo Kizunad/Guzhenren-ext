@@ -1,10 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierFive;
 
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveAllySupportEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveStarGateEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveAllySupportEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedAttributeModifierEffect;
-import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedMobEffectEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoSustainedMobEffectEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -25,7 +25,7 @@ public final class TierFiveXingDaoRegistry {
     private static void registerWuXingLianZhuGu() {
         // 五星连珠蛊：极大增幅 + 群体仪式
         GuEffectRegistry.register(
-            new YuDaoSustainedAttributeModifierEffect(
+            new XingDaoSustainedAttributeModifierEffect(
                 "guzhenren:wu_xing_lian_zhu_gu_passive_five_star_link",
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
@@ -34,18 +34,18 @@ public final class TierFiveXingDaoRegistry {
             )
         );
         GuEffectRegistry.register(
-            new YuDaoActiveAllySupportEffect(
+            new XingDaoActiveAllySupportEffect(
                 "guzhenren:wu_xing_lian_zhu_gu_active_five_star_rite",
                 cooldownKey("guzhenren:wu_xing_lian_zhu_gu_active_five_star_rite"),
                 List.of(
-                    new YuDaoActiveAllySupportEffect.EffectSpec(
+                    new XingDaoActiveAllySupportEffect.EffectSpec(
                         MobEffects.DAMAGE_BOOST,
                         "effect_duration_ticks",
                         0,
                         "effect_amplifier",
                         0
                     ),
-                    new YuDaoActiveAllySupportEffect.EffectSpec(
+                    new XingDaoActiveAllySupportEffect.EffectSpec(
                         MobEffects.DAMAGE_RESISTANCE,
                         "effect_duration_ticks",
                         0,
@@ -60,7 +60,7 @@ public final class TierFiveXingDaoRegistry {
     private static void registerXingMenGu() {
         // 星门蛊：星夜感知（常驻夜视）+ 星门挪移（夜晚/露天可选）
         GuEffectRegistry.register(
-            new YuDaoSustainedMobEffectEffect(
+            new XingDaoSustainedMobEffectEffect(
                 "guzhenren:xing_men_gu_passive_star_gaze",
                 MobEffects.NIGHT_VISION
             )
@@ -93,4 +93,3 @@ public final class TierFiveXingDaoRegistry {
         return "GuzhenrenExtCooldown_" + usageId;
     }
 }
-
