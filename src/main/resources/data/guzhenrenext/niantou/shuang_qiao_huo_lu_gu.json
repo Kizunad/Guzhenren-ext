@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:shuang_qiao_huo_lu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuang_qiao_huo_lu_gu_passive_double_furnace_regen",
+            "usageTitle": "被动·双炉温养",
+            "usageDesc": "双窍火炉持续温养，缓慢恢复并补足精力。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 治疗：+{heal_amount}/s | 精力：+{jingli_gain}/s",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "niantou_cost_per_second": "0.35",
+                "heal_amount": "0.35",
+                "niantou_gain": "0.0",
+                "jingli_gain": "0.25",
+                "hunpo_gain": "0.0",
+                "zhenyuan_gain": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuang_qiao_huo_lu_gu_active_furnace_blast",
+            "usageTitle": "主动·喷焰震退",
+            "usageDesc": "火炉喷焰爆发，震退周遭敌人并点燃。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 半径：{radius} | 伤害：+{extra_physical_damage}(普通) | 点燃：{burn_seconds}s",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "radius": "4.5",
+                "zhenyuan_base_cost": "90.0",
+                "hunpo_cost": "10.0",
+                "extra_physical_damage": "80.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.30",
+                "burn_seconds": "5.0"
+            }
+        }
+    ]
+}
+

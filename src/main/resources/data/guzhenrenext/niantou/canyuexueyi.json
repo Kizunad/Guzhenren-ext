@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:canyuexueyi",
+    "usages": [
+        {
+            "usageID": "guzhenren:canyuexueyi_passive_crescent_armor_guard",
+            "usageTitle": "被动·残月血衣",
+            "usageDesc": "残月血衣护身，受击触发更强减伤并小幅自愈。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 减伤：x{damage_multiplier} | 自愈：{self_heal_amount}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.12",
+                "proc_cooldown_ticks": "200",
+                "damage_multiplier": "0.78",
+                "self_heal_amount": "3.0",
+                "zhenyuan_base_cost": "70000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "280.0",
+                "hunpo_cost": "220.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:canyuexueyi_active_crescent_slash",
+            "usageTitle": "主动·残月斩",
+            "usageDesc": "挥出残月血刃，造成高额普通伤害并迟缓目标。",
+            "usageInfo": "距离：{range} | 伤害：{damage} | 迟缓：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t",
+            "cost_duration": 800,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "range": "24.0",
+                "damage": "3600.0",
+                "debuff_duration_ticks": "180",
+                "debuff_amplifier": "1",
+                "self_heal_amount": "0.0",
+                "cooldown_ticks": "1400",
+                "zhenyuan_base_cost": "280000.0",
+                "niantou_cost": "340.0",
+                "jingli_cost": "520.0",
+                "hunpo_cost": "420.0"
+            }
+        }
+    ]
+}

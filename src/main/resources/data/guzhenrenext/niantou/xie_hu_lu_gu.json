@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:xie_hu_lu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_hu_lu_gu_passive_blood_gourd_store",
+            "usageTitle": "被动·血葫贮血",
+            "usageDesc": "将战斗造成的伤害转化为血液存储，供主动饮用。",
+            "usageInfo": "每伤害积攒：{storage_gain_per_damage} | 上限：{max_storage}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "storage_gain_per_damage": "3.0",
+                "max_storage": "100000.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_hu_lu_gu_active_blood_gourd_drink",
+            "usageTitle": "主动·饮血回元",
+            "usageDesc": "饮下血葫中的血液，按消耗比例回复生命与多项资源。",
+            "usageInfo": "消耗血液：{consume_amount} | 最低需求：{min_required} | 回复：血{heal_amount}/念{niantou_gain}/精{jingli_gain}/魂{hunpo_gain}/真{zhenyuan_gain} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 300,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "consume_amount": "4000.0",
+                "min_required": "500.0",
+                "heal_amount": "8.0",
+                "niantou_gain": "4.0",
+                "jingli_gain": "5.0",
+                "hunpo_gain": "3.0",
+                "zhenyuan_gain": "6.0",
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "28000.0",
+                "niantou_cost": "70.0",
+                "jingli_cost": "120.0",
+                "hunpo_cost": "70.0"
+            }
+        }
+    ]
+}

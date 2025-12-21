@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jianlugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianlugu_passive_sword_road_capacity",
+            "usageTitle": "被动·剑路拓容",
+            "usageDesc": "剑路延展，提升多项资源上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 魂魄上限：+{max_hunpo_bonus} | 真元上限：+{max_zhenyuan_bonus} | 精力上限：+{max_jingli_bonus}",
+            "cost_duration": 4800,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "jingli_cost_per_second": "2.5",
+                "max_hunpo_bonus": "180.0",
+                "max_zhenyuan_bonus": "80.0",
+                "max_jingli_bonus": "60.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianlugu_active_sword_road_step",
+            "usageTitle": "主动·剑路踏",
+            "usageDesc": "踏剑路而行，短暂提速并获得抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 提速：{effect_duration_ticks}t | 抗性：{resist_duration_ticks}t",
+            "cost_duration": 4800,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "zhenyuan_base_cost": "9000.0",
+                "jingli_cost": "650.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "1",
+                "resist_duration_ticks": "200",
+                "resist_amplifier": "1"
+            }
+        }
+    ]
+}
+

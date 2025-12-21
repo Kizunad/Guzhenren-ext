@@ -1,0 +1,53 @@
+{
+    "itemID": "guzhenren:zi_jin_she_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zi_jin_she_li_gu_passive_purple_gold_cap_5",
+            "usageTitle": "被动·紫金增容",
+            "usageDesc": "紫金舍利蛊大幅滋养空窍，抬升多项上限，并稳态修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli} 魂魄+{cap_max_hunpo} 念头容量+{cap_niantou_capacity} 抗性上限+{cap_max_hunpo_resistance} | 抗性回复：{hunpo_resistance_restore}/s",
+            "cost_duration": 7800,
+            "cost_total_niantou": 1500,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "380000.0",
+                "niantou_cost_per_second": "6.0",
+                "jingli_cost_per_second": "3.0",
+                "hunpo_cost_per_second": "1.5",
+                "cap_max_zhenyuan": "600.0",
+                "cap_max_jingli": "450.0",
+                "cap_max_hunpo": "420.0",
+                "cap_niantou_capacity": "500.0",
+                "cap_max_hunpo_resistance": "90.0",
+                "hunpo_resistance_restore": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:zi_jin_she_li_gu_active_purple_gold_bless_5",
+            "usageTitle": "主动·紫金赐福",
+            "usageDesc": "紫金舍利化作福泽，范围治疗并净化负面状态，给予护体与护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 治疗：{heal_amount} | 回复：真元{zhenyuan_restore} 精力{jingli_restore} 魂魄{hunpo_restore} | 净化：{cleanse_harmful} | 回生：{effect_duration_ticks}t | 抗性：{resist_duration_ticks}t | 护盾：{absorption_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "cooldown_ticks": "3600",
+                "radius": "9.5",
+                "ignore_walls": "false",
+                "heal_amount": "60.0",
+                "zhenyuan_restore": "120.0",
+                "jingli_restore": "120.0",
+                "hunpo_restore": "100.0",
+                "cleanse_harmful": "true",
+                "effect_duration_ticks": "300",
+                "effect_amplifier": "1",
+                "resist_duration_ticks": "240",
+                "resist_amplifier": "1",
+                "absorption_duration_ticks": "300",
+                "absorption_amplifier": "1",
+                "zhenyuan_base_cost": "86000000.0",
+                "niantou_cost": "750.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "300.0"
+            }
+        }
+    ]
+}

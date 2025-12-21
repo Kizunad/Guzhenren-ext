@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:dianyangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dianyangu_passive_storm_eye",
+            "usageTitle": "被动·电眼巡照",
+            "usageDesc": "借雷霆之威巡照四周，窥破隐形之身。",
+            "usageInfo": "半径：{radius} | 显形：{reveal_duration_ticks}t | 维持消耗：{zhenyuan_base_cost_per_second}(基础真元/秒)+{jingli_cost_per_second}(精力/秒)+{niantou_cost_per_second}(念头/秒)+{hunpo_cost_per_second}(魂魄/秒)",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "radius": "14.0",
+                "reveal_duration_ticks": "60",
+                "night_vision_duration_ticks": "80",
+                "zhenyuan_base_cost_per_second": "18.0",
+                "jingli_cost_per_second": "1.5",
+                "niantou_cost_per_second": "0.4",
+                "hunpo_cost_per_second": "0.3"
+            }
+        },
+        {
+            "usageID": "guzhenren:dianyangu_active_storm_eye_pulse",
+            "usageTitle": "主动·电眼一瞬",
+            "usageDesc": "电光一闪，瞬间标记隐形目标并提升视野。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 显形：{reveal_duration_ticks}t",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "radius": "22.0",
+                "reveal_duration_ticks": "160",
+                "night_vision_duration_ticks": "240",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "16.0",
+                "niantou_cost": "12.0",
+                "hunpo_cost": "6.0"
+            }
+        }
+    ]
+}
+

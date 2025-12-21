@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:shui_lao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_lao_gu_passive_prison_hook",
+            "usageTitle": "被动·水牢牵制",
+            "usageDesc": "出手夹带水牢之意，牵制敌人行动与输出。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 附伤：{extra_physical_damage} | 持续：{effect_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.12",
+                "zhenyuan_base_cost": "24.0",
+                "jingli_cost": "2.8",
+                "niantou_cost": "1.6",
+                "hunpo_cost": "0.0",
+                "extra_physical_damage": "10.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_lao_gu_active_water_prison",
+            "usageTitle": "主动·水牢封困",
+            "usageDesc": "在目标处生成水牢领域，进入者行动受限。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 半径：{cloud_radius} | 领域：{cloud_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "280",
+                "range": "16.0",
+                "cloud_radius": "4.5",
+                "cloud_duration_ticks": "160",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "360.0",
+                "jingli_cost": "18.0",
+                "niantou_cost": "14.0",
+                "hunpo_cost": "0.0"
+            }
+        }
+    ]
+}
+

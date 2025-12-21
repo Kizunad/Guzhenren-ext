@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jianmugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianmugu_passive_sword_curtain_guard",
+            "usageTitle": "被动·剑幕护身",
+            "usageDesc": "剑幕环身，受击有概率卸力减伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 受击倍率：*{hurt_multiplier}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "proc_chance": "0.14",
+                "proc_cooldown_ticks": "120",
+                "zhenyuan_base_cost": "180.0",
+                "jingli_cost": "40.0",
+                "hunpo_cost": "10.0",
+                "hurt_multiplier": "0.80"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianmugu_active_curtain_barrier",
+            "usageTitle": "主动·剑幕障",
+            "usageDesc": "剑幕成障，短暂抗击并获得吸收护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 抗性：{effect_duration_ticks}t | 吸收：{absorption_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "1600.0",
+                "hunpo_cost": "80.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "1",
+                "absorption_duration_ticks": "240",
+                "absorption_amplifier": "2"
+            }
+        }
+    ]
+}
+

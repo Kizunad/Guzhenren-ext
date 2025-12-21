@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:zou_xue_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zou_xue_gu_passive_congeal_sustain",
+            "usageTitle": "被动·聚血缓凝",
+            "usageDesc": "血液缓慢凝聚，稳定气血并缓慢恢复生命。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 回血：{heal_per_second}/s | 回念：{niantou_gain_per_second}/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1600.0",
+                "niantou_cost_per_second": "5.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "heal_per_second": "0.25",
+                "niantou_gain_per_second": "0.20",
+                "jingli_gain_per_second": "0.00",
+                "hunpo_gain_per_second": "0.00",
+                "zhenyuan_gain_per_second": "0.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:zou_xue_gu_active_congeal_heal",
+            "usageTitle": "主动·聚血疗愈",
+            "usageDesc": "快速凝血止损，回复生命与少量念头。",
+            "usageInfo": "回血：{heal_amount} | 回念：{niantou_gain} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 300,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "39000.0",
+                "niantou_cost": "90.0",
+                "jingli_cost": "120.0",
+                "hunpo_cost": "80.0",
+                "heal_amount": "15.0",
+                "niantou_gain": "6.0",
+                "jingli_gain": "0.0",
+                "hunpo_gain": "0.0",
+                "zhenyuan_gain": "0.0"
+            }
+        }
+    ]
+}

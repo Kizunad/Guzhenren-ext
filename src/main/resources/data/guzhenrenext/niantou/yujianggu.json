@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:yujianggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yujianggu_passive_sword_rider_stride",
+            "usageTitle": "被动·御剑轻行",
+            "usageDesc": "御剑之势相随，持续提升移速。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 移速：+{attribute_amount}",
+            "cost_duration": 3600,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0",
+                "attribute_amount": "0.18"
+            }
+        },
+        {
+            "usageID": "guzhenren:yujianggu_active_sword_rider_shift",
+            "usageTitle": "主动·御剑腾挪",
+            "usageDesc": "借御剑之势腾挪瞬移，并短暂缓降。",
+            "usageInfo": "距离：{distance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 缓降：{effect_duration_ticks}t",
+            "cost_duration": 3600,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "distance": "18.0",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "5200.0",
+                "jingli_cost": "340.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

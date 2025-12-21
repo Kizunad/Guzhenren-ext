@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jian_qiao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jian_qiao_gu_passive_sheathe_capacity",
+            "usageTitle": "被动·剑鞘纳元",
+            "usageDesc": "剑鞘纳元，提升多项资源上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s + {niantou_cost_per_second}(念头)/s | 真元上限：+{max_zhenyuan_bonus} | 精力上限：+{max_jingli_bonus} | 魂魄上限：+{max_hunpo_bonus}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1640,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "20.0",
+                "jingli_cost_per_second": "4.0",
+                "niantou_cost_per_second": "2.0",
+                "max_zhenyuan_bonus": "380.0",
+                "max_jingli_bonus": "240.0",
+                "max_hunpo_bonus": "260.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jian_qiao_gu_active_sheathe_refill",
+            "usageTitle": "主动·剑鞘回充",
+            "usageDesc": "以剑鞘回纳之势，快速回补多项资源。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 念头：+{niantou_gain} | 精力：+{jingli_gain} | 魂魄：+{hunpo_gain} | 真元：+{zhenyuan_gain}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1640,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "24000.0",
+                "niantou_cost": "200.0",
+                "heal_amount": "80.0",
+                "niantou_gain": "60.0",
+                "jingli_gain": "80.0",
+                "hunpo_gain": "100.0",
+                "zhenyuan_gain": "80.0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jianyingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianyingu_passive_marked_hunt",
+            "usageTitle": "被动·剑引追猎",
+            "usageDesc": "对被标记目标触发额外增伤与附伤。",
+            "usageInfo": "需求标记：{require_mark} | 触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1040,
+            "metadata": {
+                "require_mark": "true",
+                "proc_chance": "0.25",
+                "proc_cooldown_ticks": "20",
+                "zhenyuan_base_cost": "1500.0",
+                "jingli_cost": "360.0",
+                "bonus_damage": "800.0",
+                "damage_multiplier": "1.15"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianyingu_active_mark_target",
+            "usageTitle": "主动·剑引标记",
+            "usageDesc": "标记远处目标，便于剑势追击。",
+            "usageInfo": "距离：{range} | 标记：{mark_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1040,
+            "metadata": {
+                "range": "20.0",
+                "mark_duration_ticks": "400",
+                "cooldown_ticks": "320",
+                "zhenyuan_base_cost": "3500.0",
+                "jingli_cost": "220.0"
+            }
+        }
+    ]
+}
+

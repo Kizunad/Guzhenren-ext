@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:zhong_shui_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zhong_shui_gu_passive_heavy_water",
+            "usageTitle": "被动·重水压制",
+            "usageDesc": "重水压制不息，出手大幅迟滞并附带附伤。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 附伤：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.16",
+                "zhenyuan_base_cost": "90.0",
+                "jingli_cost": "14.0",
+                "niantou_cost": "10.0",
+                "hunpo_cost": "10.0",
+                "extra_physical_damage": "120.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:zhong_shui_gu_active_heavy_water",
+            "usageTitle": "主动·重水浪击",
+            "usageDesc": "重水浪击爆发，造成高额普通伤害并强力迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 伤害：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "radius": "10.0",
+                "zhenyuan_base_cost": "2600.0",
+                "jingli_cost": "120.0",
+                "niantou_cost": "90.0",
+                "hunpo_cost": "28.0",
+                "extra_physical_damage": "2000.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

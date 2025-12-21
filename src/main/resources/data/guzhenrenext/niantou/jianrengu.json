@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:jianrengu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianrengu_passive_blade_mastery",
+            "usageTitle": "被动·剑刃精修",
+            "usageDesc": "剑刃在手，持续提升攻击力。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 攻击：+{attribute_amount}",
+            "cost_duration": 4200,
+            "cost_total_niantou": 840,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "11.0",
+                "attribute_amount": "28.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianrengu_active_blade_fan",
+            "usageTitle": "主动·剑刃乱舞",
+            "usageDesc": "范围爆发斩击，扫清近敌。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage}",
+            "cost_duration": 4200,
+            "cost_total_niantou": 840,
+            "metadata": {
+                "radius": "8.5",
+                "damage": "2500.0",
+                "knockback_strength": "0.5",
+                "cooldown_ticks": "560",
+                "zhenyuan_base_cost": "7800.0",
+                "jingli_cost": "520.0"
+            }
+        }
+    ]
+}
+

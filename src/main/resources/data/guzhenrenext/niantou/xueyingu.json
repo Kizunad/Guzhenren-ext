@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:xueyingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xueyingu_passive_blood_seal_caps",
+            "usageTitle": "被动·血印刻窍",
+            "usageDesc": "以血印改造空窍上限（高转可堆叠但有上限保护）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 上限：真{max_zhenyuan_bonus}/精{max_jingli_bonus}/魂{max_hunpo_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3200.0",
+                "niantou_cost_per_second": "10.0",
+                "jingli_cost_per_second": "12.0",
+                "hunpo_cost_per_second": "8.0",
+                "max_zhenyuan_bonus": "120.0",
+                "max_jingli_bonus": "120.0",
+                "max_hunpo_bonus": "80.0",
+                "max_hunpo_resistance_bonus": "30.0",
+                "niantou_capacity_bonus": "80.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xueyingu_active_blood_seal_guard",
+            "usageTitle": "主动·血印护身",
+            "usageDesc": "血印短时爆发，获得伤害吸收与抗性。",
+            "usageInfo": "吸收：{absorption_duration_ticks}t | 抗性：{resistance_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "120000.0",
+                "niantou_cost": "220.0",
+                "jingli_cost": "320.0",
+                "hunpo_cost": "240.0",
+                "absorption_duration_ticks": "160",
+                "absorption_amplifier": "1",
+                "resistance_duration_ticks": "160",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}

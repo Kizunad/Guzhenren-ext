@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:dian_jin_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dian_jin_gu_passive_transmutation_cap_5",
+            "usageTitle": "被动·点金增容",
+            "usageDesc": "点金蛊以金道之变拓宽上限，提高真元与念头容量，并抬升魂魄抗性上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：真元+{cap_max_zhenyuan} 念头容量+{cap_niantou_capacity} 抗性上限+{cap_max_hunpo_resistance} | 抗性回复：{hunpo_resistance_restore}/s",
+            "cost_duration": 7800,
+            "cost_total_niantou": 1500,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "350000.0",
+                "niantou_cost_per_second": "6.0",
+                "jingli_cost_per_second": "3.0",
+                "hunpo_cost_per_second": "1.5",
+                "cap_max_zhenyuan": "500.0",
+                "cap_niantou_capacity": "600.0",
+                "cap_max_hunpo_resistance": "80.0",
+                "hunpo_resistance_restore": "1.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:dian_jin_gu_active_gilded_judgment_5",
+            "usageTitle": "主动·点金裁决",
+            "usageDesc": "点金一指，金势贯体，重创目标并削弱其力量，同时回补自身资源。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage}(普通) | 虚弱：{effect_duration_ticks}t | 回复：生命{self_heal_amount} 精力{restore_jingli} 念头{restore_niantou} 魂魄{restore_hunpo} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1700,
+            "metadata": {
+                "cooldown_ticks": "3600",
+                "range": "9.0",
+                "extra_physical_damage": "9500.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "pull_strength": "0.80",
+                "pull_vertical": "0.10",
+                "self_heal_amount": "60.0",
+                "restore_jingli": "90.0",
+                "restore_niantou": "100.0",
+                "restore_hunpo": "70.0",
+                "zhenyuan_base_cost": "92000000.0",
+                "niantou_cost": "750.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "300.0"
+            }
+        }
+    ]
+}

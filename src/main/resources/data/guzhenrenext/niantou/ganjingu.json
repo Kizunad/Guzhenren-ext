@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:ganjingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:ganjingu_passive_steel_rebar_cap_4",
+            "usageTitle": "被动·钢筋增容",
+            "usageDesc": "钢筋蛊撑起空窍之骨，提高多项上限，并缓慢修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli} 抗性上限+{cap_max_hunpo_resistance} | 抗性回复：{hunpo_resistance_restore}/s",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "40000.0",
+                "niantou_cost_per_second": "2.5",
+                "jingli_cost_per_second": "1.2",
+                "hunpo_cost_per_second": "0.60",
+                "cap_max_zhenyuan": "260.0",
+                "cap_max_jingli": "180.0",
+                "cap_max_hunpo_resistance": "50.0",
+                "hunpo_resistance_restore": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:ganjingu_active_steel_rebar_will_4",
+            "usageTitle": "主动·钢筋战意",
+            "usageDesc": "钢筋之势贯通四肢，短时提升力量与抗性，并回复少量精力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 力量：{strength_duration_ticks}t | 抗性：{resist_duration_ticks}t | 回复：精力{restore_jingli} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 5200,
+            "cost_total_niantou": 900,
+            "metadata": {
+                "cooldown_ticks": "1600",
+                "strength_duration_ticks": "260",
+                "strength_amplifier": "0",
+                "resist_duration_ticks": "260",
+                "resist_amplifier": "0",
+                "heal_amount": "22.0",
+                "restore_jingli": "60.0",
+                "zhenyuan_base_cost": "4200000.0",
+                "niantou_cost": "350.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

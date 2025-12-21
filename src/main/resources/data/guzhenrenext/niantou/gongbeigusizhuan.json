@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:gongbeigusizhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:gongbeigusizhuan_passive_ordinance_shell",
+            "usageTitle": "被动·功律外壳",
+            "usageDesc": "以律护体，受击概率大幅减伤并获得短暂抗性。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 减伤：*{damage_multiplier} | 抗性：{buff_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.16",
+                "cooldown_ticks": "160",
+                "damage_multiplier": "0.60",
+                "blink_distance": "0.0",
+                "projectile_only": "false",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0",
+                "zhenyuan_base_cost": "180000.0",
+                "niantou_cost": "420.0",
+                "jingli_cost": "460.0",
+                "hunpo_cost": "380.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:gongbeigusizhuan_active_law_domain",
+            "usageTitle": "主动·律域镇压",
+            "usageDesc": "展开律域，范围造成高额普通伤害并施加虚弱。",
+            "usageInfo": "半径：{radius} | 伤害：{extra_magic_damage} | 虚弱：{effect_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1500,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "radius": "6.0",
+                "extra_magic_damage": "2400.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1",
+                "knockback_strength": "0.2",
+                "cooldown_ticks": "1400",
+                "zhenyuan_base_cost": "260000.0",
+                "niantou_cost": "620.0",
+                "jingli_cost": "700.0",
+                "hunpo_cost": "540.0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:ziyanchan",
+    "usages": [
+        {
+            "usageID": "guzhenren:ziyanchan_passive_purple_smoke_cap",
+            "usageTitle": "被动·紫烟扩容",
+            "usageDesc": "紫烟蝉吞吐紫雾，扩增念头容量并强化上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 念头容量：+{niantou_capacity_bonus} | 真元上限：+{max_zhenyuan_bonus} | 魂魄抗性上限：+{max_hunpo_resistance_bonus}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "niantou_cost_per_second": "1.2",
+                "niantou_capacity_bonus": "240.0",
+                "max_zhenyuan_bonus": "180.0",
+                "max_hunpo_resistance_bonus": "90.0",
+                "hunpo_resistance_restore": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:ziyanchan_active_purple_smoke_heaven",
+            "usageTitle": "主动·紫烟遮天",
+            "usageDesc": "喷发紫色浓烟，遮蔽天地并压制敌群。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 半径：{radius} | 伤害：+{extra_physical_damage}(普通) | 持续：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "radius": "8.0",
+                "zhenyuan_base_cost": "320.0",
+                "hunpo_cost": "45.0",
+                "extra_physical_damage": "11500.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.25",
+                "burn_seconds": "0.0"
+            }
+        }
+    ]
+}
+

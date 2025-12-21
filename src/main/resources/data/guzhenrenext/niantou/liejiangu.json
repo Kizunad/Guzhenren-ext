@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:liejiangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:liejiangu_passive_fracture_proc",
+            "usageTitle": "被动·裂剑断势",
+            "usageDesc": "剑势断裂处更凶，攻击低概率触发高额增伤与附伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "proc_chance": "0.08",
+                "proc_cooldown_ticks": "80",
+                "zhenyuan_base_cost": "4200.0",
+                "jingli_cost": "500.0",
+                "bonus_damage": "2200.0",
+                "damage_multiplier": "1.25"
+            }
+        },
+        {
+            "usageID": "guzhenren:liejiangu_active_sword_light_pierce",
+            "usageTitle": "主动·裂剑剑光",
+            "usageDesc": "发射高速剑光贯穿路径目标，并于短暂间隔后爆发剑气。",
+            "usageInfo": "距离：{range} | 剑光半径：{beam_radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 直击伤害：{damage} | 爆发延迟：{explosion_delay_ticks}t | 爆发半径：{explosion_radius} | 爆发伤害：{explosion_damage}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "range": "48.0",
+                "beam_radius": "1.5",
+                "damage": "12000.0",
+                "explosion_delay_ticks": "60",
+                "explosion_radius": "6.0",
+                "explosion_damage": "8000.0",
+                "cooldown_ticks": "2500",
+                "zhenyuan_base_cost": "90000.0",
+                "jingli_cost": "800.0"
+            }
+        }
+    ]
+}

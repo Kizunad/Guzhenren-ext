@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:fen_shen_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:fen_shen_gu_passive_burning_skin",
+            "usageTitle": "被动·焚身反灼",
+            "usageDesc": "火焰护体，受击时有概率减伤并灼烧来犯者。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 减伤倍率：x{damage_multiplier} | 反灼：{attacker_burn_seconds}s",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.14",
+                "cooldown_ticks": "180",
+                "zhenyuan_base_cost": "80.0",
+                "hunpo_cost": "10.0",
+                "damage_multiplier": "0.82",
+                "attacker_burn_seconds": "4.0",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:fen_shen_gu_active_burning_guard",
+            "usageTitle": "主动·焚身护体",
+            "usageDesc": "烈焰包裹全身，短时间内大幅强化攻防。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 火抗：{fire_resistance_duration_ticks}t | 减伤：{resistance_duration_ticks}t | 增伤：{damage_boost_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "zhenyuan_base_cost": "140.0",
+                "jingli_cost": "16.0",
+                "heal_amount": "10.0",
+                "fire_resistance_duration_ticks": "220",
+                "fire_resistance_amplifier": "0",
+                "resistance_duration_ticks": "160",
+                "resistance_amplifier": "1",
+                "damage_boost_duration_ticks": "160",
+                "damage_boost_amplifier": "0"
+            }
+        }
+    ]
+}
+

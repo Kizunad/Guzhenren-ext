@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xie_cang_gong_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_cang_gong_gu_passive_blood_arrow_proc",
+            "usageTitle": "被动·血箭破甲",
+            "usageDesc": "血箭之势更利，攻击概率附带破甲（以虚弱简化）与额外伤害。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage} | 虚弱：{debuff_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.08",
+                "proc_cooldown_ticks": "160",
+                "damage_multiplier": "1.15",
+                "bonus_damage": "420.0",
+                "debuff_duration_ticks": "140",
+                "debuff_amplifier": "1",
+                "zhenyuan_base_cost": "60000.0",
+                "niantou_cost": "140.0",
+                "jingli_cost": "260.0",
+                "hunpo_cost": "210.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_cang_gong_gu_active_blood_arrow",
+            "usageTitle": "主动·血藏破甲箭",
+            "usageDesc": "凝血成箭射击目标，造成高额普通伤害并施加虚弱。",
+            "usageInfo": "距离：{range} | 伤害：{damage} | 虚弱：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 800,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "range": "40.0",
+                "damage": "4200.0",
+                "debuff_duration_ticks": "200",
+                "debuff_amplifier": "1",
+                "self_heal_amount": "0.0",
+                "cooldown_ticks": "1400",
+                "zhenyuan_base_cost": "320000.0",
+                "niantou_cost": "360.0",
+                "jingli_cost": "520.0",
+                "hunpo_cost": "420.0"
+            }
+        }
+    ]
+}

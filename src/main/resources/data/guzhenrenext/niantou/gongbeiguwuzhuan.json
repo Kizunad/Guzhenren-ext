@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:gongbeiguwuzhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:gongbeiguwuzhuan_passive_grand_law_cap",
+            "usageTitle": "被动·大律增容",
+            "usageDesc": "大律加身，提升多项资源与抗性上限，并缓慢修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s | 上限：真元+{max_zhenyuan_bonus} 精力+{max_jingli_bonus} 念头容量+{niantou_capacity_bonus} 抗性上限+{max_hunpo_resistance_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1800.0",
+                "niantou_cost_per_second": "6.0",
+                "jingli_cost_per_second": "6.0",
+                "hunpo_cost_per_second": "4.5",
+                "max_zhenyuan_bonus": "260.0",
+                "max_jingli_bonus": "240.0",
+                "niantou_capacity_bonus": "320.0",
+                "max_hunpo_resistance_bonus": "220.0",
+                "hunpo_resistance_restore": "1.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:gongbeiguwuzhuan_active_grand_punishment",
+            "usageTitle": "主动·大律惩戒",
+            "usageDesc": "锁定单体，造成极高普通伤害并强力虚弱迟滞目标。",
+            "usageInfo": "距离：{range} | 伤害：{extra_magic_damage} | 虚弱：{weakness_duration_ticks}t | 迟滞：{slow_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 900,
+            "metadata": {
+                "range": "30.0",
+                "extra_magic_damage": "12000.0",
+                "weakness_duration_ticks": "200",
+                "weakness_amplifier": "2",
+                "slow_duration_ticks": "200",
+                "slow_amplifier": "2",
+                "cooldown_ticks": "3200",
+                "zhenyuan_base_cost": "900000.0",
+                "niantou_cost": "950.0",
+                "jingli_cost": "980.0",
+                "hunpo_cost": "900.0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:sui_ren_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:sui_ren_gu_passive_fragile_guard",
+            "usageTitle": "被动·碎刃护",
+            "usageDesc": "碎刃护身，受击有概率大幅减伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 受击倍率：*{hurt_multiplier}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "proc_chance": "0.10",
+                "proc_cooldown_ticks": "100",
+                "zhenyuan_base_cost": "3000.0",
+                "hunpo_cost": "200.0",
+                "hurt_multiplier": "0.70"
+            }
+        },
+        {
+            "usageID": "guzhenren:sui_ren_gu_active_sunder_amplify",
+            "usageTitle": "主动·碎刃断势",
+            "usageDesc": "短时间内令下一次剑道效果大幅增幅。",
+            "usageInfo": "持续：{duration_ticks}t | 增幅：*{amplify_multiplier} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄)",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "duration_ticks": "200",
+                "amplify_multiplier": "3.5",
+                "cooldown_ticks": "2000",
+                "zhenyuan_base_cost": "45000.0",
+                "hunpo_cost": "300.0"
+            }
+        }
+    ]
+}

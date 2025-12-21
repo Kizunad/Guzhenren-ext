@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:yuzangjianguangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yuzangjianguangu_passive_sword_coffin_guard",
+            "usageTitle": "被动·狱葬剑棺",
+            "usageDesc": "剑棺护体，提升护甲韧性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 护甲韧性：+{attribute_amount}",
+            "cost_duration": 6200,
+            "cost_total_niantou": 1240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "14.0",
+                "attribute_amount": "8.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yuzangjianguangu_active_coffin_burst",
+            "usageTitle": "主动·狱棺震",
+            "usageDesc": "范围爆发剑势，削弱敌人。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 虚弱：{effect_duration_ticks}t",
+            "cost_duration": 6200,
+            "cost_total_niantou": 1240,
+            "metadata": {
+                "radius": "12.0",
+                "damage": "6000.0",
+                "knockback_strength": "0.6",
+                "cooldown_ticks": "960",
+                "zhenyuan_base_cost": "15000.0",
+                "jingli_cost": "900.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "2"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:rong_yan_zha_lie_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:rong_yan_zha_lie_gu_passive_magma_shard",
+            "usageTitle": "被动·熔岩碎片",
+            "usageDesc": "攻击时溅射熔岩碎片，削弱对手并引燃。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 虚弱：{effect_duration_ticks}t | 点燃：{burn_seconds}s | 附伤：{extra_physical_damage}(普通)",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.08",
+                "zhenyuan_base_cost": "80.0",
+                "niantou_cost": "12.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "burn_seconds": "3.0",
+                "extra_physical_damage": "80.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:rong_yan_zha_lie_gu_active_magma_burst",
+            "usageTitle": "主动·熔岩爆裂",
+            "usageDesc": "凝成暗红熔岩火球，命中后爆裂轰击单体。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 伤害：+{extra_physical_damage}(普通) | 射程：{range} | 点燃：{burn_seconds}s",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "range": "18.0",
+                "zhenyuan_base_cost": "180.0",
+                "hunpo_cost": "20.0",
+                "extra_physical_damage": "1500.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "0.0",
+                "burn_seconds": "6.0",
+                "weakness_duration_ticks": "160",
+                "weakness_amplifier": "0"
+            }
+        }
+    ]
+}
+

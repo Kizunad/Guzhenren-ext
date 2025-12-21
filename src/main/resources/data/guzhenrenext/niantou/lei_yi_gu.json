@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:lei_yi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:lei_yi_gu_passive_wing_sustain",
+            "usageTitle": "被动·雷翼余势",
+            "usageDesc": "雷光羽翼残留，令身法更轻灵并缓降。",
+            "usageInfo": "维持消耗：{zhenyuan_base_cost_per_second}(基础真元/秒)+{jingli_cost_per_second}(精力/秒)+{niantou_cost_per_second}(念头/秒)+{hunpo_cost_per_second}(魂魄/秒) | 机动：移速+缓降",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "14.0",
+                "jingli_cost_per_second": "1.0",
+                "niantou_cost_per_second": "0.3",
+                "hunpo_cost_per_second": "0.1",
+                "speed_duration_ticks": "60",
+                "speed_amplifier": "0",
+                "slow_fall_duration_ticks": "60"
+            }
+        },
+        {
+            "usageID": "guzhenren:lei_yi_gu_active_wing_leap",
+            "usageTitle": "主动·雷翼飞跃",
+            "usageDesc": "雷翼爆发，冲刺腾挪并获得短暂飞跃能力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 冲刺：{dash_strength}",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "18.0",
+                "niantou_cost": "10.0",
+                "hunpo_cost": "4.0",
+                "dash_strength": "1.0",
+                "levitation_duration_ticks": "20",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "1",
+                "slow_fall_duration_ticks": "200"
+            }
+        }
+    ]
+}
+

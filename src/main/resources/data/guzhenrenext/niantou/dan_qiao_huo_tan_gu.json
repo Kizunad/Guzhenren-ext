@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:dan_qiao_huo_tan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dan_qiao_huo_tan_gu_passive_charcoal_shell",
+            "usageTitle": "被动·火炭护壳",
+            "usageDesc": "火炭温养筋骨，长期维持一层护壳增甲。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 护甲：+{attribute_amount}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.2",
+                "jingli_cost_per_second": "0.15",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:dan_qiao_huo_tan_gu_active_warmth_pulse",
+            "usageTitle": "主动·暖炉脉冲",
+            "usageDesc": "热浪扩散，短暂温养同盟并提升续航。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 半径：{radius} | 治疗：{heal_amount} | 回复：{regen_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "radius": "6.0",
+                "zhenyuan_base_cost": "50.0",
+                "niantou_cost": "8.0",
+                "heal_amount": "6.0",
+                "regen_duration_ticks": "120",
+                "regen_amplifier": "0",
+                "fire_resistance_duration_ticks": "160",
+                "fire_resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+

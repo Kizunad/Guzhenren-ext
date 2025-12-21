@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jian_zhi_gu_3",
+    "usages": [
+        {
+            "usageID": "guzhenren:jian_zhi_gu_3_passive_finger_edge_proc",
+            "usageTitle": "被动·三转剑指余锋",
+            "usageDesc": "剑指更凝，攻击有概率触发迟缓与附伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 附伤：+{bonus_damage} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 2800,
+            "cost_total_niantou": 560,
+            "metadata": {
+                "proc_chance": "0.14",
+                "proc_cooldown_ticks": "60",
+                "zhenyuan_base_cost": "250.0",
+                "jingli_cost": "70.0",
+                "bonus_damage": "110.0",
+                "damage_multiplier": "1.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:jian_zhi_gu_3_active_finger_pierce",
+            "usageTitle": "主动·三转弹指穿",
+            "usageDesc": "更远更快的一击，直贯敌身。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage}",
+            "cost_duration": 2800,
+            "cost_total_niantou": 560,
+            "metadata": {
+                "range": "18.0",
+                "damage": "850.0",
+                "cooldown_ticks": "500",
+                "zhenyuan_base_cost": "2000.0",
+                "jingli_cost": "220.0"
+            }
+        }
+    ]
+}
+

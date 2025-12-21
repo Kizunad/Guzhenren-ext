@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:jingtiegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jingtiegu_passive_refined_edge",
+            "usageTitle": "被动·精铁锋",
+            "usageDesc": "精铁之锋寄于筋骨，持续提升攻击力，但需以资源维持。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 攻击：+{attribute_amount}",
+            "cost_duration": 2800,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1200.0",
+                "jingli_cost_per_second": "800.0",
+                "attribute_amount": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jingtiegu_active_refined_pummel",
+            "usageTitle": "主动·精铁擒击",
+            "usageDesc": "以精铁之势牵扯敌身，拽近后重击，削弱其力量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage}(普通) | 牵引：{pull_strength} | 虚弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 3600,
+            "cost_total_niantou": 600,
+            "metadata": {
+                "cooldown_ticks": "720",
+                "range": "6.0",
+                "extra_physical_damage": "480.0",
+                "effect_duration_ticks": "180",
+                "effect_amplifier": "0",
+                "pull_strength": "1.10",
+                "pull_vertical": "0.10",
+                "self_heal_amount": "10.0",
+                "zhenyuan_base_cost": "180000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}

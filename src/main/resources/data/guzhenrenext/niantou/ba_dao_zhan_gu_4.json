@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:ba_dao_zhan_gu_4",
+    "usages": [
+        {
+            "usageID": "guzhenren:ba_dao_zhan_gu_4_passive_draw_slash_guard",
+            "usageTitle": "被动·拔刀护体",
+            "usageDesc": "持续催动，消耗真元+精力，获得随【刀】道道痕动态变化的护甲/护甲韧性强化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{jingli_cost_per_second}(精力)/s | 护甲：{armor} | 韧性：{armor_toughness}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "11.0",
+                "niantou_cost_per_second": "0.0",
+                "jingli_cost_per_second": "1.8",
+                "hunpo_cost_per_second": "0.0",
+                "armor": "160",
+                "armor_toughness": "95"
+            }
+        },
+        {
+            "usageID": "guzhenren:ba_dao_zhan_gu_4_active_draw_slash_flash",
+            "usageTitle": "主动·拔刀刀光",
+            "usageDesc": "释放更强更远的刀光直线穿行，造成普通伤害并迟缓，随【刀】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 宽度：{beam_radius} | 伤害：{damage} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "680.0",
+                "niantou_cost": "460.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "360",
+                "range": "10.8",
+                "beam_radius": "0.75",
+                "damage": "6500",
+                "effect_duration_ticks": "85",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

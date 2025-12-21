@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:huo_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huo_gu_passive_flame_cloak",
+            "usageTitle": "被动·火衣",
+            "usageDesc": "以火衣护身，持续免疫火焰侵袭。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 持续：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.0",
+                "niantou_cost_per_second": "0.2",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:huo_gu_active_flame_ward",
+            "usageTitle": "主动·火衣护体",
+            "usageDesc": "火衣骤盛，短时间内强化护体并恢复少量血量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 火抗：{fire_resistance_duration_ticks}t | 减伤：{resistance_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "45.0",
+                "jingli_cost": "6.0",
+                "heal_amount": "3.0",
+                "fire_resistance_duration_ticks": "160",
+                "fire_resistance_amplifier": "0",
+                "resistance_duration_ticks": "120",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+

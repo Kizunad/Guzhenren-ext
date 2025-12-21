@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:huanjianyugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huanjianyugu_passive_illusory_feather_proc",
+            "usageTitle": "被动·幻羽切割",
+            "usageDesc": "幻羽如剑，攻击有概率触发减速与附伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "proc_chance": "0.10",
+                "proc_cooldown_ticks": "40",
+                "zhenyuan_base_cost": "2200.0",
+                "jingli_cost": "700.0",
+                "bonus_damage": "1400.0",
+                "damage_multiplier": "1.10",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:huanjianyugu_active_illusory_feather_burst",
+            "usageTitle": "主动·幻羽剑雨",
+            "usageDesc": "范围幻羽剑势爆发。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "radius": "12.0",
+                "damage": "7000.0",
+                "knockback_strength": "0.4",
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "48000.0",
+                "jingli_cost": "600.0"
+            }
+        }
+    ]
+}

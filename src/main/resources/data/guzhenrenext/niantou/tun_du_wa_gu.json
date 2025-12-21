@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:tun_du_wa_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tun_du_wa_gu_passive_swallow_toxin",
+            "usageTitle": "被动·吞毒解厄",
+            "usageDesc": "持续吞吸自身负面效果，每秒净化少量有害状态。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒净化：{max_remove}",
+            "cost_duration": 600,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "jingli_cost_per_second": "0.6",
+                "niantou_cost_per_second": "0.8",
+                "hunpo_cost_per_second": "0.5",
+                "max_remove": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:tun_du_wa_gu_active_detox_recover",
+            "usageTitle": "主动·毒尽回生",
+            "usageDesc": "强行吞尽毒厄并回补身心：清除负面状态，恢复多种资源并短暂护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 持续：{buff_duration_ticks}t | 治疗：{heal_amount} | 回复：真元{restore_zhenyuan}/精力{restore_jingli}/魂魄{restore_hunpo}/念头{restore_niantou} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 600,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0",
+                "cleanse_harmful": "1",
+                "heal_amount": "20.0",
+                "restore_zhenyuan": "30.0",
+                "restore_jingli": "12.0",
+                "restore_hunpo": "10.0",
+                "restore_niantou": "8.0",
+                "zhenyuan_base_cost": "400.0",
+                "jingli_cost": "80.0",
+                "niantou_cost": "120.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}
+

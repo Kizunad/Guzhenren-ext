@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:xie_zou_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_zou_gu_passive_blood_walk_sustain",
+            "usageTitle": "被动·血走轻身",
+            "usageDesc": "持续消耗血气，维持小幅移动速度提升。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 速度：{speed_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2600.0",
+                "niantou_cost_per_second": "8.0",
+                "jingli_cost_per_second": "10.0",
+                "hunpo_cost_per_second": "6.0",
+                "speed_duration_ticks": "60",
+                "speed_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_zou_gu_active_blood_walk_dash",
+            "usageTitle": "主动·血走疾行",
+            "usageDesc": "燃烧气血换取极高机动，短时获得大幅加速与跳跃。",
+            "usageInfo": "速度：{speed_duration_ticks}t | 跳跃：{jump_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "650",
+                "zhenyuan_base_cost": "100000.0",
+                "niantou_cost": "200.0",
+                "jingli_cost": "320.0",
+                "hunpo_cost": "240.0",
+                "speed_duration_ticks": "240",
+                "speed_amplifier": "2",
+                "jump_duration_ticks": "240",
+                "jump_amplifier": "1"
+            }
+        }
+    ]
+}

@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:hu_du_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hu_du_gu_passive_tiger_poison",
+            "usageTitle": "被动·虎毒后发",
+            "usageDesc": "攻击时有概率种下虎毒暗印，毒性在后续命中时集中爆发。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 延迟：{mark_delay_ticks}t | 过期：{mark_expire_ticks}t | 引爆伤害：{detonate_physical_damage} | 削弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 600,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "proc_chance": "0.12",
+                "cooldown_ticks": "120",
+                "mark_delay_ticks": "120",
+                "mark_expire_ticks": "400",
+                "detonate_physical_damage": "700.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "120.0",
+                "jingli_cost": "18.0",
+                "niantou_cost": "25.0",
+                "hunpo_cost": "8.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:hu_du_gu_active_tiger_poison_strike",
+            "usageTitle": "主动·虎毒爆袭",
+            "usageDesc": "锁定目标爆发虎毒之势，造成高额普通伤害并强力削弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage} | 余波：{aoe_radius} | 削弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 600,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "280",
+                "range": "18.0",
+                "extra_physical_damage": "600.0",
+                "aoe_radius": "2.5",
+                "aoe_extra_physical_damage": "200.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "260.0",
+                "jingli_cost": "40.0",
+                "niantou_cost": "60.0",
+                "hunpo_cost": "15.0"
+            }
+        }
+    ]
+}
+

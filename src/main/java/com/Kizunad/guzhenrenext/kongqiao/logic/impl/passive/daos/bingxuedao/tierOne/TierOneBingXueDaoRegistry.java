@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.common.DaoSustainedResourceRegenEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.common.BingXueDaoFrostBarrierOnHurtEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.zhidao.common.ZhiDaoActiveSelfBuffEffect;
 import java.util.List;
@@ -19,6 +21,7 @@ public final class TierOneBingXueDaoRegistry {
 
     private static void registerBingBuGu() {
         final String passive = "guzhenren:bing_bu_gu_passive_frost_cloth";
+        final String regenPassive = "guzhenren:bing_bu_gu_passive_han_xi_ning_yuan";
         final String active = "guzhenren:bing_bu_gu_active_frost_shroud";
         final String barrierCooldownKey =
             "GuzhenrenExtCooldown_bing_bu_gu_passive_frost_cloth";
@@ -27,6 +30,16 @@ public final class TierOneBingXueDaoRegistry {
 
         GuEffectRegistry.register(
             new BingXueDaoFrostBarrierOnHurtEffect(passive, barrierCooldownKey)
+        );
+        GuEffectRegistry.register(
+            new DaoSustainedResourceRegenEffect(
+                regenPassive,
+                DaoHenHelper.DaoType.BING_XUE_DAO,
+                false,
+                false,
+                false,
+                true
+            )
         );
         GuEffectRegistry.register(
             new ZhiDaoActiveSelfBuffEffect(
@@ -52,4 +65,3 @@ public final class TierOneBingXueDaoRegistry {
         );
     }
 }
-

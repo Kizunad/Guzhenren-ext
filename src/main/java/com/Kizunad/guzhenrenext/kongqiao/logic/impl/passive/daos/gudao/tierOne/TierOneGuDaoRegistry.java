@@ -1,7 +1,9 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.gudao.common.GuDaoActiveTargetDebuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.common.DaoSustainedResourceRegenEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoAttackProcDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.gudao.common.GuDaoSustainedAttributeModifierEffect;
 import java.util.List;
@@ -57,12 +59,23 @@ public final class TierOneGuDaoRegistry {
 
     private static void registerGuQiangGu() {
         final String passive = "guzhenren:gu_qiang_gu_passive_bone_impale";
+        final String regenPassive = "guzhenren:gu_qiang_gu_passive_sui_yang_zhen_yuan";
         final String active = "guzhenren:gu_qiang_gu_active_bone_spear";
         final String cooldownKey =
             "GuzhenrenExtCooldown_gu_qiang_gu_active_bone_spear";
 
         GuEffectRegistry.register(
             new GuDaoAttackProcDebuffEffect(passive, MobEffects.MOVEMENT_SLOWDOWN)
+        );
+        GuEffectRegistry.register(
+            new DaoSustainedResourceRegenEffect(
+                regenPassive,
+                DaoHenHelper.DaoType.GU_DAO,
+                false,
+                false,
+                false,
+                true
+            )
         );
         GuEffectRegistry.register(
             new GuDaoActiveTargetDebuffEffect(

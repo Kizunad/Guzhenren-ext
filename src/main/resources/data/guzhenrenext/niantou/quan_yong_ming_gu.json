@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:quan_yong_ming_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:quan_yong_ming_gu_passive_life_exchange",
+            "usageTitle": "被动·以命卸力",
+            "usageDesc": "以命换力，受击时概率性大幅减伤并短暂增强输出。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 受伤乘算：{damage_multiplier}",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.16",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "80.0",
+                "jingli_cost": "12.0",
+                "niantou_cost": "8.0",
+                "hunpo_cost": "6.0",
+                "damage_multiplier": "0.55",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:quan_yong_ming_gu_active_life_exchange",
+            "usageTitle": "主动·借命强身",
+            "usageDesc": "借命强身，短暂爆发并获得抗性，但消耗极高。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "zhenyuan_base_cost": "2600.0",
+                "jingli_cost": "120.0",
+                "niantou_cost": "90.0",
+                "hunpo_cost": "25.0",
+                "heal_amount": "50.0",
+                "restore_zhenyuan": "40.0",
+                "restore_jingli": "20.0",
+                "restore_hunpo": "20.0",
+                "restore_niantou": "10.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "200",
+                "buff_amplifier": "1"
+            }
+        }
+    ]
+}
+

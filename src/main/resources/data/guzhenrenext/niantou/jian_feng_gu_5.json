@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jian_feng_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:jian_feng_gu_5_passive_piercing_edge",
+            "usageTitle": "被动·五转剑锋破甲",
+            "usageDesc": "更强的剑锋穿势，攻击有概率显著增伤并附伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1640,
+            "metadata": {
+                "proc_chance": "0.10",
+                "proc_cooldown_ticks": "60",
+                "zhenyuan_base_cost": "2600.0",
+                "jingli_cost": "600.0",
+                "bonus_damage": "1200.0",
+                "damage_multiplier": "1.20"
+            }
+        },
+        {
+            "usageID": "guzhenren:jian_feng_gu_5_active_piercing_strike",
+            "usageTitle": "主动·五转剑锋穿杀",
+            "usageDesc": "高爆发穿杀，并附带少量法术贯穿伤害。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 法术伤害：{magic_damage}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1640,
+            "metadata": {
+                "range": "24.0",
+                "damage": "10000.0",
+                "magic_damage": "300.0",
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "26000.0",
+                "jingli_cost": "500.0"
+            }
+        }
+    ]
+}

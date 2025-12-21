@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:luo_xuan_shui_jian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:luo_xuan_shui_jian_gu_passive_torrent_edge",
+            "usageTitle": "被动·旋水剑痕",
+            "usageDesc": "旋水剑势绵延，出手附带迟滞与水劲附伤。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 附伤：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.16",
+                "zhenyuan_base_cost": "22.0",
+                "jingli_cost": "2.4",
+                "niantou_cost": "1.2",
+                "hunpo_cost": "0.0",
+                "extra_physical_damage": "12.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:luo_xuan_shui_jian_gu_active_torrent_edge",
+            "usageTitle": "主动·旋水穿斩",
+            "usageDesc": "旋水剑势贯穿目标，造成普通伤害并波及近旁。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 溅射：{aoe_radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "range": "14.0",
+                "zhenyuan_base_cost": "320.0",
+                "jingli_cost": "18.0",
+                "niantou_cost": "12.0",
+                "hunpo_cost": "0.0",
+                "extra_physical_damage": "180.0",
+                "aoe_radius": "2.0",
+                "aoe_extra_physical_damage": "60.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:huo_you_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huo_you_gu_passive_oil_ignite",
+            "usageTitle": "被动·油污引燃",
+            "usageDesc": "攻击时溅出火油，黏滞对手并诱发燃烧。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 迟缓：{effect_duration_ticks}t | 点燃：{burn_seconds}s | 附伤：{extra_physical_damage}(普通)",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "proc_chance": "0.16",
+                "zhenyuan_base_cost": "20.0",
+                "niantou_cost": "4.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "burn_seconds": "2.0",
+                "extra_physical_damage": "4.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:huo_you_gu_active_oil_burst",
+            "usageTitle": "主动·泼油爆燃",
+            "usageDesc": "泼洒火油并引爆，造成小范围爆发与迟缓。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 半径：{radius} | 伤害：+{extra_physical_damage}(普通) | 点燃：{burn_seconds}s",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "160",
+                "radius": "3.5",
+                "zhenyuan_base_cost": "60.0",
+                "jingli_cost": "8.0",
+                "extra_physical_damage": "12.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.15",
+                "burn_seconds": "4.0"
+            }
+        }
+    ]
+}
+

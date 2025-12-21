@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:pen_xie_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:pen_xie_gu_passive_spray_blood_sustain",
+            "usageTitle": "被动·喷血加速",
+            "usageDesc": "持续喷涌血气，维持移动速度提升。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 速度：{speed_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2800.0",
+                "niantou_cost_per_second": "9.0",
+                "jingli_cost_per_second": "10.0",
+                "hunpo_cost_per_second": "7.0",
+                "speed_duration_ticks": "60",
+                "speed_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:pen_xie_gu_active_spray_blood_dash",
+            "usageTitle": "主动·喷血冲刺",
+            "usageDesc": "以血液喷射换取极限加速，短时获得爆发机动。",
+            "usageInfo": "速度：{speed_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "650",
+                "zhenyuan_base_cost": "110000.0",
+                "niantou_cost": "210.0",
+                "jingli_cost": "340.0",
+                "hunpo_cost": "240.0",
+                "speed_duration_ticks": "220",
+                "speed_amplifier": "2"
+            }
+        }
+    ]
+}

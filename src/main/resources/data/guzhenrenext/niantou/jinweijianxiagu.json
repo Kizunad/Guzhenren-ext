@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:jinweijianxiagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jinweijianxiagu_passive_golden_box_stride",
+            "usageTitle": "被动·金匣轻行",
+            "usageDesc": "金纹剑匣蕴势，步伐更轻更快。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 移速：+{attribute_amount}",
+            "cost_duration": 1000,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.5",
+                "jingli_cost_per_second": "0.8",
+                "attribute_amount": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:jinweijianxiagu_active_golden_box_shift",
+            "usageTitle": "主动·金匣瞬步",
+            "usageDesc": "借金匣之势短距瞬移，并短暂提速。",
+            "usageInfo": "距离：{distance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 提速：{effect_duration_ticks}t",
+            "cost_duration": 1000,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "distance": "7.0",
+                "cooldown_ticks": "260",
+                "zhenyuan_base_cost": "260.0",
+                "jingli_cost": "60.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

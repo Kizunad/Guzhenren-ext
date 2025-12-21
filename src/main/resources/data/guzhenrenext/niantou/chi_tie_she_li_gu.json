@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:chi_tie_she_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:chi_tie_she_li_gu_passive_red_iron_suppress_2",
+            "usageTitle": "被动·赤铁压制",
+            "usageDesc": "赤铁舍利蛊以人道压势，出手时有概率削弱敌人并追加伤害。",
+            "usageInfo": "触发概率：{proc_chance} | 虚弱：{effect_duration_ticks}t | 追加伤害：{extra_physical_damage}(普通) | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1600,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "proc_chance": "0.16",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "22.0",
+                "zhenyuan_base_cost": "1200.0",
+                "niantou_cost": "260.0",
+                "jingli_cost": "160.0",
+                "hunpo_cost": "60.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:chi_tie_she_li_gu_active_red_iron_strike_2",
+            "usageTitle": "主动·赤铁点杀",
+            "usageDesc": "以赤铁之势锁定目标，一击重创并短暂削弱其力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage}(普通) | 虚弱：{effect_duration_ticks}t | 牵引：{pull_strength} | 自疗：{self_heal_amount} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 2000,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "range": "9.0",
+                "extra_physical_damage": "85.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "pull_strength": "0.15",
+                "pull_vertical": "0.05",
+                "self_heal_amount": "3.0",
+                "restore_jingli": "10.0",
+                "restore_niantou": "6.0",
+                "restore_hunpo": "6.0",
+                "zhenyuan_base_cost": "5200.0",
+                "niantou_cost": "850.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "220.0"
+            }
+        }
+    ]
+}
+

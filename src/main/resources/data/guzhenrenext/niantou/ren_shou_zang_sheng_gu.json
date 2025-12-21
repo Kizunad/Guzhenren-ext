@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:ren_shou_zang_sheng_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:ren_shou_zang_sheng_gu_passive_breakthrough_force_3",
+            "usageTitle": "被动·葬生破势",
+            "usageDesc": "人兽葬生蛊以强行破境的残酷意志推动战意，持续提升攻击，但需以资源维持。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {hunpo_cost_per_second}(魂魄)/s | 攻击：+{attribute_amount}",
+            "cost_duration": 3000,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1100.0",
+                "niantou_cost_per_second": "760.0",
+                "hunpo_cost_per_second": "420.0",
+                "attribute_amount": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:ren_shou_zang_sheng_gu_active_breakthrough_surge_3",
+            "usageTitle": "主动·葬生回潮",
+            "usageDesc": "以破境余势强行回气，自疗并回补真元，短暂加速恢复。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 治疗：{heal_amount} | 回复：真元{zhenyuan_restore} 精力{jingli_restore} 魂魄{hunpo_restore} | 回生：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 4600,
+            "cost_total_niantou": 820,
+            "metadata": {
+                "cooldown_ticks": "1400",
+                "range": "0.0",
+                "heal_amount": "18.0",
+                "zhenyuan_restore": "90.0",
+                "jingli_restore": "60.0",
+                "hunpo_restore": "45.0",
+                "cleanse_harmful": "false",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "280000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}

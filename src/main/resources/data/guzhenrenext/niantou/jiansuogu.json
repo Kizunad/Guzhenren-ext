@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:jiansuogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiansuogu_passive_sword_shuttle_stride",
+            "usageTitle": "被动·剑梭疾行",
+            "usageDesc": "剑梭在身，持续提升移速。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 移速：+{attribute_amount}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.5",
+                "attribute_amount": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiansuogu_active_sword_shuttle",
+            "usageTitle": "主动·剑梭穿行",
+            "usageDesc": "短距穿行脱困，并获得短暂抗性。",
+            "usageInfo": "距离：{distance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 抗性：{effect_duration_ticks}t",
+            "cost_duration": 2600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "distance": "12.0",
+                "cooldown_ticks": "260",
+                "zhenyuan_base_cost": "1600.0",
+                "jingli_cost": "180.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

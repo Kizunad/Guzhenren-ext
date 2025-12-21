@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:bainianshougu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bainianshougu_passive_century_cap",
+            "usageTitle": "被动·百年寿库",
+            "usageDesc": "寿库沉积，提升魂魄与念头容量上限，并缓慢修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s | 上限：魂魄+{max_hunpo_bonus} 抗性上限+{max_hunpo_resistance_bonus} 念头容量+{niantou_capacity_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "900.0",
+                "niantou_cost_per_second": "3.0",
+                "jingli_cost_per_second": "2.5",
+                "hunpo_cost_per_second": "2.0",
+                "max_hunpo_bonus": "120.0",
+                "max_hunpo_resistance_bonus": "80.0",
+                "niantou_capacity_bonus": "120.0",
+                "hunpo_resistance_restore": "0.6"
+            }
+        },
+        {
+            "usageID": "guzhenren:bainianshougu_active_century_blessing",
+            "usageTitle": "主动·百年庇佑",
+            "usageDesc": "以寿库庇佑自身与盟友，群体治疗并净化负面状态。",
+            "usageInfo": "半径：{radius} | 治疗：{heal_amount} | 净化：{cleanse_negative} | 再生：{regen_duration_ticks}t | 抗性：{resistance_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1200,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "radius": "8.0",
+                "heal_amount": "8.0",
+                "cleanse_negative": "true",
+                "regen_duration_ticks": "200",
+                "regen_amplifier": "0",
+                "resistance_duration_ticks": "120",
+                "resistance_amplifier": "0",
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "150000.0",
+                "niantou_cost": "380.0",
+                "jingli_cost": "420.0",
+                "hunpo_cost": "350.0"
+            }
+        }
+    ]
+}
+

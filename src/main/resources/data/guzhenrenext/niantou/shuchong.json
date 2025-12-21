@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:shuchong",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuchong_passive_bookworm_insight",
+            "usageTitle": "被动·书虫明悟",
+            "usageDesc": "以书卷为引，缓慢滋生念头与精力，并维持少量真元流转。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s | 回复：念头+{niantou_gain_per_second}/s 精力+{jingli_gain_per_second}/s 真元+{zhenyuan_gain_per_second}/s 魂魄+{hunpo_gain_per_second}/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "300.0",
+                "niantou_cost_per_second": "0.6",
+                "jingli_cost_per_second": "0.4",
+                "hunpo_cost_per_second": "0.0",
+                "heal_per_second": "0.2",
+                "niantou_gain_per_second": "0.4",
+                "jingli_gain_per_second": "0.25",
+                "hunpo_gain_per_second": "0.08",
+                "zhenyuan_gain_per_second": "1.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuchong_active_bookworm_epiphany",
+            "usageTitle": "主动·灵光一现",
+            "usageDesc": "念头澎湃，短时间内快速恢复多种资源。",
+            "usageInfo": "恢复：生命+{heal_amount} 念头+{niantou_gain} 精力+{jingli_gain} 魂魄+{hunpo_gain} 真元+{zhenyuan_gain} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 240,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "heal_amount": "3.0",
+                "niantou_gain": "8.0",
+                "jingli_gain": "6.0",
+                "hunpo_gain": "2.0",
+                "zhenyuan_gain": "40.0",
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "18000.0",
+                "niantou_cost": "90.0",
+                "jingli_cost": "75.0",
+                "hunpo_cost": "60.0"
+            }
+        }
+    ]
+}
+

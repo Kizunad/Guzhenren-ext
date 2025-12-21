@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jianjigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianjigu_passive_trace_proc",
+            "usageTitle": "被动·剑迹连斩",
+            "usageDesc": "剑迹相随，攻击有概率触发额外斩击。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 附伤：+{bonus_damage}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.18",
+                "proc_cooldown_ticks": "40",
+                "zhenyuan_base_cost": "60.0",
+                "jingli_cost": "10.0",
+                "bonus_damage": "8.0",
+                "damage_multiplier": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianjigu_active_trace_puncture",
+            "usageTitle": "主动·剑迹穿刺",
+            "usageDesc": "以剑迹点破敌势，命中后短暂迟滞。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "range": "10.0",
+                "damage": "65.0",
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "240.0",
+                "jingli_cost": "50.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

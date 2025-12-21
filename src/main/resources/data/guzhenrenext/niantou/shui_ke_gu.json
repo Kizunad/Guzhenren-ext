@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:shui_ke_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_ke_gu_passive_water_shell",
+            "usageTitle": "被动·水壳护身",
+            "usageDesc": "维持水壳包裹，水下作战更从容。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头) | 持续：{buff_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "jingli_cost_per_second": "0.4",
+                "niantou_cost_per_second": "0.25",
+                "hunpo_cost_per_second": "0.0",
+                "buff_duration_ticks": "240",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_ke_gu_active_shell_burst",
+            "usageTitle": "主动·水壳迸发",
+            "usageDesc": "引爆水壳余势，净化并短暂强化自身。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 治疗：{heal_amount}",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "120.0",
+                "jingli_cost": "12.0",
+                "niantou_cost": "6.0",
+                "hunpo_cost": "0.0",
+                "heal_amount": "4.0",
+                "restore_zhenyuan": "0.0",
+                "restore_jingli": "4.0",
+                "restore_hunpo": "0.0",
+                "restore_niantou": "2.0",
+                "cleanse_harmful": "1",
+                "buff_duration_ticks": "140",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

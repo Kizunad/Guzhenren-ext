@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:shui_zhao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_zhao_gu_passive_water_shield",
+            "usageTitle": "被动·水罩卸力",
+            "usageDesc": "受击时引动水流卸力，概率性减免伤害。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 受伤乘算：{damage_multiplier}",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "160",
+                "zhenyuan_base_cost": "10.0",
+                "jingli_cost": "1.0",
+                "niantou_cost": "0.5",
+                "hunpo_cost": "0.0",
+                "damage_multiplier": "0.75",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_zhao_gu_active_wave_guard",
+            "usageTitle": "主动·波罩护体",
+            "usageDesc": "凝聚水罩护体，短暂提升生存并回复少量资源。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 治疗：{heal_amount}",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "140.0",
+                "jingli_cost": "10.0",
+                "niantou_cost": "6.0",
+                "hunpo_cost": "0.0",
+                "heal_amount": "6.0",
+                "restore_zhenyuan": "5.0",
+                "restore_jingli": "3.0",
+                "restore_hunpo": "0.0",
+                "restore_niantou": "0.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "140",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

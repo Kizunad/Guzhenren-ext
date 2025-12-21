@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:dieyinggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dieyinggu_passive_layered_shadow_cap",
+            "usageTitle": "被动·叠影增容",
+            "usageDesc": "影层叠加，提升念头容量与精力上限，并缓慢修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s | 上限：念头容量+{niantou_capacity_bonus} 精力上限+{max_jingli_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1200.0",
+                "niantou_cost_per_second": "4.0",
+                "jingli_cost_per_second": "3.5",
+                "hunpo_cost_per_second": "3.0",
+                "niantou_capacity_bonus": "240.0",
+                "max_jingli_bonus": "180.0",
+                "hunpo_resistance_restore": "0.8"
+            }
+        },
+        {
+            "usageID": "guzhenren:dieyinggu_active_layered_shadow_strike",
+            "usageTitle": "主动·叠影袭杀",
+            "usageDesc": "影层汇聚，锁定单体造成高额普通伤害并致盲迟滞目标。",
+            "usageInfo": "距离：{range} | 伤害：{extra_magic_damage} | 致盲：{blind_duration_ticks}t | 迟滞：{slow_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1400,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "range": "24.0",
+                "extra_magic_damage": "3200.0",
+                "blind_duration_ticks": "120",
+                "blind_amplifier": "0",
+                "slow_duration_ticks": "120",
+                "slow_amplifier": "0",
+                "cooldown_ticks": "1600",
+                "zhenyuan_base_cost": "260000.0",
+                "niantou_cost": "650.0",
+                "jingli_cost": "720.0",
+                "hunpo_cost": "600.0"
+            }
+        }
+    ]
+}
+

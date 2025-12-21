@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xuebaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xuebaogu_passive_blood_burst_sustain",
+            "usageTitle": "被动·血爆渗漏",
+            "usageDesc": "血爆蛊如心脏渗漏，持续转化血气为微弱回复。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 回血：{heal_per_second}/s | 回念：{niantou_gain_per_second}/s | 回魂：{hunpo_gain_per_second}/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8000.0",
+                "niantou_cost_per_second": "14.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "heal_per_second": "1.00",
+                "niantou_gain_per_second": "0.80",
+                "jingli_gain_per_second": "0.00",
+                "hunpo_gain_per_second": "0.60",
+                "zhenyuan_gain_per_second": "0.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:xuebaogu_active_blood_burst",
+            "usageTitle": "主动·血爆震荡",
+            "usageDesc": "引爆血爆蛊，造成范围普通伤害并迟缓周围敌人。",
+            "usageInfo": "半径：{radius} | 伤害：{damage} | 迟缓：{debuff_duration_ticks}t | 击退：{knockback_strength} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 800,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "radius": "7.0",
+                "damage": "3200.0",
+                "debuff_duration_ticks": "120",
+                "debuff_amplifier": "1",
+                "self_heal_per_hit": "0.0",
+                "knockback_strength": "0.35",
+                "cooldown_ticks": "1500",
+                "zhenyuan_base_cost": "300000.0",
+                "niantou_cost": "340.0",
+                "jingli_cost": "520.0",
+                "hunpo_cost": "420.0"
+            }
+        }
+    ]
+}

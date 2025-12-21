@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:tiexuegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tiexuegu_passive_iron_blood_guard",
+            "usageTitle": "被动·铁血沉凝",
+            "usageDesc": "血液沉重如铁，受击时更易凝滞伤势，降低部分伤害。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 减伤：x{damage_multiplier}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.15",
+                "proc_cooldown_ticks": "120",
+                "damage_multiplier": "0.85",
+                "self_heal_amount": "0.6",
+                "zhenyuan_base_cost": "2600.0",
+                "niantou_cost": "10.0",
+                "jingli_cost": "18.0",
+                "hunpo_cost": "8.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:tiexuegu_active_iron_blood_stance",
+            "usageTitle": "主动·铁血姿态",
+            "usageDesc": "短时强化防御，但行动变得沉重。",
+            "usageInfo": "抗性：{resistance_duration_ticks}t | 迟缓：{slowness_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 200,
+            "cost_total_niantou": 30,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "zhenyuan_base_cost": "11000.0",
+                "niantou_cost": "30.0",
+                "jingli_cost": "50.0",
+                "hunpo_cost": "20.0",
+                "resistance_duration_ticks": "120",
+                "resistance_amplifier": "0",
+                "slowness_duration_ticks": "120",
+                "slowness_amplifier": "0"
+            }
+        }
+    ]
+}

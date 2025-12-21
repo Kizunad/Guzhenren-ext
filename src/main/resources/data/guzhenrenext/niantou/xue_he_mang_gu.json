@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:xue_he_mang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xue_he_mang_gu_passive_serpent_fury_proc",
+            "usageTitle": "被动·血河蟒势",
+            "usageDesc": "血河蟒之凶性反哺蛊师，攻击概率触发高额增伤与附伤。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.06",
+                "proc_cooldown_ticks": "200",
+                "damage_multiplier": "1.22",
+                "bonus_damage": "2200.0",
+                "self_heal_amount": "6.0",
+                "debuff_duration_ticks": "160",
+                "debuff_amplifier": "1",
+                "zhenyuan_base_cost": "120000.0",
+                "niantou_cost": "260.0",
+                "jingli_cost": "360.0",
+                "hunpo_cost": "320.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xue_he_mang_gu_active_summon_blood_python",
+            "usageTitle": "主动·血河蟒现世",
+            "usageDesc": "召唤血河蠎协战，召唤物为临时存在，到期自动消散。",
+            "usageInfo": "持续：{duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1200,
+            "cost_total_niantou": 400,
+            "metadata": {
+                "duration_ticks": "1200",
+                "cooldown_ticks": "2600",
+                "zhenyuan_base_cost": "750000.0",
+                "niantou_cost": "650.0",
+                "jingli_cost": "850.0",
+                "hunpo_cost": "750.0"
+            }
+        }
+    ]
+}

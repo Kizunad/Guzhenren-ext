@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xie_di_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_di_gu_passive_blood_drop_proc",
+            "usageTitle": "被动·血滴渗蚀",
+            "usageDesc": "血滴入体更伤，攻击概率触发增伤与附伤，并令目标短暂中毒。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage} | 中毒：{debuff_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.12",
+                "proc_cooldown_ticks": "60",
+                "damage_multiplier": "1.05",
+                "bonus_damage": "3.0",
+                "debuff_duration_ticks": "60",
+                "debuff_amplifier": "0",
+                "self_heal_amount": "0.4",
+                "zhenyuan_base_cost": "2200.0",
+                "niantou_cost": "9.0",
+                "jingli_cost": "16.0",
+                "hunpo_cost": "7.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_di_gu_active_blood_shot",
+            "usageTitle": "主动·血滴飞射",
+            "usageDesc": "将血液凝作血滴射出，造成普通伤害并附带中毒。",
+            "usageInfo": "距离：{range} | 伤害：{damage} | 中毒：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 200,
+            "cost_total_niantou": 30,
+            "metadata": {
+                "range": "12.0",
+                "damage": "12.0",
+                "debuff_duration_ticks": "80",
+                "debuff_amplifier": "0",
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "9500.0",
+                "niantou_cost": "22.0",
+                "jingli_cost": "45.0",
+                "hunpo_cost": "18.0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:shui_lian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_lian_gu_passive_chain_bind",
+            "usageTitle": "被动·水链束缚",
+            "usageDesc": "出手夹带水链，减缓敌人步伐。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 附伤：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.14",
+                "zhenyuan_base_cost": "26.0",
+                "jingli_cost": "3.0",
+                "niantou_cost": "1.8",
+                "hunpo_cost": "0.0",
+                "extra_physical_damage": "14.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_lian_gu_active_chain_bind",
+            "usageTitle": "主动·水链缠锁",
+            "usageDesc": "以水链缠锁目标，造成普通伤害并强化束缚。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 伤害：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "range": "14.0",
+                "zhenyuan_base_cost": "400.0",
+                "jingli_cost": "22.0",
+                "niantou_cost": "16.0",
+                "hunpo_cost": "0.0",
+                "extra_physical_damage": "220.0",
+                "aoe_radius": "0.0",
+                "aoe_extra_physical_damage": "0.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

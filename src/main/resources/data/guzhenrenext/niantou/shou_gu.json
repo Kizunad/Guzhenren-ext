@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:shou_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shou_gu_passive_yearly_breath",
+            "usageTitle": "被动·一年寿息",
+            "usageDesc": "寿息绵延，缓慢滋养肉身与魂魄。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 回复：生命+{heal_per_second}/s 魂魄+{hunpo_gain_per_second}/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "320.0",
+                "niantou_cost_per_second": "0.5",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "heal_per_second": "0.6",
+                "niantou_gain_per_second": "0.0",
+                "jingli_gain_per_second": "0.0",
+                "hunpo_gain_per_second": "0.22",
+                "zhenyuan_gain_per_second": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shou_gu_active_yearly_guard",
+            "usageTitle": "主动·寿息护体",
+            "usageDesc": "以寿息护体，短暂获得恢复与抗性。",
+            "usageInfo": "恢复：{heal_amount} | 再生：{regen_duration_ticks}t | 抗性：{resistance_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 240,
+            "cost_total_niantou": 35,
+            "metadata": {
+                "heal_amount": "6.0",
+                "regen_duration_ticks": "120",
+                "regen_amplifier": "0",
+                "resistance_duration_ticks": "120",
+                "resistance_amplifier": "0",
+                "cooldown_ticks": "300",
+                "zhenyuan_base_cost": "12000.0",
+                "niantou_cost": "30.0",
+                "jingli_cost": "25.0",
+                "hunpo_cost": "10.0"
+            }
+        }
+    ]
+}
+

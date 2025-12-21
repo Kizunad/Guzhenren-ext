@@ -19,6 +19,22 @@
             }
         },
         {
+            "usageID": "guzhenren:xingguanggu_passive_xing_hui_yang_shen",
+            "usageTitle": "被动·星辉养神",
+            "usageDesc": "以星辉淬神，缓慢回补精力与魂魄，并受【星】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{jingli_gain}(精力)+{hunpo_gain}(魂魄)",
+            "cost_duration": 1600,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.10",
+                "jingli_cost_per_second": "0.02",
+                "niantou_cost_per_second": "0.03",
+                "hunpo_cost_per_second": "0.02",
+                "jingli_gain": "0.18",
+                "hunpo_gain": "0.08"
+            }
+        },
+        {
             "usageID": "guzhenren:xingguanggu_active_starlight_burst",
             "usageTitle": "主动·星光爆闪",
             "usageDesc": "爆发星光，灼亮周遭敌人，造成伤害并令其显形。",

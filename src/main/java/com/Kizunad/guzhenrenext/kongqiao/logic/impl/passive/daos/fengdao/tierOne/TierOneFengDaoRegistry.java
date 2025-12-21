@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.tierOn
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.common.FengDaoActiveWindStepEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoSustainedAttributeModifierEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.fengdao.common.FengDaoSustainedResourceRegenEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -22,6 +23,8 @@ public final class TierOneFengDaoRegistry {
     private static void registerQingFengLunGu() {
         final String passive =
             "guzhenren:qing_feng_lun_gu_passive_gentle_breeze";
+        final String regenPassive =
+            "guzhenren:qing_feng_lun_gu_passive_wind_breathing";
         final String active =
             "guzhenren:qing_feng_lun_gu_active_wind_step";
         final String cooldownKey =
@@ -35,6 +38,9 @@ public final class TierOneFengDaoRegistry {
                 0.0,
                 "speed"
             )
+        );
+        GuEffectRegistry.register(
+            new FengDaoSustainedResourceRegenEffect(regenPassive)
         );
         GuEffectRegistry.register(
             new FengDaoActiveWindStepEffect(

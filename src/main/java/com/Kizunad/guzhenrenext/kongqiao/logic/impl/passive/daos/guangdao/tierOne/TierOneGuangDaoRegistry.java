@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.guangdao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.guangdao.common.GuangDaoActiveAreaStatusEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.guangdao.common.GuangDaoActiveTargetHealEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.common.DaoSustainedResourceRegenEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.guangdao.common.GuangDaoSustainedAttackProcEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.guangdao.common.GuangDaoSustainedHurtProcEffect;
 import java.util.List;
@@ -23,6 +25,8 @@ public final class TierOneGuangDaoRegistry {
     private static void registerShanGuangGu() {
         final String passive =
             "guzhenren:shan_guang_gu_passive_dazzling_guard";
+        final String regenPassive =
+            "guzhenren:shan_guang_gu_passive_guang_ming_ning_nian";
         final String procCooldownKey =
             "GuzhenrenExtCooldown_shan_guang_gu_passive_dazzling_guard_proc";
         final String active =
@@ -32,6 +36,16 @@ public final class TierOneGuangDaoRegistry {
 
         GuEffectRegistry.register(
             new GuangDaoSustainedHurtProcEffect(passive, procCooldownKey)
+        );
+        GuEffectRegistry.register(
+            new DaoSustainedResourceRegenEffect(
+                regenPassive,
+                DaoHenHelper.DaoType.GUANG_DAO,
+                true,
+                false,
+                false,
+                false
+            )
         );
         GuEffectRegistry.register(
             new GuangDaoActiveAreaStatusEffect(
@@ -89,4 +103,3 @@ public final class TierOneGuangDaoRegistry {
         );
     }
 }
-

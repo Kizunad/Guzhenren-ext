@@ -17,6 +17,24 @@
             }
         },
         {
+            "usageID": "guzhenren:qing_feng_lun_gu_passive_wind_breathing",
+            "usageTitle": "被动·风息吐纳",
+            "usageDesc": "借清风入窍吐纳，缓慢恢复真元、魂魄、精力与念头，并受【风】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)+{hunpo_gain}(魂魄)+{jingli_gain}(精力)+{niantou_gain}(念头)",
+            "cost_duration": 750,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.12",
+                "jingli_cost_per_second": "0.02",
+                "niantou_cost_per_second": "0.04",
+                "hunpo_cost_per_second": "0.01",
+                "zhenyuan_gain": "0.18",
+                "hunpo_gain": "0.03",
+                "jingli_gain": "0.16",
+                "niantou_gain": "0.20"
+            }
+        },
+        {
             "usageID": "guzhenren:qing_feng_lun_gu_active_wind_step",
             "usageTitle": "主动·清风踏步",
             "usageDesc": "借清风之势短距挪移，距离受风道道痕增幅，落点自动寻安全位置。",

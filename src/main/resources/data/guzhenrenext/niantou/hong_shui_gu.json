@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:hong_shui_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hong_shui_gu_passive_flood_backlash",
+            "usageTitle": "被动·洪潮反冲",
+            "usageDesc": "受击时引动洪潮反冲，反制来敌并迟滞。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 反制：{retaliation_damage} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.14",
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "30.0",
+                "jingli_cost": "3.4",
+                "niantou_cost": "2.0",
+                "hunpo_cost": "0.0",
+                "retaliation_damage": "80.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:hong_shui_gu_active_flood_burst",
+            "usageTitle": "主动·洪潮冲击",
+            "usageDesc": "洪潮爆发，冲击周围敌人并造成大范围迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 伤害：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "radius": "7.0",
+                "zhenyuan_base_cost": "520.0",
+                "jingli_cost": "26.0",
+                "niantou_cost": "20.0",
+                "hunpo_cost": "0.0",
+                "extra_physical_damage": "320.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

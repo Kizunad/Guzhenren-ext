@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:qiang_qu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qiang_qu_gu_passive_force_snatch",
+            "usageTitle": "被动·强取余息",
+            "usageDesc": "以战养战，攻击概率汲取生命与资源。",
+            "usageInfo": "触发：{proc_chance} | 回复：生命+{heal_amount} 念头+{niantou_gain} 真元+{zhenyuan_gain} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.12",
+                "heal_amount": "2.0",
+                "niantou_gain": "0.8",
+                "zhenyuan_gain": "8.0",
+                "extra_magic_damage": "0.0",
+                "zhenyuan_base_cost": "45000.0",
+                "niantou_cost": "140.0",
+                "jingli_cost": "160.0",
+                "hunpo_cost": "120.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:qiang_qu_gu_active_position_plunder",
+            "usageTitle": "主动·夺位换形",
+            "usageDesc": "强行夺位，与目标换位并施加虚弱与迟滞。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 800,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "range": "14.0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "0",
+                "strength_duration_ticks": "120",
+                "strength_amplifier": "0",
+                "slow_duration_ticks": "120",
+                "slow_amplifier": "0",
+                "weakness_duration_ticks": "120",
+                "weakness_amplifier": "0",
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "80000.0",
+                "niantou_cost": "240.0",
+                "jingli_cost": "260.0",
+                "hunpo_cost": "200.0"
+            }
+        }
+    ]
+}
+

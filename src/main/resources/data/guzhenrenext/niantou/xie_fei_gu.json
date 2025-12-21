@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:xie_fei_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_fei_gu_passive_blood_lung",
+            "usageTitle": "被动·血肺潜息",
+            "usageDesc": "以血液代替呼吸，在水下亦能自如。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 水下呼吸：{water_breathing_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "420.0",
+                "niantou_cost_per_second": "2.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "water_breathing_duration_ticks": "140",
+                "water_breathing_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_fei_gu_active_deep_breath",
+            "usageTitle": "主动·深潜吐纳",
+            "usageDesc": "激活血肺，短时间内获得更强的水下机动。",
+            "usageInfo": "海豚祝福：{dolphins_grace_duration_ticks}t | 速度：{speed_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 200,
+            "cost_total_niantou": 30,
+            "metadata": {
+                "cooldown_ticks": "340",
+                "zhenyuan_base_cost": "12000.0",
+                "niantou_cost": "28.0",
+                "jingli_cost": "55.0",
+                "hunpo_cost": "18.0",
+                "dolphins_grace_duration_ticks": "160",
+                "dolphins_grace_amplifier": "0",
+                "speed_duration_ticks": "160",
+                "speed_amplifier": "0"
+            }
+        }
+    ]
+}

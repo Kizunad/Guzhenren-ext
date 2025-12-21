@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:weilianhualeichuigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:weilianhualeichuigu_passive_thunder_hammer_cap",
+            "usageTitle": "被动·镇元扩容",
+            "usageDesc": "雷锤镇压诸元，强行抬升上限并稳固抗性。",
+            "usageInfo": "维持消耗：{zhenyuan_base_cost_per_second}(基础真元/秒)+{jingli_cost_per_second}(精力/秒)+{niantou_cost_per_second}(念头/秒)+{hunpo_cost_per_second}(魂魄/秒) | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli} 魂魄+{cap_max_hunpo} 抗性上限+{cap_hunpo_resistance}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "120.0",
+                "jingli_cost_per_second": "6.0",
+                "niantou_cost_per_second": "2.0",
+                "hunpo_cost_per_second": "1.5",
+                "cap_max_zhenyuan": "260.0",
+                "cap_max_jingli": "180.0",
+                "cap_max_hunpo": "160.0",
+                "cap_hunpo_resistance": "30.0",
+                "hunpo_resistance_restore": "1.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:weilianhualeichuigu_active_thunder_hammer_crush",
+            "usageTitle": "主动·雷锤碎敌",
+            "usageDesc": "灌注真元成锤，一击击碎敌身并溅射四周。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 主伤：{extra_physical_damage} | 溅射：{aoe_extra_physical_damage}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "range": "5.0",
+                "zhenyuan_base_cost": "720.0",
+                "jingli_cost": "55.0",
+                "niantou_cost": "32.0",
+                "hunpo_cost": "20.0",
+                "extra_physical_damage": "1200.0",
+                "aoe_radius": "4.0",
+                "aoe_extra_physical_damage": "520.0",
+                "slow_duration_ticks": "120",
+                "slow_amplifier": "1",
+                "weak_duration_ticks": "120",
+                "weak_amplifier": "1"
+            }
+        }
+    ]
+}
+

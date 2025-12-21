@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:ji_tu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:ji_tu_gu_passive_mire_bind",
+            "usageTitle": "被动·泥沼牵制",
+            "usageDesc": "出手夹带泥沼之意，强力迟滞并附带较高附伤。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 附伤：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "proc_chance": "0.18",
+                "zhenyuan_base_cost": "120.0",
+                "jingli_cost": "20.0",
+                "niantou_cost": "14.0",
+                "hunpo_cost": "14.0",
+                "extra_physical_damage": "300.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:ji_tu_gu_active_mire_field",
+            "usageTitle": "主动·泥沼领域",
+            "usageDesc": "在目标处生成强力泥沼领域，进入者行动与挖掘严重受限。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 半径：{cloud_radius} | 领域：{cloud_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "720",
+                "range": "24.0",
+                "cloud_radius": "8.0",
+                "cloud_duration_ticks": "300",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "2",
+                "zhenyuan_base_cost": "7000.0",
+                "jingli_cost": "300.0",
+                "niantou_cost": "240.0",
+                "hunpo_cost": "110.0"
+            }
+        }
+    ]
+}
+

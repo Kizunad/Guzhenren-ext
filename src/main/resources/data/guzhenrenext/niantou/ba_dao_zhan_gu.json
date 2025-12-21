@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:ba_dao_zhan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:ba_dao_zhan_gu_passive_draw_stance",
+            "usageTitle": "被动·拔刀架势",
+            "usageDesc": "持续催动，消耗真元+精力，获得随【刀】道道痕动态变化的减伤。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{jingli_cost_per_second}(精力)/s | 减伤：{damage_reduction_ratio}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "7.0",
+                "niantou_cost_per_second": "0.0",
+                "jingli_cost_per_second": "0.8",
+                "hunpo_cost_per_second": "0.0",
+                "damage_reduction_ratio": "0.08"
+            }
+        },
+        {
+            "usageID": "guzhenren:ba_dao_zhan_gu_active_draw_slash",
+            "usageTitle": "主动·拔刀斩",
+            "usageDesc": "前方扇形范围斩击，造成普通伤害并少量控制，随【刀】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 扇形：{cone_degrees}° | 伤害：{damage} | 推斥：{knockback_strength} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "320.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "260.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "180",
+                "range": "4.8",
+                "radius": "4.8",
+                "cone_degrees": "95",
+                "damage": "680",
+                "knockback_strength": "0.22",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

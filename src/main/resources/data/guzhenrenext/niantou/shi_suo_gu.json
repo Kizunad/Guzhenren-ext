@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:shi_suo_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shi_suo_gu_passive_stone_lock",
+            "usageTitle": "被动·石锁牵制",
+            "usageDesc": "出手夹带石锁之力，延长牵制与迟滞。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 附伤：{extra_physical_damage} | 持续：{effect_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "proc_chance": "0.14",
+                "zhenyuan_base_cost": "60.0",
+                "jingli_cost": "9.0",
+                "niantou_cost": "6.0",
+                "hunpo_cost": "5.0",
+                "extra_physical_damage": "60.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shi_suo_gu_active_stone_lock",
+            "usageTitle": "主动·石锁泥沼",
+            "usageDesc": "在目标处生成泥沼领域，强力迟滞进入者。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 半径：{cloud_radius} | 领域：{cloud_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "range": "18.0",
+                "cloud_radius": "6.0",
+                "cloud_duration_ticks": "220",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "1",
+                "zhenyuan_base_cost": "1400.0",
+                "jingli_cost": "70.0",
+                "niantou_cost": "55.0",
+                "hunpo_cost": "14.0"
+            }
+        }
+    ]
+}
+

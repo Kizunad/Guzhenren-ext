@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:fan_shui_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:fan_shui_gu_passive_reverse_tide",
+            "usageTitle": "被动·逆潮反制",
+            "usageDesc": "受击引动逆潮反噬来敌，并施加虚弱。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 反制：{retaliation_damage} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.16",
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "90.0",
+                "jingli_cost": "14.0",
+                "niantou_cost": "10.0",
+                "hunpo_cost": "10.0",
+                "retaliation_damage": "400.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:fan_shui_gu_active_reverse_tide",
+            "usageTitle": "主动·逆潮回卷",
+            "usageDesc": "逆潮回卷四周，造成强力冲击并迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 伤害：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "radius": "9.0",
+                "zhenyuan_base_cost": "1600.0",
+                "jingli_cost": "80.0",
+                "niantou_cost": "60.0",
+                "hunpo_cost": "18.0",
+                "extra_physical_damage": "1200.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

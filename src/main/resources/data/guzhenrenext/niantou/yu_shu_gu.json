@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:yu_shu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_shu_gu_passive_obsession_edge_5",
+            "usageTitle": "被动·执念锋芒",
+            "usageDesc": "玉碎蛊以极端情绪磨砺杀意，持续提升攻击，但需以多资源维持。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {hunpo_cost_per_second}(魂魄)/s | 攻击：+{attribute_amount}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1600,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "420000.0",
+                "niantou_cost_per_second": "6.0",
+                "hunpo_cost_per_second": "1.5",
+                "attribute_amount": "8.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_shu_gu_active_jade_shatter_5",
+            "usageTitle": "主动·玉碎殉爆",
+            "usageDesc": "以决绝心念引爆血肉魂魄，范围重创敌人，伤人亦伤己。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 伤害：{extra_physical_damage}(普通) | 反噬：{self_damage_amount} | 自裁保护：{prevent_self_death} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 9800,
+            "cost_total_niantou": 2000,
+            "metadata": {
+                "cooldown_ticks": "5200",
+                "radius": "10.0",
+                "extra_physical_damage": "18000.0",
+                "self_damage_amount": "28.0",
+                "prevent_self_death": "false",
+                "zhenyuan_base_cost": "98000000.0",
+                "niantou_cost": "750.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "300.0"
+            }
+        }
+    ]
+}

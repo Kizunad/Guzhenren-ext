@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:xue_shou_yin_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xue_shou_yin_gu_passive_blood_palm_proc",
+            "usageTitle": "被动·血手蚀骨",
+            "usageDesc": "血手印残留于掌势，攻击概率触发更凶的增伤与附伤。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.06",
+                "proc_cooldown_ticks": "220",
+                "damage_multiplier": "1.25",
+                "bonus_damage": "2600.0",
+                "self_heal_amount": "6.0",
+                "debuff_duration_ticks": "200",
+                "debuff_amplifier": "1",
+                "zhenyuan_base_cost": "130000.0",
+                "niantou_cost": "280.0",
+                "jingli_cost": "380.0",
+                "hunpo_cost": "340.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xue_shou_yin_gu_active_blood_palm_finisher",
+            "usageTitle": "主动·血手湮灭",
+            "usageDesc": "血手印一击湮灭血气，造成极高普通伤害并强力虚弱目标。",
+            "usageInfo": "距离：{range} | 伤害：{damage} | 虚弱：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1200,
+            "cost_total_niantou": 400,
+            "metadata": {
+                "range": "30.0",
+                "damage": "16000.0",
+                "debuff_duration_ticks": "220",
+                "debuff_amplifier": "2",
+                "self_heal_amount": "0.0",
+                "cooldown_ticks": "2800",
+                "zhenyuan_base_cost": "900000.0",
+                "niantou_cost": "750.0",
+                "jingli_cost": "900.0",
+                "hunpo_cost": "820.0"
+            }
+        }
+    ]
+}

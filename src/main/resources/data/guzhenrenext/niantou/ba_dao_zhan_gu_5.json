@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:ba_dao_zhan_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:ba_dao_zhan_gu_5_passive_dao_intent_return",
+            "usageTitle": "被动·刀意归元",
+            "usageDesc": "持续催动，消耗真元+魂魄，提升真元/魂魄抗性上限并少量回气，同时获得随【刀】道道痕动态变化的减伤。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{hunpo_cost_per_second}(魂魄)/s | 真元上限：{cap_max_zhenyuan} | 魂魄抗性上限：{cap_max_hunpo_resistance} | 回气：{regen_zhenyuan}/s | 减伤：{damage_reduction_ratio}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "14.0",
+                "niantou_cost_per_second": "0.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "2.6",
+                "cap_max_zhenyuan": "280",
+                "cap_max_hunpo_resistance": "240",
+                "regen_zhenyuan": "6.0",
+                "damage_reduction_ratio": "0.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:ba_dao_zhan_gu_5_active_draw_slash_heaven",
+            "usageTitle": "主动·天外刀光",
+            "usageDesc": "极远距离刀光穿行，造成万级普通伤害并削弱，随【刀】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 宽度：{beam_radius} | 伤害：{damage} | 控制：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "900.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "650.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "420",
+                "range": "13.2",
+                "beam_radius": "0.85",
+                "damage": "18000",
+                "effect_duration_ticks": "110",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

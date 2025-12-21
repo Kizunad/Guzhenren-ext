@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:bei_shui_yi_zhan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bei_shui_yi_zhan_gu_passive_last_stand",
+            "usageTitle": "被动·背水保命",
+            "usageDesc": "命悬一线时触发保命卸力，大幅减伤并短暂护体。",
+            "usageInfo": "阈值：{health_threshold_ratio} | 冷却：{cooldown_ticks}t | 受伤乘算：{damage_multiplier} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "health_threshold_ratio": "0.35",
+                "cooldown_ticks": "800",
+                "damage_multiplier": "0.35",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "8.0",
+                "niantou_cost": "5.0",
+                "hunpo_cost": "10.0",
+                "buff_duration_ticks": "200",
+                "buff_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:bei_shui_yi_zhan_gu_active_last_stand",
+            "usageTitle": "主动·背水一战",
+            "usageDesc": "背水一战，短暂爆发并获得抗性，但消耗极高。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 治疗：{heal_amount}",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "1000",
+                "zhenyuan_base_cost": "9000.0",
+                "jingli_cost": "400.0",
+                "niantou_cost": "340.0",
+                "hunpo_cost": "160.0",
+                "heal_amount": "80.0",
+                "restore_zhenyuan": "80.0",
+                "restore_jingli": "60.0",
+                "restore_hunpo": "30.0",
+                "restore_niantou": "60.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "260",
+                "buff_amplifier": "2"
+            }
+        }
+    ]
+}
+

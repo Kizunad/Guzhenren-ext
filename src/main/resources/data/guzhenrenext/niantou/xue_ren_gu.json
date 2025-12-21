@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:xue_ren_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xue_ren_gu_passive_blood_blade_proc",
+            "usageTitle": "被动·血刃剜肉",
+            "usageDesc": "血刃更利，攻击概率触发增伤与附伤，并令目标中毒。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.08",
+                "proc_cooldown_ticks": "140",
+                "damage_multiplier": "1.15",
+                "bonus_damage": "110.0",
+                "debuff_duration_ticks": "100",
+                "debuff_amplifier": "0",
+                "self_heal_amount": "1.2",
+                "zhenyuan_base_cost": "28000.0",
+                "niantou_cost": "70.0",
+                "jingli_cost": "160.0",
+                "hunpo_cost": "110.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xue_ren_gu_active_blood_blade_sweep",
+            "usageTitle": "主动·血刃横扫",
+            "usageDesc": "挥动血刃横扫周围敌人，造成范围普通伤害并迟缓。",
+            "usageInfo": "半径：{radius} | 伤害：{damage} | 迟缓：{debuff_duration_ticks}t | 每命中自愈：{self_heal_per_hit} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "radius": "6.0",
+                "damage": "900.0",
+                "debuff_duration_ticks": "120",
+                "debuff_amplifier": "1",
+                "self_heal_per_hit": "2.0",
+                "knockback_strength": "0.28",
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "150000.0",
+                "niantou_cost": "260.0",
+                "jingli_cost": "380.0",
+                "hunpo_cost": "280.0"
+            }
+        }
+    ]
+}

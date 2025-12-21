@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:jianzhigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianzhigu_passive_finger_edge",
+            "usageTitle": "被动·剑指余锋",
+            "usageDesc": "剑意凝于指尖，攻击有概率破敌虚弱。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 附伤：+{bonus_damage} | 虚弱：{effect_duration_ticks}t",
+            "cost_duration": 1400,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "proc_chance": "0.16",
+                "proc_cooldown_ticks": "60",
+                "zhenyuan_base_cost": "80.0",
+                "jingli_cost": "15.0",
+                "niantou_cost": "5.0",
+                "bonus_damage": "12.0",
+                "damage_multiplier": "1.05",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianzhigu_active_finger_shot",
+            "usageTitle": "主动·弹指伤人",
+            "usageDesc": "弹指一击，剑意化锋直取要害。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage}",
+            "cost_duration": 1400,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "range": "14.0",
+                "damage": "120.0",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "320.0",
+                "jingli_cost": "70.0"
+            }
+        }
+    ]
+}
+

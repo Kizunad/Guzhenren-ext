@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:shui_jia_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_jia_gu_5_passive_armor_tide",
+            "usageTitle": "被动·潮甲上限",
+            "usageDesc": "持续维持潮甲，提升真元与精力上限，并缓慢强化魂魄抗性。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli}",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "11.0",
+                "jingli_cost_per_second": "2.0",
+                "niantou_cost_per_second": "1.6",
+                "hunpo_cost_per_second": "0.8",
+                "cap_max_zhenyuan": "180.0",
+                "cap_max_jingli": "150.0",
+                "hunpo_resistance_restore": "6.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_jia_gu_5_active_armor_tide",
+            "usageTitle": "主动·潮甲凝护",
+            "usageDesc": "潮甲凝护，获得极强抗性与护盾，并大量恢复。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "7000.0",
+                "jingli_cost": "340.0",
+                "niantou_cost": "280.0",
+                "hunpo_cost": "120.0",
+                "heal_amount": "90.0",
+                "restore_zhenyuan": "60.0",
+                "restore_jingli": "40.0",
+                "restore_hunpo": "30.0",
+                "restore_niantou": "30.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "420",
+                "buff_amplifier": "2"
+            }
+        }
+    ]
+}
+

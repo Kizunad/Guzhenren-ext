@@ -1,0 +1,55 @@
+{
+    "itemID": "guzhenren:qisiren",
+    "usages": [
+        {
+            "usageID": "guzhenren:qisiren_passive_cheat_death_4",
+            "usageTitle": "被动·起死回生（护命）",
+            "usageDesc": "起死人蛊潜伏空窍，濒死之际以重代价强行续命，并给予强力恢复。",
+            "usageInfo": "触发：仅濒死 | 概率：{proc_chance} | 冷却：{cooldown_ticks}t | 保命：生命≥{survival_health} | 自疗：{heal_amount} | 回复：精力{restore_jingli} 念头{restore_niantou} 魂魄{restore_hunpo} | 回生：{regen_duration_ticks}t | 抗性：{resist_duration_ticks}t | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 6800,
+            "cost_total_niantou": 1200,
+            "metadata": {
+                "proc_chance": "1.0",
+                "cooldown_ticks": "3600",
+                "survival_health": "2.0",
+                "heal_amount": "40.0",
+                "restore_jingli": "80.0",
+                "restore_niantou": "70.0",
+                "restore_hunpo": "60.0",
+                "regen_duration_ticks": "320",
+                "regen_amplifier": "1",
+                "resist_duration_ticks": "240",
+                "resist_amplifier": "1",
+                "zhenyuan_base_cost": "3000000.0",
+                "niantou_cost": "140.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "48.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:qisiren_active_revive_like_heal_4",
+            "usageTitle": "主动·起死人术（救治）",
+            "usageDesc": "以人道强行缝合生机，大幅治疗并净化负面状态，给予短暂护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 治疗：{heal_amount} | 回复：真元{zhenyuan_restore} 精力{jingli_restore} 魂魄{hunpo_restore} | 净化：{cleanse_harmful} | 回生：{effect_duration_ticks}t | 护盾：{absorption_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1700,
+            "metadata": {
+                "cooldown_ticks": "2400",
+                "range": "18.0",
+                "heal_amount": "80.0",
+                "zhenyuan_restore": "120.0",
+                "jingli_restore": "100.0",
+                "hunpo_restore": "80.0",
+                "cleanse_harmful": "true",
+                "effect_duration_ticks": "400",
+                "effect_amplifier": "1",
+                "absorption_duration_ticks": "400",
+                "absorption_amplifier": "1",
+                "zhenyuan_base_cost": "6000000.0",
+                "niantou_cost": "350.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

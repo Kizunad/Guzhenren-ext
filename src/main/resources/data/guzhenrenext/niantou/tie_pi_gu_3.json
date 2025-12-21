@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:tie_pi_gu_3",
+    "usages": [
+        {
+            "usageID": "guzhenren:tie_pi_gu_3_passive_iron_wall_3",
+            "usageTitle": "被动·三转铁壁",
+            "usageDesc": "铁皮蛊再蜕，受击时铁壁成形，稳固身形并减免伤害。",
+            "usageInfo": "触发概率：{proc_chance} | 冷却：{cooldown_ticks}t | 减伤倍率：{damage_multiplier}x | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 2600,
+            "cost_total_niantou": 360,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "260",
+                "damage_multiplier": "0.75",
+                "projectile_only": "false",
+                "buff_duration_ticks": "160",
+                "buff_amplifier": "0",
+                "retaliate_physical_damage": "0.0",
+                "zhenyuan_base_cost": "42000.0",
+                "niantou_cost": "60.0",
+                "jingli_cost": "32.0",
+                "hunpo_cost": "16.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:tie_pi_gu_3_active_iron_bulwark_3",
+            "usageTitle": "主动·铁壁护体",
+            "usageDesc": "铁壁凝于周身，短时获得更强抗性与护盾，并回复少量精力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 抗性：{resist_duration_ticks}t | 护盾：{absorption_duration_ticks}t | 回复：精力{restore_jingli} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 3000,
+            "cost_total_niantou": 450,
+            "metadata": {
+                "cooldown_ticks": "800",
+                "zhenyuan_base_cost": "150000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0",
+                "resist_duration_ticks": "260",
+                "resist_amplifier": "0",
+                "absorption_duration_ticks": "260",
+                "absorption_amplifier": "0",
+                "heal_amount": "16.0",
+                "restore_jingli": "40.0"
+            }
+        }
+    ]
+}

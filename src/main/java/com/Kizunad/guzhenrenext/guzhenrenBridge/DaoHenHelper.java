@@ -17,11 +17,26 @@ public final class DaoHenHelper {
         HUN_DAO("hundao"), // 魂道
         GU_DAO("gudao"), // 骨道
         MU_DAO("mudao"), // 木道
+        HUO_DAO("yandao"), // 火/炎道（库变量：daohen_yandao）
+        JIAN_DAO("jiandao"), // 剑道（库变量：daohen_jiandao）
+        DAO_DAO("daodao"), // 刀道（库变量：daohen_daodao）
+        XUE_DAO("xuedao"), // 血道（库变量：daohen_xuedao）
+        LIAN_DAO("liandao"), // 炼道（库变量：dahen_liandao，少了一个 o）
+        LV_DAO("lvdao"), // 律道（库变量：daohen_lvdao）
+        TIAN_DAO("tiandao"), // 天道（库变量：dahen_tiandao，少了一个 o）
+        TOU_DAO("toudao"), // 偷道（库变量：daohen_toudao）
+        XIN_DAO("xindao"), // 信道（库变量：daohen_xindao）
+        YING_DAO("yingdao"), // 影道（库变量：daohen_yingdao）
         XING_DAO("xingdao"), // 星道
         YUE_DAO("yuedao"), // 月道
+        YUN_DAO("yundao"), // 云道（库变量：daohen_yundao）
         ZHI_DAO("zhidao"), // 智道
         JIN_DAO("jindao"), // 金道
+        REN_DAO("rendao"), // 人道（库变量：dahen_rendao，少了一个 o）
         LI_DAO("lidao"), // 力道
+        LEI_DAO("leidao"), // 雷道
+        DU_DAO("dudao"), // 毒道
+        SHUI_DAO("shuidao"), // 水道
         TU_DAO("tudao"), // 土道
         YU_DAO("yudao"), // 宇道
         SHI_DAO("shidao"), // 食道
@@ -58,18 +73,51 @@ public final class DaoHenHelper {
                     return vars.daohen_gudao;
                 case MU_DAO:
                     return vars.daohen_mudao;
+                case HUO_DAO:
+                    return vars.daohen_yandao;
+                case JIAN_DAO:
+                    return vars.daohen_jiandao;
+                case DAO_DAO:
+                    return vars.daohen_daodao;
+                case XUE_DAO:
+                    return vars.daohen_xuedao;
+                case LIAN_DAO:
+                    // 注意：库中变量名为 dahen_liandao（少了一个 o）
+                    return vars.dahen_liandao;
+                case LV_DAO:
+                    return vars.daohen_lvdao;
+                case TIAN_DAO:
+                    // 注意：库中变量名为 dahen_tiandao（少了一个 o）
+                    return vars.dahen_tiandao;
+                case TOU_DAO:
+                    return vars.daohen_toudao;
+                case XIN_DAO:
+                    return vars.daohen_xindao;
+                case YING_DAO:
+                    return vars.daohen_yingdao;
                 case XING_DAO:
                     // 注意：库中变量名为 dahen_xingdao（少了一个 o）
                     return vars.dahen_xingdao;
                 case YUE_DAO:
                     return vars.daohen_yuedao;
+                case YUN_DAO:
+                    return vars.daohen_yundao;
                 case ZHI_DAO:
                     // 注意：库中变量名为 dahen_zhidao（少了一个 o）
                     return vars.dahen_zhidao;
                 case JIN_DAO:
                     return vars.daohen_jindao;
+                case REN_DAO:
+                    // 注意：库中变量名为 dahen_rendao（少了一个 o）
+                    return vars.dahen_rendao;
                 case LI_DAO:
                     return vars.daohen_lidao;
+                case LEI_DAO:
+                    return vars.daohen_leidao;
+                case DU_DAO:
+                    return vars.daohen_dudao;
+                case SHUI_DAO:
+                    return vars.daohen_shuidao;
                 case TU_DAO:
                     return vars.daohen_tudao;
                 case YU_DAO:

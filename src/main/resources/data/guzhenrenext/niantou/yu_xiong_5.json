@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:yu_xiong_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_xiong_5_passive_bear_king_bastion",
+            "usageTitle": "被动·御熊蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 受击倍率：{damage_multiplier}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost": "64.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "18.0",
+                "proc_chance": "0.14",
+                "cooldown_ticks": "240",
+                "damage_multiplier": "0.82",
+                "buff_duration_ticks": "160",
+                "buff_amplifier": "0",
+                "attacker_debuff_duration_ticks": "120",
+                "attacker_debuff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_xiong_5_active_bear_king_quake",
+            "usageTitle": "主动·御熊蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 范围伤害：{extra_physical_damage} | 半径：{radius}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost": "720.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "140.0",
+                "cooldown_ticks": "580",
+                "radius": "8.0",
+                "extra_physical_damage": "8075.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.35"
+            }
+        }
+    ]
+}

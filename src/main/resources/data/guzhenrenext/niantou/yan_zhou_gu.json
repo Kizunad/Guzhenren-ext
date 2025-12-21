@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:yan_zhou_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yan_zhou_gu_passive_flame_armor",
+            "usageTitle": "被动·炎胄护身",
+            "usageDesc": "炎胄成形，甲胄存在时免疫火焰侵袭。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 持续：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "niantou_cost_per_second": "0.45",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yan_zhou_gu_active_flame_bulwark",
+            "usageTitle": "主动·炎胄壁垒",
+            "usageDesc": "炎胄凝实为壁垒，短暂提供护盾与减伤。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 护盾：{absorption_duration_ticks}t | 减伤：{resistance_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "150.0",
+                "hunpo_cost": "14.0",
+                "heal_amount": "0.0",
+                "absorption_duration_ticks": "140",
+                "absorption_amplifier": "1",
+                "resistance_duration_ticks": "120",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+

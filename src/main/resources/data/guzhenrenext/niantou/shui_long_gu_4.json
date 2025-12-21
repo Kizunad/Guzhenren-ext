@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:shui_long_gu_4",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_long_gu_4_passive_dragon_surge",
+            "usageTitle": "被动·龙潮余威",
+            "usageDesc": "龙潮余威不散，出手附带更强附伤与压制。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 附伤：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "proc_chance": "0.16",
+                "zhenyuan_base_cost": "70.0",
+                "jingli_cost": "10.0",
+                "niantou_cost": "6.0",
+                "hunpo_cost": "6.0",
+                "extra_physical_damage": "80.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_long_gu_4_active_dragon_surge",
+            "usageTitle": "主动·龙潮冲击",
+            "usageDesc": "龙潮冲击目标并溅射四周，造成极高普通伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 溅射：{aoe_radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "range": "20.0",
+                "zhenyuan_base_cost": "2400.0",
+                "jingli_cost": "100.0",
+                "niantou_cost": "80.0",
+                "hunpo_cost": "30.0",
+                "extra_physical_damage": "2500.0",
+                "aoe_radius": "4.0",
+                "aoe_extra_physical_damage": "1200.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:tie_pi_gu_2",
+    "usages": [
+        {
+            "usageID": "guzhenren:tie_pi_gu_2_passive_iron_hide_2",
+            "usageTitle": "被动·二转铁韧",
+            "usageDesc": "铁皮蛊蜕变，金道之韧渗入筋骨，提升护甲韧性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 护甲韧性：+{attribute_amount}",
+            "cost_duration": 1400,
+            "cost_total_niantou": 180,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "niantou_cost_per_second": "2.0",
+                "attribute_amount": "3.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:tie_pi_gu_2_active_iron_hide_2",
+            "usageTitle": "主动·铁肤凝甲",
+            "usageDesc": "铁韧凝于体表，短时提升抗性并形成护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 抗性：{resist_duration_ticks}t | 护盾：{absorption_duration_ticks}t",
+            "cost_duration": 1600,
+            "cost_total_niantou": 220,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "zhenyuan_base_cost": "2400.0",
+                "niantou_cost": "240.0",
+                "jingli_cost": "160.0",
+                "hunpo_cost": "60.0",
+                "resist_duration_ticks": "220",
+                "resist_amplifier": "0",
+                "absorption_duration_ticks": "220",
+                "absorption_amplifier": "0",
+                "restore_hunpo": "6.0"
+            }
+        }
+    ]
+}
+

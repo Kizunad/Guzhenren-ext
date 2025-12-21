@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:huoxingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huoxingu_passive_fire_heart_cap",
+            "usageTitle": "被动·火心扩容",
+            "usageDesc": "火心改造体魄，提升多项容量上限并缓慢修补魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 真元上限：+{max_zhenyuan_bonus} | 精力上限：+{max_jingli_bonus} | 魂魄上限：+{max_hunpo_bonus}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "hunpo_cost_per_second": "0.25",
+                "max_zhenyuan_bonus": "120.0",
+                "max_jingli_bonus": "60.0",
+                "max_hunpo_bonus": "30.0",
+                "hunpo_resistance_restore": "0.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:huoxingu_active_fire_heart_awakening",
+            "usageTitle": "主动·火心激发",
+            "usageDesc": "短暂激发火心，迅速恢复并提升攻势。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 回复：{regen_duration_ticks}t | 增伤：{damage_boost_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "340",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "18.0",
+                "heal_amount": "16.0",
+                "regen_duration_ticks": "160",
+                "regen_amplifier": "0",
+                "damage_boost_duration_ticks": "120",
+                "damage_boost_amplifier": "0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:jinfeigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jinfeigu_passive_golden_breath",
+            "usageTitle": "被动·金肺行气",
+            "usageDesc": "金肺蛊调息换气，维持身法轻盈，提升移动速度。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 移速：+{attribute_amount}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "900.0",
+                "jingli_cost_per_second": "700.0",
+                "attribute_amount": "0.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:jinfeigu_active_golden_step",
+            "usageTitle": "主动·金步",
+            "usageDesc": "金息一转，身形瞬移数步，并短暂加速。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 位移：{distance} | 加速：{speed_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 3000,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "distance": "12.0",
+                "speed_duration_ticks": "200",
+                "speed_amplifier": "0",
+                "zhenyuan_base_cost": "80000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0"
+            }
+        }
+    ]
+}

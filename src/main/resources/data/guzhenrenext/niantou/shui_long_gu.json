@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:shui_long_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_long_gu_passive_dragon_fang",
+            "usageTitle": "被动·水龙余威",
+            "usageDesc": "水龙余威不散，出手附带压制与附伤。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 附伤：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.14",
+                "zhenyuan_base_cost": "32.0",
+                "jingli_cost": "3.8",
+                "niantou_cost": "2.2",
+                "hunpo_cost": "0.0",
+                "extra_physical_damage": "20.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_long_gu_active_dragon_strike",
+            "usageTitle": "主动·水龙冲击",
+            "usageDesc": "水龙冲击目标并溅射周围，造成高额普通伤害。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 溅射：{aoe_radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "range": "16.0",
+                "zhenyuan_base_cost": "900.0",
+                "jingli_cost": "40.0",
+                "niantou_cost": "28.0",
+                "hunpo_cost": "4.0",
+                "extra_physical_damage": "520.0",
+                "aoe_radius": "3.0",
+                "aoe_extra_physical_damage": "220.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

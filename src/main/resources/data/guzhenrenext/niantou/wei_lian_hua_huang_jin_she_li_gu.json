@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:wei_lian_hua_huang_jin_she_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wei_lian_hua_huang_jin_she_li_gu_passive_gold_cap_4",
+            "usageTitle": "被动·黄金增容（未炼）",
+            "usageDesc": "未炼化黄金舍利蛊滋养空窍，抬升真元上限、精力上限与念头容量，并缓慢修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli} 念头容量+{cap_niantou_capacity} | 抗性回复：{hunpo_resistance_restore}/s",
+            "cost_duration": 5200,
+            "cost_total_niantou": 920,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "38000.0",
+                "niantou_cost_per_second": "1.0",
+                "jingli_cost_per_second": "0.50",
+                "hunpo_cost_per_second": "0.25",
+                "cap_max_zhenyuan": "260.0",
+                "cap_max_jingli": "180.0",
+                "cap_niantou_capacity": "200.0",
+                "hunpo_resistance_restore": "0.9"
+            }
+        },
+        {
+            "usageID": "guzhenren:wei_lian_hua_huang_jin_she_li_gu_active_gold_nurture_4",
+            "usageTitle": "主动·黄金滋养（群护）",
+            "usageDesc": "以黄金舍利温养群体，范围治疗并回补资源，短暂增强恢复。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 治疗：{heal_amount} | 回复：真元{zhenyuan_restore} 精力{jingli_restore} 魂魄{hunpo_restore} | 回生：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 7200,
+            "cost_total_niantou": 1300,
+            "metadata": {
+                "cooldown_ticks": "1800",
+                "radius": "8.0",
+                "ignore_walls": "false",
+                "heal_amount": "20.0",
+                "zhenyuan_restore": "60.0",
+                "jingli_restore": "60.0",
+                "hunpo_restore": "45.0",
+                "cleanse_harmful": "false",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "5200000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}

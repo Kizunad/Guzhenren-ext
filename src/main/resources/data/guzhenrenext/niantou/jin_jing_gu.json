@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:jin_jing_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jin_jing_gu_passive_golden_gaze",
+            "usageTitle": "被动·金睛洞照",
+            "usageDesc": "金睛蛊洞照敌形，攻击时有概率令目标暴露并受创。",
+            "usageInfo": "触发概率：{proc_chance} | 持续：{effect_duration_ticks}t | 追加伤害：{extra_physical_damage}(普通) | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 2800,
+            "cost_total_niantou": 450,
+            "metadata": {
+                "proc_chance": "0.20",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "120.0",
+                "zhenyuan_base_cost": "60000.0",
+                "niantou_cost": "60.0",
+                "jingli_cost": "32.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jin_jing_gu_active_golden_snipe",
+            "usageTitle": "主动·金睛锁定",
+            "usageDesc": "金睛锁敌，远距一击洞穿，重创并削弱目标。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage}(普通) | 虚弱：{effect_duration_ticks}t | 回复：念头{restore_niantou} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "range": "14.0",
+                "extra_physical_damage": "700.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0",
+                "pull_strength": "0.0",
+                "pull_vertical": "0.0",
+                "restore_niantou": "40.0",
+                "zhenyuan_base_cost": "240000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}

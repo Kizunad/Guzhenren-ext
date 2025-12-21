@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:xueqigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xueqigu_passive_blood_qi_sustain",
+            "usageTitle": "被动·血气滋补",
+            "usageDesc": "持续补充血气，每秒缓慢恢复精力与魂魄。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 回血：{heal_per_second}/s | 回精：{jingli_gain_per_second}/s | 回魂：{hunpo_gain_per_second}/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1800.0",
+                "niantou_cost_per_second": "6.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "heal_per_second": "0.35",
+                "niantou_gain_per_second": "0.00",
+                "jingli_gain_per_second": "0.60",
+                "hunpo_gain_per_second": "0.30",
+                "zhenyuan_gain_per_second": "0.00"
+            }
+        },
+        {
+            "usageID": "guzhenren:xueqigu_active_blood_qi_recover",
+            "usageTitle": "主动·血气回涌",
+            "usageDesc": "短时间内回补血气，回复生命并返还部分精力/魂魄/真元。",
+            "usageInfo": "回血：{heal_amount} | 回精：{jingli_gain} | 回魂：{hunpo_gain} | 回真：{zhenyuan_gain} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 300,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "42000.0",
+                "niantou_cost": "100.0",
+                "jingli_cost": "180.0",
+                "hunpo_cost": "100.0",
+                "heal_amount": "12.0",
+                "niantou_gain": "0.0",
+                "jingli_gain": "8.0",
+                "hunpo_gain": "4.0",
+                "zhenyuan_gain": "10.0"
+            }
+        }
+    ]
+}

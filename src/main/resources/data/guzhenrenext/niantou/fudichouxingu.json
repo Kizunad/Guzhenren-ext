@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:fudichouxingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:fudichouxingu_passive_underhand_step",
+            "usageTitle": "被动·暗步",
+            "usageDesc": "步法诡谲，持续提升移速，便于寻找破绽。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s | 移速：+{attribute_amount}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1100.0",
+                "niantou_cost_per_second": "4.0",
+                "jingli_cost_per_second": "3.5",
+                "hunpo_cost_per_second": "0.0",
+                "attribute_amount": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:fudichouxingu_active_pull_the_fuel",
+            "usageTitle": "主动·釜底抽薪",
+            "usageDesc": "锁定目标，抽取其资源并按比例转化为自身续航。",
+            "usageInfo": "距离：{range} | 抽取：念头{niantou_drain} 精力{jingli_drain} 魂魄{hunpo_drain} 真元{zhenyuan_drain} | 转化：{transfer_ratio} | 虚弱：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1600,
+            "cost_total_niantou": 420,
+            "metadata": {
+                "range": "20.0",
+                "transfer_ratio": "0.8",
+                "niantou_drain": "80.0",
+                "jingli_drain": "70.0",
+                "hunpo_drain": "60.0",
+                "zhenyuan_drain": "120.0",
+                "debuff_duration_ticks": "200",
+                "debuff_amplifier": "1",
+                "cooldown_ticks": "1400",
+                "zhenyuan_base_cost": "240000.0",
+                "niantou_cost": "550.0",
+                "jingli_cost": "620.0",
+                "hunpo_cost": "580.0"
+            }
+        }
+    ]
+}
+

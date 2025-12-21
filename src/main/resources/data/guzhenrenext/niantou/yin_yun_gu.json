@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:yin_yun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yin_yun_gu_passive_gloom_shroud",
+            "usageTitle": "被动·阴云匿踪",
+            "usageDesc": "持续催动，消耗真元+魂魄，并随【云】道道痕动态变化，获得隐匿。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{hunpo_cost_per_second}(魂魄)/s | 隐身时长：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0",
+                "niantou_cost_per_second": "0.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.8",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yin_yun_gu_active_gloom_pressure",
+            "usageTitle": "主动·阴云压境",
+            "usageDesc": "压下阴云，对周围敌对目标造成普通伤害并致盲/迟缓，随【云】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 追加普通伤害：{extra_physical_damage} | 控制：{effect_duration_ticks}t | 推斥：{knockback_strength} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "280.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "220.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "280",
+                "radius": "4.8",
+                "extra_physical_damage": "420",
+                "effect_duration_ticks": "70",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.25"
+            }
+        }
+    ]
+}
+

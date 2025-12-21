@@ -1,0 +1,61 @@
+{
+    "itemID": "guzhenren:chou_pi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:chou_pi_gu_passive_stink_aura",
+            "usageTitle": "被动·恶臭缠身",
+            "usageDesc": "持续散发恶臭毒雾，削弱周围敌对目标。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 半径：{radius} | 持续：{effect_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.5",
+                "jingli_cost_per_second": "0.03",
+                "niantou_cost_per_second": "0.05",
+                "hunpo_cost_per_second": "0.0",
+                "radius": "6.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_physical_damage_per_second": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:chou_pi_gu_passive_poison_breath_refine",
+            "usageTitle": "被动·毒息归元",
+            "usageDesc": "以毒息反哺空窍，缓慢恢复真元、魂魄、精力与念头，并受【毒】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)+{hunpo_gain}(魂魄)+{jingli_gain}(精力)+{niantou_gain}(念头)",
+            "cost_duration": 600,
+            "cost_total_niantou": 50,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.15",
+                "jingli_cost_per_second": "0.03",
+                "niantou_cost_per_second": "0.05",
+                "hunpo_cost_per_second": "0.01",
+                "zhenyuan_gain": "0.20",
+                "hunpo_gain": "0.05",
+                "jingli_gain": "0.10",
+                "niantou_gain": "0.15"
+            }
+        },
+        {
+            "usageID": "guzhenren:chou_pi_gu_active_stink_field",
+            "usageTitle": "主动·臭气外放",
+            "usageDesc": "在目标位置喷吐臭气，形成短暂毒雾领域。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 领域半径：{cloud_radius} | 领域持续：{cloud_duration_ticks}t | 削弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "cooldown_ticks": "160",
+                "range": "12.0",
+                "cloud_radius": "3.5",
+                "cloud_duration_ticks": "120",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "20.0",
+                "jingli_cost": "1.5",
+                "niantou_cost": "2.0",
+                "hunpo_cost": "0.2"
+            }
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:jinlvyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jinlvyigu_passive_golden_thread_guard_4",
+            "usageTitle": "被动·金缕卸箭",
+            "usageDesc": "金缕衣蛊织出护络，对投射物伤害更易卸力。",
+            "usageInfo": "触发概率：{proc_chance} | 冷却：{cooldown_ticks}t | 仅投射物：{projectile_only} | 减伤倍率：{damage_multiplier}x | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 5200,
+            "cost_total_niantou": 900,
+            "metadata": {
+                "proc_chance": "0.20",
+                "cooldown_ticks": "320",
+                "damage_multiplier": "0.72",
+                "projectile_only": "true",
+                "buff_duration_ticks": "200",
+                "buff_amplifier": "0",
+                "retaliate_physical_damage": "0.0",
+                "zhenyuan_base_cost": "1500000.0",
+                "niantou_cost": "140.0",
+                "jingli_cost": "80.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jinlvyigu_active_golden_thread_shroud_4",
+            "usageTitle": "主动·金缕护身",
+            "usageDesc": "金缕护络缠身，短时加速并提升抗性，回复部分精力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 加速：{speed_duration_ticks}t | 抗性：{resist_duration_ticks}t | 回复：精力{restore_jingli} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 6500,
+            "cost_total_niantou": 1150,
+            "metadata": {
+                "cooldown_ticks": "1400",
+                "speed_duration_ticks": "300",
+                "speed_amplifier": "1",
+                "resist_duration_ticks": "200",
+                "resist_amplifier": "0",
+                "restore_jingli": "80.0",
+                "zhenyuan_base_cost": "3800000.0",
+                "niantou_cost": "350.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xue_di_zi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xue_di_zi_gu_passive_blood_split_caps",
+            "usageTitle": "被动·血滴裂变",
+            "usageDesc": "血滴子吞噬本命精血后裂变增殖，表现为空窍上限/容量提升。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 上限：真{max_zhenyuan_bonus}/精{max_jingli_bonus}/魂{max_hunpo_bonus}/念容{niantou_capacity_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "18000.0",
+                "niantou_cost_per_second": "28.0",
+                "jingli_cost_per_second": "34.0",
+                "hunpo_cost_per_second": "26.0",
+                "max_zhenyuan_bonus": "480.0",
+                "max_jingli_bonus": "500.0",
+                "max_hunpo_bonus": "460.0",
+                "max_hunpo_resistance_bonus": "90.0",
+                "niantou_capacity_bonus": "360.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xue_di_zi_gu_active_blood_split_burst",
+            "usageTitle": "主动·血滴裂爆",
+            "usageDesc": "血滴子裂爆成雨，造成范围普通伤害并迟缓敌人。",
+            "usageInfo": "半径：{radius} | 伤害：{damage} | 迟缓：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1200,
+            "cost_total_niantou": 400,
+            "metadata": {
+                "radius": "8.0",
+                "damage": "12000.0",
+                "debuff_duration_ticks": "140",
+                "debuff_amplifier": "1",
+                "self_heal_per_hit": "0.0",
+                "knockback_strength": "0.40",
+                "cooldown_ticks": "2800",
+                "zhenyuan_base_cost": "850000.0",
+                "niantou_cost": "700.0",
+                "jingli_cost": "900.0",
+                "hunpo_cost": "820.0"
+            }
+        }
+    ]
+}

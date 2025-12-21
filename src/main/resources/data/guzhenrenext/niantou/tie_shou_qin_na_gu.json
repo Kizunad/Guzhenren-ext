@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:tie_shou_qin_na_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tie_shou_qin_na_gu_passive_iron_grapple_5",
+            "usageTitle": "被动·铁手锁步",
+            "usageDesc": "铁手擒拿蛊令出手更狠，攻击时有概率锁住敌步并造成额外伤害。",
+            "usageInfo": "触发概率：{proc_chance} | 持续：{effect_duration_ticks}t | 追加伤害：{extra_physical_damage}(普通) | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1600,
+            "metadata": {
+                "proc_chance": "0.18",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "900.0",
+                "zhenyuan_base_cost": "22000000.0",
+                "niantou_cost": "300.0",
+                "jingli_cost": "180.0",
+                "hunpo_cost": "120.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:tie_shou_qin_na_gu_active_iron_capture_5",
+            "usageTitle": "主动·铁手擒拿",
+            "usageDesc": "铁手探出擒拿目标，强力牵引并重击，造成巨额伤害与迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 牵引：{pull_strength} | 伤害：{extra_physical_damage}(普通) | 迟滞：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 9800,
+            "cost_total_niantou": 1900,
+            "metadata": {
+                "cooldown_ticks": "2600",
+                "range": "8.0",
+                "pull_strength": "1.80",
+                "pull_vertical": "0.30",
+                "extra_physical_damage": "6200.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "self_heal_amount": "40.0",
+                "restore_jingli": "60.0",
+                "zhenyuan_base_cost": "76000000.0",
+                "niantou_cost": "750.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "300.0"
+            }
+        }
+    ]
+}

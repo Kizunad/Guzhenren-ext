@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:jianyugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianyugu_passive_domain_anchor",
+            "usageTitle": "被动·剑域根基",
+            "usageDesc": "剑域根基稳固，提升生命上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 生命上限：+{attribute_amount}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "18.0",
+                "attribute_amount": "40.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianyugu_active_sword_domain",
+            "usageTitle": "主动·剑域展开",
+            "usageDesc": "在指定位置展开剑域，持续切割并削弱敌人。",
+            "usageInfo": "范围：{range} | 持续：{duration_ticks}t | 半径：{radius} | 冷却：{cooldown_ticks}t | 开启消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 每秒伤害：{damage_per_second}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "range": "20.0",
+                "duration_ticks": "400",
+                "radius": "14.0",
+                "damage_per_second": "1800.0",
+                "cooldown_ticks": "1800",
+                "zhenyuan_base_cost": "26000.0",
+                "jingli_cost": "450.0",
+                "zhenyuan_base_cost_per_second": "120.0",
+                "niantou_cost_per_second": "4.0",
+                "jingli_cost_per_second": "6.0",
+                "hunpo_cost_per_second": "2.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "2",
+                "weak_duration_ticks": "60",
+                "weak_amplifier": "1"
+            }
+        }
+    ]
+}

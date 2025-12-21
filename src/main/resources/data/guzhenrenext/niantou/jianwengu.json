@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jianwengu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianwengu_passive_pattern_armor",
+            "usageTitle": "被动·剑纹甲",
+            "usageDesc": "剑纹加身，持续提升护甲。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 护甲：+{attribute_amount}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 440,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.0",
+                "jingli_cost_per_second": "1.5",
+                "attribute_amount": "12.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianwengu_active_pattern_shock",
+            "usageTitle": "主动·剑纹震",
+            "usageDesc": "剑纹震荡，范围削弱敌人。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 击退：{knockback_strength} | 虚弱：{effect_duration_ticks}t",
+            "cost_duration": 2200,
+            "cost_total_niantou": 440,
+            "metadata": {
+                "radius": "5.5",
+                "damage": "450.0",
+                "knockback_strength": "0.6",
+                "cooldown_ticks": "560",
+                "zhenyuan_base_cost": "1800.0",
+                "jingli_cost": "200.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

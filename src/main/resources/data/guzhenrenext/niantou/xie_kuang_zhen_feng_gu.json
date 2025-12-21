@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xie_kuang_zhen_feng_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_kuang_zhen_feng_gu_passive_frenzy_proc",
+            "usageTitle": "被动·血狂针刺",
+            "usageDesc": "血狂毒针渗透，攻击概率触发增伤与附伤，并令目标虚弱。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage} | 虚弱：{debuff_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.09",
+                "proc_cooldown_ticks": "140",
+                "damage_multiplier": "1.12",
+                "bonus_damage": "80.0",
+                "debuff_duration_ticks": "120",
+                "debuff_amplifier": "0",
+                "zhenyuan_base_cost": "25000.0",
+                "niantou_cost": "60.0",
+                "jingli_cost": "140.0",
+                "hunpo_cost": "100.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_kuang_zhen_feng_gu_active_frenzy_sting",
+            "usageTitle": "主动·血狂毒针",
+            "usageDesc": "以血道催动毒针刺入目标要害，造成较高普通伤害并施加虚弱。",
+            "usageInfo": "距离：{range} | 伤害：{damage} | 虚弱：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "range": "22.0",
+                "damage": "700.0",
+                "debuff_duration_ticks": "200",
+                "debuff_amplifier": "1",
+                "self_heal_amount": "0.0",
+                "cooldown_ticks": "700",
+                "zhenyuan_base_cost": "90000.0",
+                "niantou_cost": "170.0",
+                "jingli_cost": "260.0",
+                "hunpo_cost": "180.0"
+            }
+        }
+    ]
+}

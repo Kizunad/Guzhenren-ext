@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:jin_zhen_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jin_zhen_gu_passive_piercing_needle",
+            "usageTitle": "被动·金针钉刺",
+            "usageDesc": "金针暗藏于指间，攻击时有概率发出钉刺，迟滞敌人并造成额外伤害。",
+            "usageInfo": "触发概率：{proc_chance} | 持续：{effect_duration_ticks}t | 追加伤害：{extra_physical_damage}(普通) | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 1500,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "proc_chance": "0.18",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "18.0",
+                "zhenyuan_base_cost": "900.0",
+                "niantou_cost": "220.0",
+                "jingli_cost": "120.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jin_zhen_gu_active_needle_shot",
+            "usageTitle": "主动·金针击",
+            "usageDesc": "凝成一束金针，远距离锁定目标，造成伤害并削弱其力量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage}(普通) | 虚弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1800,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "range": "10.0",
+                "extra_physical_damage": "60.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "pull_strength": "0.0",
+                "pull_vertical": "0.0",
+                "zhenyuan_base_cost": "4200.0",
+                "niantou_cost": "680.0",
+                "jingli_cost": "380.0",
+                "hunpo_cost": "180.0",
+                "restore_niantou": "8.0"
+            }
+        }
+    ]
+}
+

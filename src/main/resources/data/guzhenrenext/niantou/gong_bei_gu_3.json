@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:gong_bei_gu_3",
+    "usages": [
+        {
+            "usageID": "guzhenren:gong_bei_gu_3_passive_bound_by_law",
+            "usageTitle": "被动·缚功之律",
+            "usageDesc": "律意渗透，攻击概率迟滞目标。",
+            "usageInfo": "触发：{proc_chance} | 迟滞：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.14",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "0.0",
+                "zhenyuan_base_cost": "50000.0",
+                "niantou_cost": "160.0",
+                "jingli_cost": "180.0",
+                "hunpo_cost": "140.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:gong_bei_gu_3_active_punish_strike",
+            "usageTitle": "主动·律罚一击",
+            "usageDesc": "锁定单体，造成中等普通伤害并施加虚弱。",
+            "usageInfo": "距离：{range} | 伤害：{extra_magic_damage} | 虚弱：{weakness_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 900,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "range": "18.0",
+                "extra_magic_damage": "600.0",
+                "weakness_duration_ticks": "120",
+                "weakness_amplifier": "0",
+                "cooldown_ticks": "800",
+                "zhenyuan_base_cost": "120000.0",
+                "niantou_cost": "320.0",
+                "jingli_cost": "360.0",
+                "hunpo_cost": "280.0"
+            }
+        }
+    ]
+}
+

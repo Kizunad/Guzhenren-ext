@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveAoEBurstEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xingdao.common.XingDaoActiveSelfBuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.common.DaoSustainedResourceRegenEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoAttackProcDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xingdao.common.XingDaoSustainedAttributeModifierEffect;
 import java.util.List;
@@ -23,6 +25,16 @@ public final class TierOneXingDaoRegistry {
             new XingDaoAttackProcDebuffEffect(
                 "guzhenren:xingguanggu_passive_starlight_mark",
                 MobEffects.GLOWING
+            )
+        );
+        GuEffectRegistry.register(
+            new DaoSustainedResourceRegenEffect(
+                "guzhenren:xingguanggu_passive_xing_hui_yang_shen",
+                DaoHenHelper.DaoType.XING_DAO,
+                false,
+                true,
+                true,
+                false
             )
         );
         GuEffectRegistry.register(

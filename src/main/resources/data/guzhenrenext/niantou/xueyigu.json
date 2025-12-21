@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:xueyigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xueyigu_passive_blood_armor_guard",
+            "usageTitle": "被动·血衣护体",
+            "usageDesc": "血衣凝形，受击时更易卸力并小幅自愈。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 减伤：x{damage_multiplier} | 自愈：{self_heal_amount}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.18",
+                "proc_cooldown_ticks": "140",
+                "damage_multiplier": "0.80",
+                "self_heal_amount": "1.0",
+                "zhenyuan_base_cost": "9000.0",
+                "niantou_cost": "22.0",
+                "jingli_cost": "60.0",
+                "hunpo_cost": "35.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xueyigu_active_blood_armor_burst",
+            "usageTitle": "主动·血衣近身",
+            "usageDesc": "血衣爆发，震散近身之敌并令其流血（以中毒简化）。",
+            "usageInfo": "半径：{radius} | 伤害：{damage} | 中毒：{debuff_duration_ticks}t | 每命中自愈：{self_heal_per_hit} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 300,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "radius": "4.5",
+                "damage": "120.0",
+                "debuff_duration_ticks": "120",
+                "debuff_amplifier": "0",
+                "self_heal_per_hit": "1.2",
+                "knockback_strength": "0.15",
+                "cooldown_ticks": "500",
+                "zhenyuan_base_cost": "42000.0",
+                "niantou_cost": "90.0",
+                "jingli_cost": "160.0",
+                "hunpo_cost": "90.0"
+            }
+        }
+    ]
+}

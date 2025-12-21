@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:yu_jun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_jun_gu_passive_command_aura",
+            "usageTitle": "被动·御军蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "niantou_cost_per_second": "0.8",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "attribute_amount": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_jun_gu_active_pack_command",
+            "usageTitle": "主动·御军蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 半径：{radius} | 治疗：{heal_amount}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost": "120.0",
+                "niantou_cost": "24.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "400",
+                "radius": "7.0",
+                "heal_amount": "1.0",
+                "cleanse_negative": "false",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

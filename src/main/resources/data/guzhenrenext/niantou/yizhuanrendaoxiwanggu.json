@@ -1,0 +1,53 @@
+{
+    "itemID": "guzhenren:yizhuanrendaoxiwanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yizhuanrendaoxiwanggu_passive_hope_luck_1",
+            "usageTitle": "被动·希望微光",
+            "usageDesc": "希望蛊常驻心田，微微提振气运与决心。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 幸运：+{attribute_amount}",
+            "cost_duration": 900,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.9",
+                "niantou_cost_per_second": "0.08",
+                "attribute_amount": "0.6"
+            }
+        },
+        {
+            "usageID": "guzhenren:yizhuanrendaoxiwanggu_passive_hope_warm_yuan",
+            "usageTitle": "被动·希望温养",
+            "usageDesc": "希望之念温养空窍底蕴，缓慢回补真元，并受【人】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)",
+            "cost_duration": 900,
+            "cost_total_niantou": 95,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.05",
+                "jingli_cost_per_second": "0.01",
+                "niantou_cost_per_second": "0.02",
+                "hunpo_cost_per_second": "0.00",
+                "zhenyuan_gain": "0.20"
+            }
+        },
+        {
+            "usageID": "guzhenren:yizhuanrendaoxiwanggu_active_hope_guard_1",
+            "usageTitle": "主动·希望护体",
+            "usageDesc": "心念凝聚，短时抵御冲击并稳住身形。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 持续：{effect_duration_ticks}t | 回复：精力{restore_jingli} 念头{restore_niantou} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 1100,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "400",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "heal_amount": "1.0",
+                "restore_jingli": "2.0",
+                "restore_niantou": "1.5",
+                "restore_hunpo": "0.0",
+                "zhenyuan_base_cost": "70.0",
+                "niantou_cost": "12.0",
+                "jingli_cost": "5.0"
+            }
+        }
+    ]
+}

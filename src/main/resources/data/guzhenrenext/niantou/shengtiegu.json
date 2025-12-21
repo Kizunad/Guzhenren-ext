@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:shengtiegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shengtiegu_passive_raw_iron_skin",
+            "usageTitle": "被动·生铁护体",
+            "usageDesc": "生铁蛊沉稳厚重，常驻可稳固皮骨，提升护甲。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 护甲：+{attribute_amount}",
+            "cost_duration": 1500,
+            "cost_total_niantou": 210,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "7.5",
+                "hunpo_cost_per_second": "1.2",
+                "attribute_amount": "3.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shengtiegu_active_raw_iron_refresh",
+            "usageTitle": "主动·生铁回气",
+            "usageDesc": "以生铁之意调息，恢复少量资源并短暂提升恢复力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 回复：精力{restore_jingli}/魂魄{restore_hunpo} | 回复：{heal_amount}(生命) | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1800,
+            "cost_total_niantou": 260,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "3600.0",
+                "niantou_cost": "480.0",
+                "jingli_cost": "240.0",
+                "hunpo_cost": "120.0",
+                "regen_duration_ticks": "200",
+                "regen_amplifier": "0",
+                "restore_jingli": "30.0",
+                "restore_hunpo": "18.0",
+                "heal_amount": "8.0"
+            }
+        }
+    ]
+}
+

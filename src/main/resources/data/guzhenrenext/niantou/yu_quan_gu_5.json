@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:yu_quan_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_quan_gu_5_passive_hound_king_sense",
+            "usageTitle": "被动·御犬蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "13.0",
+                "niantou_cost_per_second": "2.8",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_quan_gu_5_active_hound_king_lock",
+            "usageTitle": "主动·御犬蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 伤害：{extra_physical_damage} | 范围：{range}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost": "720.0",
+                "niantou_cost": "140.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "520",
+                "range": "16.0",
+                "extra_physical_damage": "8500.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "0.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

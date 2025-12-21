@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xie_zhui_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_zhui_gu_passive_blood_spike_proc",
+            "usageTitle": "被动·血锥穿心",
+            "usageDesc": "攻击概率凝出血锥贯穿要害，附带虚弱效果。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage} | 虚弱：{debuff_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.10",
+                "proc_cooldown_ticks": "120",
+                "damage_multiplier": "1.08",
+                "bonus_damage": "20.0",
+                "debuff_duration_ticks": "120",
+                "debuff_amplifier": "0",
+                "zhenyuan_base_cost": "9000.0",
+                "niantou_cost": "25.0",
+                "jingli_cost": "60.0",
+                "hunpo_cost": "40.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_zhui_gu_active_blood_spike",
+            "usageTitle": "主动·血锥飞刺",
+            "usageDesc": "凝出血锥飞刺锁定目标，造成普通伤害并附带虚弱。",
+            "usageInfo": "距离：{range} | 伤害：{damage} | 虚弱：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 300,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "range": "16.0",
+                "damage": "160.0",
+                "debuff_duration_ticks": "160",
+                "debuff_amplifier": "0",
+                "self_heal_amount": "0.0",
+                "cooldown_ticks": "450",
+                "zhenyuan_base_cost": "45000.0",
+                "niantou_cost": "110.0",
+                "jingli_cost": "180.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

@@ -14,6 +14,22 @@
                 "niantou_cost_per_second": "0.6",
                 "jingli_cost_per_second": "0.4"
             }
+        },
+        {
+            "usageID": "guzhenren:xiao_hun_gu_passive_soul_warm_aperture",
+            "usageTitle": "被动·魂温养窍",
+            "usageDesc": "以魂意温养空窍，缓慢回补念头与真元，并受【魂】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)+{niantou_gain}(念头)",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.10",
+                "jingli_cost_per_second": "0.02",
+                "niantou_cost_per_second": "0.03",
+                "hunpo_cost_per_second": "0.01",
+                "zhenyuan_gain": "0.18",
+                "niantou_gain": "0.12"
+            }
         }
     ]
 }

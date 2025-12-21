@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:bai_yin_she_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bai_yin_she_li_gu_passive_silver_cap_3",
+            "usageTitle": "被动·白银增容",
+            "usageDesc": "白银舍利蛊滋养空窍，临时抬升真元上限与念头容量，并缓慢修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：真元+{cap_max_zhenyuan} 念头容量+{cap_niantou_capacity} | 抗性回复：{hunpo_resistance_restore}/s",
+            "cost_duration": 2800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "900.0",
+                "niantou_cost_per_second": "700.0",
+                "jingli_cost_per_second": "540.0",
+                "hunpo_cost_per_second": "300.0",
+                "cap_max_zhenyuan": "140.0",
+                "cap_niantou_capacity": "90.0",
+                "hunpo_resistance_restore": "0.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:bai_yin_she_li_gu_active_silver_replenish_3",
+            "usageTitle": "主动·白银回补",
+            "usageDesc": "以白银舍利稳住气脉，迅速治疗并回补真元，短暂增强抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 治疗：{heal_amount} | 回复：真元{zhenyuan_restore} 精力{jingli_restore} 魂魄{hunpo_restore} | 抗性：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "range": "12.0",
+                "heal_amount": "20.0",
+                "zhenyuan_restore": "70.0",
+                "jingli_restore": "50.0",
+                "hunpo_restore": "35.0",
+                "cleanse_harmful": "false",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "220000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}

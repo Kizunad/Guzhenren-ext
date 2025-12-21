@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:lishigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:lishigu_passive_whetstone_sharp",
+            "usageTitle": "被动·砺石磨锋",
+            "usageDesc": "砺石磨锋，攻击有概率增伤并附伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 2800,
+            "cost_total_niantou": 560,
+            "metadata": {
+                "proc_chance": "0.10",
+                "proc_cooldown_ticks": "80",
+                "zhenyuan_base_cost": "260.0",
+                "jingli_cost": "80.0",
+                "bonus_damage": "120.0",
+                "damage_multiplier": "1.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:lishigu_active_whetstone_edge",
+            "usageTitle": "主动·砺石开锋",
+            "usageDesc": "短暂极致锋芒，爆发剑势。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 力量：{effect_duration_ticks}t",
+            "cost_duration": 2800,
+            "cost_total_niantou": 560,
+            "metadata": {
+                "cooldown_ticks": "650",
+                "zhenyuan_base_cost": "2600.0",
+                "jingli_cost": "260.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

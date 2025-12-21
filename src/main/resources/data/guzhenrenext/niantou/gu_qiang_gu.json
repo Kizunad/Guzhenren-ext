@@ -19,6 +19,21 @@
             }
         },
         {
+            "usageID": "guzhenren:gu_qiang_gu_passive_sui_yang_zhen_yuan",
+            "usageTitle": "被动·髓养真元",
+            "usageDesc": "以骨髓之意温养空窍，缓慢回补真元，并受【骨】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)",
+            "cost_duration": 900,
+            "cost_total_niantou": 70,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.06",
+                "jingli_cost_per_second": "0.00",
+                "niantou_cost_per_second": "0.02",
+                "hunpo_cost_per_second": "0.01",
+                "zhenyuan_gain": "0.18"
+            }
+        },
+        {
             "usageID": "guzhenren:gu_qiang_gu_active_bone_spear",
             "usageTitle": "主动·骨枪点杀",
             "usageDesc": "凝出骨枪意贯一点，削弱目标并附带骨意伤害。",

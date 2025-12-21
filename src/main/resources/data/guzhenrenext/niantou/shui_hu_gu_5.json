@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:shui_hu_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_hu_gu_5_passive_abyssal_guard",
+            "usageTitle": "被动·深水上限",
+            "usageDesc": "持续维持深水护持，大幅提升关键资源上限并缓慢强化魂魄抗性。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli} 魂魄+{cap_max_hunpo} 抗性上限+{cap_hunpo_resistance} 念头容量+{cap_niantou_capacity}",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "jingli_cost_per_second": "2.0",
+                "niantou_cost_per_second": "1.6",
+                "hunpo_cost_per_second": "0.9",
+                "cap_max_zhenyuan": "200.0",
+                "cap_max_jingli": "160.0",
+                "cap_max_hunpo": "160.0",
+                "cap_hunpo_resistance": "120.0",
+                "cap_niantou_capacity": "180.0",
+                "hunpo_resistance_restore": "8.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_hu_gu_5_active_abyssal_guard",
+            "usageTitle": "主动·深水护体",
+            "usageDesc": "深水护体，净化并强力恢复，获得高额抗性与护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "6000.0",
+                "jingli_cost": "260.0",
+                "niantou_cost": "220.0",
+                "hunpo_cost": "80.0",
+                "heal_amount": "120.0",
+                "restore_zhenyuan": "60.0",
+                "restore_jingli": "60.0",
+                "restore_hunpo": "40.0",
+                "restore_niantou": "50.0",
+                "cleanse_harmful": "1",
+                "buff_duration_ticks": "400",
+                "buff_amplifier": "2"
+            }
+        }
+    ]
+}
+

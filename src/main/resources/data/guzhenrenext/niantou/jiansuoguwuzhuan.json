@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:jiansuoguwuzhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiansuoguwuzhuan_passive_shuttle_mastery",
+            "usageTitle": "被动·五转剑梭无影",
+            "usageDesc": "剑梭无影，持续大幅提升移速。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 移速：+{attribute_amount}",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1640,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "16.0",
+                "attribute_amount": "0.28"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiansuoguwuzhuan_active_chain_shuttle",
+            "usageTitle": "主动·五转剑梭连穿",
+            "usageDesc": "短时间内连续穿梭多次，适合脱困与追击。",
+            "usageInfo": "距离：{distance} | 连穿窗口：{chain_window_ticks}t | 次数：{chain_charges} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1640,
+            "metadata": {
+                "distance": "26.0",
+                "chain_window_ticks": "160",
+                "chain_charges": "3",
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "18000.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "150.0"
+            }
+        }
+    ]
+}

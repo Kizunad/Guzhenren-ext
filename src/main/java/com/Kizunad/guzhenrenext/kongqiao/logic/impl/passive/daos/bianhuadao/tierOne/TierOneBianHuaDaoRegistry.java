@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveExtraCostDecorator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveSelfBuffEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.common.DaoSustainedResourceRegenEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedAttributeModifierEffect;
 import java.util.List;
 import net.minecraft.world.effect.MobEffects;
@@ -34,6 +35,16 @@ public final class TierOneBianHuaDaoRegistry {
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
                 "armor"
+            )
+        );
+        GuEffectRegistry.register(
+            new DaoSustainedResourceRegenEffect(
+                "guzhenren:shou_pi_gu_passive_beast_blood_nourish",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
+                false,
+                true,
+                true,
+                false
             )
         );
         GuEffectRegistry.register(

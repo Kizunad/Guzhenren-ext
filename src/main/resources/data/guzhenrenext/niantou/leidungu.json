@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:leidungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:leidungu_passive_thunder_shield",
+            "usageTitle": "被动·护盾回响",
+            "usageDesc": "受击时电光护盾共鸣，短暂护体并减伤。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{niantou_cost}(念头) | 受伤系数：x{damage_multiplier}",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "proc_chance": "0.20",
+                "cooldown_ticks": "160",
+                "damage_multiplier": "0.86",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0",
+                "zhenyuan_base_cost": "35.0",
+                "jingli_cost": "6.0",
+                "hunpo_cost": "2.0",
+                "niantou_cost": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:leidungu_active_thunder_guard",
+            "usageTitle": "主动·半圆护体",
+            "usageDesc": "展开电光护盾护住自身，短时间强行硬扛。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)+{niantou_cost}(念头) | 治疗：{heal_amount}",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "140.0",
+                "jingli_cost": "18.0",
+                "hunpo_cost": "8.0",
+                "niantou_cost": "6.0",
+                "heal_amount": "6.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "absorption_duration_ticks": "160",
+                "absorption_amplifier": "0"
+            }
+        }
+    ]
+}
+

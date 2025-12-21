@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jinzhonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jinzhonggu_passive_golden_bell_4",
+            "usageTitle": "被动·金钟常鸣",
+            "usageDesc": "金钟蛊常鸣护体，持续提升护甲并稳固根基。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {hunpo_cost_per_second}(魂魄)/s | 护甲：+{attribute_amount}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 900,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "42000.0",
+                "niantou_cost_per_second": "2.5",
+                "hunpo_cost_per_second": "0.60",
+                "attribute_amount": "12.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jinzhonggu_active_golden_bell_guard_4",
+            "usageTitle": "主动·金钟护体",
+            "usageDesc": "金钟护体成形，短时大幅提升抗性与护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 抗性：{resist_duration_ticks}t | 护盾：{absorption_duration_ticks}t | 回复：生命{heal_amount} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 7000,
+            "cost_total_niantou": 1300,
+            "metadata": {
+                "cooldown_ticks": "2400",
+                "resist_duration_ticks": "360",
+                "resist_amplifier": "1",
+                "absorption_duration_ticks": "360",
+                "absorption_amplifier": "1",
+                "heal_amount": "30.0",
+                "zhenyuan_base_cost": "5200000.0",
+                "niantou_cost": "350.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

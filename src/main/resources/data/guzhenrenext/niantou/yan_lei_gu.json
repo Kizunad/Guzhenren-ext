@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:yan_lei_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yan_lei_gu_passive_tears_spring",
+            "usageTitle": "被动·泪泉回润",
+            "usageDesc": "维持泪泉回润，缓慢回复生命与资源。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 治疗：{heal_amount}/s",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0",
+                "jingli_cost_per_second": "0.6",
+                "niantou_cost_per_second": "0.6",
+                "hunpo_cost_per_second": "0.4",
+                "radius": "0.0",
+                "heal_amount": "0.8",
+                "zhenyuan_restore": "2.0",
+                "jingli_restore": "2.0",
+                "hunpo_restore": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yan_lei_gu_active_tears_purify",
+            "usageTitle": "主动·泪泉回春",
+            "usageDesc": "泪泉回春，净化并治疗友方，提供强力续航。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "780",
+                "radius": "12.0",
+                "zhenyuan_base_cost": "5000.0",
+                "jingli_cost": "240.0",
+                "niantou_cost": "200.0",
+                "hunpo_cost": "80.0",
+                "heal_amount": "60.0",
+                "restore_zhenyuan": "50.0",
+                "restore_jingli": "40.0",
+                "restore_hunpo": "30.0",
+                "restore_niantou": "40.0",
+                "cleanse_harmful": "1",
+                "buff_duration_ticks": "220",
+                "buff_amplifier": "1"
+            }
+        }
+    ]
+}
+

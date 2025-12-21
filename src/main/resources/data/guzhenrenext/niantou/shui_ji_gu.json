@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:shui_ji_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_ji_gu_passive_trace_sense",
+            "usageTitle": "被动·水迹识途",
+            "usageDesc": "维持水迹感应，获得侦察能力。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头) | 持续：{buff_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "jingli_cost_per_second": "0.4",
+                "niantou_cost_per_second": "0.4",
+                "hunpo_cost_per_second": "0.0",
+                "buff_duration_ticks": "240",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_ji_gu_active_trace_mark",
+            "usageTitle": "主动·水迹标记",
+            "usageDesc": "以水光标记周围敌对目标，便于追踪。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 发光：{glow_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "200",
+                "radius": "16.0",
+                "glow_duration_ticks": "160",
+                "zhenyuan_base_cost": "240.0",
+                "jingli_cost": "10.0",
+                "niantou_cost": "10.0",
+                "hunpo_cost": "0.0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jian_ying_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jian_ying_gu_passive_shadow_proc",
+            "usageTitle": "被动·剑影追斩",
+            "usageDesc": "剑影随身，攻击有概率触发额外斩击。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 附伤：+{bonus_damage}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "proc_chance": "0.12",
+                "proc_cooldown_ticks": "60",
+                "zhenyuan_base_cost": "220.0",
+                "jingli_cost": "60.0",
+                "bonus_damage": "90.0",
+                "damage_multiplier": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jian_ying_gu_active_shadow_cut",
+            "usageTitle": "主动·剑影斩",
+            "usageDesc": "锁定目标斩击，并短暂致盲。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 致盲：{effect_duration_ticks}t",
+            "cost_duration": 2600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "range": "10.0",
+                "damage": "650.0",
+                "cooldown_ticks": "420",
+                "zhenyuan_base_cost": "1600.0",
+                "jingli_cost": "180.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

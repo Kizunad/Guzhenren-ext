@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:qixingjianxiagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qixingjianxiagu_passive_seven_star_training",
+            "usageTitle": "被动·七星养锋",
+            "usageDesc": "七星剑匣助修，持续提升攻速。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 攻速：+{attribute_amount}",
+            "cost_duration": 2600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "7.5",
+                "jingli_cost_per_second": "1.4",
+                "attribute_amount": "0.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:qixingjianxiagu_active_seven_star_rain",
+            "usageTitle": "主动·七星剑雨",
+            "usageDesc": "范围剑气倾泻，迟滞敌人。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 2600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "radius": "7.0",
+                "damage": "350.0",
+                "knockback_strength": "0.3",
+                "cooldown_ticks": "620",
+                "zhenyuan_base_cost": "2200.0",
+                "jingli_cost": "240.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

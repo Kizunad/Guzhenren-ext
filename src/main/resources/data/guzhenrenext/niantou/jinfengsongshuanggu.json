@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jinfengsongshuanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jinfengsongshuanggu_passive_gold_breeze_4",
+            "usageTitle": "被动·金风行身",
+            "usageDesc": "金风送爽蛊令步伐轻快，持续提升移动速度。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 移速：+{attribute_amount}",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "30000.0",
+                "jingli_cost_per_second": "1.2",
+                "attribute_amount": "0.18"
+            }
+        },
+        {
+            "usageID": "guzhenren:jinfengsongshuanggu_active_gold_breeze_step_4",
+            "usageTitle": "主动·金风步",
+            "usageDesc": "踏金风而行，位移更远，并在落点获得加速与力量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 位移：{distance} | 加速：{speed_duration_ticks}t | 力量：{strength_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 5200,
+            "cost_total_niantou": 900,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "distance": "18.0",
+                "speed_duration_ticks": "260",
+                "speed_amplifier": "1",
+                "strength_duration_ticks": "200",
+                "strength_amplifier": "0",
+                "zhenyuan_base_cost": "3800000.0",
+                "niantou_cost": "350.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xiong_shou_yin_xie_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xiong_shou_yin_xie_gu_passive_blood_drain",
+            "usageTitle": "被动·凶兽饮血蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 饮血比例：{lifesteal_ratio} | 单次上限：{max_heal}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost": "18.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "4.0",
+                "proc_chance": "0.10",
+                "lifesteal_ratio": "0.06",
+                "max_heal": "10.0",
+                "effect_duration_ticks": "40",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xiong_shou_yin_xie_gu_active_bloody_pounce",
+            "usageTitle": "主动·凶兽饮血蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 伤害：{extra_physical_damage} | 范围：{range}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost": "120.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "24.0",
+                "cooldown_ticks": "220",
+                "range": "8.0",
+                "extra_physical_damage": "12.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "0.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:shuipugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuipugu_passive_waterfall_aura",
+            "usageTitle": "被动·瀑流余势",
+            "usageDesc": "维持瀑流余势，获得稳固与水下适应。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 持续：{buff_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "jingli_cost_per_second": "0.8",
+                "niantou_cost_per_second": "0.8",
+                "hunpo_cost_per_second": "0.3",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuipugu_active_waterfall_crash",
+            "usageTitle": "主动·水瀑崩击",
+            "usageDesc": "水瀑轰然落下，重击周围敌人并造成迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 伤害：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "radius": "9.0",
+                "zhenyuan_base_cost": "1600.0",
+                "jingli_cost": "70.0",
+                "niantou_cost": "60.0",
+                "hunpo_cost": "14.0",
+                "extra_physical_damage": "1500.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

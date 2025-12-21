@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:shuishengu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuishengu_passive_river_blessing",
+            "usageTitle": "被动·河神赐福",
+            "usageDesc": "维持河神赐福，提升团队续航与资源回复。",
+            "usageInfo": "半径：{radius} | 每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 治疗：{heal_amount}/s",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "5.0",
+                "jingli_cost_per_second": "0.9",
+                "niantou_cost_per_second": "0.8",
+                "hunpo_cost_per_second": "0.2",
+                "radius": "8.0",
+                "heal_amount": "0.7",
+                "zhenyuan_restore": "2.4",
+                "jingli_restore": "1.8",
+                "hunpo_restore": "0.6"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuishengu_active_river_blessing",
+            "usageTitle": "主动·河神回潮",
+            "usageDesc": "引动回潮之力，治疗并短暂护佑友方。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "radius": "10.0",
+                "zhenyuan_base_cost": "600.0",
+                "jingli_cost": "28.0",
+                "niantou_cost": "22.0",
+                "hunpo_cost": "4.0",
+                "heal_amount": "18.0",
+                "restore_zhenyuan": "10.0",
+                "restore_jingli": "8.0",
+                "restore_hunpo": "4.0",
+                "restore_niantou": "10.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

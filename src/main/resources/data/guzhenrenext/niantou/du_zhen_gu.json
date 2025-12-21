@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:du_zhen_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:du_zhen_gu_passive_poison_needle",
+            "usageTitle": "被动·毒针余劲",
+            "usageDesc": "攻击时有概率以毒针余劲迟滞敌人，并附带少量普通伤害。",
+            "usageInfo": "触发：{proc_chance} | 迟滞：{effect_duration_ticks}t | 附伤：{extra_physical_damage} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.15",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "8.0",
+                "zhenyuan_base_cost": "10.0",
+                "jingli_cost": "1.0",
+                "niantou_cost": "1.0",
+                "hunpo_cost": "0.1"
+            }
+        },
+        {
+            "usageID": "guzhenren:du_zhen_gu_active_poison_needle",
+            "usageTitle": "主动·毒针点射",
+            "usageDesc": "锁定目标发射毒针，造成普通伤害并迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage} | 迟滞：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "range": "16.0",
+                "extra_physical_damage": "35.0",
+                "aoe_radius": "0.0",
+                "aoe_extra_physical_damage": "0.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "45.0",
+                "jingli_cost": "4.0",
+                "niantou_cost": "6.0",
+                "hunpo_cost": "1.0"
+            }
+        }
+    ]
+}
+

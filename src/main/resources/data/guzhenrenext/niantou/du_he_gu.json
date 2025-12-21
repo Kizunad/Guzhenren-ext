@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:du_he_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:du_he_gu_passive_scorpion_resilience",
+            "usageTitle": "被动·毒体韧性",
+            "usageDesc": "持续以毒道道痕淬体，提升魂魄抗性上限与念头容量，并略增魂魄上限。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 抗性上限：+{cap_hunpo_resistance} | 念头容量：+{cap_niantou_capacity} | 魂魄上限：+{cap_hunpo}",
+            "cost_duration": 600,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "jingli_cost_per_second": "0.3",
+                "niantou_cost_per_second": "0.4",
+                "hunpo_cost_per_second": "0.2",
+                "cap_hunpo_resistance": "80.0",
+                "cap_niantou_capacity": "60.0",
+                "cap_hunpo": "80.0",
+                "hunpo_resistance_restore": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:du_he_gu_active_scorpion_sweep",
+            "usageTitle": "主动·毒蝎横扫",
+            "usageDesc": "毒蝎之势横扫四周，造成普通伤害并使目标虚弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 伤害：{extra_physical_damage} | 虚弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 600,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "radius": "6.5",
+                "extra_physical_damage": "250.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "25.0",
+                "niantou_cost": "40.0",
+                "hunpo_cost": "10.0"
+            }
+        }
+    ]
+}
+

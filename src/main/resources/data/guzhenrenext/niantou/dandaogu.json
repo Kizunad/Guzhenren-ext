@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:dandaogu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dandaogu_passive_single_blade_charge",
+            "usageTitle": "被动·断刀蓄势",
+            "usageDesc": "持续催动，消耗真元+念头，每秒为下一次攻击充能一次“断刀附伤”，随【刀】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 充能附伤：{charged_extra_physical_damage}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.5",
+                "niantou_cost_per_second": "1.4",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "charged_extra_physical_damage": "95"
+            }
+        },
+        {
+            "usageID": "guzhenren:dandaogu_active_single_blade_break",
+            "usageTitle": "主动·单刀破势",
+            "usageDesc": "锁定视线目标斩击，造成高额普通伤害并附带削弱/迟缓，随【刀】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 伤害：{damage} | 控制：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "520.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "380.0",
+                "cooldown_ticks": "320",
+                "range": "6.8",
+                "damage": "3200",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

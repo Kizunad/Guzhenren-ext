@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:xie_zi_shi",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_zi_shi_passive_toxin_shell",
+            "usageTitle": "被动·毒性护体",
+            "usageDesc": "受击时有概率以毒性卸力，降低本次所受伤害并短暂护体。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 乘区：{damage_multiplier} | 护体：{buff_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "140",
+                "damage_multiplier": "0.85",
+                "buff_duration_ticks": "60",
+                "buff_amplifier": "0",
+                "zhenyuan_base_cost": "8.0",
+                "jingli_cost": "0.8",
+                "niantou_cost": "1.0",
+                "hunpo_cost": "0.3"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_zi_shi_active_scorpion_pellet",
+            "usageTitle": "主动·蝎毒一口",
+            "usageDesc": "锁定目标以蝎毒削弱其体能，造成普通伤害并附带饥饿与虚弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage} | 削弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "range": "12.0",
+                "extra_physical_damage": "25.0",
+                "aoe_radius": "0.0",
+                "aoe_extra_physical_damage": "0.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "55.0",
+                "jingli_cost": "5.0",
+                "niantou_cost": "8.0",
+                "hunpo_cost": "2.0"
+            }
+        }
+    ]
+}
+

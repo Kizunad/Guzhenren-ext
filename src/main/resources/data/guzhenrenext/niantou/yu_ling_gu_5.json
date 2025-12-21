@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:yu_ling_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_ling_gu_5_passive_sky_stride",
+            "usageTitle": "被动·御羚蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "13.0",
+                "niantou_cost_per_second": "2.8",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "attribute_amount": "0.1"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_ling_gu_5_active_sky_blink",
+            "usageTitle": "主动·御羚蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 距离：{distance}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost": "720.0",
+                "niantou_cost": "140.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "900",
+                "distance": "10.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

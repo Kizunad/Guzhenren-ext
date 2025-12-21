@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:xuehengu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xuehengu_passive_blood_trace_sense",
+            "usageTitle": "被动·血痕探伤",
+            "usageDesc": "感应血气外泄，只高亮受伤的敌对生物。",
+            "usageInfo": "半径：{radius} | 高亮：{glow_duration_ticks}t | 仅受伤：{require_wounded}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1600.0",
+                "niantou_cost_per_second": "6.0",
+                "jingli_cost_per_second": "8.0",
+                "hunpo_cost_per_second": "4.0",
+                "radius": "36.0",
+                "glow_duration_ticks": "80",
+                "require_wounded": "1",
+                "wounded_ratio_threshold": "0.98"
+            }
+        },
+        {
+            "usageID": "guzhenren:xuehengu_active_blood_trace_ping",
+            "usageTitle": "主动·血痕回响",
+            "usageDesc": "释放血气回响，短暂高亮附近敌对目标。",
+            "usageInfo": "半径：{radius} | 高亮：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 300,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "radius": "20.0",
+                "damage": "0.0",
+                "debuff_duration_ticks": "160",
+                "debuff_amplifier": "0",
+                "knockback_strength": "0.0",
+                "cooldown_ticks": "600",
+                "zhenyuan_base_cost": "38000.0",
+                "niantou_cost": "85.0",
+                "jingli_cost": "140.0",
+                "hunpo_cost": "90.0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,49 @@
+{
+    "itemID": "guzhenren:shui_sheng_hua_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_sheng_hua_gu_passive_lotus_bloom",
+            "usageTitle": "被动·水生花露",
+            "usageDesc": "维持花露氤氲，持续治疗友方并回复资源。",
+            "usageInfo": "半径：{radius} | 每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 治疗：{heal_amount}/s",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.5",
+                "jingli_cost_per_second": "0.8",
+                "niantou_cost_per_second": "0.7",
+                "hunpo_cost_per_second": "0.2",
+                "radius": "7.0",
+                "heal_amount": "0.8",
+                "zhenyuan_restore": "2.2",
+                "jingli_restore": "1.8",
+                "hunpo_restore": "0.7"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_sheng_hua_gu_active_lotus_bloom",
+            "usageTitle": "主动·水生花开",
+            "usageDesc": "花开回春，净化并强化友方的恢复能力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "radius": "10.0",
+                "zhenyuan_base_cost": "700.0",
+                "jingli_cost": "34.0",
+                "niantou_cost": "28.0",
+                "hunpo_cost": "6.0",
+                "heal_amount": "22.0",
+                "restore_zhenyuan": "12.0",
+                "restore_jingli": "10.0",
+                "restore_hunpo": "6.0",
+                "restore_niantou": "12.0",
+                "cleanse_harmful": "1",
+                "buff_duration_ticks": "180",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

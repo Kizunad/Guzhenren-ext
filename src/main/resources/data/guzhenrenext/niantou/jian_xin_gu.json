@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jian_xin_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jian_xin_gu_passive_sword_heart",
+            "usageTitle": "被动·剑心通透",
+            "usageDesc": "剑心通透，增幅剑道蛊虫整体效果。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {hunpo_cost_per_second}(魂魄)/s | 剑心增幅：*{jian_xin_multiplier}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "28.0",
+                "niantou_cost_per_second": "2.0",
+                "hunpo_cost_per_second": "1.0",
+                "jian_xin_multiplier": "1.35"
+            }
+        },
+        {
+            "usageID": "guzhenren:jian_xin_gu_active_sword_heart_focus",
+            "usageTitle": "主动·剑心凝神",
+            "usageDesc": "凝神一瞬，短暂增强抗性与杀力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 抗性：{effect_duration_ticks}t | 力量：{boost_duration_ticks}t",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "cooldown_ticks": "1600",
+                "zhenyuan_base_cost": "36000.0",
+                "niantou_cost": "200.0",
+                "effect_duration_ticks": "400",
+                "effect_amplifier": "2",
+                "boost_duration_ticks": "400",
+                "boost_amplifier": "2"
+            }
+        }
+    ]
+}
+

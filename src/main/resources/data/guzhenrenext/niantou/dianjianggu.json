@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:dianjianggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:dianjianggu_passive_plasma_sting",
+            "usageTitle": "被动·电浆麻痹",
+            "usageDesc": "电浆随攻势渗入，令敌人行动迟滞、手脚僵硬。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 附伤：{extra_physical_damage} | 麻痹：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.14",
+                "zhenyuan_base_cost": "10.0",
+                "jingli_cost": "1.0",
+                "niantou_cost": "0.4",
+                "extra_physical_damage": "3.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:dianjianggu_active_plasma_field",
+            "usageTitle": "主动·电浆场",
+            "usageDesc": "喷吐电浆铺成短暂领域，触碰者被电流麻痹减速。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 半径：{cloud_radius} | 持续：{cloud_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 600,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "range": "14.0",
+                "cloud_radius": "3.5",
+                "cloud_duration_ticks": "140",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "90.0",
+                "jingli_cost": "12.0",
+                "niantou_cost": "8.0",
+                "hunpo_cost": "2.0"
+            }
+        }
+    ]
+}
+

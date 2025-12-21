@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:chou_pi_fei_chong",
+    "usages": [
+        {
+            "usageID": "guzhenren:chou_pi_fei_chong_passive_fat_stink",
+            "usageTitle": "被动·臭肥侵染",
+            "usageDesc": "攻击时有概率以臭气侵染敌人，令其虚弱并附带少量普通伤害。",
+            "usageInfo": "触发：{proc_chance} | 虚弱：{effect_duration_ticks}t | 附伤：{extra_physical_damage} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "proc_chance": "0.12",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "2.0",
+                "zhenyuan_base_cost": "6.0",
+                "jingli_cost": "0.4",
+                "niantou_cost": "0.6",
+                "hunpo_cost": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:chou_pi_fei_chong_active_fat_stink_burst",
+            "usageTitle": "主动·毒雾震荡",
+            "usageDesc": "释放一股臭毒震荡，对周围敌对目标造成普通伤害并减速。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 伤害：{extra_physical_damage} | 减速：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "cooldown_ticks": "200",
+                "radius": "5.0",
+                "extra_physical_damage": "6.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "25.0",
+                "jingli_cost": "1.2",
+                "niantou_cost": "2.5",
+                "hunpo_cost": "0.5"
+            }
+        }
+    ]
+}
+

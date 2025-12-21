@@ -1,0 +1,50 @@
+{
+    "itemID": "guzhenren:nu_mu_jin_gang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:nu_mu_jin_gang_gu_passive_vajra_counter_5",
+            "usageTitle": "被动·金刚反震",
+            "usageDesc": "怒目金刚蛊受击时金势反震，减免伤害并对来犯者造成反震打击。",
+            "usageInfo": "触发概率：{proc_chance} | 冷却：{cooldown_ticks}t | 减伤倍率：{damage_multiplier}x | 反震：{retaliate_physical_damage}(普通) | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 8200,
+            "cost_total_niantou": 1600,
+            "metadata": {
+                "proc_chance": "0.16",
+                "cooldown_ticks": "300",
+                "damage_multiplier": "0.68",
+                "projectile_only": "false",
+                "buff_duration_ticks": "200",
+                "buff_amplifier": "0",
+                "retaliate_physical_damage": "1200.0",
+                "zhenyuan_base_cost": "42000000.0",
+                "niantou_cost": "300.0",
+                "jingli_cost": "180.0",
+                "hunpo_cost": "120.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:nu_mu_jin_gang_gu_active_vajra_fury_5",
+            "usageTitle": "主动·金刚怒目",
+            "usageDesc": "怒目金刚之势爆发，短时大幅提升力量、抗性与速度，并恢复部分生命与资源。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 力量：{strength_duration_ticks}t | 抗性：{resist_duration_ticks}t | 加速：{speed_duration_ticks}t | 回复：生命{heal_amount} 精力{restore_jingli} 魂魄{restore_hunpo} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 9800,
+            "cost_total_niantou": 1900,
+            "metadata": {
+                "cooldown_ticks": "3200",
+                "strength_duration_ticks": "360",
+                "strength_amplifier": "1",
+                "resist_duration_ticks": "360",
+                "resist_amplifier": "1",
+                "speed_duration_ticks": "360",
+                "speed_amplifier": "1",
+                "heal_amount": "50.0",
+                "restore_jingli": "100.0",
+                "restore_hunpo": "80.0",
+                "zhenyuan_base_cost": "82000000.0",
+                "niantou_cost": "750.0",
+                "jingli_cost": "450.0",
+                "hunpo_cost": "300.0"
+            }
+        }
+    ]
+}

@@ -17,6 +17,22 @@
             }
         },
         {
+            "usageID": "guzhenren:kongsuogu_passive_kong_xi_hui_qi",
+            "usageTitle": "被动·空隙回气",
+            "usageDesc": "借空间缝隙回旋之力回补精力与魂魄，并受【宇】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{jingli_gain}(精力)+{hunpo_gain}(魂魄)",
+            "cost_duration": 1600,
+            "cost_total_niantou": 135,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.10",
+                "jingli_cost_per_second": "0.02",
+                "niantou_cost_per_second": "0.05",
+                "hunpo_cost_per_second": "0.02",
+                "jingli_gain": "0.18",
+                "hunpo_gain": "0.08"
+            }
+        },
+        {
             "usageID": "guzhenren:kongsuogu_active_space_chain",
             "usageTitle": "主动·空链牵引",
             "usageDesc": "以空锁为引，牵动敌身。锁定目标后将其牵引至身前，并附带迟缓与法术伤害。",
@@ -36,4 +52,3 @@
         }
     ]
 }
-

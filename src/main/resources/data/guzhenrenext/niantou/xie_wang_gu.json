@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:xie_wang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_wang_gu_passive_blood_net_proc",
+            "usageTitle": "被动·血网缠足",
+            "usageDesc": "血网渗出粘滞血气，攻击概率令目标迟缓并附带少量伤害。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 附伤：+{bonus_damage} | 迟缓：{debuff_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.10",
+                "proc_cooldown_ticks": "80",
+                "damage_multiplier": "1.03",
+                "bonus_damage": "2.0",
+                "debuff_duration_ticks": "60",
+                "debuff_amplifier": "0",
+                "zhenyuan_base_cost": "2400.0",
+                "niantou_cost": "8.0",
+                "jingli_cost": "14.0",
+                "hunpo_cost": "6.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_wang_gu_active_blood_net",
+            "usageTitle": "主动·血网缚群",
+            "usageDesc": "释放血网缠住周围生物，造成少量伤害并施加迟缓。",
+            "usageInfo": "半径：{radius} | 伤害：{damage} | 迟缓：{debuff_duration_ticks}t | 击退：{knockback_strength} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 200,
+            "cost_total_niantou": 30,
+            "metadata": {
+                "radius": "6.0",
+                "damage": "6.0",
+                "debuff_duration_ticks": "100",
+                "debuff_amplifier": "0",
+                "knockback_strength": "0.25",
+                "self_heal_per_hit": "0.0",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "14000.0",
+                "niantou_cost": "32.0",
+                "jingli_cost": "65.0",
+                "hunpo_cost": "24.0"
+            }
+        }
+    ]
+}

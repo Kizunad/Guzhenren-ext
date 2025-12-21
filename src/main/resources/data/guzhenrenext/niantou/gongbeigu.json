@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:gongbeigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:gongbeigu_passive_rule_of_power",
+            "usageTitle": "被动·功律加身",
+            "usageDesc": "以律定功，持续提升攻击力。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 攻击：+{attribute_amount}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "500.0",
+                "niantou_cost_per_second": "1.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:gongbeigu_active_power_surge",
+            "usageTitle": "主动·功倍爆发",
+            "usageDesc": "短暂爆发功势，获得力量与急迫。",
+            "usageInfo": "恢复：{heal_amount} | 力量：{strength_duration_ticks}t | 急迫：{haste_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 110,
+            "metadata": {
+                "heal_amount": "4.0",
+                "strength_duration_ticks": "120",
+                "strength_amplifier": "0",
+                "haste_duration_ticks": "120",
+                "haste_amplifier": "0",
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "25000.0",
+                "niantou_cost": "60.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}
+

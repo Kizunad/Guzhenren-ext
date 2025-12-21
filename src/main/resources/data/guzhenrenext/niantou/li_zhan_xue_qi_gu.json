@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:li_zhan_xue_qi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:li_zhan_xue_qi_gu_passive_battle_caps",
+            "usageTitle": "被动·历战血窍",
+            "usageDesc": "以历战血身之力提升空窍上限与抗性上限（高转专用）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 上限：真{max_zhenyuan_bonus}/精{max_jingli_bonus}/魂{max_hunpo_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3600.0",
+                "niantou_cost_per_second": "12.0",
+                "jingli_cost_per_second": "14.0",
+                "hunpo_cost_per_second": "9.0",
+                "max_zhenyuan_bonus": "180.0",
+                "max_jingli_bonus": "200.0",
+                "max_hunpo_bonus": "160.0",
+                "max_hunpo_resistance_bonus": "45.0",
+                "niantou_capacity_bonus": "120.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:li_zhan_xue_qi_gu_active_battle_body",
+            "usageTitle": "主动·历战血身",
+            "usageDesc": "短时激活历战血身，增强战斗能力并获得额外护持。",
+            "usageInfo": "力量：{strength_duration_ticks}t | 吸收：{absorption_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "160000.0",
+                "niantou_cost": "260.0",
+                "jingli_cost": "420.0",
+                "hunpo_cost": "320.0",
+                "strength_duration_ticks": "240",
+                "strength_amplifier": "2",
+                "absorption_duration_ticks": "240",
+                "absorption_amplifier": "2"
+            }
+        }
+    ]
+}

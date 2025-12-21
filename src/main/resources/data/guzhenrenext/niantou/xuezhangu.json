@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:xuezhangu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xuezhangu_passive_blood_battle_fury",
+            "usageTitle": "被动·血战越勇",
+            "usageDesc": "血量越低越强，低血时每秒刷新力量与抗性增幅。",
+            "usageInfo": "阈值：{health_ratio_threshold} | 持续：{buff_duration_ticks}t | 基础强度：{base_amplifier} | 额外强度：{max_bonus_amplifier}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3200.0",
+                "niantou_cost_per_second": "10.0",
+                "jingli_cost_per_second": "12.0",
+                "hunpo_cost_per_second": "8.0",
+                "health_ratio_threshold": "0.60",
+                "buff_duration_ticks": "80",
+                "base_amplifier": "0",
+                "max_bonus_amplifier": "3"
+            }
+        },
+        {
+            "usageID": "guzhenren:xuezhangu_active_blood_battle_burst",
+            "usageTitle": "主动·血战爆发",
+            "usageDesc": "短时进入血战状态，显著强化攻防。",
+            "usageInfo": "力量：{strength_duration_ticks}t | 抗性：{resistance_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "130000.0",
+                "niantou_cost": "220.0",
+                "jingli_cost": "350.0",
+                "hunpo_cost": "240.0",
+                "strength_duration_ticks": "220",
+                "strength_amplifier": "2",
+                "resistance_duration_ticks": "220",
+                "resistance_amplifier": "1"
+            }
+        }
+    ]
+}

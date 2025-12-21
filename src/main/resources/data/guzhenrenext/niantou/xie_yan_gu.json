@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:xie_yan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_yan_gu_passive_blood_eye",
+            "usageTitle": "被动·血眼夜视",
+            "usageDesc": "以血气滋养双目，持续获得夜视。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 夜视：{night_vision_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "400.0",
+                "niantou_cost_per_second": "2.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "night_vision_duration_ticks": "140",
+                "night_vision_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_yan_gu_active_blood_gaze",
+            "usageTitle": "主动·血眼凝视",
+            "usageDesc": "以血眼洞察周遭，短暂高亮附近敌对目标。",
+            "usageInfo": "半径：{radius} | 高亮：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 200,
+            "cost_total_niantou": 30,
+            "metadata": {
+                "radius": "14.0",
+                "damage": "0.0",
+                "debuff_duration_ticks": "160",
+                "debuff_amplifier": "0",
+                "knockback_strength": "0.0",
+                "cooldown_ticks": "260",
+                "zhenyuan_base_cost": "9000.0",
+                "niantou_cost": "25.0",
+                "jingli_cost": "35.0",
+                "hunpo_cost": "15.0"
+            }
+        }
+    ]
+}

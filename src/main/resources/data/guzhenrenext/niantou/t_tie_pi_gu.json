@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:t_tie_pi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:t_tie_pi_gu_passive_iron_pressure",
+            "usageTitle": "被动·铁压",
+            "usageDesc": "铁皮蛊将金道之重压附于拳脚，攻击时有概率压制敌势。",
+            "usageInfo": "触发概率：{proc_chance} | 持续：{effect_duration_ticks}t | 追加伤害：{extra_physical_damage}(普通) | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 900,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "proc_chance": "0.12",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "4.0",
+                "zhenyuan_base_cost": "55.0",
+                "niantou_cost": "14.0",
+                "jingli_cost": "10.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:t_tie_pi_gu_active_iron_bash",
+            "usageTitle": "主动·铁皮撞",
+            "usageDesc": "以铁皮之势猛击目标，造成伤害并短暂迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage}(普通) | 迟滞：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 1100,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "320",
+                "range": "5.0",
+                "extra_physical_damage": "12.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "pull_strength": "0.0",
+                "pull_vertical": "0.0",
+                "zhenyuan_base_cost": "120.0",
+                "niantou_cost": "30.0",
+                "jingli_cost": "15.0"
+            }
+        }
+    ]
+}
+

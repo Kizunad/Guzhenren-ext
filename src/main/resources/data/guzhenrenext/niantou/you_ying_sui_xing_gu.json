@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:you_ying_sui_xing_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:you_ying_sui_xing_gu_passive_shadow_evasion",
+            "usageTitle": "被动·幽影避袭",
+            "usageDesc": "影息缠身，受击概率减伤并短暂隐匿。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 减伤：*{damage_multiplier} | 挪移：{blink_distance} | 隐身：{buff_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "140",
+                "damage_multiplier": "0.70",
+                "blink_distance": "3.5",
+                "projectile_only": "false",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0",
+                "zhenyuan_base_cost": "18000.0",
+                "niantou_cost": "60.0",
+                "jingli_cost": "70.0",
+                "hunpo_cost": "40.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:you_ying_sui_xing_gu_active_shadow_blink",
+            "usageTitle": "主动·幽影挪移",
+            "usageDesc": "沿视线方向短距闪烁，并获得短暂隐身与加速。",
+            "usageInfo": "距离：{distance} | 冷却：{cooldown_ticks}t | 隐身：{invis_duration_ticks}t | 加速：{speed_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 320,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "distance": "8.0",
+                "invis_duration_ticks": "120",
+                "invis_amplifier": "0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "0",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "22000.0",
+                "niantou_cost": "80.0",
+                "jingli_cost": "90.0",
+                "hunpo_cost": "60.0"
+            }
+        }
+    ]
+}
+

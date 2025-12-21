@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:shui_guang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_guang_gu_passive_ripple_light",
+            "usageTitle": "被动·水光映体",
+            "usageDesc": "以水光缠身，维持夜视与水下呼吸。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头) | 持续：{buff_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.5",
+                "jingli_cost_per_second": "0.2",
+                "niantou_cost_per_second": "0.15",
+                "hunpo_cost_per_second": "0.0",
+                "buff_duration_ticks": "240",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_guang_gu_active_ripple_glow",
+            "usageTitle": "主动·水光照映",
+            "usageDesc": "水光外放，标记周围敌对目标用于追踪。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 发光：{glow_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "cooldown_ticks": "160",
+                "radius": "14.0",
+                "glow_duration_ticks": "120",
+                "zhenyuan_base_cost": "40.0",
+                "jingli_cost": "3.0",
+                "niantou_cost": "3.0"
+            }
+        }
+    ]
+}
+

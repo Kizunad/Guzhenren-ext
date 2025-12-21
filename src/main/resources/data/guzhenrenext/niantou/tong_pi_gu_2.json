@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:tong_pi_gu_2",
+    "usages": [
+        {
+            "usageID": "guzhenren:tong_pi_gu_2_passive_copper_balance_2",
+            "usageTitle": "被动·轻盈铜皮",
+            "usageDesc": "铜皮更为贴身，受击时不易被击退。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 击退抗性：+{attribute_amount}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "5.0",
+                "jingli_cost_per_second": "2.0",
+                "attribute_amount": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:tong_pi_gu_2_active_copper_wave_2",
+            "usageTitle": "主动·铜浪",
+            "usageDesc": "以铜皮之势拍击地面，震荡波扩散，令周遭敌人迟缓并受创。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 伤害：{extra_physical_damage}(普通) | 迟滞：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 1600,
+            "cost_total_niantou": 200,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "radius": "6.0",
+                "extra_physical_damage": "25.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.50",
+                "zhenyuan_base_cost": "3200.0",
+                "niantou_cost": "420.0",
+                "jingli_cost": "260.0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:shui_jian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_jian_gu_passive_water_arrow",
+            "usageTitle": "被动·水箭余劲",
+            "usageDesc": "出手夹带水劲，迟滞敌人并附带少量伤害。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 附伤：{extra_physical_damage} | 迟滞：{effect_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "proc_chance": "0.16",
+                "zhenyuan_base_cost": "6.0",
+                "jingli_cost": "0.6",
+                "niantou_cost": "0.2",
+                "extra_physical_damage": "1.5",
+                "effect_duration_ticks": "40",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_jian_gu_active_water_arrow",
+            "usageTitle": "主动·水箭点射",
+            "usageDesc": "凝聚水箭点射目标，造成普通伤害并迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 伤害：{extra_physical_damage}",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "cooldown_ticks": "120",
+                "range": "10.0",
+                "zhenyuan_base_cost": "30.0",
+                "jingli_cost": "4.0",
+                "niantou_cost": "2.0",
+                "extra_physical_damage": "8.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "aoe_radius": "0.0",
+                "aoe_extra_physical_damage": "0.0"
+            }
+        }
+    ]
+}
+

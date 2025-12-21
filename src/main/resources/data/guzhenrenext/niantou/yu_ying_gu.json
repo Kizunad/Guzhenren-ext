@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:yu_ying_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_ying_gu_passive_eagle_eye",
+            "usageTitle": "被动·御鹰蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "3.0",
+                "niantou_cost_per_second": "0.8",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_ying_gu_active_eagle_mark",
+            "usageTitle": "主动·御鹰蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 伤害：{extra_physical_damage} | 范围：{range}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost": "120.0",
+                "niantou_cost": "24.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "220",
+                "range": "8.0",
+                "extra_physical_damage": "10.8",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "0.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

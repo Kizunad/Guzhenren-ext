@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:xuehugu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xuehugu_passive_blood_rain_sustain",
+            "usageTitle": "被动·血雨余泽",
+            "usageDesc": "血雨余泽滋养血气，持续小幅回复生命与念头。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 回血：{heal_per_second}/s | 回念：{niantou_gain_per_second}/s | 回真：{zhenyuan_gain_per_second}/s",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9000.0",
+                "niantou_cost_per_second": "14.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "heal_per_second": "1.20",
+                "niantou_gain_per_second": "0.60",
+                "jingli_gain_per_second": "0.00",
+                "hunpo_gain_per_second": "0.00",
+                "zhenyuan_gain_per_second": "1.20"
+            }
+        },
+        {
+            "usageID": "guzhenren:xuehugu_active_blood_rain_domain",
+            "usageTitle": "主动·血雨领域",
+            "usageDesc": "挥洒鲜血形成血雨领域：维持扣费，每秒回复自身并压制敌人。",
+            "usageInfo": "半径：{radius} | 持续：{duration_ticks}t | 每秒伤害：{damage_per_second} | 每秒回血：{heal_per_second} | 每秒回真：{zhenyuan_gain_per_second} | 冷却：{cooldown_ticks}t",
+            "cost_duration": 800,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "radius": "12.0",
+                "duration_ticks": "400",
+                "cooldown_ticks": "1800",
+                "damage_per_second": "220.0",
+                "heal_per_second": "2.50",
+                "zhenyuan_gain_per_second": "6.0",
+                "niantou_gain_per_second": "1.20",
+                "debuff_duration_ticks": "80",
+                "debuff_amplifier": "1",
+                "zhenyuan_base_cost_per_second": "8000.0",
+                "niantou_cost_per_second": "12.0",
+                "jingli_cost_per_second": "18.0",
+                "hunpo_cost_per_second": "12.0"
+            }
+        }
+    ]
+}

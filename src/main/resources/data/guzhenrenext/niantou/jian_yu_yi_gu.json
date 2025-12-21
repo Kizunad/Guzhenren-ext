@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:jian_yu_yi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jian_yu_yi_gu_passive_feather_robe_stride",
+            "usageTitle": "被动·剑羽轻身",
+            "usageDesc": "剑羽衣轻盈，持续提升移速。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 移速：+{attribute_amount}",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "16.0",
+                "attribute_amount": "0.22"
+            }
+        },
+        {
+            "usageID": "guzhenren:jian_yu_yi_gu_active_feather_robe_flight",
+            "usageTitle": "主动·剑羽飞行",
+            "usageDesc": "短暂缓降并提速，便于空中机动。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 缓降：{effect_duration_ticks}t | 提速：{speed_duration_ticks}t",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "cooldown_ticks": "1000",
+                "zhenyuan_base_cost": "20000.0",
+                "jingli_cost": "350.0",
+                "effect_duration_ticks": "360",
+                "effect_amplifier": "0",
+                "speed_duration_ticks": "360",
+                "speed_amplifier": "1"
+            }
+        }
+    ]
+}

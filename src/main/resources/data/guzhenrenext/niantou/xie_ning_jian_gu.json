@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:xie_ning_jian_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_ning_jian_gu_passive_blood_wine_stack",
+            "usageTitle": "被动·凝血酿酒",
+            "usageDesc": "攻击积攒血酒，积满后可主动饮下获得更强力效果。",
+            "usageInfo": "每伤害积攒：{wine_gain_per_damage} | 上限：{max_wine}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "wine_gain_per_damage": "1.0",
+                "max_wine": "1200.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_ning_jian_gu_active_drink_blood_wine",
+            "usageTitle": "主动·饮血酒",
+            "usageDesc": "饮下血酒，按本次消耗比例获得短时爆发增益。",
+            "usageInfo": "消耗血酒：{consume_amount} | 最低需求：{min_required} | 持续：{buff_duration_ticks}t | 基础强度：{base_amplifier} | 额外强度：{max_bonus_amplifier} | 冷却：{cooldown_ticks}t",
+            "cost_duration": 800,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "consume_amount": "400.0",
+                "min_required": "100.0",
+                "buff_duration_ticks": "240",
+                "base_amplifier": "1",
+                "max_bonus_amplifier": "3",
+                "cooldown_ticks": "1600",
+                "zhenyuan_base_cost": "240000.0",
+                "niantou_cost": "320.0",
+                "jingli_cost": "520.0",
+                "hunpo_cost": "420.0"
+            }
+        }
+    ]
+}

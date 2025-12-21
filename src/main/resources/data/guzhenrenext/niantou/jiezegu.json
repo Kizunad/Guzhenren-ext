@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:jiezegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiezegu_passive_clean_spring",
+            "usageTitle": "被动·洁泽净化",
+            "usageDesc": "维持洁泽之意，每秒净化少量负面效果。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒净化：{max_remove}",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "jingli_cost_per_second": "1.0",
+                "niantou_cost_per_second": "0.9",
+                "hunpo_cost_per_second": "0.2",
+                "max_remove": "2"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiezegu_active_clean_spring",
+            "usageTitle": "主动·洁泽回润",
+            "usageDesc": "迅速净化负面并恢复生命与资源。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 100,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "800.0",
+                "jingli_cost": "40.0",
+                "niantou_cost": "32.0",
+                "hunpo_cost": "10.0",
+                "heal_amount": "30.0",
+                "restore_zhenyuan": "20.0",
+                "restore_jingli": "16.0",
+                "restore_hunpo": "10.0",
+                "restore_niantou": "18.0",
+                "cleanse_harmful": "1",
+                "buff_duration_ticks": "200",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

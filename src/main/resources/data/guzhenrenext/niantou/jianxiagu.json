@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jianxiagu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianxiagu_passive_sword_box_training",
+            "usageTitle": "被动·剑匣养锋",
+            "usageDesc": "剑匣养锋，持续提升攻速。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 攻速：+{attribute_amount}",
+            "cost_duration": 800,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "jingli_cost_per_second": "0.6",
+                "attribute_amount": "0.06"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianxiagu_active_sword_box_wave",
+            "usageTitle": "主动·剑匣浪",
+            "usageDesc": "剑气自匣而出，震开近身之敌。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 击退：{knockback_strength} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 800,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "radius": "3.5",
+                "damage": "12.0",
+                "knockback_strength": "0.4",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "40.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

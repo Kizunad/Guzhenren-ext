@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:yu_xiong_gu_4",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_xiong_gu_4_passive_bear_king_wall",
+            "usageTitle": "被动·御熊蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 受击倍率：{damage_multiplier}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost": "48.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "12.0",
+                "proc_chance": "0.13",
+                "cooldown_ticks": "220",
+                "damage_multiplier": "0.84",
+                "buff_duration_ticks": "140",
+                "buff_amplifier": "0",
+                "attacker_debuff_duration_ticks": "100",
+                "attacker_debuff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_xiong_gu_4_active_bear_king_guard",
+            "usageTitle": "主动·御熊蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost": "480.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "90.0",
+                "cooldown_ticks": "680",
+                "heal_amount": "0.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

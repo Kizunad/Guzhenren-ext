@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:jianjiaoguwuzhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianjiaoguwuzhuan_passive_snake_bind_proc",
+            "usageTitle": "被动·五转剑蛇缠",
+            "usageDesc": "更强的剑蛇缠杀，攻击有概率重度迟滞目标。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 附伤：+{bonus_damage} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "proc_chance": "0.12",
+                "proc_cooldown_ticks": "60",
+                "zhenyuan_base_cost": "2800.0",
+                "jingli_cost": "700.0",
+                "bonus_damage": "1600.0",
+                "damage_multiplier": "1.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "2"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianjiaoguwuzhuan_active_snake_twist",
+            "usageTitle": "主动·五转剑蛇绞杀",
+            "usageDesc": "超大范围剑蛇绞杀，压制敌人。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 9000,
+            "cost_total_niantou": 1800,
+            "metadata": {
+                "radius": "14.0",
+                "damage": "9000.0",
+                "knockback_strength": "0.5",
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "52000.0",
+                "jingli_cost": "600.0",
+                "effect_duration_ticks": "180",
+                "effect_amplifier": "3"
+            }
+        }
+    ]
+}

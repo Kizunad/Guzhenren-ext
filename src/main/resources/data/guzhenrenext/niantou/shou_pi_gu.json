@@ -14,6 +14,22 @@
             }
         },
         {
+            "usageID": "guzhenren:shou_pi_gu_passive_beast_blood_nourish",
+            "usageTitle": "被动·兽血养魂",
+            "usageDesc": "兽血之意温养肉身与魂魄，缓慢回补精力与魂魄，并受【变化】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{jingli_gain}(精力)+{hunpo_gain}(魂魄)",
+            "cost_duration": 1600,
+            "cost_total_niantou": 160,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.08",
+                "jingli_cost_per_second": "0.01",
+                "niantou_cost_per_second": "0.03",
+                "hunpo_cost_per_second": "0.01",
+                "jingli_gain": "0.15",
+                "hunpo_gain": "0.06"
+            }
+        },
+        {
             "usageID": "guzhenren:shou_pi_gu_active_hide_harden",
             "usageTitle": "主动·硬皮",
             "usageDesc": "短时间硬化兽皮，获得吸收与抗性。",

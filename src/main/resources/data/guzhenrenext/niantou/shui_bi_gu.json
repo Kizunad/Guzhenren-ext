@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:shui_bi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_bi_gu_passive_water_wall",
+            "usageTitle": "被动·水壁卸力",
+            "usageDesc": "受击时引水成壁，卸去部分伤害。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 受伤乘算：{damage_multiplier}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "32.0",
+                "jingli_cost": "4.2",
+                "niantou_cost": "2.6",
+                "hunpo_cost": "0.0",
+                "damage_multiplier": "0.65",
+                "buff_duration_ticks": "100",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_bi_gu_active_water_wall",
+            "usageTitle": "主动·水壁护体",
+            "usageDesc": "凝聚水壁护体，短暂提升抗性与护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 治疗：{heal_amount}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "340",
+                "zhenyuan_base_cost": "800.0",
+                "jingli_cost": "40.0",
+                "niantou_cost": "32.0",
+                "hunpo_cost": "6.0",
+                "heal_amount": "20.0",
+                "restore_zhenyuan": "10.0",
+                "restore_jingli": "6.0",
+                "restore_hunpo": "0.0",
+                "restore_niantou": "0.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "220",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

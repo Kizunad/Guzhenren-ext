@@ -21,6 +21,21 @@
             }
         },
         {
+            "usageID": "guzhenren:bing_bu_gu_passive_han_xi_ning_yuan",
+            "usageTitle": "被动·寒息凝元",
+            "usageDesc": "寒息入窍，凝而不散，缓慢回补真元，并受【冰雪】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)",
+            "cost_duration": 800,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.08",
+                "jingli_cost_per_second": "0.01",
+                "niantou_cost_per_second": "0.02",
+                "hunpo_cost_per_second": "0.00",
+                "zhenyuan_gain": "0.25"
+            }
+        },
+        {
             "usageID": "guzhenren:bing_bu_gu_active_frost_shroud",
             "usageTitle": "主动·冰布成衣",
             "usageDesc": "催动冰布蛊，使冰布裹身成衣，短时间内大幅提升生存能力。",

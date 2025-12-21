@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:tong_pi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tong_pi_gu_passive_copper_hide",
+            "usageTitle": "被动·铜皮韧骨",
+            "usageDesc": "铜皮蛊护住皮肉筋骨，受击时短暂卸力，减免部分伤害。",
+            "usageInfo": "触发概率：{proc_chance} | 冷却：{cooldown_ticks}t | 减伤倍率：{damage_multiplier}x | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 900,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "proc_chance": "0.14",
+                "cooldown_ticks": "180",
+                "damage_multiplier": "0.86",
+                "projectile_only": "false",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0",
+                "retaliate_physical_damage": "0.0",
+                "zhenyuan_base_cost": "45.0",
+                "niantou_cost": "10.0",
+                "jingli_cost": "5.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:tong_pi_gu_active_copper_quake",
+            "usageTitle": "主动·铜皮震荡",
+            "usageDesc": "铜皮震鸣，气浪外扩，震退近敌并迟滞其行动。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 伤害：{extra_physical_damage}(普通) | 迟滞：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 1000,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "radius": "5.0",
+                "extra_physical_damage": "6.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.35",
+                "zhenyuan_base_cost": "80.0",
+                "niantou_cost": "16.0",
+                "jingli_cost": "8.0"
+            }
+        }
+    ]
+}
+

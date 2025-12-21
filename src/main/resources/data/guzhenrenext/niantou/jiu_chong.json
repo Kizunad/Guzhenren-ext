@@ -18,6 +18,22 @@
             }
         },
         {
+            "usageID": "guzhenren:jiu_chong_passive_wine_nourish_spirit",
+            "usageTitle": "被动·酒香养魂",
+            "usageDesc": "酒香入体，暖而不燥，缓慢回补精力与魂魄，并受【食】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{jingli_gain}(精力)+{hunpo_gain}(魂魄)",
+            "cost_duration": 480,
+            "cost_total_niantou": 35,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.10",
+                "jingli_cost_per_second": "0.01",
+                "niantou_cost_per_second": "0.02",
+                "hunpo_cost_per_second": "0.01",
+                "jingli_gain": "0.20",
+                "hunpo_gain": "0.10"
+            }
+        },
+        {
             "usageID": "guzhenren:jiu_chong_active_warm_brew",
             "usageTitle": "主动·温酒化元",
             "usageDesc": "温酒入喉，气血微热，真元随之翻涌。立刻以饱食为引，化出一口真元，并短暂提速。",

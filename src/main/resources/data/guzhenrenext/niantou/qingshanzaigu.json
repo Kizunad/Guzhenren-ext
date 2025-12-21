@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:qingshanzaigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qingshanzaigu_passive_green_mountain_cap",
+            "usageTitle": "被动·青山不动",
+            "usageDesc": "青山不动，提升多项资源上限并稳固魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s | 上限：真元+{max_zhenyuan_bonus} 精力+{max_jingli_bonus} 念头容量+{niantou_capacity_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1200.0",
+                "niantou_cost_per_second": "4.0",
+                "jingli_cost_per_second": "4.0",
+                "hunpo_cost_per_second": "2.5",
+                "max_zhenyuan_bonus": "160.0",
+                "max_jingli_bonus": "140.0",
+                "niantou_capacity_bonus": "180.0",
+                "hunpo_resistance_restore": "0.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:qingshanzaigu_active_green_mountain_guard",
+            "usageTitle": "主动·青山护体",
+            "usageDesc": "青山护体，获得较长抗性并短暂再生。",
+            "usageInfo": "恢复：{heal_amount} | 抗性：{resistance_duration_ticks}t | 再生：{regen_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1600,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "heal_amount": "12.0",
+                "resistance_duration_ticks": "200",
+                "resistance_amplifier": "0",
+                "regen_duration_ticks": "120",
+                "regen_amplifier": "0",
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "220000.0",
+                "niantou_cost": "520.0",
+                "jingli_cost": "560.0",
+                "hunpo_cost": "480.0"
+            }
+        }
+    ]
+}
+

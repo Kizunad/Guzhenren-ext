@@ -1,0 +1,34 @@
+{
+    "itemID": "guzhenren:jiansuogusizhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiansuogusizhuan_passive_shuttle_stride",
+            "usageTitle": "被动·四转剑梭疾行",
+            "usageDesc": "剑梭更疾，持续提升移速。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s | 移速：+{attribute_amount}",
+            "cost_duration": 4200,
+            "cost_total_niantou": 840,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10.0",
+                "attribute_amount": "0.20"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiansuogusizhuan_active_shuttle_chain",
+            "usageTitle": "主动·四转剑梭穿行",
+            "usageDesc": "更远更稳的穿行脱困，并获得短暂吸收护盾。",
+            "usageInfo": "距离：{distance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 吸收：{effect_duration_ticks}t",
+            "cost_duration": 4200,
+            "cost_total_niantou": 840,
+            "metadata": {
+                "distance": "20.0",
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "6400.0",
+                "jingli_cost": "420.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

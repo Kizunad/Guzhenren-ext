@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:jian_liao_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jian_liao_gu_passive_sword_heal_sustain",
+            "usageTitle": "被动·剑疗温养",
+            "usageDesc": "以剑意温养自身，持续回复生命与魂魄。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {hunpo_cost_per_second}(魂魄)/s | 回复：+{heal_per_second}/s | 魂魄：+{hunpo_gain_per_second}/s | 念头：+{niantou_gain_per_second}/s",
+            "cost_duration": 3200,
+            "cost_total_niantou": 640,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "niantou_cost_per_second": "1.0",
+                "hunpo_cost_per_second": "0.5",
+                "heal_per_second": "2.0",
+                "hunpo_gain_per_second": "3.0",
+                "niantou_gain_per_second": "0.5",
+                "jingli_gain_per_second": "0.0",
+                "zhenyuan_gain_per_second": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jian_liao_gu_active_sword_heal",
+            "usageTitle": "主动·剑疗回生",
+            "usageDesc": "凝剑意回生，快速恢复生命与魂魄。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 治疗：{heal_amount} | 魂魄：+{hunpo_gain} | 念头：+{niantou_gain}",
+            "cost_duration": 3200,
+            "cost_total_niantou": 640,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "2400.0",
+                "hunpo_cost": "120.0",
+                "heal_amount": "80.0",
+                "hunpo_gain": "80.0",
+                "niantou_gain": "20.0",
+                "jingli_gain": "0.0",
+                "zhenyuan_gain": "0.0"
+            }
+        }
+    ]
+}

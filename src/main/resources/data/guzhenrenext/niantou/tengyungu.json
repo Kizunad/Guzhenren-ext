@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:tengyungu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tengyungu_passive_cloud_stride",
+            "usageTitle": "被动·腾云身法",
+            "usageDesc": "持续催动，消耗真元+精力，并随【云】道道痕动态变化，常驻提升移动速度。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{jingli_cost_per_second}(精力)/s | 速度加成：{attribute_amount}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "11.0",
+                "niantou_cost_per_second": "0.0",
+                "jingli_cost_per_second": "1.2",
+                "hunpo_cost_per_second": "0.0",
+                "attribute_amount": "0.08"
+            }
+        },
+        {
+            "usageID": "guzhenren:tengyungu_active_rise_on_cloud",
+            "usageTitle": "主动·腾云升空",
+            "usageDesc": "腾云而起，获得缓降与身法增益，并回复少量生命，随【云】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 增益：{effect_duration_ticks}t | 回复：{heal_amount} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost": "460.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "360.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "360",
+                "heal_amount": "6.0",
+                "effect_duration_ticks": "160",
+                "slow_falling_amplifier": "0",
+                "speed_amplifier": "0",
+                "jump_amplifier": "0"
+            }
+        }
+    ]
+}
+

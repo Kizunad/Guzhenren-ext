@@ -1,0 +1,47 @@
+{
+    "itemID": "guzhenren:bi_kong_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bi_kong_gu_passive_azure_toxin_body",
+            "usageTitle": "被动·碧空毒体",
+            "usageDesc": "以极毒淬体，持续提升多项上限并缓慢增强魂魄抗性。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 上限：真元+{cap_zhenyuan}/精力+{cap_jingli}/魂魄+{cap_hunpo}/抗性上限+{cap_hunpo_resistance}/念头容量+{cap_niantou_capacity}",
+            "cost_duration": 600,
+            "cost_total_niantou": 400,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "jingli_cost_per_second": "1.2",
+                "niantou_cost_per_second": "1.5",
+                "hunpo_cost_per_second": "1.0",
+                "cap_zhenyuan": "300.0",
+                "cap_jingli": "220.0",
+                "cap_hunpo": "260.0",
+                "cap_hunpo_resistance": "180.0",
+                "cap_niantou_capacity": "200.0",
+                "hunpo_resistance_restore": "6.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:bi_kong_gu_active_azure_execution",
+            "usageTitle": "主动·碧空绝杀",
+            "usageDesc": "锁定目标施展碧空绝杀，造成极高普通伤害并强力削弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 伤害：{extra_physical_damage} | 削弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 600,
+            "cost_total_niantou": 400,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "range": "22.0",
+                "extra_physical_damage": "9000.0",
+                "aoe_radius": "0.0",
+                "aoe_extra_physical_damage": "0.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "1000.0",
+                "jingli_cost": "450.0",
+                "niantou_cost": "600.0",
+                "hunpo_cost": "250.0"
+            }
+        }
+    ]
+}
+

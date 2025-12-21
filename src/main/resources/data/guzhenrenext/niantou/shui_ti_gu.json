@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:shui_ti_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_ti_gu_passive_liquid_body",
+            "usageTitle": "被动·水体卸力",
+            "usageDesc": "以水体卸力，受击时概率性减伤并压制灼烧。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 受伤乘算：{damage_multiplier}",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "proc_chance": "0.16",
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "14.0",
+                "jingli_cost": "1.4",
+                "niantou_cost": "0.7",
+                "hunpo_cost": "0.0",
+                "damage_multiplier": "0.70",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_ti_gu_active_liquid_shift",
+            "usageTitle": "主动·水体化形",
+            "usageDesc": "短暂水体化，净化负面并提升机动与抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "200.0",
+                "jingli_cost": "16.0",
+                "niantou_cost": "10.0",
+                "hunpo_cost": "2.0",
+                "heal_amount": "12.0",
+                "restore_zhenyuan": "12.0",
+                "restore_jingli": "10.0",
+                "restore_hunpo": "5.0",
+                "restore_niantou": "6.0",
+                "cleanse_harmful": "1",
+                "buff_duration_ticks": "160",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

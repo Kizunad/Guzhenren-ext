@@ -1,0 +1,50 @@
+{
+    "itemID": "guzhenren:ai_bie_chi",
+    "usages": [
+        {
+            "usageID": "guzhenren:ai_bie_chi_passive_love_separation_mark",
+            "usageTitle": "被动·情毒暗印",
+            "usageDesc": "攻击时有概率在目标体内种下情毒暗印，延迟后于下一次命中引爆。",
+            "usageInfo": "触发：{proc_chance} | 延迟：{mark_delay_ticks}t | 过期：{mark_expire_ticks}t | 引爆伤害：{detonate_physical_damage} | 削弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.10",
+                "cooldown_ticks": "100",
+                "mark_delay_ticks": "80",
+                "mark_expire_ticks": "240",
+                "detonate_physical_damage": "30.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "18.0",
+                "jingli_cost": "1.5",
+                "niantou_cost": "2.0",
+                "hunpo_cost": "0.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:ai_bie_chi_active_shadow_ambush",
+            "usageTitle": "主动·影行偷袭",
+            "usageDesc": "短暂隐匿身形并提高机动，用于偷袭与脱身。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 持续：{buff_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "buff_duration_ticks": "60",
+                "buff_amplifier": "0",
+                "cleanse_harmful": "0",
+                "heal_amount": "0.0",
+                "restore_zhenyuan": "0.0",
+                "restore_jingli": "0.0",
+                "restore_hunpo": "0.0",
+                "restore_niantou": "0.0",
+                "zhenyuan_base_cost": "40.0",
+                "jingli_cost": "6.0",
+                "niantou_cost": "8.0",
+                "hunpo_cost": "1.0"
+            }
+        }
+    ]
+}
+

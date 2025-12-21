@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jianfenggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianfenggu_passive_piercing_edge",
+            "usageTitle": "被动·剑锋破甲",
+            "usageDesc": "剑锋更锐，攻击有概率额外增伤并附伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage}",
+            "cost_duration": 3600,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "proc_chance": "0.10",
+                "proc_cooldown_ticks": "60",
+                "zhenyuan_base_cost": "900.0",
+                "jingli_cost": "240.0",
+                "bonus_damage": "320.0",
+                "damage_multiplier": "1.10"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianfenggu_active_piercing_strike",
+            "usageTitle": "主动·剑锋穿杀",
+            "usageDesc": "锁定目标爆发穿杀，并附带少量法术贯穿伤害。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 法术伤害：{magic_damage}",
+            "cost_duration": 3600,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "range": "16.0",
+                "damage": "2200.0",
+                "magic_damage": "120.0",
+                "cooldown_ticks": "520",
+                "zhenyuan_base_cost": "6500.0",
+                "jingli_cost": "400.0"
+            }
+        }
+    ]
+}
+

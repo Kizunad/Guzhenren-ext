@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:xie_luo_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_luo_gu_passive_moon_blood_proc",
+            "usageTitle": "被动·月刃血落",
+            "usageDesc": "月刃凝血更易追踪，攻击概率高亮目标并附带额外伤害。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 增伤：*{damage_multiplier} | 附伤：+{bonus_damage} | 高亮：{debuff_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "proc_chance": "0.08",
+                "proc_cooldown_ticks": "160",
+                "damage_multiplier": "1.10",
+                "bonus_damage": "90.0",
+                "debuff_duration_ticks": "120",
+                "debuff_amplifier": "0",
+                "zhenyuan_base_cost": "26000.0",
+                "niantou_cost": "70.0",
+                "jingli_cost": "150.0",
+                "hunpo_cost": "110.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_luo_gu_active_moon_blood_strike",
+            "usageTitle": "主动·追血月刃",
+            "usageDesc": "凝出追踪月刃斩击目标，造成高额普通伤害并高亮。",
+            "usageInfo": "距离：{range} | 伤害：{damage} | 高亮：{debuff_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 500,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "range": "28.0",
+                "damage": "800.0",
+                "debuff_duration_ticks": "160",
+                "debuff_amplifier": "0",
+                "self_heal_amount": "0.0",
+                "cooldown_ticks": "1000",
+                "zhenyuan_base_cost": "150000.0",
+                "niantou_cost": "260.0",
+                "jingli_cost": "380.0",
+                "hunpo_cost": "280.0"
+            }
+        }
+    ]
+}

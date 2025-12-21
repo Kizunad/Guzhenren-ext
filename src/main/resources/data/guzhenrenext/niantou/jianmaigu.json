@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:jianmaigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianmaigu_passive_meridian_capacity",
+            "usageTitle": "被动·剑脉拓容",
+            "usageDesc": "剑脉畅通，拓展真元与精力上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s + {niantou_cost_per_second}(念头)/s | 真元上限：+{max_zhenyuan_bonus} | 精力上限：+{max_jingli_bonus}",
+            "cost_duration": 2200,
+            "cost_total_niantou": 440,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10.0",
+                "jingli_cost_per_second": "2.0",
+                "niantou_cost_per_second": "1.0",
+                "max_zhenyuan_bonus": "120.0",
+                "max_jingli_bonus": "80.0",
+                "max_hunpo_bonus": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianmaigu_active_meridian_surge",
+            "usageTitle": "主动·剑脉奔涌",
+            "usageDesc": "剑脉奔涌，短暂爆发身法与力量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 力量：{effect_duration_ticks}t | 身法：{speed_duration_ticks}t",
+            "cost_duration": 2200,
+            "cost_total_niantou": 440,
+            "metadata": {
+                "cooldown_ticks": "500",
+                "zhenyuan_base_cost": "1200.0",
+                "jingli_cost": "220.0",
+                "niantou_cost": "40.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "1",
+                "speed_duration_ticks": "200",
+                "speed_amplifier": "1"
+            }
+        }
+    ]
+}
+

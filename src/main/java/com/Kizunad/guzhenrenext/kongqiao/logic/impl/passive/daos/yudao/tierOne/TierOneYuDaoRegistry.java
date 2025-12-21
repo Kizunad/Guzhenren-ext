@@ -6,6 +6,7 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuD
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveSelfBuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveTargetDisplaceEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveBlinkEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.common.DaoSustainedResourceRegenEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoAttackProcDebuffEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedAttributeModifierEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common.YuDaoSustainedRegenEffect;
@@ -28,6 +29,16 @@ public final class TierOneYuDaoRegistry {
                 "guzhenren:kongsuogu_passive_spatial_lock",
                 DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.MOVEMENT_SLOWDOWN
+            )
+        );
+        GuEffectRegistry.register(
+            new DaoSustainedResourceRegenEffect(
+                "guzhenren:kongsuogu_passive_kong_xi_hui_qi",
+                DaoHenHelper.DaoType.YU_DAO,
+                false,
+                true,
+                true,
+                false
             )
         );
         GuEffectRegistry.register(

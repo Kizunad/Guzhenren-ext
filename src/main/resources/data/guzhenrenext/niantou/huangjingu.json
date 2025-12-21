@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:huangjingu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huangjingu_passive_golden_cap_4",
+            "usageTitle": "被动·黄金增容",
+            "usageDesc": "黄金蛊滋养空窍，提高念头容量与魂魄上限，并修复魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：念头容量+{cap_niantou_capacity} 魂魄上限+{cap_max_hunpo} | 抗性回复：{hunpo_resistance_restore}/s",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "36000.0",
+                "niantou_cost_per_second": "2.5",
+                "jingli_cost_per_second": "1.2",
+                "hunpo_cost_per_second": "0.60",
+                "cap_niantou_capacity": "320.0",
+                "cap_max_hunpo": "240.0",
+                "hunpo_resistance_restore": "0.8"
+            }
+        },
+        {
+            "usageID": "guzhenren:huangjingu_active_golden_nourish_4",
+            "usageTitle": "主动·黄金滋养",
+            "usageDesc": "黄金之息温养五脏，恢复生命与多项资源，并短暂提升恢复力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 回复：生命{heal_amount} 精力{restore_jingli} 念头{restore_niantou} 魂魄{restore_hunpo} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 5200,
+            "cost_total_niantou": 950,
+            "metadata": {
+                "cooldown_ticks": "1600",
+                "regen_duration_ticks": "260",
+                "regen_amplifier": "0",
+                "heal_amount": "28.0",
+                "restore_jingli": "90.0",
+                "restore_niantou": "70.0",
+                "restore_hunpo": "80.0",
+                "zhenyuan_base_cost": "4800000.0",
+                "niantou_cost": "350.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

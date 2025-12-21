@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:xie_lu_gu_5",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_lu_gu_5_passive_blood_skull_caps",
+            "usageTitle": "被动·五转血颅资质",
+            "usageDesc": "五转血颅更强，持续提升多项上限/容量（高转）。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 上限：真{max_zhenyuan_bonus}/精{max_jingli_bonus}/魂{max_hunpo_bonus}/念容{niantou_capacity_bonus}",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "16000.0",
+                "niantou_cost_per_second": "26.0",
+                "jingli_cost_per_second": "30.0",
+                "hunpo_cost_per_second": "24.0",
+                "max_zhenyuan_bonus": "420.0",
+                "max_jingli_bonus": "420.0",
+                "max_hunpo_bonus": "380.0",
+                "max_hunpo_resistance_bonus": "80.0",
+                "niantou_capacity_bonus": "340.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_lu_gu_5_active_blood_skull_refine",
+            "usageTitle": "主动·五转血颅炼化",
+            "usageDesc": "五转血颅炼化爆发，回复大量真元并强力稳定气血。",
+            "usageInfo": "回血：{heal_amount} | 回真：{zhenyuan_gain} | 回念：{niantou_gain} | 冷却：{cooldown_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 400,
+            "metadata": {
+                "cooldown_ticks": "2600",
+                "zhenyuan_base_cost": "600000.0",
+                "niantou_cost": "600.0",
+                "jingli_cost": "850.0",
+                "hunpo_cost": "750.0",
+                "heal_amount": "80.0",
+                "niantou_gain": "40.0",
+                "jingli_gain": "0.0",
+                "hunpo_gain": "0.0",
+                "zhenyuan_gain": "100.0"
+            }
+        }
+    ]
+}

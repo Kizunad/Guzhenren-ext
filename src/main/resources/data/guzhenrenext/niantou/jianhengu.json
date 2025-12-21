@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jianhengu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianhengu_passive_scar_edge",
+            "usageTitle": "被动·剑痕锋",
+            "usageDesc": "以剑痕磨砺锋芒，持续提升攻击力。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 攻击：+{attribute_amount}",
+            "cost_duration": 600,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "jingli_cost_per_second": "0.5",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianhengu_active_scar_resolve",
+            "usageTitle": "主动·剑痕立意",
+            "usageDesc": "以剑痕凝意，短暂提振身法与杀力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 身法：{effect_duration_ticks}t | 力量：{boost_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "160",
+                "zhenyuan_base_cost": "120.0",
+                "jingli_cost": "30.0",
+                "niantou_cost": "10.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "boost_duration_ticks": "120",
+                "boost_amplifier": "0"
+            }
+        }
+    ]
+}
+

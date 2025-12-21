@@ -1,0 +1,53 @@
+{
+    "itemID": "guzhenren:qingtonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qingtonggu_passive_bronze_shell",
+            "usageTitle": "被动·青铜壳",
+            "usageDesc": "青铜蛊常驻空窍，以真元维持一层青铜皮壳，提升护甲。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 护甲：+{attribute_amount}",
+            "cost_duration": 800,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.6",
+                "jingli_cost_per_second": "0.18",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:qingtonggu_passive_metal_essence_nourish",
+            "usageTitle": "被动·金精养窍",
+            "usageDesc": "金精入窍，反哺四资：缓慢恢复真元、魂魄、精力与念头，并受【金】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)+{hunpo_gain}(魂魄)+{jingli_gain}(精力)+{niantou_gain}(念头)",
+            "cost_duration": 800,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.14",
+                "jingli_cost_per_second": "0.02",
+                "niantou_cost_per_second": "0.03",
+                "hunpo_cost_per_second": "0.01",
+                "zhenyuan_gain": "0.22",
+                "hunpo_gain": "0.04",
+                "jingli_gain": "0.12",
+                "niantou_gain": "0.14"
+            }
+        },
+        {
+            "usageID": "guzhenren:qingtonggu_active_bronze_guard",
+            "usageTitle": "主动·青铜护体",
+            "usageDesc": "真元贯体，青铜护壳瞬间凝实，短时抵御外力冲击。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力) | 持续：{effect_duration_ticks}t",
+            "cost_duration": 1000,
+            "cost_total_niantou": 110,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "60.0",
+                "niantou_cost": "12.0",
+                "jingli_cost": "4.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "restore_jingli": "3.0"
+            }
+        }
+    ]
+}

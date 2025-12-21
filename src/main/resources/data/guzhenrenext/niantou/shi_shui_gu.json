@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:shi_shui_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shi_shui_gu_passive_water_sense",
+            "usageTitle": "被动·识水明察",
+            "usageDesc": "维持识水明察，获得夜视与水下呼吸。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 持续：{buff_duration_ticks}t",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.5",
+                "jingli_cost_per_second": "1.0",
+                "niantou_cost_per_second": "0.9",
+                "hunpo_cost_per_second": "0.3",
+                "buff_duration_ticks": "240",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shi_shui_gu_active_water_sense",
+            "usageTitle": "主动·识水照映",
+            "usageDesc": "照映周围敌对目标，标记其位置。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 发光：{glow_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "radius": "24.0",
+                "glow_duration_ticks": "220",
+                "zhenyuan_base_cost": "1400.0",
+                "jingli_cost": "70.0",
+                "niantou_cost": "55.0",
+                "hunpo_cost": "14.0"
+            }
+        }
+    ]
+}
+

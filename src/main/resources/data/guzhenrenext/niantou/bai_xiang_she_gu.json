@@ -29,7 +29,7 @@
             "cost_total_niantou": 240,
             "metadata": {
                 "cooldown_ticks": "1200",
-                "niantou_cost": "1600.0",
+                "niantou_cost": "750.0",
                 "jingli_cost": "600.0",
                 "hunpo_cost": "300.0",
                 "zhenyuan_base_cost": "33000000000.0",

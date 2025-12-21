@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:quan_tu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:quan_tu_gu_passive_hound_totem",
+            "usageTitle": "被动·犬图蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "13.0",
+                "niantou_cost_per_second": "2.8",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "cap_max_zhenyuan": "0.0",
+                "cap_max_jingli": "0.0",
+                "cap_max_hunpo": "0.0",
+                "cap_niantou_capacity": "260.0",
+                "hunpo_resistance_restore": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:quan_tu_gu_active_hound_totem_hunt",
+            "usageTitle": "主动·犬图蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost": "720.0",
+                "niantou_cost": "140.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "900",
+                "heal_amount": "0.0",
+                "effect_duration_ticks": "320",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,58 @@
+{
+    "itemID": "guzhenren:bai_yun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bai_yun_gu_passive_white_cloud_supply",
+            "usageTitle": "被动·白云供给",
+            "usageDesc": "持续催动，消耗真元+念头，并随【云】道道痕动态变化，提升部分资源上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s | 精力上限：+{cap_max_jingli} | 念头容量：+{cap_niantou_capacity}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.0",
+                "niantou_cost_per_second": "0.75",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "cap_max_jingli": "220",
+                "cap_niantou_capacity": "140"
+            }
+        },
+        {
+            "usageID": "guzhenren:bai_yun_gu_passive_cloud_nourish",
+            "usageTitle": "被动·云息润养",
+            "usageDesc": "云息绵长，润养空窍：缓慢恢复真元、魂魄、精力与念头，并受【云】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{zhenyuan_gain}(真元)+{hunpo_gain}(魂魄)+{jingli_gain}(精力)+{niantou_gain}(念头)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.35",
+                "jingli_cost_per_second": "0.05",
+                "niantou_cost_per_second": "0.08",
+                "hunpo_cost_per_second": "0.02",
+                "zhenyuan_gain": "0.50",
+                "hunpo_gain": "0.08",
+                "jingli_gain": "0.30",
+                "niantou_gain": "0.35"
+            }
+        },
+        {
+            "usageID": "guzhenren:bai_yun_gu_active_white_cloud_step",
+            "usageTitle": "主动·白云挪移",
+            "usageDesc": "短距挪移到视线前方的安全位置，并获得短暂加速/再生，随【云】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 基础距离：{distance} | 增益：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)",
+            "cost_duration": 2400,
+            "cost_total_niantou": 180,
+            "metadata": {
+                "zhenyuan_base_cost": "260.0",
+                "niantou_cost": "180.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "240",
+                "distance": "9.0",
+                "effect_duration_ticks": "120",
+                "speed_amplifier": "0",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}

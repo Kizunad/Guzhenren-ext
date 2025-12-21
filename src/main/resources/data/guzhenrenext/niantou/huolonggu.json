@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:huolonggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huolonggu_passive_fire_dragon_fury",
+            "usageTitle": "被动·火龙之势",
+            "usageDesc": "火龙之势常在，持续增强攻击力。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 攻击力：+{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "7.0",
+                "niantou_cost_per_second": "0.9",
+                "attribute_amount": "3.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:huolonggu_active_fire_dragon_roar",
+            "usageTitle": "主动·火龙咆哮",
+            "usageDesc": "火龙怒啸，灼热冲击席卷四周。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 半径：{radius} | 伤害：+{extra_physical_damage}(普通) | 点燃：{burn_seconds}s",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "640",
+                "radius": "6.5",
+                "zhenyuan_base_cost": "260.0",
+                "hunpo_cost": "36.0",
+                "extra_physical_damage": "6000.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.45",
+                "burn_seconds": "10.0"
+            }
+        }
+    ]
+}
+

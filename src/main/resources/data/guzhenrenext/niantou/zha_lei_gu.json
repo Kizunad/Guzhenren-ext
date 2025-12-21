@@ -1,0 +1,46 @@
+{
+    "itemID": "guzhenren:zha_lei_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zha_lei_gu_passive_bomb_counter",
+            "usageTitle": "被动·电爆反制",
+            "usageDesc": "受击时电气炸裂反噬来犯者。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 反制：{retaliation_damage}",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "proc_chance": "0.14",
+                "cooldown_ticks": "120",
+                "zhenyuan_base_cost": "60.0",
+                "jingli_cost": "10.0",
+                "niantou_cost": "6.0",
+                "hunpo_cost": "4.0",
+                "retaliation_damage": "28.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:zha_lei_gu_active_thunder_orb",
+            "usageTitle": "主动·雷球轰击",
+            "usageDesc": "发射磨盘大小的幽蓝雷球，轰击目标并溅射周围。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 射程：{range} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 主伤：{extra_physical_damage} | 溅射：{aoe_extra_physical_damage}",
+            "cost_duration": 800,
+            "cost_total_niantou": 140,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "range": "20.0",
+                "zhenyuan_base_cost": "220.0",
+                "jingli_cost": "25.0",
+                "niantou_cost": "18.0",
+                "hunpo_cost": "10.0",
+                "extra_physical_damage": "180.0",
+                "aoe_radius": "3.0",
+                "aoe_extra_physical_damage": "60.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

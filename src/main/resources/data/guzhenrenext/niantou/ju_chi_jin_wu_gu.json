@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:ju_chi_jin_wu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:ju_chi_jin_wu_gu_passive_sawtooth_rend",
+            "usageTitle": "被动·锯齿割裂",
+            "usageDesc": "锯齿金蜈蛊盘踞杀意，攻击时有概率割裂敌势，令其行动迟钝并受创。",
+            "usageInfo": "触发概率：{proc_chance} | 持续：{effect_duration_ticks}t | 追加伤害：{extra_physical_damage}(普通) | 触发消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 3200,
+            "cost_total_niantou": 520,
+            "metadata": {
+                "proc_chance": "0.16",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "160.0",
+                "zhenyuan_base_cost": "72000.0",
+                "niantou_cost": "60.0",
+                "jingli_cost": "32.0",
+                "hunpo_cost": "16.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:ju_chi_jin_wu_gu_active_sawtooth_sweep",
+            "usageTitle": "主动·锯齿横扫",
+            "usageDesc": "锯齿横扫一圈，撕裂周遭敌人并施加虚弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 半径：{radius} | 伤害：{extra_physical_damage}(普通) | 虚弱：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "cooldown_ticks": "800",
+                "radius": "6.5",
+                "extra_physical_damage": "320.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.40",
+                "zhenyuan_base_cost": "160000.0",
+                "niantou_cost": "150.0",
+                "jingli_cost": "80.0",
+                "hunpo_cost": "40.0"
+            }
+        }
+    ]
+}

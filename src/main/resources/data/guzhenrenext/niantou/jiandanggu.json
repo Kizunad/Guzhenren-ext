@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jiandanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jiandanggu_passive_sword_wave_guard",
+            "usageTitle": "被动·剑荡卸力",
+            "usageDesc": "剑荡如潮，受击有概率卸力减伤。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 受击倍率：*{hurt_multiplier}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1040,
+            "metadata": {
+                "proc_chance": "0.14",
+                "proc_cooldown_ticks": "100",
+                "zhenyuan_base_cost": "800.0",
+                "jingli_cost": "200.0",
+                "hurt_multiplier": "0.78"
+            }
+        },
+        {
+            "usageID": "guzhenren:jiandanggu_active_sword_wave_control",
+            "usageTitle": "主动·剑荡控场",
+            "usageDesc": "范围剑气荡开并控制敌人。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage} | 击退：{knockback_strength} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1040,
+            "metadata": {
+                "radius": "10.0",
+                "damage": "2800.0",
+                "knockback_strength": "0.8",
+                "cooldown_ticks": "720",
+                "zhenyuan_base_cost": "10000.0",
+                "jingli_cost": "700.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "2"
+            }
+        }
+    ]
+}
+

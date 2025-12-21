@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:jianqigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianqigu_passive_sword_qi_proc",
+            "usageTitle": "被动·剑气附锋",
+            "usageDesc": "剑气附锋，攻击有概率追加斩击。",
+            "usageInfo": "触发：{proc_chance} | 触发冷却：{proc_cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 附伤：+{bonus_damage}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1040,
+            "metadata": {
+                "proc_chance": "0.12",
+                "proc_cooldown_ticks": "50",
+                "zhenyuan_base_cost": "900.0",
+                "jingli_cost": "240.0",
+                "bonus_damage": "520.0",
+                "damage_multiplier": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianqigu_active_sword_qi_cut",
+            "usageTitle": "主动·剑气斩",
+            "usageDesc": "远距离剑气斩击。",
+            "usageInfo": "距离：{range} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：{damage}",
+            "cost_duration": 5200,
+            "cost_total_niantou": 1040,
+            "metadata": {
+                "range": "22.0",
+                "damage": "3800.0",
+                "cooldown_ticks": "420",
+                "zhenyuan_base_cost": "9200.0",
+                "jingli_cost": "600.0"
+            }
+        }
+    ]
+}
+

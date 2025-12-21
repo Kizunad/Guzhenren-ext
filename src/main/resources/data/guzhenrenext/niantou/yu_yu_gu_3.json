@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:yu_yu_gu_3",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_yu_gu_3_passive_tide_regen",
+            "usageTitle": "被动·御鱼蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "6.0",
+                "niantou_cost_per_second": "0.0",
+                "jingli_cost_per_second": "1.4",
+                "hunpo_cost_per_second": "0.0",
+                "heal_amount": "0.7",
+                "niantou_gain": "0.0",
+                "jingli_gain": "0.5",
+                "hunpo_gain": "0.0",
+                "zhenyuan_gain": "0.6"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_yu_gu_3_active_tide_cleanse",
+            "usageTitle": "主动·御鱼蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 半径：{radius} | 治疗：{heal_amount}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost": "320.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "60.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "600",
+                "radius": "10.0",
+                "heal_amount": "5.0",
+                "cleanse_negative": "false",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

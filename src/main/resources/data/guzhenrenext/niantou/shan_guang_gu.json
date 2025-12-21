@@ -22,6 +22,21 @@
             }
         },
         {
+            "usageID": "guzhenren:shan_guang_gu_passive_guang_ming_ning_nian",
+            "usageTitle": "被动·光明凝念",
+            "usageDesc": "以光意澄澈心神，凝聚念头，缓慢回补念头，并受【光】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{niantou_gain}(念头)",
+            "cost_duration": 800,
+            "cost_total_niantou": 75,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.05",
+                "jingli_cost_per_second": "0.02",
+                "niantou_cost_per_second": "0.01",
+                "hunpo_cost_per_second": "0.00",
+                "niantou_gain": "0.20"
+            }
+        },
+        {
             "usageID": "guzhenren:shan_guang_gu_active_flash_burst",
             "usageTitle": "主动·闪光爆",
             "usageDesc": "爆发一团刺眼白光，短暂致盲范围内敌人并令其显形；强度随光道道痕提升。",
@@ -46,4 +61,3 @@
         }
     ]
 }
-

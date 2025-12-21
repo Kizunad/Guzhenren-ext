@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:shui_jia_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_jia_gu_passive_water_armor",
+            "usageTitle": "被动·水甲卸力",
+            "usageDesc": "受击时水甲卸力，显著减免伤害。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 受伤乘算：{damage_multiplier}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "34.0",
+                "jingli_cost": "4.5",
+                "niantou_cost": "2.8",
+                "hunpo_cost": "0.0",
+                "damage_multiplier": "0.60",
+                "buff_duration_ticks": "100",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_jia_gu_active_water_armor",
+            "usageTitle": "主动·水甲凝护",
+            "usageDesc": "凝实水甲护体，获得较强抗性与护盾。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄) | 治疗：{heal_amount}",
+            "cost_duration": 400,
+            "cost_total_niantou": 80,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "850.0",
+                "jingli_cost": "42.0",
+                "niantou_cost": "34.0",
+                "hunpo_cost": "8.0",
+                "heal_amount": "22.0",
+                "restore_zhenyuan": "10.0",
+                "restore_jingli": "6.0",
+                "restore_hunpo": "0.0",
+                "restore_niantou": "0.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "240",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

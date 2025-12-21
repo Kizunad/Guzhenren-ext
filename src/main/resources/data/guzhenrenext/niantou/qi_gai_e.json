@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:qi_gai_e",
+    "usages": [
+        {
+            "usageID": "guzhenren:qi_gai_e_passive_aperture_reserve_2",
+            "usageTitle": "被动·乞蛾存元",
+            "usageDesc": "乞丐蛾常驻空窍，像口袋一样缓慢积攒真元并安抚心神。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {hunpo_cost_per_second}(魂魄)/s | 回复：真元{zhenyuan_gain}/s 念头{niantou_gain}/s 生命{heal_amount}/s",
+            "cost_duration": 1600,
+            "cost_total_niantou": 230,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0",
+                "niantou_cost_per_second": "2.2",
+                "hunpo_cost_per_second": "1.0",
+                "heal_amount": "0.6",
+                "niantou_gain": "0.8",
+                "zhenyuan_gain": "3.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:qi_gai_e_active_reserve_release_2",
+            "usageTitle": "主动·乞蛾放元",
+            "usageDesc": "将积攒的真元化作一口气，救急回元并缓解虚弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 回复：生命{heal_amount} 真元{zhenyuan_restore} 精力{jingli_restore} 魂魄{hunpo_restore} | 持续：回生{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 1900,
+            "cost_total_niantou": 280,
+            "metadata": {
+                "cooldown_ticks": "700",
+                "range": "10.0",
+                "heal_amount": "10.0",
+                "zhenyuan_restore": "45.0",
+                "jingli_restore": "20.0",
+                "hunpo_restore": "12.0",
+                "cleanse_harmful": "false",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "zhenyuan_base_cost": "4200.0",
+                "niantou_cost": "650.0",
+                "jingli_cost": "350.0",
+                "hunpo_cost": "180.0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,48 @@
+{
+    "itemID": "guzhenren:shui_wan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shui_wan_gu_passive_moist_nourish",
+            "usageTitle": "被动·温润滋养",
+            "usageDesc": "持续润泽自身，缓慢回复生命与资源。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头) | 治疗：{heal_amount}/s",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "jingli_cost_per_second": "0.3",
+                "niantou_cost_per_second": "0.2",
+                "hunpo_cost_per_second": "0.0",
+                "radius": "0.0",
+                "heal_amount": "0.6",
+                "zhenyuan_restore": "1.2",
+                "jingli_restore": "1.2",
+                "hunpo_restore": "0.3"
+            }
+        },
+        {
+            "usageID": "guzhenren:shui_wan_gu_active_clear_pill",
+            "usageTitle": "主动·清润水丸",
+            "usageDesc": "吞服水丸，净化负面状态并大量恢复。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 净化：{cleanse_harmful} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头)+{hunpo_cost}(魂魄)",
+            "cost_duration": 400,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "90.0",
+                "jingli_cost": "8.0",
+                "niantou_cost": "5.0",
+                "hunpo_cost": "1.0",
+                "heal_amount": "10.0",
+                "restore_zhenyuan": "10.0",
+                "restore_jingli": "8.0",
+                "restore_hunpo": "4.0",
+                "restore_niantou": "6.0",
+                "cleanse_harmful": "1",
+                "buff_duration_ticks": "120",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}
+

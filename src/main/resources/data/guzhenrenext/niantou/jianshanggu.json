@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jianshanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jianshanggu_passive_soul_wound_capacity",
+            "usageTitle": "被动·剑伤拓魂",
+            "usageDesc": "以剑伤磨魂，提升魂魄与真元上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 魂魄上限：+{max_hunpo_bonus} | 真元上限：+{max_zhenyuan_bonus}",
+            "cost_duration": 5600,
+            "cost_total_niantou": 1120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "15.0",
+                "hunpo_cost_per_second": "0.8",
+                "max_hunpo_bonus": "260.0",
+                "max_zhenyuan_bonus": "120.0",
+                "max_jingli_bonus": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jianshanggu_active_wound_for_power",
+            "usageTitle": "主动·以伤换势",
+            "usageDesc": "短暂爆发强力剑势，同时自身陷入虚弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 力量：{effect_duration_ticks}t | 虚弱：{weak_duration_ticks}t",
+            "cost_duration": 5600,
+            "cost_total_niantou": 1120,
+            "metadata": {
+                "cooldown_ticks": "800",
+                "zhenyuan_base_cost": "12500.0",
+                "jingli_cost": "400.0",
+                "hunpo_cost": "420.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "3",
+                "weak_duration_ticks": "260",
+                "weak_amplifier": "1"
+            }
+        }
+    ]
+}
+

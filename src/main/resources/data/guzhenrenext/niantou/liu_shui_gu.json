@@ -1,0 +1,62 @@
+{
+    "itemID": "guzhenren:liu_shui_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:liu_shui_gu_passive_flowing_recovery",
+            "usageTitle": "被动·涓流回气",
+            "usageDesc": "维持涓涓细流，缓慢回复生命与资源。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头) | 治疗：{heal_amount}/s",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.2",
+                "jingli_cost_per_second": "0.2",
+                "niantou_cost_per_second": "0.1",
+                "hunpo_cost_per_second": "0.0",
+                "radius": "0.0",
+                "heal_amount": "0.3",
+                "zhenyuan_restore": "0.6",
+                "jingli_restore": "0.4",
+                "hunpo_restore": "0.1"
+            }
+        },
+        {
+            "usageID": "guzhenren:liu_shui_gu_passive_shui_xi_yang_nian",
+            "usageTitle": "被动·水息养念",
+            "usageDesc": "以水息绵长滋养心神，缓慢回补念头，并受【水】道道痕增幅。",
+            "usageInfo": "每秒消耗：{zhenyuan_base_cost_per_second}(基础真元)+{jingli_cost_per_second}(精力)+{niantou_cost_per_second}(念头)+{hunpo_cost_per_second}(魂魄) | 每秒恢复：+{niantou_gain}(念头)",
+            "cost_duration": 400,
+            "cost_total_niantou": 55,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "0.05",
+                "jingli_cost_per_second": "0.01",
+                "niantou_cost_per_second": "0.02",
+                "hunpo_cost_per_second": "0.00",
+                "niantou_gain": "0.16"
+            }
+        },
+        {
+            "usageID": "guzhenren:liu_shui_gu_active_flowing_step",
+            "usageTitle": "主动·流水步",
+            "usageDesc": "引流水劲加持自身，短暂提升机动并回复少量资源。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力)+{niantou_cost}(念头) | 治疗：{heal_amount}",
+            "cost_duration": 400,
+            "cost_total_niantou": 40,
+            "metadata": {
+                "cooldown_ticks": "140",
+                "zhenyuan_base_cost": "36.0",
+                "jingli_cost": "3.0",
+                "niantou_cost": "1.5",
+                "hunpo_cost": "0.0",
+                "heal_amount": "2.0",
+                "restore_zhenyuan": "0.0",
+                "restore_jingli": "2.0",
+                "restore_hunpo": "0.0",
+                "restore_niantou": "1.0",
+                "cleanse_harmful": "0",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0"
+            }
+        }
+    ]
+}

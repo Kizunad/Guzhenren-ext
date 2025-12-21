@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:yu_lang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yu_lang_gu_passive_pack_frenzy",
+            "usageTitle": "被动·御狼蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost": "18.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "4.0",
+                "hunpo_cost": "0.0",
+                "proc_chance": "0.12",
+                "effect_duration_ticks": "40",
+                "effect_amplifier": "0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yu_lang_gu_active_pack_howl",
+            "usageTitle": "主动·御狼蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 范围伤害：{extra_physical_damage} | 半径：{radius}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost": "120.0",
+                "niantou_cost": "0.0",
+                "jingli_cost": "24.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "280",
+                "radius": "4.0",
+                "extra_physical_damage": "18.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.0"
+            }
+        }
+    ]
+}

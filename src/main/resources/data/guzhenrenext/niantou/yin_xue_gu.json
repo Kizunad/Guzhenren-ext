@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:yin_xue_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yin_xue_gu_passive_hidden_blood_trap",
+            "usageTitle": "被动·隐血血爆",
+            "usageDesc": "当陷阱已布置时，受击触发一次血爆，波及周围敌对目标。",
+            "usageInfo": "半径：{explosion_radius} | 伤害：{explosion_damage} | 迟缓：{slow_duration_ticks}t",
+            "cost_duration": 0,
+            "cost_total_niantou": 0,
+            "metadata": {
+                "explosion_radius": "5.0",
+                "explosion_damage": "90.0",
+                "slow_duration_ticks": "120",
+                "slow_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:yin_xue_gu_active_arm_trap",
+            "usageTitle": "主动·布置隐血",
+            "usageDesc": "布置隐血陷阱，在持续时间内“下一次受击”将触发血爆。",
+            "usageInfo": "陷阱持续：{armed_duration_ticks}t | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 300,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "armed_duration_ticks": "700",
+                "cooldown_ticks": "800",
+                "zhenyuan_base_cost": "35000.0",
+                "niantou_cost": "80.0",
+                "jingli_cost": "150.0",
+                "hunpo_cost": "90.0"
+            }
+        }
+    ]
+}

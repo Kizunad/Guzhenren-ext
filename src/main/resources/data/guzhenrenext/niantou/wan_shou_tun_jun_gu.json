@@ -1,0 +1,45 @@
+{
+    "itemID": "guzhenren:wan_shou_tun_jun_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wan_shou_tun_jun_gu_passive_beast_supply",
+            "usageTitle": "被动·万兽吞军蛊",
+            "usageDesc": "持续催动，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "9.0",
+                "niantou_cost_per_second": "2.0",
+                "jingli_cost_per_second": "0.0",
+                "hunpo_cost_per_second": "0.0",
+                "cap_max_zhenyuan": "240.0",
+                "cap_max_jingli": "0.0",
+                "cap_max_hunpo": "0.0",
+                "cap_niantou_capacity": "120.0",
+                "hunpo_resistance_restore": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:wan_shou_tun_jun_gu_active_beast_stampede",
+            "usageTitle": "主动·万兽吞军蛊",
+            "usageDesc": "主动施展，消耗资源，并随【奴】道道痕动态变化。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄) | 范围伤害：{extra_physical_damage} | 半径：{radius}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost": "480.0",
+                "niantou_cost": "90.0",
+                "jingli_cost": "0.0",
+                "hunpo_cost": "0.0",
+                "cooldown_ticks": "500",
+                "radius": "7.0",
+                "extra_physical_damage": "4620.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.0"
+            }
+        }
+    ]
+}

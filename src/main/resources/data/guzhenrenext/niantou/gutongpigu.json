@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:gutongpigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:gutongpigu_passive_ancient_bronze_hide_4",
+            "usageTitle": "被动·古铜韧甲",
+            "usageDesc": "古铜皮蛊厚重坚韧，持续提升护甲韧性，稳固身躯。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 护甲韧性：+{attribute_amount}",
+            "cost_duration": 4200,
+            "cost_total_niantou": 720,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "32000.0",
+                "jingli_cost_per_second": "1.2",
+                "attribute_amount": "8.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:gutongpigu_active_ancient_grapple_4",
+            "usageTitle": "主动·古铜擒扯",
+            "usageDesc": "以古铜之势擒扯敌身，牵引至身前后重击并迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 距离：{range} | 牵引：{pull_strength} | 伤害：{extra_physical_damage}(普通) | 迟滞：{effect_duration_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+            "cost_duration": 5200,
+            "cost_total_niantou": 900,
+            "metadata": {
+                "cooldown_ticks": "1400",
+                "range": "7.0",
+                "pull_strength": "1.20",
+                "pull_vertical": "0.10",
+                "extra_physical_damage": "1800.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "self_heal_amount": "26.0",
+                "zhenyuan_base_cost": "5200000.0",
+                "niantou_cost": "350.0",
+                "jingli_cost": "200.0",
+                "hunpo_cost": "120.0"
+            }
+        }
+    ]
+}

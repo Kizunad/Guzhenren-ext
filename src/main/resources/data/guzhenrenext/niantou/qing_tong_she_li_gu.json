@@ -1,0 +1,44 @@
+{
+    "itemID": "guzhenren:qing_tong_she_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qing_tong_she_li_gu_passive_aperture_nourish_1",
+            "usageTitle": "被动·青铜滋窍",
+            "usageDesc": "青铜舍利蛊常驻空窍，温养底蕴，缓慢回补真元并安定心神。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s + {jingli_cost_per_second}(精力)/s | 回复：真元{zhenyuan_gain}/s 念头{niantou_gain}/s 生命{heal_amount}/s",
+            "cost_duration": 900,
+            "cost_total_niantou": 90,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "1.2",
+                "niantou_cost_per_second": "0.10",
+                "jingli_cost_per_second": "0.12",
+                "heal_amount": "0.4",
+                "niantou_gain": "0.25",
+                "zhenyuan_gain": "0.8"
+            }
+        },
+        {
+            "usageID": "guzhenren:qing_tong_she_li_gu_active_aperture_spark_1",
+            "usageTitle": "主动·青铜振奋",
+            "usageDesc": "舍利微光点燃空窍，短时加速恢复并提振步伐。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 持续：回生{effect_duration_ticks}t 迅捷{speed_duration_ticks}t | 回复：生命{heal_amount} 精力{restore_jingli} 念头{restore_niantou} 魂魄{restore_hunpo} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)",
+            "cost_duration": 1100,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "0",
+                "heal_amount": "2.0",
+                "restore_jingli": "1.5",
+                "restore_niantou": "1.2",
+                "restore_hunpo": "0.6",
+                "zhenyuan_base_cost": "55.0",
+                "niantou_cost": "10.0",
+                "jingli_cost": "3.0"
+            }
+        }
+    ]
+}
+
