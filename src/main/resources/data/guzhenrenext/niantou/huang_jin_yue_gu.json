@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:huang_jin_yue_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huang_jin_yue_gu_passive_golden_edge",
+            "usageTitle": "被动·金月锋",
+            "usageDesc": "金月之锋加身，攻击更沉。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 伤害增幅：+{attribute_amount}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "5.0",
+                "hunpo_cost_per_second": "1.0",
+                "attribute_amount": "0.12"
+            }
+        },
+        {
+            "usageID": "guzhenren:huang_jin_yue_gu_active_golden_might",
+            "usageTitle": "主动·金月威",
+            "usageDesc": "爆发金月之威，攻守俱增。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 持续：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "165.0",
+                "niantou_cost": "22.0",
+                "heal_amount": "8.0",
+                "effect_duration_ticks": "160",
+                "damage_boost_amplifier": "1",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+

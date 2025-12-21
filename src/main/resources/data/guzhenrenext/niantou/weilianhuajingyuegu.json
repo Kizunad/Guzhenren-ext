@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:weilianhuajingyuegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:weilianhuajingyuegu_passive_mirror_bind",
+            "usageTitle": "被动·镜月定影",
+            "usageDesc": "镜月映敌，偶有定身之效。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 定身：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "proc_chance": "0.08",
+                "zhenyuan_base_cost": "130.0",
+                "niantou_cost": "26.0",
+                "effect_duration_ticks": "40",
+                "effect_amplifier": "4",
+                "extra_physical_damage": "0.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:weilianhuajingyuegu_active_mirror_lock",
+            "usageTitle": "主动·镜月锁",
+            "usageDesc": "镜月锁敌，重斩其身并强力束缚。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 伤害：+{extra_physical_damage}(普通) | 定身：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "range": "18.0",
+                "zhenyuan_base_cost": "290.0",
+                "hunpo_cost": "26.0",
+                "extra_physical_damage": "11500.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "80",
+                "slow_amplifier": "4",
+                "weakness_amplifier": "1",
+                "self_heal_amount": "0.0"
+            }
+        }
+    ]
+}
+

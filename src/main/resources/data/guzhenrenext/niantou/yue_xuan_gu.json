@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:yue_xuan_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yue_xuan_gu_passive_moon_spin",
+            "usageTitle": "被动·月旋身法",
+            "usageDesc": "月旋回转，出手更快。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 攻速增幅：+{attribute_amount}",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "jingli_cost_per_second": "0.4",
+                "attribute_amount": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:yue_xuan_gu_active_moon_whirl",
+            "usageTitle": "主动·月旋斩",
+            "usageDesc": "月刃盘旋，瞬间割裂周身敌人。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 半径：{radius} | 伤害：+{extra_physical_damage}(普通)",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "radius": "4.5",
+                "zhenyuan_base_cost": "95.0",
+                "jingli_cost": "10.0",
+                "extra_physical_damage": "120.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.18"
+            }
+        }
+    ]
+}
+

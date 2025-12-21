@@ -18,6 +18,7 @@ public final class DaoHenHelper {
         GU_DAO("gudao"), // 骨道
         MU_DAO("mudao"), // 木道
         XING_DAO("xingdao"), // 星道
+        YUE_DAO("yuedao"), // 月道
         ZHI_DAO("zhidao"), // 智道
         JIN_DAO("jindao"), // 金道
         LI_DAO("lidao"), // 力道
@@ -60,6 +61,8 @@ public final class DaoHenHelper {
                 case XING_DAO:
                     // 注意：库中变量名为 dahen_xingdao（少了一个 o）
                     return vars.dahen_xingdao;
+                case YUE_DAO:
+                    return vars.daohen_yuedao;
                 case ZHI_DAO:
                     // 注意：库中变量名为 dahen_zhidao（少了一个 o）
                     return vars.dahen_zhidao;

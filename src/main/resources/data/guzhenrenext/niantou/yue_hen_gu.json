@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:yue_hen_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yue_hen_gu_passive_scar_guard",
+            "usageTitle": "被动·月痕避祸",
+            "usageDesc": "受击时挪移半步，卸去锋芒。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 受伤系数：x{damage_multiplier} | 退避：{blink_distance}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.18",
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "85.0",
+                "jingli_cost": "14.0",
+                "damage_multiplier": "0.82",
+                "projectile_only": "false",
+                "blink_distance": "4.0",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "1"
+            }
+        },
+        {
+            "usageID": "guzhenren:yue_hen_gu_active_scar_step",
+            "usageTitle": "主动·月痕影步",
+            "usageDesc": "踏影而行，迅速拉开身位。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{distance} | 加速：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "distance": "11.0",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "20.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "1"
+            }
+        }
+    ]
+}
+

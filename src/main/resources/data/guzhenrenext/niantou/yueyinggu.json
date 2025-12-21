@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:yueyinggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yueyinggu_passive_moon_shadow",
+            "usageTitle": "被动·月影疾行",
+            "usageDesc": "月影相随，脚步更轻更快。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 速度：{effect_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "7.5",
+                "niantou_cost_per_second": "1.1",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yueyinggu_active_shadow_step",
+            "usageTitle": "主动·月影遁",
+            "usageDesc": "借月影遁行，瞬身并短暂匿踪。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 距离：{distance} | 匿踪：{invis_duration_ticks}t | 加速：{speed_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "distance": "14.0",
+                "zhenyuan_base_cost": "220.0",
+                "niantou_cost": "30.0",
+                "invis_duration_ticks": "120",
+                "invis_amplifier": "0",
+                "speed_duration_ticks": "120",
+                "speed_amplifier": "1"
+            }
+        }
+    ]
+}
+

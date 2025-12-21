@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:xie_yue_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:xie_yue_gu_passive_blood_moon",
+            "usageTitle": "被动·血月蚀",
+            "usageDesc": "血月照耀，伤口更难愈合。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 凋零：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.14",
+                "zhenyuan_base_cost": "80.0",
+                "hunpo_cost": "10.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "0.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:xie_yue_gu_active_blood_moon_slash",
+            "usageTitle": "主动·血月斩",
+            "usageDesc": "血月一斩，令敌人虚弱衰败。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 伤害：+{extra_physical_damage}(普通) | 持续：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "300",
+                "range": "14.0",
+                "zhenyuan_base_cost": "150.0",
+                "hunpo_cost": "14.0",
+                "extra_physical_damage": "1200.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "self_heal_amount": "0.0"
+            }
+        }
+    ]
+}
+

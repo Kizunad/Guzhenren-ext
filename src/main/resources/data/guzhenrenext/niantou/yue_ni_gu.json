@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:yue_ni_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:yue_ni_gu_passive_moon_barrier",
+            "usageTitle": "被动·月霓护体",
+            "usageDesc": "受击时月霓折光，短暂护身。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 受伤系数：x{damage_multiplier}",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.14",
+                "cooldown_ticks": "180",
+                "zhenyuan_base_cost": "55.0",
+                "hunpo_cost": "6.0",
+                "damage_multiplier": "0.86",
+                "projectile_only": "false",
+                "blink_distance": "0.0",
+                "buff_duration_ticks": "100",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:yue_ni_gu_active_moon_guard",
+            "usageTitle": "主动·月霓守护",
+            "usageDesc": "以月霓为幕，短时间庇护附近同伴。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 半径：{radius} | 治疗：{heal_amount} | 持续：{effect_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "radius": "6.0",
+                "zhenyuan_base_cost": "85.0",
+                "niantou_cost": "12.0",
+                "heal_amount": "6.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

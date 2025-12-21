@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:tunyuegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:tunyuegu_passive_swallow_caps",
+            "usageTitle": "被动·吞月容纳",
+            "usageDesc": "吞月之势强行扩容，提升魂魄相关上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：魂魄+{cap_max_hunpo} 抗性上限+{cap_max_hunpo_resistance} 真元+{cap_max_zhenyuan}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "12.0",
+                "hunpo_cost_per_second": "1.5",
+                "cap_max_hunpo": "260.0",
+                "cap_max_hunpo_resistance": "220.0",
+                "cap_max_zhenyuan": "200.0",
+                "hunpo_resistance_restore": "2.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:tunyuegu_active_swallow_moon",
+            "usageTitle": "主动·吞月重击",
+            "usageDesc": "吞月一击，重创单体并压制其行动。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 伤害：+{extra_physical_damage}(普通) | 虚弱：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "range": "16.0",
+                "zhenyuan_base_cost": "280.0",
+                "jingli_cost": "35.0",
+                "extra_physical_damage": "9500.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "140",
+                "effect_amplifier": "1",
+                "self_heal_amount": "0.0"
+            }
+        }
+    ]
+}
+

@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:huahuanyuegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huahuanyuegu_passive_moon_renew_caps",
+            "usageTitle": "被动·焕月上限",
+            "usageDesc": "焕月滋养空窍，临时抬升部分容量上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 上限：真元+{cap_max_zhenyuan} 念头容量+{cap_niantou_capacity} 精力+{cap_max_jingli}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.0",
+                "jingli_cost_per_second": "1.2",
+                "cap_max_zhenyuan": "220.0",
+                "cap_niantou_capacity": "160.0",
+                "cap_max_jingli": "120.0",
+                "hunpo_resistance_restore": "1.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:huahuanyuegu_active_moon_renew",
+            "usageTitle": "主动·焕月回春",
+            "usageDesc": "月华回春，短时间增强队伍续航。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 半径：{radius} | 治疗：{heal_amount} | 持续：{effect_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "radius": "7.0",
+                "zhenyuan_base_cost": "210.0",
+                "hunpo_cost": "18.0",
+                "heal_amount": "16.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
+

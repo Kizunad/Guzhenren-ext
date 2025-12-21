@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:shuiyuegu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shuiyuegu_passive_water_moon_regen",
+            "usageTitle": "被动·水月滋养",
+            "usageDesc": "水月之息缓慢滋养，持续恢复多种资源。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 回复：+{heal_amount}/s | 念头：+{niantou_gain}/s | 精力：+{jingli_gain}/s | 魂魄：+{hunpo_gain}/s",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "10.0",
+                "niantou_cost_per_second": "1.0",
+                "heal_amount": "0.8",
+                "niantou_gain": "0.5",
+                "jingli_gain": "0.3",
+                "hunpo_gain": "0.15",
+                "zhenyuan_gain": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shuiyuegu_active_water_moon_bless",
+            "usageTitle": "主动·水月护持",
+            "usageDesc": "水月护体，提升队伍生存与续航。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 半径：{radius} | 治疗：{heal_amount} | 持续：{effect_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "cooldown_ticks": "520",
+                "radius": "9.0",
+                "zhenyuan_base_cost": "260.0",
+                "hunpo_cost": "22.0",
+                "heal_amount": "22.0",
+                "effect_duration_ticks": "200",
+                "regen_amplifier": "1",
+                "resistance_amplifier": "0"
+            }
+        }
+    ]
+}
+
