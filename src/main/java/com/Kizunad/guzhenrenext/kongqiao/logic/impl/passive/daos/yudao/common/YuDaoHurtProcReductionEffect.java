@@ -1,10 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.SafeTeleportHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -23,7 +25,6 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
 
     private static final String META_PROC_CHANCE = "proc_chance";
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
-    private static final String META_NIANTOU_COST = "niantou_cost";
     private static final String META_DAMAGE_MULTIPLIER = "damage_multiplier";
     private static final String META_BLINK_DISTANCE = "blink_distance";
     private static final String META_PROJECTILE_ONLY = "projectile_only";
@@ -37,16 +38,21 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
     private static final int DEFAULT_BUFF_DURATION_TICKS = 80;
     private static final int DEFAULT_BUFF_AMPLIFIER = 0;
     private static final double MIN_HORIZONTAL_VECTOR_SQR = 0.0001;
+    private static final double MAX_REDUCTION = 0.85;
+    private static final double MIN_DAMAGE_TAKEN_MULTIPLIER = 0.15;
 
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
     private final String nbtCooldownKey;
     private final Holder<MobEffect> selfBuff;
 
     public YuDaoHurtProcReductionEffect(
         final String usageId,
+        final DaoHenHelper.DaoType daoType,
         final Holder<MobEffect> selfBuff
     ) {
         this.usageId = usageId;
+        this.daoType = daoType;
         this.nbtCooldownKey = "GuzhenrenExtPassiveCd_" + usageId + "_hurt_proc";
         this.selfBuff = selfBuff;
     }
@@ -99,15 +105,8 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
             return damage;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(victim) < niantouCost) {
+        if (!GuEffectCostHelper.tryConsumeOnce(null, victim, usageInfo)) {
             return damage;
-        }
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(victim, -niantouCost);
         }
 
         final int cooldownTicks = Math.max(
@@ -117,7 +116,7 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
                 META_COOLDOWN_TICKS,
                 DEFAULT_COOLDOWN_TICKS
             )
-        );
+            );
         if (cooldownTicks > 0) {
             GuEffectCooldownHelper.setCooldownUntilTick(
                 victim,
@@ -126,13 +125,28 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
             );
         }
 
-        final double multiplier = UsageMetadataHelper.clamp(
+        final double selfMultiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateSelfMultiplier(victim, daoType);
+
+        final double baseTakenMultiplier = UsageMetadataHelper.clamp(
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_DAMAGE_MULTIPLIER,
                 DEFAULT_DAMAGE_MULTIPLIER
             ),
             0.0,
+            1.0
+        );
+        final double baseReduction = 1.0 - baseTakenMultiplier;
+        final double scaledReduction = UsageMetadataHelper.clamp(
+            baseReduction * Math.max(0.0, selfMultiplier),
+            0.0,
+            MAX_REDUCTION
+        );
+        final double takenMultiplier = UsageMetadataHelper.clamp(
+            1.0 - scaledReduction,
+            MIN_DAMAGE_TAKEN_MULTIPLIER,
             1.0
         );
 
@@ -143,7 +157,7 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
                 META_BLINK_DISTANCE,
                 DEFAULT_BLINK_DISTANCE
             )
-        );
+        ) * Math.max(0.0, selfMultiplier);
         if (blinkDistance > 0.0) {
             tryBlinkAway(victim, source, blinkDistance);
         }
@@ -165,11 +179,15 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
                     DEFAULT_BUFF_AMPLIFIER
                 )
             );
-            if (duration > 0) {
+            final int scaledDuration = Math.max(
+                0,
+                (int) Math.round(duration * Math.max(0.0, selfMultiplier))
+            );
+            if (scaledDuration > 0) {
                 victim.addEffect(
                     new MobEffectInstance(
                         selfBuff,
-                        duration,
+                        scaledDuration,
                         amplifier,
                         true,
                         true
@@ -178,7 +196,7 @@ public class YuDaoHurtProcReductionEffect implements IGuEffect {
             }
         }
 
-        return (float) (damage * multiplier);
+        return (float) (damage * takenMultiplier);
     }
 
     private static void tryBlinkAway(

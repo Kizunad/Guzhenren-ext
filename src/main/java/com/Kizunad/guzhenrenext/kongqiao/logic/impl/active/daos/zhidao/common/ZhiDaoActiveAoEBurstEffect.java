@@ -1,10 +1,9 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.zhidao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -26,12 +25,11 @@ public class ZhiDaoActiveAoEBurstEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_RADIUS = "radius";
-    private static final String META_NIANTOU_COST = "niantou_cost";
-    private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
     private static final String META_MAGIC_DAMAGE = "magic_damage";
 
     private static final int DEFAULT_COOLDOWN_TICKS = 200;
     private static final double DEFAULT_RADIUS = 4.0;
+    private static final double MAX_MAGIC_DAMAGE = 12.0;
 
     public record EffectSpec(
         Holder<MobEffect> effect,
@@ -92,45 +90,15 @@ public class ZhiDaoActiveAoEBurstEffect implements IGuEffect {
             UsageMetadataHelper.getDouble(usageInfo, META_RADIUS, DEFAULT_RADIUS)
         );
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("念头不足。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
-        }
-
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("真元不足。"),
-                true
-            );
-            return false;
-        }
-
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
         }
 
         final double baseDamage = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_MAGIC_DAMAGE, 0.0)
         );
+        final double finalBaseDamage = Math.min(MAX_MAGIC_DAMAGE, baseDamage);
         final AABB area = user.getBoundingBox().inflate(radius);
         final List<LivingEntity> victims = user.level().getEntitiesOfClass(
             LivingEntity.class,
@@ -139,15 +107,16 @@ public class ZhiDaoActiveAoEBurstEffect implements IGuEffect {
         );
 
         for (LivingEntity victim : victims) {
-            if (baseDamage > 0.0) {
-                final double multiplier = DaoHenCalculator.calculateMultiplier(
-                    user,
-                    victim,
-                    DaoHenHelper.DaoType.ZHI_DAO
-                );
+            final double multiplier = DaoHenCalculator.calculateMultiplier(
+                user,
+                victim,
+                DaoHenHelper.DaoType.ZHI_DAO
+            );
+
+            if (finalBaseDamage > 0.0) {
                 victim.hurt(
                     user.damageSources().magic(),
-                    (float) (baseDamage * multiplier)
+                    (float) (finalBaseDamage * multiplier)
                 );
             }
 
@@ -156,13 +125,17 @@ public class ZhiDaoActiveAoEBurstEffect implements IGuEffect {
                     if (spec == null || spec.effect() == null) {
                         continue;
                     }
-                    final int duration = Math.max(
+                    final int durationBase = Math.max(
                         0,
                         UsageMetadataHelper.getInt(
                             usageInfo,
                             spec.durationKey(),
                             spec.defaultDurationTicks()
                         )
+                    );
+                    final int duration = Math.max(
+                        0,
+                        (int) Math.round(durationBase * multiplier)
                     );
                     final int amplifier = Math.max(
                         0,

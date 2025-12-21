@@ -24,11 +24,12 @@
                 "distance": "14.0",
                 "cooldown_ticks": "320",
                 "niantou_cost": "180.0",
-                "zhenyuan_base_cost": "1300.0",
+                "jingli_cost": "120.0",
+                "hunpo_cost": "75.0",
+                "zhenyuan_base_cost": "2490368",
                 "effect_duration_ticks": "120",
                 "effect_amplifier": "1"
             }
         }
     ]
 }
-

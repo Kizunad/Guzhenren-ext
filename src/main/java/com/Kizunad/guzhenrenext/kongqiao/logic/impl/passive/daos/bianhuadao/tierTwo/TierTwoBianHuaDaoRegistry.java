@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierTwo;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveAoEBurstEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveExtraCostDecorator;
@@ -36,6 +37,7 @@ public final class TierTwoBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:lin_jia_gu_passive_scale_vitality",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.MAX_HEALTH,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -46,6 +48,7 @@ public final class TierTwoBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveSelfBuffEffect(
                     "guzhenren:lin_jia_gu_active_scale_fortify",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:lin_jia_gu_active_scale_fortify"),
                     List.of(
                         new YuDaoActiveSelfBuffEffect.EffectSpec(
@@ -72,6 +75,7 @@ public final class TierTwoBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:bei_jia_gu_passive_backplate_guard",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.ARMOR,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -107,6 +111,7 @@ public final class TierTwoBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedMobEffectEffect(
                 "guzhenren:yin_lin_gu_passive_hidden_scale",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 MobEffects.INVISIBILITY
             )
         );
@@ -114,6 +119,7 @@ public final class TierTwoBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveBlinkEffect(
                     "guzhenren:yin_lin_gu_active_hidden_step",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:yin_lin_gu_active_hidden_step"),
                     List.of(
                         new YuDaoActiveBlinkEffect.EffectSpec(
@@ -140,6 +146,7 @@ public final class TierTwoBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:hu_yao_gu_passive_fox_grace",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,

@@ -1,9 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import java.util.Objects;
@@ -26,8 +27,6 @@ public class YuDaoActiveAoEBurstEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_RADIUS = "radius";
-    private static final String META_NIANTOU_COST = "niantou_cost";
-    private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
     private static final String META_EXTRA_MAGIC_DAMAGE = "extra_magic_damage";
     private static final String META_EFFECT_DURATION_TICKS = "effect_duration_ticks";
     private static final String META_EFFECT_AMPLIFIER = "effect_amplifier";
@@ -42,15 +41,18 @@ public class YuDaoActiveAoEBurstEffect implements IGuEffect {
     private static final double VERTICAL_PUSH = 0.05;
 
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
     private final String nbtCooldownKey;
     private final Holder<MobEffect> debuff;
 
     public YuDaoActiveAoEBurstEffect(
         final String usageId,
+        final DaoHenHelper.DaoType daoType,
         final String nbtCooldownKey,
         final Holder<MobEffect> debuff
     ) {
         this.usageId = Objects.requireNonNull(usageId, "usageId");
+        this.daoType = daoType;
         this.nbtCooldownKey = Objects.requireNonNull(nbtCooldownKey, "nbtCooldownKey");
         this.debuff = debuff;
     }
@@ -87,39 +89,8 @@ public class YuDaoActiveAoEBurstEffect implements IGuEffect {
             return false;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("念头不足。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
-        }
-
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("真元不足。"),
-                true
-            );
-            return false;
-        }
-
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
         }
 
         final double radius = Math.max(
@@ -155,28 +126,39 @@ public class YuDaoActiveAoEBurstEffect implements IGuEffect {
             )
         );
 
-        final AABB box = user.getBoundingBox().inflate(radius);
+        final double selfMultiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateSelfMultiplier(user, daoType);
+        final double scaledRadius = radius * Math.max(0.0, selfMultiplier);
+
+        final AABB box = user.getBoundingBox().inflate(scaledRadius);
         for (LivingEntity target : user.level().getEntitiesOfClass(
             LivingEntity.class,
             box,
             e -> e.isAlive() && e != user
         )) {
-            if (damage > 0.0) {
-                target.hurt(user.damageSources().magic(), (float) damage);
+            final double multiplier = daoType == null
+                ? 1.0
+                : DaoHenCalculator.calculateMultiplier(user, target, daoType);
+            final double scaledDamage = damage * Math.max(0.0, multiplier);
+            if (scaledDamage > 0.0) {
+                target.hurt(user.damageSources().playerAttack(player), (float) scaledDamage);
             }
-            if (debuff != null && duration > 0) {
+            final int scaledDuration = scaleDuration(duration, multiplier);
+            if (debuff != null && scaledDuration > 0) {
                 target.addEffect(
                     new MobEffectInstance(
                         debuff,
-                        duration,
+                        scaledDuration,
                         amplifier,
                         true,
                         true
                     )
                 );
             }
-            if (knockbackStrength > 0.0) {
-                applyKnockback(user, target, knockbackStrength);
+            final double scaledKnockback = knockbackStrength * Math.max(0.0, multiplier);
+            if (scaledKnockback > 0.0) {
+                applyKnockback(user, target, scaledKnockback);
             }
         }
 
@@ -212,5 +194,16 @@ public class YuDaoActiveAoEBurstEffect implements IGuEffect {
         final Vec3 dir = horizontal.normalize();
         target.push(dir.x * strength, VERTICAL_PUSH, dir.z * strength);
         target.hurtMarked = true;
+    }
+
+    private static int scaleDuration(final int baseDuration, final double multiplier) {
+        if (baseDuration <= 0) {
+            return 0;
+        }
+        final double scaled = baseDuration * Math.max(0.0, multiplier);
+        if (scaled <= 0.0) {
+            return 0;
+        }
+        return Math.max(1, (int) Math.round(scaled));
     }
 }

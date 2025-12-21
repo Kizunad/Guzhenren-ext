@@ -1,15 +1,17 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.JingLiHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouCapacityHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.QiyunHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 
@@ -75,7 +77,22 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
             return;
         }
 
-        final double baseCost = Math.max(
+        final double niantouCostPerSecond = UsageMetadataHelper.getDouble(
+            usageInfo,
+            GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+            0.0
+        );
+        final double jingliCostPerSecond = UsageMetadataHelper.getDouble(
+            usageInfo,
+            GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+            0.0
+        );
+        final double hunpoCostPerSecond = UsageMetadataHelper.getDouble(
+            usageInfo,
+            GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+            0.0
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
                 usageInfo,
@@ -83,15 +100,22 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
                 DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
             )
         );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
+        if (!GuEffectCostHelper.tryConsumeSustain(
+            user,
+            niantouCostPerSecond,
+            jingliCostPerSecond,
+            hunpoCostPerSecond,
+            zhenyuanBaseCostPerSecond
+        )) {
             setActive(user, false);
             return;
         }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
-        }
         setActive(user, true);
+
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.ZHI_DAO
+        );
 
         final double niantou = UsageMetadataHelper.getDouble(
             usageInfo,
@@ -99,7 +123,7 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
             0.0
         );
         if (Double.compare(niantou, 0.0) != 0) {
-            NianTouHelper.modify(user, niantou);
+            NianTouHelper.modify(user, niantou * multiplier);
         }
 
         final double zhidaNianTou = UsageMetadataHelper.getDouble(
@@ -108,7 +132,10 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
             0.0
         );
         if (Double.compare(zhidaNianTou, 0.0) != 0) {
-            NianTouCapacityHelper.modifyZhiDaoNianTou(user, zhidaNianTou);
+            NianTouCapacityHelper.modifyZhiDaoNianTou(
+                user,
+                zhidaNianTou * multiplier
+            );
         }
 
         final double jingli = UsageMetadataHelper.getDouble(
@@ -117,7 +144,7 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
             0.0
         );
         if (Double.compare(jingli, 0.0) != 0) {
-            JingLiHelper.modify(user, jingli);
+            JingLiHelper.modify(user, jingli * multiplier);
         }
 
         final double hunpo = UsageMetadataHelper.getDouble(
@@ -126,7 +153,7 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
             0.0
         );
         if (Double.compare(hunpo, 0.0) != 0) {
-            HunPoHelper.modify(user, hunpo);
+            HunPoHelper.modify(user, hunpo * multiplier);
         }
 
         final double qiyun = UsageMetadataHelper.getDouble(
@@ -135,7 +162,7 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
             0.0
         );
         if (Double.compare(qiyun, 0.0) != 0) {
-            QiyunHelper.modify(user, qiyun);
+            QiyunHelper.modify(user, qiyun * multiplier);
         }
 
         final double healthRegen = UsageMetadataHelper.getDouble(
@@ -144,7 +171,7 @@ public class ZhiDaoSustainedRegenEffect implements IGuEffect {
             0.0
         );
         if (healthRegen > 0.0) {
-            user.heal((float) healthRegen);
+            user.heal((float) (healthRegen * multiplier));
         }
     }
 

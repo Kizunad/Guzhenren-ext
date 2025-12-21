@@ -1,12 +1,16 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
@@ -19,18 +23,24 @@ import net.minecraft.world.item.ItemStack;
 public class YuDaoAttackProcLeechEffect implements IGuEffect {
 
     private static final String META_PROC_CHANCE = "proc_chance";
-    private static final String META_NIANTOU_COST = "niantou_cost";
     private static final String META_HEAL_AMOUNT = "heal_amount";
     private static final String META_NIANTOU_GAIN = "niantou_gain";
     private static final String META_ZHENYUAN_GAIN = "zhenyuan_gain";
     private static final String META_EXTRA_MAGIC_DAMAGE = "extra_magic_damage";
 
     private static final double DEFAULT_PROC_CHANCE = 0.12;
+    private static final double DEFAULT_AMOUNT = 0.0;
+    private static final double MAX_HEAL_PER_PROC = 60.0;
 
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
 
-    public YuDaoAttackProcLeechEffect(final String usageId) {
+    public YuDaoAttackProcLeechEffect(
+        final String usageId,
+        final DaoHenHelper.DaoType daoType
+    ) {
         this.usageId = usageId;
+        this.daoType = daoType;
     }
 
     @Override
@@ -68,53 +78,51 @@ public class YuDaoAttackProcLeechEffect implements IGuEffect {
             return damage;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(attacker) < niantouCost) {
+        if (!GuEffectCostHelper.tryConsumeOnce(null, attacker, usageInfo)) {
             return damage;
         }
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(attacker, -niantouCost);
-        }
+
+        final double multiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateMultiplier(attacker, target, daoType);
 
         final double heal = Math.max(
             0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_HEAL_AMOUNT, 0.0)
-        );
+            UsageMetadataHelper.getDouble(usageInfo, META_HEAL_AMOUNT, DEFAULT_AMOUNT)
+        ) * Math.max(0.0, multiplier);
         if (heal > 0.0) {
-            attacker.heal((float) heal);
+            attacker.heal((float) Math.min(heal, MAX_HEAL_PER_PROC));
         }
 
         final double niantouGain = Math.max(
             0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_GAIN, 0.0)
-        );
+            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_GAIN, DEFAULT_AMOUNT)
+        ) * Math.max(0.0, multiplier);
         if (niantouGain > 0.0) {
             NianTouHelper.modify(attacker, niantouGain);
         }
 
         final double zhenyuanGain = Math.max(
             0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_GAIN, 0.0)
-        );
+            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_GAIN, DEFAULT_AMOUNT)
+        ) * Math.max(0.0, multiplier);
         if (zhenyuanGain > 0.0) {
             ZhenYuanHelper.modify(attacker, zhenyuanGain);
         }
 
         final double extraMagicDamage = Math.max(
             0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_EXTRA_MAGIC_DAMAGE, 0.0)
+            UsageMetadataHelper.getDouble(usageInfo, META_EXTRA_MAGIC_DAMAGE, DEFAULT_AMOUNT)
         );
-        if (extraMagicDamage > 0.0) {
-            target.hurt(
-                attacker.damageSources().magic(),
-                (float) extraMagicDamage
-            );
+        final double extraDamage = extraMagicDamage * Math.max(0.0, multiplier);
+        if (extraDamage > 0.0) {
+            if (attacker instanceof ServerPlayer player) {
+                target.hurt(attacker.damageSources().playerAttack(player), (float) extraDamage);
+            } else {
+                target.hurt(attacker.damageSources().mobAttack(attacker), (float) extraDamage);
+            }
         }
 
         return damage;
     }
 }
-

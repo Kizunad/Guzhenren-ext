@@ -1,26 +1,30 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuzhenrenVariableModifierService;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
+import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 宇道通用被动：持续性维持（真元）+ 回复（生命/念头/真元）。
+ * 宇道通用被动：持续性维持（多资源）+ 提升 Guzhenren 字段上限（仅用于高转）。
  * <p>
- * 适合元老蛊/不息蛊/元气蛊等“稳态续航”类设计。
+ * 通过 metadata 配置：<br>
+ * - zhenyuan_base_cost_per_second / niantou_cost_per_second / jingli_cost_per_second / hunpo_cost_per_second<br>
+ * - cap_specs: 由构造器注入各字段及其基础加成 meta key<br>
+ * - 可选：hunpo_resistance_restore（每秒提升魂魄抗性值，受上限约束）<br>
  * </p>
  */
-public class YuDaoSustainedRegenEffect implements IGuEffect {
+public class YuDaoSustainedVariableCapEffect implements IGuEffect {
 
     private static final String META_ZHENYUAN_BASE_COST_PER_SECOND =
         GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND;
@@ -30,23 +34,25 @@ public class YuDaoSustainedRegenEffect implements IGuEffect {
         GuEffectCostHelper.META_JINGLI_COST_PER_SECOND;
     private static final String META_HUNPO_COST_PER_SECOND =
         GuEffectCostHelper.META_HUNPO_COST_PER_SECOND;
-    private static final String META_HEAL_AMOUNT = "heal_amount";
-    private static final String META_NIANTOU_GAIN = "niantou_gain";
-    private static final String META_ZHENYUAN_GAIN = "zhenyuan_gain";
 
-    private static final double DEFAULT_COST_PER_SECOND = 0.0;
+    private static final String META_HUNPO_RESISTANCE_RESTORE =
+        "hunpo_resistance_restore";
+
+    private static final double DEFAULT_COST = 0.0;
     private static final double DEFAULT_AMOUNT = 0.0;
-    private static final double MAX_HEAL_PER_SECOND = 200.0;
 
     private final String usageId;
     private final DaoHenHelper.DaoType daoType;
+    private final List<CapSpec> caps;
 
-    public YuDaoSustainedRegenEffect(
+    public YuDaoSustainedVariableCapEffect(
         final String usageId,
-        final DaoHenHelper.DaoType daoType
+        final DaoHenHelper.DaoType daoType,
+        final List<CapSpec> caps
     ) {
         this.usageId = usageId;
         this.daoType = daoType;
+        this.caps = caps == null ? List.of() : List.copyOf(caps);
     }
 
     @Override
@@ -67,39 +73,40 @@ public class YuDaoSustainedRegenEffect implements IGuEffect {
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(user);
         if (config != null && !config.isPassiveEnabled(usageId)) {
             setActive(user, false);
+            clearAll(user);
             return;
         }
 
         final double zhenyuanBaseCostPerSecond = Math.max(
-            DEFAULT_COST_PER_SECOND,
+            DEFAULT_COST,
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_ZHENYUAN_BASE_COST_PER_SECOND,
-                DEFAULT_COST_PER_SECOND
+                DEFAULT_COST
             )
         );
         final double niantouCostPerSecond = Math.max(
-            DEFAULT_COST_PER_SECOND,
+            DEFAULT_COST,
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_NIANTOU_COST_PER_SECOND,
-                DEFAULT_COST_PER_SECOND
+                DEFAULT_COST
             )
         );
         final double jingliCostPerSecond = Math.max(
-            DEFAULT_COST_PER_SECOND,
+            DEFAULT_COST,
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_JINGLI_COST_PER_SECOND,
-                DEFAULT_COST_PER_SECOND
+                DEFAULT_COST
             )
         );
         final double hunpoCostPerSecond = Math.max(
-            DEFAULT_COST_PER_SECOND,
+            DEFAULT_COST,
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_HUNPO_COST_PER_SECOND,
-                DEFAULT_COST_PER_SECOND
+                DEFAULT_COST
             )
         );
 
@@ -113,37 +120,17 @@ public class YuDaoSustainedRegenEffect implements IGuEffect {
             )
         ) {
             setActive(user, false);
+            clearAll(user);
             return;
         }
-        setActive(user, true);
 
         final double multiplier = daoType == null
             ? 1.0
             : DaoHenCalculator.calculateSelfMultiplier(user, daoType);
+        applyCaps(user, usageInfo, multiplier);
+        applyHunpoResistance(user, usageInfo, multiplier);
 
-        final double heal = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_HEAL_AMOUNT, DEFAULT_AMOUNT)
-        ) * Math.max(0.0, multiplier);
-        if (heal > 0.0) {
-            user.heal((float) Math.min(heal, MAX_HEAL_PER_SECOND));
-        }
-
-        final double niantouGain = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_GAIN, DEFAULT_AMOUNT)
-        ) * Math.max(0.0, multiplier);
-        if (niantouGain > 0.0) {
-            NianTouHelper.modify(user, niantouGain);
-        }
-
-        final double zhenyuanGain = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_GAIN, DEFAULT_AMOUNT)
-        ) * Math.max(0.0, multiplier);
-        if (zhenyuanGain > 0.0) {
-            ZhenYuanHelper.modify(user, zhenyuanGain);
-        }
+        setActive(user, true);
     }
 
     @Override
@@ -156,12 +143,65 @@ public class YuDaoSustainedRegenEffect implements IGuEffect {
             return;
         }
         setActive(user, false);
+        clearAll(user);
+    }
+
+    private void applyCaps(
+        final LivingEntity user,
+        final NianTouData.Usage usageInfo,
+        final double multiplier
+    ) {
+        for (CapSpec cap : caps) {
+            final double base = Math.max(
+                0.0,
+                UsageMetadataHelper.getDouble(
+                    usageInfo,
+                    cap.amountMetaKey(),
+                    DEFAULT_AMOUNT
+                )
+            );
+            final double amount = base * Math.max(0.0, multiplier);
+            GuzhenrenVariableModifierService.setAdditiveModifier(
+                user,
+                cap.variableKey(),
+                usageId,
+                amount
+            );
+        }
+    }
+
+    private void applyHunpoResistance(
+        final LivingEntity user,
+        final NianTouData.Usage usageInfo,
+        final double multiplier
+    ) {
+        final double baseRestore = Math.max(
+            0.0,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                META_HUNPO_RESISTANCE_RESTORE,
+                DEFAULT_AMOUNT
+            )
+        );
+        if (Double.compare(baseRestore, 0.0) == 0) {
+            return;
+        }
+        final double restore = baseRestore * Math.max(0.0, multiplier);
+        HunPoHelper.modifyResistance(user, restore);
+    }
+
+    private void clearAll(final LivingEntity user) {
+        for (CapSpec cap : caps) {
+            GuzhenrenVariableModifierService.removeModifier(
+                user,
+                cap.variableKey(),
+                usageId
+            );
+        }
     }
 
     private void setActive(final LivingEntity user, final boolean active) {
-        final ActivePassives actives = KongqiaoAttachments.getActivePassives(
-            user
-        );
+        final ActivePassives actives = KongqiaoAttachments.getActivePassives(user);
         if (actives == null) {
             return;
         }
@@ -171,4 +211,13 @@ public class YuDaoSustainedRegenEffect implements IGuEffect {
         }
         actives.remove(usageId);
     }
+
+    /**
+     * 字段上限加成描述。
+     *
+     * @param variableKey    {@link GuzhenrenVariableModifierService} 中的字段键
+     * @param amountMetaKey  从 metadata 读取基础加成的 key（字符串数值）
+     */
+    public record CapSpec(String variableKey, String amountMetaKey) {}
 }
+

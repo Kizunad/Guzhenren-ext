@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.zhidao.tierOne;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.ZhuanCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
@@ -121,8 +122,14 @@ public class XiaoHuiGuGuidedIdentifyEffect implements IGuEffect {
         }
 
         final NianTouData.Usage selected = selectCheapestUsage(player, locked);
-        int duration = selected.costDuration();
-        int cost = selected.costTotalNiantou();
+        int duration = ZhuanCostHelper.scaleTicksCeil(
+            player,
+            selected.costDuration()
+        );
+        int cost = ZhuanCostHelper.scaleCostCeil(
+            player,
+            selected.costTotalNiantou()
+        );
         if (duration <= 0) {
             duration = 1;
         }
@@ -156,24 +163,49 @@ public class XiaoHuiGuGuidedIdentifyEffect implements IGuEffect {
         final List<NianTouData.Usage> locked
     ) {
         NianTouData.Usage best = locked.get(0);
+        int bestCost = ZhuanCostHelper.scaleCostCeil(
+            player,
+            Math.max(0, best.costTotalNiantou())
+        );
+        int bestDuration = ZhuanCostHelper.scaleTicksCeil(
+            player,
+            Math.max(1, best.costDuration())
+        );
         for (int i = 1; i < locked.size(); i++) {
             final NianTouData.Usage current = locked.get(i);
             if (current == null) {
                 continue;
             }
-            if (current.costTotalNiantou() < best.costTotalNiantou()) {
+
+            final int currentCost = ZhuanCostHelper.scaleCostCeil(
+                player,
+                Math.max(0, current.costTotalNiantou())
+            );
+            final int currentDuration = ZhuanCostHelper.scaleTicksCeil(
+                player,
+                Math.max(1, current.costDuration())
+            );
+
+            if (currentCost < bestCost) {
                 best = current;
+                bestCost = currentCost;
+                bestDuration = currentDuration;
                 continue;
             }
-            if (current.costTotalNiantou() == best.costTotalNiantou()
-                && current.costDuration() < best.costDuration()) {
+            if (currentCost == bestCost && currentDuration < bestDuration) {
                 best = current;
+                bestCost = currentCost;
+                bestDuration = currentDuration;
                 continue;
             }
-            if (current.costTotalNiantou() == best.costTotalNiantou()
-                && current.costDuration() == best.costDuration()
-                && player.getRandom().nextBoolean()) {
+            if (
+                currentCost == bestCost
+                    && currentDuration == bestDuration
+                    && player.getRandom().nextBoolean()
+            ) {
                 best = current;
+                bestCost = currentCost;
+                bestDuration = currentDuration;
             }
         }
         return best;
@@ -209,4 +241,3 @@ public class XiaoHuiGuGuidedIdentifyEffect implements IGuEffect {
         return defaultValue;
     }
 }
-

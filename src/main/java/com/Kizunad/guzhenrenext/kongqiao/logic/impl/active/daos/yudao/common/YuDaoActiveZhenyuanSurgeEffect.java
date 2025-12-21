@@ -1,9 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,20 +21,22 @@ import net.minecraft.world.item.ItemStack;
 public class YuDaoActiveZhenyuanSurgeEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
-    private static final String META_NIANTOU_COST = "niantou_cost";
     private static final String META_ZHENYUAN_GAIN = "zhenyuan_gain";
 
     private static final int DEFAULT_COOLDOWN_TICKS = 600;
     private static final double DEFAULT_ZHENYUAN_GAIN = 200.0;
 
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
     private final String nbtCooldownKey;
 
     public YuDaoActiveZhenyuanSurgeEffect(
         final String usageId,
+        final DaoHenHelper.DaoType daoType,
         final String nbtCooldownKey
     ) {
         this.usageId = usageId;
+        this.daoType = daoType;
         this.nbtCooldownKey = nbtCooldownKey;
     }
 
@@ -68,18 +72,6 @@ public class YuDaoActiveZhenyuanSurgeEffect implements IGuEffect {
             return false;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("念头不足。"),
-                true
-            );
-            return false;
-        }
-
         final double gain = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
@@ -92,10 +84,17 @@ public class YuDaoActiveZhenyuanSurgeEffect implements IGuEffect {
             return false;
         }
 
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
         }
-        ZhenYuanHelper.modify(user, gain);
+
+        final double multiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateSelfMultiplier(user, daoType);
+        final double scaledGain = gain * Math.max(0.0, multiplier);
+        if (scaledGain > 0.0) {
+            ZhenYuanHelper.modify(user, scaledGain);
+        }
 
         final int cooldownTicks = Math.max(
             0,
@@ -116,4 +115,3 @@ public class YuDaoActiveZhenyuanSurgeEffect implements IGuEffect {
         return true;
     }
 }
-

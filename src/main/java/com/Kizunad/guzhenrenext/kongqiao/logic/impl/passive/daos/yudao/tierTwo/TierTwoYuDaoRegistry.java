@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierTwo;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveAllySupportEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveAoEBurstEffect;
@@ -42,12 +43,14 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedMobEffectEffect(
                 "guzhenren:dongchagu_passive_spatial_insight",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.NIGHT_VISION
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveAoEBurstEffect(
                 "guzhenren:dongchagu_active_reveal",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:dongchagu_active_reveal"),
                 MobEffects.GLOWING
             )
@@ -59,6 +62,7 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:erzhuanyumaogu_passive_space_stride",
+                DaoHenHelper.DaoType.YU_DAO,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,
@@ -68,6 +72,7 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoActiveBlinkEffect(
                 "guzhenren:erzhuanyumaogu_active_blink_dash",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:erzhuanyumaogu_active_blink_dash"),
                 List.of(
                     new YuDaoActiveBlinkEffect.EffectSpec(
@@ -87,12 +92,14 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoAttackProcDebuffEffect(
                 "guzhenren:di_yu_gu_passive_earth_lock",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.WEAKNESS
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveAoEBurstEffect(
                 "guzhenren:di_yu_gu_active_earth_burst",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:di_yu_gu_active_earth_burst"),
                 MobEffects.MOVEMENT_SLOWDOWN
             )
@@ -103,12 +110,14 @@ public final class TierTwoYuDaoRegistry {
         // 吸魔蛊：汲取 + 牵引
         GuEffectRegistry.register(
             new YuDaoAttackProcLeechEffect(
-                "guzhenren:ximogu_passive_mana_leech"
+                "guzhenren:ximogu_passive_mana_leech",
+                DaoHenHelper.DaoType.YU_DAO
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveTargetDisplaceEffect(
                 "guzhenren:ximogu_active_siphon",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:ximogu_active_siphon"),
                 true,
                 MobEffects.WEAKNESS
@@ -121,6 +130,7 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:da_du_wa_2_passive_pocket_belly",
+                DaoHenHelper.DaoType.YU_DAO,
                 Attributes.MAX_HEALTH,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -130,6 +140,7 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoActiveSelfBuffEffect(
                 "guzhenren:da_du_wa_2_active_belly_shield",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:da_du_wa_2_active_belly_shield"),
                 List.of(
                     new YuDaoActiveSelfBuffEffect.EffectSpec(
@@ -149,12 +160,14 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoHurtProcReductionEffect(
                 "guzhenren:buxigu_passive_unending_breath",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.REGENERATION
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveSelfBuffEffect(
                 "guzhenren:buxigu_active_last_stand",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:buxigu_active_last_stand"),
                 List.of(
                     new YuDaoActiveSelfBuffEffect.EffectSpec(
@@ -181,12 +194,14 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoAttackProcDebuffEffect(
                 "guzhenren:qijiegu_passive_sevenfold_bind",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.MOVEMENT_SLOWDOWN
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveTargetNukeEffect(
                 "guzhenren:qijiegu_active_world_press",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:qijiegu_active_world_press"),
                 List.of(
                     new YuDaoActiveTargetNukeEffect.EffectSpec(
@@ -213,12 +228,14 @@ public final class TierTwoYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedMobEffectEffect(
                 "guzhenren:mo_di_gu_passive_end_step",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.SLOW_FALLING
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveBlinkEffect(
                 "guzhenren:mo_di_gu_active_end_blink",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:mo_di_gu_active_end_blink"),
                 List.of(
                     new YuDaoActiveBlinkEffect.EffectSpec(
@@ -237,12 +254,14 @@ public final class TierTwoYuDaoRegistry {
         // 元老蛊（二转）：群体扶持（小）
         GuEffectRegistry.register(
             new YuDaoSustainedRegenEffect(
-                "guzhenren:e_yuanlaogurzhuan_passive_elder_nurture"
+                "guzhenren:e_yuanlaogurzhuan_passive_elder_nurture",
+                DaoHenHelper.DaoType.YU_DAO
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveAllySupportEffect(
                 "guzhenren:e_yuanlaogurzhuan_active_elder_support",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:e_yuanlaogurzhuan_active_elder_support"),
                 List.of(
                     new YuDaoActiveAllySupportEffect.EffectSpec(

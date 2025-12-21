@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveExtraCostDecorator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveSelfBuffEffect;
@@ -28,6 +29,7 @@ public final class TierOneBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:shou_pi_gu_passive_beast_hide",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.ARMOR,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -38,6 +40,7 @@ public final class TierOneBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveSelfBuffEffect(
                     "guzhenren:shou_pi_gu_active_hide_harden",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:shou_pi_gu_active_hide_harden"),
                     List.of(
                         new YuDaoActiveSelfBuffEffect.EffectSpec(
@@ -64,6 +67,7 @@ public final class TierOneBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:yu_lin_gu_passive_fish_scale_vigor",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.MAX_HEALTH,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -74,6 +78,7 @@ public final class TierOneBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveSelfBuffEffect(
                     "guzhenren:yu_lin_gu_active_aqua_skin",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:yu_lin_gu_active_aqua_skin"),
                     List.of(
                         new YuDaoActiveSelfBuffEffect.EffectSpec(

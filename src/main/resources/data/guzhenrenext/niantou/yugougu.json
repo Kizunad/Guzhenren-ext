@@ -27,7 +27,9 @@
                 "radius": "9.0",
                 "cooldown_ticks": "650",
                 "niantou_cost": "180.0",
-                "zhenyuan_base_cost": "1400.0",
+                "jingli_cost": "160.0",
+                "hunpo_cost": "100.0",
+                "zhenyuan_base_cost": "2752512",
                 "extra_magic_damage": "14.0",
                 "knockback_strength": "0.80",
                 "effect_duration_ticks": "140",
@@ -36,4 +38,3 @@
         }
     ]
 }
-

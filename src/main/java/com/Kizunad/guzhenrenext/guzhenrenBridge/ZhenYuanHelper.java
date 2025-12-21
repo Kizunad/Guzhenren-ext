@@ -95,30 +95,44 @@ public final class ZhenYuanHelper {
      * @return 实际消耗的真元量
      */
     public static double calculateGuCost(LivingEntity entity, double baseCost) {
-        if (entity == null) {
+        final double denominator = calculateGuCostDenominator(entity);
+        if (denominator <= 0.0) {
             return baseCost;
+        }
+        return baseCost / denominator;
+    }
+
+    /**
+     * 计算蛊虫消耗的折算分母（用于“按转数/阶段分层”的统一折算）。
+     * <p>
+     * 注意：真元消耗必须走 {@link #calculateGuCost(LivingEntity, double)}；
+     * 该分母方法用于其他资源（念头/精力/魂魄等）在需要按转数折算时复用同一尺度。
+     * </p>
+     */
+    public static double calculateGuCostDenominator(LivingEntity entity) {
+        if (entity == null) {
+            return 1.0;
         }
         try {
             var vars = getVariables(entity);
             double zhuanshu = vars.zhuanshu;
             double jieduan = vars.jieduan;
 
-            // 防止除以零：如果转数小于1，视为1（或者极低效率）
-            if (zhuanshu < 1) {
+            // 防止除以零：如果转数小于 1，视为 1。
+            if (zhuanshu < 1.0) {
                 zhuanshu = MIN_ZHUANSHU;
             }
 
-            double power = Math.pow(2, jieduan + zhuanshu * POWER_MULTIPLIER);
+            double power = Math.pow(2.0, jieduan + zhuanshu * POWER_MULTIPLIER);
             double denominator =
                 (power * zhuanshu * DENOM_MULTIPLIER) / DENOM_DIVISOR;
 
-            if (denominator <= 0) {
-                return baseCost; // 异常保护
+            if (denominator <= 0.0) {
+                return 1.0;
             }
-
-            return baseCost / denominator;
+            return denominator;
         } catch (Exception e) {
-            return baseCost;
+            return 1.0;
         }
     }
 

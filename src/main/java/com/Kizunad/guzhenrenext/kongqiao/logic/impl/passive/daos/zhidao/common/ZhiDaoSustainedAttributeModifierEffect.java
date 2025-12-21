@@ -1,10 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 
@@ -75,7 +77,22 @@ public class ZhiDaoSustainedAttributeModifierEffect implements IGuEffect {
             return;
         }
 
-        final double baseCost = Math.max(
+        final double niantouCostPerSecond = UsageMetadataHelper.getDouble(
+            usageInfo,
+            GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND,
+            0.0
+        );
+        final double jingliCostPerSecond = UsageMetadataHelper.getDouble(
+            usageInfo,
+            GuEffectCostHelper.META_JINGLI_COST_PER_SECOND,
+            0.0
+        );
+        final double hunpoCostPerSecond = UsageMetadataHelper.getDouble(
+            usageInfo,
+            GuEffectCostHelper.META_HUNPO_COST_PER_SECOND,
+            0.0
+        );
+        final double zhenyuanBaseCostPerSecond = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(
                 usageInfo,
@@ -83,14 +100,16 @@ public class ZhiDaoSustainedAttributeModifierEffect implements IGuEffect {
                 DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
             )
         );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
+        if (!GuEffectCostHelper.tryConsumeSustain(
+            user,
+            niantouCostPerSecond,
+            jingliCostPerSecond,
+            hunpoCostPerSecond,
+            zhenyuanBaseCostPerSecond
+        )) {
             setActive(user, false);
             removeModifier(user);
             return;
-        }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
         }
         setActive(user, true);
         applyModifier(user, usageInfo);
@@ -126,15 +145,23 @@ public class ZhiDaoSustainedAttributeModifierEffect implements IGuEffect {
             META_ATTRIBUTE_AMOUNT,
             defaultAmount
         );
+        final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+            user,
+            DaoHenHelper.DaoType.ZHI_DAO
+        );
+        final double finalAmount = amount * multiplier;
         final AttributeModifier existing = attr.getModifier(modifierId);
-        if (existing != null && Double.compare(existing.amount(), amount) == 0) {
+        if (
+            existing != null
+                && Double.compare(existing.amount(), finalAmount) == 0
+        ) {
             return;
         }
         if (existing != null) {
             attr.removeModifier(modifierId);
         }
         attr.addTransientModifier(
-            new AttributeModifier(modifierId, amount, operation)
+            new AttributeModifier(modifierId, finalAmount, operation)
         );
     }
 

@@ -1,9 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.LineOfSightTargetHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -25,8 +26,6 @@ public class YuDaoActiveTargetDisplaceEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_RANGE = "range";
-    private static final String META_NIANTOU_COST = "niantou_cost";
-    private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
     private static final String META_FORCE = "force";
     private static final String META_EXTRA_MAGIC_DAMAGE = "extra_magic_damage";
     private static final String META_EFFECT_DURATION_TICKS = "effect_duration_ticks";
@@ -41,17 +40,20 @@ public class YuDaoActiveTargetDisplaceEffect implements IGuEffect {
     private static final double VERTICAL_PUSH = 0.05;
 
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
     private final String nbtCooldownKey;
     private final boolean pull;
     private final Holder<MobEffect> debuff;
 
     public YuDaoActiveTargetDisplaceEffect(
         final String usageId,
+        final DaoHenHelper.DaoType daoType,
         final String nbtCooldownKey,
         final boolean pull,
         final Holder<MobEffect> debuff
     ) {
         this.usageId = usageId;
+        this.daoType = daoType;
         this.nbtCooldownKey = nbtCooldownKey;
         this.pull = pull;
         this.debuff = debuff;
@@ -89,10 +91,15 @@ public class YuDaoActiveTargetDisplaceEffect implements IGuEffect {
             return false;
         }
 
-        final double range = Math.max(
+        final double selfMultiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateSelfMultiplier(user, daoType);
+
+        final double baseRange = Math.max(
             1.0,
             UsageMetadataHelper.getDouble(usageInfo, META_RANGE, DEFAULT_RANGE)
         );
+        final double range = baseRange * Math.max(0.0, selfMultiplier);
         final LivingEntity target = LineOfSightTargetHelper.findTarget(
             player,
             range
@@ -105,55 +112,30 @@ public class YuDaoActiveTargetDisplaceEffect implements IGuEffect {
             return false;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("念头不足。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
         }
 
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("真元不足。"),
-                true
-            );
-            return false;
-        }
+        final double multiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateMultiplier(user, target, daoType);
 
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
-        }
-
-        final double force = Math.max(
+        final double baseForce = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_FORCE, DEFAULT_FORCE)
         );
+        final double force = baseForce * Math.max(0.0, multiplier);
         if (force > 0.0) {
             displace(user, target, force, pull);
         }
 
-        final double damage = Math.max(
+        final double baseDamage = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_EXTRA_MAGIC_DAMAGE, 0.0)
         );
+        final double damage = baseDamage * Math.max(0.0, multiplier);
         if (damage > 0.0) {
-            target.hurt(user.damageSources().magic(), (float) damage);
+            target.hurt(user.damageSources().playerAttack(player), (float) damage);
         }
 
         final int duration = Math.max(
@@ -172,11 +154,12 @@ public class YuDaoActiveTargetDisplaceEffect implements IGuEffect {
                 DEFAULT_EFFECT_AMPLIFIER
             )
         );
-        if (debuff != null && duration > 0) {
+        final int scaledDuration = scaleDuration(duration, multiplier);
+        if (debuff != null && scaledDuration > 0) {
             target.addEffect(
                 new MobEffectInstance(
                     debuff,
-                    duration,
+                    scaledDuration,
                     amplifier,
                     true,
                     true
@@ -219,5 +202,16 @@ public class YuDaoActiveTargetDisplaceEffect implements IGuEffect {
         final Vec3 dir = horizontal.normalize();
         target.push(dir.x * force, VERTICAL_PUSH, dir.z * force);
         target.hurtMarked = true;
+    }
+
+    private static int scaleDuration(final int baseDuration, final double multiplier) {
+        if (baseDuration <= 0) {
+            return 0;
+        }
+        final double scaled = baseDuration * Math.max(0.0, multiplier);
+        if (scaled <= 0.0) {
+            return 0;
+        }
+        return Math.max(1, (int) Math.round(scaled));
     }
 }

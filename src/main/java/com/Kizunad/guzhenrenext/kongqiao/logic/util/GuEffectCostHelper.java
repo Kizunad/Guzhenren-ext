@@ -51,28 +51,31 @@ public final class GuEffectCostHelper {
             return false;
         }
 
-        final double niantouCost = Math.max(
+        final double niantouBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
         );
+        final double niantouCost = ZhuanCostHelper.scaleCost(user, niantouBaseCost);
         if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
             sendMessage(player, "念头不足。");
             return false;
         }
 
-        final double jingliCost = Math.max(
+        final double jingliBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_JINGLI_COST, 0.0)
         );
+        final double jingliCost = ZhuanCostHelper.scaleCost(user, jingliBaseCost);
         if (jingliCost > 0.0 && JingLiHelper.getAmount(user) < jingliCost) {
             sendMessage(player, "精力不足。");
             return false;
         }
 
-        final double hunpoCost = Math.max(
+        final double hunpoBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_HUNPO_COST, 0.0)
         );
+        final double hunpoCost = ZhuanCostHelper.scaleCost(user, hunpoBaseCost);
         if (hunpoCost > 0.0 && HunPoHelper.getAmount(user) < hunpoCost) {
             sendMessage(player, "魂魄不足。");
             return false;
@@ -121,28 +124,31 @@ public final class GuEffectCostHelper {
             return false;
         }
 
-        final double niantouCost = Math.max(
+        final double niantouBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
         );
+        final double niantouCost = ZhuanCostHelper.scaleCost(user, niantouBaseCost);
         if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
             sendMessage(player, "念头不足。");
             return false;
         }
 
-        final double jingliCost = Math.max(
+        final double jingliBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_JINGLI_COST, 0.0)
         );
+        final double jingliCost = ZhuanCostHelper.scaleCost(user, jingliBaseCost);
         if (jingliCost > 0.0 && JingLiHelper.getAmount(user) < jingliCost) {
             sendMessage(player, "精力不足。");
             return false;
         }
 
-        final double hunpoCost = Math.max(
+        final double hunpoBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_HUNPO_COST, 0.0)
         );
+        final double hunpoCost = ZhuanCostHelper.scaleCost(user, hunpoBaseCost);
         if (hunpoCost > 0.0 && HunPoHelper.getAmount(user) < hunpoCost) {
             sendMessage(player, "魂魄不足。");
             return false;
@@ -180,19 +186,21 @@ public final class GuEffectCostHelper {
             return false;
         }
 
-        final double jingliCost = Math.max(
+        final double jingliBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_JINGLI_COST, 0.0)
         );
+        final double jingliCost = ZhuanCostHelper.scaleCost(user, jingliBaseCost);
         if (jingliCost > 0.0 && JingLiHelper.getAmount(user) < jingliCost) {
             sendMessage(player, "精力不足。");
             return false;
         }
 
-        final double hunpoCost = Math.max(
+        final double hunpoBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_HUNPO_COST, 0.0)
         );
+        final double hunpoCost = ZhuanCostHelper.scaleCost(user, hunpoBaseCost);
         if (hunpoCost > 0.0 && HunPoHelper.getAmount(user) < hunpoCost) {
             sendMessage(player, "魂魄不足。");
             return false;
@@ -212,18 +220,20 @@ public final class GuEffectCostHelper {
             return;
         }
 
-        final double jingliCost = Math.max(
+        final double jingliBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_JINGLI_COST, 0.0)
         );
+        final double jingliCost = ZhuanCostHelper.scaleCost(user, jingliBaseCost);
         if (jingliCost > 0.0) {
             JingLiHelper.modify(user, -jingliCost);
         }
 
-        final double hunpoCost = Math.max(
+        final double hunpoBaseCost = Math.max(
             0.0,
             UsageMetadataHelper.getDouble(usageInfo, META_HUNPO_COST, 0.0)
         );
+        final double hunpoCost = ZhuanCostHelper.scaleCost(user, hunpoBaseCost);
         if (hunpoCost > 0.0) {
             HunPoHelper.modify(user, -hunpoCost);
         }
@@ -244,23 +254,36 @@ public final class GuEffectCostHelper {
             return false;
         }
 
+        final double scaledNianTouCostPerSecond = ZhuanCostHelper.scaleCost(
+            user,
+            Math.max(0.0, niantouCostPerSecond)
+        );
+        final double scaledJingLiCostPerSecond = ZhuanCostHelper.scaleCost(
+            user,
+            Math.max(0.0, jingliCostPerSecond)
+        );
+        final double scaledHunPoCostPerSecond = ZhuanCostHelper.scaleCost(
+            user,
+            Math.max(0.0, hunpoCostPerSecond)
+        );
+
         if (
-            niantouCostPerSecond > 0.0
-                && NianTouHelper.getAmount(user) < niantouCostPerSecond
+            scaledNianTouCostPerSecond > 0.0
+                && NianTouHelper.getAmount(user) < scaledNianTouCostPerSecond
         ) {
             sendMessage(player, "念头不足。");
             return false;
         }
         if (
-            jingliCostPerSecond > 0.0
-                && JingLiHelper.getAmount(user) < jingliCostPerSecond
+            scaledJingLiCostPerSecond > 0.0
+                && JingLiHelper.getAmount(user) < scaledJingLiCostPerSecond
         ) {
             sendMessage(player, "精力不足。");
             return false;
         }
         if (
-            hunpoCostPerSecond > 0.0
-                && HunPoHelper.getAmount(user) < hunpoCostPerSecond
+            scaledHunPoCostPerSecond > 0.0
+                && HunPoHelper.getAmount(user) < scaledHunPoCostPerSecond
         ) {
             sendMessage(player, "魂魄不足。");
             return false;
@@ -297,21 +320,34 @@ public final class GuEffectCostHelper {
             return false;
         }
 
+        final double scaledNianTouCostPerSecond = ZhuanCostHelper.scaleCost(
+            user,
+            Math.max(0.0, niantouCostPerSecond)
+        );
+        final double scaledJingLiCostPerSecond = ZhuanCostHelper.scaleCost(
+            user,
+            Math.max(0.0, jingliCostPerSecond)
+        );
+        final double scaledHunPoCostPerSecond = ZhuanCostHelper.scaleCost(
+            user,
+            Math.max(0.0, hunpoCostPerSecond)
+        );
+
         if (
-            niantouCostPerSecond > 0.0
-                && NianTouHelper.getAmount(user) < niantouCostPerSecond
+            scaledNianTouCostPerSecond > 0.0
+                && NianTouHelper.getAmount(user) < scaledNianTouCostPerSecond
         ) {
             return false;
         }
         if (
-            jingliCostPerSecond > 0.0
-                && JingLiHelper.getAmount(user) < jingliCostPerSecond
+            scaledJingLiCostPerSecond > 0.0
+                && JingLiHelper.getAmount(user) < scaledJingLiCostPerSecond
         ) {
             return false;
         }
         if (
-            hunpoCostPerSecond > 0.0
-                && HunPoHelper.getAmount(user) < hunpoCostPerSecond
+            scaledHunPoCostPerSecond > 0.0
+                && HunPoHelper.getAmount(user) < scaledHunPoCostPerSecond
         ) {
             return false;
         }
@@ -327,14 +363,14 @@ public final class GuEffectCostHelper {
             return false;
         }
 
-        if (niantouCostPerSecond > 0.0) {
-            NianTouHelper.modify(user, -niantouCostPerSecond);
+        if (scaledNianTouCostPerSecond > 0.0) {
+            NianTouHelper.modify(user, -scaledNianTouCostPerSecond);
         }
-        if (jingliCostPerSecond > 0.0) {
-            JingLiHelper.modify(user, -jingliCostPerSecond);
+        if (scaledJingLiCostPerSecond > 0.0) {
+            JingLiHelper.modify(user, -scaledJingLiCostPerSecond);
         }
-        if (hunpoCostPerSecond > 0.0) {
-            HunPoHelper.modify(user, -hunpoCostPerSecond);
+        if (scaledHunPoCostPerSecond > 0.0) {
+            HunPoHelper.modify(user, -scaledHunPoCostPerSecond);
         }
         if (zhenyuanCostPerSecond > 0.0) {
             ZhenYuanHelper.modify(user, -zhenyuanCostPerSecond);

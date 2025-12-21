@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierOne;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveAllySupportEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveSelfBuffEffect;
@@ -25,12 +26,14 @@ public final class TierOneYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoAttackProcDebuffEffect(
                 "guzhenren:kongsuogu_passive_spatial_lock",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.MOVEMENT_SLOWDOWN
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveTargetDisplaceEffect(
                 "guzhenren:kongsuogu_active_space_chain",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:kongsuogu_active_space_chain"),
                 true,
                 MobEffects.MOVEMENT_SLOWDOWN
@@ -41,6 +44,7 @@ public final class TierOneYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:yizhuanyumaogu_passive_space_stride",
+                DaoHenHelper.DaoType.YU_DAO,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,
@@ -50,6 +54,7 @@ public final class TierOneYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoActiveBlinkEffect(
                 "guzhenren:yizhuanyumaogu_active_blink_step",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:yizhuanyumaogu_active_blink_step"),
                 List.of(
                     new YuDaoActiveBlinkEffect.EffectSpec(
@@ -67,6 +72,7 @@ public final class TierOneYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:daduwa_passive_pocket_belly",
+                DaoHenHelper.DaoType.YU_DAO,
                 Attributes.MAX_HEALTH,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -76,6 +82,7 @@ public final class TierOneYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoActiveSelfBuffEffect(
                 "guzhenren:daduwa_active_belly_shield",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:daduwa_active_belly_shield"),
                 List.of(
                     new YuDaoActiveSelfBuffEffect.EffectSpec(
@@ -99,12 +106,14 @@ public final class TierOneYuDaoRegistry {
         // 元老蛊（1）：稳态扶持
         GuEffectRegistry.register(
             new YuDaoSustainedRegenEffect(
-                "guzhenren:yuan_lao_gu_1_passive_elder_nurture"
+                "guzhenren:yuan_lao_gu_1_passive_elder_nurture",
+                DaoHenHelper.DaoType.YU_DAO
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveAllySupportEffect(
                 "guzhenren:yuan_lao_gu_1_active_elder_support",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:yuan_lao_gu_1_active_elder_support"),
                 List.of(
                     new YuDaoActiveAllySupportEffect.EffectSpec(

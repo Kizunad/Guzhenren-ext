@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierFive;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveAoEBurstEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveExtraCostDecorator;
@@ -39,6 +40,7 @@ public final class TierFiveBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:dikuishi_passive_earth_kui_shell",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.ARMOR_TOUGHNESS,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -49,6 +51,7 @@ public final class TierFiveBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveZhenyuanSurgeEffect(
                     "guzhenren:dikuishi_active_earth_sustain",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:dikuishi_active_earth_sustain")
                 )
             )
@@ -59,6 +62,7 @@ public final class TierFiveBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedMobEffectEffect(
                 "guzhenren:mengyanshi_passive_nightmare_hide",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 MobEffects.DAMAGE_RESISTANCE
             )
         );
@@ -90,6 +94,7 @@ public final class TierFiveBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:tianmoshi_passive_sky_demon_wind",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,
@@ -100,6 +105,7 @@ public final class TierFiveBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveBlinkEffect(
                     "guzhenren:tianmoshi_active_sky_demon_dash",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:tianmoshi_active_sky_demon_dash"),
                     List.of(
                         new YuDaoActiveBlinkEffect.EffectSpec(
@@ -172,6 +178,7 @@ public final class TierFiveBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:xiuluoshigu_passive_asura_fury",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,
@@ -182,6 +189,7 @@ public final class TierFiveBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveSelfBuffEffect(
                     "guzhenren:xiuluoshigu_active_asura_rampage",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:xiuluoshigu_active_asura_rampage"),
                     List.of(
                         new YuDaoActiveSelfBuffEffect.EffectSpec(

@@ -1,9 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.zhidao.common;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.CultivationHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -18,8 +19,6 @@ import net.minecraft.world.item.ItemStack;
 public class ZhiDaoActiveCultivationBoostEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
-    private static final String META_NIANTOU_COST = "niantou_cost";
-    private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
     private static final String META_PROGRESS_GAIN = "cultivation_progress_gain";
 
     private static final int DEFAULT_COOLDOWN_TICKS = 400;
@@ -68,39 +67,8 @@ public class ZhiDaoActiveCultivationBoostEffect implements IGuEffect {
             return false;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("念头不足。"),
-                true
-            );
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
             return false;
-        }
-
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("真元不足。"),
-                true
-            );
-            return false;
-        }
-
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
         }
 
         final double gain = Math.max(
@@ -112,7 +80,11 @@ public class ZhiDaoActiveCultivationBoostEffect implements IGuEffect {
             )
         );
         if (gain > 0.0) {
-            CultivationHelper.modifyProgress(user, gain);
+            final double multiplier = DaoHenCalculator.calculateSelfMultiplier(
+                user,
+                DaoHenHelper.DaoType.ZHI_DAO
+            );
+            CultivationHelper.modifyProgress(user, gain * multiplier);
         }
 
         final int cooldownTicks = Math.max(
@@ -134,4 +106,3 @@ public class ZhiDaoActiveCultivationBoostEffect implements IGuEffect {
         return true;
     }
 }
-

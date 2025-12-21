@@ -6,6 +6,7 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.ZhuanCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoUnlockService;
 import com.Kizunad.tinyUI.demo.TinyUISlot;
@@ -177,8 +178,14 @@ public class NianTouMenu extends AbstractContainerMenu {
 
                     NianTouData.Usage selected =
                         lockedUsages.get(serverPlayer.getRandom().nextInt(lockedUsages.size()));
-                    int duration = selected.costDuration();
-                    int cost = selected.costTotalNiantou();
+                    int duration = ZhuanCostHelper.scaleTicksCeil(
+                        serverPlayer,
+                        selected.costDuration()
+                    );
+                    int cost = ZhuanCostHelper.scaleCostCeil(
+                        serverPlayer,
+                        selected.costTotalNiantou()
+                    );
                     if (duration <= 0) {
                         duration = 1;
                     }

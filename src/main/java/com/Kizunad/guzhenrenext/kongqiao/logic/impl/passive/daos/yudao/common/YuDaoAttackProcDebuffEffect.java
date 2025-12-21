@@ -1,12 +1,15 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 public class YuDaoAttackProcDebuffEffect implements IGuEffect {
 
     private static final String META_PROC_CHANCE = "proc_chance";
-    private static final String META_NIANTOU_COST = "niantou_cost";
     private static final String META_EFFECT_DURATION_TICKS = "effect_duration_ticks";
     private static final String META_EFFECT_AMPLIFIER = "effect_amplifier";
     private static final String META_EXTRA_MAGIC_DAMAGE = "extra_magic_damage";
@@ -29,13 +31,16 @@ public class YuDaoAttackProcDebuffEffect implements IGuEffect {
     private static final double DEFAULT_EXTRA_MAGIC_DAMAGE = 0.0;
 
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
     private final Holder<MobEffect> debuff;
 
     public YuDaoAttackProcDebuffEffect(
         final String usageId,
+        final DaoHenHelper.DaoType daoType,
         final Holder<MobEffect> debuff
     ) {
         this.usageId = usageId;
+        this.daoType = daoType;
         this.debuff = debuff;
     }
 
@@ -74,16 +79,13 @@ public class YuDaoAttackProcDebuffEffect implements IGuEffect {
             return damage;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(attacker) < niantouCost) {
+        if (!GuEffectCostHelper.tryConsumeOnce(null, attacker, usageInfo)) {
             return damage;
         }
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(attacker, -niantouCost);
-        }
+
+        final double multiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateMultiplier(attacker, target, daoType);
 
         final int duration = Math.max(
             0,
@@ -101,9 +103,16 @@ public class YuDaoAttackProcDebuffEffect implements IGuEffect {
                 DEFAULT_EFFECT_AMPLIFIER
             )
         );
-        if (debuff != null && duration > 0) {
+        final int scaledDuration = scaleDuration(duration, multiplier);
+        if (debuff != null && scaledDuration > 0) {
             target.addEffect(
-                new MobEffectInstance(debuff, duration, amplifier, true, true)
+                new MobEffectInstance(
+                    debuff,
+                    scaledDuration,
+                    amplifier,
+                    true,
+                    true
+                )
             );
         }
 
@@ -115,14 +124,26 @@ public class YuDaoAttackProcDebuffEffect implements IGuEffect {
                 DEFAULT_EXTRA_MAGIC_DAMAGE
             )
         );
-        if (extraMagicDamage > 0.0) {
-            target.hurt(
-                attacker.damageSources().magic(),
-                (float) extraMagicDamage
-            );
+        final double extraDamage = extraMagicDamage * Math.max(0.0, multiplier);
+        if (extraDamage > 0.0) {
+            if (attacker instanceof ServerPlayer player) {
+                target.hurt(attacker.damageSources().playerAttack(player), (float) extraDamage);
+            } else {
+                target.hurt(attacker.damageSources().mobAttack(attacker), (float) extraDamage);
+            }
         }
 
         return damage;
     }
-}
 
+    private static int scaleDuration(final int baseDuration, final double multiplier) {
+        if (baseDuration <= 0) {
+            return 0;
+        }
+        final double scaled = baseDuration * Math.max(0.0, multiplier);
+        if (scaled <= 0.0) {
+            return 0;
+        }
+        return Math.max(1, (int) Math.round(scaled));
+    }
+}

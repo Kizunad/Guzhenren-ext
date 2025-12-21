@@ -27,7 +27,7 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
     private static final int COOLDOWN_TICKS =
         COOLDOWN_SECONDS * TICKS_PER_SECOND;
     private static final double BASE_PROGRESS_PER_SECOND = 50.0D;
-    private static final double PRIMEVAL_COST_PER_SECOND = 15.0D;
+    private static final double PRIMEVAL_BASE_COST_PER_SECOND = 15.0D;
     private static final double MIN_PRIMEVAL_RATIO = 0.15D;
     private static final double STAGE_BONUS_PER_LEVEL = 0.1D;
     private static final double RANK_BONUS_PER_TURN = 0.05D;
@@ -116,7 +116,7 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
             return;
         }
 
-        if (!shouldConsumePrimeval(vars)) {
+        if (!shouldConsumePrimeval(entity, vars)) {
             requestStopWithCooldown(entity);
             return;
         }
@@ -124,7 +124,13 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
         tickCounter++;
         if (tickCounter >= UPDATE_INTERVAL_TICKS) {
             tickCounter = 0;
-            ZhenYuanHelper.modify(entity, -PRIMEVAL_COST_PER_SECOND);
+            final double realCost = ZhenYuanHelper.calculateGuCost(
+                entity,
+                PRIMEVAL_BASE_COST_PER_SECOND
+            );
+            if (realCost > 0.0D) {
+                ZhenYuanHelper.modify(entity, -realCost);
+            }
             double gain = computeProgressGain(vars);
             GuCultivationHelper.addProgress(vars, gain);
         }
@@ -152,13 +158,21 @@ public class WenyunKongqiaoGoal extends AbstractGuzhenrenGoal {
     }
 
     private boolean shouldConsumePrimeval(
+        LivingEntity entity,
         GuzhenrenModVariables.PlayerVariables vars
     ) {
+        if (entity == null) {
+            return false;
+        }
         double max = Math.max(0.0D, vars.zuida_zhenyuan);
         if (max <= 0.0D) {
             return false;
         }
-        if (vars.zhenyuan < PRIMEVAL_COST_PER_SECOND) {
+        final double effectiveCost = ZhenYuanHelper.calculateGuCost(
+            entity,
+            PRIMEVAL_BASE_COST_PER_SECOND
+        );
+        if (effectiveCost > 0.0D && vars.zhenyuan < effectiveCost) {
             return false;
         }
         double ratio = vars.zhenyuan / max;

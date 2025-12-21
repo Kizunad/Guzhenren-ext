@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.tierThree;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveAoEBurstEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.common.BianHuaDaoActiveExtraCostDecorator;
@@ -55,6 +56,7 @@ public final class TierThreeBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveAllySupportEffect(
                     "guzhenren:yin_gu_active_yin_soothe",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:yin_gu_active_yin_soothe"),
                     List.of(
                         new YuDaoActiveAllySupportEffect.EffectSpec(
@@ -87,6 +89,7 @@ public final class TierThreeBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveSelfBuffEffect(
                     "guzhenren:yang_gu_active_yang_surge",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:yang_gu_active_yang_surge"),
                     List.of(
                         new YuDaoActiveSelfBuffEffect.EffectSpec(
@@ -113,6 +116,7 @@ public final class TierThreeBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:mao_jiang_gu_passive_mao_jiang_hide",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.ARMOR,
                 AttributeModifier.Operation.ADD_VALUE,
                 0.0,
@@ -131,7 +135,8 @@ public final class TierThreeBianHuaDaoRegistry {
     private static void registerChongZhiGu() {
         GuEffectRegistry.register(
             new YuDaoSustainedRegenEffect(
-                "guzhenren:chong_zhi_gu_passive_insect_mind"
+                "guzhenren:chong_zhi_gu_passive_insect_mind",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO
             )
         );
         GuEffectRegistry.register(
@@ -162,6 +167,7 @@ public final class TierThreeBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:di_xiong_zhua_gu_passive_ground_wolf_stride",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.MOVEMENT_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,
@@ -182,6 +188,7 @@ public final class TierThreeBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedMobEffectEffect(
                 "guzhenren:jiao_wei_gu_passive_mermaid_tail",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 MobEffects.DOLPHINS_GRACE
             )
         );
@@ -189,6 +196,7 @@ public final class TierThreeBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveAllySupportEffect(
                     "guzhenren:jiao_wei_gu_active_aqua_support",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:jiao_wei_gu_active_aqua_support"),
                     List.of(
                         new YuDaoActiveAllySupportEffect.EffectSpec(
@@ -215,6 +223,7 @@ public final class TierThreeBianHuaDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:hupigu_passive_tiger_strength",
+                DaoHenHelper.DaoType.BIAN_HUA_DAO,
                 Attributes.ATTACK_DAMAGE,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,
@@ -265,6 +274,7 @@ public final class TierThreeBianHuaDaoRegistry {
             new BianHuaDaoActiveExtraCostDecorator(
                 new YuDaoActiveBlinkEffect(
                     "guzhenren:baiyugu_2_active_feather_leap",
+                    DaoHenHelper.DaoType.BIAN_HUA_DAO,
                     cooldownKey("guzhenren:baiyugu_2_active_feather_leap"),
                     List.of(
                         new YuDaoActiveBlinkEffect.EffectSpec(

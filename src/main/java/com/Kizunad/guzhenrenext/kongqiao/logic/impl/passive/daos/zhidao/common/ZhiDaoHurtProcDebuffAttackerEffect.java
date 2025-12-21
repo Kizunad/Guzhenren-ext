@@ -1,9 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 
@@ -20,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 public class ZhiDaoHurtProcDebuffAttackerEffect implements IGuEffect {
 
     private static final String META_PROC_CHANCE = "proc_chance";
-    private static final String META_NIANTOU_COST = "niantou_cost";
     private static final String META_EFFECT_DURATION_TICKS = "effect_duration_ticks";
     private static final String META_EFFECT_AMPLIFIER = "effect_amplifier";
     private static final String META_DAMAGE_MULTIPLIER = "damage_multiplier";
@@ -76,22 +77,25 @@ public class ZhiDaoHurtProcDebuffAttackerEffect implements IGuEffect {
             return damage;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(
-                usageInfo,
-                META_NIANTOU_COST,
-                0.0
-            )
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(victim) < niantouCost) {
+        if (!GuEffectCostHelper.tryConsumeOnce(null, victim, usageInfo)) {
             return damage;
         }
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(victim, -niantouCost);
-        }
 
-        final int duration = Math.max(
+        final LivingEntity attacker =
+            source.getEntity() instanceof LivingEntity entity ? entity : null;
+
+        final double debuffMultiplier = attacker == null
+            ? DaoHenCalculator.calculateSelfMultiplier(
+                victim,
+                DaoHenHelper.DaoType.ZHI_DAO
+            )
+            : DaoHenCalculator.calculateMultiplier(
+                victim,
+                attacker,
+                DaoHenHelper.DaoType.ZHI_DAO
+            );
+
+        final int durationBase = Math.max(
             0,
             UsageMetadataHelper.getInt(
                 usageInfo,
@@ -99,6 +103,7 @@ public class ZhiDaoHurtProcDebuffAttackerEffect implements IGuEffect {
                 DEFAULT_EFFECT_DURATION_TICKS
             )
         );
+        final int duration = Math.max(0, (int) Math.round(durationBase * debuffMultiplier));
         final int amplifier = Math.max(
             0,
             UsageMetadataHelper.getInt(
@@ -108,7 +113,7 @@ public class ZhiDaoHurtProcDebuffAttackerEffect implements IGuEffect {
             )
         );
 
-        if (debuff != null && duration > 0 && source.getEntity() instanceof LivingEntity attacker) {
+        if (debuff != null && duration > 0 && attacker != null) {
             if (attacker != victim) {
                 attacker.addEffect(
                     new MobEffectInstance(
@@ -122,7 +127,7 @@ public class ZhiDaoHurtProcDebuffAttackerEffect implements IGuEffect {
             }
         }
 
-        final double multiplier = UsageMetadataHelper.clamp(
+        final double baseDamageMultiplier = UsageMetadataHelper.clamp(
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_DAMAGE_MULTIPLIER,
@@ -131,6 +136,17 @@ public class ZhiDaoHurtProcDebuffAttackerEffect implements IGuEffect {
             0.0,
             1.0
         );
-        return (float) (damage * multiplier);
+
+        final double selfMultiplier = DaoHenCalculator.calculateSelfMultiplier(
+            victim,
+            DaoHenHelper.DaoType.ZHI_DAO
+        );
+        final double reduction = (1.0 - baseDamageMultiplier) * selfMultiplier;
+        final double finalDamageMultiplier = UsageMetadataHelper.clamp(
+            1.0 - reduction,
+            0.0,
+            1.0
+        );
+        return (float) (damage * finalDamageMultiplier);
     }
 }

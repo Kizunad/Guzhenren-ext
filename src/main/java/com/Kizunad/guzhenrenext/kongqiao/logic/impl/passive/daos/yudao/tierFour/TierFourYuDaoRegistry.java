@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.tierFour;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.GuEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveAllySupportEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common.YuDaoActiveAoEBurstEffect;
@@ -41,12 +42,14 @@ public final class TierFourYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoHurtProcReductionEffect(
                 "guzhenren:wuwanggu_passive_stabilize",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.DAMAGE_RESISTANCE
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveSelfBuffEffect(
                 "guzhenren:wuwanggu_active_stabilize_field",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:wuwanggu_active_stabilize_field"),
                 List.of(
                     new YuDaoActiveSelfBuffEffect.EffectSpec(
@@ -80,12 +83,14 @@ public final class TierFourYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoAttackProcDebuffEffect(
                 "guzhenren:pokonggu_passive_void_edge",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.WEAKNESS
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveTargetNukeEffect(
                 "guzhenren:pokonggu_active_void_pierce",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:pokonggu_active_void_pierce"),
                 List.of(
                     new YuDaoActiveTargetNukeEffect.EffectSpec(
@@ -111,12 +116,14 @@ public final class TierFourYuDaoRegistry {
         // 元气蛊：元气流转（被动）+ 元气涌动（主动转化真元）
         GuEffectRegistry.register(
             new YuDaoSustainedRegenEffect(
-                "guzhenren:yuanqigu_passive_yuanqi_flow"
+                "guzhenren:yuanqigu_passive_yuanqi_flow",
+                DaoHenHelper.DaoType.YU_DAO
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveZhenyuanSurgeEffect(
                 "guzhenren:yuanqigu_active_yuanqi_surge",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:yuanqigu_active_yuanqi_surge")
             )
         );
@@ -126,12 +133,14 @@ public final class TierFourYuDaoRegistry {
         // 宇合蛊：和合之气（群体扶持）
         GuEffectRegistry.register(
             new YuDaoSustainedRegenEffect(
-                "guzhenren:yuhegu_passive_harmony"
+                "guzhenren:yuhegu_passive_harmony",
+                DaoHenHelper.DaoType.YU_DAO
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveAllySupportEffect(
                 "guzhenren:yuhegu_active_harmony_support",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:yuhegu_active_harmony_support"),
                 List.of(
                     new YuDaoActiveAllySupportEffect.EffectSpec(
@@ -150,12 +159,14 @@ public final class TierFourYuDaoRegistry {
         // 吃空蛊：吞空（汲取）+ 虚空牵引
         GuEffectRegistry.register(
             new YuDaoAttackProcLeechEffect(
-                "guzhenren:chikonggu_passive_void_devour"
+                "guzhenren:chikonggu_passive_void_devour",
+                DaoHenHelper.DaoType.YU_DAO
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveTargetDisplaceEffect(
                 "guzhenren:chikonggu_active_void_pull",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:chikonggu_active_void_pull"),
                 true,
                 MobEffects.WITHER
@@ -168,6 +179,7 @@ public final class TierFourYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoSustainedAttributeModifierEffect(
                 "guzhenren:sizhuanyumaogu_passive_space_hunt",
+                DaoHenHelper.DaoType.YU_DAO,
                 Attributes.ATTACK_SPEED,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
                 0.0,
@@ -177,6 +189,7 @@ public final class TierFourYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoActiveBlinkEffect(
                 "guzhenren:sizhuanyumaogu_active_blink_hunt",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:sizhuanyumaogu_active_blink_hunt"),
                 List.of(
                     new YuDaoActiveBlinkEffect.EffectSpec(
@@ -196,12 +209,14 @@ public final class TierFourYuDaoRegistry {
         GuEffectRegistry.register(
             new YuDaoAttackProcDebuffEffect(
                 "guzhenren:yugougu_passive_rift_groove",
+                DaoHenHelper.DaoType.YU_DAO,
                 MobEffects.MOVEMENT_SLOWDOWN
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveAoEBurstEffect(
                 "guzhenren:yugougu_active_rift_burst",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:yugougu_active_rift_burst"),
                 MobEffects.MOVEMENT_SLOWDOWN
             )
@@ -212,12 +227,14 @@ public final class TierFourYuDaoRegistry {
         // 元老蛊（四）：稳态扶持（大）
         GuEffectRegistry.register(
             new YuDaoSustainedRegenEffect(
-                "guzhenren:yuan_lao_gu_4_passive_elder_nurture"
+                "guzhenren:yuan_lao_gu_4_passive_elder_nurture",
+                DaoHenHelper.DaoType.YU_DAO
             )
         );
         GuEffectRegistry.register(
             new YuDaoActiveAllySupportEffect(
                 "guzhenren:yuan_lao_gu_4_active_elder_support",
+                DaoHenHelper.DaoType.YU_DAO,
                 cooldownKey("guzhenren:yuan_lao_gu_4_active_elder_support"),
                 List.of(
                     new YuDaoActiveAllySupportEffect.EffectSpec(

@@ -28,11 +28,12 @@
             "metadata": {
                 "cooldown_ticks": "900",
                 "niantou_cost": "200.0",
-                "zhenyuan_base_cost": "1400.0",
+                "jingli_cost": "120.0",
+                "hunpo_cost": "75.0",
+                "zhenyuan_base_cost": "2293760",
                 "heal_amount": "6.0",
                 "effect_duration_ticks": "240"
             }
         }
     ]
 }
-

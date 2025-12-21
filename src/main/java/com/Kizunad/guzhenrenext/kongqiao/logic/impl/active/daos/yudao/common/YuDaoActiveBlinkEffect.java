@@ -1,9 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yudao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCooldownHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.SafeTeleportHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -26,11 +27,14 @@ public class YuDaoActiveBlinkEffect implements IGuEffect {
 
     private static final String META_COOLDOWN_TICKS = "cooldown_ticks";
     private static final String META_DISTANCE = "distance";
-    private static final String META_NIANTOU_COST = "niantou_cost";
-    private static final String META_ZHENYUAN_BASE_COST = "zhenyuan_base_cost";
 
     private static final int DEFAULT_COOLDOWN_TICKS = 220;
     private static final double DEFAULT_DISTANCE = 6.0;
+
+    private static final int TICKS_PER_SECOND = 20;
+    private static final int MAX_DURATION_SECONDS = 10 * 60;
+    private static final int MAX_DURATION_TICKS =
+        TICKS_PER_SECOND * MAX_DURATION_SECONDS;
 
     public record EffectSpec(
         Holder<MobEffect> effect,
@@ -41,15 +45,18 @@ public class YuDaoActiveBlinkEffect implements IGuEffect {
     ) {}
 
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
     private final String nbtCooldownKey;
     private final List<EffectSpec> afterEffects;
 
     public YuDaoActiveBlinkEffect(
         final String usageId,
+        final DaoHenHelper.DaoType daoType,
         final String nbtCooldownKey,
         final List<EffectSpec> afterEffects
     ) {
         this.usageId = usageId;
+        this.daoType = daoType;
         this.nbtCooldownKey = nbtCooldownKey;
         this.afterEffects = afterEffects;
     }
@@ -86,51 +93,24 @@ public class YuDaoActiveBlinkEffect implements IGuEffect {
             return false;
         }
 
-        final double niantouCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_NIANTOU_COST, 0.0)
-        );
-        if (niantouCost > 0.0 && NianTouHelper.getAmount(user) < niantouCost) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("念头不足。"),
-                true
-            );
-            return false;
-        }
-
-        final double zhenyuanBaseCost = Math.max(
-            0.0,
-            UsageMetadataHelper.getDouble(usageInfo, META_ZHENYUAN_BASE_COST, 0.0)
-        );
-        final double zhenyuanCost = ZhenYuanHelper.calculateGuCost(
-            user,
-            zhenyuanBaseCost
-        );
-        if (zhenyuanCost > 0.0 && !ZhenYuanHelper.hasEnough(user, zhenyuanCost)) {
-            player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("真元不足。"),
-                true
-            );
-            return false;
-        }
-
         final double distance = Math.max(
             1.0,
             UsageMetadataHelper.getDouble(usageInfo, META_DISTANCE, DEFAULT_DISTANCE)
         );
+        final double multiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateSelfMultiplier(user, daoType);
+        final double scaledDistance = distance * Math.max(0.0, multiplier);
 
-        if (niantouCost > 0.0) {
-            NianTouHelper.modify(user, -niantouCost);
-        }
-        if (zhenyuanCost > 0.0) {
-            ZhenYuanHelper.modify(user, -zhenyuanCost);
+        if (!GuEffectCostHelper.tryConsumeOnce(player, user, usageInfo)) {
+            return false;
         }
 
         final Vec3 target = player.position().add(
-            player.getViewVector(1.0F).scale(distance)
+            player.getViewVector(1.0F).scale(scaledDistance)
         );
         SafeTeleportHelper.teleportSafely(player, target);
-        applyAfterEffects(player, usageInfo);
+        applyAfterEffects(player, usageInfo, multiplier);
 
         final int cooldownTicks = Math.max(
             0,
@@ -153,7 +133,8 @@ public class YuDaoActiveBlinkEffect implements IGuEffect {
 
     private void applyAfterEffects(
         final ServerPlayer player,
-        final NianTouData.Usage usageInfo
+        final NianTouData.Usage usageInfo,
+        final double multiplier
     ) {
         if (afterEffects == null || afterEffects.isEmpty()) {
             return;
@@ -170,6 +151,7 @@ public class YuDaoActiveBlinkEffect implements IGuEffect {
                     spec.defaultDurationTicks()
                 )
             );
+            final int scaledDuration = scaleDuration(duration, multiplier);
             final int amplifier = Math.max(
                 0,
                 UsageMetadataHelper.getInt(
@@ -178,11 +160,11 @@ public class YuDaoActiveBlinkEffect implements IGuEffect {
                     spec.defaultAmplifier()
                 )
             );
-            if (duration > 0) {
+            if (scaledDuration > 0) {
                 player.addEffect(
                     new MobEffectInstance(
                         spec.effect(),
-                        duration,
+                        scaledDuration,
                         amplifier,
                         true,
                         true
@@ -191,5 +173,15 @@ public class YuDaoActiveBlinkEffect implements IGuEffect {
             }
         }
     }
-}
 
+    private static int scaleDuration(final int baseDuration, final double multiplier) {
+        if (baseDuration <= 0) {
+            return 0;
+        }
+        final double scaled = baseDuration * Math.max(0.0, multiplier);
+        if (scaled <= 0.0) {
+            return 0;
+        }
+        return Math.min(Math.max(1, (int) Math.round(scaled)), MAX_DURATION_TICKS);
+    }
+}

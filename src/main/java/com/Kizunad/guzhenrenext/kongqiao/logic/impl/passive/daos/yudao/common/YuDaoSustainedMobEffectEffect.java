@@ -1,10 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.yudao.common;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.DaoHenCalculator;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuEffectCostHelper;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.UsageMetadataHelper;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import net.minecraft.core.Holder;
@@ -22,22 +24,36 @@ import net.minecraft.world.item.ItemStack;
 public class YuDaoSustainedMobEffectEffect implements IGuEffect {
 
     private static final String META_ZHENYUAN_BASE_COST_PER_SECOND =
-        "zhenyuan_base_cost_per_second";
+        GuEffectCostHelper.META_ZHENYUAN_BASE_COST_PER_SECOND;
+    private static final String META_NIANTOU_COST_PER_SECOND =
+        GuEffectCostHelper.META_NIANTOU_COST_PER_SECOND;
+    private static final String META_JINGLI_COST_PER_SECOND =
+        GuEffectCostHelper.META_JINGLI_COST_PER_SECOND;
+    private static final String META_HUNPO_COST_PER_SECOND =
+        GuEffectCostHelper.META_HUNPO_COST_PER_SECOND;
     private static final String META_EFFECT_DURATION_TICKS = "effect_duration_ticks";
     private static final String META_EFFECT_AMPLIFIER = "effect_amplifier";
 
-    private static final double DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND = 0.0;
+    private static final double DEFAULT_COST_PER_SECOND = 0.0;
     private static final int DEFAULT_EFFECT_DURATION_TICKS = 80;
     private static final int DEFAULT_EFFECT_AMPLIFIER = 0;
 
+    private static final int TICKS_PER_SECOND = 20;
+    private static final int MAX_DURATION_SECONDS = 10 * 60;
+    private static final int MAX_DURATION_TICKS =
+        TICKS_PER_SECOND * MAX_DURATION_SECONDS;
+
     private final String usageId;
+    private final DaoHenHelper.DaoType daoType;
     private final Holder<MobEffect> effect;
 
     public YuDaoSustainedMobEffectEffect(
         final String usageId,
+        final DaoHenHelper.DaoType daoType,
         final Holder<MobEffect> effect
     ) {
         this.usageId = usageId;
+        this.daoType = daoType;
         this.effect = effect;
     }
 
@@ -62,27 +78,59 @@ public class YuDaoSustainedMobEffectEffect implements IGuEffect {
             return;
         }
 
-        final double baseCost = Math.max(
-            0.0,
+        final double zhenyuanBaseCostPerSecond = Math.max(
+            DEFAULT_COST_PER_SECOND,
             UsageMetadataHelper.getDouble(
                 usageInfo,
                 META_ZHENYUAN_BASE_COST_PER_SECOND,
-                DEFAULT_ZHENYUAN_BASE_COST_PER_SECOND
+                DEFAULT_COST_PER_SECOND
             )
         );
-        final double cost = ZhenYuanHelper.calculateGuCost(user, baseCost);
-        if (cost > 0.0 && !ZhenYuanHelper.hasEnough(user, cost)) {
+        final double niantouCostPerSecond = Math.max(
+            DEFAULT_COST_PER_SECOND,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                META_NIANTOU_COST_PER_SECOND,
+                DEFAULT_COST_PER_SECOND
+            )
+        );
+        final double jingliCostPerSecond = Math.max(
+            DEFAULT_COST_PER_SECOND,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                META_JINGLI_COST_PER_SECOND,
+                DEFAULT_COST_PER_SECOND
+            )
+        );
+        final double hunpoCostPerSecond = Math.max(
+            DEFAULT_COST_PER_SECOND,
+            UsageMetadataHelper.getDouble(
+                usageInfo,
+                META_HUNPO_COST_PER_SECOND,
+                DEFAULT_COST_PER_SECOND
+            )
+        );
+
+        if (
+            !GuEffectCostHelper.tryConsumeSustain(
+                user,
+                niantouCostPerSecond,
+                jingliCostPerSecond,
+                hunpoCostPerSecond,
+                zhenyuanBaseCostPerSecond
+            )
+        ) {
             setActive(user, false);
             return;
-        }
-        if (cost > 0.0) {
-            ZhenYuanHelper.modify(user, -cost);
         }
         setActive(user, true);
 
         if (effect == null) {
             return;
         }
+        final double multiplier = daoType == null
+            ? 1.0
+            : DaoHenCalculator.calculateSelfMultiplier(user, daoType);
         final int duration = Math.max(
             0,
             UsageMetadataHelper.getInt(
@@ -99,9 +147,16 @@ public class YuDaoSustainedMobEffectEffect implements IGuEffect {
                 DEFAULT_EFFECT_AMPLIFIER
             )
         );
-        if (duration > 0) {
+        final int scaledDuration = scaleDuration(duration, multiplier);
+        if (scaledDuration > 0) {
             user.addEffect(
-                new MobEffectInstance(effect, duration, amplifier, true, true)
+                new MobEffectInstance(
+                    effect,
+                    scaledDuration,
+                    amplifier,
+                    true,
+                    true
+                )
             );
         }
     }
@@ -131,5 +186,16 @@ public class YuDaoSustainedMobEffectEffect implements IGuEffect {
         }
         actives.remove(usageId);
     }
-}
 
+    private static int scaleDuration(final int baseDuration, final double multiplier) {
+        if (baseDuration <= 0) {
+            return 0;
+        }
+        final double scaled = baseDuration * Math.max(0.0, multiplier);
+        if (scaled <= 0.0) {
+            return 0;
+        }
+        final int result = (int) Math.round(scaled);
+        return Math.min(Math.max(1, result), MAX_DURATION_TICKS);
+    }
+}

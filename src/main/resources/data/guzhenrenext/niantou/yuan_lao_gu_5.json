@@ -25,7 +25,9 @@
                 "radius": "18.0",
                 "cooldown_ticks": "1100",
                 "niantou_cost": "320.0",
-                "zhenyuan_base_cost": "2500.0",
+                "jingli_cost": "160.0",
+                "hunpo_cost": "100.0",
+                "zhenyuan_base_cost": "115343360",
                 "heal_amount": "18.0",
                 "cleanse_negative": "true",
                 "effect_duration_ticks": "260",
@@ -34,4 +36,3 @@
         }
     ]
 }
-

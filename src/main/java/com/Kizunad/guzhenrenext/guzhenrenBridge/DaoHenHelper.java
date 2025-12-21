@@ -21,6 +21,7 @@ public final class DaoHenHelper {
         JIN_DAO("jindao"), // 金道
         LI_DAO("lidao"), // 力道
         TU_DAO("tudao"), // 土道
+        YU_DAO("yudao"), // 宇道
         SHI_DAO("shidao"), // 食道
         BING_XUE_DAO("bingxuedao"), // 冰雪道
         BIAN_HUA_DAO("bianhuadao"), // 变化道
@@ -65,6 +66,8 @@ public final class DaoHenHelper {
                     return vars.daohen_lidao;
                 case TU_DAO:
                     return vars.daohen_tudao;
+                case YU_DAO:
+                    return vars.daohen_yudao;
                 case BING_XUE_DAO:
                     return vars.daohen_bingxuedao;
                 case BIAN_HUA_DAO:
