@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:quanliyifugusizhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:quanliyifugusizhuan_passive_all_in_4",
+            "usageTitle": "被动·全力以赴·四转",
+            "usageDesc": "全力以赴更趋极致，攻击触发压制。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 虚弱：{effect_duration_ticks}t | 附伤：{extra_physical_damage}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "proc_chance": "0.10",
+                "zhenyuan_base_cost": "360.0",
+                "hunpo_cost": "160.0",
+                "effect_duration_ticks": "220",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "220.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:quanliyifugusizhuan_active_all_in_blow_4",
+            "usageTitle": "主动·一击破军",
+            "usageDesc": "将力量压缩于一点，打出毁灭一击。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 额外伤害：{extra_physical_damage} | 自愈：{self_heal_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "1400",
+                "zhenyuan_base_cost": "680.0",
+                "jingli_cost": "240.0",
+                "extra_physical_damage": "5000.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "60.0"
+            }
+        }
+    ]
+}

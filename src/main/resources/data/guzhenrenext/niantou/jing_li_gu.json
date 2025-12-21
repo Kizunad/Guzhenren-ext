@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:jing_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jing_li_gu_passive_jingli_flow",
+            "usageTitle": "被动·精力回流",
+            "usageDesc": "力道回转，精力缓慢恢复。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 精力：+{jingli_gain}/s | 回复：+{heal_amount}/s",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.0",
+                "niantou_cost_per_second": "0.4",
+                "jingli_gain": "0.35",
+                "heal_amount": "0.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:jing_li_gu_active_jingli_surge",
+            "usageTitle": "主动·精力提振",
+            "usageDesc": "短时间提速，顺势回气。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 速度：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "200",
+                "zhenyuan_base_cost": "65.0",
+                "jingli_cost": "8.0",
+                "heal_amount": "2.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

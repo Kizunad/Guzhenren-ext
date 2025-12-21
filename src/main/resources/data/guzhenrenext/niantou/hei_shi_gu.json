@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:hei_shi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hei_shi_gu_passive_black_stone_weight",
+            "usageTitle": "被动·黑石负重",
+            "usageDesc": "以黑石负重，筋骨更稳，护甲常驻提升。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 护甲：+{attribute_amount}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.2",
+                "jingli_cost_per_second": "0.6",
+                "attribute_amount": "2.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:hei_shi_gu_active_black_stone_smash",
+            "usageTitle": "主动·黑石重击",
+            "usageDesc": "以沉重之力砸向敌人，削弱其筋力。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 额外伤害：{extra_physical_damage} | 虚弱：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "220",
+                "zhenyuan_base_cost": "80.0",
+                "jingli_cost": "10.0",
+                "extra_physical_damage": "8.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "0.0",
+                "effect_duration_ticks": "80",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

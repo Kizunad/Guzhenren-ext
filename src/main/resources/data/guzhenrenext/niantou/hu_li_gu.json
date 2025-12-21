@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:hu_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hu_li_gu_passive_tiger_force",
+            "usageTitle": "被动·虎力",
+            "usageDesc": "虎力加身，持续提高攻击力。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 攻击：+{attribute_amount}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "18.0",
+                "jingli_cost_per_second": "4.0",
+                "attribute_amount": "7.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:hu_li_gu_active_tiger_pounce",
+            "usageTitle": "主动·虎扑",
+            "usageDesc": "远距虎扑突进，命中后迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{range} | 伤害：{physical_damage}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "cooldown_ticks": "1400",
+                "zhenyuan_base_cost": "760.0",
+                "jingli_cost": "300.0",
+                "range": "18.0",
+                "dash_strength": "2.6",
+                "hit_radius": "1.6",
+                "physical_damage": "10000.0",
+                "magic_damage": "0.0",
+                "slow_duration_ticks": "160",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

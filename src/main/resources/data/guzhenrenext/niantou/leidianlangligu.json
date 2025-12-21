@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:leidianlangligu",
+    "usages": [
+        {
+            "usageID": "guzhenren:leidianlangligu_passive_thunder_bite",
+            "usageTitle": "被动·狼噬迟滞",
+            "usageDesc": "雷电狼力如噬，命中后令敌迟滞。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 迟缓：{effect_duration_ticks}t | 附伤：{extra_physical_damage}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.13",
+                "zhenyuan_base_cost": "220.0",
+                "jingli_cost": "55.0",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "40.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:leidianlangligu_active_thunder_charge",
+            "usageTitle": "主动·雷狼突进",
+            "usageDesc": "长距突进咬杀，命中后短暂迟缓。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{range} | 伤害：{physical_damage} | 迟缓：{slow_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "720",
+                "zhenyuan_base_cost": "340.0",
+                "jingli_cost": "90.0",
+                "range": "10.0",
+                "dash_strength": "1.6",
+                "hit_radius": "1.2",
+                "physical_damage": "650.0",
+                "magic_damage": "0.0",
+                "slow_duration_ticks": "120",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

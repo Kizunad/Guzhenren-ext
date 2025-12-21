@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:ziligengshenggusizhuan",
+    "usages": [
+        {
+            "usageID": "guzhenren:ziligengshenggusizhuan_passive_self_reliance_4",
+            "usageTitle": "被动·自力更生·四转",
+            "usageDesc": "自力更生更进一步，提升多项上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli} 魂魄+{cap_max_hunpo}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "15.0",
+                "niantou_cost_per_second": "3.2",
+                "cap_max_zhenyuan": "120.0",
+                "cap_max_jingli": "150.0",
+                "cap_max_hunpo": "120.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:ziligengshenggusizhuan_active_self_uplift_4",
+            "usageTitle": "主动·自强·四转",
+            "usageDesc": "短时间大幅提振力量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 力量：{effect_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "1300",
+                "zhenyuan_base_cost": "600.0",
+                "jingli_cost": "220.0",
+                "heal_amount": "35.0",
+                "effect_duration_ticks": "320",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:chi_ma_jun_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:chi_ma_jun_li_gu_passive_march",
+            "usageTitle": "被动·行军",
+            "usageDesc": "赤马军力不绝，持续提高行军速度。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 速度：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.0",
+                "jingli_cost_per_second": "1.6",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:chi_ma_jun_li_gu_active_war_march",
+            "usageTitle": "主动·战行",
+            "usageDesc": "鼓舞同盟，疾行并增强。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 速度：{effect_duration_ticks}t | 力量：{boost_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "radius": "8.0",
+                "cooldown_ticks": "600",
+                "zhenyuan_base_cost": "280.0",
+                "jingli_cost": "70.0",
+                "heal_amount": "12.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "boost_duration_ticks": "240",
+                "boost_amplifier": "0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:huang_luo_tian_niu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:huang_luo_tian_niu_gu_passive_falling_bull_force",
+            "usageTitle": "被动·天牛蛮力",
+            "usageDesc": "黄落天牛之力附体，持续提升爆发。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 力量：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.5",
+                "jingli_cost_per_second": "0.8",
+                "effect_duration_ticks": "120",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:huang_luo_tian_niu_gu_active_falling_bull_charge",
+            "usageTitle": "主动·天牛冲撞",
+            "usageDesc": "短距冲撞，撞碎敌阵并短暂迟滞。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{range} | 伤害：{physical_damage} | 迟缓：{slow_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "260",
+                "zhenyuan_base_cost": "80.0",
+                "jingli_cost": "12.0",
+                "range": "7.0",
+                "dash_strength": "1.3",
+                "hit_radius": "1.0",
+                "physical_damage": "8.0",
+                "magic_damage": "0.0",
+                "slow_duration_ticks": "40",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

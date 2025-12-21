@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:shi_gui_fu_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:shi_gui_fu_li_gu_passive_stone_ghost_pressure",
+            "usageTitle": "被动·石鬼压迫",
+            "usageDesc": "石鬼负力沉重，命中后令敌虚弱。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 虚弱：{effect_duration_ticks}t | 附伤：{extra_physical_damage}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.14",
+                "zhenyuan_base_cost": "210.0",
+                "niantou_cost": "70.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "35.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:shi_gui_fu_li_gu_active_stone_ghost_crush",
+            "usageTitle": "主动·石鬼崩压",
+            "usageDesc": "以石鬼之力崩压敌人，进一步虚弱。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 额外伤害：{extra_physical_damage} | 虚弱：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "840",
+                "zhenyuan_base_cost": "360.0",
+                "hunpo_cost": "90.0",
+                "extra_physical_damage": "800.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "0.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

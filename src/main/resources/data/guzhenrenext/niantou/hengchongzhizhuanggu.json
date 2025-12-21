@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:hengchongzhizhuanggu",
+    "usages": [
+        {
+            "usageID": "guzhenren:hengchongzhizhuanggu_passive_headlong_momentum",
+            "usageTitle": "被动·冲势不折",
+            "usageDesc": "冲势不折，持续提高击退抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 击退抗性：+{attribute_amount}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "13.0",
+                "jingli_cost_per_second": "2.8",
+                "attribute_amount": "0.35"
+            }
+        },
+        {
+            "usageID": "guzhenren:hengchongzhizhuanggu_active_headlong_breakthrough",
+            "usageTitle": "主动·横冲直撞",
+            "usageDesc": "更长距离的强行突破，一路撞碎。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{range} | 伤害：{physical_damage}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "900",
+                "zhenyuan_base_cost": "560.0",
+                "jingli_cost": "200.0",
+                "range": "16.0",
+                "dash_strength": "2.2",
+                "hit_radius": "1.4",
+                "physical_damage": "3500.0",
+                "magic_damage": "0.0",
+                "slow_duration_ticks": "100",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

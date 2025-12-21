@@ -1,0 +1,37 @@
+{
+    "itemID": "guzhenren:man_li_tian_niu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:man_li_tian_niu_gu_passive_brute_bull_hide",
+            "usageTitle": "被动·蛮牛厚皮",
+            "usageDesc": "蛮力天牛厚皮加身，生命上限提升。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 生命上限：+{attribute_amount}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "2.8",
+                "jingli_cost_per_second": "0.7",
+                "attribute_amount": "4.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:man_li_tian_niu_gu_active_brute_bull_stomp",
+            "usageTitle": "主动·蛮牛践踏",
+            "usageDesc": "高举重踏，震荡周遭。",
+            "usageInfo": "半径：{radius} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 额外伤害：{extra_physical_damage} | 迟缓：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "radius": "4.0",
+                "cooldown_ticks": "300",
+                "zhenyuan_base_cost": "90.0",
+                "hunpo_cost": "10.0",
+                "extra_physical_damage": "10.0",
+                "extra_magic_damage": "0.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "knockback_strength": "0.5"
+            }
+        }
+    ]
+}

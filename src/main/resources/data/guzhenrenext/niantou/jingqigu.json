@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:jingqigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jingqigu_passive_vital_cycle",
+            "usageTitle": "被动·精气回转",
+            "usageDesc": "精气周行不息，持续恢复与回气。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 回复：+{heal_amount}/s | 精力：+{jingli_gain}/s | 魂魄：+{hunpo_gain}/s",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.0",
+                "hunpo_cost_per_second": "1.2",
+                "heal_amount": "1.6",
+                "jingli_gain": "1.0",
+                "hunpo_gain": "0.2"
+            }
+        },
+        {
+            "usageID": "guzhenren:jingqigu_active_vital_burst",
+            "usageTitle": "主动·精气爆发",
+            "usageDesc": "短时间强化体魄并快速恢复。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 再生：{effect_duration_ticks}t | 护体：{resist_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "700",
+                "zhenyuan_base_cost": "300.0",
+                "niantou_cost": "80.0",
+                "heal_amount": "20.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "resist_duration_ticks": "240",
+                "resist_amplifier": "0"
+            }
+        }
+    ]
+}

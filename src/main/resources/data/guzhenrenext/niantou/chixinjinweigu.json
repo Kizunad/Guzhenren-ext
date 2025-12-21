@@ -1,0 +1,36 @@
+{
+    "itemID": "guzhenren:chixinjinweigu",
+    "usages": [
+        {
+            "usageID": "guzhenren:chixinjinweigu_passive_redheart_goldtail",
+            "usageTitle": "被动·金尾上限",
+            "usageDesc": "赤心金尾稳固根基，提高部分字段上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：抗性+{cap_max_hunpo_resistance} 念头容量+{cap_niantou_capacity}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "14.0",
+                "hunpo_cost_per_second": "3.0",
+                "cap_max_hunpo_resistance": "120.0",
+                "cap_niantou_capacity": "160.0",
+                "hunpo_resistance_restore": "0.5"
+            }
+        },
+        {
+            "usageID": "guzhenren:chixinjinweigu_active_goldtail_guard",
+            "usageTitle": "主动·金尾护体",
+            "usageDesc": "金尾护体，短时间提升抗性并回气。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 治疗：{heal_amount} | 护体：{effect_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "1200",
+                "zhenyuan_base_cost": "520.0",
+                "hunpo_cost": "180.0",
+                "heal_amount": "28.0",
+                "effect_duration_ticks": "300",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

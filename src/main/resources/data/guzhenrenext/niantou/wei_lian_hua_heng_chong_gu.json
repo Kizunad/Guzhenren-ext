@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:wei_lian_hua_heng_chong_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wei_lian_hua_heng_chong_gu_passive_unrefined_stride",
+            "usageTitle": "被动·横冲步",
+            "usageDesc": "未炼化横冲之势，持续提高行动速度。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {jingli_cost_per_second}(精力)/s | 速度：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "8.5",
+                "jingli_cost_per_second": "1.8",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:wei_lian_hua_heng_chong_gu_active_unrefined_dash",
+            "usageTitle": "主动·横冲",
+            "usageDesc": "长程横向冲锋，撞开前方敌人。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{range} | 伤害：{physical_damage}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "600",
+                "zhenyuan_base_cost": "300.0",
+                "jingli_cost": "80.0",
+                "range": "12.0",
+                "dash_strength": "1.8",
+                "hit_radius": "1.0",
+                "physical_damage": "550.0",
+                "magic_damage": "0.0",
+                "slow_duration_ticks": "80",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

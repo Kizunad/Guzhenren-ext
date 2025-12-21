@@ -1,0 +1,42 @@
+{
+    "itemID": "guzhenren:long_wan_qu_qu_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:long_wan_qu_qu_gu_passive_twist_break",
+            "usageTitle": "被动·扭劲破骨",
+            "usageDesc": "擒拿扭劲，命中后令敌动作迟滞。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 迟缓：{effect_duration_ticks}t | 附伤：{extra_physical_damage}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "proc_chance": "0.14",
+                "zhenyuan_base_cost": "32.0",
+                "jingli_cost": "6.0",
+                "effect_duration_ticks": "60",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "2.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:long_wan_qu_qu_gu_active_twist_charge",
+            "usageTitle": "主动·贴身冲撞",
+            "usageDesc": "贴身突进冲撞，打乱敌方节奏。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{range} | 伤害：{physical_damage}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "75.0",
+                "jingli_cost": "10.0",
+                "range": "6.5",
+                "dash_strength": "1.2",
+                "hit_radius": "1.0",
+                "physical_damage": "7.0",
+                "magic_damage": "0.0",
+                "slow_duration_ticks": "60",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

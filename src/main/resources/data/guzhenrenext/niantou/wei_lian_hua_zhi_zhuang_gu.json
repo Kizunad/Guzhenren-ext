@@ -1,0 +1,43 @@
+{
+    "itemID": "guzhenren:wei_lian_hua_zhi_zhuang_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:wei_lian_hua_zhi_zhuang_gu_passive_unrefined_guard",
+            "usageTitle": "被动·直撞硬扛",
+            "usageDesc": "未炼化直撞之势，受击时更易硬扛。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 受伤系数：x{damage_multiplier}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.13",
+                "cooldown_ticks": "340",
+                "zhenyuan_base_cost": "240.0",
+                "jingli_cost": "70.0",
+                "damage_multiplier": "0.80",
+                "projectile_only": "false",
+                "buff_duration_ticks": "180",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:wei_lian_hua_zhi_zhuang_gu_active_unrefined_strike",
+            "usageTitle": "主动·直撞",
+            "usageDesc": "直线冲锋突破，撞碎前路。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 距离：{range} | 伤害：{physical_damage}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "660",
+                "zhenyuan_base_cost": "320.0",
+                "jingli_cost": "90.0",
+                "range": "11.0",
+                "dash_strength": "1.7",
+                "hit_radius": "1.0",
+                "physical_damage": "600.0",
+                "magic_damage": "0.0",
+                "slow_duration_ticks": "100",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

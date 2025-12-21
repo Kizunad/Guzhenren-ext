@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:qiang_shen_jian_ti_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:qiang_shen_jian_ti_gu_passive_body_temper",
+            "usageTitle": "被动·强身健体",
+            "usageDesc": "强身健体，显著提高多项上限并稳固魂魄抗性。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {hunpo_cost_per_second}(魂魄)/s | 上限：真元+{cap_max_zhenyuan} 精力+{cap_max_jingli} 魂魄+{cap_max_hunpo}",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "20.0",
+                "hunpo_cost_per_second": "4.0",
+                "cap_max_zhenyuan": "180.0",
+                "cap_max_jingli": "200.0",
+                "cap_max_hunpo": "180.0",
+                "cap_max_hunpo_resistance": "180.0",
+                "cap_niantou_capacity": "220.0",
+                "hunpo_resistance_restore": "0.8"
+            }
+        },
+        {
+            "usageID": "guzhenren:qiang_shen_jian_ti_gu_active_body_temper",
+            "usageTitle": "主动·强身护体",
+            "usageDesc": "短时间强化护体并快速恢复。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 护体：{effect_duration_ticks}t | 再生：{regen_duration_ticks}t",
+            "cost_duration": 2400,
+            "cost_total_niantou": 960,
+            "metadata": {
+                "cooldown_ticks": "1600",
+                "zhenyuan_base_cost": "900.0",
+                "niantou_cost": "320.0",
+                "heal_amount": "60.0",
+                "effect_duration_ticks": "400",
+                "effect_amplifier": "0",
+                "regen_duration_ticks": "400",
+                "regen_amplifier": "0"
+            }
+        }
+    ]
+}

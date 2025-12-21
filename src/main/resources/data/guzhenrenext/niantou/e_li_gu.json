@@ -1,0 +1,40 @@
+{
+    "itemID": "guzhenren:e_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:e_li_gu_passive_evil_pressure",
+            "usageTitle": "被动·恶力压迫",
+            "usageDesc": "恶力随拳渗透，压低敌人力道。",
+            "usageInfo": "触发：{proc_chance} | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 虚弱：{effect_duration_ticks}t | 附伤：{extra_physical_damage}",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "proc_chance": "0.16",
+                "zhenyuan_base_cost": "90.0",
+                "hunpo_cost": "14.0",
+                "effect_duration_ticks": "100",
+                "effect_amplifier": "0",
+                "extra_physical_damage": "6.0",
+                "extra_magic_damage": "0.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:e_li_gu_active_evil_crush",
+            "usageTitle": "主动·恶力崩压",
+            "usageDesc": "以恶力强行破势，重击并迟滞敌人。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 额外伤害：{extra_physical_damage} | 迟缓：{slow_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "360",
+                "zhenyuan_base_cost": "180.0",
+                "jingli_cost": "25.0",
+                "extra_physical_damage": "60.0",
+                "extra_magic_damage": "0.0",
+                "self_heal_amount": "4.0",
+                "slow_duration_ticks": "80",
+                "slow_amplifier": "0"
+            }
+        }
+    ]
+}

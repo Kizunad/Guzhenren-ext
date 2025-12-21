@@ -1,0 +1,35 @@
+{
+    "itemID": "guzhenren:zi_li_geng_sheng_gu_3",
+    "usages": [
+        {
+            "usageID": "guzhenren:zi_li_geng_sheng_gu_3_passive_self_reliance_3",
+            "usageTitle": "被动·自力更生·三转",
+            "usageDesc": "自力更生更进一步，提升精力与魂魄上限。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 上限：精力+{cap_max_jingli} 魂魄+{cap_max_hunpo}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "11.0",
+                "niantou_cost_per_second": "2.5",
+                "cap_max_jingli": "100.0",
+                "cap_max_hunpo": "90.0"
+            }
+        },
+        {
+            "usageID": "guzhenren:zi_li_geng_sheng_gu_3_active_self_uplift_3",
+            "usageTitle": "主动·自强·三转",
+            "usageDesc": "短时间提振力量。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 力量：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "860",
+                "zhenyuan_base_cost": "380.0",
+                "jingli_cost": "100.0",
+                "heal_amount": "18.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

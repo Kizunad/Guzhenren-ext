@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:jun_zhi_li_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:jun_zhi_li_gu_passive_ironwall",
+            "usageTitle": "被动·铁壁",
+            "usageDesc": "军之力如铁壁，受击时硬扛并护体。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 受伤系数：x{damage_multiplier}",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "proc_chance": "0.14",
+                "cooldown_ticks": "300",
+                "zhenyuan_base_cost": "240.0",
+                "jingli_cost": "60.0",
+                "damage_multiplier": "0.78",
+                "projectile_only": "false",
+                "buff_duration_ticks": "160",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:jun_zhi_li_gu_active_ironwall_stance",
+            "usageTitle": "主动·铁壁架势",
+            "usageDesc": "摆出铁壁架势，短时间强化护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{hunpo_cost}(魂魄) | 治疗：{heal_amount} | 护体：{effect_duration_ticks}t",
+            "cost_duration": 1200,
+            "cost_total_niantou": 240,
+            "metadata": {
+                "cooldown_ticks": "800",
+                "zhenyuan_base_cost": "320.0",
+                "hunpo_cost": "80.0",
+                "heal_amount": "15.0",
+                "effect_duration_ticks": "260",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}

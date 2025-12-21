@@ -1,0 +1,41 @@
+{
+    "itemID": "guzhenren:kuligu",
+    "usages": [
+        {
+            "usageID": "guzhenren:kuligu_passive_bitter_endure",
+            "usageTitle": "被动·苦功硬扛",
+            "usageDesc": "苦力成习，受击时更能硬扛并快速回气。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 受伤系数：x{damage_multiplier}",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "proc_chance": "0.12",
+                "cooldown_ticks": "500",
+                "zhenyuan_base_cost": "420.0",
+                "jingli_cost": "150.0",
+                "damage_multiplier": "0.72",
+                "projectile_only": "false",
+                "buff_duration_ticks": "240",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:kuligu_active_bitter_uplift",
+            "usageTitle": "主动·苦战提振",
+            "usageDesc": "强行提振体魄，短时间再生与护体。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 再生：{effect_duration_ticks}t | 护体：{resist_duration_ticks}t",
+            "cost_duration": 1800,
+            "cost_total_niantou": 480,
+            "metadata": {
+                "cooldown_ticks": "1100",
+                "zhenyuan_base_cost": "480.0",
+                "niantou_cost": "160.0",
+                "heal_amount": "40.0",
+                "effect_duration_ticks": "240",
+                "effect_amplifier": "0",
+                "resist_duration_ticks": "240",
+                "resist_amplifier": "0"
+            }
+        }
+    ]
+}

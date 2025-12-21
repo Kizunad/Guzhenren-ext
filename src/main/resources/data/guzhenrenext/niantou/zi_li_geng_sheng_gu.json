@@ -1,0 +1,38 @@
+{
+    "itemID": "guzhenren:zi_li_geng_sheng_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:zi_li_geng_sheng_gu_passive_self_reliance",
+            "usageTitle": "被动·自力更生",
+            "usageDesc": "自给自足，持续回气并滋养念头。",
+            "usageInfo": "维持：{zhenyuan_base_cost_per_second}(基础真元)/s + {niantou_cost_per_second}(念头)/s | 回复：+{heal_amount}/s | 精力：+{jingli_gain}/s | 念头：+{niantou_gain}/s",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "zhenyuan_base_cost_per_second": "4.0",
+                "niantou_cost_per_second": "0.9",
+                "heal_amount": "0.8",
+                "jingli_gain": "0.6",
+                "niantou_gain": "0.05"
+            }
+        },
+        {
+            "usageID": "guzhenren:zi_li_geng_sheng_gu_active_self_uplift",
+            "usageTitle": "主动·自强",
+            "usageDesc": "短时间内提振力量与抗性。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 治疗：{heal_amount} | 力量：{effect_duration_ticks}t | 护体：{resist_duration_ticks}t",
+            "cost_duration": 900,
+            "cost_total_niantou": 120,
+            "metadata": {
+                "cooldown_ticks": "420",
+                "zhenyuan_base_cost": "160.0",
+                "jingli_cost": "22.0",
+                "heal_amount": "10.0",
+                "effect_duration_ticks": "200",
+                "effect_amplifier": "0",
+                "resist_duration_ticks": "200",
+                "resist_amplifier": "0"
+            }
+        }
+    ]
+}

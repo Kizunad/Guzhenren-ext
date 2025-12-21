@@ -1,0 +1,39 @@
+{
+    "itemID": "guzhenren:bai_shi_gu",
+    "usages": [
+        {
+            "usageID": "guzhenren:bai_shi_gu_passive_white_stone_guard",
+            "usageTitle": "被动·白石护体",
+            "usageDesc": "白石凝固为甲，受击时短暂硬化。",
+            "usageInfo": "触发：{proc_chance} | 冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{jingli_cost}(精力) | 受伤系数：x{damage_multiplier}",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "proc_chance": "0.16",
+                "cooldown_ticks": "160",
+                "zhenyuan_base_cost": "40.0",
+                "jingli_cost": "6.0",
+                "damage_multiplier": "0.85",
+                "projectile_only": "false",
+                "buff_duration_ticks": "80",
+                "buff_amplifier": "0"
+            }
+        },
+        {
+            "usageID": "guzhenren:bai_shi_gu_active_white_stone_shell",
+            "usageTitle": "主动·白石甲",
+            "usageDesc": "短时间披覆白石之甲，强行硬扛。",
+            "usageInfo": "冷却：{cooldown_ticks}t | 消耗：{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头) | 治疗：{heal_amount} | 护体：{effect_duration_ticks}t",
+            "cost_duration": 600,
+            "cost_total_niantou": 60,
+            "metadata": {
+                "cooldown_ticks": "240",
+                "zhenyuan_base_cost": "70.0",
+                "niantou_cost": "8.0",
+                "heal_amount": "6.0",
+                "effect_duration_ticks": "160",
+                "effect_amplifier": "0"
+            }
+        }
+    ]
+}
