@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext;
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
 import com.Kizunad.guzhenrenext.customNPCImpl.ai.Registery;
+import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcKongqiaoInventoryBridge;
 import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcResourceRegeneration;
 import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSecondTicker;
 import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSpawnInitializer;
@@ -28,6 +29,7 @@ public class GuzhenrenExt {
         NpcSpawnInitializer.register();
         NpcSecondTicker.register();
         NpcResourceRegeneration.register();
+        NpcKongqiaoInventoryBridge.register();
         KongqiaoMenus.register(modEventBus);
         KongqiaoAttachments.register(modEventBus);
         GuzhenrenExtNetworking.register(modEventBus);

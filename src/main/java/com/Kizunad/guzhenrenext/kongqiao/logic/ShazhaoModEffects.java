@@ -31,6 +31,12 @@ public final class ShazhaoModEffects {
 
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.hundao.shazhao.HunDaoShazhaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shuidao.shazhao.ShuiDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.huodao.shazhao.HuoDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.leidao.shazhao.LeiDaoShazhaoRegistry
+            .registerAll();
 
         registered = true;
     }

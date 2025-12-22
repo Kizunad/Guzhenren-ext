@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_dian_hu_burst",
+    "title": "电弧爆",
+    "desc": "电弧自窍中炸裂，瞬息四散。\n杀招触发，群敌皆震。",
+    "info": "半径: {radius} | 目标上限: {max_targets} | 伤害: {physical_damage} | 真元: -{zhenyuan_base_cost} | 精力: -{jingli_cost}",
+    "cost_total_niantou": 90,
+    "required_items": [
+        "guzhenren:dianliugu",
+        "guzhenren:dianwanggu",
+        "guzhenren:dianjianggu"
+    ],
+    "metadata": {
+        "radius": "3.5",
+        "max_targets": "5",
+        "physical_damage": "80",
+        "slow_duration_ticks": "60",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "140",
+        "zhenyuan_base_cost": "450",
+        "jingli_cost": "240"
+    }
+}
+

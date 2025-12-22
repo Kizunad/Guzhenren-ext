@@ -1,0 +1,26 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_shui_lao_collapse",
+    "title": "水牢崩塌",
+    "desc": "水牢一成，崩塌即灭。\n杀招主动，范围镇压。",
+    "info": "距离:{range} | 半径:{radius} | 伤害:{damage} | 牵引:{pull_strength} | 迟滞:{slow_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 520,
+    "required_items": [
+        "guzhenren:shui_hu_gu",
+        "guzhenren:shui_long_gu_4",
+        "guzhenren:shi_shui_gu"
+    ],
+    "metadata": {
+        "range": "18.0",
+        "radius": "4.0",
+        "damage": "2200.0",
+        "pull_strength": "0.35",
+        "slow_duration_ticks": "200",
+        "slow_amplifier": "1",
+        "cooldown_ticks": "1400",
+        "zhenyuan_base_cost": "260000.0",
+        "niantou_cost": "620.0",
+        "jingli_cost": "700.0",
+        "hunpo_cost": "560.0"
+    }
+}
+

@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_lian_huan_jing_lei",
+    "title": "连环惊雷",
+    "desc": "先锁其魂，后震其骨。\n杀招触发，一击贯首，跳电连击。",
+    "info": "距离: {range} | 伤害: {physical_damage} | 跳电: {chain_count} 次 | 真元: -{zhenyuan_base_cost} | 念头: -{niantou_cost}",
+    "cost_total_niantou": 160,
+    "required_items": [
+        "guzhenren:leidungu",
+        "guzhenren:leixiaogu",
+        "guzhenren:dianyangu"
+    ],
+    "metadata": {
+        "range": "18.0",
+        "chain_radius": "6.0",
+        "chain_count": "3",
+        "physical_damage": "1200",
+        "chain_damage_ratio": "0.45",
+        "slow_duration_ticks": "80",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "200",
+        "zhenyuan_base_cost": "680",
+        "niantou_cost": "260"
+    }
+}
+

@@ -1,0 +1,22 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_lei_yu_binding_field",
+    "title": "雷域缚敌",
+    "desc": "雷意外放，域成网罗。\n杀招常驻，敌近则迟，触之则伤。",
+    "info": "半径: {radius} | 目标上限: {max_targets} | 伤害: {physical_damage}/s | 真元: -{zhenyuan_base_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s",
+    "cost_total_niantou": 220,
+    "required_items": [
+        "guzhenren:yan_lei_gu",
+        "guzhenren:zha_lei_gu",
+        "guzhenren:weilianhualeichuigu"
+    ],
+    "metadata": {
+        "radius": "7.0",
+        "max_targets": "6",
+        "physical_damage": "220",
+        "slow_duration_ticks": "60",
+        "slow_amplifier": "0",
+        "zhenyuan_base_cost_per_second": "14",
+        "jingli_cost_per_second": "0.75"
+    }
+}
+

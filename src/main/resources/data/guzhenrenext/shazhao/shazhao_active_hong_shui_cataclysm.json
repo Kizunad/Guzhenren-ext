@@ -1,0 +1,28 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_hong_shui_cataclysm",
+    "title": "洪水倾覆",
+    "desc": "洪潮倾覆，万物皆沉。\n杀招主动，一击决势。",
+    "info": "半径:{radius} | 伤害:{damage} | 击退:{knockback_strength} | 迟滞:{slow_duration_ticks}t | 续航:真元+{self_zhenyuan_per_hit}/命中 念头+{self_niantou_per_hit}/命中 魂魄+{self_hunpo_per_hit}/命中 | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 900,
+    "required_items": [
+        "guzhenren:bei_shui_yi_zhan_gu",
+        "guzhenren:ji_shui_gu",
+        "guzhenren:yan_lei_gu"
+    ],
+    "metadata": {
+        "radius": "8.0",
+        "damage": "12000.0",
+        "knockback_strength": "0.55",
+        "slow_duration_ticks": "220",
+        "slow_amplifier": "1",
+        "self_zhenyuan_per_hit": "20.0",
+        "self_niantou_per_hit": "5.0",
+        "self_hunpo_per_hit": "3.0",
+        "cooldown_ticks": "3200",
+        "zhenyuan_base_cost": "900000.0",
+        "niantou_cost": "950.0",
+        "jingli_cost": "980.0",
+        "hunpo_cost": "900.0"
+    }
+}
+

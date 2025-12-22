@@ -897,7 +897,60 @@ public final class TweakScreen extends TinyUIScreen {
         if (info != null && !info.isBlank()) {
             raw.append("\n").append(info);
         }
+        final String requiredItems = buildShazhaoRequiredItemsText(data);
+        if (requiredItems != null && !requiredItems.isBlank()) {
+            raw.append("\n").append(requiredItems);
+        }
         return wrapText(raw.toString(), maxWidth);
+    }
+
+    /**
+     * 构建杀招所需蛊虫显示文本（使用物品翻译名）。
+     * <p>
+     * required_items 存储的是 itemId 字符串；这里将其解析并转换为玩家易读的名称，
+     * 用于在 Tweak UI 中明确提示“触发该杀招需要哪些蛊虫”。
+     * </p>
+     */
+    private String buildShazhaoRequiredItemsText(final ShazhaoData data) {
+        if (data == null) {
+            return "";
+        }
+        final List<String> requiredItems = data.requiredItems();
+        if (requiredItems == null || requiredItems.isEmpty()) {
+            return "";
+        }
+
+        final List<String> names = new ArrayList<>();
+        for (String itemId : requiredItems) {
+            if (itemId == null || itemId.isBlank()) {
+                continue;
+            }
+            final ResourceLocation parsedId;
+            try {
+                parsedId = ResourceLocation.parse(itemId);
+            } catch (Exception e) {
+                names.add(itemId);
+                continue;
+            }
+            final Item item = BuiltInRegistries.ITEM.getOptional(parsedId)
+                .orElse(Items.AIR);
+            if (item == Items.AIR) {
+                names.add(itemId);
+                continue;
+            }
+            final String key = item.getDescriptionId();
+            final String translated = Component.translatable(key).getString();
+            if (translated.equals(key)) {
+                names.add(itemId);
+            } else {
+                names.add(translated);
+            }
+        }
+
+        if (names.isEmpty()) {
+            return "";
+        }
+        return "所需蛊虫：" + String.join("，", names);
     }
 
     private String wrapText(final String raw, final int maxWidth) {

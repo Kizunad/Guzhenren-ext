@@ -1,5 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.service;
 
+import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
+import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
@@ -9,6 +11,7 @@ import com.Kizunad.guzhenrenext.kongqiao.logic.IGuEffect;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUnlockChecker;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -26,6 +29,8 @@ public final class GuCombatService {
 
     private GuCombatService() {}
 
+    private record SlotView(Container container, int slotCount) {}
+
     @SubscribeEvent
     public static void onLivingHurt(LivingIncomingDamageEvent event) {
         if (event.getEntity().level().isClientSide()) {
@@ -38,34 +43,60 @@ public final class GuCombatService {
             attacker = sourceEntity;
         }
 
-        // 1. 处理攻击者触发 (如果攻击者是玩家或拥有空窍的实体)
+        float amount = event.getAmount();
+
+        // 1. 处理攻击者触发（玩家空窍 / NPC 背包都可视为“空窍”）
         if (attacker != null) {
-            KongqiaoData attackerData = KongqiaoAttachments.getData(attacker);
-            // 只有当攻击者拥有空窍数据时才触发
-            if (attackerData != null) {
-                float newDamage = handleAttackEffects(
+            SlotView attackerSlots = resolveSlotView(attacker);
+            if (attackerSlots != null) {
+                amount = handleAttackEffects(
                     attacker,
                     victim,
-                    event.getAmount(),
-                    attackerData.getKongqiaoInventory()
+                    amount,
+                    attackerSlots.container(),
+                    attackerSlots.slotCount()
                 );
-                event.setAmount(newDamage);
             }
         }
 
-        // 2. 处理受害者触发 (如果受害者拥有空窍)
-        // 注意：使用的是更新后的 event.getAmount()；若攻击者增加了伤害，
-        // 受害者以新伤害为基础进行减免
-        KongqiaoData victimData = KongqiaoAttachments.getData(victim);
-        if (victimData != null) {
-            float finalDamage = handleHurtEffects(
+        // 2. 处理受害者触发
+        // 注意：以攻击者调整后的伤害为基础进行减免/触发
+        SlotView victimSlots = resolveSlotView(victim);
+        if (victimSlots != null) {
+            amount = handleHurtEffects(
                 victim,
                 event.getSource(),
-                event.getAmount(),
-                victimData.getKongqiaoInventory()
+                amount,
+                victimSlots.container(),
+                victimSlots.slotCount()
             );
-            event.setAmount(finalDamage);
         }
+
+        event.setAmount(amount);
+    }
+
+    private static SlotView resolveSlotView(LivingEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        if (entity instanceof CustomNpcEntity npc) {
+            var mind = npc.getData(NpcMindAttachment.NPC_MIND);
+            if (mind == null || mind.getInventory() == null) {
+                return null;
+            }
+            return new SlotView(mind.getInventory(), mind.getInventory().getMainSize());
+        }
+
+        KongqiaoData data = KongqiaoAttachments.getData(entity);
+        if (data == null) {
+            return null;
+        }
+        KongqiaoInventory inventory = data.getKongqiaoInventory();
+        if (inventory == null) {
+            return null;
+        }
+        return new SlotView(inventory, inventory.getSettings().getUnlockedSlots());
     }
 
     /**
@@ -75,12 +106,13 @@ public final class GuCombatService {
         LivingEntity attacker,
         LivingEntity target,
         float damage,
-        KongqiaoInventory inventory
+        Container inventory,
+        int slotCount
     ) {
         float currentDamage = damage;
-        int unlockedSlots = inventory.getSettings().getUnlockedSlots();
+        int maxSlots = Math.min(slotCount, inventory.getContainerSize());
 
-        for (int i = 0; i < unlockedSlots; i++) {
+        for (int i = 0; i < maxSlots; i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack.isEmpty()) {
                 continue;
@@ -92,7 +124,13 @@ public final class GuCombatService {
             }
 
             for (NianTouData.Usage usage : data.usages()) {
-                if (!NianTouUnlockChecker.isUsageUnlocked(attacker, stack, usage.usageID())) {
+                if (
+                    !NianTouUnlockChecker.isUsageUnlocked(
+                        attacker,
+                        stack,
+                        usage.usageID()
+                    )
+                ) {
                     continue;
                 }
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
@@ -122,12 +160,13 @@ public final class GuCombatService {
         LivingEntity victim,
         net.minecraft.world.damagesource.DamageSource source,
         float damage,
-        KongqiaoInventory inventory
+        Container inventory,
+        int slotCount
     ) {
         float currentDamage = damage;
-        int unlockedSlots = inventory.getSettings().getUnlockedSlots();
+        int maxSlots = Math.min(slotCount, inventory.getContainerSize());
 
-        for (int i = 0; i < unlockedSlots; i++) {
+        for (int i = 0; i < maxSlots; i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack.isEmpty()) {
                 continue;
@@ -139,7 +178,13 @@ public final class GuCombatService {
             }
 
             for (NianTouData.Usage usage : data.usages()) {
-                if (!NianTouUnlockChecker.isUsageUnlocked(victim, stack, usage.usageID())) {
+                if (
+                    !NianTouUnlockChecker.isUsageUnlocked(
+                        victim,
+                        stack,
+                        usage.usageID()
+                    )
+                ) {
                     continue;
                 }
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());

@@ -1,0 +1,22 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_shui_yi_tide_aegis",
+    "title": "潮衣护体",
+    "desc": "以水衣为甲，以潮息为盾，绵延不绝。\n杀招常驻，护体如潮。",
+    "info": "护甲:+{armor_bonus} | 韧性:+{armor_toughness_bonus} | 水下呼吸:{water_breathing_duration_ticks}t | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s",
+    "cost_total_niantou": 30,
+    "required_items": [
+        "guzhenren:shui_guang_gu",
+        "guzhenren:shui_jian_gu",
+        "guzhenren:liu_shui_gu"
+    ],
+    "metadata": {
+        "armor_bonus": "3.0",
+        "armor_toughness_bonus": "1.0",
+        "water_breathing_duration_ticks": "260",
+        "zhenyuan_base_cost_per_second": "380.0",
+        "niantou_cost_per_second": "0.8",
+        "jingli_cost_per_second": "0.4",
+        "hunpo_cost_per_second": "0.0"
+    }
+}
+

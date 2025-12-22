@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_shui_jian_pierce",
+    "title": "水剑贯穿",
+    "desc": "凝水为剑，贯穿其身。\n杀招主动，点破破绽。",
+    "info": "距离:{range} | 伤害:{damage} | 迟滞:{slow_duration_ticks}t | 自愈:{self_heal} | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 160,
+    "required_items": [
+        "guzhenren:shui_wan_gu",
+        "guzhenren:shui_zhao_gu",
+        "guzhenren:shui_ke_gu"
+    ],
+    "metadata": {
+        "range": "16.0",
+        "damage": "80.0",
+        "self_heal": "2.0",
+        "slow_duration_ticks": "120",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "260",
+        "zhenyuan_base_cost": "60000.0",
+        "niantou_cost": "180.0",
+        "jingli_cost": "160.0",
+        "hunpo_cost": "120.0"
+    }
+}
+

@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_shui_lian_binding_aura",
+    "title": "水链缚敌",
+    "desc": "水链如网，缚足缠身。\n杀招常驻，近者皆缓。",
+    "info": "半径:{radius} | 伤害:{damage_per_second}/s | 迟滞:{slow_duration_ticks}t | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 140,
+    "required_items": [
+        "guzhenren:shui_lian_gu",
+        "guzhenren:shui_bi_gu",
+        "guzhenren:shui_sheng_hua_gu"
+    ],
+    "metadata": {
+        "radius": "5.5",
+        "damage_per_second": "4.0",
+        "slow_duration_ticks": "60",
+        "slow_amplifier": "0",
+        "zhenyuan_base_cost_per_second": "900.0",
+        "niantou_cost_per_second": "2.5",
+        "jingli_cost_per_second": "2.0",
+        "hunpo_cost_per_second": "1.2"
+    }
+}
+

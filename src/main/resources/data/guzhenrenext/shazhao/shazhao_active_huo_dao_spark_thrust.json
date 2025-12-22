@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_huo_dao_spark_thrust",
+    "title": "炽火突刺",
+    "desc": "以火意为锋，凝一点炽芒，直刺敌身。\n杀招主动，短促而凌厉。",
+    "info": "范围: {range} | 物伤: {physical_damage} | 点燃: {burn_seconds}s | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 30,
+    "required_items": [
+        "guzhenren:huo_gu",
+        "guzhenren:huo_you_gu",
+        "guzhenren:dan_qiao_huo_tan_gu"
+    ],
+    "metadata": {
+        "range": "12.0",
+        "physical_damage": "12.0",
+        "burn_seconds": "1.0",
+        "cooldown_ticks": "100",
+        "zhenyuan_base_cost": "30.0",
+        "niantou_cost": "0.2",
+        "jingli_cost": "0.4",
+        "hunpo_cost": "0.05"
+    }
+}
+

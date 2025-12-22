@@ -1,0 +1,19 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_dian_liu_nourish",
+    "title": "电流养神",
+    "desc": "电流贯窍，神意自明。\n杀招常驻，续航绵长。",
+    "info": "精力: +{jingli_restore}/s | 念头: +{niantou_restore}/s | 真元: -{zhenyuan_base_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 80,
+    "required_items": [
+        "guzhenren:dianliugu",
+        "guzhenren:dianjianggu",
+        "guzhenren:dianwanggu"
+    ],
+    "metadata": {
+        "jingli_restore": "1.6",
+        "niantou_restore": "0.10",
+        "zhenyuan_base_cost_per_second": "6",
+        "hunpo_cost_per_second": "0.20"
+    }
+}
+

@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_lei_dun_escape",
+    "title": "雷遁",
+    "desc": "电光一闪，身形已远。\n杀招触发，遁走破局。",
+    "info": "冲刺: {dash_strength} | 速度: {speed_duration_ticks}t | 抗性: {resist_duration_ticks}t | 真元: -{zhenyuan_base_cost} | 魂魄: -{hunpo_cost}",
+    "cost_total_niantou": 240,
+    "required_items": [
+        "guzhenren:yan_lei_gu",
+        "guzhenren:lei_yi_gu",
+        "guzhenren:weilianhualeichuigu"
+    ],
+    "metadata": {
+        "dash_strength": "1.2",
+        "speed_duration_ticks": "80",
+        "speed_amplifier": "0",
+        "resist_duration_ticks": "60",
+        "resist_amplifier": "0",
+        "cooldown_ticks": "240",
+        "zhenyuan_base_cost": "820",
+        "hunpo_cost": "320"
+    }
+}
+

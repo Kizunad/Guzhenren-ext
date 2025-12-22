@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_huo_dao_ember_mantle",
+    "title": "余烬披风",
+    "desc": "余烬不灭，披作护衣。\n杀招常驻，以火意护体，消耗多源维持。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 60,
+    "required_items": [
+        "guzhenren:shuang_qiao_huo_lu_gu",
+        "guzhenren:guihuo",
+        "guzhenren:xinghuogu"
+    ],
+    "metadata": {
+        "armor_bonus": "80.0",
+        "armor_toughness_bonus": "30.0",
+        "zhenyuan_base_cost_per_second": "30.0",
+        "niantou_cost_per_second": "0.1",
+        "jingli_cost_per_second": "0.05",
+        "hunpo_cost_per_second": "0.05"
+    }
+}
+

@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_huo_dao_furnace_breath",
+    "title": "炉息归元",
+    "desc": "炉息绵长，归元自生。\n杀招常驻，以烈焰为炉，化消耗为恢复。",
+    "info": "精力: +{jingli_regen_per_second}/s | 魂魄: +{hunpo_regen_per_second}/s | 回复: +{heal_per_second}/s | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 600,
+    "required_items": [
+        "guzhenren:huo_guang_zhu_tian_gu",
+        "guzhenren:mengyanshi",
+        "guzhenren:ziyanchan"
+    ],
+    "metadata": {
+        "jingli_regen_per_second": "3.0",
+        "hunpo_regen_per_second": "1.0",
+        "heal_per_second": "1.5",
+        "zhenyuan_base_cost_per_second": "300.0",
+        "niantou_cost_per_second": "1.2",
+        "hunpo_cost_per_second": "0.2"
+    }
+}
+

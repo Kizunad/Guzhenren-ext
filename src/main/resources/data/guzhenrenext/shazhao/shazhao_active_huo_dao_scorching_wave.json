@@ -1,0 +1,28 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_huo_dao_scorching_wave",
+    "title": "灼浪横扫",
+    "desc": "火浪翻涌，一扫成圈。\n杀招主动，小范围爆发，能震退并削弱来敌。",
+    "info": "半径: {radius} | 物伤: {physical_damage} | 击退: {knockback_strength} | 点燃: {burn_seconds}s | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 120,
+    "required_items": [
+        "guzhenren:huo_yan_gu",
+        "guzhenren:huoxingu",
+        "guzhenren:rong_yan_zha_lie_gu"
+    ],
+    "metadata": {
+        "radius": "5.0",
+        "physical_damage": "250.0",
+        "knockback_strength": "0.6",
+        "burn_seconds": "2.0",
+        "slowness_duration_ticks": "80",
+        "slowness_amplifier": "0",
+        "weakness_duration_ticks": "60",
+        "weakness_amplifier": "0",
+        "cooldown_ticks": "200",
+        "zhenyuan_base_cost": "120.0",
+        "niantou_cost": "1.5",
+        "jingli_cost": "2.0",
+        "hunpo_cost": "0.3"
+    }
+}
+

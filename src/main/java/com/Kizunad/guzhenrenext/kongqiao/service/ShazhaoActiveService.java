@@ -1,7 +1,9 @@
 package com.Kizunad.guzhenrenext.kongqiao.service;
 
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
+import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoInventory;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IShazhaoActiveEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IShazhaoEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.ShazhaoEffectRegistry;
@@ -50,6 +52,21 @@ public final class ShazhaoActiveService {
             return new ActivationResult(
                 false,
                 ActivationFailureReason.NOT_IMPLEMENTED
+            );
+        }
+
+        final KongqiaoData kongqiaoData = KongqiaoAttachments.getData(player);
+        final KongqiaoInventory inventory =
+            kongqiaoData == null ? null : kongqiaoData.getKongqiaoInventory();
+        if (
+            !ShazhaoRequirementService.hasAllRequiredItems(
+                ShazhaoRequirementService.collectPresentItemIds(inventory),
+                data
+            )
+        ) {
+            return new ActivationResult(
+                false,
+                ActivationFailureReason.CONDITION_NOT_MET
             );
         }
 

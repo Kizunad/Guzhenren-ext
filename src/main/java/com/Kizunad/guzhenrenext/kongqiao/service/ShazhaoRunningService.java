@@ -1,14 +1,17 @@
 package com.Kizunad.guzhenrenext.kongqiao.service;
 
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
+import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoInventory;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IShazhaoEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.ShazhaoEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -45,6 +48,12 @@ public final class ShazhaoRunningService {
             return;
         }
 
+        final KongqiaoData kongqiaoData = KongqiaoAttachments.getData(player);
+        final KongqiaoInventory inventory =
+            kongqiaoData == null ? null : kongqiaoData.getKongqiaoInventory();
+        final Set<ResourceLocation> presentItemIds =
+            ShazhaoRequirementService.collectPresentItemIds(inventory);
+
         for (Map.Entry<ResourceLocation, IShazhaoEffect> entry : effects
             .entrySet()) {
             ResourceLocation id = entry.getKey();
@@ -62,7 +71,13 @@ public final class ShazhaoRunningService {
 
             if (unlocks.isShazhaoUnlocked(id)) {
                 ShazhaoData data = ShazhaoDataManager.get(id);
-                if (data != null) {
+                if (
+                    data != null &&
+                    ShazhaoRequirementService.hasAllRequiredItems(
+                        presentItemIds,
+                        data
+                    )
+                ) {
                     effect.onSecond(player, data);
                 } else {
                     effect.onInactive(player);

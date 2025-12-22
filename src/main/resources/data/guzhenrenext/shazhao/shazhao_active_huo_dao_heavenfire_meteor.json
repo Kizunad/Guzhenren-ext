@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_huo_dao_heavenfire_meteor",
+    "title": "天火坠击",
+    "desc": "天火一落，焰势如陨。\n杀招主动，锁定强敌，以烈焰之势碎其甲胄。",
+    "info": "范围: {range} | 主伤: {primary_physical_damage} | 溅射: {splash_physical_damage} | 半径: {splash_radius} | 击退: {knockback_strength} | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 500,
+    "required_items": [
+        "guzhenren:huo_guang_zhu_tian_gu",
+        "guzhenren:huolonggu",
+        "guzhenren:huo_yan_gu"
+    ],
+    "metadata": {
+        "range": "24.0",
+        "primary_physical_damage": "12000.0",
+        "splash_physical_damage": "4000.0",
+        "splash_radius": "6.0",
+        "knockback_strength": "1.0",
+        "cooldown_ticks": "600",
+        "zhenyuan_base_cost": "600.0",
+        "niantou_cost": "20.0",
+        "jingli_cost": "25.0",
+        "hunpo_cost": "5.0"
+    }
+}
+

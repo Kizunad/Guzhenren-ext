@@ -1,0 +1,19 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_lei_yi_guard",
+    "title": "雷衣护体",
+    "desc": "以雷衣为甲，电意缠身。\n杀招常驻，护体如铠。",
+    "info": "护甲: +{armor_bonus} | 护甲韧性: +{armor_toughness_bonus} | 真元: -{zhenyuan_base_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 120,
+    "required_items": [
+        "guzhenren:lei_yi_gu",
+        "guzhenren:dianwanggu",
+        "guzhenren:leidungu"
+    ],
+    "metadata": {
+        "armor_bonus": "160",
+        "armor_toughness_bonus": "80",
+        "zhenyuan_base_cost_per_second": "10",
+        "hunpo_cost_per_second": "0.35"
+    }
+}
+

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -52,7 +53,7 @@ public final class GuRunningService {
         }
 
         boolean isSecond = (player.tickCount % TICKS_PER_SECOND == 0);
-        handleEquipChanges(player, data.getKongqiaoInventory());
+        handleContainerEquipChanges(player, data.getKongqiaoInventory());
         tickKongqiaoEffects(player, data.getKongqiaoInventory(), isSecond);
         ShazhaoRunningService.tickUnlockedEffects(player, isSecond);
     }
@@ -66,8 +67,34 @@ public final class GuRunningService {
         boolean isSecond
     ) {
         int unlockedSlots = inventory.getSettings().getUnlockedSlots();
-        for (int i = 0; i < unlockedSlots; i++) {
-            ItemStack stack = inventory.getItem(i);
+        tickContainerEffects(user, inventory, unlockedSlots, isSecond);
+    }
+
+    /**
+     * 遍历任意容器，执行其中物品的被动逻辑。
+     * <p>
+     * 用途：将空窍被动运行时逻辑复用到自定义 NPC 上（NPC 的蛊虫通常存放在
+     * {@code NpcInventory} 中，而非玩家的 {@link KongqiaoInventory}）。
+     * </p>
+     *
+     * @param user 使用者（用于资源扣除、道痕倍率等）
+     * @param container 要遍历的容器
+     * @param slotCount 需要遍历的槽位数量（一般为已解锁槽位数或容器主槽数量）
+     * @param isSecond 是否整秒 Tick
+     */
+    public static void tickContainerEffects(
+        LivingEntity user,
+        Container container,
+        int slotCount,
+        boolean isSecond
+    ) {
+        if (user == null || container == null || slotCount <= 0) {
+            return;
+        }
+
+        int maxSlots = Math.min(slotCount, container.getContainerSize());
+        for (int i = 0; i < maxSlots; i++) {
+            ItemStack stack = container.getItem(i);
             if (stack.isEmpty()) {
                 continue;
             }
@@ -88,21 +115,23 @@ public final class GuRunningService {
                     continue;
                 }
                 IGuEffect effect = GuEffectRegistry.get(usage.usageID());
-                if (effect != null) {
-                    try {
-                        // TODO: 可以在这里添加真元消耗判定 (costDuration, costTotalNiantou)
+                if (effect == null) {
+                    continue;
+                }
 
-                        // 每 Tick 逻辑
-                        effect.onTick(user, stack, usage);
+                try {
+                    // TODO: 可以在这里添加真元消耗判定 (costDuration, costTotalNiantou)
 
-                        // 每秒逻辑
-                        if (isSecond) {
-                            effect.onSecond(user, stack, usage);
-                        }
-                    } catch (Exception e) {
-                        // 防止单个蛊虫逻辑崩溃影响整个循环
-                        e.printStackTrace();
+                    // 每 Tick 逻辑
+                    effect.onTick(user, stack, usage);
+
+                    // 每秒逻辑
+                    if (isSecond) {
+                        effect.onSecond(user, stack, usage);
                     }
+                } catch (Exception e) {
+                    // 防止单个蛊虫逻辑崩溃影响整个循环
+                    e.printStackTrace();
                 }
             }
         }
@@ -185,22 +214,57 @@ public final class GuRunningService {
         ActivationFailureReason failureReason
     ) {}
 
-    private static void handleEquipChanges(
-        ServerPlayer player,
-        KongqiaoInventory inventory
+    /**
+     * 处理“容器内物品变更”导致的装备/卸下事件。
+     * <p>
+     * 空窍逻辑中部分被动效果依赖 {@link IGuEffect#onEquip} / {@link IGuEffect#onUnequip}
+     * 来安装/移除属性修饰符，因此需要对容器内容做快照比对。<br>
+     * 该方法同时用于：玩家空窍（{@link KongqiaoInventory}）与 NPC 背包（如 {@code NpcInventory}）。
+     * </p>
+     *
+     * @param user 使用者
+     * @param container 被视为“空窍”的容器
+     */
+    public static void handleContainerEquipChanges(
+        LivingEntity user,
+        Container container
     ) {
-        int size = inventory.getContainerSize();
+        if (user == null || container == null) {
+            return;
+        }
+
+        int size = container.getContainerSize();
+        if (size <= 0) {
+            return;
+        }
+
         ItemStack[] previous = LAST_KONGQIAO_SNAPSHOT.computeIfAbsent(
-            player.getUUID(),
+            user.getUUID(),
             id -> new ItemStack[size]
         );
         if (previous.length != size) {
-            previous = new ItemStack[size];
-            LAST_KONGQIAO_SNAPSHOT.put(player.getUUID(), previous);
+            if (previous.length > size) {
+                for (int i = size; i < previous.length; i++) {
+                    ItemStack last = previous[i] == null
+                        ? ItemStack.EMPTY
+                        : previous[i];
+                    if (!last.isEmpty()) {
+                        triggerUnequip(user, last);
+                    }
+                }
+            }
+
+            ItemStack[] resized = new ItemStack[size];
+            int copyCount = Math.min(previous.length, size);
+            for (int i = 0; i < copyCount; i++) {
+                resized[i] = previous[i];
+            }
+            previous = resized;
+            LAST_KONGQIAO_SNAPSHOT.put(user.getUUID(), previous);
         }
 
         for (int i = 0; i < size; i++) {
-            ItemStack current = inventory.getItem(i);
+            ItemStack current = container.getItem(i);
             ItemStack last = previous[i] == null
                 ? ItemStack.EMPTY
                 : previous[i];
@@ -213,10 +277,10 @@ public final class GuRunningService {
             }
 
             if (!last.isEmpty()) {
-                triggerUnequip(player, last);
+                triggerUnequip(user, last);
             }
             if (!current.isEmpty()) {
-                triggerEquip(player, current);
+                triggerEquip(user, current);
             }
             previous[i] = current.isEmpty() ? ItemStack.EMPTY : current.copy();
         }
