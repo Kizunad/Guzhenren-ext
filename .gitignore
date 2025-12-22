@@ -7,7 +7,7 @@ build_n_move.sh
 
 #Java
 .gradle/
-.gradle_user_home/caches/
+.gradle_user_home/
 build/
 run/
 bin/
