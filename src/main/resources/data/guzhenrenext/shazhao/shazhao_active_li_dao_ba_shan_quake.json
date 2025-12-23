@@ -1,0 +1,26 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_li_dao_ba_shan_quake",
+    "title": "拔山裂地",
+    "desc": "拔山为势，踏地为震。\n杀招主动，一域皆乱。",
+    "info": "范围:{range} | 半径:{radius} | 伤害:{damage} | 击退:{knockback_strength} | 迟滞:{slow_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 300,
+    "required_items": [
+        "guzhenren:quanliyifugusizhuan",
+        "guzhenren:daligu",
+        "guzhenren:kuligu"
+    ],
+    "metadata": {
+        "range": "18.0",
+        "radius": "5.0",
+        "damage": "3600.0",
+        "knockback_strength": "0.55",
+        "slow_duration_ticks": "160",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "1600",
+        "zhenyuan_base_cost": "480.0",
+        "niantou_cost": "30.0",
+        "jingli_cost": "40.0",
+        "hunpo_cost": "12.0"
+    }
+}
+

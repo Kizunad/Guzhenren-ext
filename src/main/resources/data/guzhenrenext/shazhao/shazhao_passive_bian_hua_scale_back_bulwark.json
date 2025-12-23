@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_scale_back_bulwark",
+    "title": "鳞甲铁背",
+    "desc": "鳞甲覆背，稳若磐石。\n杀招常驻，以鳞甲背甲固守形体，稳固防御与根骨。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 击退抗性: +{knockback_resistance_bonus} | 生命上限: +{max_health_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 60,
+    "required_items": [
+        "guzhenren:lin_jia_gu",
+        "guzhenren:bei_jia_gu",
+        "guzhenren:tong_pi_gu_2"
+    ],
+    "metadata": {
+        "armor_bonus": "70.0",
+        "armor_toughness_bonus": "25.0",
+        "knockback_resistance_bonus": "0.10",
+        "max_health_bonus": "2.0",
+        "zhenyuan_base_cost_per_second": "18.0",
+        "niantou_cost_per_second": "0.10",
+        "jingli_cost_per_second": "0.06",
+        "hunpo_cost_per_second": "0.02"
+    }
+}
+

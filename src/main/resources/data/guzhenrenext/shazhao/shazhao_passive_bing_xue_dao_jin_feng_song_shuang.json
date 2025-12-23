@@ -1,0 +1,27 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bing_xue_dao_jin_feng_song_shuang",
+    "title": "金风送霜",
+    "desc": "金风一过，霜落万里。\n杀招常驻，近者皆寒。",
+    "info": "半径:{radius} | 伤害:{damage_per_second}/s | 迟滞:{slow_duration_ticks}t | 疲劳:{fatigue_duration_ticks}t | 冻结:+{freeze_ticks_per_second}/s(上限{max_frozen_ticks}) | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 420,
+    "required_items": [
+        "guzhenren:jinfengsongshuanggu",
+        "guzhenren:shuang_jian_gu",
+        "guzhenren:shuang_lin_yue_gu"
+    ],
+    "metadata": {
+        "radius": "6.5",
+        "damage_per_second": "260.0",
+        "slow_duration_ticks": "60",
+        "slow_amplifier": "0",
+        "fatigue_duration_ticks": "60",
+        "fatigue_amplifier": "0",
+        "freeze_ticks_per_second": "80",
+        "max_frozen_ticks": "520",
+        "zhenyuan_base_cost_per_second": "22.0",
+        "niantou_cost_per_second": "1.80",
+        "jingli_cost_per_second": "1.20",
+        "hunpo_cost_per_second": "0.80"
+    }
+}
+

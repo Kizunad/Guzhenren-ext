@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_xuanwu_shell_quake",
+    "title": "玄武震踏",
+    "desc": "玄武重躯，落地成震。\n杀招主动，以重壳震荡周身，伤敌并迟缓其身形。",
+    "info": "半径: {radius} | 普伤: {physical_damage} | 击退: {knockback_strength} | 迟缓: {slow_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 300,
+    "required_items": [
+        "guzhenren:xuanwuzhongqu",
+        "guzhenren:shilongqunjiagu",
+        "guzhenren:shuixiangjia"
+    ],
+    "metadata": {
+        "radius": "6.0",
+        "physical_damage": "1200.0",
+        "knockback_strength": "0.8",
+        "slow_duration_ticks": "100",
+        "slow_amplifier": "1",
+        "cooldown_ticks": "240",
+        "zhenyuan_base_cost": "260.0",
+        "niantou_cost": "6.0",
+        "jingli_cost": "8.0",
+        "hunpo_cost": "1.0"
+    }
+}
+

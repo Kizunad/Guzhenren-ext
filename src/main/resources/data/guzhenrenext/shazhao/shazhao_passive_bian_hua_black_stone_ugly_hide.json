@@ -1,0 +1,22 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_black_stone_ugly_hide",
+    "title": "黑石丑皮躯",
+    "desc": "黑石负重，丑皮遮形。\n杀招常驻，稳固防护与气血根基，需持续多源维持。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 生命上限: +{max_health_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 25,
+    "required_items": [
+        "guzhenren:chou_pi_gu",
+        "guzhenren:hei_shi_gu",
+        "guzhenren:tiexuegu"
+    ],
+    "metadata": {
+        "armor_bonus": "18.0",
+        "armor_toughness_bonus": "8.0",
+        "max_health_bonus": "2.0",
+        "zhenyuan_base_cost_per_second": "10.0",
+        "niantou_cost_per_second": "0.04",
+        "jingli_cost_per_second": "0.03",
+        "hunpo_cost_per_second": "0.01"
+    }
+}
+

@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_fox_shadow_pounce",
+    "title": "狐影扑杀",
+    "desc": "狐影如电，一扑即中。\n杀招主动，锁定视线目标，以变化身法突袭并令其迟缓。",
+    "info": "范围: {range} | 普伤: {physical_damage} | 击退: {knockback_strength} | 迟缓: {slow_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 80,
+    "required_items": [
+        "guzhenren:hu_yao_gu",
+        "guzhenren:yin_lin_gu",
+        "guzhenren:hei_zong_gu"
+    ],
+    "metadata": {
+        "range": "12.0",
+        "physical_damage": "8.0",
+        "knockback_strength": "0.6",
+        "slow_duration_ticks": "60",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "120",
+        "zhenyuan_base_cost": "80.0",
+        "niantou_cost": "1.0",
+        "jingli_cost": "1.5",
+        "hunpo_cost": "0.2"
+    }
+}
+

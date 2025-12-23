@@ -1,0 +1,26 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_jian_hen_pierce",
+    "title": "剑痕穿刺",
+    "desc": "一剑留痕，再剑穿心。\n杀招主动，破体追击。",
+    "info": "距离:{range} | 伤害:{damage} | 迟滞:{slow_duration_ticks}t | 自身提速:{self_speed_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 150,
+    "required_items": [
+        "guzhenren:jianzhigu",
+        "guzhenren:jianjigu",
+        "guzhenren:jinweijianxiagu"
+    ],
+    "metadata": {
+        "range": "17.0",
+        "damage": "120.0",
+        "slow_duration_ticks": "120",
+        "slow_amplifier": "0",
+        "self_speed_duration_ticks": "100",
+        "self_speed_amplifier": "0",
+        "cooldown_ticks": "320",
+        "zhenyuan_base_cost": "70000.0",
+        "niantou_cost": "200.0",
+        "jingli_cost": "170.0",
+        "hunpo_cost": "120.0"
+    }
+}
+

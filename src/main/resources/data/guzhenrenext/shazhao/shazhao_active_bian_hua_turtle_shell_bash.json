@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_turtle_shell_bash",
+    "title": "龟甲铁槌",
+    "desc": "龟甲厚势，铁槌一落。\n杀招主动，锁定单体，以龟甲化势撞击敌身，并令其虚弱。",
+    "info": "范围: {range} | 普伤: {physical_damage} | 击退: {knockback_strength} | 虚弱: {weakness_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 160,
+    "required_items": [
+        "guzhenren:guijiaogu",
+        "guzhenren:tie_pi_gu_2",
+        "guzhenren:lin_jia_gu"
+    ],
+    "metadata": {
+        "range": "12.0",
+        "physical_damage": "45.0",
+        "knockback_strength": "0.7",
+        "weakness_duration_ticks": "80",
+        "weakness_amplifier": "0",
+        "cooldown_ticks": "160",
+        "zhenyuan_base_cost": "120.0",
+        "niantou_cost": "2.5",
+        "jingli_cost": "3.5",
+        "hunpo_cost": "0.5"
+    }
+}
+

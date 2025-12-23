@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bing_xue_dao_bing_bu_ta_xue",
+    "title": "冰步踏雪",
+    "desc": "冰步踏雪，寒息护身。\n杀招常驻，进退如风。",
+    "info": "移速:+{speed_bonus} | 抗击退:+{knockback_resistance_bonus} | 抗性:{resistance_duration_ticks}t | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 35,
+    "required_items": [
+        "guzhenren:bing_bu_gu"
+    ],
+    "metadata": {
+        "speed_bonus": "0.06",
+        "knockback_resistance_bonus": "0.05",
+        "resistance_duration_ticks": "40",
+        "resistance_amplifier": "0",
+        "zhenyuan_base_cost_per_second": "1.5",
+        "niantou_cost_per_second": "0.05",
+        "jingli_cost_per_second": "0.12",
+        "hunpo_cost_per_second": "0.02"
+    }
+}
+

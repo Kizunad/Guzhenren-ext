@@ -1,0 +1,29 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bing_xue_dao_man_tian_fei_xue_reserve",
+    "title": "漫天飞雪·寒月归元",
+    "desc": "飞雪漫天，寒月归元。\n杀招常驻，雪藏真意。",
+    "info": "上限:真元+{max_zhenyuan_bonus} 精力+{max_jingli_bonus} 魂魄+{max_hunpo_bonus} 念头容量+{niantou_capacity_bonus} | 恢复:真元+{zhenyuan_restore_per_second}/s 念头+{niantou_restore_per_second}/s 精力+{jingli_restore_per_second}/s 魂魄+{hunpo_restore_per_second}/s | 抗性:{resistance_duration_ticks}t | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 900,
+    "required_items": [
+        "guzhenren:mantianfeixuegu",
+        "guzhenren:han_yue_gu",
+        "guzhenren:jinfengsongshuanggu"
+    ],
+    "metadata": {
+        "max_zhenyuan_bonus": "420.0",
+        "max_jingli_bonus": "260.0",
+        "max_hunpo_bonus": "180.0",
+        "niantou_capacity_bonus": "320.0",
+        "zhenyuan_restore_per_second": "12.0",
+        "niantou_restore_per_second": "3.0",
+        "jingli_restore_per_second": "2.0",
+        "hunpo_restore_per_second": "1.0",
+        "resistance_duration_ticks": "60",
+        "resistance_amplifier": "0",
+        "zhenyuan_base_cost_per_second": "40.0",
+        "niantou_cost_per_second": "3.80",
+        "jingli_cost_per_second": "2.60",
+        "hunpo_cost_per_second": "1.80"
+    }
+}
+

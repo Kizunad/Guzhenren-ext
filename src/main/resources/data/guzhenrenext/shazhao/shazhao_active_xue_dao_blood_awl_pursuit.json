@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_xue_dao_blood_awl_pursuit",
+    "title": "血锥追袭",
+    "desc": "一缕血意，化锥追魂。\n杀招主动，锁定敌身要害，以血锥贯穿，夺其魂魄为补。",
+    "info": "范围: {range} | 物伤: {physical_damage} | 迟滞: {slow_duration_ticks}t@{slow_amplifier} | 夺魄: +{self_hunpo_gain} | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 300,
+    "required_items": [
+        "guzhenren:xie_zhui_gu",
+        "guzhenren:xueqigu",
+        "guzhenren:xueyigu"
+    ],
+    "metadata": {
+        "range": "12.0",
+        "physical_damage": "45.0",
+        "slow_duration_ticks": "80",
+        "slow_amplifier": "0",
+        "self_hunpo_gain": "1.2",
+        "cooldown_ticks": "260",
+        "zhenyuan_base_cost": "120.0",
+        "niantou_cost": "2.5",
+        "jingli_cost": "1.6",
+        "hunpo_cost": "0.6"
+    }
+}

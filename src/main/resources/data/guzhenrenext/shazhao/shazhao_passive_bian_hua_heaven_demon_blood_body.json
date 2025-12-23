@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_heaven_demon_blood_body",
+    "title": "天魔血骨身",
+    "desc": "天魔血骨，强行化身。\n杀招常驻，强行拔升攻防与气血，需高额多源维持。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 生命上限: +{max_health_bonus} | 击退抗性: +{knockback_resistance_bonus} | 攻击增幅: +{attack_damage_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 850,
+    "required_items": [
+        "guzhenren:tianmoshi",
+        "guzhenren:xueguishi",
+        "guzhenren:mengyanshi"
+    ],
+    "metadata": {
+        "armor_bonus": "140.0",
+        "armor_toughness_bonus": "80.0",
+        "max_health_bonus": "12.0",
+        "knockback_resistance_bonus": "0.20",
+        "attack_damage_bonus": "0.22",
+        "zhenyuan_base_cost_per_second": "220.0",
+        "niantou_cost_per_second": "3.0",
+        "jingli_cost_per_second": "2.0",
+        "hunpo_cost_per_second": "1.0"
+    }
+}
+

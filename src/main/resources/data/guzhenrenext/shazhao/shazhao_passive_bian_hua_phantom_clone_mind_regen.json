@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_phantom_clone_mind_regen",
+    "title": "幻身养念",
+    "desc": "幻身分摊，养念提神。\n杀招常驻，以分身幻影分摊心神消耗，缓慢回复念头并提振精力。",
+    "info": "念头恢复: +{niantou_gain_per_second}/s | 精力恢复: +{jingli_gain_per_second}/s | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 260,
+    "required_items": [
+        "guzhenren:fen_shen_gu",
+        "guzhenren:huan_ying_yue_gu",
+        "guzhenren:e_nian_gu"
+    ],
+    "metadata": {
+        "niantou_gain_per_second": "0.35",
+        "jingli_gain_per_second": "0.12",
+        "zhenyuan_base_cost_per_second": "80.0",
+        "niantou_cost_per_second": "0.60",
+        "jingli_cost_per_second": "0.08",
+        "hunpo_cost_per_second": "0.10"
+    }
+}
+

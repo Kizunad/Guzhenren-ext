@@ -1,0 +1,20 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_xue_dao_blood_armor",
+    "title": "血甲凝护",
+    "desc": "血凝为甲，护体如铠。\n杀招常驻，以血道道痕凝作薄甲，柔中带韧，专克刀兵。",
+    "info": "护甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 900,
+    "required_items": [
+        "guzhenren:xue_ren_gu",
+        "guzhenren:xuezhangu",
+        "guzhenren:li_zhan_xue_qi_gu"
+    ],
+    "metadata": {
+        "armor_bonus": "18.0",
+        "armor_toughness_bonus": "6.0",
+        "zhenyuan_base_cost_per_second": "120.0",
+        "niantou_cost_per_second": "0.8",
+        "jingli_cost_per_second": "0.6",
+        "hunpo_cost_per_second": "0.3"
+    }
+}

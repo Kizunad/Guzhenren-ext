@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_jin_wen_jian_xia_yang_feng",
+    "title": "金纹匣养锋",
+    "desc": "金纹匣藏锋，温养刃意。\n杀招常驻，养锋亦养魂。",
+    "info": "伤害增幅:+{attack_damage_bonus} | 魂魄恢复:+{hunpo_restore_per_second}/s | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 80,
+    "required_items": [
+        "guzhenren:jinweijianxiagu",
+        "guzhenren:jianzhigu",
+        "guzhenren:jianjigu"
+    ],
+    "metadata": {
+        "attack_damage_bonus": "0.10",
+        "hunpo_restore_per_second": "0.10",
+        "zhenyuan_base_cost_per_second": "600.0",
+        "niantou_cost_per_second": "1.0",
+        "jingli_cost_per_second": "0.8",
+        "hunpo_cost_per_second": "0.2"
+    }
+}
+

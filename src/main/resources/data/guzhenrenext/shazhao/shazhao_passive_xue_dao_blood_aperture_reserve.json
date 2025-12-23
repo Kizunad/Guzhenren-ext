@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_xue_dao_blood_aperture_reserve",
+    "title": "血魄养窍",
+    "desc": "血魄反哺，养窍蓄势。\n杀招常驻，以血魄滋养空窍根基，暂增上限，且少量续航不断。",
+    "info": "上限: 真元+{max_zhenyuan_bonus} | 魂魄+{max_hunpo_bonus} | 念头+{niantou_capacity_bonus} | 回复: +{heal_per_second}/s | 魂魄: +{hunpo_gain}/s | 精力: +{jingli_gain}/s | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 2400,
+    "required_items": [
+        "guzhenren:xie_lu_gu_5",
+        "guzhenren:xue_shou_yin_gu",
+        "guzhenren:xue_di_zi_gu"
+    ],
+    "metadata": {
+        "max_hunpo_bonus": "160.0",
+        "max_zhenyuan_bonus": "220.0",
+        "niantou_capacity_bonus": "120.0",
+        "heal_per_second": "1.2",
+        "hunpo_gain": "1.0",
+        "jingli_gain": "0.8",
+        "zhenyuan_base_cost_per_second": "360.0",
+        "niantou_cost_per_second": "3.0",
+        "jingli_cost_per_second": "2.0",
+        "hunpo_cost_per_second": "0.8"
+    }
+}

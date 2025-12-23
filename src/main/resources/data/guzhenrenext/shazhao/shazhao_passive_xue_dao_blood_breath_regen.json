@@ -1,0 +1,22 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_xue_dao_blood_breath_regen",
+    "title": "血息回春",
+    "desc": "血息如潮，绵绵不绝。\n杀招常驻，以细微血气温养空窍，缓缓补益四方。",
+    "info": "回复: +{heal_per_second}/s | 魂魄: +{hunpo_gain}/s | 念头: +{niantou_gain}/s | 精力: +{jingli_gain}/s | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 120,
+    "required_items": [
+        "guzhenren:xie_yan_gu",
+        "guzhenren:tiexuegu",
+        "guzhenren:xueshugu"
+    ],
+    "metadata": {
+        "heal_per_second": "0.4",
+        "hunpo_gain": "0.1",
+        "niantou_gain": "0.2",
+        "jingli_gain": "0.3",
+        "zhenyuan_base_cost_per_second": "12.0",
+        "niantou_cost_per_second": "0.06",
+        "jingli_cost_per_second": "0.08",
+        "hunpo_cost_per_second": "0.02"
+    }
+}

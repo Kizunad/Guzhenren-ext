@@ -1,0 +1,30 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bing_xue_dao_lan_niao_bing_guan",
+    "title": "蓝鸟冰棺",
+    "desc": "蓝鸟衔寒，冰棺封魂。\n杀招主动，一击封杀。",
+    "info": "范围:{range} | 伤害:{damage} | 迟滞:{slow_duration_ticks}t | 疲劳:{fatigue_duration_ticks}t | 虚弱:{weakness_duration_ticks}t | 冻结:+{freeze_ticks}(上限{max_frozen_ticks}) | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 380,
+    "required_items": [
+        "guzhenren:lan_niao_bing_guan_gu",
+        "guzhenren:bing_ji_gu",
+        "guzhenren:shuang_xi_gu"
+    ],
+    "metadata": {
+        "range": "18.0",
+        "damage": "900.0",
+        "slow_duration_ticks": "220",
+        "slow_amplifier": "1",
+        "fatigue_duration_ticks": "220",
+        "fatigue_amplifier": "1",
+        "weakness_duration_ticks": "180",
+        "weakness_amplifier": "0",
+        "freeze_ticks": "260",
+        "max_frozen_ticks": "900",
+        "cooldown_ticks": "1600",
+        "zhenyuan_base_cost": "300.0",
+        "niantou_cost": "90.0",
+        "jingli_cost": "80.0",
+        "hunpo_cost": "40.0"
+    }
+}
+

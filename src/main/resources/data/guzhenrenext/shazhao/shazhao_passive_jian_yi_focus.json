@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_jian_yi_focus",
+    "title": "剑意凝神",
+    "desc": "剑意入心，凝神不散。\n杀招常驻，心静则锋。",
+    "info": "攻速:+{attack_speed_bonus} | 念头恢复:+{niantou_restore_per_second}/s | 精力恢复:+{jingli_restore_per_second}/s | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s",
+    "cost_total_niantou": 25,
+    "required_items": [
+        "guzhenren:jianhengu",
+        "guzhenren:jianxiagu"
+    ],
+    "metadata": {
+        "attack_speed_bonus": "0.15",
+        "niantou_restore_per_second": "0.25",
+        "jingli_restore_per_second": "0.18",
+        "zhenyuan_base_cost_per_second": "360.0",
+        "niantou_cost_per_second": "0.7",
+        "jingli_cost_per_second": "0.5",
+        "hunpo_cost_per_second": "0.0"
+    }
+}
+

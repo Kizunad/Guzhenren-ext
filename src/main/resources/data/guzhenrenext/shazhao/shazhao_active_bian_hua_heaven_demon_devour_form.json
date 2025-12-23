@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_heaven_demon_devour_form",
+    "title": "天魔噬形",
+    "desc": "天魔噬形，强敌亦衰。\n杀招主动，锁定强敌，以天魔之形吞噬其势，高额重创并施凋零。",
+    "info": "范围: {range} | 普伤: {physical_damage} | 凋零: {wither_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 1200,
+    "required_items": [
+        "guzhenren:tianmoshi",
+        "guzhenren:dikuishi",
+        "guzhenren:xueguishi"
+    ],
+    "metadata": {
+        "range": "30.0",
+        "physical_damage": "18000.0",
+        "wither_duration_ticks": "120",
+        "wither_amplifier": "0",
+        "cooldown_ticks": "840",
+        "zhenyuan_base_cost": "820.0",
+        "niantou_cost": "45.0",
+        "jingli_cost": "55.0",
+        "hunpo_cost": "12.0"
+    }
+}
+

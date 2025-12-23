@@ -1,0 +1,22 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_jian_xia_fei_ci",
+    "title": "剑匣飞刺",
+    "desc": "匣开吐锋，剑光一闪。\n杀招主动，剑匣化剑，飞刺锁敌并留下剑痕。",
+    "info": "距离:{range} | 伤害:{damage} | 标记:{mark_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 40,
+    "required_items": [
+        "guzhenren:jianxiagu",
+        "guzhenren:jianhengu"
+    ],
+    "metadata": {
+        "range": "12.0",
+        "damage": "8.0",
+        "mark_duration_ticks": "120",
+        "cooldown_ticks": "80",
+        "zhenyuan_base_cost": "25000.0",
+        "niantou_cost": "1.2",
+        "jingli_cost": "1.0",
+        "hunpo_cost": "0.3"
+    }
+}
+

@@ -1,0 +1,26 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_xue_dao_blood_sea_overturn",
+    "title": "血海倾覆",
+    "desc": "血海翻覆，万灵同沉。\n杀招主动，血意化海潮汹涌席卷，迟滞群敌，并夺命血魂魄返补真元。",
+    "info": "半径: {radius} | 物伤: {damage} | 迟滞: {slow_duration_ticks}t@{slow_amplifier} | 吸血: {self_heal_per_hit}/hit | 夺魄: {self_hunpo_per_hit}/hit | 返元: {self_zhenyuan_per_hit}/hit | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 2800,
+    "required_items": [
+        "guzhenren:xue_he_mang_gu",
+        "guzhenren:hua_xie_lu_gu",
+        "guzhenren:xuezhangu"
+    ],
+    "metadata": {
+        "radius": "3.2",
+        "damage": "12000.0",
+        "slow_duration_ticks": "180",
+        "slow_amplifier": "1",
+        "self_heal_per_hit": "2.0",
+        "self_hunpo_per_hit": "1.5",
+        "self_zhenyuan_per_hit": "5.0",
+        "cooldown_ticks": "3600",
+        "zhenyuan_base_cost": "900.0",
+        "niantou_cost": "120.0",
+        "jingli_cost": "90.0",
+        "hunpo_cost": "25.0"
+    }
+}

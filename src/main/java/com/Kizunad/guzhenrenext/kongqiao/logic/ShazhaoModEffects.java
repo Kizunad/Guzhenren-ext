@@ -33,9 +33,19 @@ public final class ShazhaoModEffects {
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.shuidao.shazhao.ShuiDaoShazhaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bingxuedao.shazhao.BingXueDaoShazhaoRegistry
+            .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.huodao.shazhao.HuoDaoShazhaoRegistry
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.leidao.shazhao.LeiDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.bianhuadao.shazhao.BianHuaDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.jiandao.shazhao.JianDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.lidao.shazhao.LiDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xuedao.shazhao.XueDaoShazhaoRegistry
             .registerAll();
 
         registered = true;

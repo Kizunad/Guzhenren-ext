@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_beast_blood_regen",
+    "title": "兽血回潮",
+    "desc": "兽血奔涌，回潮养身。\n杀招常驻，以兽血滋养躯体，持续小幅恢复并强化身法。",
+    "info": "回血: +{heal_per_second}/s | 移速: +{move_speed_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 160,
+    "required_items": [
+        "guzhenren:yin_gu",
+        "guzhenren:yang_gu",
+        "guzhenren:quanpugu"
+    ],
+    "metadata": {
+        "heal_per_second": "0.6",
+        "move_speed_bonus": "0.08",
+        "zhenyuan_base_cost_per_second": "40.0",
+        "niantou_cost_per_second": "0.4",
+        "jingli_cost_per_second": "0.2",
+        "hunpo_cost_per_second": "0.1"
+    }
+}
+

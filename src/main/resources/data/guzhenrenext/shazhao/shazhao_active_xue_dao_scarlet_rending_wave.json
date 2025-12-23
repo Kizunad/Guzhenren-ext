@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_xue_dao_scarlet_rending_wave",
+    "title": "血刃狂潮",
+    "desc": "血刃成潮，连绵如浪。\n杀招主动，血意横扫四方，既斩敌躯，亦以命血回补自身。",
+    "info": "半径: {radius} | 物伤: {damage} | 击退: {knockback_strength} | 吸血: {self_heal_per_hit}/hit | 夺魄: {self_hunpo_per_hit}/hit | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 1600,
+    "required_items": [
+        "guzhenren:xie_ning_jian_gu",
+        "guzhenren:xuebaogu",
+        "guzhenren:hua_xie_lu_gu"
+    ],
+    "metadata": {
+        "radius": "3.0",
+        "damage": "2400.0",
+        "knockback_strength": "0.25",
+        "self_heal_per_hit": "1.0",
+        "self_hunpo_per_hit": "0.8",
+        "cooldown_ticks": "1600",
+        "zhenyuan_base_cost": "600.0",
+        "niantou_cost": "35.0",
+        "jingli_cost": "25.0",
+        "hunpo_cost": "8.0"
+    }
+}

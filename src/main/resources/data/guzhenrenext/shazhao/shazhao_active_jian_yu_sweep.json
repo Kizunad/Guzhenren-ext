@@ -1,0 +1,26 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_jian_yu_sweep",
+    "title": "剑域横斩",
+    "desc": "剑域既成，一斩断界。\n杀招主动，横扫镇压。",
+    "info": "距离:{range} | 半径:{radius} | 伤害:{damage} | 击退:{knockback_strength} | 虚弱:{weakness_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 600,
+    "required_items": [
+        "guzhenren:jianfenggu",
+        "guzhenren:jianrengu",
+        "guzhenren:jianqigu"
+    ],
+    "metadata": {
+        "range": "18.0",
+        "radius": "4.2",
+        "damage": "2600.0",
+        "knockback_strength": "0.45",
+        "weakness_duration_ticks": "160",
+        "weakness_amplifier": "0",
+        "cooldown_ticks": "1600",
+        "zhenyuan_base_cost": "300000.0",
+        "niantou_cost": "720.0",
+        "jingli_cost": "760.0",
+        "hunpo_cost": "620.0"
+    }
+}
+

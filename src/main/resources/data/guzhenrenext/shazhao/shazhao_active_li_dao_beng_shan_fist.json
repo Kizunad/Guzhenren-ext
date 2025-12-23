@@ -1,0 +1,27 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_li_dao_beng_shan_fist",
+    "title": "崩山拳",
+    "desc": "一拳崩山，气劲透骨。\n杀招主动，破势夺先。",
+    "info": "范围:{range} | 伤害:{damage} | 击退:{knockback_strength} | 迟滞:{slow_duration_ticks}t | 虚弱:{weakness_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 90,
+    "required_items": [
+        "guzhenren:shi_jin_li_gu",
+        "guzhenren:e_li_gu",
+        "guzhenren:zi_li_geng_sheng_gu"
+    ],
+    "metadata": {
+        "range": "14.0",
+        "damage": "260.0",
+        "knockback_strength": "0.55",
+        "slow_duration_ticks": "80",
+        "slow_amplifier": "0",
+        "weakness_duration_ticks": "80",
+        "weakness_amplifier": "0",
+        "cooldown_ticks": "420",
+        "zhenyuan_base_cost": "120.0",
+        "niantou_cost": "4.0",
+        "jingli_cost": "8.0",
+        "hunpo_cost": "2.0"
+    }
+}
+

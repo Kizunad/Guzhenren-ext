@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_beast_hide_carapace",
+    "title": "兽皮甲胄",
+    "desc": "兽皮化铠，鳞甲护体。\n杀招常驻，以变化之形稳固根基，提升防护与气血上限。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 生命上限: +{max_health_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 20,
+    "required_items": [
+        "guzhenren:shou_pi_gu",
+        "guzhenren:yu_lin_gu"
+    ],
+    "metadata": {
+        "armor_bonus": "30.0",
+        "armor_toughness_bonus": "12.0",
+        "max_health_bonus": "4.0",
+        "zhenyuan_base_cost_per_second": "8.0",
+        "niantou_cost_per_second": "0.02",
+        "jingli_cost_per_second": "0.01",
+        "hunpo_cost_per_second": "0.01"
+    }
+}
+

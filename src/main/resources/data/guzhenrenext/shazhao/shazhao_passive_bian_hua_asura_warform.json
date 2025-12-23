@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_asura_warform",
+    "title": "修罗战体",
+    "desc": "凶躯化形，战体成就。\n杀招常驻，以修罗之形凝聚攻防，需高额多源维持。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 击退抗性: +{knockback_resistance_bonus} | 攻击增幅: +{attack_damage_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 600,
+    "required_items": [
+        "guzhenren:xiuluoshigu",
+        "guzhenren:dikuishi",
+        "guzhenren:tianmoshi"
+    ],
+    "metadata": {
+        "armor_bonus": "120.0",
+        "armor_toughness_bonus": "60.0",
+        "knockback_resistance_bonus": "0.25",
+        "attack_damage_bonus": "0.15",
+        "zhenyuan_base_cost_per_second": "160.0",
+        "niantou_cost_per_second": "3.0",
+        "jingli_cost_per_second": "1.5",
+        "hunpo_cost_per_second": "0.6"
+    }
+}
+

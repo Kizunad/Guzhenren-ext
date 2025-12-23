@@ -1,0 +1,26 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_li_dao_ba_wang_reserve",
+    "title": "霸王蓄势",
+    "desc": "霸意如岳，气血真元皆可蓄。\n杀招常驻，蓄势待发。",
+    "info": "上限:真元+{max_zhenyuan_bonus} 精力+{max_jingli_bonus} 魂魄+{max_hunpo_bonus} 念头容量+{niantou_capacity_bonus} | 恢复:真元+{zhenyuan_restore_per_second}/s 念头+{niantou_restore_per_second}/s 精力+{jingli_restore_per_second}/s | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 350,
+    "required_items": [
+        "guzhenren:qun_li_gu",
+        "guzhenren:quan_li_yi_fu_gu_5",
+        "guzhenren:nu_mu_jin_gang_gu"
+    ],
+    "metadata": {
+        "max_zhenyuan_bonus": "240.0",
+        "max_jingli_bonus": "260.0",
+        "max_hunpo_bonus": "180.0",
+        "niantou_capacity_bonus": "220.0",
+        "zhenyuan_restore_per_second": "8.0",
+        "niantou_restore_per_second": "0.30",
+        "jingli_restore_per_second": "1.20",
+        "zhenyuan_base_cost_per_second": "60.0",
+        "niantou_cost_per_second": "1.20",
+        "jingli_cost_per_second": "1.00",
+        "hunpo_cost_per_second": "0.60"
+    }
+}
+

@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_li_dao_man_niu_forge_body",
+    "title": "蛮牛锻体",
+    "desc": "蛮牛劲贯全身，筋骨自成炉火。\n杀招常驻，锻体不息。",
+    "info": "攻:+{attack_damage_bonus} | 血:+{max_health_bonus} | 恢复:念头+{niantou_restore_per_second}/s 精力+{jingli_restore_per_second}/s 魂魄+{hunpo_restore_per_second}/s | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 30,
+    "required_items": [
+        "guzhenren:jing_li_gu",
+        "guzhenren:man_li_tian_niu_gu"
+    ],
+    "metadata": {
+        "attack_damage_bonus": "3.0",
+        "max_health_bonus": "2.0",
+        "niantou_restore_per_second": "0.03",
+        "jingli_restore_per_second": "0.25",
+        "hunpo_restore_per_second": "0.08",
+        "zhenyuan_base_cost_per_second": "6.0",
+        "niantou_cost_per_second": "0.12",
+        "jingli_cost_per_second": "0.10",
+        "hunpo_cost_per_second": "0.05"
+    }
+}
+

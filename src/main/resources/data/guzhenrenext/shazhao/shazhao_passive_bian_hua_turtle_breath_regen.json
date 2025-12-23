@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_turtle_breath_regen",
+    "title": "龟息回元",
+    "desc": "龟息深沉，回元养身。\n杀招常驻，以龟息之法回养精力与魂魄，需持续多源维持。",
+    "info": "精力恢复: +{jingli_gain_per_second}/s | 魂魄恢复: +{hunpo_gain_per_second}/s | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 120,
+    "required_items": [
+        "guzhenren:guijiaogu",
+        "guzhenren:lin_jia_gu",
+        "guzhenren:xie_hu_lu_gu"
+    ],
+    "metadata": {
+        "jingli_gain_per_second": "0.10",
+        "hunpo_gain_per_second": "0.03",
+        "zhenyuan_base_cost_per_second": "35.0",
+        "niantou_cost_per_second": "0.20",
+        "jingli_cost_per_second": "0.06",
+        "hunpo_cost_per_second": "0.01"
+    }
+}
+

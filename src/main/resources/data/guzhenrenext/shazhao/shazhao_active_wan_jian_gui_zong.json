@@ -1,0 +1,29 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_wan_jian_gui_zong",
+    "title": "万剑归宗",
+    "desc": "万剑同鸣，尽归一心。\n杀招主动，一击决势。",
+    "info": "半径:{radius} | 伤害:{damage} | 击退:{knockback_strength} | 护体:{self_absorption_per_hit}/命中 上限:{self_absorption_max} | 续航:真元+{self_zhenyuan_per_hit}/命中 念头+{self_niantou_per_hit}/命中 精力+{self_jingli_per_hit}/命中 魂魄+{self_hunpo_per_hit}/命中 | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 950,
+    "required_items": [
+        "guzhenren:jiansuoguwuzhuan",
+        "guzhenren:jianjiaoguwuzhuan",
+        "guzhenren:liejiangu"
+    ],
+    "metadata": {
+        "radius": "8.0",
+        "damage": "10000.0",
+        "knockback_strength": "0.55",
+        "self_absorption_per_hit": "1.6",
+        "self_absorption_max": "18.0",
+        "self_zhenyuan_per_hit": "18.0",
+        "self_niantou_per_hit": "4.0",
+        "self_jingli_per_hit": "4.0",
+        "self_hunpo_per_hit": "2.5",
+        "cooldown_ticks": "3600",
+        "zhenyuan_base_cost": "950000.0",
+        "niantou_cost": "980.0",
+        "jingli_cost": "1000.0",
+        "hunpo_cost": "900.0"
+    }
+}
+

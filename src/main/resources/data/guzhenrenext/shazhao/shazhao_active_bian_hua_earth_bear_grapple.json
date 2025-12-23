@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_earth_bear_grapple",
+    "title": "地熊擒杀",
+    "desc": "地熊擒拿，骨裂筋断。\n杀招主动，锁定单体，以熊爪擒拽并重击其身。",
+    "info": "范围: {range} | 普伤: {physical_damage} | 擒拽: {pull_strength} | 迟缓: {slow_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 220,
+    "required_items": [
+        "guzhenren:di_xiong_zhua_gu",
+        "guzhenren:hupigu",
+        "guzhenren:xiong_shou_yin_xie_gu"
+    ],
+    "metadata": {
+        "range": "16.0",
+        "physical_damage": "160.0",
+        "pull_strength": "0.9",
+        "slow_duration_ticks": "80",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "220",
+        "zhenyuan_base_cost": "160.0",
+        "niantou_cost": "3.0",
+        "jingli_cost": "4.0",
+        "hunpo_cost": "0.6"
+    }
+}
+

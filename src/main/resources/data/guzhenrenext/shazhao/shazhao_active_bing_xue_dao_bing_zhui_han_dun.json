@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bing_xue_dao_bing_zhui_han_dun",
+    "title": "冰锥寒盾",
+    "desc": "寒锥护身，霜甲自生。\n杀招主动，守中有攻。",
+    "info": "护盾:+{self_absorption_add}(上限{self_absorption_max}) | 抗性:{resistance_duration_ticks}t | 火抗:{fire_resistance_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 120,
+    "required_items": [
+        "guzhenren:bing_zhui_gu",
+        "guzhenren:bing_bu_gu"
+    ],
+    "metadata": {
+        "self_absorption_add": "6.0",
+        "self_absorption_max": "20.0",
+        "resistance_duration_ticks": "220",
+        "resistance_amplifier": "0",
+        "fire_resistance_duration_ticks": "220",
+        "cooldown_ticks": "900",
+        "zhenyuan_base_cost": "80.0",
+        "niantou_cost": "8.0",
+        "jingli_cost": "12.0",
+        "hunpo_cost": "2.0"
+    }
+}
+

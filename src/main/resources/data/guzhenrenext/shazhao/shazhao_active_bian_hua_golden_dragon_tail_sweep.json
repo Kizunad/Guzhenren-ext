@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_golden_dragon_tail_sweep",
+    "title": "金龙摆尾",
+    "desc": "金鳞摆尾，扫灭群敌。\n杀招主动，以金龙化势摆尾扫荡周身，伤敌、击退并削其力。",
+    "info": "半径: {radius} | 普伤: {physical_damage} | 击退: {knockback_strength} | 虚弱: {weakness_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 700,
+    "required_items": [
+        "guzhenren:jinlonggu",
+        "guzhenren:youlonggu",
+        "guzhenren:jinzhonggu"
+    ],
+    "metadata": {
+        "radius": "8.0",
+        "physical_damage": "3800.0",
+        "knockback_strength": "1.0",
+        "weakness_duration_ticks": "100",
+        "weakness_amplifier": "0",
+        "cooldown_ticks": "560",
+        "zhenyuan_base_cost": "420.0",
+        "niantou_cost": "18.0",
+        "jingli_cost": "22.0",
+        "hunpo_cost": "4.0"
+    }
+}
+

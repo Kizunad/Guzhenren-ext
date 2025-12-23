@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_soaring_dragon_phantom",
+    "title": "游龙化影",
+    "desc": "游龙化影，身随意动。\n杀招常驻，以游龙蝶影之形增益身法与攻势。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 移速: +{move_speed_bonus} | 攻速: +{attack_speed_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 420,
+    "required_items": [
+        "guzhenren:youlonggu",
+        "guzhenren:dieyinggu",
+        "guzhenren:huahuanyuegu"
+    ],
+    "metadata": {
+        "armor_bonus": "90.0",
+        "armor_toughness_bonus": "35.0",
+        "move_speed_bonus": "0.15",
+        "attack_speed_bonus": "0.25",
+        "zhenyuan_base_cost_per_second": "100.0",
+        "niantou_cost_per_second": "1.2",
+        "jingli_cost_per_second": "0.8",
+        "hunpo_cost_per_second": "0.3"
+    }
+}
+

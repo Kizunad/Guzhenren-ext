@@ -1,0 +1,26 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_phantom_clone_assault",
+    "title": "分身幻围杀",
+    "desc": "分身幻影，围杀一瞬。\n杀招主动，锁定强敌主斩，并以幻身余势溅射其周。",
+    "info": "范围: {range} | 主伤: {primary_physical_damage} | 溅射: {splash_physical_damage} | 半径: {splash_radius} | 迟缓: {slow_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 420,
+    "required_items": [
+        "guzhenren:fen_shen_gu",
+        "guzhenren:huan_ying_yue_gu",
+        "guzhenren:diejiegu"
+    ],
+    "metadata": {
+        "range": "18.0",
+        "primary_physical_damage": "600.0",
+        "splash_physical_damage": "220.0",
+        "splash_radius": "4.0",
+        "slow_duration_ticks": "80",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "360",
+        "zhenyuan_base_cost": "240.0",
+        "niantou_cost": "7.0",
+        "jingli_cost": "10.0",
+        "hunpo_cost": "1.8"
+    }
+}
+

@@ -1,0 +1,25 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_qi_xing_jian_yu",
+    "title": "七星剑雨",
+    "desc": "七星剑匣启，剑雨如星落。\n杀招主动，覆盖一域，飞剑齐下。",
+    "info": "半径:{radius} | 上限:{max_targets}目标 | 伤害:{damage} | 迟滞:{slow_duration_ticks}t | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 320,
+    "required_items": [
+        "guzhenren:qixingjianxiagu",
+        "guzhenren:jian_ying_gu",
+        "guzhenren:jian_zhi_gu_3"
+    ],
+    "metadata": {
+        "radius": "6.0",
+        "max_targets": "7",
+        "damage": "800.0",
+        "slow_duration_ticks": "60",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "900",
+        "zhenyuan_base_cost": "180000.0",
+        "niantou_cost": "380.0",
+        "jingli_cost": "320.0",
+        "hunpo_cost": "220.0"
+    }
+}
+

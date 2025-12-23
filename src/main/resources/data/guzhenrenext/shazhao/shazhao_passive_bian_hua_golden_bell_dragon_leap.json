@@ -1,0 +1,23 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_bian_hua_golden_bell_dragon_leap",
+    "title": "金钟龙跃",
+    "desc": "金钟护体，龙形轻跃。\n杀招常驻，兼顾防护与身法，维持代价不菲。",
+    "info": "盔甲: +{armor_bonus} | 韧性: +{armor_toughness_bonus} | 移速: +{move_speed_bonus} | 跳跃: +{jump_strength_bonus} | 真元基耗: -{zhenyuan_base_cost_per_second}/s | 念头: -{niantou_cost_per_second}/s | 精力: -{jingli_cost_per_second}/s | 魂魄: -{hunpo_cost_per_second}/s",
+    "cost_total_niantou": 380,
+    "required_items": [
+        "guzhenren:jinzhonggu",
+        "guzhenren:jinlonggu",
+        "guzhenren:chikonggu"
+    ],
+    "metadata": {
+        "armor_bonus": "150.0",
+        "armor_toughness_bonus": "70.0",
+        "move_speed_bonus": "0.08",
+        "jump_strength_bonus": "0.18",
+        "zhenyuan_base_cost_per_second": "140.0",
+        "niantou_cost_per_second": "1.2",
+        "jingli_cost_per_second": "0.9",
+        "hunpo_cost_per_second": "0.3"
+    }
+}
+

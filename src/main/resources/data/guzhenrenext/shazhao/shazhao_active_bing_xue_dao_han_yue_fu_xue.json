@@ -1,0 +1,35 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bing_xue_dao_han_yue_fu_xue",
+    "title": "寒月覆雪",
+    "desc": "寒月覆雪，霜尽千里。\n杀招主动，一击定局。",
+    "info": "半径:{radius} | 伤害:{damage} | 击退:{knockback_strength} | 迟滞:{slow_duration_ticks}t | 虚弱:{weakness_duration_ticks}t | 冻结:+{freeze_ticks}(上限{max_frozen_ticks}) | 续航:真元+{self_zhenyuan_per_hit}/命中 念头+{self_niantou_per_hit}/命中 精力+{self_jingli_per_hit}/命中 魂魄+{self_hunpo_per_hit}/命中 | 护盾:+{self_absorption_per_hit}/命中(上限{self_absorption_max}) | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 1200,
+    "required_items": [
+        "guzhenren:han_yue_gu",
+        "guzhenren:mantianfeixuegu",
+        "guzhenren:shuang_jian_gu"
+    ],
+    "metadata": {
+        "radius": "9.0",
+        "damage": "18000.0",
+        "knockback_strength": "0.45",
+        "slow_duration_ticks": "260",
+        "slow_amplifier": "1",
+        "weakness_duration_ticks": "220",
+        "weakness_amplifier": "0",
+        "freeze_ticks": "200",
+        "max_frozen_ticks": "1400",
+        "self_zhenyuan_per_hit": "10.0",
+        "self_niantou_per_hit": "3.0",
+        "self_jingli_per_hit": "2.0",
+        "self_hunpo_per_hit": "1.0",
+        "self_absorption_per_hit": "1.5",
+        "self_absorption_max": "40.0",
+        "cooldown_ticks": "3600",
+        "zhenyuan_base_cost": "900.0",
+        "niantou_cost": "900.0",
+        "jingli_cost": "850.0",
+        "hunpo_cost": "300.0"
+    }
+}
+

@@ -1,0 +1,27 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_copper_iron_slam",
+    "title": "铜皮铁撞",
+    "desc": "铜皮铁骨，撞碎敌阵。\n杀招主动，短暂以铜皮铁骨护体，并以蛮躯震退周身。",
+    "info": "半径: {radius} | 普伤: {physical_damage} | 击退: {knockback_strength} | 抗性: {resistance_duration_ticks}t | 伤吸: {absorption_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 30,
+    "required_items": [
+        "guzhenren:tong_pi_gu",
+        "guzhenren:t_tie_pi_gu",
+        "guzhenren:shou_pi_gu"
+    ],
+    "metadata": {
+        "radius": "3.0",
+        "physical_damage": "4.0",
+        "knockback_strength": "0.5",
+        "resistance_duration_ticks": "80",
+        "resistance_amplifier": "0",
+        "absorption_duration_ticks": "80",
+        "absorption_amplifier": "0",
+        "cooldown_ticks": "100",
+        "zhenyuan_base_cost": "40.0",
+        "niantou_cost": "0.4",
+        "jingli_cost": "0.8",
+        "hunpo_cost": "0.05"
+    }
+}
+

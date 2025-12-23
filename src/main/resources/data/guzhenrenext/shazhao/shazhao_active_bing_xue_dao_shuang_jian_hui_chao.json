@@ -1,0 +1,27 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bing_xue_dao_shuang_jian_hui_chao",
+    "title": "霜剑回潮",
+    "desc": "霜剑一出，寒潮倒卷。\n杀招主动，霜落成灾。",
+    "info": "范围:{range} | 半径:{radius} | 伤害:{damage} | 迟滞:{slow_duration_ticks}t | 冻结:+{freeze_ticks}(上限{max_frozen_ticks}) | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 700,
+    "required_items": [
+        "guzhenren:shuang_jian_gu",
+        "guzhenren:jinfengsongshuanggu",
+        "guzhenren:shuang_lin_yue_gu"
+    ],
+    "metadata": {
+        "range": "20.0",
+        "radius": "6.0",
+        "damage": "6500.0",
+        "slow_duration_ticks": "220",
+        "slow_amplifier": "1",
+        "freeze_ticks": "160",
+        "max_frozen_ticks": "1200",
+        "cooldown_ticks": "2600",
+        "zhenyuan_base_cost": "650.0",
+        "niantou_cost": "380.0",
+        "jingli_cost": "320.0",
+        "hunpo_cost": "150.0"
+    }
+}
+

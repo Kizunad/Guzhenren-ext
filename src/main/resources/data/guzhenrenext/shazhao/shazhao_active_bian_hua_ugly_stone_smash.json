@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_ugly_stone_smash",
+    "title": "丑皮黑石崩",
+    "desc": "丑皮遮形，黑石加势。\n杀招主动，锁定视线目标，以沉重一击崩碎其形，并短暂迟缓敌身。",
+    "info": "范围: {range} | 普伤: {physical_damage} | 迟缓: {slow_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 50,
+    "required_items": [
+        "guzhenren:chou_pi_gu",
+        "guzhenren:hei_shi_gu",
+        "guzhenren:tiexuegu"
+    ],
+    "metadata": {
+        "range": "10.0",
+        "physical_damage": "6.0",
+        "slow_duration_ticks": "60",
+        "slow_amplifier": "0",
+        "cooldown_ticks": "80",
+        "zhenyuan_base_cost": "55.0",
+        "niantou_cost": "0.6",
+        "jingli_cost": "1.0",
+        "hunpo_cost": "0.08"
+    }
+}
+

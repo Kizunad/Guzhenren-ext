@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bing_xue_dao_bing_bu_han_ren",
+    "title": "冰步寒刃",
+    "desc": "冰步贴身，寒刃先至。\n杀招主动，一触即寒。",
+    "info": "范围:{range} | 伤害:{damage} | 迟滞:{slow_duration_ticks}t | 冻结:+{freeze_ticks}(上限{max_frozen_ticks}) | 冷却:{cooldown_ticks}t | 消耗:{zhenyuan_base_cost}(基础真元)+{niantou_cost}(念头)+{jingli_cost}(精力)+{hunpo_cost}(魂魄)",
+    "cost_total_niantou": 40,
+    "required_items": [
+        "guzhenren:bing_bu_gu"
+    ],
+    "metadata": {
+        "range": "10.0",
+        "damage": "18.0",
+        "slow_duration_ticks": "80",
+        "slow_amplifier": "0",
+        "freeze_ticks": "60",
+        "max_frozen_ticks": "260",
+        "cooldown_ticks": "240",
+        "zhenyuan_base_cost": "30.0",
+        "niantou_cost": "0.60",
+        "jingli_cost": "1.20",
+        "hunpo_cost": "0.30"
+    }
+}
+

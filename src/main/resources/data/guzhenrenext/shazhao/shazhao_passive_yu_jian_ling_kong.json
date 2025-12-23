@@ -1,0 +1,21 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_yu_jian_ling_kong",
+    "title": "御剑凌空",
+    "desc": "御剑而行，腾挪如风。\n杀招常驻，剑随身动，步步凌空。",
+    "info": "移速:+{move_speed_bonus} | 缓降:{slow_falling_duration_ticks}t | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 260,
+    "required_items": [
+        "guzhenren:yujianggu",
+        "guzhenren:jiansuogusizhuan",
+        "guzhenren:jianqigu"
+    ],
+    "metadata": {
+        "move_speed_bonus": "0.18",
+        "slow_falling_duration_ticks": "80",
+        "zhenyuan_base_cost_per_second": "1600.0",
+        "niantou_cost_per_second": "3.6",
+        "jingli_cost_per_second": "3.2",
+        "hunpo_cost_per_second": "2.4"
+    }
+}
+

@@ -1,0 +1,24 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_passive_jian_xin_reserve",
+    "title": "剑心蓄势",
+    "desc": "剑心既定，势自蓄成。\n杀招常驻，后劲绵长。",
+    "info": "上限:真元+{max_zhenyuan_bonus} 精力+{max_jingli_bonus} 魂魄+{max_hunpo_bonus} 念头容量+{niantou_capacity_bonus} | 真元恢复:+{zhenyuan_restore_per_second}/s | 维持:{zhenyuan_base_cost_per_second}(基础真元)/s+{niantou_cost_per_second}(念头)/s+{jingli_cost_per_second}(精力)/s+{hunpo_cost_per_second}(魂魄)/s",
+    "cost_total_niantou": 420,
+    "required_items": [
+        "guzhenren:jian_xin_gu",
+        "guzhenren:jian_qiao_gu",
+        "guzhenren:jian_feng_gu_5"
+    ],
+    "metadata": {
+        "max_zhenyuan_bonus": "200.0",
+        "max_jingli_bonus": "180.0",
+        "max_hunpo_bonus": "160.0",
+        "niantou_capacity_bonus": "240.0",
+        "zhenyuan_restore_per_second": "6.0",
+        "zhenyuan_base_cost_per_second": "2800.0",
+        "niantou_cost_per_second": "7.2",
+        "jingli_cost_per_second": "6.6",
+        "hunpo_cost_per_second": "5.4"
+    }
+}
+

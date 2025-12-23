@@ -1,0 +1,27 @@
+{
+    "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_asura_rend",
+    "title": "修罗裂杀",
+    "desc": "修罗裂空，一击断命。\n杀招主动，锁定强敌主斩，并以余威溅射周围。",
+    "info": "范围: {range} | 主伤: {primary_physical_damage} | 溅射: {splash_physical_damage} | 半径: {splash_radius} | 击退: {knockback_strength} | 虚弱: {weakness_duration_ticks}t | 真元基耗: {zhenyuan_base_cost} | 念头: {niantou_cost} | 精力: {jingli_cost} | 魂魄: {hunpo_cost} | 冷却: {cooldown_ticks}t",
+    "cost_total_niantou": 700,
+    "required_items": [
+        "guzhenren:xiuluoshigu",
+        "guzhenren:xueguishi",
+        "guzhenren:mengyanshi"
+    ],
+    "metadata": {
+        "range": "28.0",
+        "primary_physical_damage": "12000.0",
+        "splash_physical_damage": "4000.0",
+        "splash_radius": "5.0",
+        "knockback_strength": "1.0",
+        "weakness_duration_ticks": "120",
+        "weakness_amplifier": "0",
+        "cooldown_ticks": "600",
+        "zhenyuan_base_cost": "650.0",
+        "niantou_cost": "20.0",
+        "jingli_cost": "25.0",
+        "hunpo_cost": "6.0"
+    }
+}
+
