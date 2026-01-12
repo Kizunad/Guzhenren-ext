@@ -49,6 +49,50 @@ public final class SwordGrowthTuning {
      */
     public static final int EXP_GAIN_CAP = 1000;
 
+    // ==================== 道痕/流派加成 ====================
+
+    /**
+     * 剑道道痕每点提供的伤害加成比例。
+     * <p>
+     * 例如：0.01 表示每点剑道道痕提升 1% 伤害。
+     * </p>
+     */
+    public static final double DAOHEN_JIANDAO_DAMAGE_COEF = 0.01;
+
+    /**
+     * 剑道流派每点提供的伤害加成比例。
+     * <p>
+     * 例如：0.02 表示每点剑道流派提升 2% 伤害。
+     * </p>
+     */
+    public static final double LIUPAI_JIANDAO_DAMAGE_COEF = 0.02;
+
+    /**
+     * 剑道流派每点提供的经验获取加成比例。
+     * <p>
+     * 例如：0.01 表示每点剑道流派提升 1% 经验获取。
+     * </p>
+     */
+    public static final double LIUPAI_JIANDAO_EXP_COEF = 0.01;
+
+    /**
+     * 剑道道痕加成上限倍率。
+     * <p>
+     * 防止道痕过高导致伤害溢出。例如：5.0 表示最多 +500% 伤害。
+     * </p>
+     */
+    public static final double DAOHEN_DAMAGE_BONUS_CAP = 5.0;
+
+    /**
+     * 剑道流派伤害加成上限倍率。
+     */
+    public static final double LIUPAI_DAMAGE_BONUS_CAP = 10.0;
+
+    /**
+     * 剑道流派经验加成上限倍率。
+     */
+    public static final double LIUPAI_EXP_BONUS_CAP = 5.0;
+
     /**
      * 单次获取经验下限。
      */

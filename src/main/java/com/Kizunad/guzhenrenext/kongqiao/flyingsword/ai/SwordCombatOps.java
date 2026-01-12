@@ -1,5 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.LiuPaiHelper;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordConstants;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
@@ -155,10 +157,28 @@ public final class SwordCombatOps {
         // 获取有效伤害（包含品质、等级、临时修正）
         double baseDamage = attrs.getEffectiveDamage();
 
-        // TODO: Phase 3+ - 接入道痕/流派加成
-        // double jiandaoHen = DaoHenHelper.getDaoHen(owner, DaoType.JIAN_DAO);
-        // double jiandaoLiupai = LiuPaiHelper.getLiuPai(owner, LiuPaiType.JIAN_DAO);
-        // baseDamage *= (1.0 + jiandaoHen * 0.01 + jiandaoLiupai * 0.02);
+        // 道痕加成：剑道道痕每点 +1% 伤害，上限 +500%
+        double jiandaoHen = DaoHenHelper.getDaoHen(
+            owner,
+            DaoHenHelper.DaoType.JIAN_DAO
+        );
+        double daohenBonus = Math.min(
+            jiandaoHen * SwordGrowthTuning.DAOHEN_JIANDAO_DAMAGE_COEF,
+            SwordGrowthTuning.DAOHEN_DAMAGE_BONUS_CAP
+        );
+
+        // 流派加成：剑道流派每点 +2% 伤害，上限 +1000%
+        double jiandaoLiupai = LiuPaiHelper.getLiuPai(
+            owner,
+            LiuPaiHelper.LiuPaiType.JIAN_DAO
+        );
+        double liupaiBonus = Math.min(
+            jiandaoLiupai * SwordGrowthTuning.LIUPAI_JIANDAO_DAMAGE_COEF,
+            SwordGrowthTuning.LIUPAI_DAMAGE_BONUS_CAP
+        );
+
+        // 应用道痕/流派加成
+        baseDamage *= (1.0 + daohenBonus + liupaiBonus);
 
         // 速度加成（速度越快伤害越高）
         double speedRatio =
@@ -200,13 +220,24 @@ public final class SwordCombatOps {
     ) {
         FlyingSwordAttributes attrs = sword.getSwordAttributes();
 
-        // 计算经验获取
-        int expGain = SwordExpCalculator.calculateExpGain(
+        // 计算基础经验获取
+        int baseExpGain = SwordExpCalculator.calculateExpGain(
             damage,
             target,
             isKill,
             attrs.getQuality()
         );
+
+        // 流派经验加成：剑道流派每点 +1% 经验，上限 +500%
+        double jiandaoLiupai = LiuPaiHelper.getLiuPai(
+            owner,
+            LiuPaiHelper.LiuPaiType.JIAN_DAO
+        );
+        double liupaiExpBonus = Math.min(
+            jiandaoLiupai * SwordGrowthTuning.LIUPAI_JIANDAO_EXP_COEF,
+            SwordGrowthTuning.LIUPAI_EXP_BONUS_CAP
+        );
+        int expGain = (int) Math.round(baseExpGain * (1.0 + liupaiExpBonus));
 
         // 添加经验（自动升级）
         if (expGain > 0) {
