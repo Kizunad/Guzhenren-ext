@@ -185,6 +185,22 @@ public class FlyingSwordAttributes {
         return growthData.getExperience();
     }
 
+    /**
+     * 获取升到下一级所需的经验。
+     *
+     * @return 所需经验，已满级返回 0
+     */
+    public int getExpForNextLevel() {
+        int expToNext = SwordExpCalculator.calculateExpToNextLevel(
+            growthData.getLevel(),
+            growthData.getQuality()
+        );
+        if (expToNext == Integer.MAX_VALUE) {
+            return 0; // 满级
+        }
+        return expToNext;
+    }
+
     // ==================== 属性重算 ====================
 
     /**

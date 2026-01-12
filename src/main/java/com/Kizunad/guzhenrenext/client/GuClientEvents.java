@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.client.effect.BackPngTimedEffects;
 import com.Kizunad.guzhenrenext.client.gui.SkillWheelScreen;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.TweakScreen;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHudState;
 import com.Kizunad.guzhenrenext.network.PacketOpenNianTouGui;
 import com.Kizunad.guzhenrenext.network.ServerboundFlyingSwordActionPayload;
 import net.minecraft.client.Minecraft;
@@ -13,7 +14,11 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-@EventBusSubscriber(modid = GuzhenrenExt.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(
+    modid = GuzhenrenExt.MODID,
+    value = Dist.CLIENT,
+    bus = EventBusSubscriber.Bus.GAME
+)
 public final class GuClientEvents {
 
     private GuClientEvents() {}
@@ -38,7 +43,9 @@ public final class GuClientEvents {
         // 技能轮盘属于纯客户端 Screen：按住打开，松开由 Screen 内部确认。
         while (GuKeyBindings.OPEN_SKILL_WHEEL.consumeClick()) {
             if (minecraft.screen == null) {
-                minecraft.setScreen(new SkillWheelScreen(GuKeyBindings.OPEN_SKILL_WHEEL));
+                minecraft.setScreen(
+                    new SkillWheelScreen(GuKeyBindings.OPEN_SKILL_WHEEL)
+                );
             }
         }
 
@@ -97,6 +104,11 @@ public final class GuClientEvents {
                     ServerboundFlyingSwordActionPayload.Action.RESTORE_ALL
                 )
             );
+        }
+
+        // 切换飞剑 HUD 显示
+        while (GuKeyBindings.FLYING_SWORD_TOGGLE_HUD.consumeClick()) {
+            FlyingSwordHudState.toggleHud();
         }
     }
 }

@@ -7,31 +7,43 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai;
  * </p>
  */
 public enum SwordAIMode {
-
     /**
      * 环绕：围绕主人旋转飞行，不主动攻击。
      */
-    ORBIT,
+    ORBIT("环绕"),
 
     /**
      * 防御：守护主人周围，攻击进入范围的敌对目标。
      */
-    GUARD,
+    GUARD("防御"),
 
     /**
      * 狩猎：主动搜索并追击目标，范围更大、更激进。
      */
-    HUNT,
+    HUNT("狩猎"),
 
     /**
      * 悬停：在主人头顶静止悬停。
      */
-    HOVER,
+    HOVER("悬停"),
 
     /**
      * 召回：返回主人身边，到达后存入存储。
      */
-    RECALL;
+    RECALL("召回");
+
+    private final String displayName;
+
+    SwordAIMode(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * 获取显示名称。
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
 
     /**
      * 是否为战斗模式（需要目标扫描）。

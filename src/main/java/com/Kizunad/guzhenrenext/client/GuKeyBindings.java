@@ -10,7 +10,11 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import org.lwjgl.glfw.GLFW;
 
-@EventBusSubscriber(modid = GuzhenrenExt.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(
+    modid = GuzhenrenExt.MODID,
+    value = Dist.CLIENT,
+    bus = EventBusSubscriber.Bus.MOD
+)
 public final class GuKeyBindings {
 
     public static final String KEY_CATEGORY = "key.categories.guzhenrenext";
@@ -125,6 +129,20 @@ public final class GuKeyBindings {
         KEY_CATEGORY
     );
 
+    /**
+     * 切换飞剑状态 HUD 显示。
+     * <p>
+     * 默认绑定到 'H' 键（HUD）。
+     * </p>
+     */
+    public static final KeyMapping FLYING_SWORD_TOGGLE_HUD = new KeyMapping(
+        "key.guzhenrenext.flyingsword.toggle_hud",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_H,
+        KEY_CATEGORY
+    );
+
     private GuKeyBindings() {}
 
     @SubscribeEvent
@@ -139,5 +157,6 @@ public final class GuKeyBindings {
         event.register(FLYING_SWORD_RESTORE_ONE);
         event.register(FLYING_SWORD_RECALL_ALL);
         event.register(FLYING_SWORD_RESTORE_ALL);
+        event.register(FLYING_SWORD_TOGGLE_HUD);
     }
 }
