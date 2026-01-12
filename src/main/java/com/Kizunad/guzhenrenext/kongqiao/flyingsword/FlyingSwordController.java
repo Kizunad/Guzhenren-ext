@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai.SwordAIMode;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordSelectionAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.effects.FlyingSwordEffects;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
@@ -65,6 +67,10 @@ public final class FlyingSwordController {
         SwordAIMode current = sword.getAIModeEnum();
         SwordAIMode next = current.cycleNext();
         sword.setAIMode(next);
+
+        // 播放模式切换特效
+        FlyingSwordEffects.playModeSwitchEffect(sword);
+
         return next;
     }
 
@@ -74,6 +80,12 @@ public final class FlyingSwordController {
         }
         // Phase 2：一律允许召回；后续再区分"不可召回的主动技能飞剑"。
         sword.setAIMode(SwordAIMode.RECALL);
+
+        // 播放召回特效
+        LivingEntity owner = sword.getOwner();
+        if (owner instanceof Player player) {
+            FlyingSwordEffects.playRecallEffect(sword, player);
+        }
     }
 
     public static int recallAll(ServerLevel level, Player owner) {

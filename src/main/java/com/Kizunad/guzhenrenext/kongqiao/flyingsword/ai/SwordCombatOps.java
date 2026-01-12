@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.LiuPaiHelper;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordConstants;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.effects.FlyingSwordEffects;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordExpCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthData;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthTuning;
@@ -199,9 +200,9 @@ public final class SwordCombatOps {
      * 处理：
      * <ul>
      *     <li>经验获取</li>
-     *     <li>粒子效果（TODO）</li>
-     *     <li>音效（TODO）</li>
-     *     <li>统计记录（TODO）</li>
+     *     <li>粒子效果</li>
+     *     <li>音效</li>
+     *     <li>击杀特效</li>
      * </ul>
      * </p>
      *
@@ -219,6 +220,14 @@ public final class SwordCombatOps {
         boolean isKill
     ) {
         FlyingSwordAttributes attrs = sword.getSwordAttributes();
+
+        // 播放攻击命中特效
+        FlyingSwordEffects.playHitEffect(sword, target, damage);
+
+        // 如果击杀，播放击杀特效
+        if (isKill) {
+            FlyingSwordEffects.playKillEffect(sword, target);
+        }
 
         // 计算基础经验获取
         int baseExpGain = SwordExpCalculator.calculateExpGain(
@@ -243,17 +252,11 @@ public final class SwordCombatOps {
         if (expGain > 0) {
             SwordGrowthData.ExpAddResult result = attrs.addExperience(expGain);
 
-            // 如果升级了，可以播放升级效果
+            // 如果升级了，播放升级效果
             if (result.levelsGained > 0) {
                 onLevelUp(sword, owner, result);
             }
         }
-
-        // TODO: 后续添加
-        // - 攻击音效
-        // - 攻击粒子
-        // - 击杀特效
-        // - 统计记录
     }
 
     /**
@@ -268,12 +271,14 @@ public final class SwordCombatOps {
         LivingEntity owner,
         SwordGrowthData.ExpAddResult result
     ) {
-        // TODO: 升级特效
-        // - 播放升级音效
-        // - 播放升级粒子
-        // - 发送升级消息给玩家
+        // 播放升级特效（粒子 + 音效）
+        FlyingSwordEffects.playLevelUpEffect(
+            sword,
+            result.levelsGained,
+            result.newLevel
+        );
 
-        // 临时日志（调试用）
+        // 发送升级消息给玩家
         if (owner instanceof net.minecraft.world.entity.player.Player player) {
             FlyingSwordAttributes attrs = sword.getSwordAttributes();
             player.displayClientMessage(

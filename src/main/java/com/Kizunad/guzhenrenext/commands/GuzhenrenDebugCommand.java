@@ -15,6 +15,7 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordSpawner;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.effects.FlyingSwordEffects;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordExpCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthData;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.quality.SwordQuality;
@@ -1006,6 +1007,13 @@ public class GuzhenrenDebugCommand {
                 attrs.tryBreakthrough();
 
             if (result.success) {
+                // 播放突破特效
+                FlyingSwordEffects.playBreakthroughEffect(
+                    sword,
+                    oldQuality,
+                    result.newQuality
+                );
+
                 context
                     .getSource()
                     .sendSuccess(

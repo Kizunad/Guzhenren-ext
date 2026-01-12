@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword;
 
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai.SwordAIMode;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.effects.FlyingSwordEffects;
 import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -50,6 +51,9 @@ public final class FlyingSwordSpawner {
         if (!level.addFreshEntity(sword)) {
             return null;
         }
+
+        // 播放生成特效
+        FlyingSwordEffects.playSpawnEffect(sword);
 
         return sword;
     }
@@ -106,6 +110,9 @@ public final class FlyingSwordSpawner {
         if (!level.addFreshEntity(sword)) {
             return null;
         }
+
+        // 播放生成特效
+        FlyingSwordEffects.playSpawnEffect(sword);
 
         return sword;
     }
