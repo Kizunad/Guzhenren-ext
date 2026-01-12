@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.client.effect.BackPngTimedEffects;
 import com.Kizunad.guzhenrenext.client.gui.SkillWheelScreen;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.TweakScreen;
 import com.Kizunad.guzhenrenext.network.PacketOpenNianTouGui;
+import com.Kizunad.guzhenrenext.network.ServerboundFlyingSwordActionPayload;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -26,6 +27,8 @@ public final class GuClientEvents {
 
         BackPngTimedEffects.tick();
 
+        // ===== 念头/轮盘/调整面板 =====
+
         // 检查按键是否按下，并消耗点击（防止连续触发）
         while (GuKeyBindings.OPEN_NIANTOU_GUI.consumeClick()) {
             // 发送网络包请求打开 GUI
@@ -44,6 +47,56 @@ public final class GuClientEvents {
             if (minecraft.screen == null) {
                 minecraft.setScreen(new TweakScreen());
             }
+        }
+
+        // ===== 飞剑（Phase 2 最小输入） =====
+
+        while (GuKeyBindings.FLYING_SWORD_SELECT_NEAREST.consumeClick()) {
+            PacketDistributor.sendToServer(
+                new ServerboundFlyingSwordActionPayload(
+                    ServerboundFlyingSwordActionPayload.Action.SELECT_NEAREST
+                )
+            );
+        }
+
+        while (GuKeyBindings.FLYING_SWORD_CYCLE_MODE.consumeClick()) {
+            PacketDistributor.sendToServer(
+                new ServerboundFlyingSwordActionPayload(
+                    ServerboundFlyingSwordActionPayload.Action.CYCLE_MODE_NEAREST
+                )
+            );
+        }
+
+        while (GuKeyBindings.FLYING_SWORD_RECALL_NEAREST.consumeClick()) {
+            PacketDistributor.sendToServer(
+                new ServerboundFlyingSwordActionPayload(
+                    ServerboundFlyingSwordActionPayload.Action.RECALL_NEAREST
+                )
+            );
+        }
+
+        while (GuKeyBindings.FLYING_SWORD_RECALL_ALL.consumeClick()) {
+            PacketDistributor.sendToServer(
+                new ServerboundFlyingSwordActionPayload(
+                    ServerboundFlyingSwordActionPayload.Action.RECALL_ALL
+                )
+            );
+        }
+
+        while (GuKeyBindings.FLYING_SWORD_RESTORE_ONE.consumeClick()) {
+            PacketDistributor.sendToServer(
+                new ServerboundFlyingSwordActionPayload(
+                    ServerboundFlyingSwordActionPayload.Action.RESTORE_ONE
+                )
+            );
+        }
+
+        while (GuKeyBindings.FLYING_SWORD_RESTORE_ALL.consumeClick()) {
+            PacketDistributor.sendToServer(
+                new ServerboundFlyingSwordActionPayload(
+                    ServerboundFlyingSwordActionPayload.Action.RESTORE_ALL
+                )
+            );
         }
     }
 }

@@ -32,6 +32,7 @@ public class GuzhenrenExt {
         NpcKongqiaoInventoryBridge.register();
         KongqiaoMenus.register(modEventBus);
         KongqiaoAttachments.register(modEventBus);
+        com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntities.register(modEventBus);
         GuzhenrenExtNetworking.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.logic.GuModEffects.registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.ShazhaoModEffects.registerAll();

@@ -14,7 +14,9 @@ import org.lwjgl.glfw.GLFW;
 public final class GuKeyBindings {
 
     public static final String KEY_CATEGORY = "key.categories.guzhenrenext";
-    
+
+    // ===== 念头/轮盘/调整面板 =====
+
     // 定义快捷键：默认绑定到 'N' 键 (NianTou)
     public static final KeyMapping OPEN_NIANTOU_GUI = new KeyMapping(
         "key.guzhenrenext.open_niantou",
@@ -52,6 +54,77 @@ public final class GuKeyBindings {
         KEY_CATEGORY
     );
 
+    // ===== 飞剑（Phase 2 最小输入） =====
+
+    /**
+     * 选择最近飞剑。
+     * <p>
+     * 说明：Phase 2 暂时用“最近目标”完成闭环；后续可以接入 UI/轮盘/锁定系统。
+     * </p>
+     */
+    public static final KeyMapping FLYING_SWORD_SELECT_NEAREST = new KeyMapping(
+        "key.guzhenrenext.flyingsword.select_nearest",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_Z,
+        KEY_CATEGORY
+    );
+
+    /**
+     * 切换最近/选中飞剑模式。
+     */
+    public static final KeyMapping FLYING_SWORD_CYCLE_MODE = new KeyMapping(
+        "key.guzhenrenext.flyingsword.cycle_mode",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_X,
+        KEY_CATEGORY
+    );
+
+    /**
+     * 召回最近/选中飞剑。
+     */
+    public static final KeyMapping FLYING_SWORD_RECALL_NEAREST = new KeyMapping(
+        "key.guzhenrenext.flyingsword.recall_nearest",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_C,
+        KEY_CATEGORY
+    );
+
+    /**
+     * 恢复一把已召回飞剑。
+     */
+    public static final KeyMapping FLYING_SWORD_RESTORE_ONE = new KeyMapping(
+        "key.guzhenrenext.flyingsword.restore_one",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_V,
+        KEY_CATEGORY
+    );
+
+    /**
+     * 召回全部飞剑（默认不绑定，避免误触）。
+     */
+    public static final KeyMapping FLYING_SWORD_RECALL_ALL = new KeyMapping(
+        "key.guzhenrenext.flyingsword.recall_all",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_UNKNOWN,
+        KEY_CATEGORY
+    );
+
+    /**
+     * 恢复全部飞剑（默认不绑定，避免误触）。
+     */
+    public static final KeyMapping FLYING_SWORD_RESTORE_ALL = new KeyMapping(
+        "key.guzhenrenext.flyingsword.restore_all",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_UNKNOWN,
+        KEY_CATEGORY
+    );
+
     private GuKeyBindings() {}
 
     @SubscribeEvent
@@ -59,5 +132,12 @@ public final class GuKeyBindings {
         event.register(OPEN_NIANTOU_GUI);
         event.register(OPEN_SKILL_WHEEL);
         event.register(OPEN_TWEAK_UI);
+
+        event.register(FLYING_SWORD_SELECT_NEAREST);
+        event.register(FLYING_SWORD_CYCLE_MODE);
+        event.register(FLYING_SWORD_RECALL_NEAREST);
+        event.register(FLYING_SWORD_RESTORE_ONE);
+        event.register(FLYING_SWORD_RECALL_ALL);
+        event.register(FLYING_SWORD_RESTORE_ALL);
     }
 }

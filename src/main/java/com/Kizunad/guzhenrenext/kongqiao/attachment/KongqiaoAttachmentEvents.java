@@ -63,6 +63,16 @@ public final class KongqiaoAttachmentEvents {
                 new NianTouUnlocks()
             );
         }
+
+        // 飞剑系统附件：仅对玩家初始化。
+        if (entity instanceof Player) {
+            KongqiaoAttachments.getFlyingSwordStorage(entity);
+            KongqiaoAttachments.getFlyingSwordSelection(entity);
+            KongqiaoAttachments.getFlyingSwordCooldowns(entity);
+            KongqiaoAttachments.getFlyingSwordPreferences(entity);
+            KongqiaoAttachments.getFlyingSwordRuntime(entity);
+            KongqiaoAttachments.getFlyingSwordState(entity);
+        }
     }
 
     private static void copyKongqiaoData(Player original, Player clone) {

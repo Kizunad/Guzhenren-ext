@@ -5,6 +5,8 @@ import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncKongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncTweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.network.ServerboundTweakConfigUpdatePayload;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
+import com.Kizunad.guzhenrenext.kongqiao.domain.network.ClientboundDomainRemovePayload;
+import com.Kizunad.guzhenrenext.kongqiao.domain.network.ClientboundDomainSyncPayload;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -51,6 +53,11 @@ public final class GuzhenrenExtNetworking {
             ServerboundLingHunGuDoubleJumpPayload.STREAM_CODEC,
             ServerboundLingHunGuDoubleJumpPayload::handle
         );
+        registrar.playToServer(
+            ServerboundFlyingSwordActionPayload.TYPE,
+            ServerboundFlyingSwordActionPayload.STREAM_CODEC,
+            ServerboundFlyingSwordActionPayload::handle
+        );
         registrar.playToClient(
             ClientboundKongqiaoSyncPayload.TYPE,
             ClientboundKongqiaoSyncPayload.STREAM_CODEC,
@@ -77,6 +84,16 @@ public final class GuzhenrenExtNetworking {
             ClientboundBackPngEffectPayload.TYPE,
             ClientboundBackPngEffectPayload.STREAM_CODEC,
             ClientboundBackPngEffectPayload::handle
+        );
+        registrar.playToClient(
+            ClientboundDomainSyncPayload.TYPE,
+            ClientboundDomainSyncPayload.STREAM_CODEC,
+            ClientboundDomainSyncPayload::handle
+        );
+        registrar.playToClient(
+            ClientboundDomainRemovePayload.TYPE,
+            ClientboundDomainRemovePayload.STREAM_CODEC,
+            ClientboundDomainRemovePayload::handle
         );
         registrar.playToClient(
             ClientboundLingHunGuIntuitionPayload.TYPE,

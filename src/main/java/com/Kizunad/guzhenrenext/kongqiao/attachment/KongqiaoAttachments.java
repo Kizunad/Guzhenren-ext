@@ -32,6 +32,89 @@ public final class KongqiaoAttachments {
             () -> AttachmentType.serializable(NianTouUnlocks::new).build()
         );
 
+    // ===== 飞剑系统（独立附件，不写入 KongqiaoData） =====
+
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment>
+    > FLYING_SWORD_STORAGE =
+        ATTACHMENT_TYPES.register(
+            "flying_sword_storage",
+            () ->
+                AttachmentType.serializable(
+                        com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment::new
+                    )
+                    .copyOnDeath()
+                    .build()
+        );
+
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordSelectionAttachment>
+    > FLYING_SWORD_SELECTION =
+        ATTACHMENT_TYPES.register(
+            "flying_sword_selection",
+            () ->
+                AttachmentType.serializable(
+                        com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordSelectionAttachment::new
+                    )
+                    .copyOnDeath()
+                    .build()
+        );
+
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordCooldownAttachment>
+    > FLYING_SWORD_COOLDOWNS =
+        ATTACHMENT_TYPES.register(
+            "flying_sword_cooldowns",
+            () ->
+                AttachmentType.serializable(
+                        com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordCooldownAttachment::new
+                    )
+                    .build()
+        );
+
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordPreferencesAttachment>
+    > FLYING_SWORD_PREFERENCES =
+        ATTACHMENT_TYPES.register(
+            "flying_sword_preferences",
+            () ->
+                AttachmentType.serializable(
+                        com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordPreferencesAttachment::new
+                    )
+                    .copyOnDeath()
+                    .build()
+        );
+
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordRuntimeAttachment>
+    > FLYING_SWORD_RUNTIME =
+        ATTACHMENT_TYPES.register(
+            "flying_sword_runtime",
+            () ->
+                AttachmentType.serializable(
+                        com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordRuntimeAttachment::new
+                    )
+                    .build()
+        );
+
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment>
+    > FLYING_SWORD_STATE =
+        ATTACHMENT_TYPES.register(
+            "flying_sword_state",
+            () ->
+                AttachmentType.serializable(
+                        com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment::new
+                    )
+                    .build()
+        );
+
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<ActivePassives>> ACTIVE_PASSIVES =
         ATTACHMENT_TYPES.register(
             "active_passives",
@@ -69,6 +152,96 @@ public final class KongqiaoAttachments {
             return null;
         }
         return entity.getData(NIANTOU_UNLOCKS.get());
+    }
+
+    public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+        .FlyingSwordStorageAttachment getFlyingSwordStorage(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(FLYING_SWORD_STORAGE.get())) {
+            entity.setData(
+                FLYING_SWORD_STORAGE.get(),
+                new com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+                    .FlyingSwordStorageAttachment()
+            );
+        }
+        return entity.getData(FLYING_SWORD_STORAGE.get());
+    }
+
+    public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+        .FlyingSwordSelectionAttachment getFlyingSwordSelection(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(FLYING_SWORD_SELECTION.get())) {
+            entity.setData(
+                FLYING_SWORD_SELECTION.get(),
+                new com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+                    .FlyingSwordSelectionAttachment()
+            );
+        }
+        return entity.getData(FLYING_SWORD_SELECTION.get());
+    }
+
+    public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+        .FlyingSwordCooldownAttachment getFlyingSwordCooldowns(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(FLYING_SWORD_COOLDOWNS.get())) {
+            entity.setData(
+                FLYING_SWORD_COOLDOWNS.get(),
+                new com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+                    .FlyingSwordCooldownAttachment()
+            );
+        }
+        return entity.getData(FLYING_SWORD_COOLDOWNS.get());
+    }
+
+    public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+        .FlyingSwordPreferencesAttachment getFlyingSwordPreferences(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(FLYING_SWORD_PREFERENCES.get())) {
+            entity.setData(
+                FLYING_SWORD_PREFERENCES.get(),
+                new com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+                    .FlyingSwordPreferencesAttachment()
+            );
+        }
+        return entity.getData(FLYING_SWORD_PREFERENCES.get());
+    }
+
+    public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+        .FlyingSwordRuntimeAttachment getFlyingSwordRuntime(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(FLYING_SWORD_RUNTIME.get())) {
+            entity.setData(
+                FLYING_SWORD_RUNTIME.get(),
+                new com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+                    .FlyingSwordRuntimeAttachment()
+            );
+        }
+        return entity.getData(FLYING_SWORD_RUNTIME.get());
+    }
+
+    public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+        .FlyingSwordStateAttachment getFlyingSwordState(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(FLYING_SWORD_STATE.get())) {
+            entity.setData(
+                FLYING_SWORD_STATE.get(),
+                new com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment
+                    .FlyingSwordStateAttachment()
+            );
+        }
+        return entity.getData(FLYING_SWORD_STATE.get());
     }
 
     public static ActivePassives getActivePassives(Entity entity) {
