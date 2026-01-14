@@ -172,4 +172,30 @@ public final class KongqiaoService {
         );
         owner.markKongqiaoDirty();
     }
+
+    /**
+     * 打开飞剑培养界面。
+     */
+    public static void openFlyingSwordForgeMenu(ServerPlayer player) {
+        if (player.level().isClientSide()) {
+            return;
+        }
+        MenuProvider provider = new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.translatable("menu.guzhenrenext.flying_sword_forge");
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(
+                int containerId,
+                Inventory playerInventory,
+                Player playerEntity
+            ) {
+                return new com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge
+                    .FlyingSwordForgeMenu(containerId, playerInventory);
+            }
+        };
+        player.openMenu(provider);
+    }
 }

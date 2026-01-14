@@ -65,6 +65,9 @@ public record ServerboundKongqiaoActionPayload(Action action)
                         serverPlayer,
                         owner
                     );
+                case OPEN_FORGE -> KongqiaoService.openFlyingSwordForgeMenu(
+                        serverPlayer
+                    );
                 default -> {
                 }
             }
@@ -77,5 +80,6 @@ public record ServerboundKongqiaoActionPayload(Action action)
         OPEN_FEED,
         EXPAND,
         SWAP_ATTACK,
+        OPEN_FORGE,
     }
 }

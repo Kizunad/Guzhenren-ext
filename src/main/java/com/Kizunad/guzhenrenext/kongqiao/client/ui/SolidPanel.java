@@ -8,13 +8,13 @@ import java.util.Objects;
 /**
  * 统一的矩形背景面板，提供与 TinyUI 主题一致的填充与描边，用于还原 drawio 布局中的容器轮廓。
  */
-final class SolidPanel extends UIElement {
+public final class SolidPanel extends UIElement {
 
     private static final int BORDER = 1;
 
     private final Theme theme;
 
-    SolidPanel(final Theme theme) {
+    public SolidPanel(final Theme theme) {
         this.theme = Objects.requireNonNull(theme, "theme");
     }
 

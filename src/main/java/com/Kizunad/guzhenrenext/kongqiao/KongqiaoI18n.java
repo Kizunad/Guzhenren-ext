@@ -46,6 +46,13 @@ public final class KongqiaoI18n {
     public static final String NIANTOU_COST_LABEL =
         "screen.guzhenrenext.niantou.cost_label";
 
+    public static final String FORGE_TITLE =
+        "screen.guzhenrenext.forge.title";
+    public static final String FORGE_BUTTON_CLAIM =
+        "screen.guzhenrenext.forge.button.claim";
+    public static final String FORGE_BUTTON_CANCEL =
+        "screen.guzhenrenext.forge.button.cancel";
+
     private KongqiaoI18n() {}
 
     /**

@@ -37,6 +37,10 @@ public final class KongqiaoClientEvents {
             KongqiaoMenus.NIANTOU.get(),
             com.Kizunad.guzhenrenext.kongqiao.client.ui.NianTouScreen::new
         );
+        event.register(
+            KongqiaoMenus.FLYING_SWORD_FORGE.get(),
+            com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge.FlyingSwordForgeScreen::new
+        );
     }
 
     @SubscribeEvent

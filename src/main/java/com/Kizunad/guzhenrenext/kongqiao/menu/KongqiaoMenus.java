@@ -46,6 +46,15 @@ public final class KongqiaoMenus {
         IMenuTypeExtension.create(NianTouMenu::fromNetwork)
     );
 
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge.FlyingSwordForgeMenu>
+    > FLYING_SWORD_FORGE = MENUS.register("flying_sword_forge", () ->
+        IMenuTypeExtension.create(
+            com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge.FlyingSwordForgeMenu::fromNetwork
+        )
+    );
+
     public static void register(IEventBus bus) {
         MENUS.register(bus);
     }
