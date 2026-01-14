@@ -279,6 +279,37 @@ public final class SwordGrowthTuning {
     /** 临时修正最小值 */
     public static final double MULTIPLIER_MIN = 0.1;
 
+    public static final int IMPRINT_TIER_1_THRESHOLD = 10;
+    public static final int IMPRINT_TIER_2_THRESHOLD = 25;
+    public static final int IMPRINT_TIER_3_THRESHOLD = 45;
+    public static final int IMPRINT_TIER_4_THRESHOLD = 70;
+    public static final int IMPRINT_TIER_CAP = 4;
+
+    public static final double IMPRINT_MAIN_DAMAGE_SQRT_COEF = 0.06;
+    public static final double IMPRINT_MAIN_DAMAGE_BONUS_CAP = 0.8;
+
+    public static final double IMPRINT_SUB_DAMAGE_SQRT_COEF = 0.03;
+    public static final double IMPRINT_SUB_DAMAGE_BONUS_CAP = 0.3;
+
+    public static final double IMPRINT_SUB_SPEED_SQRT_COEF = 0.025;
+    public static final double IMPRINT_SUB_SPEED_BONUS_CAP = 0.25;
+
+    public static final double IMPRINT_PROC_BASE_CHANCE = 0.08;
+    public static final double IMPRINT_PROC_CHANCE_PER_TIER = 0.01;
+    public static final double IMPRINT_PROC_CHANCE_CAP = 0.25;
+
+    public static final int IMPRINT_PROC_BASE_COOLDOWN_TICKS = 40;
+    public static final int IMPRINT_PROC_COOLDOWN_REDUCTION_PER_TIER = 5;
+    public static final int IMPRINT_PROC_MIN_COOLDOWN_TICKS = 10;
+
+    public static final int IMPRINT_YANDAO_BASE_BURN_SECONDS = 2;
+
+    public static final double IMPRINT_JIANDAO_BASE_BONUS_DAMAGE_MULTIPLIER = 0.5;
+    public static final double IMPRINT_JIANDAO_BONUS_DAMAGE_PER_TIER = 0.2;
+
+    public static final double IMPRINT_LEIDAO_CHAIN_DAMAGE_RATIO = 0.25;
+    public static final double IMPRINT_LEIDAO_CHAIN_RANGE = 6.0;
+
     /** 初始速度相对最大速度的上限比例 */
     public static final double SPEED_BASE_TO_MAX_RATIO = 0.8;
 

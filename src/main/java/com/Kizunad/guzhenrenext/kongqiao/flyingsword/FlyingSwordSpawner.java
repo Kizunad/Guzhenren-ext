@@ -87,9 +87,17 @@ public final class FlyingSwordSpawner {
         sword.setOwner(owner);
         sword.setAIMode(SwordAIMode.ORBIT);
 
-        // 属性/耐久/经验：Phase 2 最小恢复
         try {
-            sword.readAttributesFromTag(recalled.attributes);
+            if (recalled.attributes != null && !recalled.attributes.isEmpty()) {
+                sword.readAttributesFromTag(recalled.attributes);
+            } else {
+                var attrs = sword.getSwordAttributes();
+                attrs.getGrowthData().setQualityRaw(recalled.quality);
+                attrs.getGrowthData().setLevelRaw(recalled.level);
+                attrs.getGrowthData().setExperienceRaw(recalled.experience);
+                attrs.recalculateFromGrowth();
+                attrs.durability = recalled.durability;
+            }
         } catch (Exception ignored) {}
 
         // 展示物品：尝试从 NBT 恢复。

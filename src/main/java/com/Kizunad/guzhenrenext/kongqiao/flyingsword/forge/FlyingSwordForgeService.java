@@ -185,39 +185,75 @@ public final class FlyingSwordForgeService {
 
     private static String daoTagToKey(String daoTag) {
         return switch (daoTag) {
-            case "huo_dao" -> DaoHenHelper.DaoType.HUO_DAO.name().toLowerCase();
-            case "leidao" -> DaoHenHelper.DaoType.LEI_DAO.name().toLowerCase();
-            case "jiandao" -> DaoHenHelper.DaoType.JIAN_DAO.name().toLowerCase();
-            case "ren_dao" -> DaoHenHelper.DaoType.REN_DAO.name().toLowerCase();
-            case "xue_dao" -> DaoHenHelper.DaoType.XUE_DAO.name().toLowerCase();
-            case "shui_dao" -> DaoHenHelper.DaoType.SHUI_DAO.name().toLowerCase();
-            case "du_dao" -> DaoHenHelper.DaoType.DU_DAO.name().toLowerCase();
-            case "bing_xue_dao" -> DaoHenHelper.DaoType.BING_XUE_DAO.name().toLowerCase();
-            case "feng_dao" -> DaoHenHelper.DaoType.FENG_DAO.name().toLowerCase();
-            case "tu_dao" -> DaoHenHelper.DaoType.TU_DAO.name().toLowerCase();
-            case "mu_dao" -> DaoHenHelper.DaoType.MU_DAO.name().toLowerCase();
-            case "jin_dao" -> DaoHenHelper.DaoType.JIN_DAO.name().toLowerCase();
-            case "hun_dao" -> DaoHenHelper.DaoType.HUN_DAO.name().toLowerCase();
-            case "gu_dao" -> DaoHenHelper.DaoType.GU_DAO.name().toLowerCase();
-            case "tian_dao" -> DaoHenHelper.DaoType.TIAN_DAO.name().toLowerCase();
-            case "nu_dao" -> DaoHenHelper.DaoType.NU_DAO.name().toLowerCase();
-            case "tou_dao" -> DaoHenHelper.DaoType.TOU_DAO.name().toLowerCase();
-            case "xin_dao" -> DaoHenHelper.DaoType.XIN_DAO.name().toLowerCase();
-            case "ying_dao" -> DaoHenHelper.DaoType.YING_DAO.name().toLowerCase();
-            case "xing_dao" -> DaoHenHelper.DaoType.XING_DAO.name().toLowerCase();
-            case "yue_dao" -> DaoHenHelper.DaoType.YUE_DAO.name().toLowerCase();
-            case "yundao" -> DaoHenHelper.DaoType.YUN_DAO.name().toLowerCase();
-            case "zhi_dao" -> DaoHenHelper.DaoType.ZHI_DAO.name().toLowerCase();
-            case "zhou_dao" -> DaoHenHelper.DaoType.ZHOU_DAO.name().toLowerCase();
-            case "lv_dao" -> DaoHenHelper.DaoType.LV_DAO.name().toLowerCase();
-            case "yu_dao" -> DaoHenHelper.DaoType.YU_DAO.name().toLowerCase();
-            case "shi_dao" -> DaoHenHelper.DaoType.SHI_DAO.name().toLowerCase();
-            case "guang_dao" -> DaoHenHelper.DaoType.GUANG_DAO.name().toLowerCase();
-            case "daodao" -> DaoHenHelper.DaoType.DAO_DAO.name().toLowerCase();
-            case "lian_dao" -> DaoHenHelper.DaoType.LIAN_DAO.name().toLowerCase();
-            case "bianha_dao" -> DaoHenHelper.DaoType.BIAN_HUA_DAO.name().toLowerCase();
+            case "huo_dao" -> DaoHenHelper.DaoType.HUO_DAO.getKey();
+            case "leidao" -> DaoHenHelper.DaoType.LEI_DAO.getKey();
+            case "jiandao" -> DaoHenHelper.DaoType.JIAN_DAO.getKey();
+            case "ren_dao" -> DaoHenHelper.DaoType.REN_DAO.getKey();
+            case "xue_dao" -> DaoHenHelper.DaoType.XUE_DAO.getKey();
+            case "shui_dao" -> DaoHenHelper.DaoType.SHUI_DAO.getKey();
+            case "du_dao" -> DaoHenHelper.DaoType.DU_DAO.getKey();
+            case "bing_xue_dao" -> DaoHenHelper.DaoType.BING_XUE_DAO.getKey();
+            case "feng_dao" -> DaoHenHelper.DaoType.FENG_DAO.getKey();
+            case "tu_dao" -> DaoHenHelper.DaoType.TU_DAO.getKey();
+            case "mu_dao" -> DaoHenHelper.DaoType.MU_DAO.getKey();
+            case "jin_dao" -> DaoHenHelper.DaoType.JIN_DAO.getKey();
+            case "hun_dao" -> DaoHenHelper.DaoType.HUN_DAO.getKey();
+            case "gu_dao" -> DaoHenHelper.DaoType.GU_DAO.getKey();
+            case "tian_dao" -> DaoHenHelper.DaoType.TIAN_DAO.getKey();
+            case "nu_dao" -> DaoHenHelper.DaoType.NU_DAO.getKey();
+            case "tou_dao" -> DaoHenHelper.DaoType.TOU_DAO.getKey();
+            case "xin_dao" -> DaoHenHelper.DaoType.XIN_DAO.getKey();
+            case "ying_dao" -> DaoHenHelper.DaoType.YING_DAO.getKey();
+            case "xing_dao" -> DaoHenHelper.DaoType.XING_DAO.getKey();
+            case "yue_dao" -> DaoHenHelper.DaoType.YUE_DAO.getKey();
+            case "yundao" -> DaoHenHelper.DaoType.YUN_DAO.getKey();
+            case "zhi_dao" -> DaoHenHelper.DaoType.ZHI_DAO.getKey();
+            case "zhou_dao" -> DaoHenHelper.DaoType.ZHOU_DAO.getKey();
+            case "lv_dao" -> DaoHenHelper.DaoType.LV_DAO.getKey();
+            case "yu_dao" -> DaoHenHelper.DaoType.YU_DAO.getKey();
+            case "shi_dao" -> DaoHenHelper.DaoType.SHI_DAO.getKey();
+            case "guang_dao" -> DaoHenHelper.DaoType.GUANG_DAO.getKey();
+            case "daodao" -> DaoHenHelper.DaoType.DAO_DAO.getKey();
+            case "lian_dao" -> DaoHenHelper.DaoType.LIAN_DAO.getKey();
+            case "bianha_dao" -> DaoHenHelper.DaoType.BIAN_HUA_DAO.getKey();
             default -> daoTag.replace("_", "");
         };
+    }
+
+    private static final int QUALITY_TIER_SPIRIT_THRESHOLD = 10;
+    private static final int QUALITY_TIER_MYSTIC_THRESHOLD = 20;
+    private static final int QUALITY_TIER_EARTH_THRESHOLD = 35;
+    private static final int QUALITY_TIER_HEAVEN_THRESHOLD = 50;
+    private static final int QUALITY_TIER_KING_THRESHOLD = 70;
+
+    private static SwordQuality computeQualityFromDaoMarks(
+        Map<String, Integer> marks
+    ) {
+        int total = 0;
+        if (marks != null) {
+            for (Integer v : marks.values()) {
+                if (v != null && v > 0) {
+                    total += v;
+                }
+            }
+        }
+
+        if (total < QUALITY_TIER_SPIRIT_THRESHOLD) {
+            return SwordQuality.COMMON;
+        }
+        if (total < QUALITY_TIER_MYSTIC_THRESHOLD) {
+            return SwordQuality.SPIRIT;
+        }
+        if (total < QUALITY_TIER_EARTH_THRESHOLD) {
+            return SwordQuality.MYSTIC;
+        }
+        if (total < QUALITY_TIER_HEAVEN_THRESHOLD) {
+            return SwordQuality.EARTH;
+        }
+        if (total < QUALITY_TIER_KING_THRESHOLD) {
+            return SwordQuality.HEAVEN;
+        }
+        return SwordQuality.KING;
     }
 
     public static boolean claim(ServerPlayer player) {
@@ -239,18 +275,19 @@ public final class FlyingSwordForgeService {
             new FlyingSwordStorageAttachment.RecalledSword();
 
         recalled.displayItem = forge.getBaseSwordItem().copy();
-        recalled.quality = SwordQuality.COMMON;
-        recalled.level = 1;
-        recalled.experience = 0;
-        recalled.durability = 1.0f;
 
-        CompoundTag attributesTag = new CompoundTag();
-        CompoundTag daoMarksTag = new CompoundTag();
-        for (Map.Entry<String, Integer> entry : forge.getDaoMarks().entrySet()) {
-            daoMarksTag.putInt(entry.getKey(), entry.getValue());
-        }
-        attributesTag.put("DaoMarks", daoMarksTag);
-        recalled.attributes = attributesTag;
+        com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes attrs =
+            new com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes(
+                computeQualityFromDaoMarks(forge.getDaoMarks())
+            );
+        attrs.getImprint().setMarks(forge.getDaoMarks());
+        attrs.fullRestoreDurability();
+
+        recalled.attributes = attrs.toNBT();
+        recalled.quality = attrs.getQuality();
+        recalled.level = attrs.getLevel();
+        recalled.experience = attrs.getExperience();
+        recalled.durability = (float) attrs.durability;
 
         boolean success = storage.recallSword(recalled);
         if (!success) {

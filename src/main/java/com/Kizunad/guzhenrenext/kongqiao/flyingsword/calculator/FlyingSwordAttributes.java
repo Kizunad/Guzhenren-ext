@@ -41,6 +41,7 @@ public class FlyingSwordAttributes {
     private static final String TAG_DAMAGE = "Damage";
     private static final String TAG_ATTACK_COOLDOWN = "AttackCooldown";
     private static final String TAG_MAX_DURABILITY = "MaxDurability";
+    private static final String TAG_IMPRINT = "Imprint";
 
     // ==================== 默认值（凡品1级） ====================
 
@@ -100,7 +101,14 @@ public class FlyingSwordAttributes {
     /** 伤害临时倍率 */
     private transient double damageMultiplier = 1.0;
 
+    private final com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprint imprint =
+        new com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprint();
+
     // ==================== 构造 ====================
+
+    public com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprint getImprint() {
+        return imprint;
+    }
 
     /**
      * 创建默认属性（凡品1级）。
@@ -427,6 +435,10 @@ public class FlyingSwordAttributes {
         tag.putDouble(TAG_MAX_DURABILITY, maxDurability);
         tag.putInt(TAG_ATTACK_COOLDOWN, attackCooldown);
 
+        if (!imprint.isEmpty()) {
+            tag.put(TAG_IMPRINT, imprint.toNBT());
+        }
+
         return tag;
     }
 
@@ -451,16 +463,21 @@ public class FlyingSwordAttributes {
 
         FlyingSwordAttributes attrs = new FlyingSwordAttributes(growthData);
 
-        // 读取当前耐久
-        if (tag.contains(TAG_DURABILITY)) {
-            attrs.durability = tag.getDouble(TAG_DURABILITY);
+         // 读取当前耐久
+         if (tag.contains(TAG_DURABILITY)) {
+             attrs.durability = tag.getDouble(TAG_DURABILITY);
+         }
+ 
+        if (tag.contains(TAG_IMPRINT, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+            var imprintTag = tag.getCompound(TAG_IMPRINT);
+            attrs.imprint.setMarks(
+                com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprint
+                    .fromNBT(imprintTag)
+                    .getMarks()
+            );
         }
-
-        // 可选：读取保存的属性值（用于兼容旧存档或快速加载）
-        // 通常建议重算以确保一致性
-        // attrs.recalculateFromGrowth();
-
-        return attrs;
+ 
+         return attrs;
     }
 
     /**
@@ -490,6 +507,15 @@ public class FlyingSwordAttributes {
         // 读取当前耐久
         if (tag.contains(TAG_DURABILITY)) {
             this.durability = tag.getDouble(TAG_DURABILITY);
+        }
+
+        if (tag.contains(TAG_IMPRINT, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+            var imprintTag = tag.getCompound(TAG_IMPRINT);
+            imprint.setMarks(
+                com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprint
+                    .fromNBT(imprintTag)
+                    .getMarks()
+            );
         }
     }
 

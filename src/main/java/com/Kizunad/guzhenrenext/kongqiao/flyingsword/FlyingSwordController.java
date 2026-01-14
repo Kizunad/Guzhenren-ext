@@ -128,10 +128,11 @@ public final class FlyingSwordController {
 
         FlyingSwordStorageAttachment.RecalledSword recalled =
             new FlyingSwordStorageAttachment.RecalledSword();
-        // Phase 2：暂存最小字段；属性等后续对齐 calculator。
-        recalled.level = 1;
-        recalled.experience = 0;
-        recalled.durability = 1.0f;
+        recalled.quality = sword.getQuality();
+        recalled.level = sword.getSwordLevel();
+        recalled.experience = sword.getSwordExperience();
+        recalled.durability = (float) sword.getSwordAttributes().durability;
+        recalled.totalExperience = sword.getSwordAttributes().getGrowthData().getTotalExperience();
 
         try {
             recalled.displayItem = (net.minecraft.nbt.CompoundTag) sword

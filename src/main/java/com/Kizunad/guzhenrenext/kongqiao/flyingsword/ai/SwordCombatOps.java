@@ -1,7 +1,5 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
-import com.Kizunad.guzhenrenext.guzhenrenBridge.LiuPaiHelper;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordConstants;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
@@ -31,9 +29,15 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  * </p>
  */
-public final class SwordCombatOps {
+ public final class SwordCombatOps {
+ 
+     private static final String IMPRINT_PROC_DOMAIN_PREFIX = "imprint/";
+     private static final String IMPRINT_PROC_DOMAIN_JIANDAO = IMPRINT_PROC_DOMAIN_PREFIX + "jiandao";
+     private static final String IMPRINT_PROC_DOMAIN_YANDAO = IMPRINT_PROC_DOMAIN_PREFIX + "yandao";
+     private static final String IMPRINT_PROC_DOMAIN_LEIDAO = IMPRINT_PROC_DOMAIN_PREFIX + "leidao";
+ 
+     private SwordCombatOps() {}
 
-    private SwordCombatOps() {}
 
     /**
      * 执行战斗追击 tick。
@@ -149,37 +153,82 @@ public final class SwordCombatOps {
      * @param owner 主人
      * @return 最终伤害值
      */
+     private static void applyImprintPassiveMultipliers(FlyingSwordAttributes attrs) {
+        if (attrs == null) {
+            return;
+        }
+
+        attrs.resetMultipliers();
+
+        var imprint = attrs.getImprint();
+        if (imprint == null || imprint.isEmpty()) {
+            return;
+        }
+
+        String mainDao = imprint.getMainDao();
+        int mainPoints = imprint.getMark(mainDao);
+
+        double damageBonus = 0.0;
+        if (mainPoints > 0) {
+            damageBonus += Math.min(
+                SwordGrowthTuning.IMPRINT_MAIN_DAMAGE_BONUS_CAP,
+                Math.sqrt(mainPoints) * SwordGrowthTuning.IMPRINT_MAIN_DAMAGE_SQRT_COEF
+            );
+        }
+
+        int bestSub = 0;
+        int secondSub = 0;
+        for (var entry : imprint.getMarks().entrySet()) {
+            if (entry == null) {
+                continue;
+            }
+            String key = entry.getKey();
+            if (key == null || key.isBlank() || key.equals(mainDao)) {
+                continue;
+            }
+            Integer v = entry.getValue();
+            if (v == null || v <= 0) {
+                continue;
+            }
+            int points = v;
+            if (points > bestSub) {
+                secondSub = bestSub;
+                bestSub = points;
+            } else if (points > secondSub) {
+                secondSub = points;
+            }
+        }
+
+        if (bestSub > 0) {
+            damageBonus += Math.min(
+                SwordGrowthTuning.IMPRINT_SUB_DAMAGE_BONUS_CAP,
+                Math.sqrt(bestSub) * SwordGrowthTuning.IMPRINT_SUB_DAMAGE_SQRT_COEF
+            );
+        }
+
+        double speedBonus = 0.0;
+        if (secondSub > 0) {
+            speedBonus += Math.min(
+                SwordGrowthTuning.IMPRINT_SUB_SPEED_BONUS_CAP,
+                Math.sqrt(secondSub) * SwordGrowthTuning.IMPRINT_SUB_SPEED_SQRT_COEF
+            );
+        }
+
+        attrs.setDamageMultiplier(1.0 + Math.max(0.0, damageBonus));
+        attrs.setSpeedMultiplier(1.0 + Math.max(0.0, speedBonus));
+    }
+
     public static float calculateDamage(
-        FlyingSwordEntity sword,
-        LivingEntity owner
-    ) {
+         FlyingSwordEntity sword,
+         LivingEntity owner
+     ) {
         FlyingSwordAttributes attrs = sword.getSwordAttributes();
+
+        applyImprintPassiveMultipliers(attrs);
 
         // 获取有效伤害（包含品质、等级、临时修正）
         double baseDamage = attrs.getEffectiveDamage();
 
-        // 道痕加成：剑道道痕每点 +1% 伤害，上限 +500%
-        double jiandaoHen = DaoHenHelper.getDaoHen(
-            owner,
-            DaoHenHelper.DaoType.JIAN_DAO
-        );
-        double daohenBonus = Math.min(
-            jiandaoHen * SwordGrowthTuning.DAOHEN_JIANDAO_DAMAGE_COEF,
-            SwordGrowthTuning.DAOHEN_DAMAGE_BONUS_CAP
-        );
-
-        // 流派加成：剑道流派每点 +2% 伤害，上限 +1000%
-        double jiandaoLiupai = LiuPaiHelper.getLiuPai(
-            owner,
-            LiuPaiHelper.LiuPaiType.JIAN_DAO
-        );
-        double liupaiBonus = Math.min(
-            jiandaoLiupai * SwordGrowthTuning.LIUPAI_JIANDAO_DAMAGE_COEF,
-            SwordGrowthTuning.LIUPAI_DAMAGE_BONUS_CAP
-        );
-
-        // 应用道痕/流派加成
-        baseDamage *= (1.0 + daohenBonus + liupaiBonus);
 
         // 速度加成（速度越快伤害越高）
         double speedRatio =
@@ -224,8 +273,12 @@ public final class SwordCombatOps {
         // 播放攻击命中特效
         FlyingSwordEffects.playHitEffect(sword, target, damage);
 
+        applyImprintProcs(sword, owner, target, damage);
+
+        boolean killed = isKill || target.isDeadOrDying();
+
         // 如果击杀，播放击杀特效
-        if (isKill) {
+        if (killed) {
             FlyingSwordEffects.playKillEffect(sword, target);
         }
 
@@ -233,20 +286,11 @@ public final class SwordCombatOps {
         int baseExpGain = SwordExpCalculator.calculateExpGain(
             damage,
             target,
-            isKill,
+            killed,
             attrs.getQuality()
         );
 
-        // 流派经验加成：剑道流派每点 +1% 经验，上限 +500%
-        double jiandaoLiupai = LiuPaiHelper.getLiuPai(
-            owner,
-            LiuPaiHelper.LiuPaiType.JIAN_DAO
-        );
-        double liupaiExpBonus = Math.min(
-            jiandaoLiupai * SwordGrowthTuning.LIUPAI_JIANDAO_EXP_COEF,
-            SwordGrowthTuning.LIUPAI_EXP_BONUS_CAP
-        );
-        int expGain = (int) Math.round(baseExpGain * (1.0 + liupaiExpBonus));
+        int expGain = baseExpGain;
 
         // 添加经验（自动升级）
         if (expGain > 0) {
@@ -266,11 +310,249 @@ public final class SwordCombatOps {
      * @param owner  主人
      * @param result 升级结果
      */
-    private static void onLevelUp(
+    private static void applyImprintProcs(
         FlyingSwordEntity sword,
         LivingEntity owner,
-        SwordGrowthData.ExpAddResult result
+        LivingEntity target,
+        float actualDamage
     ) {
+        if (sword == null || owner == null || target == null) {
+            return;
+        }
+        if (owner.level().isClientSide()) {
+            return;
+        }
+
+        FlyingSwordAttributes attrs = sword.getSwordAttributes();
+        if (attrs == null) {
+            return;
+        }
+
+        var imprint = attrs.getImprint();
+        if (imprint == null || imprint.isEmpty()) {
+            return;
+        }
+
+        int tier = imprint.getTier();
+        if (tier <= 0) {
+            return;
+        }
+
+        String mainDao = imprint.getMainDao();
+        if (
+            mainDao == null
+                || mainDao.isBlank()
+                || mainDao.equals(com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper.DaoType.GENERIC.getKey())
+        ) {
+            return;
+        }
+
+        if (
+            mainDao.equals(
+                com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper.DaoType.JIAN_DAO.getKey()
+            )
+        ) {
+            applyJianDaoProc(sword, owner, target, tier);
+            return;
+        }
+        if (
+            mainDao.equals(
+                com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper.DaoType.HUO_DAO.getKey()
+            )
+        ) {
+            applyYanDaoProc(sword, owner, target, tier);
+            return;
+        }
+        if (
+            mainDao.equals(
+                com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper.DaoType.LEI_DAO.getKey()
+            )
+        ) {
+            applyLeiDaoProc(sword, owner, target, actualDamage, tier);
+        }
+    }
+
+    private static void applyLeiDaoProc(
+        FlyingSwordEntity sword,
+        LivingEntity owner,
+        LivingEntity target,
+        float actualDamage,
+        int tier
+    ) {
+        int cd = com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.FlyingSwordCooldownOps
+            .get(sword, IMPRINT_PROC_DOMAIN_LEIDAO);
+        if (cd > 0) {
+            return;
+        }
+
+        double chance = Math.min(
+            SwordGrowthTuning.IMPRINT_PROC_CHANCE_CAP,
+            SwordGrowthTuning.IMPRINT_PROC_BASE_CHANCE +
+                SwordGrowthTuning.IMPRINT_PROC_CHANCE_PER_TIER * tier
+        );
+        if (owner.getRandom().nextDouble() > chance) {
+            return;
+        }
+
+        net.minecraft.world.entity.LivingEntity secondary = findChainTarget(
+            sword,
+            owner,
+            target
+        );
+        if (secondary == null) {
+            return;
+        }
+
+        float chainDamage = (float) Math.max(
+            0.0,
+            actualDamage * SwordGrowthTuning.IMPRINT_LEIDAO_CHAIN_DAMAGE_RATIO
+        );
+        if (chainDamage <= 0.0f) {
+            return;
+        }
+
+        if (owner.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            net.minecraft.world.damagesource.DamageSource source =
+                serverLevel.damageSources().mobAttack(owner);
+            secondary.hurt(source, chainDamage);
+        }
+
+        int cooldownTicks = Math.max(
+            SwordGrowthTuning.IMPRINT_PROC_MIN_COOLDOWN_TICKS,
+            SwordGrowthTuning.IMPRINT_PROC_BASE_COOLDOWN_TICKS -
+                SwordGrowthTuning.IMPRINT_PROC_COOLDOWN_REDUCTION_PER_TIER * tier
+        );
+        com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.FlyingSwordCooldownOps
+            .set(sword, IMPRINT_PROC_DOMAIN_LEIDAO, cooldownTicks);
+    }
+
+    @Nullable
+    private static net.minecraft.world.entity.LivingEntity findChainTarget(
+        FlyingSwordEntity sword,
+        LivingEntity owner,
+        LivingEntity primary
+    ) {
+        if (sword == null || owner == null || primary == null) {
+            return null;
+        }
+
+        if (!(owner.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return null;
+        }
+
+        net.minecraft.world.phys.AABB box = primary
+            .getBoundingBox()
+            .inflate(SwordGrowthTuning.IMPRINT_LEIDAO_CHAIN_RANGE);
+        net.minecraft.world.entity.LivingEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+
+        for (net.minecraft.world.entity.LivingEntity candidate : level.getEntitiesOfClass(
+            net.minecraft.world.entity.LivingEntity.class,
+            box
+        )) {
+            if (candidate == null) {
+                continue;
+            }
+            if (candidate == primary || candidate == owner) {
+                continue;
+            }
+            if (candidate.isRemoved() || candidate.isDeadOrDying()) {
+                continue;
+            }
+            if (!owner.canAttack(candidate)) {
+                continue;
+            }
+
+            double d = candidate.distanceToSqr(primary);
+            if (d < bestDist) {
+                bestDist = d;
+                best = candidate;
+            }
+        }
+
+        return best;
+    }
+
+    private static void applyYanDaoProc(
+        FlyingSwordEntity sword,
+        LivingEntity owner,
+        LivingEntity target,
+        int tier
+    ) {
+        int cd = com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.FlyingSwordCooldownOps
+            .get(sword, IMPRINT_PROC_DOMAIN_YANDAO);
+        if (cd > 0) {
+            return;
+        }
+
+        double chance = Math.min(
+            SwordGrowthTuning.IMPRINT_PROC_CHANCE_CAP,
+            SwordGrowthTuning.IMPRINT_PROC_BASE_CHANCE +
+                SwordGrowthTuning.IMPRINT_PROC_CHANCE_PER_TIER * tier
+        );
+        if (owner.getRandom().nextDouble() > chance) {
+            return;
+        }
+
+        int seconds = SwordGrowthTuning.IMPRINT_YANDAO_BASE_BURN_SECONDS + Math.max(0, tier);
+        target.igniteForSeconds(seconds);
+
+        int cooldownTicks = Math.max(
+            SwordGrowthTuning.IMPRINT_PROC_MIN_COOLDOWN_TICKS,
+            SwordGrowthTuning.IMPRINT_PROC_BASE_COOLDOWN_TICKS -
+                SwordGrowthTuning.IMPRINT_PROC_COOLDOWN_REDUCTION_PER_TIER * tier
+        );
+        com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.FlyingSwordCooldownOps
+            .set(sword, IMPRINT_PROC_DOMAIN_YANDAO, cooldownTicks);
+    }
+
+    private static void applyJianDaoProc(
+        FlyingSwordEntity sword,
+        LivingEntity owner,
+        LivingEntity target,
+        int tier
+    ) {
+        int cd = com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.FlyingSwordCooldownOps
+            .get(sword, IMPRINT_PROC_DOMAIN_JIANDAO);
+        if (cd > 0) {
+            return;
+        }
+
+        double chance = Math.min(
+            SwordGrowthTuning.IMPRINT_PROC_CHANCE_CAP,
+            SwordGrowthTuning.IMPRINT_PROC_BASE_CHANCE +
+                SwordGrowthTuning.IMPRINT_PROC_CHANCE_PER_TIER * tier
+        );
+        if (owner.getRandom().nextDouble() > chance) {
+            return;
+        }
+
+        double base = SwordGrowthTuning.BASE_DAMAGE * (
+            SwordGrowthTuning.IMPRINT_JIANDAO_BASE_BONUS_DAMAGE_MULTIPLIER +
+                SwordGrowthTuning.IMPRINT_JIANDAO_BONUS_DAMAGE_PER_TIER * tier
+        );
+        float bonusDamage = (float) Math.max(0.0, base);
+
+        if (owner.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            net.minecraft.world.damagesource.DamageSource source =
+                serverLevel.damageSources().mobAttack(owner);
+            target.hurt(source, bonusDamage);
+        }
+
+        int cooldownTicks = Math.max(
+            SwordGrowthTuning.IMPRINT_PROC_MIN_COOLDOWN_TICKS,
+            SwordGrowthTuning.IMPRINT_PROC_BASE_COOLDOWN_TICKS -
+                SwordGrowthTuning.IMPRINT_PROC_COOLDOWN_REDUCTION_PER_TIER * tier
+        );
+        com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.FlyingSwordCooldownOps
+            .set(sword, IMPRINT_PROC_DOMAIN_JIANDAO, cooldownTicks);
+    }
+
+    private static void onLevelUp(
+         FlyingSwordEntity sword,
+         LivingEntity owner,
+         SwordGrowthData.ExpAddResult result
+     ) {
         // 播放升级特效（粒子 + 音效）
         FlyingSwordEffects.playLevelUpEffect(
             sword,

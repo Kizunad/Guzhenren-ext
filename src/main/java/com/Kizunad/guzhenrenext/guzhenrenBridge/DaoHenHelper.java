@@ -67,6 +67,10 @@ public final class DaoHenHelper {
         DaoType(String key) {
             this.key = key;
         }
+
+        public String getKey() {
+            return key;
+        }
     }
 
     /**
