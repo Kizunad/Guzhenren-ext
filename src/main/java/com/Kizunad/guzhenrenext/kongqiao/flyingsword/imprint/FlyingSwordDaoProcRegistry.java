@@ -85,7 +85,8 @@ public final class FlyingSwordDaoProcRegistry {
         double power,
         int durationTicks,
         int amplifier,
-        double range
+        double range,
+        TargetEffect targetEffect
     ) {
 
         public enum EffectType {
@@ -99,6 +100,18 @@ public final class FlyingSwordDaoProcRegistry {
             CLEANSE_TARGET
         }
 
+        public enum TargetEffect {
+            SLOW,
+            WEAKNESS,
+            POISON,
+            WITHER,
+            GLOWING,
+            DARKNESS,
+            BLINDNESS,
+            HUNGER,
+            LEVITATION
+        }
+
         public static ProcSpec jianDao() {
             return new ProcSpec(
                 "jiandao",
@@ -106,7 +119,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -117,7 +131,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -128,7 +143,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_CHAIN_DAMAGE_RATIO,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_CHAIN
+                RANGE_CHAIN,
+                null
             );
         }
 
@@ -139,7 +155,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_SHORT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.SLOW
             );
         }
 
@@ -150,7 +167,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_1,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.SLOW
             );
         }
 
@@ -161,7 +179,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_KNOCKBACK_LIGHT,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -172,7 +191,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_1,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.SLOW
             );
         }
 
@@ -183,7 +203,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.WEAKNESS
             );
         }
 
@@ -194,7 +215,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_BONUS_DAMAGE_HEAVY,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -205,7 +227,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.POISON
             );
         }
 
@@ -216,7 +239,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.WITHER
             );
         }
 
@@ -227,7 +251,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_DURABILITY_RESTORE_HEAVY,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -238,7 +263,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.WEAKNESS
             );
         }
 
@@ -249,7 +275,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_LONG,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.GLOWING
             );
         }
 
@@ -260,7 +287,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.DARKNESS
             );
         }
 
@@ -271,7 +299,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_AOE_DAMAGE_MEDIUM,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_AOE_MEDIUM
+                RANGE_AOE_MEDIUM,
+                null
             );
         }
 
@@ -282,7 +311,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_LONG,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.BLINDNESS
             );
         }
 
@@ -293,7 +323,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.BLINDNESS
             );
         }
 
@@ -304,7 +335,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_LONG,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.GLOWING
             );
         }
 
@@ -315,7 +347,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -326,7 +359,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_AOE_DAMAGE_LIGHT,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_AOE_LARGE
+                RANGE_AOE_LARGE,
+                null
             );
         }
 
@@ -337,7 +371,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_KNOCKBACK_HEAVY,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -348,7 +383,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.WEAKNESS
             );
         }
 
@@ -359,7 +395,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -370,7 +407,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_BONUS_DAMAGE_LIGHT,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -381,7 +419,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_DURABILITY_RESTORE_LIGHT,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -392,7 +431,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_BONUS_DAMAGE_MEDIUM,
                 DURATION_TICKS_NONE,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                null
             );
         }
 
@@ -403,7 +443,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.HUNGER
             );
         }
 
@@ -414,7 +455,8 @@ public final class FlyingSwordDaoProcRegistry {
                 POWER_ONE,
                 DURATION_TICKS_DEFAULT,
                 AMP_0,
-                RANGE_ZERO
+                RANGE_ZERO,
+                ProcSpec.TargetEffect.WEAKNESS
             );
         }
     }

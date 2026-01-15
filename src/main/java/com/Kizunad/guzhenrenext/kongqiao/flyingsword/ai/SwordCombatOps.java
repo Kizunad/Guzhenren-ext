@@ -451,7 +451,8 @@ import net.minecraft.world.phys.Vec3;
     private static final float DEFAULT_DAMAGE_RATIO_BASE = 0.1f;
      private static final float DEFAULT_DAMAGE_RATIO_PER_TIER = 0.03f;
 
-    private static final double KNOCKBACK_STRENGTH_PER_TIER = 0.1;
+    private static final double KNOCKBACK_STRENGTH_PER_TIER =
+        com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprintProcTuning.POWER_KNOCKBACK_PER_TIER;
 
 
     private static final double DOUBLE_EPS = 1.0e-6;
@@ -579,25 +580,22 @@ import net.minecraft.world.phys.Vec3;
         );
         int amplifier = Math.max(DEFAULT_MOB_EFFECT_AMPLIFIER, spec.amplifier());
 
-        var effect = switch (spec.procId()) {
-            case "shuidao" -> MobEffects.MOVEMENT_SLOWDOWN;
-            case "bingxuedao" -> MobEffects.MOVEMENT_SLOWDOWN;
-            case "fengdao" -> MobEffects.MOVEMENT_SLOWDOWN;
-            case "tudao" -> MobEffects.MOVEMENT_SLOWDOWN;
-            case "mudao" -> MobEffects.WEAKNESS;
-            case "dudao" -> MobEffects.POISON;
-            case "xuedao" -> MobEffects.WITHER;
-            case "gudao" -> MobEffects.WEAKNESS;
-            case "guangdao" -> MobEffects.GLOWING;
-            case "yingdao" -> MobEffects.DARKNESS;
-            case "yuedao" -> MobEffects.BLINDNESS;
-            case "yundao" -> MobEffects.BLINDNESS;
-            case "zhidao" -> MobEffects.GLOWING;
-            case "rendao" -> MobEffects.WEAKNESS;
-            case "shidao" -> MobEffects.HUNGER;
-            case "bianhuadao" -> MobEffects.WEAKNESS;
+        var effect = switch (spec.targetEffect()) {
+            case SLOW -> MobEffects.MOVEMENT_SLOWDOWN;
+            case WEAKNESS -> MobEffects.WEAKNESS;
+            case POISON -> MobEffects.POISON;
+            case WITHER -> MobEffects.WITHER;
+            case GLOWING -> MobEffects.GLOWING;
+            case DARKNESS -> MobEffects.DARKNESS;
+            case BLINDNESS -> MobEffects.BLINDNESS;
+            case HUNGER -> MobEffects.HUNGER;
+            case LEVITATION -> MobEffects.LEVITATION;
             default -> MobEffects.WEAKNESS;
         };
+
+        if (spec.targetEffect() == null) {
+            return;
+        }
 
         target.addEffect(new MobEffectInstance(effect, duration, amplifier, true, true));
     }

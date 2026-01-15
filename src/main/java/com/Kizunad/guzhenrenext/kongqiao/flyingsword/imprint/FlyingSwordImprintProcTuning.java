@@ -20,6 +20,8 @@ public final class FlyingSwordImprintProcTuning {
     public static final double POWER_KNOCKBACK_LIGHT = 0.8;
     public static final double POWER_KNOCKBACK_HEAVY = 1.2;
 
+    public static final double POWER_KNOCKBACK_PER_TIER = 0.1;
+
     public static final double POWER_BONUS_DAMAGE_LIGHT = 0.3;
     public static final double POWER_BONUS_DAMAGE_MEDIUM = 0.5;
     public static final double POWER_BONUS_DAMAGE_HEAVY = 0.6;
