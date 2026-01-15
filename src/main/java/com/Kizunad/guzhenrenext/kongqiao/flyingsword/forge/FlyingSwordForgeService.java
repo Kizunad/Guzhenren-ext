@@ -23,14 +23,6 @@ public final class FlyingSwordForgeService {
 
     private static final String GUZHENREN_NAMESPACE = "guzhenren";
 
-    private static final String[] DAO_TAGS = {
-        "huo_dao", "leidao", "jiandao", "ren_dao", "xue_dao", "shui_dao",
-        "du_dao", "bing_xue_dao", "feng_dao", "tu_dao", "mu_dao", "jin_dao",
-        "hun_dao", "gu_dao", "tian_dao", "nu_dao", "tou_dao", "xin_dao",
-        "ying_dao", "xing_dao", "yue_dao", "yundao", "zhi_dao", "zhou_dao",
-        "lv_dao", "yu_dao", "shi_dao", "guang_dao", "daodao", "lian_dao",
-        "bianha_dao"
-    };
 
     private static final String[] Z_TAGS = {"z5", "z4", "z3", "z2", "z1"};
     private static final int[] Z_POINTS = {5, 4, 3, 2, 1};
@@ -162,62 +154,73 @@ public final class FlyingSwordForgeService {
         return 0;
     }
 
+    private static final String TAG_PATH_SUFFIX_DAO = "dao";
+    private static final String TAG_PATH_SUFFIX_DAO_UNDERSCORE = "_dao";
+
     private static String getDaoKey(ItemStack stack) {
         String found = null;
         int count = 0;
 
-        for (String daoTag : DAO_TAGS) {
-            TagKey<Item> tag = TagKey.create(
-                BuiltInRegistries.ITEM.key(),
-                ResourceLocation.fromNamespaceAndPath(GUZHENREN_NAMESPACE, daoTag)
-            );
-            if (stack.is(tag)) {
-                found = daoTagToKey(daoTag);
-                count++;
-                if (count > 1) {
-                    return null;
-                }
+        java.util.Iterator<TagKey<Item>> it =
+            stack.getItem().builtInRegistryHolder().tags().iterator();
+        while (it.hasNext()) {
+            TagKey<Item> tag = it.next();
+            if (tag == null) {
+                continue;
+            }
+
+            ResourceLocation id = tag.location();
+            if (id == null || !GUZHENREN_NAMESPACE.equals(id.getNamespace())) {
+                continue;
+            }
+
+            String path = id.getPath();
+            if (path == null || path.isBlank()) {
+                continue;
+            }
+
+            if (!looksLikeDaoTag(path)) {
+                continue;
+            }
+
+            found = tagPathToDaoKey(path);
+            count++;
+            if (count > 1) {
+                return null;
             }
         }
 
         return found;
     }
 
+    private static boolean looksLikeDaoTag(String path) {
+        return path.endsWith(TAG_PATH_SUFFIX_DAO_UNDERSCORE) || path.endsWith(TAG_PATH_SUFFIX_DAO);
+    }
+
+    private static String tagPathToDaoKey(String tagPath) {
+        if (tagPath.endsWith(TAG_PATH_SUFFIX_DAO_UNDERSCORE)) {
+            tagPath =
+                tagPath.substring(
+                    0,
+                    tagPath.length() - TAG_PATH_SUFFIX_DAO_UNDERSCORE.length()
+                ) + TAG_PATH_SUFFIX_DAO;
+        }
+        return daoTagToKey(tagPath);
+    }
+
+    private static final String DAO_TAG_HUO_DAO_COMPAT = "huodao";
+
     private static String daoTagToKey(String daoTag) {
-        return switch (daoTag) {
-            case "huo_dao" -> DaoHenHelper.DaoType.HUO_DAO.getKey();
-            case "leidao" -> DaoHenHelper.DaoType.LEI_DAO.getKey();
-            case "jiandao" -> DaoHenHelper.DaoType.JIAN_DAO.getKey();
-            case "ren_dao" -> DaoHenHelper.DaoType.REN_DAO.getKey();
-            case "xue_dao" -> DaoHenHelper.DaoType.XUE_DAO.getKey();
-            case "shui_dao" -> DaoHenHelper.DaoType.SHUI_DAO.getKey();
-            case "du_dao" -> DaoHenHelper.DaoType.DU_DAO.getKey();
-            case "bing_xue_dao" -> DaoHenHelper.DaoType.BING_XUE_DAO.getKey();
-            case "feng_dao" -> DaoHenHelper.DaoType.FENG_DAO.getKey();
-            case "tu_dao" -> DaoHenHelper.DaoType.TU_DAO.getKey();
-            case "mu_dao" -> DaoHenHelper.DaoType.MU_DAO.getKey();
-            case "jin_dao" -> DaoHenHelper.DaoType.JIN_DAO.getKey();
-            case "hun_dao" -> DaoHenHelper.DaoType.HUN_DAO.getKey();
-            case "gu_dao" -> DaoHenHelper.DaoType.GU_DAO.getKey();
-            case "tian_dao" -> DaoHenHelper.DaoType.TIAN_DAO.getKey();
-            case "nu_dao" -> DaoHenHelper.DaoType.NU_DAO.getKey();
-            case "tou_dao" -> DaoHenHelper.DaoType.TOU_DAO.getKey();
-            case "xin_dao" -> DaoHenHelper.DaoType.XIN_DAO.getKey();
-            case "ying_dao" -> DaoHenHelper.DaoType.YING_DAO.getKey();
-            case "xing_dao" -> DaoHenHelper.DaoType.XING_DAO.getKey();
-            case "yue_dao" -> DaoHenHelper.DaoType.YUE_DAO.getKey();
-            case "yundao" -> DaoHenHelper.DaoType.YUN_DAO.getKey();
-            case "zhi_dao" -> DaoHenHelper.DaoType.ZHI_DAO.getKey();
-            case "zhou_dao" -> DaoHenHelper.DaoType.ZHOU_DAO.getKey();
-            case "lv_dao" -> DaoHenHelper.DaoType.LV_DAO.getKey();
-            case "yu_dao" -> DaoHenHelper.DaoType.YU_DAO.getKey();
-            case "shi_dao" -> DaoHenHelper.DaoType.SHI_DAO.getKey();
-            case "guang_dao" -> DaoHenHelper.DaoType.GUANG_DAO.getKey();
-            case "daodao" -> DaoHenHelper.DaoType.DAO_DAO.getKey();
-            case "lian_dao" -> DaoHenHelper.DaoType.LIAN_DAO.getKey();
-            case "bianha_dao" -> DaoHenHelper.DaoType.BIAN_HUA_DAO.getKey();
-            default -> daoTag.replace("_", "");
-        };
+        if (DAO_TAG_HUO_DAO_COMPAT.equals(daoTag)) {
+            return DaoHenHelper.DaoType.HUO_DAO.getKey();
+        }
+
+        for (DaoHenHelper.DaoType type : DaoHenHelper.DaoType.values()) {
+            if (type != null && type.getKey().equals(daoTag)) {
+                return type.getKey();
+            }
+        }
+        return daoTag.replace("_", "");
     }
 
     private static final int QUALITY_TIER_SPIRIT_THRESHOLD = 10;
