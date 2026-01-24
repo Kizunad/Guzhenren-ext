@@ -1,0 +1,22 @@
+{
+  "id": "default",
+  "display_name": "默认基地",
+  "primary_dao": "zhi_dao",
+  "max_tier": 6,
+  "spawning": {
+    "base_spawn_chance": 0.1,
+    "tier_spawn_bonus": 0.05,
+    "max_spawns_per_tick": 2,
+    "entity_weights": []
+  },
+  "expansion": {
+    "base_cost": 5.0,
+    "tier_multiplier": 1.2,
+    "max_radius": 64,
+    "max_per_tick": 3
+  },
+  "evolution": {
+    "base_evolution_ticks": 72000,
+    "tier_multiplier": 3
+  }
+}

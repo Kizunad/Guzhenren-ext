@@ -43,9 +43,25 @@ tasks.withType(Checkstyle).configureEach {
 }
 
 sourceSets {
+    main {
+        java {
+            // 从主编译中排除 CustomNPCs 及其桥接实现和测试
+            exclude 'com/Kizunad/customNPCs/**'
+            exclude 'com/Kizunad/customNPCs_test/**'
+            exclude 'com/Kizunad/guzhenrenext/customNPCImpl/**'
+        }
+        resources {
+            // 从主资源中排除 CustomNPCs 相关资源
+            exclude 'assets/customnpcs/**'
+            exclude 'data/customnpcs/**'
+        }
+    }
     test {
         java {
             exclude 'com/Kizunad/tinyUI/**'
+            exclude 'com/Kizunad/customNPCs/**'
+            exclude 'com/Kizunad/customNPCs_test/**'
+            exclude 'com/Kizunad/guzhenrenext/customNPCImpl/**'
         }
     }
     tinyUi {

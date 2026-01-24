@@ -1,7 +1,5 @@
 package com.Kizunad.guzhenrenext.kongqiao.service;
 
-import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
-import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
@@ -22,6 +20,9 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
  * 蛊虫战斗逻辑服务。
  * <p>
  * 负责监听实体受伤或攻击事件，并触发空窍中物品的相应逻辑。
+ * </p>
+ * <p>
+ * 注意：CustomNPCs 支持已移除，仅支持玩家空窍背包。
  * </p>
  */
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -45,7 +46,7 @@ public final class GuCombatService {
 
         float amount = event.getAmount();
 
-        // 1. 处理攻击者触发（玩家空窍 / NPC 背包都可视为“空窍”）
+        // 1. 处理攻击者触发（仅支持玩家空窍背包）
         if (attacker != null) {
             SlotView attackerSlots = resolveSlotView(attacker);
             if (attackerSlots != null) {
@@ -80,14 +81,7 @@ public final class GuCombatService {
             return null;
         }
 
-        if (entity instanceof CustomNpcEntity npc) {
-            var mind = npc.getData(NpcMindAttachment.NPC_MIND);
-            if (mind == null || mind.getInventory() == null) {
-                return null;
-            }
-            return new SlotView(mind.getInventory(), mind.getInventory().getMainSize());
-        }
-
+        // CustomNPCs 支持已移除，仅处理拥有 KongqiaoData 的实体
         KongqiaoData data = KongqiaoAttachments.getData(entity);
         if (data == null) {
             return null;

@@ -1,0 +1,31 @@
+{
+  "id": "mu_dao_bastion",
+  "display_name": "木道基地",
+  "primary_dao": "mu_dao",
+  "max_tier": 6,
+  "spawning": {
+    "base_spawn_chance": 0.06,
+    "tier_spawn_bonus": 0.03,
+    "max_spawns_per_tick": 2,
+    "entity_weights": [
+      { "entity_type": "minecraft:vindicator", "weight": 2, "min_tier": 1 },
+      { "entity_type": "minecraft:pillager", "weight": 3, "min_tier": 1 },
+      { "entity_type": "minecraft:iron_golem", "weight": 1, "min_tier": 5 }
+    ]
+  },
+  "expansion": {
+    "base_cost": 3.0,
+    "tier_multiplier": 1.1,
+    "max_radius": 80,
+    "max_per_tick": 5
+  },
+  "evolution": {
+    "base_evolution_ticks": 90000,
+    "tier_multiplier": 3
+  },
+  "loot": {
+    "loot_table": "guzhenrenext:bastion/mu_dao",
+    "drop_on_destroy": true,
+    "drop_on_capture": true
+  }
+}

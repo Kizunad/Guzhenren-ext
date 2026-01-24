@@ -2,11 +2,6 @@ package com.Kizunad.guzhenrenext;
 
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
-import com.Kizunad.guzhenrenext.customNPCImpl.ai.Registery;
-import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcKongqiaoInventoryBridge;
-import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcResourceRegeneration;
-import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSecondTicker;
-import com.Kizunad.guzhenrenext.customNPCImpl.lifecycle.NpcSpawnInitializer;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
@@ -19,17 +14,25 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
+/**
+ * 蛊真人扩展模组主入口。
+ * <p>
+ * 注意：CustomNPCs 相关初始化已移除。如需启用 NPC 功能，请使用 customNpcsJar 单独构建。
+ * </p>
+ */
 @Mod(GuzhenrenExt.MODID)
 public class GuzhenrenExt {
 
     public static final String MODID = "guzhenrenext";
 
     public GuzhenrenExt(IEventBus modEventBus, ModContainer modContainer) {
-        Registery.registerAll();
-        NpcSpawnInitializer.register();
-        NpcSecondTicker.register();
-        NpcResourceRegeneration.register();
-        NpcKongqiaoInventoryBridge.register();
+        // CustomNPCs 初始化已移除
+        // Registery.registerAll();
+        // NpcSpawnInitializer.register();
+        // NpcSecondTicker.register();
+        // NpcResourceRegeneration.register();
+        // NpcKongqiaoInventoryBridge.register();
+
         KongqiaoMenus.register(modEventBus);
         KongqiaoAttachments.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntities.register(modEventBus);
@@ -37,6 +40,16 @@ public class GuzhenrenExt {
         com.Kizunad.guzhenrenext.kongqiao.logic.GuModEffects.registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.ShazhaoModEffects.registerAll();
         com.Kizunad.guzhenrenext.registry.ModMobEffects.register(modEventBus);
+
+        // Bastion 高转技能/特效注册
+        com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierEffectRegistry.registerAll();
+
+        // Bastion system registration
+        com.Kizunad.guzhenrenext.bastion.BastionBlocks.register(modEventBus);
+        com.Kizunad.guzhenrenext.bastion.BastionSounds.register(modEventBus);
+        com.Kizunad.guzhenrenext.bastion.BastionCreativeTab.register(modEventBus);
+        com.Kizunad.guzhenrenext.bastion.BastionTicker.register();
+
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onAddReloadListeners);
 
@@ -72,5 +85,6 @@ public class GuzhenrenExt {
     private void onAddReloadListeners(net.neoforged.neoforge.event.AddReloadListenerEvent event) {
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataLoader());
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataLoader());
+        event.addListener(new com.Kizunad.guzhenrenext.bastion.config.BastionTypeDataLoader());
     }
 }

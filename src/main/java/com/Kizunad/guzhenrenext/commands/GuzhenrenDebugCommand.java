@@ -1,8 +1,9 @@
 package com.Kizunad.guzhenrenext.commands;
 
-import com.Kizunad.customNPCs.capabilities.mind.INpcMind;
-import com.Kizunad.customNPCs.capabilities.mind.NpcMindAttachment;
-import com.Kizunad.guzhenrenext.customNPCImpl.ai.Action.GuzhenrenItemUseAction;
+import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
+import com.Kizunad.guzhenrenext.bastion.BastionDao;
+import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.LiuPaiHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
@@ -37,17 +38,20 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+/**
+ * 蛊真人扩展调试命令。
+ * <p>
+ * 注意：CustomNPCs 相关命令（guzhenren_mind）已移除。
+ * </p>
+ */
 public class GuzhenrenDebugCommand {
 
     private static final double DOMAIN_MAX_RADIUS = 256.0;
@@ -71,18 +75,7 @@ public class GuzhenrenDebugCommand {
     public static void register(
         CommandDispatcher<CommandSourceStack> dispatcher
     ) {
-        dispatcher.register(
-            Commands.literal("guzhenren_mind")
-                .requires(source -> source.hasPermission(2))
-                .then(
-                    Commands.literal("use_hand_item").then(
-                        Commands.argument(
-                            "npc",
-                            EntityArgument.entity()
-                        ).executes(GuzhenrenDebugCommand::useHandItem)
-                    )
-                )
-        );
+        // 注意：guzhenren_mind 命令已移除（CustomNPCs 依赖已解除）
 
         dispatcher.register(
             Commands.literal("guzhenren_debug")
@@ -100,6 +93,7 @@ public class GuzhenrenDebugCommand {
                 .then(buildFlyingSwordCommands())
                 .then(buildBridgeCommands())
                 .then(buildDomainCommands())
+                .then(buildBastionCommands())
         );
     }
 
@@ -240,6 +234,62 @@ public class GuzhenrenDebugCommand {
                         "id",
                         net.minecraft.commands.arguments.UuidArgument.uuid()
                     ).executes(GuzhenrenDebugCommand::removeDomain)
+                )
+            );
+    }
+
+    /** 基地道途名称建议提供器。 */
+    private static final SuggestionProvider<
+        CommandSourceStack
+    > DAO_SUGGESTIONS = (context, builder) -> {
+        for (BastionDao dao : BastionDao.values()) {
+            builder.suggest(dao.getSerializedName());
+        }
+        return builder.buildFuture();
+    };
+
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > buildBastionCommands() {
+        return Commands.literal("bastion")
+            .then(
+                Commands.literal("create").then(
+                    Commands.argument("dao", StringArgumentType.word())
+                        .suggests(DAO_SUGGESTIONS)
+                        .executes(GuzhenrenDebugCommand::createBastion)
+                )
+            )
+            .then(
+                Commands.literal("list").executes(
+                    GuzhenrenDebugCommand::listBastions
+                )
+            )
+            .then(
+                Commands.literal("info").executes(
+                    GuzhenrenDebugCommand::showNearestBastionInfo
+                )
+            )
+            .then(
+                Commands.literal("destroy").executes(
+                    GuzhenrenDebugCommand::destroyNearestBastion
+                )
+            )
+            .then(
+                Commands.literal("seal").then(
+                    Commands.argument(
+                        "duration",
+                        IntegerArgumentType.integer(1)
+                    ).executes(GuzhenrenDebugCommand::sealNearestBastion)
+                )
+            )
+            .then(
+                Commands.literal("give_core").executes(
+                    GuzhenrenDebugCommand::giveBastionCore
+                )
+            )
+            .then(
+                Commands.literal("give_node").executes(
+                    GuzhenrenDebugCommand::giveBastionNode
                 )
             );
     }
@@ -1049,61 +1099,6 @@ public class GuzhenrenDebugCommand {
         }
     }
 
-    private static int useHandItem(CommandContext<CommandSourceStack> context) {
-        try {
-            Entity entity = EntityArgument.getEntity(context, "npc");
-            if (!(entity instanceof Mob mob)) {
-                context
-                    .getSource()
-                    .sendFailure(Component.literal("目标必须是 Mob 实体"));
-                return 0;
-            }
-
-            if (!mob.hasData(NpcMindAttachment.NPC_MIND)) {
-                context
-                    .getSource()
-                    .sendFailure(Component.literal("目标没有 Mind 系统"));
-                return 0;
-            }
-
-            INpcMind mind = mob.getData(NpcMindAttachment.NPC_MIND);
-            ItemStack mainHandItem = mob.getItemInHand(
-                InteractionHand.MAIN_HAND
-            );
-
-            if (mainHandItem.isEmpty()) {
-                context
-                    .getSource()
-                    .sendFailure(Component.literal("目标主手为空"));
-                return 0;
-            }
-
-            // 创建并提交动作
-            GuzhenrenItemUseAction action = new GuzhenrenItemUseAction(
-                mainHandItem
-            );
-            mind.getActionExecutor().addAction(action);
-
-            context
-                .getSource()
-                .sendSuccess(
-                    () ->
-                        Component.literal(
-                            "已让 NPC 尝试使用主手物品: " +
-                                mainHandItem.getDisplayName().getString()
-                        ),
-                    true
-                );
-            return 1;
-        } catch (Exception e) {
-            context
-                .getSource()
-                .sendFailure(Component.literal("执行出错: " + e.getMessage()));
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
     private static int unlockAllSelf(
         CommandContext<CommandSourceStack> context
     ) {
@@ -1238,5 +1233,373 @@ public class GuzhenrenDebugCommand {
             unlockedShazhao++;
         }
         return unlockedShazhao;
+    }
+
+    // ===== 基地调试命令 =====
+
+    /**
+     * 基地命令相关常量。
+     */
+    private static final class BastionConfig {
+        /** 基地搜索最大半径。 */
+        static final int SEARCH_RADIUS = 128;
+        /** 放置基地的最小缓冲距离。 */
+        static final int PLACEMENT_BUFFER = 32;
+        /** UUID 截取显示长度。 */
+        static final int UUID_DISPLAY_LENGTH = 8;
+        /** 进度百分比乘数。 */
+        static final int PROGRESS_PERCENT_MULTIPLIER = 100;
+        /** 每秒 tick 数。 */
+        static final long TICKS_PER_SECOND = 20L;
+
+        private BastionConfig() {
+        }
+    }
+
+    /**
+     * 在玩家位置创建基地。
+     */
+    private static int createBastion(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            String daoName = StringArgumentType.getString(context, "dao");
+            BastionDao dao = null;
+            for (BastionDao d : BastionDao.values()) {
+                if (d.getSerializedName().equals(daoName)) {
+                    dao = d;
+                    break;
+                }
+            }
+            if (dao == null) {
+                context.getSource().sendFailure(
+                    Component.literal("未知道途类型: " + daoName)
+                );
+                return 0;
+            }
+
+            BlockPos corePos = player.blockPosition();
+            BastionSavedData savedData = BastionSavedData.get(level);
+
+            // 检查是否可以放置
+            if (!savedData.canPlaceBastion(corePos, BastionConfig.SEARCH_RADIUS, BastionConfig.PLACEMENT_BUFFER)) {
+                context.getSource().sendFailure(
+                    Component.literal("该位置距离其他基地太近")
+                );
+                return 0;
+            }
+
+            // 创建基地数据
+            BastionData bastion = BastionData.create(
+                corePos,
+                level.dimension(),
+                "default",
+                dao,
+                level.getGameTime()
+            );
+
+            // 放置核心方块
+            level.setBlockAndUpdate(
+                corePos,
+                BastionBlocks.BASTION_CORE.get().defaultBlockState()
+            );
+
+            // 注册基地
+            savedData.addBastion(bastion);
+
+            final BastionDao finalDao = dao;
+            context.getSource().sendSuccess(
+                () -> Component.literal(
+                    String.format(
+                        "已在 %s 创建 %s 基地 (ID: %s)",
+                        corePos.toShortString(),
+                        finalDao.getSerializedName(),
+                        bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH)
+                    )
+                ),
+                true
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(
+                Component.literal("执行出错: " + e.getMessage())
+            );
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 列出当前维度所有基地。
+     */
+    private static int listBastions(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            int count = savedData.getBastionCount();
+
+            if (count == 0) {
+                context.getSource().sendSuccess(
+                    () -> Component.literal("当前维度没有基地"),
+                    false
+                );
+                return 1;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("§e当前维度基地列表 (").append(count).append(")§r\n");
+
+            for (BastionData bastion : savedData.getAllBastions()) {
+                sb.append(String.format(
+                    "  §b%s§r [%s] %s T%d | 节点: %d | 状态: %s\n",
+                    bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH),
+                    bastion.primaryDao().getSerializedName(),
+                    bastion.corePos().toShortString(),
+                    bastion.tier(),
+                    bastion.totalNodes(),
+                    bastion.state().getSerializedName()
+                ));
+            }
+
+            context.getSource().sendSuccess(
+                () -> Component.literal(sb.toString()),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(
+                Component.literal("执行出错: " + e.getMessage())
+            );
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 显示最近基地的详细信息。
+     */
+    private static int showNearestBastionInfo(
+        CommandContext<CommandSourceStack> context
+    ) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(
+                player.blockPosition(),
+                BastionConfig.SEARCH_RADIUS
+            );
+
+            if (bastion == null) {
+                context.getSource().sendFailure(
+                    Component.literal("附近没有基地")
+                );
+                return 0;
+            }
+
+            String info = String.format(
+                "§e[基地信息]§r\n" +
+                    "  ID: §b%s§r\n" +
+                    "  道途: §a%s§r\n" +
+                    "  位置: %s\n" +
+                    "  转数: §c%d§r / %d\n" +
+                    "  进化: §e%.1f%%§r\n" +
+                    "  节点: §9%d§r\n" +
+                    "  半径: §d%d§r\n" +
+                    "  资源池: §6%.1f§r\n" +
+                    "  状态: §7%s§r",
+                bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH),
+                bastion.primaryDao().getSerializedName(),
+                bastion.corePos().toShortString(),
+                bastion.tier(),
+                BastionData.DEFAULT_MAX_TIER,
+                bastion.evolutionProgress() * BastionConfig.PROGRESS_PERCENT_MULTIPLIER,
+                bastion.totalNodes(),
+                bastion.growthRadius(),
+                bastion.resourcePool(),
+                bastion.getEffectiveState(level.getGameTime()).getSerializedName()
+            );
+
+            context.getSource().sendSuccess(
+                () -> Component.literal(info),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(
+                Component.literal("执行出错: " + e.getMessage())
+            );
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 销毁最近的基地。
+     */
+    private static int destroyNearestBastion(
+        CommandContext<CommandSourceStack> context
+    ) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(
+                player.blockPosition(),
+                BastionConfig.SEARCH_RADIUS
+            );
+
+            if (bastion == null) {
+                context.getSource().sendFailure(
+                    Component.literal("附近没有基地")
+                );
+                return 0;
+            }
+
+            savedData.markDestroyed(bastion.id(), level.getGameTime());
+
+            context.getSource().sendSuccess(
+                () -> Component.literal(
+                    "已将基地 " + bastion.id().toString().substring(
+                        0, BastionConfig.UUID_DISPLAY_LENGTH
+                    ) + " 标记为销毁"
+                ),
+                true
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(
+                Component.literal("执行出错: " + e.getMessage())
+            );
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 封印最近的基地。
+     */
+    private static int sealNearestBastion(
+        CommandContext<CommandSourceStack> context
+    ) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            int durationSeconds = IntegerArgumentType.getInteger(
+                context,
+                "duration"
+            );
+            long durationTicks = (long) durationSeconds * BastionConfig.TICKS_PER_SECOND;
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(
+                player.blockPosition(),
+                BastionConfig.SEARCH_RADIUS
+            );
+
+            if (bastion == null) {
+                context.getSource().sendFailure(
+                    Component.literal("附近没有基地")
+                );
+                return 0;
+            }
+
+            long sealUntil = level.getGameTime() + durationTicks;
+            savedData.applySeal(bastion.id(), sealUntil);
+
+            context.getSource().sendSuccess(
+                () -> Component.literal(
+                    String.format(
+                        "已封印基地 %s %d 秒",
+                        bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH),
+                        durationSeconds
+                    )
+                ),
+                true
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(
+                Component.literal("执行出错: " + e.getMessage())
+            );
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 给予玩家基地核心物品。
+     */
+    private static int giveBastionCore(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+
+            net.minecraft.world.item.ItemStack stack =
+                new net.minecraft.world.item.ItemStack(
+                    BastionBlocks.BASTION_CORE_ITEM.get()
+                );
+
+            if (!player.addItem(stack)) {
+                player.drop(stack, false);
+            }
+
+            context.getSource().sendSuccess(
+                () -> Component.literal("已给予基地核心"),
+                true
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(
+                Component.literal("执行出错: " + e.getMessage())
+            );
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 给予玩家基地节点物品。
+     */
+    private static int giveBastionNode(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+
+            net.minecraft.world.item.ItemStack stack =
+                new net.minecraft.world.item.ItemStack(
+                    BastionBlocks.BASTION_NODE_ITEM.get()
+                );
+
+            if (!player.addItem(stack)) {
+                player.drop(stack, false);
+            }
+
+            context.getSource().sendSuccess(
+                () -> Component.literal("已给予基地节点"),
+                true
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(
+                Component.literal("执行出错: " + e.getMessage())
+            );
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

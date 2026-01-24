@@ -1,6 +1,5 @@
 package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
-import com.Kizunad.customNPCs.entity.CustomNpcEntity;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoCapacityService;
 import net.minecraft.world.entity.Entity;
@@ -22,7 +21,8 @@ public final class KongqiaoAttachmentEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (!(entity instanceof Player) && !(entity instanceof CustomNpcEntity)) {
+        // 仅对玩家初始化空窍附件（CustomNPCs 支持已移除）
+        if (!(entity instanceof Player)) {
             return;
         }
         ensureAttachment(entity);

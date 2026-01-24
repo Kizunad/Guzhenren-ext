@@ -12,12 +12,13 @@ logoFile="logo.jpg"
 authors="${mod_authors}"
 description="${mod_description}"
 
-[[mods]]
-modId="customnpcs"
-version="1.0.0"
-displayName="Custom NPCs AI System"
-authors="Kizunad"
-description="Autonomous NPC AI system with Utility AI and memory"
+# CustomNPCs 模块已从主编译中移除，如需启用请使用 customNpcsJar 单独构建
+# [[mods]]
+# modId="customnpcs"
+# version="1.0.0"
+# displayName="Custom NPCs AI System"
+# authors="Kizunad"
+# description="Autonomous NPC AI system with Utility AI and memory"
 
 [[mods]]
 modId="tinyui"

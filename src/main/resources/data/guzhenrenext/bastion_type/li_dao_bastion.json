@@ -1,0 +1,31 @@
+{
+  "id": "li_dao_bastion",
+  "display_name": "力道基地",
+  "primary_dao": "li_dao",
+  "max_tier": 6,
+  "spawning": {
+    "base_spawn_chance": 0.15,
+    "tier_spawn_bonus": 0.08,
+    "max_spawns_per_tick": 4,
+    "entity_weights": [
+      { "entity_type": "minecraft:ravager", "weight": 2, "min_tier": 1 },
+      { "entity_type": "minecraft:hoglin", "weight": 3, "min_tier": 1 },
+      { "entity_type": "minecraft:warden", "weight": 1, "min_tier": 6 }
+    ]
+  },
+  "expansion": {
+    "base_cost": 8.0,
+    "tier_multiplier": 1.4,
+    "max_radius": 48,
+    "max_per_tick": 2
+  },
+  "evolution": {
+    "base_evolution_ticks": 54000,
+    "tier_multiplier": 3
+  },
+  "loot": {
+    "loot_table": "guzhenrenext:bastion/li_dao",
+    "drop_on_destroy": true,
+    "drop_on_capture": true
+  }
+}

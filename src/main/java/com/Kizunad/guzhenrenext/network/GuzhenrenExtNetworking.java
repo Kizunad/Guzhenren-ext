@@ -5,6 +5,8 @@ import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncKongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncTweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.network.ServerboundTweakConfigUpdatePayload;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
+import com.Kizunad.guzhenrenext.bastion.network.ClientboundBastionRemovePayload;
+import com.Kizunad.guzhenrenext.bastion.network.ClientboundBastionSyncPayload;
 import com.Kizunad.guzhenrenext.kongqiao.domain.network.ClientboundDomainRemovePayload;
 import com.Kizunad.guzhenrenext.kongqiao.domain.network.ClientboundDomainSyncPayload;
 import net.neoforged.bus.api.IEventBus;
@@ -99,6 +101,18 @@ public final class GuzhenrenExtNetworking {
             ClientboundLingHunGuIntuitionPayload.TYPE,
             ClientboundLingHunGuIntuitionPayload.STREAM_CODEC,
             ClientboundLingHunGuIntuitionPayload::handle
+        );
+
+        // Bastion system packets
+        registrar.playToClient(
+            ClientboundBastionSyncPayload.TYPE,
+            ClientboundBastionSyncPayload.STREAM_CODEC,
+            ClientboundBastionSyncPayload::handle
+        );
+        registrar.playToClient(
+            ClientboundBastionRemovePayload.TYPE,
+            ClientboundBastionRemovePayload.STREAM_CODEC,
+            ClientboundBastionRemovePayload::handle
         );
     }
 }
