@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.slf4j.Logger;
@@ -28,6 +29,27 @@ public class BastionSavedData extends SavedData {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BastionSavedData.class);
     private static final String DATA_NAME = GuzhenrenExt.MODID + "_bastions";
+
+    // ===== SavedData NBT 字段名 =====
+
+    /** 基地主数据（bastions）字段。 */
+    private static final String TAG_BASTIONS = "bastions";
+
+    /**
+     * 菌毯归属索引（posAsLong -> bastionId）。
+     * <p>
+     * 设计说明：
+     * <ul>
+     *     <li>Key 使用 {@link BlockPos#asLong()} 的十进制字符串：NBT 的 CompoundTag key 只能是 String。
+     *     十进制便于排查与日志定位；也避免引入额外编码约定（如 hex）。</li>
+     *     <li>Value 使用 UUID 字符串：与本文件中 bastions 的 UUID 编解码风格一致。</li>
+     * </ul>
+     * </p>
+     */
+    private static final String TAG_MYCELIUM_OWNER_INDEX = "mycelium_owner_index";
+
+    /** Anchor 归属索引（posAsLong -> bastionId）。 */
+    private static final String TAG_ANCHOR_OWNER_INDEX = "anchor_owner_index";
 
     // ===== chunk 坐标计算常量 =====
     /** chunk 坐标位移量（blockPos >> 4 得到 chunkPos）。 */
@@ -46,6 +68,21 @@ public class BastionSavedData extends SavedData {
 
     /** 按 UUID 索引的所有基地。 */
     private final Map<UUID, BastionData> bastions = new HashMap<>();
+
+    // ===== 回合2.1.1：归属索引（持久化） =====
+
+    /**
+     * 菌毯归属索引：key=BlockPos.asLong，value=基地 UUID。
+     * <p>
+     * 仅用于“精确坐标命中”的快速归属判断；当索引缺失时会回退到最近核心的旧逻辑。
+     * </p>
+     */
+    private final Map<Long, UUID> myceliumOwnerIndex = new HashMap<>();
+
+    /**
+     * Anchor 归属索引：key=BlockPos.asLong，value=基地 UUID。
+     */
+    private final Map<Long, UUID> anchorOwnerIndex = new HashMap<>();
 
     /**
      * 基于 chunk 的空间索引，用于快速查找。
@@ -158,8 +195,8 @@ public class BastionSavedData extends SavedData {
     public static BastionSavedData load(CompoundTag tag, HolderLookup.Provider provider) {
         BastionSavedData data = new BastionSavedData();
 
-        if (tag.contains("bastions")) {
-            CompoundTag bastionsTag = tag.getCompound("bastions");
+        if (tag.contains(TAG_BASTIONS, Tag.TAG_COMPOUND)) {
+            CompoundTag bastionsTag = tag.getCompound(TAG_BASTIONS);
             var result = BASTIONS_CODEC.parse(NbtOps.INSTANCE, bastionsTag);
             result.resultOrPartial(LOGGER::error).ifPresent(map -> {
                 data.bastions.putAll(map);
@@ -170,6 +207,10 @@ public class BastionSavedData extends SavedData {
             });
         }
 
+        // 回合2.1.1：归属索引（旧存档缺失时视为空 map，保持兼容）。
+        readOwnerIndexIfPresent(tag, TAG_MYCELIUM_OWNER_INDEX, data.myceliumOwnerIndex);
+        readOwnerIndexIfPresent(tag, TAG_ANCHOR_OWNER_INDEX, data.anchorOwnerIndex);
+
         return data;
     }
 
@@ -177,8 +218,12 @@ public class BastionSavedData extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         var result = BASTIONS_CODEC.encodeStart(NbtOps.INSTANCE, bastions);
         result.resultOrPartial(LOGGER::error).ifPresent(nbt -> {
-            tag.put("bastions", nbt);
+            tag.put(TAG_BASTIONS, nbt);
         });
+
+        // 回合2.1.1：仅持久化 owner 索引。运行时大集合（frontier/visited 等）严格不写入。
+        writeOwnerIndexIfNotEmpty(tag, TAG_MYCELIUM_OWNER_INDEX, myceliumOwnerIndex);
+        writeOwnerIndexIfNotEmpty(tag, TAG_ANCHOR_OWNER_INDEX, anchorOwnerIndex);
         return tag;
     }
 
@@ -266,6 +311,12 @@ public class BastionSavedData extends SavedData {
      */
     @Nullable
     public BastionData findOwnerBastion(BlockPos pos, int maxRadius) {
+        // 回合2.1.1：优先精确索引（菌毯/Anchor）命中，避免全量遍历。
+        BastionData byIndex = findOwnerBastionByIndex(pos);
+        if (byIndex != null) {
+            return byIndex;
+        }
+
         BastionData nearest = null;
         double nearestDistSq = Double.MAX_VALUE;
 
@@ -281,6 +332,121 @@ public class BastionSavedData extends SavedData {
         }
 
         return nearest;
+    }
+
+    /**
+     * 通过“归属索引”查找该位置的基地。
+     * <p>
+     * 优先级：Anchor 索引 -> 菌毯索引。
+     * <br>
+     * 若索引命中但对应基地已不存在/已销毁，会自动清理该索引项并返回 null，调用方应继续走 fallback。
+     * </p>
+     */
+    @Nullable
+    public BastionData findOwnerBastionByIndex(BlockPos pos) {
+        BastionData owner = findOwnerFromIndexMap(anchorOwnerIndex, pos);
+        if (owner != null) {
+            return owner;
+        }
+        return findOwnerFromIndexMap(myceliumOwnerIndex, pos);
+    }
+
+    @Nullable
+    private BastionData findOwnerFromIndexMap(Map<Long, UUID> index, BlockPos pos) {
+        long key = pos.asLong();
+        UUID bastionId = index.get(key);
+        if (bastionId == null) {
+            return null;
+        }
+
+        BastionData bastion = bastions.get(bastionId);
+        if (bastion == null || bastion.state() == BastionState.DESTROYED) {
+            // 索引“撒谎”：基地不存在/已销毁。这里自愈，避免永久污染查询。
+            index.remove(key);
+            setDirty();
+            return null;
+        }
+
+        return bastion;
+    }
+
+    // ===== 回合2.1.1：索引维护 API =====
+
+    /**
+     * 写入菌毯归属索引。
+     * <p>
+     * 仅在“扩张成功放置菌毯”时调用，避免把玩家随手放置的装饰误当作强绑定数据。</p>
+     */
+    public void indexMyceliumOwner(UUID bastionId, BlockPos pos) {
+        putOwnerIndex(myceliumOwnerIndex, bastionId, pos);
+    }
+
+    /** 清理菌毯归属索引（方块移除时兜底）。 */
+    public void clearMyceliumOwnerIndex(BlockPos pos) {
+        removeOwnerIndex(myceliumOwnerIndex, pos);
+    }
+
+    /** 写入 Anchor 归属索引。 */
+    public void indexAnchorOwner(UUID bastionId, BlockPos pos) {
+        putOwnerIndex(anchorOwnerIndex, bastionId, pos);
+    }
+
+    /** 清理 Anchor 归属索引（方块移除时兜底）。 */
+    public void clearAnchorOwnerIndex(BlockPos pos) {
+        removeOwnerIndex(anchorOwnerIndex, pos);
+    }
+
+    private void putOwnerIndex(Map<Long, UUID> index, UUID bastionId, BlockPos pos) {
+        if (bastionId == null || pos == null) {
+            return;
+        }
+        long key = pos.asLong();
+        UUID prev = index.put(key, bastionId);
+        if (!bastionId.equals(prev)) {
+            setDirty();
+        }
+    }
+
+    private void removeOwnerIndex(Map<Long, UUID> index, BlockPos pos) {
+        if (pos == null) {
+            return;
+        }
+        long key = pos.asLong();
+        UUID removed = index.remove(key);
+        if (removed != null) {
+            setDirty();
+        }
+    }
+
+    private static void readOwnerIndexIfPresent(CompoundTag root, String tagName, Map<Long, UUID> out) {
+        if (!root.contains(tagName, Tag.TAG_COMPOUND)) {
+            return;
+        }
+
+        CompoundTag indexTag = root.getCompound(tagName);
+        for (String keyStr : indexTag.getAllKeys()) {
+            try {
+                long posLong = Long.parseLong(keyStr);
+                UUID bastionId = UUID.fromString(indexTag.getString(keyStr));
+                out.put(posLong, bastionId);
+            } catch (Exception ex) {
+                // 兼容与鲁棒性：跳过损坏条目，避免整个 SavedData 无法加载。
+                LOGGER.warn("读取 BastionSavedData 索引字段 {} 时遇到损坏条目 key={}，将跳过", tagName, keyStr);
+            }
+        }
+    }
+
+    private static void writeOwnerIndexIfNotEmpty(CompoundTag root, String tagName, Map<Long, UUID> index) {
+        if (index == null || index.isEmpty()) {
+            return;
+        }
+
+        CompoundTag indexTag = new CompoundTag();
+        for (Map.Entry<Long, UUID> entry : index.entrySet()) {
+            // NBT Compound key 只能是 String，因此把 BlockPos.asLong() 转为十进制字符串。
+            indexTag.putString(Long.toString(entry.getKey()), entry.getValue().toString());
+        }
+        root.put(tagName, indexTag);
     }
 
     /**
@@ -516,6 +682,21 @@ public class BastionSavedData extends SavedData {
 
         // 回合3：清理能源挂载运行时缓存，避免内存泄露。
         anchorEnergyTypes.remove(bastionId);
+
+        // 回合2.1.1：清理持久化 owner 索引中的“悬空引用”，避免后续查询命中已删除基地。
+        // 这里按 value 扫描移除即可：基地删除是低频操作，允许 O(N) 清理。
+        removeOwnerIndexEntriesByBastionId(myceliumOwnerIndex, bastionId);
+        removeOwnerIndexEntriesByBastionId(anchorOwnerIndex, bastionId);
+    }
+
+    private void removeOwnerIndexEntriesByBastionId(Map<Long, UUID> index, UUID bastionId) {
+        if (index == null || index.isEmpty() || bastionId == null) {
+            return;
+        }
+        boolean changed = index.entrySet().removeIf(e -> bastionId.equals(e.getValue()));
+        if (changed) {
+            setDirty();
+        }
     }
 
     // ===== 回合2：连通性/衰败 API（运行时） =====

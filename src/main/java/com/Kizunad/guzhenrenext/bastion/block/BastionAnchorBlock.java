@@ -163,12 +163,17 @@ public class BastionAnchorBlock extends Block {
     }
 
     private void updateBastionAnchorCount(ServerLevel level, BlockPos pos, BlockState state, int countDelta) {
+        BastionSavedData savedData = BastionSavedData.get(level);
+        BastionData owner = savedData.findOwnerBastion(pos, MAX_OWNER_SEARCH_RADIUS);
+
+        // 回合2.1.1：无论是否能找到 owner，都清理索引，避免 NBT 残留。
+        // 注意：必须在 owner 查询之后执行，否则会破坏“优先索引命中”的效果。
+        savedData.clearAnchorOwnerIndex(pos);
+
+        // 非扩张生成的 Anchor 不参与基地 Anchor 计数（但索引仍应清理，见上）。
         if (countDelta < 0 && !state.getValue(GENERATED)) {
             return;
         }
-
-        BastionSavedData savedData = BastionSavedData.get(level);
-        BastionData owner = savedData.findOwnerBastion(pos, MAX_OWNER_SEARCH_RADIUS);
         if (owner == null) {
             return;
         }

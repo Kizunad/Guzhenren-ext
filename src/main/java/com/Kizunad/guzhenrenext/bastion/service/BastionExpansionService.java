@@ -295,7 +295,14 @@ public final class BastionExpansionService {
         }
 
         BlockState nodeState = myceliumBlock.defaultBlockState();
-        level.setBlock(pos, nodeState, Block.UPDATE_ALL);
+        boolean placed = level.setBlock(pos, nodeState, Block.UPDATE_ALL);
+        if (!placed) {
+            return false;
+        }
+
+        // 回合2.1.1：写入菌毯归属索引（持久化）。
+        // 只在“扩张服务成功放置”时写入，避免误标记玩家随手放置的装饰方块。
+        savedData.indexMyceliumOwner(bastion.id(), pos);
 
         // 将新节点添加到缓存（用于 frontier 追踪，非持久化）。
         savedData.addNodeToCache(bastion.id(), pos);
@@ -327,7 +334,13 @@ public final class BastionExpansionService {
 
         BlockState anchorState = bastionAnchorBlock.withTierDaoGenerated(
             bastion.tier(), bastion.primaryDao(), true);
-        level.setBlock(pos, anchorState, Block.UPDATE_ALL);
+        boolean placed = level.setBlock(pos, anchorState, Block.UPDATE_ALL);
+        if (!placed) {
+            return false;
+        }
+
+        // 回合2.1.1：写入 Anchor 归属索引（持久化）。
+        savedData.indexAnchorOwner(bastion.id(), pos);
 
         savedData.addAnchorToCache(bastion.id(), pos);
         return true;

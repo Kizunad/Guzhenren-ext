@@ -51,7 +51,12 @@ public class BastionMyceliumBlock extends Block {
         BastionSavedData savedData = BastionSavedData.get(level);
 
         // 在半径内寻找归属基地：该方法本身就是设计上的“非重叠约束”入口。
+        // 回合2.1.1：findOwnerBastion 会优先查索引，因此可在半径不足时仍命中正确归属。
         BastionData owner = savedData.findOwnerBastion(pos, MAX_OWNER_SEARCH_RADIUS);
+
+        // 回合2.1.1：清理索引（幂等）。
+        // 注意：必须在 owner 查询之后执行，否则会破坏“优先索引命中”的效果。
+        savedData.clearMyceliumOwnerIndex(pos);
         if (owner == null) {
             return;
         }
