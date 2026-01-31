@@ -8,6 +8,7 @@ import com.Kizunad.guzhenrenext.bastion.service.BastionCleanupService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionConnectivityService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionEnergyService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionExpansionService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionHatcheryService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionSpawnService;
 import com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierSkillService;
 import java.util.ArrayList;
@@ -467,17 +468,23 @@ public final class BastionTicker {
         if (category == TickCategory.FULL) {
             // 重新获取最新数据（savedData 已更新）
             BastionData freshData = savedData.getBastion(bastion.id());
-            if (freshData != null) {
-                // 扩张服务
-                BastionExpansionService.tryExpand(level, savedData, freshData, gameTime);
-                // 刷怪服务
-                BastionSpawnService.trySpawn(level, savedData, freshData, gameTime);
+                if (freshData != null) {
+                    // 扩张服务
+                    BastionExpansionService.tryExpand(level, savedData, freshData, gameTime);
+                    // 刷怪服务
+                    BastionSpawnService.trySpawn(level, savedData, freshData, gameTime);
 
-                // 高转主动技能：仅在 FULL tick 驱动
-                BastionHighTierSkillService.runActiveSkills(level, freshData, gameTime);
+                    // Round 4.2：守卫孵化巢（GuardianHatchery）
+                    // 仅在 ACTIVE + FULL tick 驱动：
+                    // - 与刷怪/扩张同一节奏（每秒一次），避免离线/远离玩家时产生大量实体。
+                    // - 冷却与扣费由 BastionHatcheryService 自行处理。
+                    BastionHatcheryService.tick(level, savedData, freshData, gameTime);
+
+                    // 高转主动技能：仅在 FULL tick 驱动
+                    BastionHighTierSkillService.runActiveSkills(level, freshData, gameTime);
+                }
             }
         }
-    }
 
     /**
      * 计算每刻间隔的资源池获取量。

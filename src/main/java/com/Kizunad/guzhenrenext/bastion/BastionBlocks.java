@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionGuardianHatcheryBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionReversalArrayBlock;
 import com.Kizunad.guzhenrenext.bastion.service.BastionEnergyBuildService;
@@ -118,6 +119,14 @@ public final class BastionBlocks {
         .sound(SoundType.STONE)
         .requiresCorrectToolForDrops();
 
+    /**
+     * 守卫孵化巢属性：中等硬度，类石材行为。
+     */
+    private static final BlockBehaviour.Properties HATCHERY_PROPERTIES = BlockBehaviour.Properties.of()
+        .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
+        .sound(SoundType.STONE)
+        .requiresCorrectToolForDrops();
+
     // ===== 方块注册 =====
 
     /**
@@ -161,6 +170,15 @@ public final class BastionBlocks {
         () -> new BastionEnergyNodeBlock(ENERGY_NODE_PROPERTIES)
     );
 
+    /**
+     * 守卫孵化巢方块（挂载在 Anchor 上）。
+     */
+    public static final DeferredHolder<Block, BastionGuardianHatcheryBlock> BASTION_GUARDIAN_HATCHERY =
+        BLOCKS.register(
+            "bastion_guardian_hatchery",
+            () -> new BastionGuardianHatcheryBlock(HATCHERY_PROPERTIES)
+        );
+
     // ===== 物品注册（方块物品） =====
 
     /**
@@ -196,6 +214,18 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BlockItem> BASTION_ENERGY_NODE_ITEM = ITEMS.register(
         "bastion_energy_node",
         () -> new BastionEnergyNodeItem(BASTION_ENERGY_NODE.get(), new Item.Properties())
+    );
+
+    /**
+     * 守卫孵化巢方块物品。
+     * <p>
+     * Round 4.2：本回合仅做“结构约束 + FULL tick 驱动”，不在放置时扣费。
+     * 扣费与冷却由 {@code BastionHatcheryService} 统一在服务端 tick 中处理，避免玩家放置时刷屏。
+     * </p>
+     */
+    public static final DeferredHolder<Item, BlockItem> BASTION_GUARDIAN_HATCHERY_ITEM = ITEMS.register(
+        "bastion_guardian_hatchery",
+        () -> new BlockItem(BASTION_GUARDIAN_HATCHERY.get(), new Item.Properties())
     );
 
     /**

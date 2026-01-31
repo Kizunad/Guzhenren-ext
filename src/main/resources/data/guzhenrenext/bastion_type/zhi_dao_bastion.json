@@ -153,5 +153,19 @@
       "water_intake",
       "photosynthesis"
     ]
+  },
+  "hatchery": {
+    "enabled": false,
+    "cooldown_ticks": 200,
+    "spawn_per_cycle": 1,
+    "max_alive": 0,
+    "cost_per_spawn": 0.0,
+    "weights": {
+      "minion": 1,
+      "ranged": 1,
+      "support": 1,
+      "elite": 0,
+      "boss": 0
+    }
   }
 }

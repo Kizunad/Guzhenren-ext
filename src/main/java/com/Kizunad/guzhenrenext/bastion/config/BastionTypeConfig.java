@@ -29,6 +29,7 @@ import java.util.Optional;
  * @param evolution       进化配置
  * @param aura            光环配置（影响半径与衰减）
  * @param energy          能源节点配置（影响资源池增长的额外加成）
+ * @param hatchery        守卫孵化巢配置（Round 4.2：守卫产出机制地基，缺省为未启用）
  * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
  * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
  * @param loot            战利品配置（可选）
@@ -47,6 +48,7 @@ public record BastionTypeConfig(
         EvolutionConfig evolution,
         AuraConfig aura,
         EnergyConfig energy,
+        HatcheryConfig hatchery,
         int anchorsWeight,
         int myceliumWeight,
         Optional<LootConfig> loot,
@@ -140,6 +142,8 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::aura),
             EnergyConfig.CODEC.optionalFieldOf("energy", EnergyConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::energy),
+            HatcheryConfig.CODEC.optionalFieldOf("hatchery", HatcheryConfig.DEFAULT)
+                .forGetter(BastionTypeConfig::hatchery),
             // 有效节点数（effectiveNodes）权重配置：
             // - anchorsWeight：Anchor（子核心/支撑节点）的权重
             // - myceliumWeight：菌毯（贴地蔓延主网）的权重
@@ -167,6 +171,7 @@ public record BastionTypeConfig(
                 evolution,
                 aura,
                 energy,
+                hatchery,
                 anchorsWeight,
                 myceliumWeight,
                 optionalContent) -> new BastionTypeConfig(
@@ -182,6 +187,7 @@ public record BastionTypeConfig(
             evolution,
             aura,
             energy,
+            hatchery,
             anchorsWeight,
             myceliumWeight,
             optionalContent.loot(),
@@ -189,6 +195,108 @@ public record BastionTypeConfig(
             optionalContent.guardianShazhao()
         ))
     );
+
+    // ===== 守卫孵化巢（hatchery）配置 =====
+
+    /**
+     * 守卫孵化巢（GuardianHatchery）配置。
+     * <p>
+     * Round 4.2 的目标是提供“产出机制地基”：当基地资源池足够时，按配置周期性产出守卫。
+     * 本配置缺省必须是“未启用”，以保证旧世界/旧 JSON 在不新增字段时行为完全不变。
+     * </p>
+     * <p>
+     * 重要语义：
+     * <ul>
+     *     <li>enabled=false 时，无论世界中是否存在孵化巢方块，都不产出。</li>
+     *     <li>cooldownTicks 为“基地级”冷却：同一基地多个孵化巢也共用节流（避免刷屏/爆量）。</li>
+     *     <li>maxAlive 仅统计属于该基地的守卫（由 {@code BastionGuardianData} 判定）。</li>
+     * </ul>
+     * </p>
+     */
+    public record HatcheryConfig(
+            boolean enabled,
+            long cooldownTicks,
+            int spawnPerCycle,
+            int maxAlive,
+            double costPerSpawn,
+            GuardianWeights weights
+    ) {
+        public static final HatcheryConfig DEFAULT = new HatcheryConfig(
+            false,
+            DefaultValues.DEFAULT_HATCHERY_COOLDOWN_TICKS,
+            DefaultValues.DEFAULT_HATCHERY_SPAWN_PER_CYCLE,
+            DefaultValues.DEFAULT_HATCHERY_MAX_ALIVE,
+            DefaultValues.DEFAULT_HATCHERY_COST_PER_SPAWN,
+            GuardianWeights.DEFAULT
+        );
+
+        public static final Codec<HatcheryConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", false)
+                    .forGetter(HatcheryConfig::enabled),
+                Codec.LONG.optionalFieldOf(
+                        "cooldown_ticks",
+                        DefaultValues.DEFAULT_HATCHERY_COOLDOWN_TICKS)
+                    .forGetter(HatcheryConfig::cooldownTicks),
+                Codec.INT.optionalFieldOf(
+                        "spawn_per_cycle",
+                        DefaultValues.DEFAULT_HATCHERY_SPAWN_PER_CYCLE)
+                    .forGetter(HatcheryConfig::spawnPerCycle),
+                Codec.INT.optionalFieldOf(
+                        "max_alive",
+                        DefaultValues.DEFAULT_HATCHERY_MAX_ALIVE)
+                    .forGetter(HatcheryConfig::maxAlive),
+                Codec.DOUBLE.optionalFieldOf(
+                        "cost_per_spawn",
+                        DefaultValues.DEFAULT_HATCHERY_COST_PER_SPAWN)
+                    .forGetter(HatcheryConfig::costPerSpawn),
+                GuardianWeights.CODEC.optionalFieldOf("weights", GuardianWeights.DEFAULT)
+                    .forGetter(HatcheryConfig::weights)
+            ).apply(instance, HatcheryConfig::new)
+        );
+    }
+
+    /**
+     * 守卫类型权重配置。
+     * <p>
+     * Round 4.2 只要求最小落点：minion/ranged/support 按比例抽取。
+     * elite/boss 预留权重接口，默认 0（不参与抽取）。
+     * </p>
+     */
+    public record GuardianWeights(int minion, int ranged, int support, int elite, int boss) {
+        public static final GuardianWeights DEFAULT = new GuardianWeights(
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_MINION,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_RANGED,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_SUPPORT,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_ELITE,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS
+        );
+
+        public static final Codec<GuardianWeights> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.INT.optionalFieldOf(
+                        "minion",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_MINION)
+                    .forGetter(GuardianWeights::minion),
+                Codec.INT.optionalFieldOf(
+                        "ranged",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_RANGED)
+                    .forGetter(GuardianWeights::ranged),
+                Codec.INT.optionalFieldOf(
+                        "support",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_SUPPORT)
+                    .forGetter(GuardianWeights::support),
+                Codec.INT.optionalFieldOf(
+                        "elite",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_ELITE)
+                    .forGetter(GuardianWeights::elite),
+                Codec.INT.optionalFieldOf(
+                        "boss",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS)
+                    .forGetter(GuardianWeights::boss)
+            ).apply(instance, GuardianWeights::new)
+        );
+    }
 
     // ===== 守卫维护费（upkeep）配置 =====
 
@@ -445,6 +553,21 @@ public record BastionTypeConfig(
         static final double DEFAULT_POOL_GAIN_MULTIPLIER = 0.0;
         static final double DEFAULT_POOL_GAIN_FLAT = 0.0;
         static final int DEFAULT_SCAN_RADIUS = 8;
+
+        // ===== 孵化巢默认值（Round 4.2） =====
+        // 兼容策略：默认必须“未启用”，否则旧世界在未配置时会无意产出守卫。
+        static final long DEFAULT_HATCHERY_COOLDOWN_TICKS = 200L;
+        static final int DEFAULT_HATCHERY_SPAWN_PER_CYCLE = 1;
+        static final int DEFAULT_HATCHERY_MAX_ALIVE = 0;
+        static final double DEFAULT_HATCHERY_COST_PER_SPAWN = 0.0;
+
+        // 权重默认值：为了让“未启用”的默认完全不生效，这里保持一个无害的权重基线。
+        // 注意：真正的“是否产出”应由 enabled/maxAlive/cost 等多重门禁控制。
+        static final int DEFAULT_HATCHERY_WEIGHT_MINION = 1;
+        static final int DEFAULT_HATCHERY_WEIGHT_RANGED = 1;
+        static final int DEFAULT_HATCHERY_WEIGHT_SUPPORT = 1;
+        static final int DEFAULT_HATCHERY_WEIGHT_ELITE = 0;
+        static final int DEFAULT_HATCHERY_WEIGHT_BOSS = 0;
 
         /**
          * 能源冲突优先级默认值。

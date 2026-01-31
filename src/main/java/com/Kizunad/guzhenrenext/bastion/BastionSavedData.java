@@ -125,6 +125,16 @@ public class BastionSavedData extends SavedData {
      */
     private final Map<UUID, Long> nextAnchorTryTick = new HashMap<>();
 
+    /**
+     * Round 4.2：守卫孵化巢（GuardianHatchery）基地级冷却（不持久化）。
+     * <p>
+     * 语义：记录某个基地下一次允许“尝试孵化”的 gameTime。
+     * 说明：本回合不引入 BlockEntity，因此冷却由 SavedData 运行时缓存承担，重启后会重置。
+     * 后续回合可迁移为持久化字段（并提供兼容读写）。
+     * </p>
+     */
+    private final Map<UUID, Long> nextHatcheryTryTick = new HashMap<>();
+
     // ===== 回合2：连通性/衰败运行时状态（不持久化） =====
 
     /**
@@ -676,6 +686,9 @@ public class BastionSavedData extends SavedData {
         anchorCache.remove(bastionId);
         nextAnchorTryTick.remove(bastionId);
 
+        // Round 4.2：清理孵化巢冷却缓存，避免内存泄露。
+        nextHatcheryTryTick.remove(bastionId);
+
         // 回合2：清理运行时连通性/衰败状态，避免内存泄露。
         connectivityRuntimes.remove(bastionId);
         myceliumDecayTicks.remove(bastionId);
@@ -933,6 +946,16 @@ public class BastionSavedData extends SavedData {
 
     public void setNextAnchorTryTick(UUID bastionId, long nextTick) {
         nextAnchorTryTick.put(bastionId, nextTick);
+    }
+
+    // ===== Round 4.2：孵化巢冷却 API（运行时） =====
+
+    public long getNextHatcheryTryTick(UUID bastionId) {
+        return nextHatcheryTryTick.getOrDefault(bastionId, 0L);
+    }
+
+    public void setNextHatcheryTryTick(UUID bastionId, long nextTick) {
+        nextHatcheryTryTick.put(bastionId, nextTick);
     }
 
     /**
