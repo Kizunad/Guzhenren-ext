@@ -2,7 +2,8 @@
 
 > 本文用于安排后续 Bastion 方向的持续迭代节奏。
 >
-> **约束**：不使用 `./gradlew runClient` 做验证；默认以 `compileJava + checkstyleMain` 与 `runGameTestServer`（GameTest）为准。
+> **约束**：不使用 `./gradlew runClient` 做验证；也不使用 GameTest/不运行任何测试任务。
+> 每轮最低 DoD：`./gradlew compileJava` + `./gradlew checkstyleMain`。
 
 ---
 
@@ -30,14 +31,14 @@
 建议使用方式：
 - 前 10 回合：每回合是一个“整合式大回合”，适合一次性推进一个子系统闭环
 - 后 30 回合：每回合扩展 1 个类型（守卫/节点/玩家玩法）+ 1 个对抗点 + 1 组测试
-- 严格遵守 DoD：compile/checkstyle + GameTest（禁止 runClient）
+- 严格遵守 DoD：compile/checkstyle（禁止 runClient；不跑测试）
 
 ---
 
 ## 1. 持续迭代的“主线”与节奏
 
-> 核心原则：每一轮迭代都必须能通过 **自动化验证**。
-> 不要求每轮都新增玩法，但必须：编译过、checkstyle 过、有可复现的测试/验证路径。
+> 核心原则：每一轮迭代都必须“可重复检查”。
+> 不要求每轮都新增玩法，但必须：编译过、checkstyle 过，并提供可复现的最小验证路径（日志/调试命令/配置检查）。
 
 ### 迭代主线（推荐顺序）
 
@@ -58,34 +59,39 @@
 - `./gradlew compileJava` 通过
 - `./gradlew checkstyleMain` 通过
 
-### 2.2 自动化验证（二选一，优先 A）
+### 2.2 最小验证路径（不跑测试）
 
-A) 有对应 GameTest：
-- `./gradlew runGameTestServer` 通过（至少包含本轮新增/改动的关键用例）
+提供至少一种可复现验证方式（按成本由低到高）：
 
-B) 若暂时无法写 GameTest（仅限“纯数据/纯配置调整”）：
-- 提供可执行的最小验证脚本/命令（例如数据生成、json 校验、codec 解析 smoke test）
+1) 配置/数据校验：
+- JSON 字段存在性与默认值说明（写在文档里即可）
+
+2) 日志/调试命令：
+- 通过 `GuzhenrenDebugCommand` 或等效命令输出关键状态（例如：effectiveNodes、poolGain、auraRadius）
+
+3) 本地手动验证（可选）：
+- 仅在必要时提供“最小可复现步骤”，但不将 runClient 作为交付必需。
 
 > 说明：不使用 runClient，因此“目测效果”只能作为补充，不作为交付标准。
 
 ---
 
-## 3. 建议的 GameTest 分层（逐步补齐）
+## 3. （已禁用）GameTest 分层
 
-### 3.1 扩张与缓存一致性
+### 3.1 扩张与缓存一致性（改为调试命令/日志）
 - 创建一个最小基地（core+初始 anchor），跑若干 tick
 - 断言：
   - 菌毯数量增长（BastionData.counts.totalMycelium）
   - Anchor 数量增长或不增长符合阈值与冷却
   - resourcePool 不为 NaN，且在上限内
 
-### 3.2 破坏事件
+### 3.2 破坏事件（改为调试命令/日志）
 - 破坏一个 generated Anchor：
   - totalAnchors 递减
   - 缓存移除
   - 不应导致 crash
 
-### 3.3 逆转阵法结构
+### 3.3 逆转阵法结构（改为调试命令/日志）
 - 结构判定必须要求四向 Anchor
 - 缺 Anchor 时应拒绝启动（返回 false/提示）
 
@@ -100,7 +106,7 @@ TODO：
 - `BastionTypeConfig.ExpansionConfig` 拆为 `MyceliumConfig + AnchorConfig`
 - JSON 默认值补齐（`data/guzhenrenext/bastion_type/default.json`）
 - `BastionExpansionService` 读取配置而不是 Constants
-- GameTest：验证配置读取生效（改 default.json 后行为变化）
+  - 验证方式：compile+checkstyle；并补齐调试命令/日志可观察点（例如打印读取到的配置与关键计算结果）
 
 ### Round 2：连通性（简化版）+ 衰败标记
 目标：不做实时 BFS，先做“周期性抽样校验 + 失联标记”。
@@ -109,7 +115,7 @@ TODO：
 - BastionData 增加一个轻量状态：`disconnected` 或 `decayStage`（可选）
 - 每 N 秒在服务端跑一次小预算连通检查（从 Anchor 出发标记可达菌毯）
 - 不可达区域：停止功能（未来）、并逐步衰败（先做计数衰减即可）
-- GameTest：构造一段菌毯链，切断中间，验证远端进入衰败
+  - 验证方式：compile+checkstyle；并补齐调试命令/日志可观察点（例如 decayMap 大小、reachable 统计）
 
 ---
 

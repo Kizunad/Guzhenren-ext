@@ -24,6 +24,7 @@ gametest_*
 .serena
 agent_workflow.py
 agent_assignments.json
+.sisyphus/
 
 #IDE
 .settings

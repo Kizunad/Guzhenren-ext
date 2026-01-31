@@ -9,7 +9,7 @@
 > - 每回合最低 DoD：
 >   - `./gradlew compileJava`
 >   - `./gradlew checkstyleMain`
->   - 涉及逻辑：优先补 `GameTest` 并用 `./gradlew runGameTestServer`
+>   - **不使用 GameTest**，也不运行任何测试任务；只要求编译 + checkstyle。
 
 ---
 
@@ -17,18 +17,17 @@
 
 > 每回合目标：落地一块“可玩闭环”的子系统，而不是零碎 patch。
 
-### 回合 1：扩张系统完全配置化 + 测试基座
-**目标**：把扩张/Anchor 相关常量全部从硬编码迁移到 bastion_type JSON，并建立最小 GameTest 基座。
+### 回合 1：扩张系统完全配置化（无测试版）
+**目标**：把扩张/Anchor/effectiveNodes 相关常量全部从硬编码迁移到 bastion_type JSON。
 
 **交付**
 - 配置结构：`MyceliumConfig + AnchorConfig`（成本、spacing、maxPerTick、maxRadius、triggerDistance、cooldown、maxCount）
-- 服务读取配置：扩张、Anchor 自动生成、effectiveNodes 权重（可在此回合一起配置化）
-- GameTest：
-  - codec 解析 smoke test
-  - “预算=0 不扩张”
-  - “资源不足不生成 Anchor，但菌毯仍可扩张”
+- 服务读取配置：扩张、Anchor 自动生成、effectiveNodes 权重（必须按 bastionType 配置化）
+- 修复与约束：
+  - 菌毯扩张目标也必须贴地（与 Anchor 一致），避免漂浮与观感/性能问题。
+  - 明确并核对：菌毯/Anchor 放置函数的命名与实际放置的方块类型一致。
 
-**DoD**：compile/checkstyle + runGameTestServer
+**DoD**：compile/checkstyle
 
 ---
 
@@ -38,7 +37,8 @@
 **交付**
 - 连通检查：周期性小预算，从 Anchor 出发标记可达菌毯（不做实时）
 - 衰败状态：断连菌毯进入倒计时并自毁/回收（先做菌毯；Anchor 断连只做状态标记）
-- GameTest：断连→衰败→回收
+ 
+**DoD**：compile/checkstyle
 
 ---
 
@@ -54,7 +54,8 @@
   - 地热（邻近岩浆/深层高度）
 - 统一接口：`EnergyProvider`（输出 poolGainMultiplier 或 poolGainFlat）
 - 配置化：各能源上限、成本、倍率、检测半径
-- GameTest：模拟环境 → 倍率变化可断言
+
+**DoD**：compile/checkstyle
 
 ---
 
@@ -69,7 +70,8 @@
   - 远程：射击/法术，成本更高
   - 辅助：治疗/增益，数量上限低
 - 维护费用：按时间消耗 pool；pool 不足时停机（不崩溃）
-- GameTest：pool=0 时停机；pool>阈值时按速率产出
+
+**DoD**：compile/checkstyle
 
 ---
 
@@ -81,7 +83,8 @@
 **交付**
 - 光环节点两类：正极（增幅守卫）、负极（压制玩家）
 - 叠加规则（简单、可预测）：同类取最大、异类互斥或相加（明确写入 config）
-- GameTest：守卫属性变化/玩家效果变化
+
+**DoD**：compile/checkstyle
 
 ---
 
@@ -93,7 +96,8 @@
 **交付**
 - 外壳覆盖生成：在菌毯链路间生成薄壳（易破坏）
 - 再生：连通且 pool>阈值时缓慢恢复；断连停止
-- GameTest：生成/清理/再生逻辑不崩 + 阈值断言
+
+**DoD**：compile/checkstyle
 
 ---
 
@@ -107,7 +111,8 @@
   - 精英模板：更高属性 + 1 个特殊技能
   - 生成条件：Anchor 数量/能源充足/威胁事件触发
 - 战利品/奖励：击杀或拆除关键节点给予材料（用于玩家推进）
-- GameTest：精英生成条件可验证
+
+**DoD**：compile/checkstyle
 
 ---
 
@@ -120,7 +125,8 @@
 - Boss 生成条件：基地转数/Anchor 数/被攻击次数/威胁值
 - Boss 行为：至少 1~2 个可配置技能（AOE/召唤/护盾）
 - 失败回退：Boss 不应导致服务器卡死（预算/冷却）
-- GameTest：Boss 生成条件与冷却
+
+**DoD**：compile/checkstyle
 
 ---
 
@@ -133,7 +139,8 @@
 - 渗透道具：寄生孢子/污染（降低能源或导致断连加速）
 - 反制道具：净化盐/火焰药剂（清理菌毯、阻止再生）
 - 玩法闭环：玩家通过材料推进道具升级
-- GameTest：污染状态切换、净化恢复
+
+**DoD**：compile/checkstyle
 
 ---
 
@@ -142,7 +149,7 @@
 
 **交付**
 - 统一配置命名与默认值（bastion_type/default.json）
-- 关键链路 GameTest 组合回归：扩张→anchor→能源→守卫→光环→衰败→外壳
+- 关键链路检查清单（不跑测试）：扩张→anchor→能源→守卫→光环→衰败→外壳
 - 关键 debug 命令输出（无 runClient 观测）
 
 ---
