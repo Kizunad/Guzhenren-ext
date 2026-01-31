@@ -130,6 +130,7 @@ public class ExampleGameTests {
             spawning,
             BastionTypeConfig.ExpansionConfig.DEFAULT,
             BastionTypeConfig.ConnectivityConfig.DEFAULT,
+            BastionTypeConfig.DecayConfig.DEFAULT,
             BastionTypeConfig.EvolutionConfig.DEFAULT,
             BastionTypeConfig.AuraConfig.DEFAULT,
             BastionTypeConfig.EnergyConfig.DEFAULT,

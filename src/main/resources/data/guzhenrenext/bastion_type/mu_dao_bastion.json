@@ -35,6 +35,11 @@
     "scan_interval_ticks": 40,
     "bfs_budget_nodes": 128
   },
+  "decay": {
+    "total_ticks": 200,
+    "tick_interval": 20,
+    "budget_nodes": 16
+  },
   "evolution": {
     "base_evolution_ticks": 90000,
     "tier_multiplier": 3

@@ -23,6 +23,7 @@ import java.util.Optional;
  * @param spawning        刷怪配置
  * @param expansion       扩张配置
  * @param connectivity    连通性扫描配置（连通性为非实时：按周期触发、按预算推进 BFS）
+ * @param decay           菌毯衰败配置（倒计时/预算/间隔；缺省回退旧常量，保证旧 JSON 行为不变）
  * @param evolution       进化配置
  * @param aura            光环配置（影响半径与衰减）
  * @param energy          能源节点配置（影响资源池增长的额外加成）
@@ -39,6 +40,7 @@ public record BastionTypeConfig(
         SpawningConfig spawning,
         ExpansionConfig expansion,
         ConnectivityConfig connectivity,
+        DecayConfig decay,
         EvolutionConfig evolution,
         AuraConfig aura,
         EnergyConfig energy,
@@ -80,6 +82,8 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::expansion),
             ConnectivityConfig.CODEC.optionalFieldOf("connectivity", ConnectivityConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::connectivity),
+            DecayConfig.CODEC.optionalFieldOf("decay", DecayConfig.DEFAULT)
+                .forGetter(BastionTypeConfig::decay),
             EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::evolution),
             AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
@@ -100,6 +104,47 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::guardianShazhao)
         ).apply(instance, BastionTypeConfig::new)
     );
+
+    // ===== 衰败配置（菌毯断连后的倒计时） =====
+
+    /**
+     * 衰败（decay）配置。
+     * <p>
+     * 用途：当菌毯节点与基地网络断连后，会进入衰败倒计时；倒计时到期后移除方块。
+     * 本配置将“倒计时/预算/间隔”从代码常量下沉到 bastion_type JSON，便于不同基地类型调参。
+     * </p>
+     * <p>
+     * 兼容策略：旧版 bastion_type JSON 若缺失 decay 字段，必须回退到 v1 的常量行为。
+     * </p>
+     *
+     * @param totalTicks   衰败总倒计时（tick）
+     * @param tickInterval 衰败处理间隔（tick）
+     * @param budgetNodes  单次衰败 tick 最大处理节点数（预算）
+     */
+    public record DecayConfig(int totalTicks, long tickInterval, int budgetNodes) {
+        public static final DecayConfig DEFAULT = new DecayConfig(
+            DefaultValues.DEFAULT_MYCELIUM_DECAY_TOTAL_TICKS,
+            DefaultValues.DEFAULT_MYCELIUM_DECAY_TICK_INTERVAL,
+            DefaultValues.DEFAULT_MYCELIUM_DECAY_BUDGET_NODES
+        );
+
+        public static final Codec<DecayConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.INT.optionalFieldOf(
+                        "total_ticks",
+                        DefaultValues.DEFAULT_MYCELIUM_DECAY_TOTAL_TICKS)
+                    .forGetter(DecayConfig::totalTicks),
+                Codec.LONG.optionalFieldOf(
+                        "tick_interval",
+                        DefaultValues.DEFAULT_MYCELIUM_DECAY_TICK_INTERVAL)
+                    .forGetter(DecayConfig::tickInterval),
+                Codec.INT.optionalFieldOf(
+                        "budget_nodes",
+                        DefaultValues.DEFAULT_MYCELIUM_DECAY_BUDGET_NODES)
+                    .forGetter(DecayConfig::budgetNodes)
+            ).apply(instance, DecayConfig::new)
+        );
+    }
 
     /**
      * 守卫杀招配置。
@@ -202,6 +247,32 @@ public record BastionTypeConfig(
          * </p>
          */
         static final int DEFAULT_CONNECTIVITY_BFS_BUDGET_NODES = 128;
+
+        // ===== 菌毯衰败默认值 =====
+
+        /**
+         * 衰败总倒计时默认值（tick）。
+         * <p>
+         * 对齐 v1：BastionConnectivityService.Config.MYCELIUM_DECAY_TOTAL_TICKS=200。
+         * </p>
+         */
+        static final int DEFAULT_MYCELIUM_DECAY_TOTAL_TICKS = 200;
+
+        /**
+         * 衰败处理间隔默认值（tick）。
+         * <p>
+         * 对齐 v1：BastionConnectivityService.Config.MYCELIUM_DECAY_TICK_INTERVAL=20。
+         * </p>
+         */
+        static final long DEFAULT_MYCELIUM_DECAY_TICK_INTERVAL = 20L;
+
+        /**
+         * 单次衰败 tick 最大处理节点数默认值（预算）。
+         * <p>
+         * 对齐 v1：BastionConnectivityService.Config.MYCELIUM_DECAY_BUDGET_NODES=16。
+         * </p>
+         */
+        static final int DEFAULT_MYCELIUM_DECAY_BUDGET_NODES = 16;
 
         static final double DEFAULT_SPAWN_CHANCE = 0.1;
         static final double DEFAULT_TIER_SPAWN_BONUS = 0.05;

@@ -145,6 +145,7 @@ public final class BastionTypeManager {
             BastionTypeConfig.SpawningConfig.DEFAULT,
             BastionTypeConfig.ExpansionConfig.DEFAULT,
             BastionTypeConfig.ConnectivityConfig.DEFAULT,
+            BastionTypeConfig.DecayConfig.DEFAULT,
             BastionTypeConfig.EvolutionConfig.DEFAULT,
             BastionTypeConfig.AuraConfig.DEFAULT,
             BastionTypeConfig.EnergyConfig.DEFAULT,

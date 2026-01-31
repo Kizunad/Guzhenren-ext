@@ -46,13 +46,8 @@ public final class BastionConnectivityService {
     private static final class Config {
         // 连通性扫描相关参数已配置化：见 BastionTypeConfig.ConnectivityConfig。
         // 这里不再保留 interval/budget 的硬编码常量，避免后续出现“代码常量覆盖配置”的双源真相。
-
-        /** 衰败总倒计时（tick）。 */
-        static final int MYCELIUM_DECAY_TOTAL_TICKS = 200;
-        /** 衰败处理间隔（tick）。 */
-        static final long MYCELIUM_DECAY_TICK_INTERVAL = 20L;
-        /** 单次衰败 tick 最大处理节点数（预算）。 */
-        static final int MYCELIUM_DECAY_BUDGET_NODES = 16;
+        // 衰败相关参数已配置化：见 BastionTypeConfig.DecayConfig。
+        // 这里不再保留 total/interval/budget 的硬编码常量，避免后续出现“代码常量覆盖配置”的双源真相。
 
         /** 查找归属基地的最大搜索半径（与交互/Anchor 一致）。 */
         static final int MAX_OWNER_SEARCH_RADIUS = 128;
@@ -209,6 +204,9 @@ public final class BastionConnectivityService {
             BastionData bastion,
             Set<BlockPos> reachable) {
 
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.DecayConfig decayConfig = typeConfig.decay();
+
         Map<BlockPos, Integer> decayMap = savedData.getOrCreateMyceliumDecayMap(bastion.id());
 
         // 清理已不存在/已不在缓存中的条目，防止内存泄露。
@@ -251,14 +249,18 @@ public final class BastionConnectivityService {
             }
 
             // 不可达：若尚未开始衰败，则创建倒计时。
-            decayMap.putIfAbsent(pos, Math.max(1, Config.MYCELIUM_DECAY_TOTAL_TICKS));
+            decayMap.putIfAbsent(pos, Math.max(1, decayConfig.totalTicks()));
         }
     }
 
     // ===== 衰败（可观察） =====
 
     private static void tickDecay(ServerLevel level, BastionSavedData savedData, BastionData bastion, long gameTime) {
-        if (gameTime % Config.MYCELIUM_DECAY_TICK_INTERVAL != 0) {
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.DecayConfig decayConfig = typeConfig.decay();
+
+        long tickInterval = Math.max(1L, decayConfig.tickInterval());
+        if (gameTime % tickInterval != 0) {
             return;
         }
 
@@ -267,7 +269,7 @@ public final class BastionConnectivityService {
             return;
         }
 
-        int budget = Math.max(1, Config.MYCELIUM_DECAY_BUDGET_NODES);
+        int budget = Math.max(1, decayConfig.budgetNodes());
         int processed = 0;
 
         // 注意：destroyBlock 可能触发方块 onRemove，间接修改 decayMap。
@@ -296,7 +298,7 @@ public final class BastionConnectivityService {
                 continue;
             }
 
-            int remaining = value - (int) Config.MYCELIUM_DECAY_TICK_INTERVAL;
+            int remaining = value - (int) tickInterval;
             if (remaining > 0) {
                 decayMap.put(pos, remaining);
                 processed++;
