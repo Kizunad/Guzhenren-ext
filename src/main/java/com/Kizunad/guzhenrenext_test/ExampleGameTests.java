@@ -127,6 +127,7 @@ public class ExampleGameTests {
             "测试-刷怪停机门禁",
             BastionDao.ZHI_DAO,
             1,
+            BastionTypeConfig.UpkeepConfig.DEFAULT,
             spawning,
             BastionTypeConfig.ExpansionConfig.DEFAULT,
             BastionTypeConfig.ConnectivityConfig.DEFAULT,

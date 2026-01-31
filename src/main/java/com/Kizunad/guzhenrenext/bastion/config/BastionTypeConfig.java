@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.bastion.config;
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +21,7 @@ import java.util.Optional;
  * @param displayName     显示名称（用于 UI）
  * @param primaryDao      主道途类型
  * @param maxTier         最大转数（1-9）
+ * @param upkeep          守卫维护费（upkeep）配置（兼容旧 JSON 缺省）
  * @param spawning        刷怪配置
  * @param expansion       扩张配置
  * @param connectivity    连通性扫描配置（连通性为非实时：按周期触发、按预算推进 BFS）
@@ -37,6 +39,7 @@ public record BastionTypeConfig(
         String displayName,
         BastionDao primaryDao,
         int maxTier,
+        UpkeepConfig upkeep,
         SpawningConfig spawning,
         ExpansionConfig expansion,
         ConnectivityConfig connectivity,
@@ -68,6 +71,51 @@ public record BastionTypeConfig(
      */
     public static final int DEFAULT_MYCELIUM_WEIGHT = DefaultValues.DEFAULT_MYCELIUM_WEIGHT;
 
+    /**
+     * 可选内容配置（用于 codec 分组）。
+     * <p>
+     * 注意：BastionTypeConfig 字段较多，RecordCodecBuilder 的 group 有 16 参数限制。
+     * 这里使用 {@link MapCodec} 把 3 个 Optional 字段（loot/high_tier/guardian_shazhao）打包为 1 组，
+     * 但 JSON schema 不变：仍然是根对象上的 3 个字段（不会引入额外嵌套对象）。
+     * </p>
+     */
+    private static final class OptionalContentConfig {
+        private final Optional<LootConfig> loot;
+        private final Optional<HighTierConfig> highTier;
+        private final Optional<GuardianShazhaoConfig> guardianShazhao;
+
+        private OptionalContentConfig(
+                Optional<LootConfig> loot,
+                Optional<HighTierConfig> highTier,
+                Optional<GuardianShazhaoConfig> guardianShazhao
+        ) {
+            this.loot = loot;
+            this.highTier = highTier;
+            this.guardianShazhao = guardianShazhao;
+        }
+
+        private Optional<LootConfig> loot() {
+            return loot;
+        }
+
+        private Optional<HighTierConfig> highTier() {
+            return highTier;
+        }
+
+        private Optional<GuardianShazhaoConfig> guardianShazhao() {
+            return guardianShazhao;
+        }
+
+        private static final MapCodec<OptionalContentConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
+                HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(OptionalContentConfig::highTier),
+                GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
+                    .forGetter(OptionalContentConfig::guardianShazhao)
+            ).apply(instance, OptionalContentConfig::new)
+        );
+    }
+
     /** 序列化/反序列化编解码器。 */
     public static final Codec<BastionTypeConfig> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
@@ -76,6 +124,8 @@ public record BastionTypeConfig(
             BastionDao.CODEC.fieldOf("primary_dao").forGetter(BastionTypeConfig::primaryDao),
             Codec.INT.optionalFieldOf("max_tier", DefaultValues.DEFAULT_MAX_TIER)
                 .forGetter(BastionTypeConfig::maxTier),
+            UpkeepConfig.CODEC.optionalFieldOf("upkeep", UpkeepConfig.DEFAULT)
+                .forGetter(BastionTypeConfig::upkeep),
             SpawningConfig.CODEC.optionalFieldOf("spawning", SpawningConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::spawning),
             ExpansionConfig.CODEC.optionalFieldOf("expansion", ExpansionConfig.DEFAULT)
@@ -94,16 +144,93 @@ public record BastionTypeConfig(
             // - anchorsWeight：Anchor（子核心/支撑节点）的权重
             // - myceliumWeight：菌毯（贴地蔓延主网）的权重
             // 兼容策略：旧版 JSON 若缺失该字段，必须回退为 10/1，保持当前游戏平衡不被破坏。
-            Codec.INT.optionalFieldOf("anchors_weight", DEFAULT_ANCHORS_WEIGHT)
+            Codec.INT.optionalFieldOf("anchors_weight", DefaultValues.DEFAULT_ANCHORS_WEIGHT)
                 .forGetter(BastionTypeConfig::anchorsWeight),
-            Codec.INT.optionalFieldOf("mycelium_weight", DEFAULT_MYCELIUM_WEIGHT)
+            Codec.INT.optionalFieldOf("mycelium_weight", DefaultValues.DEFAULT_MYCELIUM_WEIGHT)
                 .forGetter(BastionTypeConfig::myceliumWeight),
-            LootConfig.CODEC.optionalFieldOf("loot").forGetter(BastionTypeConfig::loot),
-            HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(BastionTypeConfig::highTier),
-            GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
-                .forGetter(BastionTypeConfig::guardianShazhao)
-        ).apply(instance, BastionTypeConfig::new)
+            // 可选内容配置。
+            // 注意：这里用 MapCodec 进行字段分组以规避 16 参数限制，但字段仍位于根对象。
+            OptionalContentConfig.MAP_CODEC.forGetter(config -> new OptionalContentConfig(
+                config.loot(),
+                config.highTier(),
+                config.guardianShazhao()
+            ))
+        ).apply(instance, (id,
+                displayName,
+                primaryDao,
+                maxTier,
+                upkeep,
+                spawning,
+                expansion,
+                connectivity,
+                decay,
+                evolution,
+                aura,
+                energy,
+                anchorsWeight,
+                myceliumWeight,
+                optionalContent) -> new BastionTypeConfig(
+            id,
+            displayName,
+            primaryDao,
+            maxTier,
+            upkeep,
+            spawning,
+            expansion,
+            connectivity,
+            decay,
+            evolution,
+            aura,
+            energy,
+            anchorsWeight,
+            myceliumWeight,
+            optionalContent.loot(),
+            optionalContent.highTier(),
+            optionalContent.guardianShazhao()
+        ))
     );
+
+    // ===== 守卫维护费（upkeep）配置 =====
+
+    /**
+     * 守卫维护费（upkeep）配置。
+     * <p>
+     * Round 4.1 的目标：把“守卫扣费 + 停机阈值”从代码常量下沉到 bastion_type JSON，便于不同道途独立调参。
+     * </p>
+     * <p>
+     * 兼容策略：旧版 bastion_type JSON 若缺失 upkeep 字段或其子字段，必须回退到旧行为：
+     * <ul>
+     *   <li>{@code per_guardian_cost} 缺省回退为 1.0（对齐 BastionGuardianUpkeepService 旧常量）。</li>
+     *   <li>{@code shutdown_threshold} 缺省回退为 0.0（对齐 BastionSpawnService 旧门禁：resourcePool<=0）。</li>
+     * </ul>
+     * </p>
+     * <p>
+     * 重要语义说明：停机门禁采用“含阈值”的比较（{@code resourcePool <= shutdown_threshold}）。
+     * 这样在默认阈值为 0.0 时，仍能严格复现旧逻辑“资源池为 0 即停机”。
+     * </p>
+     *
+     * @param perGuardianCost   每个守卫在一个维护间隔（tickInterval）内的维护费用
+     * @param shutdownThreshold 刷怪停机阈值（含）：资源池 <= 阈值时禁止继续刷出新守卫
+     */
+    public record UpkeepConfig(double perGuardianCost, double shutdownThreshold) {
+        public static final UpkeepConfig DEFAULT = new UpkeepConfig(
+            DefaultValues.DEFAULT_UPKEEP_PER_GUARDIAN_COST,
+            DefaultValues.DEFAULT_UPKEEP_SHUTDOWN_THRESHOLD
+        );
+
+        public static final Codec<UpkeepConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.DOUBLE.optionalFieldOf(
+                        "per_guardian_cost",
+                        DefaultValues.DEFAULT_UPKEEP_PER_GUARDIAN_COST)
+                    .forGetter(UpkeepConfig::perGuardianCost),
+                Codec.DOUBLE.optionalFieldOf(
+                        "shutdown_threshold",
+                        DefaultValues.DEFAULT_UPKEEP_SHUTDOWN_THRESHOLD)
+                    .forGetter(UpkeepConfig::shutdownThreshold)
+            ).apply(instance, UpkeepConfig::new)
+        );
+    }
 
     // ===== 衰败配置（菌毯断连后的倒计时） =====
 
@@ -273,6 +400,24 @@ public record BastionTypeConfig(
          * </p>
          */
         static final int DEFAULT_MYCELIUM_DECAY_BUDGET_NODES = 16;
+
+        // ===== 守卫维护费（upkeep）默认值 =====
+
+        /**
+         * 每个守卫每个维护间隔的维护费默认值。
+         * <p>
+         * 对齐 v1：BastionGuardianUpkeepService 内部旧常量 UPKEEP_COST_PER_GUARDIAN_PER_INTERVAL=1.0。
+         * </p>
+         */
+        static final double DEFAULT_UPKEEP_PER_GUARDIAN_COST = 1.0;
+
+        /**
+         * 刷怪停机阈值默认值。
+         * <p>
+         * 对齐 v1：BastionSpawnService 的旧门禁为 resourcePool<=0，因此缺省应为 0.0。
+         * </p>
+         */
+        static final double DEFAULT_UPKEEP_SHUTDOWN_THRESHOLD = 0.0;
 
         static final double DEFAULT_SPAWN_CHANCE = 0.1;
         static final double DEFAULT_TIER_SPAWN_BONUS = 0.05;

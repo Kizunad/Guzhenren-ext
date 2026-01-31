@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.bastion.service;
 
 import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -28,16 +30,8 @@ public final class BastionGuardianUpkeepService {
         // 工具类
     }
 
-    /** 非配置化的常量，先用于实现回合 4 的确定性扣费语义。 */
+    /** 非配置化的常量：只保留“计数策略”相关的技术常量。 */
     private static final class Constants {
-        /**
-         * 每个守卫在一个维护间隔（tickInterval）内的维护费用。
-         * <p>
-         * 这里刻意做成常量而非魔法数字，便于后续回合做平衡/配置化。
-         * </p>
-         */
-        static final double UPKEEP_COST_PER_GUARDIAN_PER_INTERVAL = 1.0;
-
         /**
          * 守卫计数时的垂直搜索半径。
          * <p>
@@ -65,7 +59,12 @@ public final class BastionGuardianUpkeepService {
      */
     public static BastionData applyUpkeep(ServerLevel level, BastionData bastion) {
         int guardianCount = countBastionGuardians(level, bastion);
-        double upkeepCost = guardianCount * Constants.UPKEEP_COST_PER_GUARDIAN_PER_INTERVAL;
+
+        // Round 4.1：维护费参数从 bastionType 配置读取。
+        // 兼容策略：旧 JSON 缺失 upkeep 字段时，BastionTypeConfig.CODEC 会回退默认值 1.0。
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        double costPerGuardian = typeConfig.upkeep().perGuardianCost();
+        double upkeepCost = guardianCount * costPerGuardian;
 
         double oldPool = bastion.resourcePool();
         double newPool = Math.max(0.0, oldPool - upkeepCost);

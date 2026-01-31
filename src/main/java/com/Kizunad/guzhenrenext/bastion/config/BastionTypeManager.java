@@ -142,6 +142,7 @@ public final class BastionTypeManager {
             "默认基地",
             BastionDao.ZHI_DAO,
             FALLBACK_MAX_TIER,
+            BastionTypeConfig.UpkeepConfig.DEFAULT,
             BastionTypeConfig.SpawningConfig.DEFAULT,
             BastionTypeConfig.ExpansionConfig.DEFAULT,
             BastionTypeConfig.ConnectivityConfig.DEFAULT,

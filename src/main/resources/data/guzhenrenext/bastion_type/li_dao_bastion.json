@@ -5,6 +5,10 @@
   "max_tier": 6,
   "anchors_weight": 10,
   "mycelium_weight": 1,
+  "upkeep": {
+    "per_guardian_cost": 1.0,
+    "shutdown_threshold": 0.0
+  },
   "spawning": {
     "base_spawn_chance": 0.15,
     "tier_spawn_bonus": 0.08,
