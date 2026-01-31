@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.bastion.service;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType;
@@ -131,7 +132,24 @@ public final class BastionEnergyService {
                 continue;
             }
 
-            BastionEnergyType detected = detectEnergyType(
+            // Round 3.1：能源节点成为可建造方块，必须“挂载在 Anchor 上”。
+            // 规则：仅当 Anchor 上方存在 BastionEnergyNodeBlock 时才允许该 Anchor 产生能源挂载。
+            BlockPos nodePos = anchorPos.above();
+            if (!level.isLoaded(nodePos)) {
+                continue;
+            }
+            BlockState nodeState = level.getBlockState(nodePos);
+            if (!(nodeState.getBlock() instanceof BastionEnergyNodeBlock)) {
+                // 该 Anchor 未挂载能源节点：清理旧记录（避免拆除后长期保留加成）。
+                energyMap.remove(anchorPos);
+                continue;
+            }
+
+            // Round 3.1：能源类型由“节点方块的类型属性”指定；扫描只负责校验环境是否满足该类型。
+            BastionEnergyType desiredType = nodeState.getValue(BastionEnergyNodeBlock.ENERGY_TYPE);
+
+            boolean valid = isEnergyTypeSatisfied(
+                desiredType,
                 level,
                 anchorPos,
                 photoRadius,
@@ -139,12 +157,13 @@ public final class BastionEnergyService {
                 geothermalRadius
             );
 
-            if (detected == null) {
-                // 扫描确认该 Anchor 不满足任何能源条件：移除旧记录，避免长期保留过期加成。
+            if (!valid) {
+                // 环境不满足：移除旧记录，避免长期保留过期加成。
                 energyMap.remove(anchorPos);
-            } else {
-                energyMap.put(anchorPos, detected);
+                continue;
             }
+
+            energyMap.put(anchorPos, desiredType);
         }
 
         // 清理失效条目：如果能源缓存里存在“已不在 anchorCache 的位置”，则移除。
@@ -158,31 +177,29 @@ public final class BastionEnergyService {
     }
 
     /**
-     * 判定某个 Anchor 的能源类型。
+     * 判断“指定能源类型”在当前环境中是否满足。
      * <p>
-     * 优先级（确定性）：地热 &gt; 汲水 &gt; 光合。
-     * <br>
-     * 解释：地热/汲水通常代表更“稀缺/强约束”的环境要素（岩浆/水源），
-     * 若同时满足多条件，优先让更强的类型占用挂载位，避免玩家通过堆叠环境获得不确定收益。
+     * Round 3.1：能源类型不再由扫描“推断”，而是由能源节点方块指定；
+     * 扫描只负责校验环境条件。
      * </p>
      */
-    private static BastionEnergyType detectEnergyType(
+    private static boolean isEnergyTypeSatisfied(
+            BastionEnergyType energyType,
             ServerLevel level,
             BlockPos anchorPos,
             int photoRadius,
             int waterRadius,
             int geothermalRadius) {
 
-        if (isGeothermal(level, anchorPos, geothermalRadius)) {
-            return BastionEnergyType.GEOTHERMAL;
+        if (energyType == null) {
+            return false;
         }
-        if (isWaterIntake(level, anchorPos, waterRadius)) {
-            return BastionEnergyType.WATER_INTAKE;
-        }
-        if (isPhotosynthesis(level, anchorPos, photoRadius)) {
-            return BastionEnergyType.PHOTOSYNTHESIS;
-        }
-        return null;
+
+        return switch (energyType) {
+            case PHOTOSYNTHESIS -> isPhotosynthesis(level, anchorPos, photoRadius);
+            case WATER_INTAKE -> isWaterIntake(level, anchorPos, waterRadius);
+            case GEOTHERMAL -> isGeothermal(level, anchorPos, geothermalRadius);
+        };
     }
 
     /**
@@ -193,9 +210,10 @@ public final class BastionEnergyService {
      * </p>
      */
     private static boolean isPhotosynthesis(ServerLevel level, BlockPos anchorPos, int scanRadius) {
-        // 以 Anchor 上方为起点做垂直采样。
+        // Round 3.1：能源节点本身位于 Anchor 上方一格。
+        // 因此这里从“能源节点上方”开始做垂直采样：避免节点方块本身阻挡 canSeeSky 判断。
         for (int dy = 1; dy <= scanRadius; dy++) {
-            BlockPos pos = anchorPos.above(dy);
+            BlockPos pos = anchorPos.above(dy + 1);
             if (!level.isLoaded(pos)) {
                 continue;
             }

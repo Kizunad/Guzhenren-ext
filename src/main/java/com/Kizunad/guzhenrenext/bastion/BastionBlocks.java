@@ -3,14 +3,20 @@ package com.Kizunad.guzhenrenext.bastion;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionReversalArrayBlock;
+import com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType;
+import com.Kizunad.guzhenrenext.bastion.service.BastionEnergyBuildService;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.ItemStackCustomDataHelper;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -107,6 +113,14 @@ public final class BastionBlocks {
         .strength(BlockProperties.MYCELIUM_HARDNESS, BlockProperties.MYCELIUM_BLAST_RESISTANCE)
         .sound(SoundType.GRASS);
 
+    /**
+     * 能源节点属性：中等硬度，类石材行为。
+     */
+    private static final BlockBehaviour.Properties ENERGY_NODE_PROPERTIES = BlockBehaviour.Properties.of()
+        .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
+        .sound(SoundType.STONE)
+        .requiresCorrectToolForDrops();
+
     // ===== 方块注册 =====
 
     /**
@@ -142,6 +156,14 @@ public final class BastionBlocks {
             () -> new BastionReversalArrayBlock(REVERSAL_ARRAY_PROPERTIES)
         );
 
+    /**
+     * 能源节点方块（带 energy_type 属性）。
+     */
+    public static final DeferredHolder<Block, BastionEnergyNodeBlock> BASTION_ENERGY_NODE = BLOCKS.register(
+        "bastion_energy_node",
+        () -> new BastionEnergyNodeBlock(ENERGY_NODE_PROPERTIES)
+    );
+
     // ===== 物品注册（方块物品） =====
 
     /**
@@ -158,6 +180,25 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BlockItem> BASTION_ANCHOR_ITEM = ITEMS.register(
         "bastion_anchor",
         () -> new BlockItem(BASTION_ANCHOR.get(), new Item.Properties())
+    );
+
+    /**
+     * 能源节点方块物品（可建造）。
+     * <p>
+     * Round 3.1：放置时必须满足 server-side 约束：
+     * <ul>
+     *     <li>只能放在 Anchor 上方</li>
+     *     <li>扣除 resourcePool（buildCost）</li>
+     *     <li>遵守 maxCount 上限</li>
+     * </ul>
+     * </p>
+     * <p>
+     * 能源类型通过物品 CustomData 写入（避免拆成 3 个独立方块）。
+     * </p>
+     */
+    public static final DeferredHolder<Item, BlockItem> BASTION_ENERGY_NODE_ITEM = ITEMS.register(
+        "bastion_energy_node",
+        () -> new BastionEnergyNodeItem(BASTION_ENERGY_NODE.get(), new Item.Properties())
     );
 
     /**
@@ -276,5 +317,73 @@ public final class BastionBlocks {
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);
         ITEMS.register(eventBus);
+    }
+
+    /**
+     * 能源节点物品：在服务端放置时做“扣费/上限/归属”校验。
+     */
+    private static final class BastionEnergyNodeItem extends BlockItem {
+
+        /** ItemStack CustomData 中记录能源类型的 key（append-only，可平滑兼容）。 */
+        private static final String TAG_ENERGY_TYPE = "bastion_energy_type";
+
+        private BastionEnergyNodeItem(Block block, Properties properties) {
+            super(block, properties);
+        }
+
+        @Override
+        protected boolean placeBlock(
+                BlockPlaceContext context,
+                net.minecraft.world.level.block.state.BlockState state) {
+            if (context == null) {
+                return false;
+            }
+
+            // 客户端：保持原始行为（让客户端先行放置预览），最终以服务端为权威。
+            if (context.getLevel().isClientSide()) {
+                return super.placeBlock(context, state);
+            }
+
+            if (!(context.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel)
+                || !(context.getPlayer() instanceof net.minecraft.server.level.ServerPlayer serverPlayer)) {
+                return false;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(serverLevel);
+            BastionEnergyType type = readEnergyTypeFromStack(context.getItemInHand());
+
+            net.minecraft.world.level.block.state.BlockState desired = state;
+            if (desired.getBlock() instanceof BastionEnergyNodeBlock) {
+                desired = desired.setValue(BastionEnergyNodeBlock.ENERGY_TYPE, type);
+            }
+
+            boolean ok = BastionEnergyBuildService.tryBuildEnergyNode(
+                serverLevel,
+                savedData,
+                serverPlayer,
+                context.getClickedPos(),
+                desired,
+                type
+            );
+
+            // 说明：tryBuildEnergyNode 内部已执行 setBlock。
+            // 这里返回 true 仅用于告诉上层“放置成功”，由 BlockItem 流程处理消耗/统计。
+            return ok;
+        }
+
+        private static BastionEnergyType readEnergyTypeFromStack(ItemStack stack) {
+            CompoundTag tag = ItemStackCustomDataHelper.copyCustomDataTag(stack);
+            if (!tag.contains(TAG_ENERGY_TYPE)) {
+                return BastionEnergyType.PHOTOSYNTHESIS;
+            }
+
+            String raw = tag.getString(TAG_ENERGY_TYPE);
+            for (BastionEnergyType type : BastionEnergyType.values()) {
+                if (type.getSerializedName().equals(raw)) {
+                    return type;
+                }
+            }
+            return BastionEnergyType.PHOTOSYNTHESIS;
+        }
     }
 }
