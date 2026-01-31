@@ -497,6 +497,17 @@ public final class BastionExpansionService {
             return false;
         }
 
+        // 贴地约束：菌毯扩张必须“落在地面上”。
+        // 这里使用 isFaceSturdy(UP) 而不是 isSolidRender：
+        // - isSolidRender 更偏向“渲染遮挡/是否看起来是实心方块”，它会把很多可站立的形态（如台阶/半砖等）排除掉；
+        // - isFaceSturdy 用于判断某个面是否能提供稳定支撑，更贴近“能否站立/放置在其上”的物理语义；
+        // - 扩张逻辑目标是约束菌毯不会生成在空中/可坍塌边缘，而不是做视觉意义上的实心判断。
+        BlockPos below = pos.below();
+        BlockState belowState = level.getBlockState(below);
+        if (!belowState.isFaceSturdy(level, below, Direction.UP)) {
+            return false;
+        }
+
         // 检查是否已被其他基地占用
         // （非重叠约束由 BastionSavedData.canPlaceBastion 在创建时保证）
         return true;
