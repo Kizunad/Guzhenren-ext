@@ -49,21 +49,6 @@ public final class BastionExpansionService {
         /** 六个方向的数量。 */
         static final int DIRECTION_COUNT = 6;
 
-        /** Anchor 自动生成冷却（tick）。 */
-        static final long ANCHOR_TRY_COOLDOWN_TICKS = 100L;
-
-        /** Anchor 触发距离阈值（格）。 */
-        static final int ANCHOR_TRIGGER_DISTANCE = 10;
-
-        /** Anchor 最大数量（每个基地）。 */
-        static final int ANCHOR_MAX_COUNT = 16;
-
-        /** Anchor 最小间距（格）。 */
-        static final int ANCHOR_MIN_SPACING = 8;
-
-        /** Anchor 生成成本。 */
-        static final double ANCHOR_BUILD_COST = 50.0;
-
         /** Anchor 采样随机扰动常量（用于与菌毯扩张的随机序列错开）。 */
         static final int ANCHOR_RANDOM_SALT = 31;
 
@@ -157,10 +142,6 @@ public final class BastionExpansionService {
     /**
      * 尝试放置 Anchor（子核心/支撑节点）。
      * <p>
-     * MVP：先不做配置化拆分，直接使用文档默认参数：
-     * triggerDistance=10，maxCount=16，spacing=8，buildCost=50。
-     * </p>
-     * <p>
      * 失败回退原则：
      * <ul>
      *   <li>资源不足 / 达到上限 / 找不到合法位置：直接返回，不影响菌毯扩张</li>
@@ -245,6 +226,10 @@ public final class BastionExpansionService {
             bastion.id().hashCode() ^ (bastion.growthCursor() + Constants.ANCHOR_RANDOM_SALT));
 
         int candidateSamples = Math.max(1, Constants.CANDIDATE_SAMPLE_COUNT);
+
+        // spacing 为 Anchor 自动生成的“空间约束”参数：
+        // 1) 从 frontier 向外偏移的步长；
+        // 2) 与现有 Anchor 的最小间距。
         int spacing = Math.max(1, anchorConfig.spacing());
         for (int i = 0; i < candidateSamples; i++) {
             BlockPos source = frontierList.get(random.nextInt(frontierList.size()));
@@ -300,6 +285,37 @@ public final class BastionExpansionService {
     }
 
     private static boolean placeMycelium(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BlockPos pos,
+            BastionData bastion) {
+        Block nodeBlock = BastionBlocks.BASTION_NODE.get();
+        if (!(nodeBlock instanceof BastionMyceliumBlock myceliumBlock)) {
+            return false;
+        }
+
+        BlockState nodeState = myceliumBlock.defaultBlockState();
+        level.setBlock(pos, nodeState, Block.UPDATE_ALL);
+
+        // 将新节点添加到缓存（用于 frontier 追踪，非持久化）。
+        savedData.addNodeToCache(bastion.id(), pos);
+        return true;
+    }
+
+    /**
+     * 在指定位置放置 Anchor 方块。
+     * <p>
+     * 说明：Anchor 是“扩张服务生成”的支点节点，因此需要写入 GENERATED=true，
+     * 以便与玩家手动放置的 Anchor 区分（计数/拆除风险等逻辑会使用该标记）。
+     * </p>
+     *
+     * @param level     服务端世界
+     * @param savedData 基地存储数据
+     * @param pos       目标位置
+     * @param bastion   基地数据
+     * @return 是否成功放置
+     */
+    private static boolean placeAnchor(
             ServerLevel level,
             BastionSavedData savedData,
             BlockPos pos,
@@ -495,39 +511,4 @@ public final class BastionExpansionService {
     }
 
     // ===== 节点放置 =====
-
-    /**
-     * 在指定位置放置节点方块。
-     * <p>
-     * 使用 GENERATED=true 标记节点为扩张服务生成，
-     * 确保服务器重启后节点计数逻辑仍能正确工作。
-     * </p>
-     *
-     * @param level     服务端世界
-     * @param savedData 基地存储数据
-     * @param pos       目标位置
-     * @param bastion   基地数据
-     * @return 是否成功放置
-     */
-    private static boolean placeAnchor(
-            ServerLevel level,
-            BastionSavedData savedData,
-            BlockPos pos,
-            BastionData bastion) {
-        // MVP：扩张落点为菌毯；Anchor 将在后续“自动生成支点”阶段单独放置。
-        Block nodeBlock = BastionBlocks.BASTION_NODE.get();
-        if (!(nodeBlock instanceof BastionMyceliumBlock myceliumBlock)) {
-            return false;
-        }
-
-        BlockState nodeState = myceliumBlock.defaultBlockState();
-
-        // 放置方块（不触发 onPlace 的节点计数，由此服务直接处理）
-        level.setBlock(pos, nodeState, Block.UPDATE_ALL);
-
-        // 将新节点添加到缓存（用于 frontier 追踪，非持久化）
-        savedData.addNodeToCache(bastion.id(), pos);
-
-        return true;
-    }
 }
