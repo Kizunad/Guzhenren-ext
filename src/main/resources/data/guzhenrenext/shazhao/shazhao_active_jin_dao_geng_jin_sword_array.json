@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array",
+  "title": "庚金剑阵",
+  "desc": "金道防御杀招。以金精蛊为基，锯齿金蜈辅之，在周身布下锐利无比的庚金剑气。剑阵不仅能绞杀靠近的敌人，更能对攻击者施加惨痛的反击。",
+  "info": "主动释放 | 持续消耗真元 | 反伤+切割 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:jin_jing_gu",
+    "guzhenren:ju_chi_jin_wu_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array_radius": "4.5",
+    "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array_duration": "240",
+    "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array_damage_reduction": "0.0",
+    "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array_enemy_damage": "8.0",
+    "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array_zhenyuan_base_cost_per_second": "5.5",
+    "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array_thorns_damage": "15.0",
+    "guzhenrenext:shazhao_active_jin_dao_geng_jin_sword_array_cooldown": "600"
+  }
+}

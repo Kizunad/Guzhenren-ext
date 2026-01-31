@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "guzhenrenext:block/bastion_reversal_array"
+    },
+    "active=true": {
+      "model": "guzhenrenext:block/bastion_reversal_array_active"
+    }
+  }
+}

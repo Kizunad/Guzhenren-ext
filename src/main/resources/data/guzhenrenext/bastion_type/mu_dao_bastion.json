@@ -14,14 +14,31 @@
     ]
   },
   "expansion": {
-    "base_cost": 3.0,
-    "tier_multiplier": 1.1,
-    "max_radius": 80,
-    "max_per_tick": 5
+    "mycelium": {
+      "base_cost": 3.0,
+      "tier_multiplier": 1.1,
+      "max_radius": 80,
+      "max_per_tick": 5,
+      "spacing": 3
+    },
+    "anchor": {
+      "build_cost": 50.0,
+      "spacing": 8,
+      "max_count": 16,
+      "trigger_distance": 10,
+      "cooldown_ticks": 100
+    }
   },
   "evolution": {
     "base_evolution_ticks": 90000,
     "tier_multiplier": 3
+  },
+  "aura": {
+    "base_radius": 24,
+    "tier_exponent": 1.8,
+    "max_radius": 1024,
+    "falloff_power": 2.5,
+    "min_falloff": 0.03
   },
   "loot": {
     "loot_table": "guzhenrenext:bastion/mu_dao",

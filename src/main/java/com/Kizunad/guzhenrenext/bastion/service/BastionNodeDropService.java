@@ -1,7 +1,7 @@
 package com.Kizunad.guzhenrenext.bastion.service;
 
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
-import com.Kizunad.guzhenrenext.bastion.block.BastionNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.JingLiHelper;
@@ -105,14 +105,14 @@ public final class BastionNodeDropService {
      */
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        // 检查方块是否为节点
+        // 检查方块是否为 Anchor
         BlockState state = event.getState();
-        if (!(state.getBlock() instanceof BastionNodeBlock)) {
+        if (!(state.getBlock() instanceof BastionAnchorBlock)) {
             return;
         }
 
-        // 检查节点是否由扩张服务生成
-        if (!state.getValue(BastionNodeBlock.GENERATED)) {
+        // 检查 Anchor 是否由扩张服务生成
+        if (!state.getValue(BastionAnchorBlock.GENERATED)) {
             return;
         }
 
@@ -122,8 +122,8 @@ public final class BastionNodeDropService {
         }
 
         // 获取节点属性
-        int tier = state.getValue(BastionNodeBlock.TIER);
-        BastionDao dao = state.getValue(BastionNodeBlock.DAO);
+        int tier = state.getValue(BastionAnchorBlock.TIER);
+        BastionDao dao = state.getValue(BastionAnchorBlock.DAO);
 
         // 计算并给予奖励（使用玩家随机源）
         RandomSource random = player.getRandom();

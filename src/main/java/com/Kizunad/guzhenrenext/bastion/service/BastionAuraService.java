@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
+import java.util.List;
 import com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierSkillService;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.JingLiHelper;
@@ -106,6 +107,7 @@ public final class BastionAuraService {
      * 处理玩家刻事件。
      * <p>
      * 每秒检测一次玩家是否在基地领域内，并应用资源消耗。
+     * 支持多个基地光环重叠，玩家会受到所有覆盖光环的效果（距离衰减后叠加）。
      * </p>
      */
     @SubscribeEvent
@@ -122,29 +124,33 @@ public final class BastionAuraService {
             return;
         }
 
-        // 查找玩家所在的基地
+        // 查找玩家所在的所有基地（支持光环重叠）
         BlockPos playerPos = player.blockPosition();
         BastionSavedData savedData = BastionSavedData.get(level);
-        BastionData bastion = findBastionContainingPlayer(savedData, playerPos, gameTime);
+        List<BastionData> bastions = findBastionsContainingPlayer(savedData, playerPos, gameTime);
 
         java.util.UUID playerId = player.getUUID();
         java.util.UUID previousBastionId = PLAYER_IN_BASTION.get(playerId);
 
-        if (bastion != null) {
-            // 玩家在基地领域内
-            java.util.UUID currentBastionId = bastion.id();
+        if (!bastions.isEmpty()) {
+            // 玩家在至少一个基地领域内
+            // 使用第一个基地的 ID 作为"主基地"用于进入/离开消息
+            BastionData primaryBastion = bastions.get(0);
+            java.util.UUID currentBastionId = primaryBastion.id();
 
             // 检测是否刚进入新基地
             if (previousBastionId == null || !previousBastionId.equals(currentBastionId)) {
                 PLAYER_IN_BASTION.put(playerId, currentBastionId);
-                sendEnterMessage(player, bastion);
+                sendEnterMessage(player, primaryBastion);
             }
 
-            // 应用光环效果
-            applyAuraEffect(player, bastion);
+            // 应用所有覆盖光环的效果（距离衰减后叠加）
+            for (BastionData bastion : bastions) {
+                applyAuraEffect(player, bastion, playerPos);
 
-            // 驱动高转被动技能/特效（每秒触发一次，内部会做每基地节流）
-            BastionHighTierSkillService.runPassiveEffects(level, bastion, gameTime);
+                // 驱动高转被动技能/特效（每秒触发一次，内部会做每基地节流）
+                BastionHighTierSkillService.runPassiveEffects(level, bastion, gameTime);
+            }
         } else {
             // 玩家不在任何基地领域内
             if (previousBastionId != null) {
@@ -157,23 +163,25 @@ public final class BastionAuraService {
     // ===== 基地查找 =====
 
     /**
-     * 查找包含玩家位置的活跃基地。
+     * 查找包含玩家位置的所有活跃基地（支持光环重叠）。
      * <p>
-     * 使用 chunk 距离预过滤优化：
-     * 1. 先计算基地核心与玩家的 chunk 距离
-     * 2. 若 chunk 距离超过 (radius/16 + 1)，直接跳过
-     * 3. 仅对通过预过滤的基地进行精确距离计算
+     * 使用 auraRadius（而非 growthRadius）判定玩家是否在光环范围内。
+     * 支持多个基地光环重叠的场景。
+     * </p>
+     * <p>
+     * 优化：使用 chunk 距离预过滤，减少精确距离计算次数。
      * </p>
      *
      * @param savedData 基地存储数据
      * @param playerPos 玩家位置
      * @param gameTime  当前游戏时间
-     * @return 包含玩家的活跃基地，如果没有则返回 null
+     * @return 包含玩家的所有活跃基地列表（可能为空）
      */
-    private static BastionData findBastionContainingPlayer(
+    private static List<BastionData> findBastionsContainingPlayer(
             BastionSavedData savedData,
             BlockPos playerPos,
             long gameTime) {
+        List<BastionData> result = new java.util.ArrayList<>();
         int playerChunkX = playerPos.getX() >> SearchConfig.CHUNK_BITS;
         int playerChunkZ = playerPos.getZ() >> SearchConfig.CHUNK_BITS;
 
@@ -184,12 +192,12 @@ public final class BastionAuraService {
             }
 
             BlockPos corePos = bastion.corePos();
-            int radius = bastion.growthRadius();
+            int auraRadius = bastion.getAuraRadius();  // 使用光环半径而非节点扩张半径
 
             // Chunk 距离预过滤（+1 容错边界）
             int coreChunkX = corePos.getX() >> SearchConfig.CHUNK_BITS;
             int coreChunkZ = corePos.getZ() >> SearchConfig.CHUNK_BITS;
-            int maxChunkDist = (radius >> SearchConfig.CHUNK_BITS) + 1;
+            int maxChunkDist = (auraRadius >> SearchConfig.CHUNK_BITS) + 1;
 
             int chunkDistX = Math.abs(playerChunkX - coreChunkX);
             int chunkDistZ = Math.abs(playerChunkZ - coreChunkZ);
@@ -198,36 +206,76 @@ public final class BastionAuraService {
                 continue;  // 快速跳过远距离基地
             }
 
-            // 精确距离检查
+            // 精确距离检查（使用 auraRadius）
             double distSq = playerPos.distSqr(corePos);
-            if (distSq <= (long) radius * radius) {
-                return bastion;
+            if (distSq <= (long) auraRadius * auraRadius) {
+                result.add(bastion);
             }
         }
-        return null;
+        return result;
+    }
+
+    /**
+     * 查找包含玩家位置的活跃基地（兼容旧接口，返回第一个匹配）。
+     *
+     * @param savedData 基地存储数据
+     * @param playerPos 玩家位置
+     * @param gameTime  当前游戏时间
+     * @return 包含玩家的活跃基地，如果没有则返回 null
+     */
+    private static BastionData findBastionContainingPlayer(
+            BastionSavedData savedData,
+            BlockPos playerPos,
+            long gameTime) {
+        List<BastionData> bastions = findBastionsContainingPlayer(savedData, playerPos, gameTime);
+        return bastions.isEmpty() ? null : bastions.get(0);
     }
 
     // ===== 光环效果 =====
 
     /**
-     * 应用光环资源消耗效果（按道途分配资源类型）。
+     * 应用光环资源消耗效果（按道途分配资源类型 + 距离衰减）。
+     * <p>
+     * 资源消耗根据玩家到核心的距离进行衰减：
+     * <ul>
+     *   <li>中心区域：效果最强（接近 100%）</li>
+     *   <li>边缘区域：效果最弱（接近 minFalloff，默认 5%）</li>
+     * </ul>
+     * 衰减公式：drain = baseDrain * (1 - distance/auraRadius)^falloffPower
+     * </p>
      * <p>
      * 对于魂道基地，魂魄消耗有下限保护（最低保留 1），
      * 光环不应直接导致玩家死亡。
      * </p>
      *
-     * @param player  目标玩家
-     * @param bastion 所在基地
+     * @param player    目标玩家
+     * @param bastion   所在基地
+     * @param playerPos 玩家位置
      */
-    private static void applyAuraEffect(ServerPlayer player, BastionData bastion) {
+    private static void applyAuraEffect(ServerPlayer player, BastionData bastion, BlockPos playerPos) {
         int tier = bastion.tier();
         BastionDao dao = bastion.primaryDao();
 
-        // 计算消耗量
-        double drain = Math.min(
+        // 计算距离和衰减因子
+        double distance = Math.sqrt(playerPos.distSqr(bastion.corePos()));
+        double falloff = bastion.getAuraFalloff(distance);
+
+        // 如果衰减因子为 0（超出光环范围），不应用效果
+        if (falloff <= 0) {
+            return;
+        }
+
+        // 计算基础消耗量（基于转数）
+        double baseDrain = Math.min(
             ResourceConfig.MAX_DRAIN,
             ResourceConfig.TIER_1_BASE * Math.pow(ResourceConfig.TIER_MULTIPLIER, tier - 1)
         );
+
+        // 应用距离衰减
+        double drain = baseDrain * falloff;
+
+        // 道途特化光环效果（如智道：疲劳+缓慢）
+        dao.onAuraTick(player, tier, falloff);
 
         // 按道途分配资源消耗
         String resourceName;
@@ -261,10 +309,12 @@ public final class BastionAuraService {
             }
         }
 
-        LOGGER.trace("玩家 {} 在 {}转 {} 基地领域内，消耗 {} {}",
+        LOGGER.trace("玩家 {} 在 {}转 {} 基地领域内，距离 {} 衰减 {}，消耗 {} {}",
             player.getName().getString(),
             tier,
             dao.getSerializedName(),
+            distance,
+            falloff,
             actualDrain,
             resourceName);
     }

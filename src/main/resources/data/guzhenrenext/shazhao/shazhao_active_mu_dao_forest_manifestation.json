@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_mu_dao_forest_manifestation",
+  "title": "森罗万象",
+  "desc": "木道防御杀招。以建木蛊为根，花种为媒，瞬间催生出一片充满生机的森林领域。藤蔓将缠绕一切入侵者，汲取其生命力以滋养施术者。",
+  "info": "主动释放 | 持续消耗真元 | 定身+吸血 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:jianmugu",
+    "guzhenren:tiekehuazhonggu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_mu_dao_forest_manifestation_radius": "5.0",
+    "guzhenrenext:shazhao_active_mu_dao_forest_manifestation_duration": "240",
+    "guzhenrenext:shazhao_active_mu_dao_forest_manifestation_damage_reduction": "0.0",
+    "guzhenrenext:shazhao_active_mu_dao_forest_manifestation_enemy_damage": "4.0",
+    "guzhenrenext:shazhao_active_mu_dao_forest_manifestation_zhenyuan_base_cost_per_second": "5.0",
+    "guzhenrenext:shazhao_active_mu_dao_forest_manifestation_lifesteal_ratio": "0.5",
+    "guzhenrenext:shazhao_active_mu_dao_forest_manifestation_cooldown": "600"
+  }
+}

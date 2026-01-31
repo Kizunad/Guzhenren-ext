@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe",
+  "title": "红莲业火袍",
+  "desc": "炎道四转防御杀招。身披红莲业火，焚尽世间罪孽。领域内化为炼狱火海，任何靠近者都将遭受毁灭性的持续灼烧。",
+  "info": "主动释放 | 持续消耗真元 | 毁灭灼烧+高抗性 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:huahuanyuegu",
+    "guzhenren:liehuoxiongqu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe_radius": "6.0",
+    "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe_duration": "300",
+    "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe_enemy_damage": "50.0",
+    "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe_resistance_amplifier": "2",
+    "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe_explosion_radius": "6.0",
+    "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe_zhenyuan_base_cost_per_second": "70.0",
+    "guzhenrenext:shazhao_active_yan_dao_red_lotus_karmic_robe_cooldown": "1200"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall",
+  "title": "不动明王·石龙壁",
+  "desc": "土道四转防御杀招。召唤上古石龙之力，化作不动明王法相护体。石龙盘绕，青山不倒，给予施术者海量的护盾与极致的伤害减免，足以硬抗千钧一击。",
+  "info": "主动释放 | 持续消耗真元 | 巨量护盾+高额减伤 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:shilongqunjiagu",
+    "guzhenren:qingshanzaigu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall_radius": "6.0",
+    "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall_duration": "300",
+    "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall_damage_reduction": "200.0",
+    "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall_resistance_amplifier": "3",
+    "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall_enemy_damage": "50.0",
+    "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall_zhenyuan_base_cost_per_second": "50.0",
+    "guzhenrenext:shazhao_active_tu_dao_immovable_king_wall_cooldown": "1200"
+  }
+}

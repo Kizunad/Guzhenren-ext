@@ -69,6 +69,12 @@ public class FlyingSwordForgeMenu extends AbstractContainerMenu {
         addSlot(new TinyUISlot(inputContainer, 0, HIDDEN_POS, HIDDEN_POS));
         addPlayerSlots(playerInventory);
         addDataSlots(data);
+
+        // 初始同步一次，确保客户端按钮/进度不会一直停留在默认值。
+        if (playerInventory.player instanceof ServerPlayer serverPlayer) {
+            syncDataFromAttachment(serverPlayer);
+            broadcastChanges();
+        }
     }
 
     public static FlyingSwordForgeMenu fromNetwork(
@@ -170,6 +176,20 @@ public class FlyingSwordForgeMenu extends AbstractContainerMenu {
             slot.set(ItemStack.EMPTY);
         } else {
             slot.setChanged();
+        }
+
+        // 注意：shift-click（QUICK_MOVE）时，原版不一定会触发 inputContainer 的 slotsChanged 回调。
+        // 这里补一层兜底：若物品被移入输入槽，则立即按“投喂逻辑”处理并同步 data。
+        if (player instanceof ServerPlayer serverPlayer) {
+            ItemStack input = inputContainer.getItem(0);
+            if (!input.isEmpty()) {
+                FlyingSwordForgeService.handleInsertItem(
+                    serverPlayer,
+                    inputContainer
+                );
+            }
+            syncDataFromAttachment(serverPlayer);
+            broadcastChanges();
         }
         return copy;
     }

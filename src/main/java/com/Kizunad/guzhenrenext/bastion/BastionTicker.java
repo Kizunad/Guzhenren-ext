@@ -2,14 +2,18 @@ package com.Kizunad.guzhenrenext.bastion;
 
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
+import com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType;
 import com.Kizunad.guzhenrenext.bastion.network.BastionNetworkHandler;
 import com.Kizunad.guzhenrenext.bastion.service.BastionCleanupService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionConnectivityService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionEnergyService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionExpansionService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionSpawnService;
 import com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierSkillService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,6 +77,19 @@ public final class BastionTicker {
         static final double POOL_BASE_GAIN_FACTOR = 0.01;
         /** 转数幂基数（用于计算转数加成）。 */
         static final double TIER_POWER_BASE = 1.5;
+
+        /**
+         * 有效节点数权重：Anchor 的权重（子核心/支撑节点）。
+         * <p>
+         * 设计：Anchor 更稀有且更关键，因此权重大于菌毯。
+         * </p>
+         */
+        static final int EFFECTIVE_NODE_ANCHOR_WEIGHT = 10;
+
+        /**
+         * 有效节点数权重：菌毯的权重（贴地蔓延主网）。
+         */
+        static final int EFFECTIVE_NODE_MYCELIUM_WEIGHT = 1;
 
         private MultiplierConfig() {
         }
@@ -259,6 +276,11 @@ public final class BastionTicker {
         if (elapsed < DecayConfig.DESTRUCTION_DECAY_WINDOW_TICKS) {
             // 衰减窗口 - 调用清理服务处理节点衰减
             BastionCleanupService.processCleanup(level, savedData, bastion, gameTime);
+
+            // 回合2：连通性/衰败 v1 也在 DESTROYED 阶段继续推进（作为额外安全网）。
+            // 设计：即使旧清理服务只处理 Anchor，这里也会让断连菌毯按倒计时消失。
+            BastionConnectivityService.tick(level, savedData, bastion, gameTime);
+
             BastionData updated = bastion.withLastGameTime(gameTime);
             savedData.updateBastion(updated);
             return;
@@ -267,6 +289,10 @@ public final class BastionTicker {
         if (elapsed < DecayConfig.DESTRUCTION_REMOVAL_TICKS) {
             // 衰减后期 - 继续清理残余节点
             BastionCleanupService.processCleanup(level, savedData, bastion, gameTime);
+
+            // 回合2：继续推进连通性/衰败。
+            BastionConnectivityService.tick(level, savedData, bastion, gameTime);
+
             BastionData updated = bastion.withLastGameTime(gameTime);
             savedData.updateBastion(updated);
             return;
@@ -283,12 +309,17 @@ public final class BastionTicker {
 
         // 清理高转技能运行时状态
         BastionHighTierSkillService.onBastionRemoved(bastion.id());
+
+        // 清理同步缓存
+        BastionNetworkHandler.clearSyncCache(bastion.id());
+
         LOGGER.info("基地 {} 在销毁超时后被移除", bastion.id());
 
         // 通知客户端移除缓存
         BastionNetworkHandler.notifyRemoveToNearbyPlayers(
             level, bastion.id(),
-            bastion.corePos().getX(), bastion.corePos().getZ());
+            bastion.corePos().getX(), bastion.corePos().getZ(),
+            bastion.getAuraRadius());
     }
 
     /**
@@ -335,15 +366,71 @@ public final class BastionTicker {
             return;
         }
 
+        // 回合2：连通性 v1（非实时 BFS）+ 衰败 v1（可观察）
+        // 设计：该逻辑应在 chunk 已加载时推进；由 determineTickCategory 保证 UNLOADED 已提前返回。
+        // 预算由 BastionConnectivityService 自身控制，避免在 BastionTicker 再做二次预算叠加。
+        BastionConnectivityService.tick(level, savedData, bastion, gameTime);
+
         // 根据类别计算乘数
         double evolutionMultiplier = category == TickCategory.FULL
             ? 1.0 : MultiplierConfig.NO_PLAYER_EVOLUTION_MULTIPLIER;
         double poolMultiplier = category == TickCategory.FULL
             ? 1.0 : MultiplierConfig.NO_PLAYER_POOL_MULTIPLIER;
 
-        // 更新资源池
-        double poolGain = calculatePoolGain(bastion, poolMultiplier);
-        double poolCap = bastion.totalNodes() * MultiplierConfig.POOL_CAP_PER_NODE;
+        // 更新资源池（按“有效节点数”计算：Anchor 权重更高，菌毯权重更低）
+        int effectiveNodes = calculateEffectiveNodes(bastion);
+
+        // 回合3：能源挂载 v1 需要预算化扫描以更新“Anchor -> 能源类型”运行时缓存。
+        // 说明：该缓存不持久化，且扫描成本较高，因此必须由 BastionEnergyService 进行预算化驱动。
+        BastionEnergyService.tick(level, savedData, bastion, gameTime);
+
+        // 从缓存统计各能源类型数量，并按配置 maxCount 截断。
+        // 解释：maxCount 是“上限贡献数”，即使缓存里有更多同类能源挂载，也只取前 maxCount 个计入加成，
+        // 以避免通过堆量 Anchor 获得线性无限收益。
+        BastionTypeConfig typeConfigForEnergy = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.EnergyConfig energyConfig = typeConfigForEnergy.energy();
+        Map<BlockPos, BastionEnergyType> energyMap = savedData.getOrCreateAnchorEnergyMap(bastion.id());
+
+        int photoMax = Math.max(0, energyConfig.photosynthesis().maxCount());
+        int waterMax = Math.max(0, energyConfig.waterIntake().maxCount());
+        int geoMax = Math.max(0, energyConfig.geothermal().maxCount());
+        int photoCount = 0;
+        int waterCount = 0;
+        int geoCount = 0;
+        for (BastionEnergyType type : energyMap.values()) {
+            if (type == null) {
+                continue;
+            }
+            if (type == BastionEnergyType.PHOTOSYNTHESIS) {
+                if (photoCount < photoMax) {
+                    photoCount++;
+                }
+            } else if (type == BastionEnergyType.WATER_INTAKE) {
+                if (waterCount < waterMax) {
+                    waterCount++;
+                }
+            } else if (type == BastionEnergyType.GEOTHERMAL) {
+                if (geoCount < geoMax) {
+                    geoCount++;
+                }
+            }
+        }
+
+        // 能源加成策略：倍率是“加法语义”（mAdd=0.25 表示额外 +25%），最终 multiplier=poolMultiplier*(1+mAdd)。
+        // flat 为平坦增量，不参与倍率放大：
+        // - 原因：flat 用于表达“环境提供的固定供给”，若再乘倍率会形成乘法叠加，导致收益随节点/转数爆炸。
+        // - 设计：flat 仅与 TickInterval 线性累计，保持可控。
+        double mAdd = photoCount * energyConfig.photosynthesis().poolGainMultiplier()
+            + waterCount * energyConfig.waterIntake().poolGainMultiplier()
+            + geoCount * energyConfig.geothermal().poolGainMultiplier();
+        double flatAdd = photoCount * energyConfig.photosynthesis().poolGainFlat()
+            + waterCount * energyConfig.waterIntake().poolGainFlat()
+            + geoCount * energyConfig.geothermal().poolGainFlat();
+        double multiplierFinal = poolMultiplier * (1.0 + Math.max(0.0, mAdd));
+
+        double basePoolGain = calculatePoolGain(bastion, effectiveNodes, multiplierFinal);
+        double poolGain = basePoolGain + flatAdd * TickConfig.TICK_INTERVAL;
+        double poolCap = effectiveNodes * MultiplierConfig.POOL_CAP_PER_NODE;
         double newPool = Math.min(poolCap, bastion.resourcePool() + poolGain);
 
         // 更新进化进度
@@ -408,9 +495,18 @@ public final class BastionTicker {
     /**
      * 计算每刻间隔的资源池获取量。
      */
-    private static double calculatePoolGain(BastionData bastion, double multiplier) {
+    private static int calculateEffectiveNodes(BastionData bastion) {
+        // 核心/旧节点总数依然保留在 bastion.totalNodes，用于 aura 等旧机制。
+        // 资源池使用单独的“有效节点数”，避免菌毯不计入 totalNodes 导致资源池过低。
+        int anchors = Math.max(0, bastion.totalAnchors());
+        int mycelium = Math.max(0, bastion.totalMycelium());
+        return anchors * MultiplierConfig.EFFECTIVE_NODE_ANCHOR_WEIGHT
+            + mycelium * MultiplierConfig.EFFECTIVE_NODE_MYCELIUM_WEIGHT;
+    }
+
+    private static double calculatePoolGain(BastionData bastion, int effectiveNodes, double multiplier) {
         double tierFactor = Math.pow(MultiplierConfig.TIER_POWER_BASE, bastion.tier() - 1);
-        double baseGain = bastion.totalNodes() * tierFactor * MultiplierConfig.POOL_BASE_GAIN_FACTOR;
+        double baseGain = effectiveNodes * tierFactor * MultiplierConfig.POOL_BASE_GAIN_FACTOR;
         return baseGain * multiplier * TickConfig.TICK_INTERVAL;
     }
 

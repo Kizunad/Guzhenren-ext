@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell",
+  "title": "不灭金钟罩",
+  "desc": "金道四转防御杀招。金钟蛊与金缕衣蛊的完美结合，铸就不灭金身。金钟罩体，万法不侵，且能将敌人的攻击以五倍之力震反回去。",
+  "info": "主动释放 | 持续消耗真元 | 极高反伤+高抗性 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:jinzhonggu",
+    "guzhenren:jinlvyigu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell_radius": "5.0",
+    "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell_duration": "300",
+    "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell_enemy_damage": "20.0",
+    "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell_thorns_multiplier": "5.0",
+    "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell_resistance_amplifier": "3",
+    "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell_zhenyuan_base_cost_per_second": "60.0",
+    "guzhenrenext:shazhao_active_jin_dao_indestructible_golden_bell_cooldown": "1200"
+  }
+}

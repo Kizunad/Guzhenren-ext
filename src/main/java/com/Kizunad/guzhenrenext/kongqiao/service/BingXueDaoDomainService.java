@@ -56,7 +56,14 @@ public final class BingXueDaoDomainService {
     public static final String KEY_DOMAIN_SLOW_AMPLIFIER =
         "GuzhenrenExtBingXue_SnowDomainSlowAmplifier";
 
+    public static final String KEY_DOMAIN_SELF_HEAL = "GuzhenrenExtBingXue_SnowDomainSelfHeal";
+    public static final String KEY_DOMAIN_ENEMY_DAMAGE = "GuzhenrenExtBingXue_SnowDomainEnemyDamage";
+
     private static final int TICKS_PER_SECOND = 20;
+
+    private static final int RESISTANCE_DURATION_TICKS = 40;
+    private static final int RESISTANCE_AMPLIFIER = 4;
+    private static final int EXTRA_FREEZE_TICKS = 100;
 
     private BingXueDaoDomainService() {}
 
@@ -189,6 +196,14 @@ public final class BingXueDaoDomainService {
             return;
         }
 
+        if (!player.getPersistentData().contains(KEY_DOMAIN_MAGIC_DAMAGE_PER_SECOND)) {
+            return;
+        }
+
+        tickSnowDomainMagicEffect(player, radius);
+    }
+
+    private static void tickSnowDomainMagicEffect(final ServerPlayer player, final double radius) {
         final double baseDamage = Math.max(
             0.0,
             player.getPersistentData().getDouble(KEY_DOMAIN_MAGIC_DAMAGE_PER_SECOND)
@@ -205,6 +220,8 @@ public final class BingXueDaoDomainService {
             0,
             player.getPersistentData().getInt(KEY_DOMAIN_SLOW_AMPLIFIER)
         );
+        final double enemyDamage = player.getPersistentData().getDouble(KEY_DOMAIN_ENEMY_DAMAGE);
+        final double selfHeal = player.getPersistentData().getDouble(KEY_DOMAIN_SELF_HEAL);
 
         final AABB area = player.getBoundingBox().inflate(radius);
         final List<LivingEntity> targets = player.level().getEntitiesOfClass(
@@ -234,7 +251,28 @@ public final class BingXueDaoDomainService {
                     (float) (baseDamage * multiplier)
                 );
             }
+
+            if (enemyDamage > 0) {
+                target.hurt(player.damageSources().freeze(), (float) enemyDamage);
+                target.setTicksFrozen(target.getTicksRequiredToFreeze() + EXTRA_FREEZE_TICKS);
+            }
         }
+
+        if (selfHeal <= 0) {
+            return;
+        }
+
+        player.heal((float) selfHeal);
+        player.addEffect(
+            new MobEffectInstance(
+                MobEffects.DAMAGE_RESISTANCE,
+                RESISTANCE_DURATION_TICKS,
+                RESISTANCE_AMPLIFIER,
+                false,
+                false,
+                true
+            )
+        );
     }
 
     private static void clearSnowDomain(final ServerPlayer player) {

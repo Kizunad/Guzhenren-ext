@@ -19,6 +19,8 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.kongqiao.button.expand";
     public static final String KONGQIAO_BUTTON_ATTACK =
         "screen.guzhenrenext.kongqiao.button.attack";
+    public static final String KONGQIAO_BUTTON_FORGE =
+        "screen.guzhenrenext.kongqiao.button.forge";
     public static final String ATTACK_TITLE =
         "screen.guzhenrenext.attack.title";
     public static final String ATTACK_BUTTON_SWAP =

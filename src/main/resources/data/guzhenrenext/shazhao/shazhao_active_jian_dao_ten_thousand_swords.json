@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_jian_dao_ten_thousand_swords",
+  "title": "万剑归宗",
+  "desc": "剑道防御杀招。以剑影蛊幻化万千剑气，剑纹蛊铭刻杀伐法则。剑域之内，剑气纵横，敌人的护甲如纸糊般脆弱，手中的兵刃更会因恐惧而颤抖脱手。",
+  "info": "主动释放 | 持续消耗真元 | 缴械+破甲 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:jian_ying_gu",
+    "guzhenren:jianwengu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_jian_dao_ten_thousand_swords_radius": "5.0",
+    "guzhenrenext:shazhao_active_jian_dao_ten_thousand_swords_duration": "240",
+    "guzhenrenext:shazhao_active_jian_dao_ten_thousand_swords_enemy_damage": "6.0",
+    "guzhenrenext:shazhao_active_jian_dao_ten_thousand_swords_zhenyuan_cost_per_second": "5.5",
+    "guzhenrenext:shazhao_active_jian_dao_ten_thousand_swords_disarm_chance": "0.1",
+    "guzhenrenext:shazhao_active_jian_dao_ten_thousand_swords_cooldown": "600"
+  }
+}

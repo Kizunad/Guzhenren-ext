@@ -319,13 +319,19 @@ public final class BastionHighTierSkillService {
 
     // ===== 内部：收集对象 =====
 
+    /**
+     * 收集光环范围内的玩家。
+     * <p>
+     * 使用 auraRadius 而非 growthRadius，确保高转技能效果范围与光环一致。
+     * </p>
+     */
     private static List<ServerPlayer> collectPlayersInDomain(
         final ServerLevel level,
         final BastionData bastion
     ) {
         final List<ServerPlayer> targets = new ArrayList<>();
         final BlockPos core = bastion.corePos();
-        final int radius = Math.max(1, bastion.growthRadius());
+        final int radius = Math.max(1, bastion.getAuraRadius());
         final AABB box = new AABB(
             core.getX() - radius,
             core.getY() - radius,

@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_li_dao_absolute_strength_suppression",
+  "title": "一力降十会",
+  "desc": "力道四转防御杀招。四转钧号蛊与大力蛊的共鸣，产生足以扭曲空间的重力场。领域内重力倍增，敌人如背负泰山，且施术者的每一次受击都会以万钧之力震碎敌人。",
+  "info": "主动释放 | 持续消耗真元 | 重力压制+真实反伤 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:jun_hao_gu_4",
+    "guzhenren:daligu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_li_dao_absolute_strength_suppression_radius": "6.0",
+    "guzhenrenext:shazhao_active_li_dao_absolute_strength_suppression_duration": "300",
+    "guzhenrenext:shazhao_active_li_dao_absolute_strength_suppression_gravity_multiplier": "5.0",
+    "guzhenrenext:shazhao_active_li_dao_absolute_strength_suppression_repel_strength": "3.0",
+    "guzhenrenext:shazhao_active_li_dao_absolute_strength_suppression_zhenyuan_base_cost_per_second": "60.0",
+    "guzhenrenext:shazhao_active_li_dao_absolute_strength_suppression_cooldown": "1200"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_feng_dao_nine_heavens_astral_wind",
+  "title": "九天罡风壁",
+  "desc": "风道四转防御杀招。引九天之上的罡风护体，形成一道无法逾越的风墙。任何实体和攻击都将被绝对排斥，无法近身分毫。",
+  "info": "主动释放 | 持续消耗真元 | 绝对排斥+远程免疫 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:dalongjuanfenggu",
+    "guzhenren:zhui_feng_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_feng_dao_nine_heavens_astral_wind_radius": "6.0",
+    "guzhenrenext:shazhao_active_feng_dao_nine_heavens_astral_wind_duration": "300",
+    "guzhenrenext:shazhao_active_feng_dao_nine_heavens_astral_wind_knockback_strength": "3.0",
+    "guzhenrenext:shazhao_active_feng_dao_nine_heavens_astral_wind_zhenyuan_base_cost_per_second": "55.0",
+    "guzhenrenext:shazhao_active_feng_dao_nine_heavens_astral_wind_cooldown": "1200"
+  }
+}

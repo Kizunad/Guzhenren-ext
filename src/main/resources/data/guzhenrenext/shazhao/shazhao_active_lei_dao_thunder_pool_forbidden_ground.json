@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_lei_dao_thunder_pool_forbidden_ground",
+  "title": "雷池禁地",
+  "desc": "雷道四转防御杀招。借天元宝君莲之威，化周身为绝对的雷池禁地。踏入者如遭雷亟，寸步难行；手持兵刃者更会遭到雷霆的无情轰击。",
+  "info": "主动释放 | 持续消耗真元 | 绝对定身+强力落雷 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:tianyuanbaojunlian",
+    "guzhenren:leidungu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_lei_dao_thunder_pool_forbidden_ground_radius": "6.0",
+    "guzhenrenext:shazhao_active_lei_dao_thunder_pool_forbidden_ground_duration": "300",
+    "guzhenrenext:shazhao_active_lei_dao_thunder_pool_forbidden_ground_stun_duration": "20",
+    "guzhenrenext:shazhao_active_lei_dao_thunder_pool_forbidden_ground_lightning_interval": "20",
+    "guzhenrenext:shazhao_active_lei_dao_thunder_pool_forbidden_ground_zhenyuan_base_cost_per_second": "65.0",
+    "guzhenrenext:shazhao_active_lei_dao_thunder_pool_forbidden_ground_cooldown": "1200"
+  }
+}

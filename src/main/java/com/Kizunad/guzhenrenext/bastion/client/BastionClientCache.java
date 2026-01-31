@@ -35,7 +35,8 @@ public final class BastionClientCache {
      * @param corePos             核心方块坐标
      * @param dao                 道途类型
      * @param tier                转数
-     * @param radius              扩张半径
+     * @param radius              节点扩张半径
+     * @param auraRadius          光环影响半径（用于边界渲染）
      * @param persistedState      持久化状态（ACTIVE/DESTROYED）
      * @param sealedUntilGameTime 封印解除时间（0 表示未封印）
      * @param color               渲染颜色（基于道途）
@@ -46,6 +47,7 @@ public final class BastionClientCache {
             BastionDao dao,
             int tier,
             int radius,
+            int auraRadius,
             BastionState persistedState,
             long sealedUntilGameTime,
             int color
@@ -64,6 +66,7 @@ public final class BastionClientCache {
                 dao,
                 payload.tier(),
                 payload.radius(),
+                payload.auraRadius(),
                 payload.getState(),
                 payload.sealedUntilGameTime(),
                 dao.getColorWithAlpha()

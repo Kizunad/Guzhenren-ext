@@ -3,6 +3,7 @@
     "screen.guzhenrenext.kongqiao.hint": "Unlock more Kongqiao rows with the expand button.",
     "screen.guzhenrenext.kongqiao.button.expand": "Expand Kongqiao",
     "screen.guzhenrenext.kongqiao.button.attack": "Open Attack Inventory",
+    "screen.guzhenrenext.kongqiao.button.forge": "Flying Sword Forge",
     "screen.guzhenrenext.common.button.feed": "Feed Gu Insect",
     "screen.guzhenrenext.attack.title": "Attack Inventory",
     "screen.guzhenrenext.attack.button.swap": "Swap With Player",
@@ -10,6 +11,7 @@
     "screen.guzhenrenext.common.player_inventory": "Player Inventory",
     "screen.guzhenrenext.feed.title": "Gu Insect Feeding",
     "screen.guzhenrenext.feed.button.auto": "Enable Auto Feed",
+    "menu.guzhenrenext.flying_sword_forge": "Flying Sword Forge",
     "key.categories.guzhenrenext": "Guzhenren Extension",
     "key.guzhenrenext.kongqiao": "Open Kongqiao Window",
     "key.guzhenrenext.attack_swap": "Swap Attack Inventory",
@@ -34,6 +36,31 @@
     "screen.guzhenrenext.niantou.button.derive_shazhao": "Derive Shazhao",
     "screen.guzhenrenext.niantou.time_label": "Time",
     "screen.guzhenrenext.niantou.cost_label": "Cost",
+
+    "screen.guzhenrenext.forge.title": "Flying Sword Forge",
+    "screen.guzhenrenext.forge.button.claim": "Claim",
+    "screen.guzhenrenext.forge.button.cancel": "Cancel",
+
     "death.attack.guzhenrenext.antelope_pierce": "%1$s was pierced by antelope horns",
-    "death.attack.guzhenrenext.antelope_pierce.player": "%1$s was pierced by %2$s"
+    "death.attack.guzhenrenext.antelope_pierce.player": "%1$s was pierced by %2$s",
+    "block.guzhenrenext.bastion_node": "Bastion Node",
+    "block.guzhenrenext.bastion_core": "Bastion Core",
+  "block.guzhenrenext.bastion_reversal_array": "Reversal Array",
+  "block.guzhenrenext.bastion_core": "Bastion Core",
+  "block.guzhenrenext.bastion_node": "Bastion Mycelium",
+  "block.guzhenrenext.bastion_anchor": "Bastion Anchor",
+  "tooltip.guzhenrenext.bastion_core.hint": "Hold §eShift§7 for info",
+  "tooltip.guzhenrenext.bastion_core.desc.1": "§6Use:§f The bastion core block (destroying it marks the bastion DESTROYED)",
+  "tooltip.guzhenrenext.bastion_core.desc.2": "§6Mechanics:§f Higher tier is harder; some modifiers further increase hardness",
+  "tooltip.guzhenrenext.bastion_core.desc.3": "§6Tip:§f Reversal Array steals the resourcePool (raiding)",
+
+  "tooltip.guzhenrenext.bastion_reversal_array.hint": "Hold §eShift§7 for usage",
+    "tooltip.guzhenrenext.bastion_reversal_array.desc.1": "§6Use:§f Steal bastion resourcePool into random Gu",
+    "tooltip.guzhenrenext.bastion_reversal_array.desc.2": "§6Structure:§f Nodes must be placed on N/S/E/W",
+    "tooltip.guzhenrenext.bastion_reversal_array.desc.3": "§6Activate:§f Right-click with Gu material to sacrifice",
+  "tooltip.guzhenrenext.bastion_reversal_array.desc.4": "§6Fuel:§f Requires Spring Eye (guzhenren:quanyan)",
+    "tooltip.guzhenrenext.bastion_reversal_array.desc.5": "§cRisk:§f High chance to trigger hunters / radiation",
+
+    "advancement.guzhenrenext.bastion.reversal_array.title": "Reversal Array",
+    "advancement.guzhenrenext.bastion.reversal_array.desc": "Steal bastion pool for Gu (high risk)"
 }

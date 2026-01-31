@@ -29,7 +29,7 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
     private static final int BUTTON_HEIGHT = 18;
     private static final int BUTTON_WIDTH = 120;
     private static final int BUTTON_GAP = 8;
-    private static final int BUTTON_COUNT = 3;
+    private static final int BUTTON_COUNT = 4;
     private static final int SECTION_GAP = 12;
     private static final int SCROLLBAR_ALLOWANCE = 14;
     private static final int HINT_MARGIN_TOP = 4;
@@ -121,6 +121,14 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
             sendAction(ServerboundKongqiaoActionPayload.Action.OPEN_ATTACK)
         );
 
+        Button forgeButton = new Button(
+            KongqiaoI18n.text(KongqiaoI18n.KONGQIAO_BUTTON_FORGE),
+            theme
+        );
+        forgeButton.setOnClick(() ->
+            sendAction(ServerboundKongqiaoActionPayload.Action.OPEN_FORGE)
+        );
+
         UIElement playerGrid = InventoryUI.playerInventoryGrid(
             menu.getTotalSlots(),
             SLOT_SIZE,
@@ -141,7 +149,7 @@ public class KongqiaoScreen extends TinyUIContainerScreen<KongqiaoMenu> {
             kongqiaoGrid,
             title,
             hint,
-            new Button[] { expandButton, feedButton, attackButton }
+            new Button[] { expandButton, feedButton, attackButton, forgeButton }
         );
         buildPlayerPanel(window, layout, playerGrid);
     }

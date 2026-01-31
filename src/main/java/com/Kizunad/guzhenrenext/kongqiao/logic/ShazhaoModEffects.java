@@ -47,6 +47,36 @@ public final class ShazhaoModEffects {
             .registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.xuedao.shazhao.XueDaoShazhaoRegistry
             .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.tudao.shazhao.TuDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.fengdao.shazhao.FengDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.yandao.shazhao.YanDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.jindao.shazhao.JinDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.shuidao.shazhao.ShuiDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.mudao.shazhao.MuDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.leidao.shazhao.LeiDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.lidao.shazhao.LiDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.jiandao.shazhao.JianDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.xuedao.shazhao.XueDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.hundao.shazhao.HunDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bingxuedao.shazhao.BingXueDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.zhidao.shazhao.ZhiDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.bianhuadao.shazhao.BianHuaDaoShazhaoRegistry
+            .registerAll();
+        com.Kizunad.guzhenrenext.kongqiao.logic.impl.active.daos.lvdao.shazhao.LvDaoShazhaoRegistry
+            .registerAll();
 
         registered = true;
     }

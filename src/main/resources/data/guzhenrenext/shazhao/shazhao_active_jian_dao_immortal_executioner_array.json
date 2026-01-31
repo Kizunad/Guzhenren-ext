@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array",
+  "title": "诛仙剑阵",
+  "desc": "剑道四转防御杀招。多重剑影重叠，剑刃风暴护体。非但能削减九成近战伤害，更能直接斩杀领域内虚弱的敌人。顺我者昌，逆我者亡。",
+  "info": "主动释放 | 持续消耗真元 | 斩杀低血量+近战免伤 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:duochongjianying",
+    "guzhenren:jianrengu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array_radius": "7.0",
+    "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array_duration": "300",
+    "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array_execute_threshold": "0.2",
+    "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array_damage_reduction_melee": "0.9",
+    "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array_enemy_damage": "20.0",
+    "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array_zhenyuan_base_cost_per_second": "70.0",
+    "guzhenrenext:shazhao_active_jian_dao_immortal_executioner_array_cooldown": "1200"
+  }
+}

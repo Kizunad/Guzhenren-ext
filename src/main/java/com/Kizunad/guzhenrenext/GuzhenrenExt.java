@@ -46,9 +46,17 @@ public class GuzhenrenExt {
 
         // Bastion system registration
         com.Kizunad.guzhenrenext.bastion.BastionBlocks.register(modEventBus);
+        com.Kizunad.guzhenrenext.bastion.BastionBlockEntities.register(modEventBus);
         com.Kizunad.guzhenrenext.bastion.BastionSounds.register(modEventBus);
         com.Kizunad.guzhenrenext.bastion.BastionCreativeTab.register(modEventBus);
         com.Kizunad.guzhenrenext.bastion.BastionTicker.register();
+
+        // Bastion guardians
+        com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianEntities.register(modEventBus);
+        // Client 渲染注册通过 @EventBusSubscriber(Dist.CLIENT) 自动挂载。
+
+        // Worldgen
+        com.Kizunad.guzhenrenext.worldgen.GuzhenrenExtWorldGen.register(modEventBus);
 
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onAddReloadListeners);
@@ -86,5 +94,6 @@ public class GuzhenrenExt {
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataLoader());
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataLoader());
         event.addListener(new com.Kizunad.guzhenrenext.bastion.config.BastionTypeDataLoader());
+        event.addListener(new com.Kizunad.guzhenrenext.bastion.config.BastionBreakingDataLoader());
     }
 }

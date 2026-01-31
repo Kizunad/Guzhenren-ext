@@ -3,7 +3,9 @@ package com.Kizunad.guzhenrenext.commands;
 import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionModifier;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
+import com.Kizunad.guzhenrenext.worldgen.BastionRuinLocator;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.LiuPaiHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
@@ -62,6 +64,9 @@ public class GuzhenrenDebugCommand {
     /** 飞剑等级上限（命令参数）。 */
     private static final int MAX_LEVEL_CAP = 1000;
 
+    /** 方块中心偏移。 */
+    private static final double CENTER_OFFSET = 0.5;
+
     /** 品质名称建议提供器。 */
     private static final SuggestionProvider<
         CommandSourceStack
@@ -94,6 +99,7 @@ public class GuzhenrenDebugCommand {
                 .then(buildBridgeCommands())
                 .then(buildDomainCommands())
                 .then(buildBastionCommands())
+                .then(buildBastionRuinCommands())
         );
     }
 
@@ -291,7 +297,293 @@ public class GuzhenrenDebugCommand {
                 Commands.literal("give_node").executes(
                     GuzhenrenDebugCommand::giveBastionNode
                 )
+            )
+            .then(
+                Commands.literal("modifier")
+                    .then(
+                        Commands.literal("add")
+                            .then(
+                                Commands.argument("modifier", StringArgumentType.word())
+                                    .suggests((context, builder) -> {
+                                        for (BastionModifier modifier : BastionModifier.values()) {
+                                            builder.suggest(modifier.getSerializedName());
+                                        }
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(GuzhenrenDebugCommand::addModifierToNearestBastion)
+                            )
+                    )
+                    .then(
+                        Commands.literal("remove")
+                            .then(
+                                Commands.argument("modifier", StringArgumentType.word())
+                                    .suggests((context, builder) -> {
+                                        for (BastionModifier modifier : BastionModifier.values()) {
+                                            builder.suggest(modifier.getSerializedName());
+                                        }
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(GuzhenrenDebugCommand::removeModifierFromNearestBastion)
+                            )
+                    )
+                    .then(
+                        Commands.literal("list")
+                            .executes(GuzhenrenDebugCommand::listNearestBastionModifiers)
+                    )
             );
+    }
+
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > buildBastionRuinCommands() {
+        return Commands.literal("bastion_ruin")
+            .then(
+                Commands.literal("stats")
+                    .executes(GuzhenrenDebugCommand::bastionRuinStats)
+            )
+            .then(
+                Commands.literal("tp_last")
+                    .executes(GuzhenrenDebugCommand::bastionRuinTpLast)
+            )
+            .then(
+                Commands.literal("tp_last_attempt")
+                    .executes(GuzhenrenDebugCommand::bastionRuinTpLastAttempt)
+            )
+            .then(
+                Commands.literal("clear")
+                    .executes(GuzhenrenDebugCommand::bastionRuinClear)
+            );
+    }
+
+    private static BastionModifier parseModifier(final String text) {
+        if (text == null || text.isBlank()) {
+            return null;
+        }
+        for (BastionModifier modifier : BastionModifier.values()) {
+            if (modifier.getSerializedName().equals(text)) {
+                return modifier;
+            }
+        }
+        return null;
+    }
+
+    private static int addModifierToNearestBastion(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            String modifierText = StringArgumentType.getString(context, "modifier");
+            BastionModifier modifier = parseModifier(modifierText);
+            if (modifier == null) {
+                context.getSource().sendFailure(Component.literal("未知 modifier: " + modifierText));
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(player.blockPosition(), BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("附近未找到基地"));
+                return 0;
+            }
+
+            java.util.Set<BastionModifier> newModifiers = new java.util.HashSet<>(bastion.modifiers());
+            newModifiers.add(modifier);
+            BastionData updated = bastion.withModifiers(newModifiers);
+            savedData.updateBastion(updated);
+
+            context.getSource().sendSuccess(
+                () -> Component.literal("已为基地 "
+                    + bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH)
+                    + " 添加词缀: " + modifier.getSerializedName()),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("操作失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int removeModifierFromNearestBastion(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            String modifierText = StringArgumentType.getString(context, "modifier");
+            BastionModifier modifier = parseModifier(modifierText);
+            if (modifier == null) {
+                context.getSource().sendFailure(Component.literal("未知 modifier: " + modifierText));
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(player.blockPosition(), BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("附近未找到基地"));
+                return 0;
+            }
+
+            java.util.Set<BastionModifier> newModifiers = new java.util.HashSet<>(bastion.modifiers());
+            boolean removed = newModifiers.remove(modifier);
+            if (!removed) {
+                context.getSource().sendFailure(Component.literal("基地未包含该词缀: " + modifier.getSerializedName()));
+                return 0;
+            }
+
+            BastionData updated = bastion.withModifiers(newModifiers);
+            savedData.updateBastion(updated);
+
+            context.getSource().sendSuccess(
+                () -> Component.literal("已为基地 "
+                    + bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH)
+                    + " 移除词缀: " + modifier.getSerializedName()),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("操作失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int listNearestBastionModifiers(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(player.blockPosition(), BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("附近未找到基地"));
+                return 0;
+            }
+
+            String modifierText = bastion.modifiers().isEmpty()
+                ? "(none)"
+                : bastion.modifiers().stream()
+                    .map(BastionModifier::getSerializedName)
+                    .sorted()
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("(none)");
+
+            context.getSource().sendSuccess(
+                () -> Component.literal("基地 "
+                    + bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH)
+                    + " modifiers: " + modifierText),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("操作失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int bastionRuinStats(CommandContext<CommandSourceStack> context) {
+        int count = BastionRuinLocator.count();
+        context.getSource().sendSuccess(
+            () -> Component.literal(
+                "已记录的 Bastion 遗迹生成次数: " + count
+                    + " | 尝试: " + BastionRuinLocator.attemptCount()
+                    + " | 成功: " + BastionRuinLocator.successCount()
+                    + " | 待激活: " + BastionRuinLocator.pendingCount()
+            ),
+            false
+        );
+        BastionRuinLocator.lastSuccess().ifPresent(record -> context.getSource().sendSuccess(
+            () -> Component.literal(
+                "最近一次: " + record.dimension().location() + " @ " + record.pos().toShortString()
+            ),
+            false
+        ));
+        return 1;
+    }
+
+    private static int bastionRuinTpLast(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+            var recordOpt = BastionRuinLocator.lastSuccess();
+            if (recordOpt.isEmpty()) {
+                context.getSource().sendFailure(Component.literal("尚未记录任何 Bastion 遗迹生成"));
+                return 0;
+            }
+            var record = recordOpt.get();
+            if (!record.dimension().equals(level.dimension())) {
+                context.getSource().sendFailure(Component.literal(
+                    "最近遗迹不在当前维度: " + record.dimension().location()
+                ));
+                return 0;
+            }
+
+            BlockPos pos = record.pos();
+            player.teleportTo(level,
+                pos.getX() + CENTER_OFFSET,
+                pos.getY() + 1.0,
+                pos.getZ() + CENTER_OFFSET,
+                player.getYRot(), player.getXRot());
+            context.getSource().sendSuccess(
+                () -> Component.literal("已传送到最近遗迹: " + pos.toShortString()),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int bastionRuinTpLastAttempt(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+            var recordOpt = BastionRuinLocator.lastAttempt();
+            if (recordOpt.isEmpty()) {
+                context.getSource().sendFailure(Component.literal("尚未记录任何 Bastion 遗迹尝试"));
+                return 0;
+            }
+            var record = recordOpt.get();
+            if (!record.dimension().equals(level.dimension())) {
+                context.getSource().sendFailure(Component.literal(
+                    "最近尝试不在当前维度: " + record.dimension().location()
+                ));
+                return 0;
+            }
+
+            BlockPos pos = record.pos();
+            player.teleportTo(level,
+                pos.getX() + CENTER_OFFSET,
+                pos.getY() + 1.0,
+                pos.getZ() + CENTER_OFFSET,
+                player.getYRot(), player.getXRot());
+            context.getSource().sendSuccess(
+                () -> Component.literal("已传送到最近尝试位置: " + pos.toShortString()),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int bastionRuinClear(CommandContext<CommandSourceStack> context) {
+        BastionRuinLocator.clear();
+        context.getSource().sendSuccess(
+            () -> Component.literal("已清空 Bastion 遗迹记录"),
+            false
+        );
+        return 1;
     }
 
     private static int spawnDomain(CommandContext<CommandSourceStack> context) {

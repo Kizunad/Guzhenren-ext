@@ -58,8 +58,8 @@ public final class BastionBoundaryRenderer {
     /** 封印闪烁振幅。 */
     private static final float SEALED_BLINK_AMPLITUDE = 0.2f;
 
-    /** 渲染距离阈值的平方。 */
-    private static final double RENDER_DISTANCE_SQUARED = 256.0 * 256.0;
+    /** 渲染距离缓冲区（确保玩家接近边缘时能看到边界）。 */
+    private static final int RENDER_DISTANCE_BUFFER = 64;
 
     /** 颜色分量提取常量。 */
     private static final int COLOR_SHIFT_RED = 16;
@@ -126,6 +126,10 @@ public final class BastionBoundaryRenderer {
 
     /**
      * 渲染单个基地的边界。
+     * <p>
+     * 使用 auraRadius（光环影响半径）而非 growthRadius（节点扩张半径）进行渲染，
+     * 确保玩家看到的边界与实际效果判定范围一致。
+     * </p>
      */
     private static void renderBastionBoundary(
             final PoseStack poseStack,
@@ -133,10 +137,12 @@ public final class BastionBoundaryRenderer {
             final Vec3 cameraPos,
             final BastionClientCache.CachedBastion bastion,
             final long gameTime) {
-        // 距离检查
+        // 距离检查：使用 auraRadius 确保大光环基地也能正确渲染
         double dx = bastion.corePos().getX() - cameraPos.x;
         double dz = bastion.corePos().getZ() - cameraPos.z;
-        if (dx * dx + dz * dz > RENDER_DISTANCE_SQUARED) {
+        double distSq = dx * dx + dz * dz;
+        int effectiveRadius = bastion.auraRadius() + RENDER_DISTANCE_BUFFER;
+        if (distSq > (long) effectiveRadius * effectiveRadius) {
             return;
         }
 
@@ -182,8 +188,8 @@ public final class BastionBoundaryRenderer {
             }
         }
 
-        // 渲染圆形边界
-        renderCircle(poseStack, buffer, bastion.radius(), red, green, blue, alpha);
+        // 使用 auraRadius 渲染圆形边界（与效果判定范围一致）
+        renderCircle(poseStack, buffer, bastion.auraRadius(), red, green, blue, alpha);
 
         poseStack.popPose();
     }

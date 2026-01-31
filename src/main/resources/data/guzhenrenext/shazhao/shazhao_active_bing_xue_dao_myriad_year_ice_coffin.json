@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_bing_xue_dao_myriad_year_ice_coffin",
+  "title": "万载玄冰棺",
+  "desc": "冰雪道四转防御杀招。以蓝鸟冰棺蛊自封，残月雪衣护体。化身万载不化的玄冰，虽无法动弹，却拥有绝对的防御与惊人的恢复力。靠近者皆被极寒冻结。",
+  "info": "主动释放 | 持续消耗真元 | 无敌自封+极寒领域 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:lan_niao_bing_guan_gu",
+    "guzhenren:canyuexueyi"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_bing_xue_dao_myriad_year_ice_coffin_radius": "5.0",
+    "guzhenrenext:shazhao_active_bing_xue_dao_myriad_year_ice_coffin_duration": "300",
+    "guzhenrenext:shazhao_active_bing_xue_dao_myriad_year_ice_coffin_enemy_damage": "20.0",
+    "guzhenrenext:shazhao_active_bing_xue_dao_myriad_year_ice_coffin_self_heal": "10.0",
+    "guzhenrenext:shazhao_active_bing_xue_dao_myriad_year_ice_coffin_zhenyuan_base_cost_per_second": "40.0",
+    "guzhenrenext:shazhao_active_bing_xue_dao_myriad_year_ice_coffin_cooldown": "1200"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_li_dao_overlord_force_field",
+  "title": "霸王力场",
+  "desc": "力道防御杀招。以钧之力蛊为核，横冲蛊辅之，形成极具压迫感的斥力场。任何试图高速冲撞的敌人都将被霸道的力量狠狠弹飞。",
+  "info": "主动释放 | 持续消耗真元 | 冲撞反制 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:jun_zhi_li_gu",
+    "guzhenren:heng_chong_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_li_dao_overlord_force_field_radius": "4.0",
+    "guzhenrenext:shazhao_active_li_dao_overlord_force_field_duration": "240",
+    "guzhenrenext:shazhao_active_li_dao_overlord_force_field_zhenyuan_base_cost_per_second": "5.0",
+    "guzhenrenext:shazhao_active_li_dao_overlord_force_field_repel_strength": "1.5",
+    "guzhenrenext:shazhao_active_li_dao_overlord_force_field_cooldown": "600"
+  }
+}

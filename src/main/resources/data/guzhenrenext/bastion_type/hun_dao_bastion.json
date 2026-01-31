@@ -14,18 +14,49 @@
     ]
   },
   "expansion": {
-    "base_cost": 4.0,
-    "tier_multiplier": 1.15,
-    "max_radius": 72,
-    "max_per_tick": 4
+    "mycelium": {
+      "base_cost": 4.0,
+      "tier_multiplier": 1.15,
+      "max_radius": 72,
+      "max_per_tick": 4,
+      "spacing": 4
+    },
+    "anchor": {
+      "build_cost": 50.0,
+      "spacing": 8,
+      "max_count": 16,
+      "trigger_distance": 10,
+      "cooldown_ticks": 100
+    }
   },
   "evolution": {
     "base_evolution_ticks": 60000,
     "tier_multiplier": 3
   },
+  "aura": {
+    "base_radius": 20,
+    "tier_exponent": 2.0,
+    "max_radius": 1280,
+    "falloff_power": 1.5,
+    "min_falloff": 0.08
+  },
   "loot": {
     "loot_table": "guzhenrenext:bastion/hun_dao",
     "drop_on_destroy": true,
     "drop_on_capture": true
+  },
+  "guardian_shazhao": {
+    "active_pool": [
+      {
+        "shazhao_id": "guzhenrenext:shazhao_active_hun_dao_nether_ghost_domain",
+        "weight": 3,
+        "min_tier": 3
+      },
+      {
+        "shazhao_id": "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom",
+        "weight": 1,
+        "min_tier": 5
+      }
+    ]
   }
 }

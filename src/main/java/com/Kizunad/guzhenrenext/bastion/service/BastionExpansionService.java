@@ -4,9 +4,11 @@ import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
-import com.Kizunad.guzhenrenext.bastion.block.BastionNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
+import com.Kizunad.guzhenrenext.bastion.network.BastionNetworkHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -47,6 +49,24 @@ public final class BastionExpansionService {
         /** 六个方向的数量。 */
         static final int DIRECTION_COUNT = 6;
 
+        /** Anchor 自动生成冷却（tick）。 */
+        static final long ANCHOR_TRY_COOLDOWN_TICKS = 100L;
+
+        /** Anchor 触发距离阈值（格）。 */
+        static final int ANCHOR_TRIGGER_DISTANCE = 10;
+
+        /** Anchor 最大数量（每个基地）。 */
+        static final int ANCHOR_MAX_COUNT = 16;
+
+        /** Anchor 最小间距（格）。 */
+        static final int ANCHOR_MIN_SPACING = 8;
+
+        /** Anchor 生成成本。 */
+        static final double ANCHOR_BUILD_COST = 50.0;
+
+        /** Anchor 采样随机扰动常量（用于与菌毯扩张的随机序列错开）。 */
+        static final int ANCHOR_RANDOM_SALT = 31;
+
         private Constants() {
         }
     }
@@ -79,8 +99,10 @@ public final class BastionExpansionService {
         // 从配置读取扩张参数
         BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
         BastionTypeConfig.ExpansionConfig expansionConfig = typeConfig.expansion();
+        BastionTypeConfig.MyceliumConfig myceliumConfig = expansionConfig.mycelium();
+        BastionTypeConfig.AnchorConfig anchorConfig = expansionConfig.anchor();
 
-        double expansionCost = calculateExpansionCost(bastion, expansionConfig);
+        double expansionCost = calculateExpansionCost(bastion, myceliumConfig);
         if (bastion.resourcePool() < expansionCost) {
             return 0;
         }
@@ -91,17 +113,20 @@ public final class BastionExpansionService {
         int expandedCount = 0;
         BastionData current = bastion;
 
-        for (int i = 0; i < expansionConfig.maxPerTick(); i++) {
+        // 每次扩张 tick 前尝试生成 Anchor（冷却 + 失败回退，不阻塞菌毯扩张）。
+        current = tryPlaceAnchor(level, savedData, current, gameTime, anchorConfig, myceliumConfig);
+
+        for (int i = 0; i < myceliumConfig.maxPerTick(); i++) {
             if (current.resourcePool() < expansionCost) {
                 break;
             }
 
-            BlockPos candidate = findExpansionCandidate(level, savedData, current, expansionConfig);
+            BlockPos candidate = findExpansionCandidate(level, savedData, current, myceliumConfig);
             if (candidate == null) {
                 break;
             }
 
-            if (placeNode(level, savedData, candidate, current)) {
+            if (placeMycelium(level, savedData, candidate, current)) {
                 // 计算新节点到核心的距离，更新扩张半径
                 int distToCore = (int) Math.ceil(Math.sqrt(candidate.distSqr(current.corePos())));
                 int newGrowthRadius = Math.max(current.growthRadius(), distToCore);
@@ -111,19 +136,185 @@ public final class BastionExpansionService {
                     .withResourcePool(current.resourcePool() - expansionCost)
                     .withGrowthCursor(current.growthCursor() + 1)
                     .withGrowthRadius(newGrowthRadius)
-                    .withNodeCountUpdate(current.tier(), 1);
+                    .withMyceliumCountDelta(1);
                 expandedCount++;
             }
         }
 
         if (expandedCount > 0) {
             // 修剪 frontier 缓存，移除已无邻接可扩张位置的节点
-            pruneFrontierCache(level, savedData, current, expansionConfig);
+            pruneFrontierCache(level, savedData, current, myceliumConfig);
             savedData.updateBastion(current);
             LOGGER.debug("基地 {} 扩张了 {} 个节点", bastion.id(), expandedCount);
+
+            // 扩张可能改变 totalNodes -> auraRadius（缩圈系数），按阈值同步
+            BastionNetworkHandler.syncIfAuraRadiusChanged(level, current);
         }
 
         return expandedCount;
+    }
+
+    /**
+     * 尝试放置 Anchor（子核心/支撑节点）。
+     * <p>
+     * MVP：先不做配置化拆分，直接使用文档默认参数：
+     * triggerDistance=10，maxCount=16，spacing=8，buildCost=50。
+     * </p>
+     * <p>
+     * 失败回退原则：
+     * <ul>
+     *   <li>资源不足 / 达到上限 / 找不到合法位置：直接返回，不影响菌毯扩张</li>
+     *   <li>设置冷却，避免下一秒重复失败</li>
+     * </ul>
+     * </p>
+     */
+    private static BastionData tryPlaceAnchor(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion,
+            long gameTime,
+            BastionTypeConfig.AnchorConfig anchorConfig,
+            BastionTypeConfig.MyceliumConfig myceliumConfig) {
+        if (bastion.totalAnchors() >= anchorConfig.maxCount()) {
+            return bastion;
+        }
+
+        long nextAllowed = savedData.getNextAnchorTryTick(bastion.id());
+        if (gameTime < nextAllowed) {
+            return bastion;
+        }
+
+        // 冷却：无论成功与否都先推迟下一次尝试，避免刷屏/卡住。
+        savedData.setNextAnchorTryTick(bastion.id(), gameTime + Math.max(1L, anchorConfig.cooldownTicks()));
+
+        // 资源不足：不尝试。
+        if (bastion.resourcePool() < anchorConfig.buildCost()) {
+            return bastion;
+        }
+
+        // 触发条件：当前扩张半径超过阈值。
+        if (bastion.growthRadius() < anchorConfig.triggerDistance()) {
+            return bastion;
+        }
+
+        ensureAnchorCacheInitialized(savedData, bastion);
+
+        BlockPos anchorPos = findAnchorPlacement(level, savedData, bastion, anchorConfig, myceliumConfig);
+        if (anchorPos == null) {
+            return bastion;
+        }
+
+        if (!placeAnchor(level, savedData, anchorPos, bastion)) {
+            return bastion;
+        }
+
+        BastionData updated = bastion
+            .withResourcePool(bastion.resourcePool() - anchorConfig.buildCost())
+            .withAnchorCountDelta(1);
+        savedData.updateBastion(updated);
+        return updated;
+    }
+
+    private static void ensureAnchorCacheInitialized(BastionSavedData savedData, BastionData bastion) {
+        if (savedData.hasAnchorCache(bastion.id())) {
+            return;
+        }
+        savedData.initializeAnchorCacheFromCore(bastion.id(), bastion.corePos());
+    }
+
+    /**
+     * 查找 Anchor 放置位置。
+     * <p>
+     * 策略：从菌毯 frontier 采样，向外偏移一个大步长，满足贴地与最小间距。
+     * </p>
+     */
+    private static BlockPos findAnchorPlacement(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion,
+            BastionTypeConfig.AnchorConfig anchorConfig,
+            BastionTypeConfig.MyceliumConfig myceliumConfig) {
+        java.util.Set<BlockPos> frontier = savedData.getFrontier(bastion.id());
+        if (frontier.isEmpty()) {
+            return null;
+        }
+
+        java.util.Set<BlockPos> anchors = savedData.getAnchors(bastion.id());
+        List<BlockPos> frontierList = new ArrayList<>(frontier);
+        Random random = new Random(
+            bastion.id().hashCode() ^ (bastion.growthCursor() + Constants.ANCHOR_RANDOM_SALT));
+
+        int candidateSamples = Math.max(1, Constants.CANDIDATE_SAMPLE_COUNT);
+        int spacing = Math.max(1, anchorConfig.spacing());
+        for (int i = 0; i < candidateSamples; i++) {
+            BlockPos source = frontierList.get(random.nextInt(frontierList.size()));
+            Direction dir = Direction.values()[random.nextInt(Constants.DIRECTION_COUNT)];
+            BlockPos candidate = source.relative(dir, spacing);
+
+            if (!isValidAnchorTarget(level, bastion, candidate, myceliumConfig.maxRadius())) {
+                continue;
+            }
+            if (!isFarEnoughFromAnchors(anchors, candidate, spacing)) {
+                continue;
+            }
+            return candidate;
+        }
+
+        return null;
+    }
+
+    private static boolean isFarEnoughFromAnchors(
+            java.util.Set<BlockPos> anchors,
+            BlockPos candidate,
+            int minSpacing) {
+        if (anchors == null || anchors.isEmpty()) {
+            return true;
+        }
+        long minSq = (long) minSpacing * minSpacing;
+        for (BlockPos pos : anchors) {
+            if (pos.distSqr(candidate) < minSq) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isValidAnchorTarget(
+            ServerLevel level,
+            BastionData bastion,
+            BlockPos pos,
+            int maxRadius) {
+        if (pos.distSqr(bastion.corePos()) > (long) maxRadius * maxRadius) {
+            return false;
+        }
+
+        BlockState targetState = level.getBlockState(pos);
+        if (!targetState.canBeReplaced()) {
+            return false;
+        }
+
+        // 贴地约束：下方必须可站立
+        BlockPos below = pos.below();
+        BlockState belowState = level.getBlockState(below);
+        return belowState.isFaceSturdy(level, below, Direction.UP);
+    }
+
+    private static boolean placeMycelium(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BlockPos pos,
+            BastionData bastion) {
+        Block anchorBlock = BastionBlocks.BASTION_ANCHOR.get();
+        if (!(anchorBlock instanceof BastionAnchorBlock bastionAnchorBlock)) {
+            return false;
+        }
+
+        BlockState anchorState = bastionAnchorBlock.withTierDaoGenerated(
+            bastion.tier(), bastion.primaryDao(), true);
+        level.setBlock(pos, anchorState, Block.UPDATE_ALL);
+
+        savedData.addAnchorToCache(bastion.id(), pos);
+        return true;
     }
 
     /**
@@ -146,11 +337,8 @@ public final class BastionExpansionService {
      * @param expansionConfig 扩张配置
      * @return 扩张成本
      */
-    private static double calculateExpansionCost(
-            BastionData bastion,
-            BastionTypeConfig.ExpansionConfig expansionConfig) {
-        return expansionConfig.baseCost()
-            * Math.pow(expansionConfig.tierMultiplier(), bastion.tier() - 1);
+    private static double calculateExpansionCost(BastionData bastion, BastionTypeConfig.MyceliumConfig config) {
+        return config.baseCost() * Math.pow(config.tierMultiplier(), bastion.tier() - 1);
     }
 
     // ===== 候选位置选择 =====
@@ -159,7 +347,7 @@ public final class BastionExpansionService {
      * 查找扩张候选位置。
      * <p>
      * 使用 frontier 缓存和确定性随机从边界节点的邻接位置中选择。
-     * 复杂度从 O(n³) 降至 O(frontier_size)。
+     * 步长使用 nodeSpacing 配置，确保节点稀疏分布。
      * </p>
      *
      * @param level           服务端世界
@@ -172,7 +360,7 @@ public final class BastionExpansionService {
             ServerLevel level,
             BastionSavedData savedData,
             BastionData bastion,
-            BastionTypeConfig.ExpansionConfig expansionConfig) {
+            BastionTypeConfig.MyceliumConfig expansionConfig) {
         // 使用 growthCursor 作为伪随机种子
         Random random = new Random(bastion.id().hashCode() ^ bastion.growthCursor());
 
@@ -182,6 +370,10 @@ public final class BastionExpansionService {
             return null;
         }
 
+        // 获取步长配置
+        int spacing = Math.max(1, expansionConfig.spacing());
+        int ySpacing = Math.max(1, spacing / 2);  // Y方向使用较小步长
+
         // 转为列表以支持随机访问
         List<BlockPos> frontierList = new ArrayList<>(frontier);
 
@@ -190,7 +382,10 @@ public final class BastionExpansionService {
         for (int i = 0; i < Constants.CANDIDATE_SAMPLE_COUNT && !frontierList.isEmpty(); i++) {
             BlockPos sourceNode = frontierList.get(random.nextInt(frontierList.size()));
             Direction dir = Direction.values()[random.nextInt(Constants.DIRECTION_COUNT)];
-            BlockPos candidate = sourceNode.relative(dir);
+
+            // 根据方向使用不同步长
+            int step = dir.getAxis() == Direction.Axis.Y ? ySpacing : spacing;
+            BlockPos candidate = sourceNode.relative(dir, step);
 
             if (isValidExpansionTarget(level, bastion, candidate, expansionConfig)) {
                 candidates.add(candidate);
@@ -215,7 +410,7 @@ public final class BastionExpansionService {
             ServerLevel level,
             BastionSavedData savedData,
             BastionData bastion,
-            BastionTypeConfig.ExpansionConfig expansionConfig) {
+            BastionTypeConfig.MyceliumConfig expansionConfig) {
         java.util.Set<BlockPos> frontier = savedData.getFrontier(bastion.id());
         if (frontier.isEmpty()) {
             return;
@@ -241,14 +436,21 @@ public final class BastionExpansionService {
 
     /**
      * 检查节点是否至少有一个可扩张的邻接位置。
+     * <p>
+     * 步长使用 nodeSpacing 配置，与 findExpansionCandidate 保持一致。
+     * </p>
      */
     private static boolean hasExpandableNeighbor(
             ServerLevel level,
             BastionData bastion,
             BlockPos pos,
-            BastionTypeConfig.ExpansionConfig expansionConfig) {
+            BastionTypeConfig.MyceliumConfig expansionConfig) {
+        int spacing = Math.max(1, expansionConfig.spacing());
+        int ySpacing = Math.max(1, spacing / 2);
+
         for (Direction dir : Direction.values()) {
-            BlockPos neighbor = pos.relative(dir);
+            int step = dir.getAxis() == Direction.Axis.Y ? ySpacing : spacing;
+            BlockPos neighbor = pos.relative(dir, step);
             if (isValidExpansionTarget(level, bastion, neighbor, expansionConfig)) {
                 return true;
             }
@@ -258,12 +460,15 @@ public final class BastionExpansionService {
 
     /**
      * 检查位置是否是有效的扩张目标。
+     * <p>
+     * 注意：稀疏化由 findExpansionCandidate 的步长控制，此方法仅检查基本约束。
+     * </p>
      */
     private static boolean isValidExpansionTarget(
             ServerLevel level,
             BastionData bastion,
             BlockPos pos,
-            BastionTypeConfig.ExpansionConfig expansionConfig) {
+            BastionTypeConfig.MyceliumConfig expansionConfig) {
         // 检查是否在最大半径内
         int maxRadius = expansionConfig.maxRadius();
         if (pos.distSqr(bastion.corePos()) > (long) maxRadius * maxRadius) {
@@ -286,7 +491,7 @@ public final class BastionExpansionService {
      */
     private static boolean isOwnedNode(ServerLevel level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        return state.getBlock() instanceof BastionNodeBlock;
+        return state.getBlock() instanceof BastionMyceliumBlock;
     }
 
     // ===== 节点放置 =====
@@ -304,19 +509,18 @@ public final class BastionExpansionService {
      * @param bastion   基地数据
      * @return 是否成功放置
      */
-    private static boolean placeNode(
+    private static boolean placeAnchor(
             ServerLevel level,
             BastionSavedData savedData,
             BlockPos pos,
             BastionData bastion) {
+        // MVP：扩张落点为菌毯；Anchor 将在后续“自动生成支点”阶段单独放置。
         Block nodeBlock = BastionBlocks.BASTION_NODE.get();
-        if (!(nodeBlock instanceof BastionNodeBlock bastionNodeBlock)) {
+        if (!(nodeBlock instanceof BastionMyceliumBlock myceliumBlock)) {
             return false;
         }
 
-        // 使用 GENERATED=true 标记为扩张服务生成的节点
-        BlockState nodeState = bastionNodeBlock.withTierDaoGenerated(
-            bastion.tier(), bastion.primaryDao(), true);
+        BlockState nodeState = myceliumBlock.defaultBlockState();
 
         // 放置方块（不触发 onPlace 的节点计数，由此服务直接处理）
         level.setBlock(pos, nodeState, Block.UPDATE_ALL);

@@ -1,0 +1,18 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_hun_dao_nether_ghost_domain",
+  "title": "幽冥鬼域",
+  "desc": "魂道防御杀招。鬼气森森，狼魂哀嚎。领域展开，如堕九幽。生灵入内，直面灵魂深处的大恐怖，陷入无尽的恐慌与盲目之中。",
+  "info": "主动释放 | 持续消耗真元 | 恐惧+致盲 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:guiqigu",
+    "guzhenren:langhungu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_hun_dao_nether_ghost_domain_radius": "6.0",
+    "guzhenrenext:shazhao_active_hun_dao_nether_ghost_domain_duration": "240",
+    "guzhenrenext:shazhao_active_hun_dao_nether_ghost_domain_zhenyuan_base_cost_per_second": "4.5",
+    "guzhenrenext:shazhao_active_hun_dao_nether_ghost_domain_enemy_damage": "2.0",
+    "guzhenrenext:shazhao_active_hun_dao_nether_ghost_domain_cooldown": "600"
+  }
+}

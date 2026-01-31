@@ -1,0 +1,18 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_bing_xue_dao_absolute_zero",
+  "title": "绝对零度",
+  "desc": "冰雪道防御杀招。以冰魄蛊为源，蓝鸟冰棺蛊为器，冻结周身一切时空。领域内寒气逼人，生机断绝，被冻结者稍有动弹便会粉身碎骨。",
+  "info": "主动释放 | 持续消耗真元 | 冻结+粉碎 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:bingpogu",
+    "guzhenren:lan_niao_bing_guan_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_bing_xue_dao_absolute_zero_radius": "5.0",
+    "guzhenrenext:shazhao_active_bing_xue_dao_absolute_zero_duration": "240",
+    "guzhenrenext:shazhao_active_bing_xue_dao_absolute_zero_zhenyuan_base_cost_per_second": "5.5",
+    "guzhenrenext:shazhao_active_bing_xue_dao_absolute_zero_magic_damage_per_second": "8.0",
+    "guzhenrenext:shazhao_active_bing_xue_dao_absolute_zero_cooldown": "600"
+  }
+}

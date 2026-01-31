@@ -1,0 +1,12 @@
+{
+  "core_seconds_by_tier": [
+    {"tier": 1, "seconds": 20},
+    {"tier": 4, "seconds": 30},
+    {"tier": 9, "seconds": 180}
+  ],
+  "node_seconds_by_tier": [
+    {"tier": 1, "seconds": 5},
+    {"tier": 4, "seconds": 8},
+    {"tier": 9, "seconds": 45}
+  ]
+}

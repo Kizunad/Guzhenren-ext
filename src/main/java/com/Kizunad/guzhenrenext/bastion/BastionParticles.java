@@ -1,7 +1,7 @@
 package com.Kizunad.guzhenrenext.bastion;
 
+import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
-import com.Kizunad.guzhenrenext.bastion.block.BastionNodeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -227,11 +227,11 @@ public final class BastionParticles {
             Level level,
             BlockPos pos,
             RandomSource random) {
-        if (!(state.getBlock() instanceof BastionNodeBlock)) {
+        if (!(state.getBlock() instanceof BastionAnchorBlock)) {
             return;
         }
 
-        BastionDao dao = state.getValue(BastionNodeBlock.DAO);
+        BastionDao dao = state.getValue(BastionAnchorBlock.DAO);
         Vector3f color = getDaoColor(dao);
         DustParticleOptions dust = new DustParticleOptions(color, PARTICLE_SIZE * NODE_AMBIENT_SIZE_FACTOR);
 
@@ -242,6 +242,16 @@ public final class BastionParticles {
 
             level.addParticle(dust, x, y, z, 0, NODE_AMBIENT_Y_SPEED, 0);
         }
+    }
+
+    /**
+     * 生成 Anchor 被拆除时的粒子效果。
+     * <p>
+     * 目前复用节点扩张粒子，保持资源依赖最小化。
+     * </p>
+     */
+    public static void spawnAnchorDestroyedParticles(ServerLevel level, BlockPos pos, BastionDao dao) {
+        spawnNodeExpandParticles(level, pos, dao);
     }
 
     // ===== 事件粒子（服务端） =====
@@ -319,6 +329,35 @@ public final class BastionParticles {
             EVOLVE_HAPPY_COUNT,
             CAPTURE_TOTEM_SPREAD_XZ, CAPTURE_TOTEM_SPREAD_Y, CAPTURE_TOTEM_SPREAD_XZ,
             EVOLVE_HAPPY_SPEED);
+    }
+
+    /**
+     * 生成威胁事件通用粒子效果。
+     * <p>
+     * 当前版本复用节点扩张粒子作为“能量波动”提示。
+     * </p>
+     *
+     * @param level 服务端世界
+     * @param pos   位置
+     * @param dao   道途类型
+     */
+    public static void spawnThreatParticles(ServerLevel level, BlockPos pos, BastionDao dao) {
+        // 复用已有粒子，避免增加新的资源依赖
+        spawnNodeExpandParticles(level, pos, dao);
+    }
+
+    /**
+     * 生成扩张涌动粒子效果。
+     * <p>
+     * 当前版本复用升级粒子，体现“基地能量突然上涌”。
+     * </p>
+     *
+     * @param level 服务端世界
+     * @param pos   位置
+     * @param dao   道途类型
+     */
+    public static void spawnExpansionSurgeParticles(ServerLevel level, BlockPos pos, BastionDao dao) {
+        spawnEvolveParticles(level, pos, dao);
     }
 
     /**

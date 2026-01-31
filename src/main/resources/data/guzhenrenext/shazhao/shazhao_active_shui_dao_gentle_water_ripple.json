@@ -1,0 +1,21 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple",
+  "title": "柔水涟漪",
+  "desc": "水道防御杀招。以水牢蛊为源，肉白骨蛊为引，荡起层层柔和的涟漪。身处其中，如沐温泉，伤势迅速愈合；而敌人却如陷泥沼，攻势与步伐皆被柔水化解。",
+  "info": "主动释放 | 持续消耗真元 | 回复+削弱 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:shui_lao_gu",
+    "guzhenren:rou_bai_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_radius": "5.0",
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_duration": "300",
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_damage_reduction": "0.0",
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_enemy_damage": "0.0",
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_zhenyuan_cost_per_second": "4.5",
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_regen_amplifier": "1",
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_weakness_amplifier": "1",
+    "guzhenrenext:shazhao_active_shui_dao_gentle_water_ripple_cooldown": "600"
+  }
+}

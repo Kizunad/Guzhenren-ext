@@ -10,13 +10,54 @@
     "entity_weights": []
   },
   "expansion": {
-    "base_cost": 5.0,
-    "tier_multiplier": 1.2,
-    "max_radius": 64,
-    "max_per_tick": 3
+    "mycelium": {
+      "base_cost": 5.0,
+      "tier_multiplier": 1.2,
+      "max_radius": 64,
+      "max_per_tick": 3,
+      "spacing": 4
+    },
+    "anchor": {
+      "build_cost": 50.0,
+      "spacing": 8,
+      "max_count": 16,
+      "trigger_distance": 10,
+      "cooldown_ticks": 100
+    }
   },
   "evolution": {
     "base_evolution_ticks": 72000,
     "tier_multiplier": 3
+  },
+  "aura": {
+    "base_radius": 16,
+    "tier_exponent": 2.0,
+    "max_radius": 1024,
+    "falloff_power": 2.0,
+    "min_falloff": 0.05,
+    "polarity": "negative"
+  },
+  "energy": {
+    "photosynthesis": {
+      "build_cost": 30.0,
+      "max_count": 12,
+      "pool_gain_multiplier": 0.15,
+      "pool_gain_flat": 0.0,
+      "scan_radius": 12
+    },
+    "water_intake": {
+      "build_cost": 25.0,
+      "max_count": 12,
+      "pool_gain_multiplier": 0.10,
+      "pool_gain_flat": 0.5,
+      "scan_radius": 10
+    },
+    "geothermal": {
+      "build_cost": 40.0,
+      "max_count": 8,
+      "pool_gain_multiplier": 0.20,
+      "pool_gain_flat": 0.0,
+      "scan_radius": 8
+    }
   }
 }

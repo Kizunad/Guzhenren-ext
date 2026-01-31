@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_yan_dao_explosive_crimson_robe",
+  "title": "爆炎红裳",
+  "desc": "炎道防御杀招。身披烈焰织就的红裳，靠近者皆受灼烧之苦。当红裳消散之时（杀招结束或真元耗尽），将引发剧烈的火焰爆发，轰退一切强敌。",
+  "info": "主动释放 | 持续消耗真元 | 结束时爆炸 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:huo_yan_gu",
+    "guzhenren:rong_yan_zha_lie_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_yan_dao_explosive_crimson_robe_radius": "4.0",
+    "guzhenrenext:shazhao_active_yan_dao_explosive_crimson_robe_duration": "200",
+    "guzhenrenext:shazhao_active_yan_dao_explosive_crimson_robe_enemy_damage": "2.0",
+    "guzhenrenext:shazhao_active_yan_dao_explosive_crimson_robe_zhenyuan_base_cost_per_second": "6.0",
+    "guzhenrenext:shazhao_active_yan_dao_explosive_crimson_robe_explosion_radius": "3.0",
+    "guzhenrenext:shazhao_active_yan_dao_explosive_crimson_robe_cooldown": "600"
+  }
+}

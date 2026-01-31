@@ -28,7 +28,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * @param coreZ               核心 Z 坐标
  * @param daoOrdinal          道途类型的 ordinal 值
  * @param tier                当前转数
- * @param radius              扩张半径
+ * @param radius              节点扩张半径（growthRadius）
+ * @param auraRadius          光环影响半径（用于边界渲染和效果判定）
  * @param stateOrdinal        持久化状态的 ordinal 值（ACTIVE/DESTROYED）
  * @param sealedUntilGameTime 封印解除的游戏时间（0 表示未封印）
  */
@@ -40,6 +41,7 @@ public record ClientboundBastionSyncPayload(
         int daoOrdinal,
         int tier,
         int radius,
+        int auraRadius,
         int stateOrdinal,
         long sealedUntilGameTime
 ) implements CustomPacketPayload {
@@ -61,6 +63,7 @@ public record ClientboundBastionSyncPayload(
                 buf.writeVarInt(payload.daoOrdinal);
                 buf.writeVarInt(payload.tier);
                 buf.writeVarInt(payload.radius);
+                buf.writeVarInt(payload.auraRadius);
                 buf.writeVarInt(payload.stateOrdinal);
                 buf.writeLong(payload.sealedUntilGameTime);
             },
@@ -69,6 +72,7 @@ public record ClientboundBastionSyncPayload(
                 buf.readInt(),
                 buf.readInt(),
                 buf.readInt(),
+                buf.readVarInt(),
                 buf.readVarInt(),
                 buf.readVarInt(),
                 buf.readVarInt(),

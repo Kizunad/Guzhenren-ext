@@ -4,7 +4,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
-import com.Kizunad.guzhenrenext.bastion.block.BastionNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -163,7 +163,7 @@ public final class BastionCleanupService {
                     }
 
                     BlockState state = level.getBlockState(pos);
-                    if (state.getBlock() instanceof BastionNodeBlock) {
+                    if (state.getBlock() instanceof BastionAnchorBlock) {
                         nodes.add(pos);
                     }
                 }
@@ -188,7 +188,7 @@ public final class BastionCleanupService {
             java.util.UUID bastionId,
             BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof BastionNodeBlock)) {
+        if (!(state.getBlock() instanceof BastionAnchorBlock)) {
             return false;
         }
 
@@ -259,7 +259,7 @@ public final class BastionCleanupService {
      * @return 调度的节点数量
      */
     public static int scheduleOrphanChecks(ServerLevel level, BlockPos corePos, int radius) {
-        BastionNodeBlock nodeBlock = BastionBlocks.BASTION_NODE.get();
+        BastionAnchorBlock nodeBlock = BastionBlocks.BASTION_ANCHOR.get();
         int scheduledCount = 0;
 
         for (int dx = -radius; dx <= radius; dx += CleanupConfig.SEARCH_STEP) {
@@ -272,7 +272,7 @@ public final class BastionCleanupService {
                     }
 
                     BlockState state = level.getBlockState(pos);
-                    if (state.getBlock() instanceof BastionNodeBlock) {
+                    if (state.getBlock() instanceof BastionAnchorBlock) {
                         nodeBlock.scheduleOrphanCheck(level, pos, ORPHAN_CHECK_DELAY_TICKS);
                         scheduledCount++;
                     }

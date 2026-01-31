@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak",
+  "title": "无形风衣",
+  "desc": "风道防御杀招。狂风环绕周身，形成一道肉眼难辨的保护层。任何试图靠近的敌人或飞来的箭矢都会被强劲的气流无情吹飞。",
+  "info": "主动释放 | 持续消耗真元 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:weilianhuakuangfenggu",
+    "guzhenren:fengligu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak_radius": "4.0",
+    "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak_duration": "300",
+    "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak_damage_reduction": "0.0",
+    "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak_enemy_damage": "0.0",
+    "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak_zhenyuan_base_cost_per_second": "4.0",
+    "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak_knockback_strength": "0.8",
+    "guzhenrenext:shazhao_active_feng_dao_invisible_wind_cloak_cooldown": "600"
+  }
+}

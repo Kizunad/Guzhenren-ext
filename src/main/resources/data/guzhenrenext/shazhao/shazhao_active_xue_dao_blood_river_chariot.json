@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot",
+  "title": "不亦乐乎·血河车",
+  "desc": "血道四转防御杀招。血湖沸腾，血暴席卷。以敌人之血铸就吾之坚盾。杀戮越多，血盾越厚，直至化身不死血魔。",
+  "info": "主动释放 | 持续消耗真元 | 击杀叠盾+强力凋零 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:xuehugu",
+    "guzhenren:xuebaogu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot_radius": "7.0",
+    "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot_duration": "300",
+    "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot_enemy_damage": "10.0",
+    "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot_absorption_per_kill": "10.0",
+    "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot_wither_amplifier": "4",
+    "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot_zhenyuan_base_cost_per_second": "50.0",
+    "guzhenrenext:shazhao_active_xue_dao_blood_river_chariot_cooldown": "1200"
+  }
+}

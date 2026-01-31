@@ -14,14 +14,31 @@
     ]
   },
   "expansion": {
-    "base_cost": 6.0,
-    "tier_multiplier": 1.3,
-    "max_radius": 48,
-    "max_per_tick": 2
+    "mycelium": {
+      "base_cost": 6.0,
+      "tier_multiplier": 1.3,
+      "max_radius": 48,
+      "max_per_tick": 2,
+      "spacing": 4
+    },
+    "anchor": {
+      "build_cost": 50.0,
+      "spacing": 8,
+      "max_count": 16,
+      "trigger_distance": 10,
+      "cooldown_ticks": 100
+    }
   },
   "evolution": {
     "base_evolution_ticks": 72000,
     "tier_multiplier": 3
+  },
+  "aura": {
+    "base_radius": 16,
+    "tier_exponent": 2.0,
+    "max_radius": 4096,
+    "falloff_power": 2.0,
+    "min_falloff": 0.05
   },
   "loot": {
     "loot_table": "guzhenrenext:bastion/zhi_dao",
@@ -99,6 +116,20 @@
     "special_effects": [
       "guzhenrenext:high_tier_zhi_dao_calculation_aura",
       "guzhenrenext:high_tier_zhi_dao_fate_threads"
+    ]
+  },
+  "guardian_shazhao": {
+    "active_pool": [
+      {
+        "shazhao_id": "guzhenrenext:shazhao_active_zhi_dao_starry_chess_board",
+        "weight": 3,
+        "min_tier": 3
+      },
+      {
+        "shazhao_id": "guzhenrenext:shazhao_active_zhi_dao_heavenly_secret_calculation",
+        "weight": 1,
+        "min_tier": 5
+      }
     ]
   }
 }

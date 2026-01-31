@@ -89,6 +89,12 @@ public final class BastionSpawnService {
             return 0;
         }
 
+        // 回合 4“供养/停机”的最小落点：当资源池为 0（或更少）时，基地必须停机，禁止继续刷出新守卫。
+        // 这里先提供确定性的门禁行为，便于 GameTest 直接验证；upkeep 的扣费逻辑后续单独实现。
+        if (bastion.resourcePool() <= 0) {
+            return 0;
+        }
+
         // 从配置读取刷怪参数
         BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
         BastionTypeConfig.SpawningConfig spawningConfig = typeConfig.spawning();

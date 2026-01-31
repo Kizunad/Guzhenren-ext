@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower",
+  "title": "水幕天华",
+  "desc": "水道四转防御杀招。水幕天华蛊引动天地水汽，形成绝对防御的碧蓝光幕。受到的伤害将被真元化解，只要真元不绝，生命便永不枯竭。",
+  "info": "主动释放 | 持续消耗真元 | 伤害转化真元+强回复 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:shui_mu_tian_hua_gu",
+    "guzhenren:shui_hu_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower_radius": "7.0",
+    "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower_duration": "300",
+    "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower_mana_shield_ratio": "10.0",
+    "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower_regen_amplifier": "3",
+    "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower_weakness_amplifier": "3",
+    "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower_zhenyuan_base_cost_per_second": "45.0",
+    "guzhenrenext:shazhao_active_shui_dao_water_screen_sky_flower_cooldown": "1200"
+  }
+}

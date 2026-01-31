@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid",
+  "title": "雷磁电网",
+  "desc": "雷道防御杀招。以雷翼蛊与雷盾蛊交织，在周身形成高压电磁场。任何闯入者都会手脚麻痹，无法施力，且每隔数息便会遭受晴天霹雳。",
+  "info": "主动释放 | 持续消耗真元 | 麻痹+落雷 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:lei_yi_gu",
+    "guzhenren:leidungu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid_radius": "5.0",
+    "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid_duration": "200",
+    "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid_damage_reduction": "0.0",
+    "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid_enemy_damage": "5.0",
+    "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid_zhenyuan_base_cost_per_second": "6.0",
+    "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid_lightning_interval": "60",
+    "guzhenrenext:shazhao_active_lei_dao_lightning_magnetic_grid_cooldown": "600"
+  }
+}

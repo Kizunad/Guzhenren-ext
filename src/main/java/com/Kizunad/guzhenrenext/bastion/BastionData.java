@@ -1,9 +1,11 @@
 package com.Kizunad.guzhenrenext.bastion;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
@@ -29,6 +31,8 @@ import net.minecraft.world.level.Level;
  * @param growthRadius        当前扩张半径
  * @param growthCursor        扩张游标（用于确定性随机）
  * @param resourcePool        资源池（用于资源驱动扩张）
+ * @param counts              菌毯/Anchor 等额外计数（避免 CODEC 超出参数上限）
+ * @param modifiers           基地词缀（生态演化/变异，默认空集）
  * @param timing              时间相关字段（封印、销毁、最后处理、离线累积）
  */
 public record BastionData(
@@ -45,8 +49,50 @@ public record BastionData(
         int growthRadius,
         long growthCursor,
         double resourcePool,
+        BastionCounts counts,
+        Set<BastionModifier> modifiers,
         BastionTiming timing
 ) {
+
+    /**
+     * 额外计数信息。
+     * <p>
+     * 目的：避免 BastionData CODEC 字段超过 RecordCodecBuilder 的参数上限。</p>
+     *
+     * @param totalMycelium 菌毯总数
+     * @param totalAnchors  Anchor 总数
+     */
+    public record BastionCounts(int totalMycelium, int totalAnchors) {
+        public static final BastionCounts DEFAULT = new BastionCounts(0, 0);
+
+        public static final Codec<BastionCounts> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.INT.optionalFieldOf("total_mycelium", 0).forGetter(BastionCounts::totalMycelium),
+                Codec.INT.optionalFieldOf("total_anchors", 0).forGetter(BastionCounts::totalAnchors)
+            ).apply(instance, BastionCounts::new)
+        );
+    }
+
+    /** 兼容旧调用：返回菌毯总数。 */
+    public int totalMycelium() {
+        return counts == null ? 0 : counts.totalMycelium();
+    }
+
+    /** 兼容旧调用：返回 Anchor 总数。 */
+    public int totalAnchors() {
+        return counts == null ? 0 : counts.totalAnchors();
+    }
+
+    /**
+     * 词缀集合的编解码器。
+     * <p>
+     * 存档使用列表形式，运行时使用 Set 去重。
+     * </p>
+     */
+    private static final MapCodec<Set<BastionModifier>> MODIFIERS_CODEC =
+        BastionModifier.CODEC.listOf()
+            .optionalFieldOf("modifiers", java.util.List.of())
+            .xmap(java.util.Set::copyOf, java.util.List::copyOf);
 
     /** 默认最大转数（基础配置，可通过 BastionTypeConfig 扩展到 9）。 */
     public static final int DEFAULT_MAX_TIER = 9;
@@ -103,6 +149,9 @@ public record BastionData(
             Codec.INT.fieldOf("growth_radius").forGetter(BastionData::growthRadius),
             Codec.LONG.fieldOf("growth_cursor").forGetter(BastionData::growthCursor),
             Codec.DOUBLE.fieldOf("resource_pool").forGetter(BastionData::resourcePool),
+            BastionCounts.CODEC.optionalFieldOf("counts", BastionCounts.DEFAULT)
+                .forGetter(BastionData::counts),
+            MODIFIERS_CODEC.forGetter(BastionData::modifiers),
             BastionTiming.CODEC.fieldOf("timing").forGetter(BastionData::timing)
         ).apply(instance, BastionData::new)
     );
@@ -163,6 +212,8 @@ public record BastionData(
             1,              // 初始扩张半径
             0L,             // 扩张游标
             0.0,            // 资源池
+            BastionCounts.DEFAULT,
+            java.util.Set.of(),
             BastionTiming.createDefault(gameTime)
         );
     }
@@ -194,7 +245,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, newTotal, newNodesByTier, growthRadius,
-            growthCursor, resourcePool, timing
+            growthCursor, resourcePool, counts, modifiers, timing
         );
     }
 
@@ -214,7 +265,7 @@ public record BastionData(
         return new BastionData(
             id, BastionState.DESTROYED, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming
         );
     }
 
@@ -234,7 +285,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming
         );
     }
 
@@ -249,7 +300,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, newTier,
             newProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, timing
+            growthCursor, resourcePool, counts, modifiers, timing
         );
     }
 
@@ -263,7 +314,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, newRadius,
-            growthCursor, resourcePool, timing
+            growthCursor, resourcePool, counts, modifiers, timing
         );
     }
 
@@ -277,7 +328,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            newCursor, resourcePool, timing
+            newCursor, resourcePool, counts, modifiers, timing
         );
     }
 
@@ -291,7 +342,41 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, newPool, timing
+            growthCursor, newPool, counts, modifiers, timing
+        );
+    }
+
+    /**
+     * 创建菌毯计数更新后的副本。
+     *
+     * @param delta 菌毯增量（+1 添加，-1 移除）
+     * @return 更新后的 BastionData
+     */
+    public BastionData withMyceliumCountDelta(int delta) {
+        BastionCounts safe = counts == null ? BastionCounts.DEFAULT : counts;
+        int newTotal = Math.max(0, safe.totalMycelium() + delta);
+        BastionCounts updatedCounts = new BastionCounts(newTotal, safe.totalAnchors());
+        return new BastionData(
+            id, state, corePos, dimension, bastionType, primaryDao, tier,
+            evolutionProgress, totalNodes, nodesByTier, growthRadius,
+            growthCursor, resourcePool, updatedCounts, modifiers, timing
+        );
+    }
+
+    /**
+     * 创建 Anchor 计数更新后的副本。
+     *
+     * @param delta Anchor 增量（+1 添加，-1 移除）
+     * @return 更新后的 BastionData
+     */
+    public BastionData withAnchorCountDelta(int delta) {
+        BastionCounts safe = counts == null ? BastionCounts.DEFAULT : counts;
+        int newTotal = Math.max(0, safe.totalAnchors() + delta);
+        BastionCounts updatedCounts = new BastionCounts(safe.totalMycelium(), newTotal);
+        return new BastionData(
+            id, state, corePos, dimension, bastionType, primaryDao, tier,
+            evolutionProgress, totalNodes, nodesByTier, growthRadius,
+            growthCursor, resourcePool, updatedCounts, modifiers, timing
         );
     }
 
@@ -311,7 +396,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming
         );
     }
 
@@ -331,7 +416,88 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming
         );
     }
+
+    // ===== 光环半径计算（从 growthRadius 解耦） =====
+
+    /**
+     * 计算当前有效光环半径（考虑节点缩圈）。
+     * <p>
+     * 光环半径基于 BastionTypeConfig 的 auraConfig 配置，并根据节点数量进行缩圈：
+     * effectiveRadius = baseRadius * tierExponent^(tier-1) * scale，
+     * 其中 scale = clamp(minScale, totalNodes/refNodes, 1.0)。
+     * </p>
+     * <p>
+     * 当节点被拆除时，光环半径会相应缩小，但保留最少 minScale（默认 30%）的范围。
+     * 当节点数量达到或超过 refNodes 时，光环为满状态。
+     * </p>
+     *
+     * @return 当前的有效光环半径（已应用缩圈）
+     */
+    public int getAuraRadius() {
+        var typeConfig = com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager
+            .getOrDefault(bastionType);
+        return typeConfig.aura().calculateEffectiveRadius(tier, totalNodes);
+    }
+
+    /**
+     * 计算满状态下的基础光环半径（不考虑节点缩圈）。
+     * <p>
+     * 公式：baseAuraRadius = baseRadius * tierExponent^(tier-1)，上限为 maxRadius。
+     * </p>
+     * <p>
+     * 典型值：
+     * <ul>
+     *   <li>1 转：16 格</li>
+     *   <li>6 转：256 格（16²）</li>
+     *   <li>9 转：4096 格（16³）</li>
+     * </ul>
+     * </p>
+     *
+     * @return 当前转数对应的满状态光环半径
+     */
+    public int getBaseAuraRadius() {
+        var typeConfig = com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager
+            .getOrDefault(bastionType);
+        return typeConfig.aura().calculateRadius(tier);
+    }
+
+    /**
+     * 计算玩家距离衰减因子。
+     * <p>
+     * 衰减公式：factor = max(minFalloff, (1 - distance/auraRadius)^falloffPower)。
+     * 中心区域效果最强（接近 1.0），边缘区域效果最弱（接近 minFalloff）。
+     * </p>
+     * <p>
+     * 注意：此方法使用有效光环半径（已应用缩圈），确保衰减计算与实际光环范围一致。
+     * </p>
+     *
+     * @param distance 玩家到核心的距离
+     * @return 衰减因子（0.0 ~ 1.0），距离超出光环范围返回 0.0
+     */
+    public double getAuraFalloff(double distance) {
+        var typeConfig = com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager
+            .getOrDefault(bastionType);
+        int effectiveRadius = typeConfig.aura().calculateEffectiveRadius(tier, totalNodes);
+        return typeConfig.aura().calculateFalloff(distance, effectiveRadius);
+    }
+
+    /**
+     * 创建词缀集合更新后的副本。
+     *
+     * @param newModifiers 新词缀集合
+     * @return 更新后的 BastionData
+     */
+    public BastionData withModifiers(java.util.Set<BastionModifier> newModifiers) {
+        return new BastionData(
+            id, state, corePos, dimension, bastionType, primaryDao, tier,
+            evolutionProgress, totalNodes, nodesByTier, growthRadius,
+            growthCursor, resourcePool, counts,
+            newModifiers == null ? java.util.Set.of() : java.util.Set.copyOf(newModifiers),
+            timing
+        );
+    }
+
 }

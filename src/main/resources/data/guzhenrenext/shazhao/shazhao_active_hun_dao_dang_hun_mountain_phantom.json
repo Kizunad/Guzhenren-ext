@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom",
+  "title": "荡魂山虚影",
+  "desc": "魂道四转防御杀招。召唤传说中的荡魂山虚影降临。山影镇压，灵魂战栗。领域内敌人不仅攻击力尽失，灵魂更会受到荡魂魔音的持续撕裂。",
+  "info": "主动释放 | 持续消耗真元 | 灵魂伤害+极度虚弱 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:he_hun_gu",
+    "guzhenren:luohugu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom_radius": "8.0",
+    "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom_duration": "300",
+    "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom_soul_damage": "30.0",
+    "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom_weakness_amplifier": "5",
+    "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom_zhenyuan_base_cost_per_second": "50.0",
+    "guzhenrenext:shazhao_active_hun_dao_dang_hun_mountain_phantom_cooldown": "1200"
+  }
+}

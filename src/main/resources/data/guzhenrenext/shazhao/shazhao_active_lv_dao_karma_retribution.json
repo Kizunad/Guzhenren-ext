@@ -1,0 +1,18 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_lv_dao_karma_retribution",
+  "title": "因果报应",
+  "desc": "律道四转防御杀招。无妄蛊定下规则：凡伤人者，必受其害。领域内因果逆转，物理攻击无效化，且攻击者将承受自己施加的全部痛苦。",
+  "info": "主动释放 | 持续消耗真元 | 伤害无效+全额反弹 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:wuwanggu",
+    "guzhenren:lv_ling_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_lv_dao_karma_retribution_radius": "6.0",
+    "guzhenrenext:shazhao_active_lv_dao_karma_retribution_duration": "300",
+    "guzhenrenext:shazhao_active_lv_dao_karma_retribution_reflect_ratio": "1.0",
+    "guzhenrenext:shazhao_active_lv_dao_karma_retribution_zhenyuan_base_cost_per_second": "65.0",
+    "guzhenrenext:shazhao_active_lv_dao_karma_retribution_cooldown": "1200"
+  }
+}

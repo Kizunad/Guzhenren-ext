@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_tu_dao_heavy_earth_fortress",
+  "title": "重土壁垒",
+  "desc": "土道防御杀招。以土墙蛊为核心，重质蛊辅之，构建一片厚重的重力领域。领域内，施术者如大地般稳固，受到的伤害将被极大幅度削减；侵入的敌人则会受到大地的挤压。",
+  "info": "主动释放 | 持续消耗真元 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:tu_qiang_gu",
+    "guzhenren:shi_qiao_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_tu_dao_heavy_earth_fortress_radius": "5.0",
+    "guzhenrenext:shazhao_active_tu_dao_heavy_earth_fortress_duration": "200",
+    "guzhenrenext:shazhao_active_tu_dao_heavy_earth_fortress_damage_reduction": "100.0",
+    "guzhenrenext:shazhao_active_tu_dao_heavy_earth_fortress_enemy_damage": "30.0",
+    "guzhenrenext:shazhao_active_tu_dao_heavy_earth_fortress_zhenyuan_base_cost_per_second": "5.0",
+    "guzhenrenext:shazhao_active_tu_dao_heavy_earth_fortress_cooldown": "600"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body",
+  "title": "天魔解体·不灭躯",
+  "desc": "变化道四转防御杀招。无常骨蛊重塑肉身，神通蛊激发潜能。化身不灭天魔，肉身坚不可摧。每一次受伤，都会激发更强的生命潜能，愈战愈强。",
+  "info": "主动释放 | 持续消耗真元 | 属性暴涨+受击回血 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:wuchanggugu",
+    "guzhenren:shentonggu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body_radius": "0.0",
+    "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body_duration": "300",
+    "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body_max_health_bonus": "100.0",
+    "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body_armor_bonus": "20.0",
+    "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body_heal_ratio": "0.1",
+    "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body_zhenyuan_base_cost_per_second": "60.0",
+    "guzhenrenext:shazhao_active_bian_hua_dao_heavenly_demon_body_cooldown": "1200"
+  }
+}

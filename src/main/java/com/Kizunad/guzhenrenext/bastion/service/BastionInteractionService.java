@@ -5,8 +5,10 @@ import com.Kizunad.guzhenrenext.bastion.BastionParticles;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionSoundPlayer;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
+import com.Kizunad.guzhenrenext.bastion.BastionDao;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
-import com.Kizunad.guzhenrenext.bastion.block.BastionNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.Kizunad.guzhenrenext.bastion.network.BastionNetworkHandler;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.Direction;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -136,7 +139,7 @@ public final class BastionInteractionService {
 
         // 仅处理基地方块
         if (!(state.getBlock() instanceof BastionCoreBlock)
-                && !(state.getBlock() instanceof BastionNodeBlock)) {
+                && !(state.getBlock() instanceof BastionAnchorBlock)) {
             return;
         }
 
@@ -186,7 +189,7 @@ public final class BastionInteractionService {
 
         // 仅处理基地方块
         boolean isCore = state.getBlock() instanceof BastionCoreBlock;
-        boolean isNode = state.getBlock() instanceof BastionNodeBlock;
+        boolean isNode = state.getBlock() instanceof BastionAnchorBlock;
         if (!isCore && !isNode) {
             return;
         }
@@ -227,6 +230,11 @@ public final class BastionInteractionService {
         BastionData bastion;
         if (state.getBlock() instanceof BastionCoreBlock) {
             bastion = savedData.findByCorePos(pos);
+            // worldgen 遗迹会由 BastionRuinAutoActivator 延迟自动激活。
+            // 这里保留兜底：玩家交互时若仍未激活，则立即激活以提升体验。
+            if (bastion == null) {
+                bastion = tryRegisterWorldgenRuin(level, savedData, pos, state);
+            }
         } else {
             bastion = savedData.findOwnerBastion(pos, InteractionConfig.SEARCH_RADIUS);
         }
@@ -255,6 +263,49 @@ public final class BastionInteractionService {
 
         // 其他物品：不处理
         return InteractionResult.PASS;
+    }
+
+    private static BastionData tryRegisterWorldgenRuin(
+        ServerLevel level,
+        BastionSavedData savedData,
+        BlockPos corePos,
+        BlockState coreState
+    ) {
+        if (!(coreState.getBlock() instanceof BastionCoreBlock)) {
+            return null;
+        }
+        BastionDao dao = coreState.getValue(BastionCoreBlock.DAO);
+        int tier = BastionCoreBlock.getTier(coreState);
+
+        String bastionType = BastionTypeManager.getByDao(dao).id();
+        BastionData created = BastionData.create(
+            corePos,
+            level.dimension(),
+            bastionType,
+            dao,
+            level.getGameTime()
+        );
+        created = created.withEvolution(created.evolutionProgress(), tier);
+        savedData.addBastion(created);
+        savedData.initializeFrontierFromCore(created.id(), corePos);
+
+        // 将附近遗迹节点写入 cache，确保扩张/清理服务可用。
+        for (Direction dir : new Direction[] {
+            Direction.NORTH,
+            Direction.SOUTH,
+            Direction.EAST,
+            Direction.WEST
+        }) {
+            BlockPos nodePos = corePos.relative(dir, 2);
+            BlockState nodeState = level.getBlockState(nodePos);
+            if (nodeState.getBlock() instanceof BastionAnchorBlock
+                && nodeState.getValue(BastionAnchorBlock.GENERATED)) {
+                savedData.addNodeToCache(created.id(), nodePos);
+            }
+        }
+
+        BastionNetworkHandler.syncToNearbyPlayers(level, created);
+        return created;
     }
 
     // ===== 查看信息 =====

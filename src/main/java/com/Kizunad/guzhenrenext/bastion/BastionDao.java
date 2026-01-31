@@ -1,7 +1,10 @@
 package com.Kizunad.guzhenrenext.bastion;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 
 /**
  * 基地道途类型枚举（MVP：4 种，预留扩展到 8 种）。
@@ -82,6 +85,57 @@ public enum BastionDao implements StringRepresentable {
     }
 
     /**
+     * 智道光环：挖掘疲劳 + 缓慢。
+     * <p>
+     * 设计：
+     * <ul>
+     *   <li>效果每秒刷新一次，持续 2 秒，避免边界抖动。</li>
+     *   <li>等级随转数提升，并受距离衰减影响（边缘更弱）。</li>
+     * </ul>
+     * </p>
+     */
+    private static void applyZhiDaoAura(ServerPlayer player, int tier, double falloff) {
+        // falloff 在边缘可能接近 minFalloff（默认 5%），这里不做过多数学变换。
+        int tierBonus = Math.max(0, tier - 1);
+        int amplifier = Math.min(Constants.MAX_AMPLIFIER, tierBonus / 2);
+
+        // 距离越近越强：当 falloff 足够低时，降低一档
+        if (falloff < Constants.STRONG_EFFECT_THRESHOLD) {
+            amplifier = Math.max(0, amplifier - 1);
+        }
+
+        int duration = Constants.EFFECT_DURATION_TICKS;
+        player.addEffect(new MobEffectInstance(
+            MobEffects.DIG_SLOWDOWN,
+            duration,
+            amplifier,
+            false,
+            false,
+            true
+        ));
+        player.addEffect(new MobEffectInstance(
+            MobEffects.MOVEMENT_SLOWDOWN,
+            duration,
+            amplifier,
+            false,
+            false,
+            true
+        ));
+    }
+
+    public void onAuraTick(ServerPlayer player, int tier, double falloff) {
+        if (player == null) {
+            return;
+        }
+        switch (this) {
+            case ZHI_DAO -> applyZhiDaoAura(player, tier, falloff);
+            default -> {
+                // no-op
+            }
+        }
+    }
+
+    /**
      * 道途颜色常量，避免 MagicNumber checkstyle 错误。
      */
     private static final class BastionDaoColors {
@@ -98,6 +152,23 @@ public enum BastionDao implements StringRepresentable {
 
         private BastionDaoColors() {
             // 工具类
+        }
+    }
+
+    /**
+     * 道途特化光环常量。
+     */
+    private static final class Constants {
+        /** 每秒刷新一次，但给 2 秒持续避免抖动。 */
+        static final int EFFECT_DURATION_TICKS = 40;
+        /** 最大效果等级。 */
+        static final int MAX_AMPLIFIER = 3;
+        /**
+         * 强效果阈值：低于该衰减值认为在边缘，减弱一档。
+         */
+        static final double STRONG_EFFECT_THRESHOLD = 0.2;
+
+        private Constants() {
         }
     }
 }

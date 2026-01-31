@@ -83,6 +83,21 @@ public final class BastionSoundPlayer {
     }
 
     /**
+     * 播放威胁事件音效。
+     * <p>
+     * 用于辐射脉冲、扩张涌动等随机威胁事件。
+     * 当前版本使用警报音效作为统一提示。
+     * </p>
+     *
+     * @param level 服务端世界
+     * @param pos   位置
+     */
+    public static void playThreat(ServerLevel level, BlockPos pos) {
+        // 复用警报音效（回退到铃声），避免引入新的资源依赖
+        playAlarm(level, pos);
+    }
+
+    /**
      * 播放资源祭献音效。
      *
      * @param level 服务端世界

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NYN",
+    "YCY",
+    "NYN"
+  ],
+  "key": {
+    "C": {
+      "item": "guzhenrenext:bastion_core"
+    },
+    "N": {
+      "item": "guzhenrenext:bastion_node"
+    },
+    "Y": {
+      "item": "guzhenren:quanyan"
+    }
+  },
+  "result": {
+    "id": "guzhenrenext:bastion_reversal_array",
+    "count": 1
+  }
+}

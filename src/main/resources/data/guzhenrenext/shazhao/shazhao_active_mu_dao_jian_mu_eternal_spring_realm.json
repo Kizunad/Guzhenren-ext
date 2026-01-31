@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_mu_dao_jian_mu_eternal_spring_realm",
+  "title": "建木长春界",
+  "desc": "木道四转防御杀招。以长青蛊赋予无尽生机，青藤剑意蛊构筑森严壁垒。领域展开，如建木降临，生生不息。受到的伤害将被转移给领域内的敌人，让敌人的生命成为你的护盾。",
+  "info": "主动释放 | 持续消耗真元 | 伤害转移+极速再生 | 4转杀招",
+  "cost_total_niantou": 2000,
+  "required_items": [
+    "guzhenren:changqinggu",
+    "guzhenren:qingtengjianyigu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_mu_dao_jian_mu_eternal_spring_realm_radius": "8.0",
+    "guzhenrenext:shazhao_active_mu_dao_jian_mu_eternal_spring_realm_duration": "300",
+    "guzhenrenext:shazhao_active_mu_dao_jian_mu_eternal_spring_realm_damage_transfer_ratio": "0.5",
+    "guzhenrenext:shazhao_active_mu_dao_jian_mu_eternal_spring_realm_regen_amplifier": "4",
+    "guzhenrenext:shazhao_active_mu_dao_jian_mu_eternal_spring_realm_zhenyuan_base_cost_per_second": "55.0",
+    "guzhenrenext:shazhao_active_mu_dao_jian_mu_eternal_spring_realm_cooldown": "1200"
+  }
+}

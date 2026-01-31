@@ -2,8 +2,10 @@ package com.Kizunad.guzhenrenext.bastion.config;
 
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,6 +23,8 @@ import java.util.Optional;
  * @param spawning        刷怪配置
  * @param expansion       扩张配置
  * @param evolution       进化配置
+ * @param aura            光环配置（影响半径与衰减）
+ * @param energy          能源节点配置（影响资源池增长的额外加成）
  * @param loot            战利品配置（可选）
  * @param highTier        高转内容配置（可选，7-9 转专属）
  */
@@ -32,8 +36,11 @@ public record BastionTypeConfig(
         SpawningConfig spawning,
         ExpansionConfig expansion,
         EvolutionConfig evolution,
+        AuraConfig aura,
+        EnergyConfig energy,
         Optional<LootConfig> loot,
-        Optional<HighTierConfig> highTier
+        Optional<HighTierConfig> highTier,
+        Optional<GuardianShazhaoConfig> guardianShazhao
 ) {
 
     /** 序列化/反序列化编解码器。 */
@@ -50,10 +57,53 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::expansion),
             EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::evolution),
+            AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
+                .forGetter(BastionTypeConfig::aura),
+            EnergyConfig.CODEC.optionalFieldOf("energy", EnergyConfig.DEFAULT)
+                .forGetter(BastionTypeConfig::energy),
             LootConfig.CODEC.optionalFieldOf("loot").forGetter(BastionTypeConfig::loot),
-            HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(BastionTypeConfig::highTier)
+            HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(BastionTypeConfig::highTier),
+            GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
+                .forGetter(BastionTypeConfig::guardianShazhao)
         ).apply(instance, BastionTypeConfig::new)
     );
+
+    /**
+     * 守卫杀招配置。
+     * <p>
+     * 用途：让基地守卫在战斗中按权重选择“主动杀招”（复用 shazhao JSON 配置格式），
+     * 但不走玩家的解锁/物品/消耗校验。
+     * </p>
+     *
+     * @param activePool 主动杀招池（按权重随机；可按 minTier 分层）
+     */
+    public record GuardianShazhaoConfig(List<WeightedShazhao> activePool) {
+        public static final GuardianShazhaoConfig DEFAULT = new GuardianShazhaoConfig(List.of());
+
+        public static final Codec<GuardianShazhaoConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                WeightedShazhao.CODEC.listOf().optionalFieldOf("active_pool", List.of())
+                    .forGetter(GuardianShazhaoConfig::activePool)
+            ).apply(instance, GuardianShazhaoConfig::new)
+        );
+    }
+
+    /**
+     * 杀招权重条目。
+     *
+     * @param shazhaoId 杀招 ID（例如 guzhhenrenext:shazhao_active_xxx）
+     * @param weight    权重
+     * @param minTier   最低转数
+     */
+    public record WeightedShazhao(String shazhaoId, int weight, int minTier) {
+        public static final Codec<WeightedShazhao> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.STRING.fieldOf("shazhao_id").forGetter(WeightedShazhao::shazhaoId),
+                Codec.INT.optionalFieldOf("weight", 1).forGetter(WeightedShazhao::weight),
+                Codec.INT.optionalFieldOf("min_tier", 1).forGetter(WeightedShazhao::minTier)
+            ).apply(instance, WeightedShazhao::new)
+        );
+    }
 
     /**
      * 默认值常量。
@@ -67,11 +117,104 @@ public record BastionTypeConfig(
         static final double DEFAULT_COST_MULTIPLIER = 1.2;
         static final int DEFAULT_MAX_RADIUS = 64;
         static final int DEFAULT_MAX_PER_TICK = 3;
+        static final int DEFAULT_NODE_SPACING = 2;
         static final long DEFAULT_BASE_EVOLUTION_TICKS = 72000L;
         static final int DEFAULT_EVOLUTION_MULTIPLIER = 3;
+        // Aura defaults: 1转=16, 6转=256, 9转=4096
+        static final int DEFAULT_AURA_BASE_RADIUS = 16;
+        static final double DEFAULT_AURA_TIER_EXPONENT = 2.0;
+        static final int DEFAULT_AURA_MAX_RADIUS = 4096;
+        static final double DEFAULT_FALLOFF_POWER = 2.0;
+        static final double DEFAULT_MIN_FALLOFF = 0.05;
+        // 缩圈相关默认值：refNodes 为各转"满状态"所需节点数
+        static final List<Integer> DEFAULT_REF_NODES_BY_TIER = List.of(20, 40, 80, 150, 280, 500);
+        static final double DEFAULT_MIN_SCALE = 0.3;
+
+        // ===== 能源节点默认值 =====
+        static final double DEFAULT_ENERGY_BUILD_COST = 0.0;
+        static final int DEFAULT_ENERGY_MAX_COUNT = 0;
+        static final double DEFAULT_POOL_GAIN_MULTIPLIER = 0.0;
+        static final double DEFAULT_POOL_GAIN_FLAT = 0.0;
+        static final int DEFAULT_SCAN_RADIUS = 8;
 
         private DefaultValues() {
         }
+    }
+
+    // ===== 能源节点配置 =====
+
+    /**
+     * 能源节点配置。
+     * <p>
+     * 能源节点（挂载在 Anchor 上）为资源池增长提供额外加成。
+     * 当前版本仅定义配置 schema + 默认值，不包含具体扫描逻辑。
+     * </p>
+     *
+     * @param photosynthesis 光合：依赖天空光（skylight）的能源
+     * @param waterIntake    汲水：依赖邻近水源的能源
+     * @param geothermal     地热：依赖邻近岩浆/深层地形的能源
+     */
+    public record EnergyConfig(
+            EnergyNodeConfig photosynthesis,
+            EnergyNodeConfig waterIntake,
+            EnergyNodeConfig geothermal
+    ) {
+        public static final EnergyConfig DEFAULT = new EnergyConfig(
+            EnergyNodeConfig.DEFAULT,
+            EnergyNodeConfig.DEFAULT,
+            EnergyNodeConfig.DEFAULT
+        );
+
+        public static final Codec<EnergyConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                EnergyNodeConfig.CODEC.optionalFieldOf("photosynthesis", EnergyNodeConfig.DEFAULT)
+                    .forGetter(EnergyConfig::photosynthesis),
+                EnergyNodeConfig.CODEC.optionalFieldOf("water_intake", EnergyNodeConfig.DEFAULT)
+                    .forGetter(EnergyConfig::waterIntake),
+                EnergyNodeConfig.CODEC.optionalFieldOf("geothermal", EnergyNodeConfig.DEFAULT)
+                    .forGetter(EnergyConfig::geothermal)
+            ).apply(instance, EnergyConfig::new)
+        );
+    }
+
+    /**
+     * 单种能源节点配置。
+     *
+     * @param buildCost           建造成本（消耗资源池；单位：pool）
+     * @param maxCount            上限数量（每个基地类型可配置不同上限）
+     * @param poolGainMultiplier  资源池增长倍率增量（加法语义：0.25 表示额外 +25%）
+     * @param poolGainFlat        资源池增长平坦增量（加法语义；单位：pool/刻间隔）
+     * @param scanRadius          检测半径（方块；用于后续环境扫描）
+     */
+    public record EnergyNodeConfig(
+            double buildCost,
+            int maxCount,
+            double poolGainMultiplier,
+            double poolGainFlat,
+            int scanRadius
+    ) {
+        public static final EnergyNodeConfig DEFAULT = new EnergyNodeConfig(
+            DefaultValues.DEFAULT_ENERGY_BUILD_COST,
+            DefaultValues.DEFAULT_ENERGY_MAX_COUNT,
+            DefaultValues.DEFAULT_POOL_GAIN_MULTIPLIER,
+            DefaultValues.DEFAULT_POOL_GAIN_FLAT,
+            DefaultValues.DEFAULT_SCAN_RADIUS
+        );
+
+        public static final Codec<EnergyNodeConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.DOUBLE.optionalFieldOf("build_cost", DefaultValues.DEFAULT_ENERGY_BUILD_COST)
+                    .forGetter(EnergyNodeConfig::buildCost),
+                Codec.INT.optionalFieldOf("max_count", DefaultValues.DEFAULT_ENERGY_MAX_COUNT)
+                    .forGetter(EnergyNodeConfig::maxCount),
+                Codec.DOUBLE.optionalFieldOf("pool_gain_multiplier", DefaultValues.DEFAULT_POOL_GAIN_MULTIPLIER)
+                    .forGetter(EnergyNodeConfig::poolGainMultiplier),
+                Codec.DOUBLE.optionalFieldOf("pool_gain_flat", DefaultValues.DEFAULT_POOL_GAIN_FLAT)
+                    .forGetter(EnergyNodeConfig::poolGainFlat),
+                Codec.INT.optionalFieldOf("scan_radius", DefaultValues.DEFAULT_SCAN_RADIUS)
+                    .forGetter(EnergyNodeConfig::scanRadius)
+            ).apply(instance, EnergyNodeConfig::new)
+        );
     }
 
     /**
@@ -131,38 +274,288 @@ public record BastionTypeConfig(
     }
 
     /**
-     * 扩张配置。
-     *
-     * @param baseCost       基础扩张成本
-     * @param tierMultiplier 转数成本倍率
-     * @param maxRadius      最大扩张半径
-     * @param maxPerTick     每刻最大扩张次数
+     * 扩张配置（菌毯 + Anchor）。
+     * <p>
+     * 原结构为单一 ExpansionConfig，本版本拆分为：
+     * <ul>
+     *   <li>菌毯扩张（mycelium）：低成本、高频率、贴地蔓延</li>
+     *   <li>Anchor 自动生成（anchor）：高成本、低频率、作为支点</li>
+     * </ul>
+     * </p>
      */
-    public record ExpansionConfig(
-            double baseCost,
-            double tierMultiplier,
-            int maxRadius,
-            int maxPerTick
-    ) {
-        public static final ExpansionConfig DEFAULT = new ExpansionConfig(
-            DefaultValues.DEFAULT_EXPANSION_COST,
-            DefaultValues.DEFAULT_COST_MULTIPLIER,
-            DefaultValues.DEFAULT_MAX_RADIUS,
-            DefaultValues.DEFAULT_MAX_PER_TICK
-        );
+    public record ExpansionConfig(MyceliumConfig mycelium, AnchorConfig anchor) {
+        public static final ExpansionConfig DEFAULT = new ExpansionConfig(MyceliumConfig.DEFAULT, AnchorConfig.DEFAULT);
 
         public static final Codec<ExpansionConfig> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                Codec.DOUBLE.optionalFieldOf("base_cost", DefaultValues.DEFAULT_EXPANSION_COST)
-                    .forGetter(ExpansionConfig::baseCost),
-                Codec.DOUBLE.optionalFieldOf("tier_multiplier", DefaultValues.DEFAULT_COST_MULTIPLIER)
-                    .forGetter(ExpansionConfig::tierMultiplier),
-                Codec.INT.optionalFieldOf("max_radius", DefaultValues.DEFAULT_MAX_RADIUS)
-                    .forGetter(ExpansionConfig::maxRadius),
-                Codec.INT.optionalFieldOf("max_per_tick", DefaultValues.DEFAULT_MAX_PER_TICK)
-                    .forGetter(ExpansionConfig::maxPerTick)
+                MyceliumConfig.CODEC.optionalFieldOf("mycelium", MyceliumConfig.DEFAULT)
+                    .forGetter(ExpansionConfig::mycelium),
+                AnchorConfig.CODEC.optionalFieldOf("anchor", AnchorConfig.DEFAULT)
+                    .forGetter(ExpansionConfig::anchor)
             ).apply(instance, ExpansionConfig::new)
         );
+    }
+
+    /** 菌毯扩张配置。 */
+    public record MyceliumConfig(
+            double baseCost,
+            double tierMultiplier,
+            int maxRadius,
+            int maxPerTick,
+            int spacing
+    ) {
+        public static final MyceliumConfig DEFAULT = new MyceliumConfig(
+            DefaultValues.DEFAULT_EXPANSION_COST,
+            DefaultValues.DEFAULT_COST_MULTIPLIER,
+            DefaultValues.DEFAULT_MAX_RADIUS,
+            DefaultValues.DEFAULT_MAX_PER_TICK,
+            DefaultValues.DEFAULT_NODE_SPACING
+        );
+
+        public static final Codec<MyceliumConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.DOUBLE.optionalFieldOf("base_cost", DefaultValues.DEFAULT_EXPANSION_COST)
+                    .forGetter(MyceliumConfig::baseCost),
+                Codec.DOUBLE.optionalFieldOf("tier_multiplier", DefaultValues.DEFAULT_COST_MULTIPLIER)
+                    .forGetter(MyceliumConfig::tierMultiplier),
+                Codec.INT.optionalFieldOf("max_radius", DefaultValues.DEFAULT_MAX_RADIUS)
+                    .forGetter(MyceliumConfig::maxRadius),
+                Codec.INT.optionalFieldOf("max_per_tick", DefaultValues.DEFAULT_MAX_PER_TICK)
+                    .forGetter(MyceliumConfig::maxPerTick),
+                Codec.INT.optionalFieldOf("spacing", DefaultValues.DEFAULT_NODE_SPACING)
+                    .forGetter(MyceliumConfig::spacing)
+            ).apply(instance, MyceliumConfig::new)
+        );
+    }
+
+    /** Anchor 自动生成配置。 */
+    public record AnchorConfig(
+            double buildCost,
+            int spacing,
+            int maxCount,
+            int triggerDistance,
+            long cooldownTicks
+    ) {
+        private static final double DEFAULT_BUILD_COST = 50.0;
+        private static final int DEFAULT_SPACING = 8;
+        private static final int DEFAULT_MAX_COUNT = 16;
+        private static final int DEFAULT_TRIGGER_DISTANCE = 10;
+        private static final long DEFAULT_COOLDOWN_TICKS = 100L;
+
+        public static final AnchorConfig DEFAULT = new AnchorConfig(
+            DEFAULT_BUILD_COST,
+            DEFAULT_SPACING,
+            DEFAULT_MAX_COUNT,
+            DEFAULT_TRIGGER_DISTANCE,
+            DEFAULT_COOLDOWN_TICKS
+        );
+
+        public static final Codec<AnchorConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.DOUBLE.optionalFieldOf("build_cost", DEFAULT_BUILD_COST)
+                    .forGetter(AnchorConfig::buildCost),
+                Codec.INT.optionalFieldOf("spacing", DEFAULT_SPACING)
+                    .forGetter(AnchorConfig::spacing),
+                Codec.INT.optionalFieldOf("max_count", DEFAULT_MAX_COUNT)
+                    .forGetter(AnchorConfig::maxCount),
+                Codec.INT.optionalFieldOf("trigger_distance", DEFAULT_TRIGGER_DISTANCE)
+                    .forGetter(AnchorConfig::triggerDistance),
+                Codec.LONG.optionalFieldOf("cooldown_ticks", DEFAULT_COOLDOWN_TICKS)
+                    .forGetter(AnchorConfig::cooldownTicks)
+            ).apply(instance, AnchorConfig::new)
+        );
+    }
+
+    /**
+     * 光环极性。
+     * <p>
+     * 用于区分光环的“受益者/受害者”方向：
+     * <ul>
+     *   <li>{@link #POSITIVE}：正极，倾向于<strong>增幅守卫</strong>（例如守卫获得加成）。</li>
+     *   <li>{@link #NEGATIVE}：负极，倾向于<strong>压制玩家</strong>（例如玩家在光环内受抑制）。</li>
+     * </ul>
+     * </p>
+     * <p>
+     * 默认值必须为 {@link #NEGATIVE}：因为旧版本配置/旧存档没有 polarity 字段时，
+     * 历史行为就是“压制玩家”；缺省为 NEGATIVE 可确保完全向后兼容。
+     * </p>
+     */
+    public enum AuraPolarity {
+        /** 正极：增幅守卫。 */
+        POSITIVE,
+        /** 负极：压制玩家（兼容旧配置的默认行为）。 */
+        NEGATIVE;
+
+        /**
+         * JSON 编解码器。
+         * <p>
+         * 采用字符串表示（"positive" / "negative"），并允许大小写差异。
+         * </p>
+         */
+        public static final Codec<AuraPolarity> CODEC = Codec.STRING.comapFlatMap(
+            value -> {
+                String normalized = value.trim().toLowerCase(Locale.ROOT);
+                return switch (normalized) {
+                    case "positive" -> DataResult.success(POSITIVE);
+                    case "negative" -> DataResult.success(NEGATIVE);
+                    default -> DataResult.error(() -> "未知的 polarity: " + value
+                        + "（期望为 positive/negative）");
+                };
+            },
+            polarity -> switch (polarity) {
+                case POSITIVE -> "positive";
+                case NEGATIVE -> "negative";
+            }
+        );
+    }
+
+    /**
+     * 光环配置（影响半径与衰减）。
+     * <p>
+     * auraRadius 用于玩家资源消耗判定和边界渲染，与节点扩张半径解耦。
+     * 衰减公式：factor = max(minFalloff, (1 - distance/auraRadius)^falloffPower)
+     * </p>
+     * <p>
+     * 缩圈机制：effectiveRadius = baseRadius * scale，
+     * 其中 scale = clamp(minScale, totalNodes/refNodes, 1.0)
+     * </p>
+     *
+     * @param polarity        光环极性：正极增幅守卫 / 负极压制玩家。
+     *                        <p>
+     *                        注意：当旧 JSON/旧存档缺少 polarity 字段时，必须默认为 NEGATIVE，
+     *                        以保持当前默认“压制玩家”的历史行为。
+     *                        </p>
+     * @param baseRadius      1 转基础半径
+     * @param tierExponent    转数指数（auraRadius = baseRadius * tierExponent^(tier-1)）
+     * @param maxRadius       最大半径上限
+     * @param falloffPower    衰减指数（越大中心越强、边缘越弱）
+     * @param minFalloff      最小衰减因子（边缘仍有微弱效果）
+     * @param refNodesByTier  各转的满状态参考节点数（用于缩圈计算）
+     * @param minScale        最小缩圈比例（节点全拆时仍保留的光环比例）
+     */
+    public record AuraConfig(
+            AuraPolarity polarity,
+            int baseRadius,
+            double tierExponent,
+            int maxRadius,
+            double falloffPower,
+            double minFalloff,
+            List<Integer> refNodesByTier,
+            double minScale
+    ) {
+        public static final AuraConfig DEFAULT = new AuraConfig(
+            AuraPolarity.NEGATIVE,
+            DefaultValues.DEFAULT_AURA_BASE_RADIUS,
+            DefaultValues.DEFAULT_AURA_TIER_EXPONENT,
+            DefaultValues.DEFAULT_AURA_MAX_RADIUS,
+            DefaultValues.DEFAULT_FALLOFF_POWER,
+            DefaultValues.DEFAULT_MIN_FALLOFF,
+            DefaultValues.DEFAULT_REF_NODES_BY_TIER,
+            DefaultValues.DEFAULT_MIN_SCALE
+        );
+
+        /**
+         * 兼容旧代码/旧配置的构造方法：缺省 polarity 为 NEGATIVE。
+         * <p>
+         * 之所以固定为 NEGATIVE，是因为旧版本没有 polarity 字段时默认行为就是“压制玩家”。
+         * </p>
+         */
+        public AuraConfig(
+                int baseRadius,
+                double tierExponent,
+                int maxRadius,
+                double falloffPower,
+                double minFalloff,
+                List<Integer> refNodesByTier,
+                double minScale
+        ) {
+            this(AuraPolarity.NEGATIVE, baseRadius, tierExponent, maxRadius, falloffPower, minFalloff,
+                refNodesByTier, minScale);
+        }
+
+        public static final Codec<AuraConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                AuraPolarity.CODEC.optionalFieldOf("polarity", AuraPolarity.NEGATIVE)
+                    .forGetter(AuraConfig::polarity),
+                Codec.INT.optionalFieldOf("base_radius", DefaultValues.DEFAULT_AURA_BASE_RADIUS)
+                    .forGetter(AuraConfig::baseRadius),
+                Codec.DOUBLE.optionalFieldOf("tier_exponent", DefaultValues.DEFAULT_AURA_TIER_EXPONENT)
+                    .forGetter(AuraConfig::tierExponent),
+                Codec.INT.optionalFieldOf("max_radius", DefaultValues.DEFAULT_AURA_MAX_RADIUS)
+                    .forGetter(AuraConfig::maxRadius),
+                Codec.DOUBLE.optionalFieldOf("falloff_power", DefaultValues.DEFAULT_FALLOFF_POWER)
+                    .forGetter(AuraConfig::falloffPower),
+                Codec.DOUBLE.optionalFieldOf("min_falloff", DefaultValues.DEFAULT_MIN_FALLOFF)
+                    .forGetter(AuraConfig::minFalloff),
+                Codec.INT.listOf().optionalFieldOf("ref_nodes_by_tier",
+                        DefaultValues.DEFAULT_REF_NODES_BY_TIER)
+                    .forGetter(AuraConfig::refNodesByTier),
+                Codec.DOUBLE.optionalFieldOf("min_scale", DefaultValues.DEFAULT_MIN_SCALE)
+                    .forGetter(AuraConfig::minScale)
+            ).apply(instance, AuraConfig::new)
+        );
+
+        /**
+         * 计算指定转数的光环半径。
+         *
+         * @param tier 转数
+         * @return 光环半径
+         */
+        public int calculateRadius(int tier) {
+            double radius = baseRadius * Math.pow(tierExponent, tier - 1);
+            return Math.min(maxRadius, (int) Math.round(radius));
+        }
+
+        /**
+         * 计算距离衰减因子。
+         *
+         * @param distance   玩家到核心的距离
+         * @param auraRadius 当前光环半径
+         * @return 衰减因子（0.0 ~ 1.0）
+         */
+        public double calculateFalloff(double distance, int auraRadius) {
+            if (auraRadius <= 0 || distance >= auraRadius) {
+                return 0.0;
+            }
+            double t = distance / auraRadius;
+            return Math.max(minFalloff, Math.pow(1.0 - t, falloffPower));
+        }
+
+        /**
+         * 获取指定转数的满状态参考节点数。
+         * <p>
+         * 用于缩圈计算：scale = clamp(minScale, totalNodes/refNodes, 1.0)。
+         * 如果 refNodesByTier 列表长度不足，则使用最后一个值；如果列表为空则返回 1。
+         * </p>
+         *
+         * @param tier 转数（1-based）
+         * @return 该转数的参考节点数
+         */
+        public int getRefNodesForTier(int tier) {
+            if (refNodesByTier.isEmpty()) {
+                return 1;  // 避免除零
+            }
+            int index = Math.max(0, Math.min(tier - 1, refNodesByTier.size() - 1));
+            return Math.max(1, refNodesByTier.get(index));
+        }
+
+        /**
+         * 计算基于节点数量的有效光环半径。
+         * <p>
+         * effectiveRadius = baseRadius * tierExponent^(tier-1) * scale，
+         * 其中 scale = clamp(minScale, totalNodes/refNodes, 1.0)。
+         * </p>
+         *
+         * @param tier       当前转数
+         * @param totalNodes 当前节点数量
+         * @return 有效光环半径
+         */
+        public int calculateEffectiveRadius(int tier, int totalNodes) {
+            int baseAuraRadius = calculateRadius(tier);
+            int refNodes = getRefNodesForTier(tier);
+            double scale = Math.max(minScale, Math.min(1.0, (double) totalNodes / refNodes));
+            return Math.max(1, (int) Math.round(baseAuraRadius * scale));
+        }
     }
 
     /**

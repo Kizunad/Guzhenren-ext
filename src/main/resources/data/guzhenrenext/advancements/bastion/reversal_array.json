@@ -1,0 +1,36 @@
+{
+  "display": {
+    "icon": {
+      "id": "guzhenrenext:bastion_reversal_array"
+    },
+    "title": {
+      "translate": "advancement.guzhenrenext.bastion.reversal_array.title"
+    },
+    "description": {
+      "translate": "advancement.guzhenrenext.bastion.reversal_array.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "has_reversal_array": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "guzhenrenext:bastion_reversal_array"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_reversal_array"
+    ]
+  ]
+}

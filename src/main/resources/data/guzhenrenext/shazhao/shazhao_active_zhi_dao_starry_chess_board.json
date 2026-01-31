@@ -1,0 +1,17 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_zhi_dao_starry_chess_board",
+  "title": "星罗棋布",
+  "desc": "智道防御杀招。以天机蛊推演，三星在天蛊布阵。领域如棋盘，敌我如棋子。敌人的每一步都在算计之中，攻势尽被化解，而我方则如得天助。",
+  "info": "主动释放 | 持续消耗真元 | 群体增益/减益 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:tianjigu",
+    "guzhenren:san_xing_zai_tian_gu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_zhi_dao_starry_chess_board_radius": "8.0",
+    "guzhenrenext:shazhao_active_zhi_dao_starry_chess_board_duration": "300",
+    "guzhenrenext:shazhao_active_zhi_dao_starry_chess_board_zhenyuan_base_cost_per_second": "4.0",
+    "guzhenrenext:shazhao_active_zhi_dao_starry_chess_board_cooldown": "600"
+  }
+}

@@ -38,6 +38,7 @@ public final class BastionCreativeTab {
                     // 基地系统物品
                     output.accept(BastionBlocks.BASTION_CORE_ITEM.get());
                     output.accept(BastionBlocks.BASTION_NODE_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_REVERSAL_ARRAY_ITEM.get());
                 })
                 .build()
         );

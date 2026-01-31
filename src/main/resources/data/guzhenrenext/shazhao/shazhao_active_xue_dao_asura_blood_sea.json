@@ -1,0 +1,19 @@
+{
+  "shazhaoID": "guzhenrenext:shazhao_active_xue_dao_asura_blood_sea",
+  "title": "血海修罗",
+  "desc": "血道防御杀招。以血水蛊化作滔滔血海，血战蛊激发修罗杀意。身陷血海者，护甲将被污血腐蚀，其流失的生命将化作养分反哺施术者。",
+  "info": "主动释放 | 持续消耗真元 | 腐蚀+吸血 | 3转杀招",
+  "cost_total_niantou": 500,
+  "required_items": [
+    "guzhenren:xue_shui_gu",
+    "guzhenren:xuezhangu"
+  ],
+  "metadata": {
+    "guzhenrenext:shazhao_active_xue_dao_asura_blood_sea_radius": "5.0",
+    "guzhenrenext:shazhao_active_xue_dao_asura_blood_sea_duration": "300",
+    "guzhenrenext:shazhao_active_xue_dao_asura_blood_sea_enemy_damage": "3.0",
+    "guzhenrenext:shazhao_active_xue_dao_asura_blood_sea_zhenyuan_cost_per_second": "5.0",
+    "guzhenrenext:shazhao_active_xue_dao_asura_blood_sea_wither_amplifier": "1",
+    "guzhenrenext:shazhao_active_xue_dao_asura_blood_sea_cooldown": "600"
+  }
+}

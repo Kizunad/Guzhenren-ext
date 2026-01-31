@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.bastion.block;
 
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionModifier;
 import com.Kizunad.guzhenrenext.bastion.BastionParticles;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
@@ -35,6 +36,14 @@ public class BastionCoreBlock extends Block {
 
     /** 核心转数最大值（支持 7-9 转高转内容）。 */
     private static final int MAX_TIER = 9;
+
+    /**
+     * HARDENED 词缀：核心破坏速度倍率。
+     */
+    private static final float HARDENED_CORE_PROGRESS_MULTIPLIER = 0.33f;
+
+    /** 每秒 tick 数（MC 固定为 20）。 */
+    private static final float TICKS_PER_SECOND = 20.0f;
 
     /**
      * 核心转数属性（反映基地转数，1-9）。
@@ -119,13 +128,51 @@ public class BastionCoreBlock extends Block {
             Player player,
             BlockGetter level,
             BlockPos pos) {
-        // 更高转数的核心更难破坏
-        int tier = state.getValue(TIER);
-        float baseProgress = super.getDestroyProgress(state, player, level, pos);
+        // 工具不正确时保持原版行为（通常会非常慢），避免“徒手也能按固定秒数拆核心”。
+        if (!player.hasCorrectToolForDrops(state)) {
+            return super.getDestroyProgress(state, player, level, pos);
+        }
 
-        // 转数缩放：1 转 = 100%，6 转 ≈ 16% 速度
-        float tierMultiplier = 1.0f / tier;
-        return baseProgress * tierMultiplier;
+        // 目标：按“转数 -> 目标破坏秒数”配置控制体验。
+        // 这里不直接依赖 super.getDestroyProgress（否则会叠加硬度/工具导致过慢）。
+        // 我们保留“挖掘速度（效率/急迫/疲劳/水下等）”的原版影响：
+        // 通过 Player#getDestroySpeed 的倍率映射到目标秒数。
+        int tier = state.getValue(TIER);
+        int targetSeconds = com.Kizunad.guzhenrenext.bastion.config.BastionBreakingConfig
+            .getCoreSeconds(tier);
+        float progress = computeProgressBySeconds(state, player, targetSeconds);
+
+        // 词缀影响：HARDENED 核心更难被破坏（保留作为额外修饰）
+        if (level instanceof ServerLevel serverLevel) {
+            BastionSavedData savedData = BastionSavedData.get(serverLevel);
+            BastionData bastion = savedData.findByCorePos(pos);
+            if (bastion != null && bastion.modifiers().contains(BastionModifier.HARDENED)) {
+                progress *= HARDENED_CORE_PROGRESS_MULTIPLIER;
+            }
+        }
+
+        return progress;
+    }
+
+    private static float computeProgressBySeconds(
+        BlockState state,
+        Player player,
+        int targetSeconds
+    ) {
+        int safeSeconds = Math.max(1, targetSeconds);
+
+        // 设计：targetSeconds 以“普通铁镐、无效率/无急迫/无疲劳”的体验为参考。
+        // 原版中铁镐挖掘速度通常为 6（不同方块/标签下可能略有差异），
+        // 这里用常量作为参考速度，让急迫/效率能按倍率加速。
+        final float referenceSpeed = 6.0f;
+        float actualSpeed = player.getDestroySpeed(state);
+        if (actualSpeed <= 0.0f) {
+            return 0.0f;
+        }
+
+        // 基础每 tick 进度 = 1 / (seconds * 20)
+        // 再乘以 (actualSpeed / referenceSpeed)，保留急迫/效率/疲劳等倍率影响。
+        return (actualSpeed / referenceSpeed) * (1.0f / (safeSeconds * TICKS_PER_SECOND));
     }
 
     /**
