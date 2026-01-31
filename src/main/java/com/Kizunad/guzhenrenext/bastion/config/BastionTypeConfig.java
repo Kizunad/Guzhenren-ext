@@ -22,6 +22,7 @@ import java.util.Optional;
  * @param maxTier         最大转数（1-9）
  * @param spawning        刷怪配置
  * @param expansion       扩张配置
+ * @param connectivity    连通性扫描配置（连通性为非实时：按周期触发、按预算推进 BFS）
  * @param evolution       进化配置
  * @param aura            光环配置（影响半径与衰减）
  * @param energy          能源节点配置（影响资源池增长的额外加成）
@@ -37,6 +38,7 @@ public record BastionTypeConfig(
         int maxTier,
         SpawningConfig spawning,
         ExpansionConfig expansion,
+        ConnectivityConfig connectivity,
         EvolutionConfig evolution,
         AuraConfig aura,
         EnergyConfig energy,
@@ -76,6 +78,8 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::spawning),
             ExpansionConfig.CODEC.optionalFieldOf("expansion", ExpansionConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::expansion),
+            ConnectivityConfig.CODEC.optionalFieldOf("connectivity", ConnectivityConfig.DEFAULT)
+                .forGetter(BastionTypeConfig::connectivity),
             EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::evolution),
             AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
@@ -134,6 +138,44 @@ public record BastionTypeConfig(
         );
     }
 
+    // ===== 连通性扫描配置 =====
+
+    /**
+     * 连通性扫描配置。
+     * <p>
+     * 说明：基地连通性（核心/Anchor/菌毯网络）采用“非实时”的增量 BFS：
+     * <ul>
+     *   <li>按 {@link #scanIntervalTicks()} 周期触发一次扫描；</li>
+     *   <li>每次 tick 仅消耗 {@link #bfsBudgetNodes()} 的节点预算推进 BFS，避免卡顿。</li>
+     * </ul>
+     * </p>
+     * <p>
+     * 兼容策略：旧版 bastion_type JSON 若缺失 connectivity 字段，必须回退到 v1 的常量行为。
+     * </p>
+     *
+     * @param scanIntervalTicks 扫描间隔（tick）
+     * @param bfsBudgetNodes    BFS 预算（单次调用最大处理节点数）
+     */
+    public record ConnectivityConfig(long scanIntervalTicks, int bfsBudgetNodes) {
+        public static final ConnectivityConfig DEFAULT = new ConnectivityConfig(
+            DefaultValues.DEFAULT_CONNECTIVITY_SCAN_INTERVAL_TICKS,
+            DefaultValues.DEFAULT_CONNECTIVITY_BFS_BUDGET_NODES
+        );
+
+        public static final Codec<ConnectivityConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.LONG.optionalFieldOf(
+                        "scan_interval_ticks",
+                        DefaultValues.DEFAULT_CONNECTIVITY_SCAN_INTERVAL_TICKS)
+                    .forGetter(ConnectivityConfig::scanIntervalTicks),
+                Codec.INT.optionalFieldOf(
+                        "bfs_budget_nodes",
+                        DefaultValues.DEFAULT_CONNECTIVITY_BFS_BUDGET_NODES)
+                    .forGetter(ConnectivityConfig::bfsBudgetNodes)
+            ).apply(instance, ConnectivityConfig::new)
+        );
+    }
+
     /**
      * 默认值常量。
      */
@@ -143,6 +185,24 @@ public record BastionTypeConfig(
         static final int DEFAULT_ANCHORS_WEIGHT = 10;
         /** 有效节点数：菌毯权重默认值（兼容旧 JSON）。 */
         static final int DEFAULT_MYCELIUM_WEIGHT = 1;
+
+        // ===== 连通性扫描默认值 =====
+        /**
+         * 连通性扫描间隔默认值（tick）。
+         * <p>
+         * 对齐 v1：BastionConnectivityService 内部旧常量 CONNECTIVITY_SCAN_INTERVAL_TICKS=40。
+         * </p>
+         */
+        static final long DEFAULT_CONNECTIVITY_SCAN_INTERVAL_TICKS = 40L;
+
+        /**
+         * 连通性 BFS 预算默认值（节点数）。
+         * <p>
+         * 对齐 v1：BastionConnectivityService 内部旧常量 CONNECTIVITY_BFS_BUDGET_NODES=128。
+         * </p>
+         */
+        static final int DEFAULT_CONNECTIVITY_BFS_BUDGET_NODES = 128;
+
         static final double DEFAULT_SPAWN_CHANCE = 0.1;
         static final double DEFAULT_TIER_SPAWN_BONUS = 0.05;
         static final int DEFAULT_MAX_SPAWNS = 2;

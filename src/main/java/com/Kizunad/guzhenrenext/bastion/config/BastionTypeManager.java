@@ -144,6 +144,7 @@ public final class BastionTypeManager {
             FALLBACK_MAX_TIER,
             BastionTypeConfig.SpawningConfig.DEFAULT,
             BastionTypeConfig.ExpansionConfig.DEFAULT,
+            BastionTypeConfig.ConnectivityConfig.DEFAULT,
             BastionTypeConfig.EvolutionConfig.DEFAULT,
             BastionTypeConfig.AuraConfig.DEFAULT,
             BastionTypeConfig.EnergyConfig.DEFAULT,

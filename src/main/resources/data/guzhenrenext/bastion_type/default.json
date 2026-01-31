@@ -27,6 +27,10 @@
       "cooldown_ticks": 100
     }
   },
+  "connectivity": {
+    "scan_interval_ticks": 40,
+    "bfs_budget_nodes": 128
+  },
   "evolution": {
     "base_evolution_ticks": 72000,
     "tier_multiplier": 3

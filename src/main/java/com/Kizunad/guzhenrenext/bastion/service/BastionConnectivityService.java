@@ -44,10 +44,8 @@ public final class BastionConnectivityService {
      * 配置常量（不外置，避免 MagicNumber）。
      */
     private static final class Config {
-        /** 连通性扫描的最小间隔（tick）。 */
-        static final long CONNECTIVITY_SCAN_INTERVAL_TICKS = 40L;
-        /** 单次调用中 BFS 最大处理节点数（预算）。 */
-        static final int CONNECTIVITY_BFS_BUDGET_NODES = 128;
+        // 连通性扫描相关参数已配置化：见 BastionTypeConfig.ConnectivityConfig。
+        // 这里不再保留 interval/budget 的硬编码常量，避免后续出现“代码常量覆盖配置”的双源真相。
 
         /** 衰败总倒计时（tick）。 */
         static final int MYCELIUM_DECAY_TOTAL_TICKS = 200;
@@ -79,6 +77,7 @@ public final class BastionConnectivityService {
             BastionData bastion,
             long gameTime) {
         BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.ConnectivityConfig connectivityConfig = typeConfig.connectivity();
         int spacing = Math.max(1, typeConfig.expansion().mycelium().spacing());
         int spacingY = Math.max(1, spacing / 2);
 
@@ -86,6 +85,10 @@ public final class BastionConnectivityService {
             savedData.getOrCreateConnectivityRuntime(bastion.id(), bastion.corePos());
 
         // 每次都更新步长，确保配置变更可生效。
+        // 注意：BFS 的“步长”目前并非通过 connectivityConfig 配置，而是复用菌毯扩张的 spacing：
+        // - X/Z 方向：typeConfig.expansion().mycelium().spacing()
+        // - Y 方向：spacing/2
+        // 这意味着：步长已可通过 bastion_type.expansion.mycelium.spacing 间接配置化。
         runtime.updateSpacing(spacing, spacingY);
 
         // 未到下一次扫描且当前不在扫描中：跳过。
@@ -100,7 +103,7 @@ public final class BastionConnectivityService {
         }
 
         // 推进 BFS（预算化）。
-        int budget = Math.max(1, Config.CONNECTIVITY_BFS_BUDGET_NODES);
+        int budget = Math.max(1, connectivityConfig.bfsBudgetNodes());
         for (int i = 0; i < budget && runtime.isScanning(); i++) {
             BlockPos current = runtime.pollNext();
             if (current == null) {
@@ -126,7 +129,8 @@ public final class BastionConnectivityService {
         if (runtime.isScanJustFinished()) {
             runtime.clearScanJustFinished();
             updateDecayTargets(level, savedData, bastion, runtime.getLastReachableNodes());
-            runtime.setNextScanGameTime(gameTime + Config.CONNECTIVITY_SCAN_INTERVAL_TICKS);
+            long intervalTicks = Math.max(1L, connectivityConfig.scanIntervalTicks());
+            runtime.setNextScanGameTime(gameTime + intervalTicks);
         }
     }
 
