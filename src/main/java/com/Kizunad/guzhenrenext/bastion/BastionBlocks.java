@@ -6,11 +6,8 @@ import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionReversalArrayBlock;
-import com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType;
 import com.Kizunad.guzhenrenext.bastion.service.BastionEnergyBuildService;
-import com.Kizunad.guzhenrenext.kongqiao.logic.util.ItemStackCustomDataHelper;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -322,10 +319,7 @@ public final class BastionBlocks {
     /**
      * 能源节点物品：在服务端放置时做“扣费/上限/归属”校验。
      */
-    private static final class BastionEnergyNodeItem extends BlockItem {
-
-        /** ItemStack CustomData 中记录能源类型的 key（append-only，可平滑兼容）。 */
-        private static final String TAG_ENERGY_TYPE = "bastion_energy_type";
+     private static final class BastionEnergyNodeItem extends BlockItem {
 
         private BastionEnergyNodeItem(Block block, Properties properties) {
             super(block, properties);
@@ -350,40 +344,23 @@ public final class BastionBlocks {
             }
 
             BastionSavedData savedData = BastionSavedData.get(serverLevel);
-            BastionEnergyType type = readEnergyTypeFromStack(context.getItemInHand());
 
+            // Round 3.2：能源节点类型不再要求玩家预先写入 CustomData。
+            // 服务端会在 tryBuildEnergyNode 内部根据环境判定 + bastion_type.energy.priority_order
+            // 自动选择最终类型，并将其写入方块属性与运行时缓存。
             net.minecraft.world.level.block.state.BlockState desired = state;
-            if (desired.getBlock() instanceof BastionEnergyNodeBlock) {
-                desired = desired.setValue(BastionEnergyNodeBlock.ENERGY_TYPE, type);
-            }
 
             boolean ok = BastionEnergyBuildService.tryBuildEnergyNode(
                 serverLevel,
                 savedData,
                 serverPlayer,
                 context.getClickedPos(),
-                desired,
-                type
+                desired
             );
 
             // 说明：tryBuildEnergyNode 内部已执行 setBlock。
             // 这里返回 true 仅用于告诉上层“放置成功”，由 BlockItem 流程处理消耗/统计。
             return ok;
-        }
-
-        private static BastionEnergyType readEnergyTypeFromStack(ItemStack stack) {
-            CompoundTag tag = ItemStackCustomDataHelper.copyCustomDataTag(stack);
-            if (!tag.contains(TAG_ENERGY_TYPE)) {
-                return BastionEnergyType.PHOTOSYNTHESIS;
-            }
-
-            String raw = tag.getString(TAG_ENERGY_TYPE);
-            for (BastionEnergyType type : BastionEnergyType.values()) {
-                if (type.getSerializedName().equals(raw)) {
-                    return type;
-                }
-            }
-            return BastionEnergyType.PHOTOSYNTHESIS;
         }
     }
 }

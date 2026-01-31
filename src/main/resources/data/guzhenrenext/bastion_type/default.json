@@ -53,6 +53,11 @@
     "polarity": "negative"
   },
   "energy": {
+    "priority_order": [
+      "geothermal",
+      "water_intake",
+      "photosynthesis"
+    ],
     "photosynthesis": {
       "build_cost": 30.0,
       "max_count": 12,

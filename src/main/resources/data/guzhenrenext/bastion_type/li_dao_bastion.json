@@ -59,5 +59,12 @@
     "loot_table": "guzhenrenext:bastion/li_dao",
     "drop_on_destroy": true,
     "drop_on_capture": true
+  },
+  "energy": {
+    "priority_order": [
+      "geothermal",
+      "water_intake",
+      "photosynthesis"
+    ]
   }
 }

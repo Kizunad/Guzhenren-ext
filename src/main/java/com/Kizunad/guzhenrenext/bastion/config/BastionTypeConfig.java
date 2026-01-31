@@ -446,6 +446,24 @@ public record BastionTypeConfig(
         static final double DEFAULT_POOL_GAIN_FLAT = 0.0;
         static final int DEFAULT_SCAN_RADIUS = 8;
 
+        /**
+         * 能源冲突优先级默认值。
+         * <p>
+         * Round 3.2 的关键：同一 Anchor 周边环境可能同时满足多个能源条件。
+         * 在旧实现中，优先级被硬编码为：地热 &gt; 汲水 &gt; 光合。
+         * </p>
+         * <p>
+         * 为保证旧配置/旧玩法的默认行为不变，当 bastion_type.energy.priority_order 缺失时，
+         * 必须回退到该默认顺序。
+         * </p>
+         */
+        static final List<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> DEFAULT_ENERGY_PRIORITY_ORDER =
+            List.of(
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.GEOTHERMAL,
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.WATER_INTAKE,
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.PHOTOSYNTHESIS
+            );
+
         private DefaultValues() {
         }
     }
@@ -466,12 +484,25 @@ public record BastionTypeConfig(
     public record EnergyConfig(
             EnergyNodeConfig photosynthesis,
             EnergyNodeConfig waterIntake,
-            EnergyNodeConfig geothermal
+            EnergyNodeConfig geothermal,
+
+            /**
+             * 同一 Anchor 多条件满足时的最终能源类型选择顺序（冲突优先级）。
+             * <p>
+             * 说明：能源节点的环境判定可能同时满足多个条件（例如附近同时有水与岩浆）。
+             * Round 3.2 要求将该优先级配置化：由 bastion_type.energy.priority_order 控制。
+             * </p>
+             * <p>
+             * 兼容策略：旧 JSON 若缺失该字段，必须回退到 Round 3.1 的默认行为（地热 &gt; 汲水 &gt; 光合）。
+             * </p>
+             */
+            List<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> priorityOrder
     ) {
         public static final EnergyConfig DEFAULT = new EnergyConfig(
             EnergyNodeConfig.DEFAULT,
             EnergyNodeConfig.DEFAULT,
-            EnergyNodeConfig.DEFAULT
+            EnergyNodeConfig.DEFAULT,
+            DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER
         );
 
         public static final Codec<EnergyConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -481,9 +512,33 @@ public record BastionTypeConfig(
                 EnergyNodeConfig.CODEC.optionalFieldOf("water_intake", EnergyNodeConfig.DEFAULT)
                     .forGetter(EnergyConfig::waterIntake),
                 EnergyNodeConfig.CODEC.optionalFieldOf("geothermal", EnergyNodeConfig.DEFAULT)
-                    .forGetter(EnergyConfig::geothermal)
+                    .forGetter(EnergyConfig::geothermal),
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.CODEC.listOf()
+                    .optionalFieldOf("priority_order", DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER)
+                    .forGetter(EnergyConfig::priorityOrder)
             ).apply(instance, EnergyConfig::new)
         );
+
+        /**
+         * 获取可用于运行时判定的规范化优先级顺序。
+         * <p>
+         * 允许配置中出现：
+         * <ul>
+         *     <li>重复项（会被去重）</li>
+         *     <li>缺失项（会按默认顺序补齐）</li>
+         * </ul>
+         * 以保证“总能选出一个最终类型”，避免配置错误导致无法建造。
+         * </p>
+         */
+        public List<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> normalizedPriorityOrder() {
+            java.util.LinkedHashSet<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> ordered =
+                new java.util.LinkedHashSet<>();
+            if (priorityOrder != null) {
+                ordered.addAll(priorityOrder);
+            }
+            ordered.addAll(DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER);
+            return List.copyOf(ordered);
+        }
     }
 
     /**

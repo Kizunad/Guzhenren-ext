@@ -146,5 +146,12 @@
         "min_tier": 5
       }
     ]
+  },
+  "energy": {
+    "priority_order": [
+      "geothermal",
+      "water_intake",
+      "photosynthesis"
+    ]
   }
 }

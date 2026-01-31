@@ -145,25 +145,30 @@ public final class BastionEnergyService {
                 continue;
             }
 
-            // Round 3.1：能源类型由“节点方块的类型属性”指定；扫描只负责校验环境是否满足该类型。
-            BastionEnergyType desiredType = nodeState.getValue(BastionEnergyNodeBlock.ENERGY_TYPE);
+            // Round 3.2：同一 Anchor 可能同时满足多种能源条件（例如附近同时有水与岩浆）。
+            // 能源类型不能再“固化为某一个”，必须按 bastion_type.energy.priority_order 的顺序做冲突收口。
+            BastionEnergyType chosenType = null;
+            for (BastionEnergyType type : energyConfig.normalizedPriorityOrder()) {
+                if (isEnergyTypeSatisfied(type, level, anchorPos, photoRadius, waterRadius, geothermalRadius)) {
+                    chosenType = type;
+                    break;
+                }
+            }
 
-            boolean valid = isEnergyTypeSatisfied(
-                desiredType,
-                level,
-                anchorPos,
-                photoRadius,
-                waterRadius,
-                geothermalRadius
-            );
-
-            if (!valid) {
-                // 环境不满足：移除旧记录，避免长期保留过期加成。
+            if (chosenType == null) {
+                // 三类条件都不满足：移除旧记录，避免长期保留过期加成。
                 energyMap.remove(anchorPos);
                 continue;
             }
 
-            energyMap.put(anchorPos, desiredType);
+            energyMap.put(anchorPos, chosenType);
+
+            // 同步节点方块的 energy_type：用于可视化/调试，也避免后续逻辑继续读取旧值。
+            // 说明：该更新只改变方块属性，不涉及 BE，不会引入额外持久化数据。
+            if (nodeState.getValue(BastionEnergyNodeBlock.ENERGY_TYPE) != chosenType) {
+                BlockState updated = nodeState.setValue(BastionEnergyNodeBlock.ENERGY_TYPE, chosenType);
+                level.setBlock(nodePos, updated, net.minecraft.world.level.block.Block.UPDATE_ALL);
+            }
         }
 
         // 清理失效条目：如果能源缓存里存在“已不在 anchorCache 的位置”，则移除。
@@ -183,7 +188,7 @@ public final class BastionEnergyService {
      * 扫描只负责校验环境条件。
      * </p>
      */
-    private static boolean isEnergyTypeSatisfied(
+    public static boolean isEnergyTypeSatisfied(
             BastionEnergyType energyType,
             ServerLevel level,
             BlockPos anchorPos,
