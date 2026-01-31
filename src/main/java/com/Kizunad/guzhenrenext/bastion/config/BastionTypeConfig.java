@@ -25,6 +25,8 @@ import java.util.Optional;
  * @param evolution       进化配置
  * @param aura            光环配置（影响半径与衰减）
  * @param energy          能源节点配置（影响资源池增长的额外加成）
+ * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
+ * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
  * @param loot            战利品配置（可选）
  * @param highTier        高转内容配置（可选，7-9 转专属）
  */
@@ -38,10 +40,29 @@ public record BastionTypeConfig(
         EvolutionConfig evolution,
         AuraConfig aura,
         EnergyConfig energy,
+        int anchorsWeight,
+        int myceliumWeight,
         Optional<LootConfig> loot,
         Optional<HighTierConfig> highTier,
         Optional<GuardianShazhaoConfig> guardianShazhao
 ) {
+
+    /**
+     * 有效节点数计算：Anchor 权重默认值。
+     * <p>
+     * 兼容策略：旧版 bastionType JSON 若缺失 anchors_weight 字段，必须回退到该默认值，
+     * 以保证行为与改动前一致。
+     * </p>
+     */
+    public static final int DEFAULT_ANCHORS_WEIGHT = DefaultValues.DEFAULT_ANCHORS_WEIGHT;
+
+    /**
+     * 有效节点数计算：菌毯权重默认值。
+     * <p>
+     * 兼容策略：旧版 bastionType JSON 若缺失 mycelium_weight 字段，必须回退到该默认值。
+     * </p>
+     */
+    public static final int DEFAULT_MYCELIUM_WEIGHT = DefaultValues.DEFAULT_MYCELIUM_WEIGHT;
 
     /** 序列化/反序列化编解码器。 */
     public static final Codec<BastionTypeConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -61,6 +82,14 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::aura),
             EnergyConfig.CODEC.optionalFieldOf("energy", EnergyConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::energy),
+            // 有效节点数（effectiveNodes）权重配置：
+            // - anchorsWeight：Anchor（子核心/支撑节点）的权重
+            // - myceliumWeight：菌毯（贴地蔓延主网）的权重
+            // 兼容策略：旧版 JSON 若缺失该字段，必须回退为 10/1，保持当前游戏平衡不被破坏。
+            Codec.INT.optionalFieldOf("anchors_weight", DEFAULT_ANCHORS_WEIGHT)
+                .forGetter(BastionTypeConfig::anchorsWeight),
+            Codec.INT.optionalFieldOf("mycelium_weight", DEFAULT_MYCELIUM_WEIGHT)
+                .forGetter(BastionTypeConfig::myceliumWeight),
             LootConfig.CODEC.optionalFieldOf("loot").forGetter(BastionTypeConfig::loot),
             HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(BastionTypeConfig::highTier),
             GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
@@ -110,6 +139,10 @@ public record BastionTypeConfig(
      */
     private static final class DefaultValues {
         static final int DEFAULT_MAX_TIER = 6;
+        /** 有效节点数：Anchor 权重默认值（兼容旧 JSON）。 */
+        static final int DEFAULT_ANCHORS_WEIGHT = 10;
+        /** 有效节点数：菌毯权重默认值（兼容旧 JSON）。 */
+        static final int DEFAULT_MYCELIUM_WEIGHT = 1;
         static final double DEFAULT_SPAWN_CHANCE = 0.1;
         static final double DEFAULT_TIER_SPAWN_BONUS = 0.05;
         static final int DEFAULT_MAX_SPAWNS = 2;

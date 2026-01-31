@@ -3,6 +3,8 @@
   "display_name": "默认基地",
   "primary_dao": "zhi_dao",
   "max_tier": 6,
+  "anchors_weight": 10,
+  "mycelium_weight": 1,
   "spawning": {
     "base_spawn_chance": 0.1,
     "tier_spawn_bonus": 0.05,

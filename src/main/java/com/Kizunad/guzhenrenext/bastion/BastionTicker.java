@@ -78,19 +78,6 @@ public final class BastionTicker {
         /** 转数幂基数（用于计算转数加成）。 */
         static final double TIER_POWER_BASE = 1.5;
 
-        /**
-         * 有效节点数权重：Anchor 的权重（子核心/支撑节点）。
-         * <p>
-         * 设计：Anchor 更稀有且更关键，因此权重大于菌毯。
-         * </p>
-         */
-        static final int EFFECTIVE_NODE_ANCHOR_WEIGHT = 10;
-
-        /**
-         * 有效节点数权重：菌毯的权重（贴地蔓延主网）。
-         */
-        static final int EFFECTIVE_NODE_MYCELIUM_WEIGHT = 1;
-
         private MultiplierConfig() {
         }
     }
@@ -498,10 +485,17 @@ public final class BastionTicker {
     private static int calculateEffectiveNodes(BastionData bastion) {
         // 核心/旧节点总数依然保留在 bastion.totalNodes，用于 aura 等旧机制。
         // 资源池使用单独的“有效节点数”，避免菌毯不计入 totalNodes 导致资源池过低。
+        //
+        // Round 1.1：权重不再硬编码在 Ticker 中，而是按 bastionType JSON 配置读取。
+        // 兼容策略：若旧 JSON 缺失字段，将由 BastionTypeConfig 的 optionalFieldOf 回退到 10/1。
         int anchors = Math.max(0, bastion.totalAnchors());
         int mycelium = Math.max(0, bastion.totalMycelium());
-        return anchors * MultiplierConfig.EFFECTIVE_NODE_ANCHOR_WEIGHT
-            + mycelium * MultiplierConfig.EFFECTIVE_NODE_MYCELIUM_WEIGHT;
+
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        int anchorsWeight = Math.max(0, typeConfig.anchorsWeight());
+        int myceliumWeight = Math.max(0, typeConfig.myceliumWeight());
+
+        return anchors * anchorsWeight + mycelium * myceliumWeight;
     }
 
     private static double calculatePoolGain(BastionData bastion, int effectiveNodes, double multiplier) {

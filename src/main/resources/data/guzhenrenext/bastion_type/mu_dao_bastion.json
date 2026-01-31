@@ -3,6 +3,8 @@
   "display_name": "木道基地",
   "primary_dao": "mu_dao",
   "max_tier": 6,
+  "anchors_weight": 10,
+  "mycelium_weight": 1,
   "spawning": {
     "base_spawn_chance": 0.06,
     "tier_spawn_bonus": 0.03,
