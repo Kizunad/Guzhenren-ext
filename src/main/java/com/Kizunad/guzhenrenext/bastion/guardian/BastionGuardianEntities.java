@@ -14,6 +14,7 @@ import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionBerserkerGuardian
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWardenGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWitherSkeletonGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWitchGuardian;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionArcherGuardian;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -70,6 +71,9 @@ public final class BastionGuardianEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionPillagerGuardian>> BASTION_PILLAGER =
         registerMob("bastion_pillager_guardian", BastionPillagerGuardian::new);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BastionArcherGuardian>> BASTION_ARCHER_GUARDIAN =
+        registerMob("bastion_archer_guardian", BastionArcherGuardian::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionIronGolemGuardian>> BASTION_IRON_GOLEM =
         registerMob("bastion_iron_golem_guardian", BastionIronGolemGuardian::new);

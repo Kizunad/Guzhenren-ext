@@ -763,7 +763,7 @@ public record BastionTypeConfig(
      * </p>
      */
     public record GuardianWeights(int minion, int ranged, int support, int elite, int boss, int shieldMinion,
-                                  int berserker) {
+                                  int berserker, int archer) {
         public static final GuardianWeights DEFAULT = new GuardianWeights(
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_MINION,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_RANGED,
@@ -771,7 +771,8 @@ public record BastionTypeConfig(
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_ELITE,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_SHIELD_MINION,
-            DefaultValues.DEFAULT_HATCHERY_WEIGHT_BERSERKER
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_BERSERKER,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_ARCHER
         );
 
         public static final Codec<GuardianWeights> CODEC = RecordCodecBuilder.create(instance ->
@@ -794,7 +795,7 @@ public record BastionTypeConfig(
                     .forGetter(GuardianWeights::elite),
                 Codec.INT.optionalFieldOf(
                         "boss",
-                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS)
+                    DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS)
                     .forGetter(GuardianWeights::boss),
                 Codec.INT.optionalFieldOf(
                         "shield_minion",
@@ -803,7 +804,11 @@ public record BastionTypeConfig(
                 Codec.INT.optionalFieldOf(
                         "berserker",
                         DefaultValues.DEFAULT_HATCHERY_WEIGHT_BERSERKER)
-                    .forGetter(GuardianWeights::berserker)
+                    .forGetter(GuardianWeights::berserker),
+                Codec.INT.optionalFieldOf(
+                        "archer",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_ARCHER)
+                    .forGetter(GuardianWeights::archer)
             ).apply(instance, GuardianWeights::new)
         );
     }
@@ -1251,6 +1256,14 @@ public record BastionTypeConfig(
          * </p>
          */
         static final int DEFAULT_HATCHERY_WEIGHT_BERSERKER = 0;
+
+        /**
+         * Round 13：弓手权重默认值。
+         * <p>
+         * 兼容策略：默认 0，保持旧 JSON 不产出弓手。
+         * </p>
+         */
+        static final int DEFAULT_HATCHERY_WEIGHT_ARCHER = 0;
 
         /**
          * 能源冲突优先级默认值。

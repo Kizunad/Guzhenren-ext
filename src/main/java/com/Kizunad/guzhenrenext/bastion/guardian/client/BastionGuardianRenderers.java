@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.WardenRenderer;
 import net.minecraft.client.renderer.entity.WitchRenderer;
 import net.minecraft.client.renderer.entity.WitherSkeletonRenderer;
 import net.minecraft.client.renderer.entity.HoglinRenderer;
+import net.minecraft.client.renderer.entity.SkeletonRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -47,6 +48,7 @@ public final class BastionGuardianRenderers {
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_SHIELD_GUARDIAN.get(), VindicatorRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_BERSERKER_GUARDIAN.get(), VindicatorRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_PILLAGER.get(), PillagerRenderer::new);
+        event.registerEntityRenderer(BastionGuardianEntities.BASTION_ARCHER_GUARDIAN.get(), SkeletonRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_IRON_GOLEM.get(), IronGolemRenderer::new);
 
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_RAVAGER.get(), RavagerRenderer::new);

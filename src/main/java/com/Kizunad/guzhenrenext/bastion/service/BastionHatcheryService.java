@@ -629,6 +629,9 @@ public final class BastionHatcheryService {
      *     <li>minion：Vindicator</li>
      *     <li>ranged：Pillager</li>
      *     <li>support：Witch</li>
+     *     <li>shield_minion：BastionShieldGuardian</li>
+     *     <li>berserker：BastionBerserkerGuardian</li>
+     *     <li>archer：BastionArcherGuardian</li>
      *     <li>elite：Warden（默认权重为 0，不会出现）</li>
      *     <li>boss：Ravager（默认权重为 0，不会出现）</li>
      * </ul>
@@ -648,8 +651,9 @@ public final class BastionHatcheryService {
         int wBoss = Math.max(0, weights.boss());
         int wShieldMinion = Math.max(0, weights.shieldMinion());
         int wBerserker = Math.max(0, weights.berserker());
+        int wArcher = Math.max(0, weights.archer());
 
-        int total = wMinion + wRanged + wSupport + wElite + wBoss + wShieldMinion + wBerserker;
+        int total = wMinion + wRanged + wSupport + wElite + wBoss + wShieldMinion + wBerserker + wArcher;
         if (total <= 0) {
             return null;
         }
@@ -676,6 +680,10 @@ public final class BastionHatcheryService {
         cumulative += wBerserker;
         if (roll < cumulative) {
             return BastionGuardianEntities.BASTION_BERSERKER_GUARDIAN.get();
+        }
+        cumulative += wArcher;
+        if (roll < cumulative) {
+            return BastionGuardianEntities.BASTION_ARCHER_GUARDIAN.get();
         }
         cumulative += wElite;
         if (roll < cumulative) {
