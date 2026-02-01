@@ -154,6 +154,7 @@ public final class BastionTypeManager {
             BastionTypeConfig.HatcheryConfig.DEFAULT,
             BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.BossConfig.DEFAULT,
+            BastionTypeConfig.ThreatConfig.DEFAULT,
             BastionTypeConfig.PollutionConfig.DEFAULT,
             BastionTypeConfig.CaptureConfig.DEFAULT,
             BastionTypeConfig.DEFAULT_ANCHORS_WEIGHT,

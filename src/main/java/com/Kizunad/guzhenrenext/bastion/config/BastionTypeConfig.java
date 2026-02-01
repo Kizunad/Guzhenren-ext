@@ -55,11 +55,12 @@ public record BastionTypeConfig(
          HatcheryConfig hatchery,
          EliteConfig elite,
          BossConfig boss,
-         PollutionConfig pollution,
-         CaptureConfig capture,
-         int anchorsWeight,
-         int myceliumWeight,
-         Optional<LootConfig> loot,
+         ThreatConfig threat,
+          PollutionConfig pollution,
+          CaptureConfig capture,
+          int anchorsWeight,
+          int myceliumWeight,
+          Optional<LootConfig> loot,
          Optional<HighTierConfig> highTier,
          Optional<GuardianShazhaoConfig> guardianShazhao
 ) {
@@ -95,10 +96,11 @@ public record BastionTypeConfig(
         private final EliteConfig elite;
         private final Optional<LootConfig> loot;
         private final Optional<HighTierConfig> highTier;
-        private final Optional<GuardianShazhaoConfig> guardianShazhao;
-        private final BossConfig boss;
-        private final PollutionConfig pollution;
-        private final CaptureConfig capture;
+         private final Optional<GuardianShazhaoConfig> guardianShazhao;
+         private final BossConfig boss;
+         private final ThreatConfig threat;
+         private final PollutionConfig pollution;
+         private final CaptureConfig capture;
 
         private OptionalContentConfig(OptionalContentParams params) {
             this.shell = params.shell();
@@ -107,12 +109,23 @@ public record BastionTypeConfig(
             this.highTier = params.highTier();
             this.guardianShazhao = params.guardianShazhao();
             this.boss = params.boss();
+            this.threat = params.threat();
             this.pollution = params.pollution();
             this.capture = params.capture();
         }
 
         private OptionalContentParams toParams() {
-            return new OptionalContentParams(shell, elite, loot, highTier, guardianShazhao, boss, pollution, capture);
+            return new OptionalContentParams(
+                shell,
+                elite,
+                loot,
+                highTier,
+                guardianShazhao,
+                boss,
+                threat,
+                pollution,
+                capture
+            );
         }
 
         private ShellConfig shell() {
@@ -139,6 +152,10 @@ public record BastionTypeConfig(
             return boss;
         }
 
+        private ThreatConfig threat() {
+            return threat;
+        }
+
         private PollutionConfig pollution() {
             return pollution;
         }
@@ -157,15 +174,17 @@ public record BastionTypeConfig(
                     LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentParams::loot),
                     HighTierConfig.CODEC.optionalFieldOf("high_tier")
                         .forGetter(OptionalContentParams::highTier),
-                    GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
-                        .forGetter(OptionalContentParams::guardianShazhao),
-                    BossConfig.CODEC.optionalFieldOf("boss", BossConfig.DEFAULT)
-                        .forGetter(OptionalContentParams::boss),
-                    PollutionConfig.CODEC.optionalFieldOf("pollution", PollutionConfig.DEFAULT)
-                        .forGetter(OptionalContentParams::pollution),
-                    CaptureConfig.CODEC.optionalFieldOf("capture", CaptureConfig.DEFAULT)
-                        .forGetter(OptionalContentParams::capture)
-                ).apply(instance, OptionalContentParams::new)
+                     GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
+                         .forGetter(OptionalContentParams::guardianShazhao),
+                     BossConfig.CODEC.optionalFieldOf("boss", BossConfig.DEFAULT)
+                         .forGetter(OptionalContentParams::boss),
+                     ThreatConfig.CODEC.optionalFieldOf("threat", ThreatConfig.DEFAULT)
+                         .forGetter(OptionalContentParams::threat),
+                     PollutionConfig.CODEC.optionalFieldOf("pollution", PollutionConfig.DEFAULT)
+                         .forGetter(OptionalContentParams::pollution),
+                     CaptureConfig.CODEC.optionalFieldOf("capture", CaptureConfig.DEFAULT)
+                         .forGetter(OptionalContentParams::capture)
+                 ).apply(instance, OptionalContentParams::new)
             );
 
         private static final MapCodec<OptionalContentConfig> MAP_CODEC =
@@ -184,6 +203,7 @@ public record BastionTypeConfig(
                 Optional<HighTierConfig> highTier,
                 Optional<GuardianShazhaoConfig> guardianShazhao,
                 BossConfig boss,
+                ThreatConfig threat,
                 PollutionConfig pollution,
                 CaptureConfig capture) {
         }
@@ -654,6 +674,7 @@ public record BastionTypeConfig(
                     config.highTier(),
                     config.guardianShazhao(),
                     config.boss(),
+                    config.threat(),
                     config.pollution(),
                     config.capture()
                 )
@@ -690,15 +711,69 @@ public record BastionTypeConfig(
             hatchery,
              optionalContent.elite(),
              optionalContent.boss(),
+             optionalContent.threat(),
              optionalContent.pollution(),
              optionalContent.capture(),
              anchorsWeight,
              myceliumWeight,
              optionalContent.loot(),
              optionalContent.highTier(),
-             optionalContent.guardianShazhao()
+            optionalContent.guardianShazhao()
         ))
     );
+
+    /**
+     * 威胁值配置。
+     * <p>
+     * Round 19：驱动威胁值累积/衰减与等级判定。
+     * </p>
+     *
+     * @param enabled        是否启用威胁系统
+     * @param maxThreat      威胁值上限
+     * @param decayPerTick   每次衰减的威胁值
+     * @param decayInterval  衰减间隔（tick）
+     * @param lowThreshold   低威胁阈值
+     * @param mediumThreshold 中威胁阈值
+     * @param highThreshold  高威胁阈值
+     */
+    public record ThreatConfig(
+            boolean enabled,
+            int maxThreat,
+            int decayPerTick,
+            int decayInterval,
+            int lowThreshold,
+            int mediumThreshold,
+            int highThreshold
+    ) {
+        public static final ThreatConfig DEFAULT = new ThreatConfig(
+            DefaultValues.DEFAULT_THREAT_ENABLED,
+            DefaultValues.DEFAULT_THREAT_MAX,
+            DefaultValues.DEFAULT_THREAT_DECAY_PER_TICK,
+            DefaultValues.DEFAULT_THREAT_DECAY_INTERVAL,
+            DefaultValues.DEFAULT_THREAT_LOW_THRESHOLD,
+            DefaultValues.DEFAULT_THREAT_MEDIUM_THRESHOLD,
+            DefaultValues.DEFAULT_THREAT_HIGH_THRESHOLD
+        );
+
+        public static final Codec<ThreatConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_THREAT_ENABLED)
+                    .forGetter(ThreatConfig::enabled),
+                Codec.INT.optionalFieldOf("max_threat", DefaultValues.DEFAULT_THREAT_MAX)
+                    .forGetter(ThreatConfig::maxThreat),
+                Codec.INT.optionalFieldOf("decay_per_tick", DefaultValues.DEFAULT_THREAT_DECAY_PER_TICK)
+                    .forGetter(ThreatConfig::decayPerTick),
+                Codec.INT.optionalFieldOf("decay_interval", DefaultValues.DEFAULT_THREAT_DECAY_INTERVAL)
+                    .forGetter(ThreatConfig::decayInterval),
+                Codec.INT.optionalFieldOf("low_threshold", DefaultValues.DEFAULT_THREAT_LOW_THRESHOLD)
+                    .forGetter(ThreatConfig::lowThreshold),
+                Codec.INT.optionalFieldOf("medium_threshold", DefaultValues.DEFAULT_THREAT_MEDIUM_THRESHOLD)
+                    .forGetter(ThreatConfig::mediumThreshold),
+                Codec.INT.optionalFieldOf("high_threshold", DefaultValues.DEFAULT_THREAT_HIGH_THRESHOLD)
+                    .forGetter(ThreatConfig::highThreshold)
+            ).apply(instance, ThreatConfig::new)
+        );
+    }
 
     // ===== 守卫孵化巢（hatchery）配置 =====
 
@@ -1262,6 +1337,15 @@ public record BastionTypeConfig(
         static final double DEFAULT_POOL_GAIN_MULTIPLIER = 0.0;
         static final double DEFAULT_POOL_GAIN_FLAT = 0.0;
         static final int DEFAULT_SCAN_RADIUS = 8;
+
+        // ===== 威胁值默认值（Round 19） =====
+        static final boolean DEFAULT_THREAT_ENABLED = false;
+        static final int DEFAULT_THREAT_MAX = 1000;
+        static final int DEFAULT_THREAT_DECAY_PER_TICK = 1;
+        static final int DEFAULT_THREAT_DECAY_INTERVAL = 20;
+        static final int DEFAULT_THREAT_LOW_THRESHOLD = 200;
+        static final int DEFAULT_THREAT_MEDIUM_THRESHOLD = 500;
+        static final int DEFAULT_THREAT_HIGH_THRESHOLD = 800;
 
         // ===== 孵化巢默认值（Round 4.2） =====
         // 兼容策略：默认必须“未启用”，否则旧世界在未配置时会无意产出守卫。

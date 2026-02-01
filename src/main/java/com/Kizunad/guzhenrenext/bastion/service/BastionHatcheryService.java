@@ -9,6 +9,7 @@ import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianEntities;
+import com.Kizunad.guzhenrenext.bastion.service.BastionThreatService.ThreatTier;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -96,6 +97,8 @@ public final class BastionHatcheryService {
             return;
         }
 
+        ThreatTier threatTier = BastionThreatService.getThreatTier(bastion);
+
         // Gate 0：冷却（基地级）。
         long nextAllowed = savedData.getNextHatcheryTryTick(bastion.id());
         if (gameTime < nextAllowed) {
@@ -158,7 +161,7 @@ public final class BastionHatcheryService {
                 break;
             }
 
-            EntityType<? extends Mob> type = chooseGuardianType(hatchery.weights(), random);
+            EntityType<? extends Mob> type = chooseGuardianType(hatchery.weights(), threatTier, random);
             if (type == null) {
                 // 权重全为 0：视为未启用。
                 break;
@@ -639,16 +642,29 @@ public final class BastionHatcheryService {
      */
     private static EntityType<? extends Mob> chooseGuardianType(
             BastionTypeConfig.GuardianWeights weights,
+            ThreatTier threatTier,
             Random random) {
         if (weights == null || random == null) {
             return null;
         }
 
+        int eliteBonus = switch (threatTier) {
+            case HIGH -> ThreatBonusConstants.HIGH_ELITE_BONUS;
+            case MEDIUM -> ThreatBonusConstants.MEDIUM_ELITE_BONUS;
+            case LOW -> ThreatBonusConstants.LOW_ELITE_BONUS;
+            default -> 0;
+        };
+        int bossBonus = switch (threatTier) {
+            case HIGH -> ThreatBonusConstants.HIGH_BOSS_BONUS;
+            case MEDIUM -> ThreatBonusConstants.MEDIUM_BOSS_BONUS;
+            default -> 0;
+        };
+
         int wMinion = Math.max(0, weights.minion());
         int wRanged = Math.max(0, weights.ranged());
         int wSupport = Math.max(0, weights.support());
-        int wElite = Math.max(0, weights.elite());
-        int wBoss = Math.max(0, weights.boss());
+        int wElite = Math.max(0, weights.elite()) + eliteBonus;
+        int wBoss = Math.max(0, weights.boss()) + bossBonus;
         int wShieldMinion = Math.max(0, weights.shieldMinion());
         int wBerserker = Math.max(0, weights.berserker());
         int wArcher = Math.max(0, weights.archer());
@@ -750,6 +766,18 @@ public final class BastionHatcheryService {
         static final double MAX_KNOCKBACK_RESIST = 0.9;
 
         private Stats() {
+        }
+    }
+
+    /** 威胁等级对精英/Boss 权重的加成常量（避免 MagicNumber）。 */
+    private static final class ThreatBonusConstants {
+        static final int HIGH_ELITE_BONUS = 3;
+        static final int MEDIUM_ELITE_BONUS = 2;
+        static final int LOW_ELITE_BONUS = 1;
+        static final int HIGH_BOSS_BONUS = 2;
+        static final int MEDIUM_BOSS_BONUS = 1;
+
+        private ThreatBonusConstants() {
         }
     }
 }

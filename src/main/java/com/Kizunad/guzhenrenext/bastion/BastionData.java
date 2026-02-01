@@ -63,16 +63,17 @@ public record BastionData(
      * @param totalMycelium 菌毯总数
      * @param totalAnchors  Anchor 总数
      */
-    public record BastionCounts(int totalMycelium, int totalAnchors) {
-        public static final BastionCounts DEFAULT = new BastionCounts(0, 0);
+     public record BastionCounts(int totalMycelium, int totalAnchors, int threatMeter) {
+         public static final BastionCounts DEFAULT = new BastionCounts(0, 0, 0);
 
-        public static final Codec<BastionCounts> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                Codec.INT.optionalFieldOf("total_mycelium", 0).forGetter(BastionCounts::totalMycelium),
-                Codec.INT.optionalFieldOf("total_anchors", 0).forGetter(BastionCounts::totalAnchors)
-            ).apply(instance, BastionCounts::new)
-        );
-    }
+         public static final Codec<BastionCounts> CODEC = RecordCodecBuilder.create(instance ->
+             instance.group(
+                 Codec.INT.optionalFieldOf("total_mycelium", 0).forGetter(BastionCounts::totalMycelium),
+                 Codec.INT.optionalFieldOf("total_anchors", 0).forGetter(BastionCounts::totalAnchors),
+                 Codec.INT.optionalFieldOf("threat_meter", 0).forGetter(BastionCounts::threatMeter)
+             ).apply(instance, BastionCounts::new)
+         );
+     }
 
     /**
      * 接管原因枚举。
@@ -126,6 +127,11 @@ public record BastionData(
     public int totalAnchors() {
         return counts == null ? 0 : counts.totalAnchors();
     }
+
+     /** 兼容调用：返回威胁值计量。 */
+     public int threatMeter() {
+         return counts == null ? 0 : counts.threatMeter();
+     }
 
     /**
      * 词缀集合的编解码器。
@@ -463,7 +469,7 @@ public record BastionData(
     public BastionData withMyceliumCountDelta(int delta) {
         BastionCounts safe = counts == null ? BastionCounts.DEFAULT : counts;
         int newTotal = Math.max(0, safe.totalMycelium() + delta);
-        BastionCounts updatedCounts = new BastionCounts(newTotal, safe.totalAnchors());
+        BastionCounts updatedCounts = new BastionCounts(newTotal, safe.totalAnchors(), safe.threatMeter());
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
@@ -480,7 +486,7 @@ public record BastionData(
     public BastionData withAnchorCountDelta(int delta) {
         BastionCounts safe = counts == null ? BastionCounts.DEFAULT : counts;
         int newTotal = Math.max(0, safe.totalAnchors() + delta);
-        BastionCounts updatedCounts = new BastionCounts(safe.totalMycelium(), newTotal);
+        BastionCounts updatedCounts = new BastionCounts(safe.totalMycelium(), newTotal, safe.threatMeter());
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
@@ -527,6 +533,23 @@ public record BastionData(
             growthCursor, resourcePool, counts, modifiers, newTiming, captureState
         );
     }
+
+     /**
+      * 创建威胁值更新后的副本。
+      *
+      * @param newThreat 新的威胁值
+      * @return 更新后的 BastionData
+      */
+     public BastionData withThreatMeter(int newThreat) {
+         BastionCounts safe = counts == null ? BastionCounts.DEFAULT : counts;
+         int clamped = Math.max(0, newThreat);
+         BastionCounts updatedCounts = new BastionCounts(safe.totalMycelium(), safe.totalAnchors(), clamped);
+         return new BastionData(
+             id, state, corePos, dimension, bastionType, primaryDao, tier,
+             evolutionProgress, totalNodes, nodesByTier, growthRadius,
+             growthCursor, resourcePool, updatedCounts, modifiers, timing, captureState
+         );
+     }
 
     // ===== 光环半径计算（从 growthRadius 解耦） =====
 

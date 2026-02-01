@@ -6,6 +6,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionParticles;
 import com.Kizunad.guzhenrenext.bastion.BastionSoundPlayer;
 import com.Kizunad.guzhenrenext.bastion.network.BastionNetworkHandler;
+import com.Kizunad.guzhenrenext.bastion.service.BastionThreatService;
 import com.Kizunad.guzhenrenext.bastion.threat.impl.ExpansionSurgeEvent;
 import com.Kizunad.guzhenrenext.bastion.threat.impl.HunterSpawnEvent;
 import com.Kizunad.guzhenrenext.bastion.threat.impl.RadiationPulseEvent;
@@ -137,6 +138,15 @@ public final class ThreatEventService {
         }
     }
 
+    /** 威胁值相关常量。 */
+    private static final class ThreatConstants {
+        /** 节点破坏时增加的威胁值。 */
+        static final int NODE_DESTROYED_THREAT_GAIN = 10;
+
+        private ThreatConstants() {
+        }
+    }
+
     // ===== 运行时状态 =====
 
     /** 已注册的威胁事件列表。 */
@@ -207,6 +217,9 @@ public final class ThreatEventService {
 
         // 计算触发概率
         double triggerChance = calculateTriggerChance(bastion, nodeCountBefore);
+
+        // 节点被拆除直接增加威胁值（用于孵化巢强度驱动）。
+        BastionThreatService.addThreat(level, bastion, ThreatConstants.NODE_DESTROYED_THREAT_GAIN);
 
         // 随机判定
         RandomSource random = level.getRandom();
