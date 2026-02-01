@@ -220,6 +220,18 @@ public record BastionTypeConfig(
             int spawnPerCycle,
             int maxAlive,
             double costPerSpawn,
+            /**
+             * 孵化巢连通性校验：Anchor 邻近半径。
+             * <p>
+             * Round 4.2.2：孵化巢必须满足“菌毯网络连通 + 周围 M 格内存在属于该基地的 Anchor”，
+             * 其中 M 由该字段控制。
+             * </p>
+             * <p>
+             * 兼容策略：旧版 bastion_type JSON 若缺失该字段，必须回退到默认值，
+             * 以保证旧配置无需新增字段也能正常加载。
+             * </p>
+             */
+            int anchorProximityRadius,
             GuardianWeights weights
     ) {
         public static final HatcheryConfig DEFAULT = new HatcheryConfig(
@@ -229,6 +241,7 @@ public record BastionTypeConfig(
             DefaultValues.DEFAULT_HATCHERY_SPAWN_PER_CYCLE,
             DefaultValues.DEFAULT_HATCHERY_MAX_ALIVE,
             DefaultValues.DEFAULT_HATCHERY_COST_PER_SPAWN,
+            DefaultValues.DEFAULT_HATCHERY_ANCHOR_PROXIMITY_RADIUS,
             GuardianWeights.DEFAULT
         );
 
@@ -256,6 +269,10 @@ public record BastionTypeConfig(
                         "cost_per_spawn",
                         DefaultValues.DEFAULT_HATCHERY_COST_PER_SPAWN)
                     .forGetter(HatcheryConfig::costPerSpawn),
+                Codec.INT.optionalFieldOf(
+                        "anchor_proximity_radius",
+                        DefaultValues.DEFAULT_HATCHERY_ANCHOR_PROXIMITY_RADIUS)
+                    .forGetter(HatcheryConfig::anchorProximityRadius),
                 GuardianWeights.CODEC.optionalFieldOf("weights", GuardianWeights.DEFAULT)
                     .forGetter(HatcheryConfig::weights)
             ).apply(instance, HatcheryConfig::new)
@@ -567,6 +584,14 @@ public record BastionTypeConfig(
         static final int DEFAULT_HATCHERY_SPAWN_PER_CYCLE = 1;
         static final int DEFAULT_HATCHERY_MAX_ALIVE = 0;
         static final double DEFAULT_HATCHERY_COST_PER_SPAWN = 0.0;
+
+        /**
+         * Round 4.2.2：孵化巢邻近 Anchor 校验半径默认值。
+         * <p>
+         * 默认 8：用于“孵化巢周围 M 格内存在至少一个属于该基地的 Anchor”的连通性约束。
+         * </p>
+         */
+        static final int DEFAULT_HATCHERY_ANCHOR_PROXIMITY_RADIUS = 8;
 
         // 权重默认值：为了让“未启用”的默认完全不生效，这里保持一个无害的权重基线。
         // 注意：真正的“是否产出”应由 enabled/maxAlive/cost 等多重门禁控制。

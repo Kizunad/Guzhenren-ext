@@ -486,6 +486,14 @@ public final class BastionHatcheryService {
         BlockPos corePos = bastion.corePos();
         int r = Math.max(1, Constants.HATCHERY_SCAN_RADIUS);
         int vertical = Math.max(0, Constants.HATCHERY_SCAN_VERTICAL);
+
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.HatcheryConfig hatcheryConfig = typeConfig.hatchery();
+        int proximityRadius = 0;
+        if (hatcheryConfig != null) {
+            proximityRadius = Math.max(0, hatcheryConfig.anchorProximityRadius());
+        }
+
         for (int dx = -r; dx <= r; dx++) {
             for (int dz = -r; dz <= r; dz++) {
                 // y 方向只检查一个较小窗口：核心上下 N 格。
@@ -497,6 +505,17 @@ public final class BastionHatcheryService {
                         // 解释：避免把邻近基地的 Anchor 结构误当作本基地孵化点。
                         BastionData owner = savedData.findOwnerBastion(pos.below(), Constants.MAX_OWNER_SEARCH_RADIUS);
                         if (owner != null && owner.id().equals(bastion.id())) {
+                            // 连通性约束：孵化巢附近必须存在属于同基地的 Anchor（包含下方 Anchor）。
+                            boolean hasNearbyAnchor = hasAnchorWithinRadius(
+                                level,
+                                savedData,
+                                bastion,
+                                pos,
+                                proximityRadius
+                            );
+                            if (!hasNearbyAnchor) {
+                                continue;
+                            }
                             return pos;
                         }
                     }
@@ -504,6 +523,46 @@ public final class BastionHatcheryService {
             }
         }
         return null;
+    }
+
+    /**
+     * 判断孵化巢附近是否存在“属于该基地”的 Anchor。
+     * <p>
+     * 说明：遍历以孵化巢为中心的立方体窗口，半径由配置给定，包含孵化巢下方的 Anchor。
+     * </p>
+     */
+    private static boolean hasAnchorWithinRadius(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion,
+            BlockPos hatcheryPos,
+            int radius) {
+        if (level == null || savedData == null || bastion == null || hatcheryPos == null) {
+            return false;
+        }
+
+        // 需要包含“孵化巢下方的 Anchor”，因此最小半径取 1，避免半径为 0 时漏掉 dy=-1 的位置。
+        int clampedRadius = Math.max(1, radius);
+        for (int dx = -clampedRadius; dx <= clampedRadius; dx++) {
+            for (int dz = -clampedRadius; dz <= clampedRadius; dz++) {
+                for (int dy = -clampedRadius; dy <= clampedRadius; dy++) {
+                    BlockPos candidate = hatcheryPos.offset(dx, dy, dz);
+                    if (!level.isLoaded(candidate)) {
+                        continue;
+                    }
+
+                    BlockState state = level.getBlockState(candidate);
+                    if (!(state.getBlock() instanceof BastionAnchorBlock)) {
+                        continue;
+                    }
+
+                    if (isAnchorOwnedByBastion(savedData, bastion, candidate)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private static boolean isAirTwoBlocks(ServerLevel level, BlockPos pos) {
