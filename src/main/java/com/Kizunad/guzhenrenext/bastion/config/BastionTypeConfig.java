@@ -569,6 +569,10 @@ public record BastionTypeConfig(
         // 缩圈相关默认值：refNodes 为各转"满状态"所需节点数
         static final List<Integer> DEFAULT_REF_NODES_BY_TIER = List.of(20, 40, 80, 150, 280, 500);
         static final double DEFAULT_MIN_SCALE = 0.3;
+        /** 光环同类叠加默认：取最大值（兼容旧行为）。 */
+        static final AuraStackingMode DEFAULT_SAME_TYPE_STACKING = AuraStackingMode.MAX;
+        /** 光环异类默认：可同时生效（兼容旧行为）。 */
+        static final boolean DEFAULT_DIFFERENT_TYPES_COEXIST = true;
 
         // ===== 能源节点默认值 =====
         static final double DEFAULT_ENERGY_BUILD_COST = 0.0;
@@ -929,6 +933,40 @@ public record BastionTypeConfig(
     }
 
     /**
+     * 光环叠加模式。
+     * <p>
+     * 控制同类光环的叠加方式：取最大值、叠加相加或取平均。
+     * </p>
+     */
+    public enum AuraStackingMode {
+        /** 同类取最大值。 */
+        MAX,
+        /** 同类叠加（相加）。 */
+        ADDITIVE,
+        /** 同类取平均。 */
+        AVERAGE;
+
+        /** JSON 编解码器（字符串表示，大小写不敏感）。 */
+        public static final Codec<AuraStackingMode> CODEC = Codec.STRING.comapFlatMap(
+            value -> {
+                String normalized = value.trim().toLowerCase(Locale.ROOT);
+                return switch (normalized) {
+                    case "max" -> DataResult.success(MAX);
+                    case "additive" -> DataResult.success(ADDITIVE);
+                    case "average" -> DataResult.success(AVERAGE);
+                    default -> DataResult.error(() -> "未知的 stacking 模式: " + value
+                        + "（期望为 max/additive/average）");
+                };
+            },
+            mode -> switch (mode) {
+                case MAX -> "max";
+                case ADDITIVE -> "additive";
+                case AVERAGE -> "average";
+            }
+        );
+    }
+
+    /**
      * 光环配置（影响半径与衰减）。
      * <p>
      * auraRadius 用于玩家资源消耗判定和边界渲染，与节点扩张半径解耦。
@@ -960,7 +998,9 @@ public record BastionTypeConfig(
             double falloffPower,
             double minFalloff,
             List<Integer> refNodesByTier,
-            double minScale
+            double minScale,
+            AuraStackingMode sameTypeStacking,
+            boolean differentTypesCoexist
     ) {
         public static final AuraConfig DEFAULT = new AuraConfig(
             AuraPolarity.NEGATIVE,
@@ -970,7 +1010,9 @@ public record BastionTypeConfig(
             DefaultValues.DEFAULT_FALLOFF_POWER,
             DefaultValues.DEFAULT_MIN_FALLOFF,
             DefaultValues.DEFAULT_REF_NODES_BY_TIER,
-            DefaultValues.DEFAULT_MIN_SCALE
+            DefaultValues.DEFAULT_MIN_SCALE,
+            DefaultValues.DEFAULT_SAME_TYPE_STACKING,
+            DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST
         );
 
         /**
@@ -989,7 +1031,8 @@ public record BastionTypeConfig(
                 double minScale
         ) {
             this(AuraPolarity.NEGATIVE, baseRadius, tierExponent, maxRadius, falloffPower, minFalloff,
-                refNodesByTier, minScale);
+                refNodesByTier, minScale, DefaultValues.DEFAULT_SAME_TYPE_STACKING,
+                DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST);
         }
 
         public static final Codec<AuraConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -1010,7 +1053,13 @@ public record BastionTypeConfig(
                         DefaultValues.DEFAULT_REF_NODES_BY_TIER)
                     .forGetter(AuraConfig::refNodesByTier),
                 Codec.DOUBLE.optionalFieldOf("min_scale", DefaultValues.DEFAULT_MIN_SCALE)
-                    .forGetter(AuraConfig::minScale)
+                    .forGetter(AuraConfig::minScale),
+                AuraStackingMode.CODEC.optionalFieldOf("same_type_stacking",
+                        DefaultValues.DEFAULT_SAME_TYPE_STACKING)
+                    .forGetter(AuraConfig::sameTypeStacking),
+                Codec.BOOL.optionalFieldOf("different_types_coexist",
+                        DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST)
+                    .forGetter(AuraConfig::differentTypesCoexist)
             ).apply(instance, AuraConfig::new)
         );
 
