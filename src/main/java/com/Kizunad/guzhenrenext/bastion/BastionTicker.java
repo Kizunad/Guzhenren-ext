@@ -81,6 +81,10 @@ public final class BastionTicker {
          static final double TIER_POWER_BASE = 1.5;
         /** 核心每 tick 基础产出（不依赖节点数量）。 */
         static final double CORE_BASE_GAIN_PER_TICK = 0.5;
+        /** 核心基础容量（确保即使没有节点也有基础容量）。 */
+        static final double CORE_BASE_CAP = 100.0;
+        /** 资源池变化检测阈值（小于此值视为未变化）。 */
+        static final double POOL_CHANGE_EPSILON = 0.001;
 
         private MultiplierConfig() {
         }
@@ -386,8 +390,24 @@ public final class BastionTicker {
 
         double basePoolGain = calculatePoolGain(bastion, effectiveNodes, multiplierFinal);
         double poolGain = basePoolGain + flatAdd * TickConfig.TICK_INTERVAL;
-        double poolCap = effectiveNodes * MultiplierConfig.POOL_CAP_PER_NODE;
-        double newPool = Math.min(poolCap, bastion.resourcePool() + poolGain);
+        // 核心自带基础容量，确保即使没有节点也能积累资源
+        double poolCap = MultiplierConfig.CORE_BASE_CAP
+            + effectiveNodes * MultiplierConfig.POOL_CAP_PER_NODE;
+        double oldPool = bastion.resourcePool();
+        double newPool = Math.min(poolCap, oldPool + poolGain);
+
+        // 详细日志：资源池变动追踪
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("基地 {} 资源池更新: effectiveNodes={}, poolGain={}, poolCap={}, "
+                + "oldPool={}, newPool={}", bastion.id(), effectiveNodes,
+                String.format("%.2f", poolGain), String.format("%.2f", poolCap),
+                String.format("%.2f", oldPool), String.format("%.2f", newPool));
+        }
+        if (Math.abs(newPool - oldPool) < MultiplierConfig.POOL_CHANGE_EPSILON) {
+            LOGGER.info("基地 {} 资源池未变化: oldPool={}, poolCap={}, poolGain={}",
+                bastion.id(), String.format("%.2f", oldPool),
+                String.format("%.2f", poolCap), String.format("%.2f", poolGain));
+        }
 
         // 更新进化进度
         double evolutionGain = calculateEvolutionGain(bastion, evolutionMultiplier);
