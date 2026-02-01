@@ -5,6 +5,8 @@ import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAntiExplosionShellBlock;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,7 +66,7 @@ public final class BastionAntiExplosionService {
                 continue;
             }
 
-            // 检查基地是否有反爆节点。
+            // 检查基地是否有反爆节点（包含配置开关）。
             boolean hasShield = antiExplosionCache.computeIfAbsent(
                 bastion.id(),
                 id -> hasAntiExplosionShell(level, savedData, bastion)
@@ -87,6 +89,12 @@ public final class BastionAntiExplosionService {
     }
 
     private static boolean hasAntiExplosionShell(ServerLevel level, BastionSavedData savedData, BastionData bastion) {
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.AntiExplosionShellConfig config = typeConfig.antiExplosionShell();
+        if (config == null || !config.enabled()) {
+            return false;
+        }
+
         java.util.Set<BlockPos> anchors = savedData.getAnchorCache(bastion.id());
         if (anchors == null || anchors.isEmpty()) {
             return false;

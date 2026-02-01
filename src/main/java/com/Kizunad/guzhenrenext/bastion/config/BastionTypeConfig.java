@@ -79,6 +79,16 @@ import java.util.Optional;
             return nodeContent == null ? TrapConfig.DEFAULT : nodeContent.trap();
         }
 
+        public AntiExplosionShellConfig antiExplosionShell() {
+            return nodeContent == null
+                ? AntiExplosionShellConfig.DEFAULT
+                : nodeContent.antiExplosionShell();
+        }
+
+        public AntiFireShellConfig antiFireShell() {
+            return nodeContent == null ? AntiFireShellConfig.DEFAULT : nodeContent.antiFireShell();
+        }
+
     /**
      * 有效节点数计算：Anchor 权重默认值。
      * <p>
@@ -231,29 +241,66 @@ import java.util.Optional;
      */
     public static final class NodeContentConfig {
         public static final NodeContentConfig DEFAULT = new NodeContentConfig(
-            new NodeContentParams(HatcheryConfig.DEFAULT, TurretConfig.DEFAULT, TrapConfig.DEFAULT)
+            new NodeContentParams(
+                HatcheryConfig.DEFAULT,
+                TurretConfig.DEFAULT,
+                TrapConfig.DEFAULT,
+                AntiExplosionShellConfig.DEFAULT,
+                AntiFireShellConfig.DEFAULT
+            )
         );
 
         /**
-         * 工厂方法：从显式的 hatchery/turret 配置创建 NodeContentConfig。
-         * <p>外部调用使用此方法，避免直接依赖内部 NodeContentParams 可见性。</p>
+         * 工厂方法：从显式的节点配置创建 NodeContentConfig。
+         * <p>未提供的反爆/反火配置默认取 {@code DEFAULT}，保证旧调用兼容。</p>
          */
-        public static NodeContentConfig create(HatcheryConfig hatchery, TurretConfig turret, TrapConfig trap) {
-            return new NodeContentConfig(new NodeContentParams(hatchery, turret, trap));
+        public static NodeContentConfig create(
+                HatcheryConfig hatchery,
+                TurretConfig turret,
+                TrapConfig trap) {
+            return new NodeContentConfig(new NodeContentParams(
+                hatchery,
+                turret,
+                trap,
+                AntiExplosionShellConfig.DEFAULT,
+                AntiFireShellConfig.DEFAULT
+            ));
+        }
+
+        /**
+         * 工厂方法：完整提供所有节点配置。
+         */
+        public static NodeContentConfig create(
+                HatcheryConfig hatchery,
+                TurretConfig turret,
+                TrapConfig trap,
+                AntiExplosionShellConfig antiExplosionShell,
+                AntiFireShellConfig antiFireShell) {
+            return new NodeContentConfig(new NodeContentParams(
+                hatchery,
+                turret,
+                trap,
+                antiExplosionShell,
+                antiFireShell
+            ));
         }
 
         private final HatcheryConfig hatchery;
         private final TurretConfig turret;
         private final TrapConfig trap;
+        private final AntiExplosionShellConfig antiExplosionShell;
+        private final AntiFireShellConfig antiFireShell;
 
         private NodeContentConfig(NodeContentParams params) {
             this.hatchery = params.hatchery();
             this.turret = params.turret();
             this.trap = params.trap();
+            this.antiExplosionShell = params.antiExplosionShell();
+            this.antiFireShell = params.antiFireShell();
         }
 
         private NodeContentParams toParams() {
-            return new NodeContentParams(hatchery, turret, trap);
+            return new NodeContentParams(hatchery, turret, trap, antiExplosionShell, antiFireShell);
         }
 
         private HatcheryConfig hatchery() {
@@ -268,6 +315,14 @@ import java.util.Optional;
             return trap;
         }
 
+        private AntiExplosionShellConfig antiExplosionShell() {
+            return antiExplosionShell;
+        }
+
+        private AntiFireShellConfig antiFireShell() {
+            return antiFireShell;
+        }
+
         private static final MapCodec<NodeContentParams> NODE_CONTENT_PARAMS_CODEC =
             RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
@@ -276,14 +331,27 @@ import java.util.Optional;
                     TurretConfig.CODEC.optionalFieldOf("turret", TurretConfig.DEFAULT)
                         .forGetter(NodeContentParams::turret),
                     TrapConfig.CODEC.optionalFieldOf("trap", TrapConfig.DEFAULT)
-                        .forGetter(NodeContentParams::trap)
+                        .forGetter(NodeContentParams::trap),
+                    AntiExplosionShellConfig.CODEC.optionalFieldOf(
+                            "anti_explosion_shell",
+                            AntiExplosionShellConfig.DEFAULT)
+                        .forGetter(NodeContentParams::antiExplosionShell),
+                    AntiFireShellConfig.CODEC.optionalFieldOf(
+                            "anti_fire_shell",
+                            AntiFireShellConfig.DEFAULT)
+                        .forGetter(NodeContentParams::antiFireShell)
                 ).apply(instance, NodeContentParams::new)
             );
 
         private static final MapCodec<NodeContentConfig> MAP_CODEC =
             NODE_CONTENT_PARAMS_CODEC.xmap(NodeContentConfig::new, NodeContentConfig::toParams);
 
-        private record NodeContentParams(HatcheryConfig hatchery, TurretConfig turret, TrapConfig trap) {
+        private record NodeContentParams(
+                HatcheryConfig hatchery,
+                TurretConfig turret,
+                TrapConfig trap,
+                AntiExplosionShellConfig antiExplosionShell,
+                AntiFireShellConfig antiFireShell) {
         }
     }
 
@@ -772,13 +840,19 @@ import java.util.Optional;
                 .forGetter(BastionTypeConfig::decay),
                  EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
                      .forGetter(BastionTypeConfig::evolution),
-             AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
-                 .forGetter(BastionTypeConfig::aura),
-             EnergyContentConfig.MAP_CODEC.forGetter(config -> new EnergyContentConfig(
-                 new EnergyContentConfig.EnergyContentParams(config.energy(), config.energyLoss())
-             )),
+            AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
+                .forGetter(BastionTypeConfig::aura),
+            EnergyContentConfig.MAP_CODEC.forGetter(config -> new EnergyContentConfig(
+                new EnergyContentConfig.EnergyContentParams(config.energy(), config.energyLoss())
+            )),
             NodeContentConfig.MAP_CODEC.forGetter(config -> new NodeContentConfig(
-                new NodeContentConfig.NodeContentParams(config.hatchery(), config.turret(), config.trap())
+                new NodeContentConfig.NodeContentParams(
+                    config.hatchery(),
+                    config.turret(),
+                    config.trap(),
+                    config.antiExplosionShell(),
+                    config.antiFireShell()
+                )
             )),
             // 有效节点数（effectiveNodes）权重配置：
             // - anchorsWeight：Anchor（子核心/支撑节点）的权重
@@ -838,12 +912,12 @@ import java.util.Optional;
              optionalContent.boss(),
              optionalContent.threat(),
              optionalContent.pollution(),
-             optionalContent.capture(),
-             anchorsWeight,
-             myceliumWeight,
-             optionalContent.loot(),
-             optionalContent.highTier(),
-            optionalContent.guardianShazhao()
+                optionalContent.capture(),
+                anchorsWeight,
+                myceliumWeight,
+                optionalContent.loot(),
+                optionalContent.highTier(),
+                optionalContent.guardianShazhao()
         ))
     );
 
@@ -1500,6 +1574,22 @@ import java.util.Optional;
         static final int DEFAULT_THREAT_MEDIUM_THRESHOLD = 500;
         static final int DEFAULT_THREAT_HIGH_THRESHOLD = 800;
 
+        // ===== 反爆外壳默认值（Round 30） =====
+        /** 是否启用反爆外壳效果，默认关闭以兼容旧 JSON。 */
+        static final boolean DEFAULT_ANTI_EXPLOSION_SHELL_ENABLED = false;
+        /** 反爆节点建造成本默认值。 */
+        static final double DEFAULT_ANTI_EXPLOSION_SHELL_BUILD_COST = 0.0;
+        /** 反爆节点数量上限（0 表示不限，兼容旧 JSON）。 */
+        static final int DEFAULT_ANTI_EXPLOSION_SHELL_MAX_COUNT = 0;
+
+        // ===== 反火外壳默认值（Round 30） =====
+        /** 是否启用反火外壳效果，默认关闭以兼容旧 JSON。 */
+        static final boolean DEFAULT_ANTI_FIRE_SHELL_ENABLED = false;
+        /** 反火节点建造成本默认值。 */
+        static final double DEFAULT_ANTI_FIRE_SHELL_BUILD_COST = 0.0;
+        /** 反火节点数量上限（0 表示不限，兼容旧 JSON）。 */
+        static final int DEFAULT_ANTI_FIRE_SHELL_MAX_COUNT = 0;
+
         // ===== 孵化巢默认值（Round 4.2） =====
         // 兼容策略：默认必须“未启用”，否则旧世界在未配置时会无意产出守卫。
         static final int DEFAULT_HATCHERY_AUTO_SPAWN_THRESHOLD = 32;
@@ -1657,12 +1747,12 @@ import java.util.Optional;
      * @param cooldownTicks  触发冷却（tick）
      * @param maxCount       每基地最大陷阱数量
      */
-    public record TrapConfig(
-            boolean enabled,
-            int triggerRadius,
-            int effectDuration,
-            int cooldownTicks,
-            int maxCount
+     public record TrapConfig(
+             boolean enabled,
+             int triggerRadius,
+             int effectDuration,
+             int cooldownTicks,
+             int maxCount
     ) {
         public static final TrapConfig DEFAULT = new TrapConfig(
             DefaultValues.DEFAULT_TRAP_ENABLED,
@@ -1672,19 +1762,88 @@ import java.util.Optional;
             DefaultValues.DEFAULT_TRAP_MAX_COUNT
         );
 
-        public static final Codec<TrapConfig> CODEC = RecordCodecBuilder.create(instance ->
+         public static final Codec<TrapConfig> CODEC = RecordCodecBuilder.create(instance ->
+             instance.group(
+                 Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_TRAP_ENABLED)
+                     .forGetter(TrapConfig::enabled),
+                 Codec.INT.optionalFieldOf("trigger_radius", DefaultValues.DEFAULT_TRAP_TRIGGER_RADIUS)
+                     .forGetter(TrapConfig::triggerRadius),
+                 Codec.INT.optionalFieldOf("effect_duration", DefaultValues.DEFAULT_TRAP_EFFECT_DURATION)
+                     .forGetter(TrapConfig::effectDuration),
+                 Codec.INT.optionalFieldOf("cooldown_ticks", DefaultValues.DEFAULT_TRAP_COOLDOWN_TICKS)
+                     .forGetter(TrapConfig::cooldownTicks),
+                 Codec.INT.optionalFieldOf("max_count", DefaultValues.DEFAULT_TRAP_MAX_COUNT)
+                     .forGetter(TrapConfig::maxCount)
+             ).apply(instance, TrapConfig::new)
+         );
+     }
+
+    /**
+     * 反爆外壳节点配置。
+     * <p>
+     * Round 30：为反爆节点增加启用开关、建造成本与数量上限，并保持旧 JSON 兼容。
+     * </p>
+     *
+     * @param enabled   是否启用反爆节点效果
+     * @param buildCost 建造成本（扣资源池）
+     * @param maxCount  每基地最大数量（0 表示不限）
+     */
+    public record AntiExplosionShellConfig(boolean enabled, double buildCost, int maxCount) {
+        public static final AntiExplosionShellConfig DEFAULT = new AntiExplosionShellConfig(
+            DefaultValues.DEFAULT_ANTI_EXPLOSION_SHELL_ENABLED,
+            DefaultValues.DEFAULT_ANTI_EXPLOSION_SHELL_BUILD_COST,
+            DefaultValues.DEFAULT_ANTI_EXPLOSION_SHELL_MAX_COUNT
+        );
+
+        public static final Codec<AntiExplosionShellConfig> CODEC =
+            RecordCodecBuilder.create(instance ->
+                instance.group(
+                    Codec.BOOL.optionalFieldOf(
+                            "enabled",
+                            DefaultValues.DEFAULT_ANTI_EXPLOSION_SHELL_ENABLED)
+                        .forGetter(AntiExplosionShellConfig::enabled),
+                    Codec.DOUBLE.optionalFieldOf(
+                            "build_cost",
+                            DefaultValues.DEFAULT_ANTI_EXPLOSION_SHELL_BUILD_COST)
+                        .forGetter(AntiExplosionShellConfig::buildCost),
+                    Codec.INT.optionalFieldOf(
+                            "max_count",
+                            DefaultValues.DEFAULT_ANTI_EXPLOSION_SHELL_MAX_COUNT)
+                        .forGetter(AntiExplosionShellConfig::maxCount)
+                ).apply(instance, AntiExplosionShellConfig::new)
+            );
+    }
+
+    /**
+     * 反火外壳节点配置。
+     * <p>
+     * Round 30：为反火节点增加启用开关、建造成本与数量上限，并保持旧 JSON 兼容。
+     * </p>
+     *
+     * @param enabled   是否启用反火节点效果
+     * @param buildCost 建造成本（扣资源池）
+     * @param maxCount  每基地最大数量（0 表示不限）
+     */
+    public record AntiFireShellConfig(boolean enabled, double buildCost, int maxCount) {
+        public static final AntiFireShellConfig DEFAULT = new AntiFireShellConfig(
+            DefaultValues.DEFAULT_ANTI_FIRE_SHELL_ENABLED,
+            DefaultValues.DEFAULT_ANTI_FIRE_SHELL_BUILD_COST,
+            DefaultValues.DEFAULT_ANTI_FIRE_SHELL_MAX_COUNT
+        );
+
+        public static final Codec<AntiFireShellConfig> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_TRAP_ENABLED)
-                    .forGetter(TrapConfig::enabled),
-                Codec.INT.optionalFieldOf("trigger_radius", DefaultValues.DEFAULT_TRAP_TRIGGER_RADIUS)
-                    .forGetter(TrapConfig::triggerRadius),
-                Codec.INT.optionalFieldOf("effect_duration", DefaultValues.DEFAULT_TRAP_EFFECT_DURATION)
-                    .forGetter(TrapConfig::effectDuration),
-                Codec.INT.optionalFieldOf("cooldown_ticks", DefaultValues.DEFAULT_TRAP_COOLDOWN_TICKS)
-                    .forGetter(TrapConfig::cooldownTicks),
-                Codec.INT.optionalFieldOf("max_count", DefaultValues.DEFAULT_TRAP_MAX_COUNT)
-                    .forGetter(TrapConfig::maxCount)
-            ).apply(instance, TrapConfig::new)
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_ANTI_FIRE_SHELL_ENABLED)
+                    .forGetter(AntiFireShellConfig::enabled),
+                Codec.DOUBLE.optionalFieldOf(
+                        "build_cost",
+                        DefaultValues.DEFAULT_ANTI_FIRE_SHELL_BUILD_COST)
+                    .forGetter(AntiFireShellConfig::buildCost),
+                Codec.INT.optionalFieldOf(
+                        "max_count",
+                        DefaultValues.DEFAULT_ANTI_FIRE_SHELL_MAX_COUNT)
+                    .forGetter(AntiFireShellConfig::maxCount)
+            ).apply(instance, AntiFireShellConfig::new)
         );
     }
 

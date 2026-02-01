@@ -4,6 +4,8 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAntiFireShellBlock;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,6 +110,12 @@ public final class BastionAntiFireService {
     }
 
     private static boolean hasAntiFireShell(ServerLevel level, BastionSavedData savedData, BastionData bastion) {
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.AntiFireShellConfig config = typeConfig.antiFireShell();
+        if (config == null || !config.enabled()) {
+            return false;
+        }
+
         java.util.Set<BlockPos> anchors = savedData.getAnchorCache(bastion.id());
         if (anchors == null || anchors.isEmpty()) {
             return false;

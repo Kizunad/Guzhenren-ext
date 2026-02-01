@@ -155,7 +155,9 @@ public final class BastionTypeManager {
             BastionTypeConfig.NodeContentConfig.create(
                 BastionTypeConfig.HatcheryConfig.DEFAULT,
                 BastionTypeConfig.TurretConfig.DEFAULT,
-                BastionTypeConfig.TrapConfig.DEFAULT
+                BastionTypeConfig.TrapConfig.DEFAULT,
+                BastionTypeConfig.AntiExplosionShellConfig.DEFAULT,
+                BastionTypeConfig.AntiFireShellConfig.DEFAULT
             ),
             BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.BossConfig.DEFAULT,
