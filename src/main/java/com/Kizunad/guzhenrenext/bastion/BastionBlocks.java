@@ -30,6 +30,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.Kizunad.guzhenrenext.bastion.item.BastionScoutItem;
 
 /**
  * 基地系统方块与物品注册表。
@@ -375,6 +376,12 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BlockItem> BASTION_ANTI_FIRE_SHELL_ITEM = ITEMS.register(
         "bastion_anti_fire_shell",
         () -> new BlockItem(BASTION_ANTI_FIRE_SHELL.get(), new Item.Properties())
+    );
+
+    /** 侦查道具，用于侦测附近基地信息。 */
+    public static final DeferredHolder<Item, BastionScoutItem> BASTION_SCOUT_ITEM = ITEMS.register(
+        "bastion_scout",
+        () -> new BastionScoutItem(new Item.Properties())
     );
 
     /**
