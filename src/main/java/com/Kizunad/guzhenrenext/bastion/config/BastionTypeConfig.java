@@ -215,6 +215,7 @@ public record BastionTypeConfig(
      */
     public record HatcheryConfig(
             boolean enabled,
+            int autoSpawnThreshold,
             long cooldownTicks,
             int spawnPerCycle,
             int maxAlive,
@@ -223,6 +224,7 @@ public record BastionTypeConfig(
     ) {
         public static final HatcheryConfig DEFAULT = new HatcheryConfig(
             false,
+            DefaultValues.DEFAULT_HATCHERY_AUTO_SPAWN_THRESHOLD,
             DefaultValues.DEFAULT_HATCHERY_COOLDOWN_TICKS,
             DefaultValues.DEFAULT_HATCHERY_SPAWN_PER_CYCLE,
             DefaultValues.DEFAULT_HATCHERY_MAX_ALIVE,
@@ -234,6 +236,10 @@ public record BastionTypeConfig(
             instance.group(
                 Codec.BOOL.optionalFieldOf("enabled", false)
                     .forGetter(HatcheryConfig::enabled),
+                Codec.INT.optionalFieldOf(
+                        "auto_spawn_threshold",
+                        DefaultValues.DEFAULT_HATCHERY_AUTO_SPAWN_THRESHOLD)
+                    .forGetter(HatcheryConfig::autoSpawnThreshold),
                 Codec.LONG.optionalFieldOf(
                         "cooldown_ticks",
                         DefaultValues.DEFAULT_HATCHERY_COOLDOWN_TICKS)
@@ -556,6 +562,7 @@ public record BastionTypeConfig(
 
         // ===== 孵化巢默认值（Round 4.2） =====
         // 兼容策略：默认必须“未启用”，否则旧世界在未配置时会无意产出守卫。
+        static final int DEFAULT_HATCHERY_AUTO_SPAWN_THRESHOLD = 32;
         static final long DEFAULT_HATCHERY_COOLDOWN_TICKS = 200L;
         static final int DEFAULT_HATCHERY_SPAWN_PER_CYCLE = 1;
         static final int DEFAULT_HATCHERY_MAX_ALIVE = 0;

@@ -1,7 +1,9 @@
 package com.Kizunad.guzhenrenext.bastion.service;
 
 import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionGuardianHatcheryBlock;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
@@ -16,6 +18,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -209,6 +212,242 @@ public final class BastionHatcheryService {
                 break;
             }
         }
+    }
+
+    /**
+     * Round 4.2.1：孵化巢自动生成 v1（基于菌毯数量阈值）。
+     * <p>
+     * 当菌毯数量达到配置阈值后，若基地仍未拥有任何孵化巢，则尝试在一个“属于该基地”的 Anchor 上方
+     * 放置 {@link BastionBlocks#BASTION_GUARDIAN_HATCHERY}。
+     * </p>
+     * <p>
+     * 说明：
+     * <ul>
+     *     <li>该方法只负责“生成方块”，不负责刷怪/扣费/冷却；后者由 {@link #tick} 统一驱动。</li>
+     *     <li>为保证 tick 能在 v1 的“核心附近扫描”范围内找到孵化巢，这里优先选择核心附近的 Anchor。</li>
+     *     <li>若暂时找不到合适 Anchor/位置不可替换，则静默返回，下次 FULL tick 继续尝试。</li>
+     * </ul>
+     * </p>
+     */
+    public static void tryAutoSpawnHatchery(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion,
+            long gameTime) {
+        if (level == null || savedData == null || bastion == null) {
+            return;
+        }
+
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.HatcheryConfig hatchery = typeConfig.hatchery();
+
+        // Gate 0：必须启用孵化巢系统。
+        if (hatchery == null || !hatchery.enabled()) {
+            return;
+        }
+
+        // Gate 1：菌毯数量阈值。
+        int threshold = Math.max(0, hatchery.autoSpawnThreshold());
+        if (bastion.totalMycelium() < threshold) {
+            return;
+        }
+
+        // Gate 2：基地已经存在孵化巢则不重复生成。
+        if (findAnyHatcheryNearCore(level, savedData, bastion) != null) {
+            return;
+        }
+
+        // Gate 3：选择一个合适的 Anchor 位置。
+        BlockPos anchorPos = findAnchorForAutoSpawn(level, savedData, bastion);
+        if (anchorPos == null) {
+            return;
+        }
+
+        BlockPos hatcheryPos = anchorPos.above();
+        if (!level.isLoaded(hatcheryPos)) {
+            return;
+        }
+
+        BlockState currentState = level.getBlockState(hatcheryPos);
+        if (!currentState.canBeReplaced()) {
+            return;
+        }
+
+        // 放置孵化巢方块。
+        BlockState hatcheryState = BastionBlocks.BASTION_GUARDIAN_HATCHERY.get().defaultBlockState();
+        level.setBlock(hatcheryPos, hatcheryState, Block.UPDATE_ALL);
+    }
+
+    /**
+     * 为孵化巢自动生成选择一个 Anchor。
+     * <p>
+     * v1 约束：孵化巢在 tick 中采用“以核心为中心的范围扫描”查找，因此这里尽量选择核心附近的 Anchor。
+     * </p>
+     */
+    private static BlockPos findAnchorForAutoSpawn(ServerLevel level, BastionSavedData savedData, BastionData bastion) {
+        if (level == null || savedData == null || bastion == null) {
+            return null;
+        }
+
+        BlockPos corePos = bastion.corePos();
+
+        // 1) 优先使用运行时 anchorCache（成本最低），但要校验方块仍存在且归属正确。
+        BlockPos fromCache = chooseBestAnchorFromIterable(
+            level,
+            savedData,
+            bastion,
+            savedData.getAnchors(bastion.id()),
+            corePos
+        );
+        if (fromCache != null) {
+            return fromCache;
+        }
+
+        // 2) 后备：在核心附近做范围扫描。
+        // 说明：用于服务器重启后 anchorCache 为空、但世界中仍存在 Anchor 的情况。
+        int r = Math.max(1, Constants.HATCHERY_SCAN_RADIUS);
+        int vertical = Math.max(0, Constants.HATCHERY_SCAN_VERTICAL);
+
+        BlockPos best = null;
+        double bestDistSq = Double.MAX_VALUE;
+        boolean bestHasSpawnSpace = false;
+
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                for (int dy = -vertical; dy <= vertical; dy++) {
+                    BlockPos pos = corePos.offset(dx, dy, dz);
+                    if (!level.isLoaded(pos)) {
+                        continue;
+                    }
+
+                    BlockState state = level.getBlockState(pos);
+                    if (!(state.getBlock() instanceof BastionAnchorBlock)) {
+                        continue;
+                    }
+
+                    // 重要：孵化巢会放在 Anchor 上方 1 格，因此必须保证“孵化巢方块位置”能被后续
+                    // findAnyHatcheryNearCore 的扫描窗口覆盖，否则会导致“放了但找不到”。
+                    if (!isWithinCoreScanWindow(corePos, pos, r, vertical)) {
+                        continue;
+                    }
+
+                    if (!isAnchorOwnedByBastion(savedData, bastion, pos)) {
+                        continue;
+                    }
+
+                    if (!canPlaceHatcheryAbove(level, pos)) {
+                        continue;
+                    }
+
+                    boolean hasSpawnSpace = isAirTwoBlocks(level, pos.above(2));
+                    double distSq = corePos.distSqr(pos);
+
+                    // 优先级：可生成空间（孵化巢上方两格空气）优先，其次选离核心更近的。
+                    if (best == null
+                        || (hasSpawnSpace && !bestHasSpawnSpace)
+                        || (hasSpawnSpace == bestHasSpawnSpace && distSq < bestDistSq)) {
+                        best = pos;
+                        bestDistSq = distSq;
+                        bestHasSpawnSpace = hasSpawnSpace;
+                    }
+                }
+            }
+        }
+
+        return best;
+    }
+
+    private static BlockPos chooseBestAnchorFromIterable(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion,
+            Iterable<BlockPos> anchors,
+            BlockPos corePos) {
+        if (anchors == null) {
+            return null;
+        }
+
+        BlockPos best = null;
+        double bestDistSq = Double.MAX_VALUE;
+        boolean bestHasSpawnSpace = false;
+
+        int r = Math.max(1, Constants.HATCHERY_SCAN_RADIUS);
+        int vertical = Math.max(0, Constants.HATCHERY_SCAN_VERTICAL);
+
+        for (BlockPos pos : anchors) {
+            if (pos == null) {
+                continue;
+            }
+
+            // 为保证 tick 的扫描能命中孵化巢，这里把候选限制在“核心附近窗口”。
+            if (!isWithinCoreScanWindow(corePos, pos, r, vertical)) {
+                continue;
+            }
+
+            if (!level.isLoaded(pos)) {
+                continue;
+            }
+
+            BlockState state = level.getBlockState(pos);
+            if (!(state.getBlock() instanceof BastionAnchorBlock)) {
+                continue;
+            }
+
+            if (!isAnchorOwnedByBastion(savedData, bastion, pos)) {
+                continue;
+            }
+
+            if (!canPlaceHatcheryAbove(level, pos)) {
+                continue;
+            }
+
+            boolean hasSpawnSpace = isAirTwoBlocks(level, pos.above(2));
+            double distSq = corePos.distSqr(pos);
+
+            if (best == null
+                || (hasSpawnSpace && !bestHasSpawnSpace)
+                || (hasSpawnSpace == bestHasSpawnSpace && distSq < bestDistSq)) {
+                best = pos;
+                bestDistSq = distSq;
+                bestHasSpawnSpace = hasSpawnSpace;
+            }
+        }
+
+        return best;
+    }
+
+    /**
+     * 判断 Anchor 是否归属于指定基地。
+     * <p>
+     * 注意：这里使用 {@link BastionSavedData#findOwnerBastion}，它会优先走持久化索引，
+     * 并在索引缺失时 fallback 到“最近核心”规则。
+     * </p>
+     */
+    private static boolean isAnchorOwnedByBastion(BastionSavedData savedData, BastionData bastion, BlockPos anchorPos) {
+        BastionData owner = savedData.findOwnerBastion(anchorPos, Constants.MAX_OWNER_SEARCH_RADIUS);
+        return owner != null && owner.id().equals(bastion.id());
+    }
+
+    private static boolean canPlaceHatcheryAbove(ServerLevel level, BlockPos anchorPos) {
+        BlockPos hatcheryPos = anchorPos.above();
+        if (!level.isLoaded(hatcheryPos)) {
+            return false;
+        }
+        BlockState above = level.getBlockState(hatcheryPos);
+        return above.canBeReplaced();
+    }
+
+    private static boolean isWithinCoreScanWindow(BlockPos corePos, BlockPos pos, int radius, int vertical) {
+        int dx = Math.abs(pos.getX() - corePos.getX());
+        int dz = Math.abs(pos.getZ() - corePos.getZ());
+        if (dx > radius || dz > radius) {
+            return false;
+        }
+
+        // y 维度用孵化巢方块的位置（Anchor 上方 1 格）做窗口约束。
+        int hatcheryY = pos.getY() + 1;
+        int dy = Math.abs(hatcheryY - corePos.getY());
+        return dy <= vertical;
     }
 
     /**
