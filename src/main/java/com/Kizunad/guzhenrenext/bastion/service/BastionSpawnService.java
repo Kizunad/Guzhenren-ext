@@ -133,7 +133,7 @@ public final class BastionSpawnService {
 
         int spawnedCount = 0;
         for (int i = 0; i < maxSpawns; i++) {
-            BlockPos spawnPos = findSpawnPosition(level, bastion, random);
+            BlockPos spawnPos = findSpawnPosition(level, savedData, bastion, random);
             if (spawnPos == null) {
                 continue;
             }
@@ -232,38 +232,56 @@ public final class BastionSpawnService {
 
     /**
      * 查找合适的刷怪位置。
+     * <p>
+     * 从菌毯节点缓存中采样位置，在菌毯上方寻找可站立空间。
+     * 这确保怪物只在基地实际控制的区域（菌毯覆盖范围）刷新。
+     * </p>
      *
-     * @param level   服务端世界
-     * @param bastion 基地数据
-     * @param random  随机源
+     * @param level     服务端世界
+     * @param savedData 基地存储数据
+     * @param bastion   基地数据
+     * @param random    随机源
      * @return 刷怪位置，如果没有合适位置则返回 null
      */
     private static BlockPos findSpawnPosition(
-            ServerLevel level, BastionData bastion, Random random) {
-        BlockPos core = bastion.corePos();
-        int radius = Math.min(bastion.growthRadius(), Constants.SPAWN_SEARCH_RADIUS);
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion,
+            Random random) {
+        // 从缓存中采样菌毯节点
+        java.util.List<BlockPos> sampledNodes = savedData.sampleNodesFromCache(
+            bastion.id(), Constants.SPAWN_POSITION_ATTEMPTS, random);
 
-        for (int attempt = 0; attempt < Constants.SPAWN_POSITION_ATTEMPTS; attempt++) {
-            int dx = random.nextInt(radius * 2 + 1) - radius;
-            int dz = random.nextInt(radius * 2 + 1) - radius;
-            BlockPos candidate = core.offset(dx, 0, dz);
+        if (sampledNodes.isEmpty()) {
+            // 如果没有缓存节点，回退到核心位置
+            BlockPos validPos = findValidSpawnHeightAboveNode(level, bastion.corePos());
+            return validPos;
+        }
 
-            // 向下搜索可站立的位置
-            BlockPos validPos = findValidSpawnHeight(level, candidate);
+        // 对每个节点，向上搜索可站立空间
+        for (BlockPos nodePos : sampledNodes) {
+            BlockPos validPos = findValidSpawnHeightAboveNode(level, nodePos);
             if (validPos != null) {
                 return validPos;
             }
         }
-
         return null;
     }
 
     /**
-     * 在指定 XZ 坐标查找可站立的 Y 坐标。
+     * 在菌毯节点上方查找可站立的位置。
+     * <p>
+     * 节点本身是实心方块，从节点上方开始搜索。
+     * </p>
+     *
+     * @param level   服务端世界
+     * @param nodePos 菌毯节点位置
+     * @return 可站立位置，如果没有合适位置则返回 null
      */
-    private static BlockPos findValidSpawnHeight(ServerLevel level, BlockPos pos) {
-        for (int dy = Constants.SPAWN_HEIGHT_CHECK; dy >= -Constants.SPAWN_DEPTH_SEARCH; dy--) {
-            BlockPos checkPos = pos.offset(0, dy, 0);
+    private static BlockPos findValidSpawnHeightAboveNode(ServerLevel level, BlockPos nodePos) {
+        // 从节点上方 1 格开始向上搜索
+        for (int dy = 1; dy <= Constants.SPAWN_HEIGHT_CHECK + 1; dy++) {
+            BlockPos checkPos = nodePos.above(dy);
             if (isValidSpawnLocation(level, checkPos)) {
                 return checkPos;
             }

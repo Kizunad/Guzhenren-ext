@@ -46,8 +46,12 @@ public final class BastionExpansionService {
     private static final class Constants {
         /** 扩张候选搜索的采样数。 */
         static final int CANDIDATE_SAMPLE_COUNT = 8;
-        /** 六个方向的数量。 */
-        static final int DIRECTION_COUNT = 6;
+        /** 水平方向的数量（NORTH, SOUTH, EAST, WEST）。 */
+        static final int HORIZONTAL_DIRECTION_COUNT = 4;
+        /** 水平扩张的概率百分比（优先平铺）。 */
+        static final int HORIZONTAL_CHANCE_PERCENT = 85;
+        /** 百分比基数。 */
+        static final int PERCENT_BASE = 100;
 
         /** Anchor 采样随机扰动常量（用于与菌毯扩张的随机序列错开）。 */
         static final int ANCHOR_RANDOM_SALT = 31;
@@ -243,7 +247,7 @@ public final class BastionExpansionService {
         int spacing = Math.max(1, anchorConfig.spacing());
         for (int i = 0; i < candidateSamples; i++) {
             BlockPos source = frontierList.get(random.nextInt(frontierList.size()));
-            Direction dir = Direction.values()[random.nextInt(Constants.DIRECTION_COUNT)];
+            Direction dir = selectExpansionDirection(random);
             BlockPos candidate = source.relative(dir, spacing);
 
             if (!isValidAnchorTarget(level, bastion, candidate, myceliumConfig.maxRadius())) {
@@ -304,14 +308,14 @@ public final class BastionExpansionService {
             return false;
         }
 
-        BlockState nodeState = myceliumBlock.defaultBlockState();
+        BlockState nodeState = myceliumBlock.withDao(bastion.primaryDao());
         boolean placed = level.setBlock(pos, nodeState, Block.UPDATE_ALL);
         if (!placed) {
             return false;
         }
 
         // 回合2.1.1：写入菌毯归属索引（持久化）。
-        // 只在“扩张服务成功放置”时写入，避免误标记玩家随手放置的装饰方块。
+        // 只在"扩张服务成功放置"时写入，避免误标记玩家随手放置的装饰方块。
         savedData.indexMyceliumOwner(bastion.id(), pos);
 
         // 将新节点添加到缓存（用于 frontier 追踪，非持久化）。
@@ -392,6 +396,17 @@ public final class BastionExpansionService {
         return config.baseCost() * Math.pow(config.tierMultiplier(), bastion.tier() - 1);
     }
 
+    private static final Direction[] HORIZONTAL_DIRECTIONS = {
+        Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST
+    };
+
+    private static Direction selectExpansionDirection(Random random) {
+        if (random.nextInt(Constants.PERCENT_BASE) < Constants.HORIZONTAL_CHANCE_PERCENT) {
+            return HORIZONTAL_DIRECTIONS[random.nextInt(Constants.HORIZONTAL_DIRECTION_COUNT)];
+        }
+        return random.nextBoolean() ? Direction.UP : Direction.DOWN;
+    }
+
     // ===== 候选位置选择 =====
 
     /**
@@ -434,7 +449,7 @@ public final class BastionExpansionService {
         int rejectedNotReplaceable = 0;
         for (int i = 0; i < Constants.CANDIDATE_SAMPLE_COUNT && !frontierList.isEmpty(); i++) {
             BlockPos sourceNode = frontierList.get(random.nextInt(frontierList.size()));
-            Direction dir = Direction.values()[random.nextInt(Constants.DIRECTION_COUNT)];
+            Direction dir = selectExpansionDirection(random);
 
             // 根据方向使用不同步长
             int step = dir.getAxis() == Direction.Axis.Y ? ySpacing : spacing;

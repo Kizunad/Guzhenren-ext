@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.bastion.block;
 
 import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
+import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import net.minecraft.server.level.ServerLevel;
@@ -9,6 +10,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.item.context.BlockPlaceContext;
 
@@ -20,16 +23,33 @@ import net.minecraft.world.item.context.BlockPlaceContext;
  *   <li>无 BlockEntity，性能友好</li>
  *   <li>硬度低、易清理</li>
  *   <li>不直接触发节点掉落/威胁事件（这些由 Anchor 节点承担）</li>
+ *   <li>不同道途显示不同材质</li>
  * </ul>
  * </p>
  */
 public class BastionMyceliumBlock extends Block {
+
+    /** 道途属性：决定菌毯的外观材质。 */
+    public static final EnumProperty<BastionDao> DAO = EnumProperty.create("dao", BastionDao.class);
 
     /** 查找归属基地的最大搜索半径（与交互/Anchor 逻辑对齐）。 */
     private static final int MAX_OWNER_SEARCH_RADIUS = 128;
 
     public BastionMyceliumBlock(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(DAO, BastionDao.ZHI_DAO));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(DAO);
+    }
+
+    /**
+     * 创建指定道途的方块状态。
+     */
+    public BlockState withDao(BastionDao dao) {
+        return this.defaultBlockState().setValue(DAO, dao != null ? dao : BastionDao.ZHI_DAO);
     }
 
     @Override
