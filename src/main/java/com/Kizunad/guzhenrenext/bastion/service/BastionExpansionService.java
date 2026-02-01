@@ -89,11 +89,20 @@ public final class BastionExpansionService {
 
         double expansionCost = calculateExpansionCost(bastion, myceliumConfig);
         if (bastion.resourcePool() < expansionCost) {
+            LOGGER.info("基地 {} 扩张跳过: 资源不足, pool={}, cost={}",
+                bastion.id(), String.format("%.2f", bastion.resourcePool()),
+                String.format("%.2f", expansionCost));
             return 0;
         }
 
         // 确保 frontier 缓存已初始化
         ensureFrontierCacheInitialized(savedData, bastion);
+
+        // 日志：检查 frontier 状态
+        java.util.Set<BlockPos> frontierSet = savedData.getFrontier(bastion.id());
+        LOGGER.info("基地 {} 扩张检查: pool={}, cost={}, frontier.size={}",
+            bastion.id(), String.format("%.2f", bastion.resourcePool()),
+            String.format("%.2f", expansionCost), frontierSet.size());
 
         int expandedCount = 0;
         BastionData current = bastion;
@@ -108,6 +117,7 @@ public final class BastionExpansionService {
 
             BlockPos candidate = findExpansionCandidate(level, savedData, current, myceliumConfig);
             if (candidate == null) {
+                LOGGER.info("基地 {} 扩张中断: 找不到有效候选位置 (i={})", bastion.id(), i);
                 break;
             }
 
@@ -420,6 +430,9 @@ public final class BastionExpansionService {
 
         // 采样候选位置
         List<BlockPos> candidates = new ArrayList<>();
+        int rejectedOutOfRadius = 0;
+        int rejectedNotReplaceable = 0;
+        int rejectedNotGrounded = 0;
         for (int i = 0; i < Constants.CANDIDATE_SAMPLE_COUNT && !frontierList.isEmpty(); i++) {
             BlockPos sourceNode = frontierList.get(random.nextInt(frontierList.size()));
             Direction dir = Direction.values()[random.nextInt(Constants.DIRECTION_COUNT)];
@@ -428,12 +441,31 @@ public final class BastionExpansionService {
             int step = dir.getAxis() == Direction.Axis.Y ? ySpacing : spacing;
             BlockPos candidate = sourceNode.relative(dir, step);
 
-            if (isValidExpansionTarget(level, bastion, candidate, expansionConfig)) {
-                candidates.add(candidate);
+            // 详细检查为什么候选位置无效
+            int maxRadius = expansionConfig.maxRadius();
+            if (candidate.distSqr(bastion.corePos()) > (long) maxRadius * maxRadius) {
+                rejectedOutOfRadius++;
+                continue;
             }
+            BlockState targetState = level.getBlockState(candidate);
+            if (!targetState.canBeReplaced()) {
+                rejectedNotReplaceable++;
+                continue;
+            }
+            BlockPos below = candidate.below();
+            BlockState belowState = level.getBlockState(below);
+            if (!belowState.isFaceSturdy(level, below, Direction.UP)) {
+                rejectedNotGrounded++;
+                continue;
+            }
+            candidates.add(candidate);
         }
 
         if (candidates.isEmpty()) {
+            LOGGER.info("基地 {} findExpansionCandidate 失败: "
+                + "frontier.size={}, spacing={}, 拒绝原因: 超出半径={}, 不可替换={}, 无地面={}",
+                bastion.id(), frontier.size(), spacing,
+                rejectedOutOfRadius, rejectedNotReplaceable, rejectedNotGrounded);
             return null;
         }
 
