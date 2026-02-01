@@ -168,15 +168,25 @@ public record BastionTypeConfig(
      * Round 9.1：为基地引入可配置的污染阶段与状态机，默认关闭以兼容旧 JSON。
      * </p>
      *
-     * @param enabled     是否启用污染系统
-     * @param stageCount  污染阶段数量（>0），用于驱动状态机阶梯
-     * @param stages      污染阶段配置列表（按阈值升序）
+     * @param enabled                      是否启用污染系统
+     * @param stageCount                   污染阶段数量（>0），用于驱动状态机阶梯
+     * @param stages                       污染阶段配置列表（按阈值升序）
+     * @param nodeDestructionPollutionGain 节点被破坏时增加的污染值
+     * @param escalationCooldownTicks      激化冷却时间（tick），用于节流连续激化
      */
-    public record PollutionConfig(boolean enabled, int stageCount, List<PollutionStage> stages) {
+    public record PollutionConfig(
+            boolean enabled,
+            int stageCount,
+            List<PollutionStage> stages,
+            double nodeDestructionPollutionGain,
+            long escalationCooldownTicks
+    ) {
         public static final PollutionConfig DEFAULT = new PollutionConfig(
             DefaultValues.DEFAULT_POLLUTION_ENABLED,
             DefaultValues.DEFAULT_POLLUTION_STAGE_COUNT,
-            DefaultValues.DEFAULT_POLLUTION_STAGES
+            DefaultValues.DEFAULT_POLLUTION_STAGES,
+            DefaultValues.DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN,
+            DefaultValues.DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS
         );
 
         public static final Codec<PollutionConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -187,7 +197,15 @@ public record BastionTypeConfig(
                     .forGetter(PollutionConfig::stageCount),
                 PollutionStage.CODEC.listOf()
                     .optionalFieldOf("stages", DefaultValues.DEFAULT_POLLUTION_STAGES)
-                    .forGetter(PollutionConfig::stages)
+                    .forGetter(PollutionConfig::stages),
+                Codec.DOUBLE.optionalFieldOf(
+                        "node_destruction_pollution_gain",
+                        DefaultValues.DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN)
+                    .forGetter(PollutionConfig::nodeDestructionPollutionGain),
+                Codec.LONG.optionalFieldOf(
+                        "escalation_cooldown_ticks",
+                        DefaultValues.DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS)
+                    .forGetter(PollutionConfig::escalationCooldownTicks)
             ).apply(instance, PollutionConfig::new)
         );
     }
@@ -913,12 +931,16 @@ public record BastionTypeConfig(
         static final int DEFAULT_MYCELIUM_WEIGHT = 1;
 
         // ===== 污染系统默认值（Round 9.1） =====
-        /** 是否启用污染系统（兼容旧 JSON，默认关闭）。 */
-        static final boolean DEFAULT_POLLUTION_ENABLED = false;
-        /** 污染阶段数量默认值。 */
-        static final int DEFAULT_POLLUTION_STAGE_COUNT = 3;
-        /** 污染阶段默认列表：留空表示无效果，仅为 schema 占位。 */
-        static final List<PollutionStage> DEFAULT_POLLUTION_STAGES = List.of();
+         /** 是否启用污染系统（兼容旧 JSON，默认关闭）。 */
+         static final boolean DEFAULT_POLLUTION_ENABLED = false;
+         /** 污染阶段数量默认值。 */
+         static final int DEFAULT_POLLUTION_STAGE_COUNT = 3;
+         /** 污染阶段默认列表：留空表示无效果，仅为 schema 占位。 */
+         static final List<PollutionStage> DEFAULT_POLLUTION_STAGES = List.of();
+         /** 节点被破坏时增加的污染值。 */
+         static final double DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN = 0.1;
+         /** 激化冷却时间（tick），避免连续触发。 */
+         static final long DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS = 200L;
 
         // ===== 连通性扫描默认值 =====
         /**
