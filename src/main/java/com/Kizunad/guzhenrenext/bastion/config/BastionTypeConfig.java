@@ -379,30 +379,34 @@ public record BastionTypeConfig(
              double spawnCost,
              /** 精英掉落表 ID（ResourceLocation 字符串，空表示不使用）。 */
              String lootTableId,
-             /** 精英击杀经验倍率。 */
-             double experienceMultiplier,
-             /** 同时存活的精英上限。 */
-             int maxAlive,
-             List<String> skillPool
-     ) {
-          public static final EliteConfig DEFAULT = new EliteConfig(
-              DefaultValues.DEFAULT_ELITE_ENABLED,
-              DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER,
-             DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER,
-             DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER,
-             DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER,
-             DefaultValues.DEFAULT_ELITE_MIN_TIER,
-             DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS,
-             DefaultValues.DEFAULT_ELITE_SPAWN_COST,
-             DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID,
-             DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER,
-             DefaultValues.DEFAULT_ELITE_MAX_ALIVE,
-             List.of()
-         );
+     /** 精英击杀经验倍率。 */
+     double experienceMultiplier,
+     /** 同时存活的精英上限。 */
+     int maxAlive,
+     /** 精英技能池（无道途区分，兼容旧字段）。 */
+     List<String> skillPool,
+     /** 按道途划分的精英技能池（新配置，旧 JSON 缺省为空映射）。 */
+     Map<BastionDao, EliteSkillPool> daoSkillPools
+  ) {
+       public static final EliteConfig DEFAULT = new EliteConfig(
+           DefaultValues.DEFAULT_ELITE_ENABLED,
+           DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER,
+          DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER,
+          DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER,
+          DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER,
+          DefaultValues.DEFAULT_ELITE_MIN_TIER,
+          DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS,
+          DefaultValues.DEFAULT_ELITE_SPAWN_COST,
+          DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID,
+          DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER,
+          DefaultValues.DEFAULT_ELITE_MAX_ALIVE,
+          List.of(),
+          DefaultValues.DEFAULT_ELITE_DAO_SKILL_POOLS
+      );
 
-          public static final Codec<EliteConfig> CODEC = RecordCodecBuilder.create(instance ->
-              instance.group(
-                 Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_ELITE_ENABLED)
+       public static final Codec<EliteConfig> CODEC = RecordCodecBuilder.create(instance ->
+           instance.group(
+              Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_ELITE_ENABLED)
                      .forGetter(EliteConfig::enabled),
                  Codec.DOUBLE.optionalFieldOf(
                          "health_multiplier",
@@ -434,17 +438,41 @@ public record BastionTypeConfig(
                          "loot_table_id",
                          DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID)
                      .forGetter(EliteConfig::lootTableId),
-                 Codec.DOUBLE.optionalFieldOf(
-                         "experience_multiplier",
-                         DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER)
-                     .forGetter(EliteConfig::experienceMultiplier),
-                 Codec.INT.optionalFieldOf("max_alive", DefaultValues.DEFAULT_ELITE_MAX_ALIVE)
-                     .forGetter(EliteConfig::maxAlive),
-                 Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
-                     .forGetter(EliteConfig::skillPool)
-              ).apply(instance, EliteConfig::new)
-          );
-      }
+              Codec.DOUBLE.optionalFieldOf(
+                      "experience_multiplier",
+                      DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER)
+                  .forGetter(EliteConfig::experienceMultiplier),
+              Codec.INT.optionalFieldOf("max_alive", DefaultValues.DEFAULT_ELITE_MAX_ALIVE)
+                  .forGetter(EliteConfig::maxAlive),
+              Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
+                  .forGetter(EliteConfig::skillPool),
+              Codec.unboundedMap(BastionDao.CODEC, EliteSkillPool.CODEC)
+                  .optionalFieldOf("dao_skill_pools", DefaultValues.DEFAULT_ELITE_DAO_SKILL_POOLS)
+                  .forGetter(EliteConfig::daoSkillPools)
+           ).apply(instance, EliteConfig::new)
+       );
+   }
+
+     /**
+      * 精英技能池配置。
+      * <p>
+      * Round 17：支持按道途拆分技能池，采用权重映射。
+      * 兼容策略：旧 JSON 未提供字段时回退空映射，不影响旧行为。
+      * </p>
+      *
+      * @param skills 技能权重映射（技能 ID -> 权重）
+      */
+     public record EliteSkillPool(Map<String, Integer> skills) {
+         /** 兼容旧 JSON：缺失字段时回退为空池。 */
+         public static final EliteSkillPool DEFAULT = new EliteSkillPool(Map.of());
+
+         public static final Codec<EliteSkillPool> CODEC = RecordCodecBuilder.create(instance ->
+             instance.group(
+                 Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("skills", Map.of())
+                     .forGetter(EliteSkillPool::skills)
+             ).apply(instance, EliteSkillPool::new)
+         );
+     }
 
      /**
       * Boss 阶段配置。
@@ -1119,6 +1147,8 @@ public record BastionTypeConfig(
          static final double DEFAULT_ELITE_EXPERIENCE_MULTIPLIER = 3.0;
          /** 精英同时存活上限。 */
          static final int DEFAULT_ELITE_MAX_ALIVE = 1;
+         /** 按道途划分的精英技能池默认值（空映射，兼容旧 JSON）。 */
+         static final Map<BastionDao, EliteSkillPool> DEFAULT_ELITE_DAO_SKILL_POOLS = Map.of();
 
          // ===== Boss 默认值（Round 8.1） =====
          /** 是否启用 Boss 系统，缺省关闭以兼容旧 JSON。 */
