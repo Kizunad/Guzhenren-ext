@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.kongqiao.parasite.ParasiteUpgradeAttachment;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -139,6 +140,12 @@ public final class KongqiaoAttachments {
         ATTACHMENT_TYPES.register(
             "tweak_config",
             () -> AttachmentType.serializable(TweakConfig::new).copyOnDeath().build()
+        );
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<ParasiteUpgradeAttachment>> PARASITE_UPGRADES =
+        ATTACHMENT_TYPES.register(
+            "parasite_upgrades",
+            () -> AttachmentType.serializable(ParasiteUpgradeAttachment::new).copyOnDeath().build()
         );
 
     public static final DeferredHolder<
@@ -291,6 +298,16 @@ public final class KongqiaoAttachments {
             );
         }
         return entity.getData(GUZHENREN_VARIABLE_MODIFIERS.get());
+    }
+
+    public static ParasiteUpgradeAttachment getParasiteUpgrades(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(PARASITE_UPGRADES.get())) {
+            entity.setData(PARASITE_UPGRADES.get(), new ParasiteUpgradeAttachment());
+        }
+        return entity.getData(PARASITE_UPGRADES.get());
     }
 
     public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge

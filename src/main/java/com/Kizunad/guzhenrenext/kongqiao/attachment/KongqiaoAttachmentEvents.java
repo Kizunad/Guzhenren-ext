@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoCapacityService;
+import com.Kizunad.guzhenrenext.kongqiao.parasite.ParasiteUpgradeAttachment;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,6 +38,7 @@ public final class KongqiaoAttachmentEvents {
         }
         copyKongqiaoData(original, clone);
         copyNianTouUnlocks(original, clone);
+        copyParasiteUpgrades(original, clone);
     }
 
     private static void ensureAttachment(Entity entity) {
@@ -61,6 +63,13 @@ public final class KongqiaoAttachmentEvents {
             entity.setData(
                 KongqiaoAttachments.NIANTOU_UNLOCKS.get(),
                 new NianTouUnlocks()
+            );
+        }
+
+        if (entity instanceof Player && !entity.hasData(KongqiaoAttachments.PARASITE_UPGRADES.get())) {
+            entity.setData(
+                KongqiaoAttachments.PARASITE_UPGRADES.get(),
+                new ParasiteUpgradeAttachment()
             );
         }
 
@@ -96,5 +105,18 @@ public final class KongqiaoAttachmentEvents {
         NianTouUnlocks newUnlocks = new NianTouUnlocks();
         newUnlocks.setUnlockedUsageMap(originalUnlocks.getUnlockedUsageMap());
         clone.setData(KongqiaoAttachments.NIANTOU_UNLOCKS.get(), newUnlocks);
+    }
+
+    private static void copyParasiteUpgrades(Player original, Player clone) {
+        ParasiteUpgradeAttachment originalAttachment = KongqiaoAttachments.getParasiteUpgrades(original);
+        if (originalAttachment == null) {
+            return;
+        }
+        ParasiteUpgradeAttachment newAttachment = new ParasiteUpgradeAttachment();
+        newAttachment.deserializeNBT(
+            clone.level().registryAccess(),
+            originalAttachment.serializeNBT(original.level().registryAccess())
+        );
+        clone.setData(KongqiaoAttachments.PARASITE_UPGRADES.get(), newAttachment);
     }
 }
