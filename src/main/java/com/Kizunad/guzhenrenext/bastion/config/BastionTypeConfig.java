@@ -87,29 +87,29 @@ public record BastionTypeConfig(
      * （不会引入额外嵌套对象）。
      * </p>
      */
-    private static final class OptionalContentConfig {
+     private static final class OptionalContentConfig {
         private final ShellConfig shell;
         private final EliteConfig elite;
-         private final Optional<LootConfig> loot;
-         private final Optional<HighTierConfig> highTier;
-         private final Optional<GuardianShazhaoConfig> guardianShazhao;
-         private final BossConfig boss;
+        private final Optional<LootConfig> loot;
+        private final Optional<HighTierConfig> highTier;
+        private final Optional<GuardianShazhaoConfig> guardianShazhao;
+        private final BossConfig boss;
 
-         private OptionalContentConfig(
-                 ShellConfig shell,
-                 EliteConfig elite,
-                 Optional<LootConfig> loot,
-                 Optional<HighTierConfig> highTier,
-                 Optional<GuardianShazhaoConfig> guardianShazhao,
-                 BossConfig boss
-         ) {
-             this.shell = shell;
-             this.elite = elite;
-             this.loot = loot;
-             this.highTier = highTier;
-             this.guardianShazhao = guardianShazhao;
-             this.boss = boss;
-         }
+             private OptionalContentConfig(
+                     ShellConfig shell,
+                     EliteConfig elite,
+                     Optional<LootConfig> loot,
+                     Optional<HighTierConfig> highTier,
+            Optional<GuardianShazhaoConfig> guardianShazhao,
+            BossConfig boss
+     ) {
+         this.shell = shell;
+         this.elite = elite;
+         this.loot = loot;
+         this.highTier = highTier;
+         this.guardianShazhao = guardianShazhao;
+         this.boss = boss;
+     }
 
         private ShellConfig shell() {
             return shell;
@@ -152,90 +152,129 @@ public record BastionTypeConfig(
          );
      }
 
-    /**
-     * 精英守卫配置。
-     * <p>
-     * Round 7.1：定义精英守卫的属性倍率和技能池。
-     * </p>
-     */
-    public record EliteConfig(
-            boolean enabled,
-            double healthMultiplier,
-            double damageMultiplier,
-            double armorMultiplier,
-            double speedMultiplier,
-            /** 最低转数要求（低于该转数不生成精英）。 */
-            int minTier,
-            /** 精英生成冷却（tick），基地级节流，避免刷屏。 */
-            long cooldownTicks,
-            /** 生成精英消耗的资源池量。 */
-            double spawnCost,
-            /** 精英掉落表 ID（ResourceLocation 字符串，空表示不使用）。 */
-            String lootTableId,
-            /** 精英击杀经验倍率。 */
-            double experienceMultiplier,
-            /** 同时存活的精英上限。 */
-            int maxAlive,
-            List<String> skillPool
-    ) {
-         public static final EliteConfig DEFAULT = new EliteConfig(
-             DefaultValues.DEFAULT_ELITE_ENABLED,
-             DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER,
-            DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER,
-            DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER,
-            DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER,
-            DefaultValues.DEFAULT_ELITE_MIN_TIER,
-            DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS,
-            DefaultValues.DEFAULT_ELITE_SPAWN_COST,
-            DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID,
-            DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER,
-            DefaultValues.DEFAULT_ELITE_MAX_ALIVE,
-            List.of()
-        );
+     /**
+      * 精英守卫配置。
+      * <p>
+      * Round 7.1：定义精英守卫的属性倍率和技能池。
+      * </p>
+      */
+     public record EliteConfig(
+             boolean enabled,
+             double healthMultiplier,
+             double damageMultiplier,
+             double armorMultiplier,
+             double speedMultiplier,
+             /** 最低转数要求（低于该转数不生成精英）。 */
+             int minTier,
+             /** 精英生成冷却（tick），基地级节流，避免刷屏。 */
+             long cooldownTicks,
+             /** 生成精英消耗的资源池量。 */
+             double spawnCost,
+             /** 精英掉落表 ID（ResourceLocation 字符串，空表示不使用）。 */
+             String lootTableId,
+             /** 精英击杀经验倍率。 */
+             double experienceMultiplier,
+             /** 同时存活的精英上限。 */
+             int maxAlive,
+             List<String> skillPool
+     ) {
+          public static final EliteConfig DEFAULT = new EliteConfig(
+              DefaultValues.DEFAULT_ELITE_ENABLED,
+              DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER,
+             DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER,
+             DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER,
+             DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER,
+             DefaultValues.DEFAULT_ELITE_MIN_TIER,
+             DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS,
+             DefaultValues.DEFAULT_ELITE_SPAWN_COST,
+             DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID,
+             DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER,
+             DefaultValues.DEFAULT_ELITE_MAX_ALIVE,
+             List.of()
+         );
 
-         public static final Codec<EliteConfig> CODEC = RecordCodecBuilder.create(instance ->
+          public static final Codec<EliteConfig> CODEC = RecordCodecBuilder.create(instance ->
+              instance.group(
+                 Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_ELITE_ENABLED)
+                     .forGetter(EliteConfig::enabled),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "health_multiplier",
+                         DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER)
+                     .forGetter(EliteConfig::healthMultiplier),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "damage_multiplier",
+                         DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER)
+                     .forGetter(EliteConfig::damageMultiplier),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "armor_multiplier",
+                         DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER)
+                     .forGetter(EliteConfig::armorMultiplier),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "speed_multiplier",
+                         DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER)
+                     .forGetter(EliteConfig::speedMultiplier),
+                 Codec.INT.optionalFieldOf("min_tier", DefaultValues.DEFAULT_ELITE_MIN_TIER)
+                     .forGetter(EliteConfig::minTier),
+                 Codec.LONG.optionalFieldOf(
+                         "cooldown_ticks",
+                         DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS)
+                     .forGetter(EliteConfig::cooldownTicks),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "spawn_cost",
+                         DefaultValues.DEFAULT_ELITE_SPAWN_COST)
+                     .forGetter(EliteConfig::spawnCost),
+                 Codec.STRING.optionalFieldOf(
+                         "loot_table_id",
+                         DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID)
+                     .forGetter(EliteConfig::lootTableId),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "experience_multiplier",
+                         DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER)
+                     .forGetter(EliteConfig::experienceMultiplier),
+                 Codec.INT.optionalFieldOf("max_alive", DefaultValues.DEFAULT_ELITE_MAX_ALIVE)
+                     .forGetter(EliteConfig::maxAlive),
+                 Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
+                     .forGetter(EliteConfig::skillPool)
+              ).apply(instance, EliteConfig::new)
+          );
+      }
+
+     /**
+      * Boss 阶段配置。
+      * <p>
+      * Round 8.2：按血量阈值切换技能池与倍率。
+      * </p>
+      *
+      * @param healthThreshold  血量阈值（0.0-1.0，含）：Boss 当前血量占比低于该值时触发阶段
+      * @param skillPool        阶段技能池（字符串 ID 列表）
+      * @param damageMultiplier 阶段伤害倍率调整
+      * @param speedMultiplier  阶段移动速度倍率调整
+      */
+     public record BossPhase(
+             double healthThreshold,
+             List<String> skillPool,
+             double damageMultiplier,
+             double speedMultiplier
+     ) {
+         private static final double MIN_HEALTH_THRESHOLD = 0.0;
+         private static final double MAX_HEALTH_THRESHOLD = 1.0;
+         private static final double DEFAULT_HEALTH_THRESHOLD = 1.0;
+         private static final double DEFAULT_DAMAGE_MULTIPLIER = 1.0;
+         private static final double DEFAULT_SPEED_MULTIPLIER = 1.0;
+         private static final List<String> DEFAULT_SKILL_POOL = List.of();
+
+         public static final Codec<BossPhase> CODEC = RecordCodecBuilder.create(instance ->
              instance.group(
-                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_ELITE_ENABLED)
-                    .forGetter(EliteConfig::enabled),
-                Codec.DOUBLE.optionalFieldOf(
-                        "health_multiplier",
-                        DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER)
-                    .forGetter(EliteConfig::healthMultiplier),
-                Codec.DOUBLE.optionalFieldOf(
-                        "damage_multiplier",
-                        DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER)
-                    .forGetter(EliteConfig::damageMultiplier),
-                Codec.DOUBLE.optionalFieldOf(
-                        "armor_multiplier",
-                        DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER)
-                    .forGetter(EliteConfig::armorMultiplier),
-                Codec.DOUBLE.optionalFieldOf(
-                        "speed_multiplier",
-                        DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER)
-                    .forGetter(EliteConfig::speedMultiplier),
-                Codec.INT.optionalFieldOf("min_tier", DefaultValues.DEFAULT_ELITE_MIN_TIER)
-                    .forGetter(EliteConfig::minTier),
-                Codec.LONG.optionalFieldOf(
-                        "cooldown_ticks",
-                        DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS)
-                    .forGetter(EliteConfig::cooldownTicks),
-                Codec.DOUBLE.optionalFieldOf(
-                        "spawn_cost",
-                        DefaultValues.DEFAULT_ELITE_SPAWN_COST)
-                    .forGetter(EliteConfig::spawnCost),
-                Codec.STRING.optionalFieldOf(
-                        "loot_table_id",
-                        DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID)
-                    .forGetter(EliteConfig::lootTableId),
-                Codec.DOUBLE.optionalFieldOf(
-                        "experience_multiplier",
-                        DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER)
-                    .forGetter(EliteConfig::experienceMultiplier),
-                Codec.INT.optionalFieldOf("max_alive", DefaultValues.DEFAULT_ELITE_MAX_ALIVE)
-                    .forGetter(EliteConfig::maxAlive),
-                Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
-                    .forGetter(EliteConfig::skillPool)
-             ).apply(instance, EliteConfig::new)
+                 Codec.doubleRange(MIN_HEALTH_THRESHOLD, MAX_HEALTH_THRESHOLD)
+                     .optionalFieldOf("health_threshold", DEFAULT_HEALTH_THRESHOLD)
+                     .forGetter(BossPhase::healthThreshold),
+                 Codec.STRING.listOf().optionalFieldOf("skill_pool", DEFAULT_SKILL_POOL)
+                     .forGetter(BossPhase::skillPool),
+                 Codec.DOUBLE.optionalFieldOf("damage_multiplier", DEFAULT_DAMAGE_MULTIPLIER)
+                     .forGetter(BossPhase::damageMultiplier),
+                 Codec.DOUBLE.optionalFieldOf("speed_multiplier", DEFAULT_SPEED_MULTIPLIER)
+                     .forGetter(BossPhase::speedMultiplier)
+             ).apply(instance, BossPhase::new)
          );
      }
 
@@ -243,6 +282,7 @@ public record BastionTypeConfig(
       * Boss 配置。
       * <p>
       * Round 8.1：定义 Boss 的倍率、转数门槛与生成冷却。
+      * Round 8.2：引入分阶段行为（血量阈值→技能/倍率）。
       * </p>
       */
      public record BossConfig(
@@ -260,7 +300,9 @@ public record BastionTypeConfig(
              /** Boss 生成所需资源池消耗。 */
              double spawnCost,
              /** Boss 掉落表 ID（空字符串表示不使用自定义掉落表）。 */
-             String lootTableId
+             String lootTableId,
+             /** Boss 阶段配置列表（空表示无阶段行为）。 */
+             List<BossPhase> phases
      ) {
          public static final BossConfig DEFAULT = new BossConfig(
              DefaultValues.DEFAULT_BOSS_ENABLED,
@@ -270,7 +312,8 @@ public record BastionTypeConfig(
              DefaultValues.DEFAULT_BOSS_ARMOR_MULTIPLIER,
              DefaultValues.DEFAULT_BOSS_COOLDOWN_TICKS,
              DefaultValues.DEFAULT_BOSS_SPAWN_COST,
-             DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID
+             DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID,
+             DefaultValues.DEFAULT_BOSS_PHASES
          );
 
          public static final Codec<BossConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -302,7 +345,9 @@ public record BastionTypeConfig(
                  Codec.STRING.optionalFieldOf(
                          "loot_table_id",
                          DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID)
-                     .forGetter(BossConfig::lootTableId)
+                     .forGetter(BossConfig::lootTableId),
+                 BossPhase.CODEC.listOf().optionalFieldOf("phases", DefaultValues.DEFAULT_BOSS_PHASES)
+                     .forGetter(BossConfig::phases)
              ).apply(instance, BossConfig::new)
          );
      }
@@ -809,6 +854,8 @@ public record BastionTypeConfig(
          static final double DEFAULT_BOSS_SPAWN_COST = 200.0;
          /** Boss 掉落表 ID，空字符串表示不启用自定义掉落表。 */
          static final String DEFAULT_BOSS_LOOT_TABLE_ID = "";
+         /** Boss 阶段配置默认：空列表表示无阶段行为。 */
+         static final List<BossPhase> DEFAULT_BOSS_PHASES = List.of();
 
         // ===== 菌毯衰败默认值 =====
 
