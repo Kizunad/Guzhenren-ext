@@ -157,7 +157,17 @@ public final class BastionGuardianRuntimeService {
 
     private static boolean isTargetCandidate(ServerLevel level, Mob guardian, LivingEntity candidate) {
         if (candidate instanceof ServerPlayer player) {
-            return !isIgnoredPlayer(player);
+            if (isIgnoredPlayer(player)) {
+                return false;
+            }
+            java.util.UUID bastionId = BastionGuardianData.getBastionId(guardian);
+            if (bastionId != null) {
+                BastionData bastion = BastionSavedData.get(level).getBastion(bastionId);
+                if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                    return false; // 已接管者视为友军，不设为目标
+                }
+            }
+            return true;
         }
         if (!BastionGuardianCombatRules.isGuardian(candidate)) {
             return false;

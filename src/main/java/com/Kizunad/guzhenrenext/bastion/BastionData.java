@@ -104,9 +104,23 @@ public record BastionData(
      * @param capturable               是否可接管
      * @param reason                   可接管原因（NONE/BOSS_DEFEATED/PURIFICATION_READY）
      * @param capturableUntilGameTime  可接管窗口截止时间（0 表示无限期）
+     * @param captured                 是否已被玩家接管
+     * @param capturedBy               接管者 UUID（null 表示尚未接管）
      */
-    public record CaptureState(boolean capturable, CaptureReason reason, long capturableUntilGameTime) {
-        public static final CaptureState DEFAULT = new CaptureState(false, CaptureReason.NONE, 0L);
+    public record CaptureState(
+        boolean capturable,
+        CaptureReason reason,
+        long capturableUntilGameTime,
+        boolean captured,
+        java.util.UUID capturedBy
+    ) {
+        public static final CaptureState DEFAULT = new CaptureState(
+            false,
+            CaptureReason.NONE,
+            0L,
+            false,
+            null
+        );
 
         /** 序列化/反序列化编解码器。 */
         public static final Codec<CaptureState> CODEC = RecordCodecBuilder.create(instance ->
@@ -115,9 +129,29 @@ public record BastionData(
                 CaptureReason.CODEC.optionalFieldOf("reason", CaptureReason.NONE)
                     .forGetter(CaptureState::reason),
                 Codec.LONG.optionalFieldOf("capturable_until_game_time", 0L)
-                    .forGetter(CaptureState::capturableUntilGameTime)
-            ).apply(instance, CaptureState::new)
+                    .forGetter(CaptureState::capturableUntilGameTime),
+                Codec.BOOL.optionalFieldOf("captured", false)
+                    .forGetter(CaptureState::captured),
+                UUIDUtil.CODEC.optionalFieldOf("captured_by")
+                    .forGetter(state -> java.util.Optional.ofNullable(state.capturedBy()))
+            ).apply(instance, (capturable, reason, until, captured, capturedBy) -> new CaptureState(
+                capturable,
+                reason,
+                until,
+                captured,
+                capturedBy.orElse(null)
+            ))
         );
+
+        /**
+         * 判断是否被指定玩家接管。
+         *
+         * @param playerId 玩家 UUID
+         * @return true 表示已被该玩家接管
+         */
+        public boolean isCapturedBy(java.util.UUID playerId) {
+            return captured && playerId != null && playerId.equals(capturedBy);
+        }
     }
 
     /** 兼容旧调用：返回菌毯总数。 */
@@ -646,14 +680,14 @@ public record BastionData(
      * @param newCaptureState 新的接管状态（null 将回退为默认值）
      * @return 更新后的 BastionData
      */
-    public BastionData withCaptureState(CaptureState newCaptureState) {
-        CaptureState safe = newCaptureState == null ? CaptureState.DEFAULT : newCaptureState;
-        return new BastionData(
-            id, state, corePos, dimension, bastionType, primaryDao, tier,
-            evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, counts, modifiers, timing, safe
-        );
-    }
+     public BastionData withCaptureState(CaptureState newCaptureState) {
+         CaptureState safe = newCaptureState == null ? CaptureState.DEFAULT : newCaptureState;
+         return new BastionData(
+             id, state, corePos, dimension, bastionType, primaryDao, tier,
+             evolutionProgress, totalNodes, nodesByTier, growthRadius,
+             growthCursor, resourcePool, pollution, counts, modifiers, timing, safe
+         );
+     }
 
     /**
      * 创建仅更新可接管标记的副本（原因与窗口保持不变）。
@@ -661,10 +695,16 @@ public record BastionData(
      * @param capturable 是否可接管
      * @return 更新后的 BastionData
      */
-    public BastionData withCapturable(boolean capturable) {
-        CaptureState safe = captureState == null ? CaptureState.DEFAULT : captureState;
-        return withCaptureState(new CaptureState(capturable, safe.reason(), safe.capturableUntilGameTime()));
-    }
+     public BastionData withCapturable(boolean capturable) {
+         CaptureState safe = captureState == null ? CaptureState.DEFAULT : captureState;
+        return withCaptureState(new CaptureState(
+            capturable,
+            safe.reason(),
+            safe.capturableUntilGameTime(),
+            safe.captured(),
+            safe.capturedBy()
+        ));
+     }
 
     /**
      * 创建接管原因与窗口更新后的副本。
@@ -674,10 +714,17 @@ public record BastionData(
      * @param capturableUntilGameTime 可接管窗口截止时间（0 表示无限期）
      * @return 更新后的 BastionData
      */
-    public BastionData withCapturable(boolean capturable, CaptureReason reason, long capturableUntilGameTime) {
-        CaptureReason safeReason = reason == null ? CaptureReason.NONE : reason;
-        return withCaptureState(new CaptureState(capturable, safeReason, Math.max(0L, capturableUntilGameTime)));
-    }
+     public BastionData withCapturable(boolean capturable, CaptureReason reason, long capturableUntilGameTime) {
+         CaptureReason safeReason = reason == null ? CaptureReason.NONE : reason;
+        CaptureState safe = captureState == null ? CaptureState.DEFAULT : captureState;
+        return withCaptureState(new CaptureState(
+            capturable,
+            safeReason,
+            Math.max(0L, capturableUntilGameTime),
+            safe.captured(),
+            safe.capturedBy()
+        ));
+     }
 
     /** 返回当前污染值（0.0~1.0）。 */
     public double pollution() {
@@ -690,13 +737,73 @@ public record BastionData(
      * @param newPollution 新污染值（将被夹取到 0.0-1.0）
      * @return 更新后的 BastionData
      */
-    public BastionData withPollution(double newPollution) {
-        double clamped = Math.min(1.0, Math.max(0.0, newPollution));
-        return new BastionData(
-            id, state, corePos, dimension, bastionType, primaryDao, tier,
-            evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, clamped, counts, modifiers, timing, captureState
+     public BastionData withPollution(double newPollution) {
+         double clamped = Math.min(1.0, Math.max(0.0, newPollution));
+         return new BastionData(
+             id, state, corePos, dimension, bastionType, primaryDao, tier,
+             evolutionProgress, totalNodes, nodesByTier, growthRadius,
+             growthCursor, resourcePool, clamped, counts, modifiers, timing, captureState
+         );
+     }
+
+    /**
+     * 创建接管后的副本：转为 ACTIVE、清空封印/摧毁时间并写入占领者。
+     *
+     * @param ownerId   接管者 UUID
+     * @param gameTime  当前游戏时间（用于刷新 lastGameTime）
+     * @return 接管后的 BastionData
+     */
+    public BastionData withCaptured(java.util.UUID ownerId, long gameTime) {
+        CaptureState safe = captureState == null ? CaptureState.DEFAULT : captureState;
+        CaptureState capturedState = new CaptureState(
+            false,
+            CaptureReason.NONE,
+            0L,
+            true,
+            ownerId
         );
+        BastionTiming newTiming = new BastionTiming(0L, 0L, gameTime, timing.offlineAccumTicks());
+        return new BastionData(
+            id,
+            BastionState.ACTIVE,
+            corePos,
+            dimension,
+            bastionType,
+            primaryDao,
+            tier,
+            evolutionProgress,
+            totalNodes,
+            nodesByTier,
+            growthRadius,
+            growthCursor,
+            resourcePool,
+            pollution,
+            counts,
+            modifiers,
+            newTiming,
+            capturedState
+        );
+    }
+
+    /**
+     * 是否已被接管。
+     *
+     * @return true 表示基地处于友方（已接管）模式
+     */
+    public boolean isCaptured() {
+        CaptureState safe = captureState == null ? CaptureState.DEFAULT : captureState;
+        return safe.captured();
+    }
+
+    /**
+     * 判断指定玩家是否为接管者。
+     *
+     * @param playerId 玩家 UUID
+     * @return true 表示该玩家为接管者
+     */
+    public boolean isFriendlyTo(java.util.UUID playerId) {
+        CaptureState safe = captureState == null ? CaptureState.DEFAULT : captureState;
+        return safe.isCapturedBy(playerId);
     }
 
 }

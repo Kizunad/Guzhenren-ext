@@ -567,17 +567,16 @@ public final class BastionInteractionService {
             return InteractionResult.FAIL;
         }
 
-        // 占领成功：将基地转为玩家所有（MVP 实现：直接移除基地）
-        // 完整实现应该：
-        // 1. 将基地所有权转移给玩家
-        // 2. 重置基地状态为 ACTIVE
-        // 3. 清除封印和销毁时间
+        // 完整实现：将基地标记为已接管，重置状态为 ACTIVE，清除封印/销毁时间。
 
         BastionSavedData savedData = BastionSavedData.get(level);
 
-        // MVP 实现：标记基地为已销毁（相当于清除）
-        // 后续版本应实现真正的所有权转移
-        savedData.markDestroyed(bastion.id(), gameTime);
+        // 写入接管者并回到 ACTIVE（友方模式）。
+        BastionData captured = bastion.withCaptured(player.getUUID(), gameTime);
+        savedData.updateBastion(captured);
+
+        // 同步基地状态到客户端，确保 HUD/光环立即刷新
+        BastionNetworkHandler.syncToNearbyPlayers(level, captured);
 
         // 消耗占领物品
         if (!player.isCreative()) {

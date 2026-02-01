@@ -167,6 +167,9 @@ public final class BastionAuraService {
         java.util.UUID playerId = player.getUUID();
         java.util.UUID previousBastionId = PLAYER_IN_BASTION.get(playerId);
 
+        // 友方基地：跳过负面光环效果与进入提示
+        bastions.removeIf(bastion -> bastion.isFriendlyTo(playerId));
+
         if (!bastions.isEmpty()) {
             // 玩家在至少一个基地领域内
             // 使用第一个基地的 ID 作为"主基地"用于进入/离开消息
