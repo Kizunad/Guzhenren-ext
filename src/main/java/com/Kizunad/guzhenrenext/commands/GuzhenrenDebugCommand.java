@@ -28,6 +28,9 @@ import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
+import com.Kizunad.guzhenrenext.bastion.service.BastionGuardianUpkeepService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionThreatService;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -46,6 +49,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.entity.Mob;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -258,6 +263,12 @@ public class GuzhenrenDebugCommand {
         CommandSourceStack
     > buildBastionCommands() {
         return Commands.literal("bastion")
+            .then(
+                Commands.literal("debug").then(
+                    Commands.argument("pos", Vec3Argument.vec3())
+                        .executes(GuzhenrenDebugCommand::debugBastion)
+                )
+            )
             .then(
                 Commands.literal("create").then(
                     Commands.argument("dao", StringArgumentType.word())
@@ -483,6 +494,90 @@ public class GuzhenrenDebugCommand {
             context.getSource().sendFailure(Component.literal("操作失败: " + e.getMessage()));
             return 0;
         }
+    }
+
+    /**
+     * 调试：查看指定位置所属基地的守卫系统状态。
+     * <p>
+     * 输出内容：
+     * <ul>
+     *   <li>当前守卫数量（按基地归属计数）</li>
+     *   <li>威胁值与威胁等级</li>
+     *   <li>孵化巢冷却（下次尝试 tick 与剩余 tick）</li>
+     * </ul>
+     * </p>
+     */
+    private static int debugBastion(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            Vec3 vec = Vec3Argument.getVec3(context, "pos");
+            BlockPos pos = BlockPos.containing(vec);
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(pos, BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("该位置附近未找到基地"));
+                return 0;
+            }
+
+            // 1) 守卫数量（复用运行时计数逻辑，与 upkeep/孵化巢一致）。
+            int guardianCount = countBastionGuardians(level, bastion);
+
+            // 2) 威胁值与威胁等级（按配置阈值划分）。
+            int threatValue = bastion.threatMeter();
+            BastionThreatService.ThreatTier threatTier = BastionThreatService.getThreatTier(bastion);
+
+            // 3) 孵化巢冷却（基地级）。
+            long gameTime = level.getGameTime();
+            long nextHatcheryTry = savedData.getNextHatcheryTryTick(bastion.id());
+            long remaining = Math.max(0L, nextHatcheryTry - gameTime);
+
+            Component msg = Component.literal(String.format(
+                "§e[守卫调试]§r 基地 %s @ %s\n" +
+                    "  守卫数量: §b%d§r\n" +
+                    "  威胁值: §d%d§r 等级: §c%s§r\n" +
+                    "  孵化巢冷却: 下次 %d (剩余 %d tick)",
+                bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH),
+                bastion.corePos().toShortString(),
+                guardianCount,
+                threatValue,
+                threatTier.name(),
+                nextHatcheryTry,
+                remaining
+            ));
+
+            context.getSource().sendSuccess(() -> msg, false);
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 统计指定基地范围内属于该基地的守卫数量（与孵化巢/维护费保持一致）。
+     */
+    private static int countBastionGuardians(ServerLevel level, BastionData bastion) {
+        BlockPos core = bastion.corePos();
+        int radius = bastion.growthRadius();
+
+        AABB searchBox = new AABB(
+            core.getX() - radius,
+            core.getY() - BastionGuardianUpkeepService.Constants.GUARDIAN_SEARCH_HEIGHT,
+            core.getZ() - radius,
+            core.getX() + radius,
+            core.getY() + BastionGuardianUpkeepService.Constants.GUARDIAN_SEARCH_HEIGHT,
+            core.getZ() + radius
+        );
+
+        return (int) level.getEntitiesOfClass(Mob.class, searchBox,
+            mob -> BastionGuardianData.isGuardian(mob)
+                && BastionGuardianData.belongsToBastion(mob, bastion.id())
+        ).size();
     }
 
     private static int bastionRuinStats(CommandContext<CommandSourceStack> context) {

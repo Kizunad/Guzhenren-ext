@@ -31,7 +31,7 @@ public final class BastionGuardianUpkeepService {
     }
 
     /** 非配置化的常量：只保留“计数策略”相关的技术常量。 */
-    private static final class Constants {
+    public static final class Constants {
         /**
          * 守卫计数时的垂直搜索半径。
          * <p>
@@ -40,7 +40,7 @@ public final class BastionGuardianUpkeepService {
          * 避免守卫上下小范围移动导致计数波动。
          * </p>
          */
-        static final int GUARDIAN_SEARCH_HEIGHT = 16;
+        public static final int GUARDIAN_SEARCH_HEIGHT = 16;
 
         private Constants() {
         }
@@ -63,7 +63,14 @@ public final class BastionGuardianUpkeepService {
         // Round 4.1：维护费参数从 bastionType 配置读取。
         // 兼容策略：旧 JSON 缺失 upkeep 字段时，BastionTypeConfig.CODEC 会回退默认值 1.0。
         BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
-        double costPerGuardian = typeConfig.upkeep().perGuardianCost();
+        BastionTypeConfig.UpkeepConfig upkeepConfig = typeConfig.upkeep();
+        double shutdownThreshold = upkeepConfig.shutdownThreshold();
+        double costPerGuardian = upkeepConfig.perGuardianCost();
+
+        // 停机阈值兜底：当资源池已低于（或等于）停机阈值时，不再额外扣费，避免出现“负资源池”感知偏差。
+        if (bastion.resourcePool() <= shutdownThreshold) {
+            return bastion;
+        }
         double upkeepCost = guardianCount * costPerGuardian;
 
         double oldPool = bastion.resourcePool();
