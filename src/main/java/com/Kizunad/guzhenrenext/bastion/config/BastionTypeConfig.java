@@ -202,18 +202,36 @@ public record BastionTypeConfig(
      * @param threshold             污染值阈值（0.0-1.0，含）
      * @param playerDebuffStrength  对玩家的 debuff 强度
      * @param bastionBuffStrength   对基地的 buff 强度
+     * @param playerEffects         对玩家施加的效果 ID 列表（ResourceLocation 字符串）
+     * @param effectDurationTicks   玩家效果的持续时间（tick）
      */
     public record PollutionStage(
             String name,
             double threshold,
             double playerDebuffStrength,
-            double bastionBuffStrength
+            double bastionBuffStrength,
+            List<String> playerEffects,
+            int effectDurationTicks
     ) {
         private static final double MIN_THRESHOLD = 0.0;
         private static final double MAX_THRESHOLD = 1.0;
         private static final double DEFAULT_THRESHOLD = 0.0;
         private static final double DEFAULT_PLAYER_DEBUFF_STRENGTH = 0.0;
         private static final double DEFAULT_BASTION_BUFF_STRENGTH = 0.0;
+        /**
+         * 玩家效果默认列表。
+         * <p>
+         * 兼容策略：旧版 JSON 不包含 player_effects 时回退为空列表，保持“无效果”行为。
+         * </p>
+         */
+        private static final List<String> DEFAULT_PLAYER_EFFECTS = List.of();
+        /**
+         * 玩家效果持续时间默认值（tick）。
+         * <p>
+         * 兼容策略：旧版 JSON 缺失 effect_duration_ticks 时回退为 0，表示不施加额外效果。
+         * </p>
+         */
+        private static final int DEFAULT_EFFECT_DURATION_TICKS = 0;
 
         public static final Codec<PollutionStage> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
@@ -228,7 +246,13 @@ public record BastionTypeConfig(
                 Codec.DOUBLE.optionalFieldOf(
                         "bastion_buff_strength",
                         DEFAULT_BASTION_BUFF_STRENGTH)
-                    .forGetter(PollutionStage::bastionBuffStrength)
+                    .forGetter(PollutionStage::bastionBuffStrength),
+                Codec.STRING.listOf().optionalFieldOf("player_effects", DEFAULT_PLAYER_EFFECTS)
+                    .forGetter(PollutionStage::playerEffects),
+                Codec.INT.optionalFieldOf(
+                        "effect_duration_ticks",
+                        DEFAULT_EFFECT_DURATION_TICKS)
+                    .forGetter(PollutionStage::effectDurationTicks)
             ).apply(instance, PollutionStage::new)
         );
     }
