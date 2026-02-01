@@ -59,6 +59,50 @@ public final class BastionCaptureService {
         return true;
     }
 
+    /**
+     * 尝试通过击杀 Boss 将基地标记为可接管状态。
+     * <p>
+     * 注意：根据 F1 规则，击杀 Boss 只能进入"可接管状态"；
+     * 最终接管仍需净化阵法完成（调用 {@link #tryFinalizeCapture}）。
+     * </p>
+     *
+     * @param level  服务器世界
+     * @param bastion 目标基地数据
+     * @return 是否成功标记为可接管
+     */
+    public static boolean tryMarkCapturableViaBossDefeat(ServerLevel level, BastionData bastion) {
+        if (level == null || bastion == null) {
+            return false;
+        }
+
+        BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.CaptureConfig capture = typeConfig.capture();
+
+        // 兼容策略：未启用接管系统则不标记，保持旧存档行为。
+        if (capture == null || !capture.enabled()) {
+            return false;
+        }
+
+        BastionData.CaptureState currentCapture = bastion.captureState() == null
+            ? BastionData.CaptureState.DEFAULT
+            : bastion.captureState();
+
+        // 已经可接管则不重复标记，避免无谓落盘。
+        if (currentCapture.capturable()) {
+            return false;
+        }
+
+        long timeout = Math.max(0L, capture.capturableTimeoutTicks());
+        long untilGameTime = timeout > 0 ? level.getGameTime() + timeout : 0L;
+
+        BastionData updated = bastion.withCapturable(true, BastionData.CaptureReason.BOSS_DEFEATED, untilGameTime);
+        BastionSavedData.get(level).updateBastion(updated);
+        return true;
+    }
+
     // TODO Round 34：在净化阵法完成的事件回调中调用此方法，
     // 例如在净化阵法完成后：BastionCaptureService.tryMarkCapturableViaPurification(level, bastionData)
+
+    // TODO Round 34：在 Boss 死亡事件回调中调用此方法，
+    // 例如在 Boss 击杀后：BastionCaptureService.tryMarkCapturableViaBossDefeat(level, bastionData)
 }
