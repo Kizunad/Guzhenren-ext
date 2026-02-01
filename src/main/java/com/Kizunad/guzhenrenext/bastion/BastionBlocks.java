@@ -9,6 +9,7 @@ import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionGuardianHatcheryBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionReversalArrayBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionTurretBlock;
 import com.Kizunad.guzhenrenext.bastion.service.BastionEnergyBuildService;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
@@ -144,6 +145,14 @@ public final class BastionBlocks {
         .requiresCorrectToolForDrops();
 
     /**
+     * 炮台节点属性：中等硬度，类石材行为。
+     */
+    private static final BlockBehaviour.Properties TURRET_PROPERTIES = BlockBehaviour.Properties.of()
+        .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
+        .sound(SoundType.STONE)
+        .requiresCorrectToolForDrops();
+
+    /**
      * 光环节点属性：中等硬度，类石材行为。
      */
     private static final BlockBehaviour.Properties AURA_NODE_PROPERTIES = BlockBehaviour.Properties.of()
@@ -219,6 +228,14 @@ public final class BastionBlocks {
         () -> new BastionChitinShellBlock(CHITIN_SHELL_PROPERTIES)
     );
 
+    /**
+     * 炮台节点方块（挂载在 Anchor 上）。
+     */
+    public static final DeferredHolder<Block, BastionTurretBlock> BASTION_TURRET = BLOCKS.register(
+        "bastion_turret",
+        () -> new BastionTurretBlock(TURRET_PROPERTIES)
+    );
+
     // ===== 物品注册（方块物品） =====
 
     /**
@@ -282,6 +299,12 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BlockItem> BASTION_CHITIN_SHELL_ITEM = ITEMS.register(
         "bastion_chitin_shell",
         () -> new BlockItem(BASTION_CHITIN_SHELL.get(), new Item.Properties())
+    );
+
+    /** 炮台节点方块物品。 */
+    public static final DeferredHolder<Item, BlockItem> BASTION_TURRET_ITEM = ITEMS.register(
+        "bastion_turret",
+        () -> new BlockItem(BASTION_TURRET.get(), new Item.Properties())
     );
 
     /**

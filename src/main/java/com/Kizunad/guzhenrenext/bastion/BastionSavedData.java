@@ -135,6 +135,11 @@ public class BastionSavedData extends SavedData {
      */
     private final Map<UUID, Long> nextHatcheryTryTick = new HashMap<>();
 
+    /**
+     * Round 24：炮台节点冷却（基地级，不持久化）。
+     */
+    private final Map<UUID, Long> nextTurretTryTick = new HashMap<>();
+
     // ===== 回合2：连通性/衰败运行时状态（不持久化） =====
 
     /**
@@ -673,6 +678,23 @@ public class BastionSavedData extends SavedData {
     }
 
     /**
+     * 如果存在，移除指定坐标的节点归属缓存。
+     * <p>
+     * 用于方块被破坏时清理运行时缓存，避免悬空引用。
+     * </p>
+     *
+     * @param pos 节点位置
+     */
+    public void removeNodeOwnershipIfPresent(BlockPos pos) {
+        if (pos == null) {
+            return;
+        }
+        for (UUID bastionId : nodeCache.keySet()) {
+            removeNodeFromCache(bastionId, pos);
+        }
+    }
+
+    /**
      * 清除指定基地的所有运行时缓存。
      * <p>
      * 在基地被移除时调用。
@@ -688,6 +710,7 @@ public class BastionSavedData extends SavedData {
 
         // Round 4.2：清理孵化巢冷却缓存，避免内存泄露。
         nextHatcheryTryTick.remove(bastionId);
+        nextTurretTryTick.remove(bastionId);
 
         // 回合2：清理运行时连通性/衰败状态，避免内存泄露。
         connectivityRuntimes.remove(bastionId);
@@ -956,6 +979,20 @@ public class BastionSavedData extends SavedData {
 
     public void setNextHatcheryTryTick(UUID bastionId, long nextTick) {
         nextHatcheryTryTick.put(bastionId, nextTick);
+    }
+
+    /**
+     * 获取炮台下一次允许攻击的时间（基地级）。
+     */
+    public long getNextTurretTryTick(UUID bastionId) {
+        return nextTurretTryTick.getOrDefault(bastionId, 0L);
+    }
+
+    /**
+     * 设置炮台下一次允许攻击的时间（基地级）。
+     */
+    public void setNextTurretTryTick(UUID bastionId, long nextTick) {
+        nextTurretTryTick.put(bastionId, nextTick);
     }
 
     /**

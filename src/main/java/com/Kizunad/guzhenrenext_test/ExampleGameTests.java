@@ -137,7 +137,10 @@ public class ExampleGameTests {
             BastionTypeConfig.AuraConfig.DEFAULT,
             BastionTypeConfig.EnergyConfig.DEFAULT,
             BastionTypeConfig.EnergyLossConfig.DEFAULT,
-            BastionTypeConfig.HatcheryConfig.DEFAULT,
+            BastionTypeConfig.NodeContentConfig.create(
+                BastionTypeConfig.HatcheryConfig.DEFAULT,
+                BastionTypeConfig.TurretConfig.DEFAULT
+            ),
             BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.BossConfig.DEFAULT,
             BastionTypeConfig.ThreatConfig.DEFAULT,

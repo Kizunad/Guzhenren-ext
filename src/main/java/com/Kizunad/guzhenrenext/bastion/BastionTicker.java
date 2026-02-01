@@ -11,6 +11,7 @@ import com.Kizunad.guzhenrenext.bastion.service.BastionExpansionService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionHatcheryService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionSpawnService;
 import com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierSkillService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionTurretService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -616,6 +617,9 @@ public final class BastionTicker {
         // - 与刷怪/扩张同一节奏（每秒一次），避免离线/远离玩家时产生大量实体。
         // - 冷却与扣费由 BastionHatcheryService 自行处理。
         BastionHatcheryService.tick(level, savedData, freshData, gameTime);
+
+        // Round 24：炮台节点（自动攻击）
+        BastionTurretService.tick(level, savedData, freshData, gameTime);
 
         // 高转主动技能：仅在 FULL tick 驱动
         BastionHighTierSkillService.runActiveSkills(level, freshData, gameTime);

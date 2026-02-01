@@ -30,6 +30,7 @@ import java.util.Optional;
  * @param aura            光环配置（影响半径与衰减）
  * @param energy          能源节点配置（影响资源池增长的额外加成）
  * @param hatchery        守卫孵化巢配置（Round 4.2：守卫产出机制地基，缺省为未启用）
+ * @param turret          炮台节点配置（Round 24：自动攻击敌对目标，缺省未启用）
      * @param elite           精英守卫配置（Round 7.1：倍率与技能池，缺省未启用）
      * @param boss            Boss 配置（Round 8.1：倍率与生成门槛，缺省未启用）
      * @param capture         接管配置（Round 10.1：是否启用接管与窗口超时，缺省未启用）
@@ -38,33 +39,40 @@ import java.util.Optional;
      * @param loot            战利品配置（可选）
      * @param highTier        高转内容配置（可选，7-9 转专属）
      */
-public record BastionTypeConfig(
-        String id,
-        String displayName,
-        BastionDao primaryDao,
-        int maxTier,
-        UpkeepConfig upkeep,
-        SpawningConfig spawning,
-        ExpansionConfig expansion,
-        ConnectivityConfig connectivity,
-         ShellConfig shell,
-         DecayConfig decay,
-         EvolutionConfig evolution,
-         AuraConfig aura,
-         EnergyConfig energy,
-         EnergyLossConfig energyLoss,
-         HatcheryConfig hatchery,
-         EliteConfig elite,
-         BossConfig boss,
-         ThreatConfig threat,
-          PollutionConfig pollution,
-          CaptureConfig capture,
-          int anchorsWeight,
-          int myceliumWeight,
-          Optional<LootConfig> loot,
-         Optional<HighTierConfig> highTier,
-         Optional<GuardianShazhaoConfig> guardianShazhao
-) {
+     public record BastionTypeConfig(
+            String id,
+            String displayName,
+            BastionDao primaryDao,
+            int maxTier,
+            UpkeepConfig upkeep,
+            SpawningConfig spawning,
+            ExpansionConfig expansion,
+            ConnectivityConfig connectivity,
+             ShellConfig shell,
+             DecayConfig decay,
+             EvolutionConfig evolution,
+             AuraConfig aura,
+             EnergyConfig energy,
+             EnergyLossConfig energyLoss,
+            NodeContentConfig nodeContent,
+             EliteConfig elite,
+             BossConfig boss,
+             ThreatConfig threat,
+               PollutionConfig pollution,
+               CaptureConfig capture,
+               int anchorsWeight,
+               int myceliumWeight,
+               Optional<LootConfig> loot,
+              Optional<HighTierConfig> highTier,
+              Optional<GuardianShazhaoConfig> guardianShazhao
+    ) {
+        public HatcheryConfig hatchery() {
+            return nodeContent == null ? HatcheryConfig.DEFAULT : nodeContent.hatchery();
+        }
+
+        public TurretConfig turret() {
+            return nodeContent == null ? TurretConfig.DEFAULT : nodeContent.turret();
+        }
 
     /**
      * 有效节点数计算：Anchor 权重默认值。
@@ -197,7 +205,7 @@ public record BastionTypeConfig(
          * 通过将多字段聚合到单个参数对象，既满足编解码需求，又保持字段扁平的 JSON schema。
          * </p>
          */
-     private record OptionalContentParams(
+         private record OptionalContentParams(
                 ShellConfig shell,
                 EliteConfig elite,
                 Optional<LootConfig> loot,
@@ -211,14 +219,70 @@ public record BastionTypeConfig(
     }
 
     /**
+     * 炮台/孵化巢配置打包（用于 codec 分组，保持 JSON 扁平）。
+     * <p>
+     * 目的：在不增加 RecordCodecBuilder 组数量的情况下新增炮台配置，保持根字段扁平且兼容旧 JSON。
+     * </p>
+     */
+    public static final class NodeContentConfig {
+        public static final NodeContentConfig DEFAULT = new NodeContentConfig(
+            new NodeContentParams(HatcheryConfig.DEFAULT, TurretConfig.DEFAULT)
+        );
+
+        /**
+         * 工厂方法：从显式的 hatchery/turret 配置创建 NodeContentConfig。
+         * <p>外部调用使用此方法，避免直接依赖内部 NodeContentParams 可见性。</p>
+         */
+        public static NodeContentConfig create(HatcheryConfig hatchery, TurretConfig turret) {
+            return new NodeContentConfig(new NodeContentParams(hatchery, turret));
+        }
+
+        private final HatcheryConfig hatchery;
+        private final TurretConfig turret;
+
+         private NodeContentConfig(NodeContentParams params) {
+            this.hatchery = params.hatchery();
+            this.turret = params.turret();
+        }
+
+         private NodeContentParams toParams() {
+             return new NodeContentParams(hatchery, turret);
+         }
+
+         private HatcheryConfig hatchery() {
+             return hatchery;
+         }
+
+         private TurretConfig turret() {
+             return turret;
+         }
+
+         private static final MapCodec<NodeContentParams> NODE_CONTENT_PARAMS_CODEC =
+             RecordCodecBuilder.mapCodec(instance ->
+                 instance.group(
+                     HatcheryConfig.CODEC.optionalFieldOf("hatchery", HatcheryConfig.DEFAULT)
+                         .forGetter(NodeContentParams::hatchery),
+                     TurretConfig.CODEC.optionalFieldOf("turret", TurretConfig.DEFAULT)
+                         .forGetter(NodeContentParams::turret)
+                 ).apply(instance, NodeContentParams::new)
+             );
+
+         private static final MapCodec<NodeContentConfig> MAP_CODEC =
+             NODE_CONTENT_PARAMS_CODEC.xmap(NodeContentConfig::new, NodeContentConfig::toParams);
+
+        private record NodeContentParams(HatcheryConfig hatchery, TurretConfig turret) {
+        }
+    }
+
+    /**
      * 能源相关配置打包（用于 codec 分组，保持 JSON 扁平）。
      * <p>
      * 目的：避免 RecordCodecBuilder 参数数量超限，同时保证 energy/energy_loss 仍位于根对象。
      * </p>
      */
-    private static final class EnergyContentConfig {
-        private final EnergyConfig energy;
-        private final EnergyLossConfig energyLoss;
+     private static final class EnergyContentConfig {
+         private final EnergyConfig energy;
+         private final EnergyLossConfig energyLoss;
 
         private EnergyContentConfig(EnergyContentParams params) {
             this.energy = params.energy();
@@ -700,8 +764,9 @@ public record BastionTypeConfig(
              EnergyContentConfig.MAP_CODEC.forGetter(config -> new EnergyContentConfig(
                  new EnergyContentConfig.EnergyContentParams(config.energy(), config.energyLoss())
              )),
-             HatcheryConfig.CODEC.optionalFieldOf("hatchery", HatcheryConfig.DEFAULT)
-                 .forGetter(BastionTypeConfig::hatchery),
+             NodeContentConfig.MAP_CODEC.forGetter(config -> new NodeContentConfig(
+                 new NodeContentConfig.NodeContentParams(config.hatchery(), config.turret())
+             )),
             // 有效节点数（effectiveNodes）权重配置：
             // - anchorsWeight：Anchor（子核心/支撑节点）的权重
             // - myceliumWeight：菌毯（贴地蔓延主网）的权重
@@ -736,11 +801,11 @@ public record BastionTypeConfig(
                 decay,
                 evolution,
                 aura,
-                energyContent,
-                hatchery,
-                anchorsWeight,
-                myceliumWeight,
-                optionalContent) -> new BastionTypeConfig(
+                 energyContent,
+                 nodeContent,
+                 anchorsWeight,
+                 myceliumWeight,
+                 optionalContent) -> new BastionTypeConfig(
             id,
             displayName,
             primaryDao,
@@ -753,14 +818,14 @@ public record BastionTypeConfig(
             decay,
             evolution,
             aura,
-            energyContent.energy(),
-            energyContent.energyLoss(),
-            hatchery,
+             energyContent.energy(),
+             energyContent.energyLoss(),
+             nodeContent,
              optionalContent.elite(),
              optionalContent.boss(),
              optionalContent.threat(),
-             optionalContent.pollution(),
-             optionalContent.capture(),
+              optionalContent.pollution(),
+              optionalContent.capture(),
              anchorsWeight,
              myceliumWeight,
              optionalContent.loot(),
@@ -1199,15 +1264,29 @@ public record BastionTypeConfig(
         /** 有效节点数：菌毯权重默认值（兼容旧 JSON）。 */
         static final int DEFAULT_MYCELIUM_WEIGHT = 1;
 
+        // ===== 炮台节点默认值（Round 24） =====
+        /** 是否启用炮台系统（兼容旧 JSON，默认关闭）。 */
+        static final boolean DEFAULT_TURRET_ENABLED = false;
+        /** 炮台攻击范围默认值（方块）。 */
+        static final int DEFAULT_TURRET_RANGE = 16;
+        /** 炮台伤害默认值。 */
+        static final double DEFAULT_TURRET_DAMAGE = 4.0;
+        /** 炮台攻击冷却（tick）。 */
+        static final int DEFAULT_TURRET_COOLDOWN_TICKS = 40;
+        /** 每基地最大炮台数量默认值。 */
+        static final int DEFAULT_TURRET_MAX_COUNT = 4;
+        /** 每次攻击的资源消耗默认值。 */
+        static final double DEFAULT_TURRET_COST_PER_SHOT = 0.5;
+
         // ===== 污染系统默认值（Round 9.1） =====
-         /** 是否启用污染系统（兼容旧 JSON，默认关闭）。 */
-         static final boolean DEFAULT_POLLUTION_ENABLED = false;
-         /** 污染阶段数量默认值。 */
-         static final int DEFAULT_POLLUTION_STAGE_COUNT = 3;
-         /** 污染阶段默认列表：留空表示无效果，仅为 schema 占位。 */
-         static final List<PollutionStage> DEFAULT_POLLUTION_STAGES = List.of();
-         /** 节点被破坏时增加的污染值。 */
-         static final double DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN = 0.1;
+        /** 是否启用污染系统（兼容旧 JSON，默认关闭）。 */
+        static final boolean DEFAULT_POLLUTION_ENABLED = false;
+        /** 污染阶段数量默认值。 */
+        static final int DEFAULT_POLLUTION_STAGE_COUNT = 3;
+        /** 污染阶段默认列表：留空表示无效果，仅为 schema 占位。 */
+        static final List<PollutionStage> DEFAULT_POLLUTION_STAGES = List.of();
+        /** 节点被破坏时增加的污染值。 */
+        static final double DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN = 0.1;
          /** 激化冷却时间（tick），避免连续触发。 */
          static final long DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS = 200L;
          /** 渗透道具单次增加的污染值。 */
@@ -1491,6 +1570,55 @@ public record BastionTypeConfig(
         }
     }
 
+    /**
+     * 炮台配置。
+     * <p>
+     * Round 24：可选的自动攻击节点配置，默认关闭以兼容旧 JSON。
+     * 所有字段使用 optionalFieldOf，缺失时回退 DEFAULT，保证存档/旧配置兼容。
+     * </p>
+     *
+     * @param enabled       是否启用炮台系统
+     * @param range         攻击范围（方块）
+     * @param damage        攻击伤害
+     * @param cooldownTicks 攻击冷却（tick）
+     * @param maxCount      每基地最大炮台数量
+     * @param costPerShot   每次攻击资源消耗
+     */
+    public record TurretConfig(
+            boolean enabled,
+            int range,
+            double damage,
+            int cooldownTicks,
+            int maxCount,
+            double costPerShot
+    ) {
+        public static final TurretConfig DEFAULT = new TurretConfig(
+            DefaultValues.DEFAULT_TURRET_ENABLED,
+            DefaultValues.DEFAULT_TURRET_RANGE,
+            DefaultValues.DEFAULT_TURRET_DAMAGE,
+            DefaultValues.DEFAULT_TURRET_COOLDOWN_TICKS,
+            DefaultValues.DEFAULT_TURRET_MAX_COUNT,
+            DefaultValues.DEFAULT_TURRET_COST_PER_SHOT
+        );
+
+        public static final Codec<TurretConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_TURRET_ENABLED)
+                    .forGetter(TurretConfig::enabled),
+                Codec.INT.optionalFieldOf("range", DefaultValues.DEFAULT_TURRET_RANGE)
+                    .forGetter(TurretConfig::range),
+                Codec.DOUBLE.optionalFieldOf("damage", DefaultValues.DEFAULT_TURRET_DAMAGE)
+                    .forGetter(TurretConfig::damage),
+                Codec.INT.optionalFieldOf("cooldown_ticks", DefaultValues.DEFAULT_TURRET_COOLDOWN_TICKS)
+                    .forGetter(TurretConfig::cooldownTicks),
+                Codec.INT.optionalFieldOf("max_count", DefaultValues.DEFAULT_TURRET_MAX_COUNT)
+                    .forGetter(TurretConfig::maxCount),
+                Codec.DOUBLE.optionalFieldOf("cost_per_shot", DefaultValues.DEFAULT_TURRET_COST_PER_SHOT)
+                    .forGetter(TurretConfig::costPerShot)
+            ).apply(instance, TurretConfig::new)
+        );
+    }
+
     // ===== 能源节点配置 =====
 
     /**
@@ -1507,11 +1635,11 @@ public record BastionTypeConfig(
      * @param night          夜能：依赖夜间/低光照环境的能源
      */
      public record EnergyConfig(
-             EnergyNodeConfig photosynthesis,
-             EnergyNodeConfig waterIntake,
-             EnergyNodeConfig geothermal,
-             EnergyNodeConfig wind,
-             NightEnergyNodeConfig night,
+            EnergyNodeConfig photosynthesis,
+            EnergyNodeConfig waterIntake,
+            EnergyNodeConfig geothermal,
+            EnergyNodeConfig wind,
+            NightEnergyNodeConfig night,
 
              /**
               * 同一 Anchor 多条件满足时的最终能源类型选择顺序（冲突优先级）。
