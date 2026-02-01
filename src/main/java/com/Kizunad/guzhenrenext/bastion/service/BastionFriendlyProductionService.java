@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.bastion.service;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
@@ -98,7 +99,7 @@ public final class BastionFriendlyProductionService {
      */
     private static void tryProduce(ServerLevel level, BastionData bastion, long gameTime) {
         RandomSource random = RandomSource.create(bastion.id().hashCode() ^ gameTime);
-        ItemStack stack = chooseRewardStack(bastion.tier(), random);
+        ItemStack stack = chooseRewardStack(bastion.tier(), bastion.primaryDao(), random);
         if (stack.isEmpty()) {
             return;
         }
@@ -110,27 +111,45 @@ public final class BastionFriendlyProductionService {
     }
 
     /**
-     * 按转数选择产物：
+     * 按道途 + 转数选择产物：
      * <ul>
-     *     <li>1-3 转：铁锭</li>
-     *     <li>4-6 转：金锭</li>
-     *     <li>7-9 转：钻石</li>
+     *     <li>1-3 转：基础产物（低价值）。</li>
+     *     <li>4-9 转：进阶产物（高价值）。</li>
      * </ul>
-     * 数量在 1-3 之间随机。
+     * 产物映射：智道=书籍/附魔瓶，魂道=骨头/骨块，木道=原木/树苗，力道=铁锭/金锭。
+     * 数量在 1-3 之间随机，保持 MVP 资源节奏。
      */
-    private static ItemStack chooseRewardStack(int tier, RandomSource random) {
+    private static ItemStack chooseRewardStack(int tier, BastionDao dao, RandomSource random) {
         int amount = random.nextInt(Constants.MAX_COUNT - Constants.MIN_COUNT + 1)
             + Constants.MIN_COUNT;
         ItemStack base;
-        if (tier <= Constants.LOW_TIER_MAX) {
-            base = new ItemStack(Items.IRON_INGOT, amount);
-        } else if (tier <= Constants.MID_TIER_MAX) {
-            base = new ItemStack(Items.GOLD_INGOT, amount);
-        } else if (tier <= Constants.HIGH_TIER_MAX) {
-            base = new ItemStack(Items.DIAMOND, amount);
-        } else {
-            // 超出规划转数的回退策略：继续给钻石，避免出现空产物。
-            base = new ItemStack(Items.DIAMOND, amount);
+        boolean isLowTier = tier <= Constants.LOW_TIER_MAX;
+        boolean isMidTier = tier <= Constants.MID_TIER_MAX;
+        boolean isHighTier = tier <= Constants.HIGH_TIER_MAX;
+        switch (dao) {
+            case ZHI_DAO -> base = isLowTier
+                ? new ItemStack(Items.BOOK, amount)
+                : new ItemStack(Items.EXPERIENCE_BOTTLE, amount);
+            case HUN_DAO -> base = isLowTier
+                ? new ItemStack(Items.BONE, amount)
+                : new ItemStack(Items.BONE_BLOCK, amount);
+            case MU_DAO -> base = isLowTier
+                ? new ItemStack(Items.OAK_LOG, amount)
+                : new ItemStack(Items.OAK_SAPLING, amount);
+            case LI_DAO -> {
+                if (isLowTier) {
+                    base = new ItemStack(Items.IRON_INGOT, amount);
+                } else if (isMidTier) {
+                    base = new ItemStack(Items.GOLD_INGOT, amount);
+                } else if (isHighTier) {
+                    // 力道高转：维持金锭，避免与钻石产出冲突。
+                    base = new ItemStack(Items.GOLD_INGOT, amount);
+                } else {
+                    // 超出规划转数：继续给金锭，避免空产物。
+                    base = new ItemStack(Items.GOLD_INGOT, amount);
+                }
+            }
+            default -> base = new ItemStack(Items.IRON_INGOT, amount);
         }
         return base;
     }
