@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.bastion.block;
 
+import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import net.minecraft.server.level.ServerLevel;
@@ -9,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.item.context.BlockPlaceContext;
 
 /**
  * 基地菌毯方块（贴地蔓延主网）。
@@ -89,5 +91,24 @@ public class BastionMyceliumBlock extends Block {
     public boolean isCollisionShapeFullBlock(BlockState state, BlockGetter level, BlockPos pos) {
         // 避免当作完整方块影响碰撞/渲染判断。
         return false;
+    }
+
+    @Override
+    protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
+        Block placingBlock = context.getItemInHand().getItem() instanceof net.minecraft.world.item.BlockItem blockItem
+            ? blockItem.getBlock() : null;
+        if (placingBlock == null) {
+            return false;
+        }
+        // 允许基地特殊节点方块替换菌毯
+        return placingBlock == BastionBlocks.BASTION_ENERGY_NODE.get()
+            || placingBlock == BastionBlocks.BASTION_AURA_NODE.get()
+            || placingBlock == BastionBlocks.BASTION_GUARDIAN_HATCHERY.get()
+            || placingBlock == BastionBlocks.BASTION_TURRET.get()
+            || placingBlock == BastionBlocks.BASTION_TRAP.get()
+            || placingBlock == BastionBlocks.BASTION_CHITIN_SHELL.get()
+            || placingBlock == BastionBlocks.BASTION_ANTI_EXPLOSION_SHELL.get()
+            || placingBlock == BastionBlocks.BASTION_ANTI_FIRE_SHELL.get()
+            || placingBlock == BastionBlocks.BASTION_ANCHOR.get();
     }
 }

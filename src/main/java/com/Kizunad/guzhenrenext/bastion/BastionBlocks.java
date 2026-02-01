@@ -85,6 +85,18 @@ public final class BastionBlocks {
         static final float CORE_BLAST_RESISTANCE = 1200.0f;
         /** 核心方块光照等级（最大值）。 */
         static final int CORE_LIGHT_LEVEL = 15;
+        /** 能源节点光照等级。 */
+        static final int ENERGY_NODE_LIGHT = 12;
+        /** 孵化巢光照等级。 */
+        static final int HATCHERY_LIGHT = 7;
+        /** 炮台光照等级。 */
+        static final int TURRET_LIGHT = 5;
+        /** 陷阱光照等级。 */
+        static final int TRAP_LIGHT = 4;
+        /** 光环节点光照等级。 */
+        static final int AURA_NODE_LIGHT = 10;
+        /** 反火外壳光照等级。 */
+        static final int ANTI_FIRE_SHELL_LIGHT = 3;
 
         private BlockProperties() {
             // 工具类
@@ -143,44 +155,49 @@ public final class BastionBlocks {
         .requiresCorrectToolForDrops();
 
     /**
-     * 能源节点属性：中等硬度，类石材行为。
+     * 能源节点属性：中等硬度，类石材行为，发光。
      */
     private static final BlockBehaviour.Properties ENERGY_NODE_PROPERTIES = BlockBehaviour.Properties.of()
         .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
         .sound(SoundType.STONE)
-        .requiresCorrectToolForDrops();
+        .requiresCorrectToolForDrops()
+        .lightLevel(state -> BlockProperties.ENERGY_NODE_LIGHT);
 
     /**
-     * 守卫孵化巢属性：中等硬度，类石材行为。
+     * 守卫孵化巢属性：中等硬度，类石材行为，微光。
      */
     private static final BlockBehaviour.Properties HATCHERY_PROPERTIES = BlockBehaviour.Properties.of()
         .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
         .sound(SoundType.STONE)
-        .requiresCorrectToolForDrops();
+        .requiresCorrectToolForDrops()
+        .lightLevel(state -> BlockProperties.HATCHERY_LIGHT);
 
     /**
-     * 炮台节点属性：中等硬度，类石材行为。
+     * 炮台节点属性：中等硬度，类石材行为，微光。
      */
     private static final BlockBehaviour.Properties TURRET_PROPERTIES = BlockBehaviour.Properties.of()
         .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
         .sound(SoundType.STONE)
-        .requiresCorrectToolForDrops();
+        .requiresCorrectToolForDrops()
+        .lightLevel(state -> BlockProperties.TURRET_LIGHT);
 
     /**
-     * 陷阱节点属性：中等硬度，类石材行为。
+     * 陷阱节点属性：中等硬度，类石材行为，微光。
      */
     private static final BlockBehaviour.Properties TRAP_PROPERTIES = BlockBehaviour.Properties.of()
         .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
         .sound(SoundType.STONE)
-        .requiresCorrectToolForDrops();
+        .requiresCorrectToolForDrops()
+        .lightLevel(state -> BlockProperties.TRAP_LIGHT);
 
     /**
-     * 光环节点属性：中等硬度，类石材行为。
+     * 光环节点属性：中等硬度，类石材行为，发光。
      */
     private static final BlockBehaviour.Properties AURA_NODE_PROPERTIES = BlockBehaviour.Properties.of()
         .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
         .sound(SoundType.STONE)
-        .requiresCorrectToolForDrops();
+        .requiresCorrectToolForDrops()
+        .lightLevel(state -> BlockProperties.AURA_NODE_LIGHT);
 
     /**
      * 反爆外壳节点属性：中等硬度，类石材行为。
@@ -191,12 +208,13 @@ public final class BastionBlocks {
         .requiresCorrectToolForDrops();
 
     /**
-     * 反火外壳节点属性：中等硬度，类石材行为。
+     * 反火外壳节点属性：中等硬度，类石材行为，微光。
      */
     private static final BlockBehaviour.Properties ANTI_FIRE_SHELL_PROPERTIES = BlockBehaviour.Properties.of()
         .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
         .sound(SoundType.STONE)
-        .requiresCorrectToolForDrops();
+        .requiresCorrectToolForDrops()
+        .lightLevel(state -> BlockProperties.ANTI_FIRE_SHELL_LIGHT);
 
     // ===== 方块注册 =====
 
