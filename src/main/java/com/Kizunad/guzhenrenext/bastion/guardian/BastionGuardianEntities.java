@@ -6,6 +6,7 @@ import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionBerserkerGuardian
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionCasterGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionEvokerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionIllusionerGuardian;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionHealerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionIronGolemGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionPhantomGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionPillagerGuardian;
@@ -43,6 +44,9 @@ public final class BastionGuardianEntities {
     // ===== 智道 =====
     public static final DeferredHolder<EntityType<?>, EntityType<BastionWitchGuardian>> BASTION_WITCH =
         registerMob("bastion_witch_guardian", BastionWitchGuardian::new);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BastionHealerGuardian>> BASTION_HEALER =
+        registerMob("bastion_healer_guardian", BastionHealerGuardian::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionEvokerGuardian>> BASTION_EVOKER =
         registerMob("bastion_evoker_guardian", BastionEvokerGuardian::new);

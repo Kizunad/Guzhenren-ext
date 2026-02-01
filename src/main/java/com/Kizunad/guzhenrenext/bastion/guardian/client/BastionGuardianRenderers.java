@@ -35,6 +35,7 @@ public final class BastionGuardianRenderers {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_WITCH.get(), WitchRenderer::new);
+        event.registerEntityRenderer(BastionGuardianEntities.BASTION_HEALER.get(), WitchRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_EVOKER.get(), EvokerRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_ILLUSIONER.get(), IllusionerRenderer::new);
 

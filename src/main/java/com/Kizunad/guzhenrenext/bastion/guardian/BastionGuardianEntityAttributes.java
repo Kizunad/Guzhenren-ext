@@ -27,6 +27,10 @@ public final class BastionGuardianEntityAttributes {
             net.minecraft.world.entity.monster.Witch.createAttributes().build()
         );
         event.put(
+            BastionGuardianEntities.BASTION_HEALER.get(),
+            net.minecraft.world.entity.monster.Witch.createAttributes().build()
+        );
+        event.put(
             BastionGuardianEntities.BASTION_EVOKER.get(),
             net.minecraft.world.entity.monster.Evoker.createAttributes().build()
         );

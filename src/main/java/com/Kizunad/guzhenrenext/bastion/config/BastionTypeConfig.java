@@ -763,7 +763,7 @@ public record BastionTypeConfig(
      * </p>
      */
     public record GuardianWeights(int minion, int ranged, int support, int elite, int boss, int shieldMinion,
-                                  int berserker, int archer, int caster) {
+                                  int berserker, int archer, int caster, int healer) {
         public static final GuardianWeights DEFAULT = new GuardianWeights(
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_MINION,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_RANGED,
@@ -773,7 +773,8 @@ public record BastionTypeConfig(
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_SHIELD_MINION,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_BERSERKER,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_ARCHER,
-            DefaultValues.DEFAULT_HATCHERY_WEIGHT_CASTER
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_CASTER,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_HEALER
         );
 
         public static final Codec<GuardianWeights> CODEC = RecordCodecBuilder.create(instance ->
@@ -813,7 +814,11 @@ public record BastionTypeConfig(
                 Codec.INT.optionalFieldOf(
                         "caster",
                         DefaultValues.DEFAULT_HATCHERY_WEIGHT_CASTER)
-                    .forGetter(GuardianWeights::caster)
+                    .forGetter(GuardianWeights::caster),
+                Codec.INT.optionalFieldOf(
+                        "healer",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_HEALER)
+                    .forGetter(GuardianWeights::healer)
             ).apply(instance, GuardianWeights::new)
         );
     }
@@ -1277,6 +1282,14 @@ public record BastionTypeConfig(
          * </p>
          */
         static final int DEFAULT_HATCHERY_WEIGHT_CASTER = 0;
+
+        /**
+         * Round 15：治疗守卫权重默认值。
+         * <p>
+         * 兼容策略：默认 0，保持旧 JSON 不产出治疗守卫。
+         * </p>
+         */
+        static final int DEFAULT_HATCHERY_WEIGHT_HEALER = 0;
 
         /**
          * 能源冲突优先级默认值。
