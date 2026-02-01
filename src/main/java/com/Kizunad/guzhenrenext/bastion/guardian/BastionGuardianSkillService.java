@@ -1,15 +1,21 @@
 package com.Kizunad.guzhenrenext.bastion.guardian;
 
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
+import java.util.UUID;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -23,6 +29,213 @@ public final class BastionGuardianSkillService {
     private BastionGuardianSkillService() {
     }
 
+    /**
+     * Boss 技能入口：由 Boss 守卫实体每 tick 调用。
+     * <p>
+     * 逻辑：
+     * <ul>
+     *     <li>仅服务端执行，避免客户端重复逻辑</li>
+     *     <li>每隔 CAST_CHECK_INTERVAL_TICKS 做一次检查</li>
+     *     <li>目标存在且存活时，根据冷却判定是否释放 Boss 召唤</li>
+     * </ul>
+     * </p>
+     *
+     * @param boss Boss 守卫实体
+     * @param dao  基地道途，用于后续扩展（当前召唤不区分道途）
+     * @param tier 基地转数，用于缩放召唤数量
+     */
+    public static void tickBossSkills(Mob boss, BastionDao dao, int tier) {
+        if (boss.level().isClientSide()) {
+            return;
+        }
+        if (!(boss.level() instanceof ServerLevel level)) {
+            return;
+        }
+        if (!boss.isAlive() || boss.isRemoved()) {
+            return;
+        }
+
+        long gameTime = level.getGameTime();
+        if ((gameTime % SkillConfig.CAST_CHECK_INTERVAL_TICKS) != 0) {
+            return;
+        }
+
+        LivingEntity target = boss.getTarget();
+        if (target == null || !target.isAlive() || target.isRemoved()) {
+            return;
+        }
+
+        var data = boss.getPersistentData();
+        var root = data.getCompound(Keys.ROOT);
+        long nextCast = root.getLong(Keys.BOSS_SUMMON_NEXT_CAST);
+        if (gameTime < nextCast) {
+            return;
+        }
+
+        boolean casted = castBossSummon(level, boss, dao, tier);
+        if (!casted) {
+            return;
+        }
+
+        root.putLong(Keys.BOSS_SUMMON_NEXT_CAST, gameTime + SkillConfig.BOSS_SUMMON_COOLDOWN_TICKS);
+        data.put(Keys.ROOT, root);
+    }
+
+    /**
+     * Boss 召唤技能：在 Boss 周围随机位置召唤 1-3 个守卫。
+     * <p>
+     * 要求：
+     * <ul>
+     *     <li>数量随 tier 递增，封顶 3</li>
+     *     <li>位置在 Boss 周围随机扇形落点，避免贴脸/卡墙</li>
+     *     <li>召唤出的守卫继承 Boss 的 bastionId，用于阵营判定</li>
+     *     <li>生成粒子与音效提示</li>
+     * </ul>
+     * </p>
+     */
+    private static boolean castBossSummon(ServerLevel level, Mob boss, BastionDao dao, int tier) {
+        UUID bastionId = BastionGuardianData.getBastionId(boss);
+        if (bastionId == null) {
+            return false;
+        }
+
+        int clampedTier = Math.max(SkillConfig.MIN_TIER, tier);
+        int maxCount = Math.min(
+            SkillConfig.BOSS_SUMMON_MAX_COUNT,
+            SkillConfig.BOSS_SUMMON_BASE_COUNT + clampedTier - SkillConfig.MIN_TIER
+        );
+        // 数量：基础 1，随转数线性增长并封顶 3。
+        // 取 max 而不是 min：保障至少召唤基础数量。
+        int spawnCount = Math.max(SkillConfig.BOSS_SUMMON_BASE_COUNT, maxCount);
+
+        int spawned = 0;
+        for (int i = 0; i < spawnCount; i++) {
+            BlockPos pos = findSummonPos(level, boss);
+            if (pos == null) {
+                continue;
+            }
+
+            Mob minion = chooseSummonEntity(level, dao);
+            if (minion == null) {
+                continue;
+            }
+
+            minion.moveTo(
+                pos.getX() + SpawnConstants.BLOCK_CENTER_OFFSET,
+                pos.getY() + SkillConfig.BOSS_SUMMON_HEIGHT_OFFSET,
+                pos.getZ() + SpawnConstants.BLOCK_CENTER_OFFSET,
+                level.random.nextFloat() * SpawnConstants.FULL_ROTATION_DEGREES,
+                0.0f
+            );
+            minion.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.MOB_SUMMONED, null);
+            BastionGuardianData.markAsGuardian(minion, bastionId, clampedTier);
+            minion.setPersistenceRequired();
+
+            boolean added = level.addFreshEntity(minion);
+            if (!added) {
+                continue;
+            }
+
+            playSummonFeedback(level, minion);
+            spawned++;
+        }
+
+        if (spawned <= 0) {
+            return false;
+        }
+
+        playSummonFeedback(level, boss);
+        return true;
+    }
+
+    /**
+     * 选择召唤实体类型。
+     * <p>
+     * 逻辑：优先使用与 Boss 道途相近的守卫类型；若 Boss 不是守卫/无道途信息，回退为 Vindicator。
+     * 当前版本简化为：
+     * <ul>
+     *     <li>默认召唤 Vindicator（近战小兵），保证可用性</li>
+     *     <li>后续如需道途区分，可扩展到 BastionGuardianEntities 中的其他类型</li>
+     * </ul>
+     * </p>
+     */
+    private static Mob chooseSummonEntity(ServerLevel level, BastionDao dao) {
+        // 道途轻微区分：智/木召唤施法系（Evoker），魂召唤脆皮输出（Vex），力召唤近战肉盾（Vindicator）。
+        EntityType<? extends Mob> type = switch (dao) {
+            case ZHI_DAO, MU_DAO -> BastionGuardianEntities.BASTION_EVOKER.get();
+            case HUN_DAO -> BastionGuardianEntities.BASTION_VEX.get();
+            case LI_DAO -> BastionGuardianEntities.BASTION_VINDICATOR.get();
+        };
+        return type.create(level);
+    }
+
+    /**
+     * 寻找 Boss 周围合适的召唤落点。
+     * <p>
+     * 约束：
+     * <ul>
+     *     <li>半径在 [BOSS_SUMMON_MIN_DIST, BOSS_SUMMON_MAX_DIST]</li>
+     *     <li>最多尝试 BOSS_SUMMON_RETRY 次，需两格空气</li>
+     *     <li>Y 高度基于高度图，避免刷在空中或方块内</li>
+     * </ul>
+     * </p>
+     */
+    private static BlockPos findSummonPos(ServerLevel level, Mob boss) {
+        for (int i = 0; i < SkillConfig.BOSS_SUMMON_RETRY; i++) {
+            double angle = level.random.nextDouble() * Math.PI * 2.0;
+            double dist = SkillConfig.BOSS_SUMMON_MIN_DIST
+                + level.random.nextDouble() * (SkillConfig.BOSS_SUMMON_MAX_DIST - SkillConfig.BOSS_SUMMON_MIN_DIST);
+
+            double offsetX = Math.cos(angle) * dist;
+            double offsetZ = Math.sin(angle) * dist;
+
+            BlockPos base = BlockPos.containing(boss.getX() + offsetX, boss.getY(), boss.getZ() + offsetZ);
+            BlockPos topPos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, base);
+
+            if (!hasTwoBlocksAir(level, topPos)) {
+                continue;
+            }
+
+            return topPos;
+        }
+        return null;
+    }
+
+    /**
+     * 判定落点是否有两格空气，避免召唤窒息。
+     */
+    private static boolean hasTwoBlocksAir(ServerLevel level, BlockPos pos) {
+        if (pos == null) {
+            return false;
+        }
+        return level.isEmptyBlock(pos) && level.isEmptyBlock(pos.above());
+    }
+
+    /**
+     * 召唤视觉与音效反馈。
+     */
+    private static void playSummonFeedback(ServerLevel level, Mob entity) {
+        level.sendParticles(
+            ParticleTypes.POOF,
+            entity.getX(),
+            entity.getY() + SkillConfig.BOSS_SUMMON_PARTICLE_Y,
+            entity.getZ(),
+            SkillConfig.BOSS_SUMMON_PARTICLES,
+            SkillConfig.BOSS_SUMMON_PARTICLE_SPREAD_XZ,
+            SkillConfig.BOSS_SUMMON_PARTICLE_SPREAD_Y,
+            SkillConfig.BOSS_SUMMON_PARTICLE_SPREAD_XZ,
+            SkillConfig.BOSS_SUMMON_PARTICLE_SPEED
+        );
+        level.playSound(
+            null,
+            entity.blockPosition(),
+            SoundEvents.EVOKER_CAST_SPELL,
+            SoundSource.HOSTILE,
+            SkillConfig.SOUND_VOL_NORMAL,
+            SkillConfig.SOUND_PITCH_LOW
+        );
+    }
+
     private static final class Keys {
         static final String ROOT = "BastionGuardianSkills";
         static final String NEXT_CAST = "NextCast";
@@ -31,6 +244,9 @@ public final class BastionGuardianSkillService {
         static final String HUN_NEXT_CAST = "HunNextCast";
         static final String MU_NEXT_CAST = "MuNextCast";
         static final String LI_NEXT_CAST = "LiNextCast";
+
+        // Boss 专属技能冷却键
+        static final String BOSS_SUMMON_NEXT_CAST = "BossSummonNextCast";
 
         private Keys() {
         }
@@ -124,11 +340,37 @@ public final class BastionGuardianSkillService {
         static final double TARGET_NEAR_DISTANCE_SQ = 64.0;
         static final double TARGET_FAR_DISTANCE_SQ = 256.0;
 
+        // Boss 召唤技能配置
+        static final int BOSS_SUMMON_COOLDOWN_TICKS = 400;
+        static final int BOSS_SUMMON_BASE_COUNT = 1;
+        static final int BOSS_SUMMON_MAX_COUNT = 3;
+        static final int BOSS_SUMMON_RANGE = 5;
+        static final int BOSS_SUMMON_RETRY = 6;
+        static final double BOSS_SUMMON_MIN_DIST = 1.5;
+        static final double BOSS_SUMMON_MAX_DIST = 4.5;
+        static final double BOSS_SUMMON_HEIGHT_OFFSET = 0.1;
+        static final double BOSS_SUMMON_PARTICLE_Y = 0.4;
+        static final int BOSS_SUMMON_PARTICLES = 26;
+        static final double BOSS_SUMMON_PARTICLE_SPREAD_XZ = 0.6;
+        static final double BOSS_SUMMON_PARTICLE_SPREAD_Y = 0.4;
+        static final double BOSS_SUMMON_PARTICLE_SPEED = 0.02;
+
         static final double ZHI_PARTICLE_HEIGHT_FACTOR = 0.6;
         static final double HUN_PARTICLE_HEIGHT_FACTOR = 0.5;
         static final double LI_POOF_HEIGHT_OFFSET = 0.5;
 
         private SkillConfig() {
+        }
+    }
+
+    /**
+     * 召唤/移动通用常量，避免魔法数。
+     */
+    private static final class SpawnConstants {
+        static final double BLOCK_CENTER_OFFSET = 0.5;
+        static final float FULL_ROTATION_DEGREES = 360.0f;
+
+        private SpawnConstants() {
         }
     }
 
