@@ -285,40 +285,49 @@ public record BastionTypeConfig(
       * Round 8.2：引入分阶段行为（血量阈值→技能/倍率）。
       * </p>
       */
-     public record BossConfig(
-             boolean enabled,
-             /** 最低转数要求（低于该转数不生成 Boss）。 */
-             int minTier,
-             /** Boss 生命倍率。 */
-             double healthMultiplier,
-             /** Boss 伤害倍率。 */
-             double damageMultiplier,
-             /** Boss 护甲倍率。 */
-             double armorMultiplier,
-             /** Boss 生成冷却（tick），基地级节流，默认 3 分钟。 */
-             long cooldownTicks,
-             /** Boss 生成所需资源池消耗。 */
-             double spawnCost,
-             /** Boss 掉落表 ID（空字符串表示不使用自定义掉落表）。 */
-             String lootTableId,
-             /** Boss 阶段配置列表（空表示无阶段行为）。 */
-             List<BossPhase> phases
-     ) {
-         public static final BossConfig DEFAULT = new BossConfig(
-             DefaultValues.DEFAULT_BOSS_ENABLED,
-             DefaultValues.DEFAULT_BOSS_MIN_TIER,
-             DefaultValues.DEFAULT_BOSS_HEALTH_MULTIPLIER,
-             DefaultValues.DEFAULT_BOSS_DAMAGE_MULTIPLIER,
-             DefaultValues.DEFAULT_BOSS_ARMOR_MULTIPLIER,
-             DefaultValues.DEFAULT_BOSS_COOLDOWN_TICKS,
-             DefaultValues.DEFAULT_BOSS_SPAWN_COST,
-             DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID,
-             DefaultValues.DEFAULT_BOSS_PHASES
-         );
+      public record BossConfig(
+              boolean enabled,
+              /** 最低转数要求（低于该转数不生成 Boss）。 */
+              int minTier,
+              /** Boss 生命倍率。 */
+              double healthMultiplier,
+              /** Boss 伤害倍率。 */
+              double damageMultiplier,
+              /** Boss 护甲倍率。 */
+              double armorMultiplier,
+              /** Boss 生成冷却（tick），基地级节流，默认 3 分钟。 */
+              long cooldownTicks,
+              /** Boss 生成所需资源池消耗。 */
+              double spawnCost,
+              /** Boss 掉落表 ID（空字符串表示不使用自定义掉落表）。 */
+              String lootTableId,
+              /** Boss 阶段配置列表（空表示无阶段行为）。 */
+              List<BossPhase> phases,
+              /** 失败后的冷却时间（tick）。 */
+              long failureCooldownTicks,
+              /** 失败时资源退还比例（0.0-1.0）。 */
+              double failureBudgetRefund,
+              /** 是否非阻塞（失败不阻止其他刷怪）。 */
+              boolean nonBlocking
+      ) {
+          public static final BossConfig DEFAULT = new BossConfig(
+              DefaultValues.DEFAULT_BOSS_ENABLED,
+              DefaultValues.DEFAULT_BOSS_MIN_TIER,
+              DefaultValues.DEFAULT_BOSS_HEALTH_MULTIPLIER,
+              DefaultValues.DEFAULT_BOSS_DAMAGE_MULTIPLIER,
+              DefaultValues.DEFAULT_BOSS_ARMOR_MULTIPLIER,
+              DefaultValues.DEFAULT_BOSS_COOLDOWN_TICKS,
+              DefaultValues.DEFAULT_BOSS_SPAWN_COST,
+              DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID,
+              DefaultValues.DEFAULT_BOSS_PHASES,
+              DefaultValues.DEFAULT_BOSS_FAILURE_COOLDOWN_TICKS,
+              DefaultValues.DEFAULT_BOSS_FAILURE_BUDGET_REFUND,
+              DefaultValues.DEFAULT_BOSS_NON_BLOCKING
+          );
 
-         public static final Codec<BossConfig> CODEC = RecordCodecBuilder.create(instance ->
-             instance.group(
-                 Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_BOSS_ENABLED)
+          public static final Codec<BossConfig> CODEC = RecordCodecBuilder.create(instance ->
+              instance.group(
+                  Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_BOSS_ENABLED)
                      .forGetter(BossConfig::enabled),
                  Codec.INT.optionalFieldOf("min_tier", DefaultValues.DEFAULT_BOSS_MIN_TIER)
                      .forGetter(BossConfig::minTier),
@@ -332,25 +341,37 @@ public record BastionTypeConfig(
                      .forGetter(BossConfig::damageMultiplier),
                  Codec.DOUBLE.optionalFieldOf(
                          "armor_multiplier",
-                         DefaultValues.DEFAULT_BOSS_ARMOR_MULTIPLIER)
-                     .forGetter(BossConfig::armorMultiplier),
-                 Codec.LONG.optionalFieldOf(
-                         "cooldown_ticks",
-                         DefaultValues.DEFAULT_BOSS_COOLDOWN_TICKS)
+                          DefaultValues.DEFAULT_BOSS_ARMOR_MULTIPLIER)
+                      .forGetter(BossConfig::armorMultiplier),
+                  Codec.LONG.optionalFieldOf(
+                          "cooldown_ticks",
+                          DefaultValues.DEFAULT_BOSS_COOLDOWN_TICKS)
                      .forGetter(BossConfig::cooldownTicks),
                  Codec.DOUBLE.optionalFieldOf(
                          "spawn_cost",
-                         DefaultValues.DEFAULT_BOSS_SPAWN_COST)
-                     .forGetter(BossConfig::spawnCost),
-                 Codec.STRING.optionalFieldOf(
-                         "loot_table_id",
-                         DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID)
-                     .forGetter(BossConfig::lootTableId),
-                 BossPhase.CODEC.listOf().optionalFieldOf("phases", DefaultValues.DEFAULT_BOSS_PHASES)
-                     .forGetter(BossConfig::phases)
-             ).apply(instance, BossConfig::new)
-         );
-     }
+                          DefaultValues.DEFAULT_BOSS_SPAWN_COST)
+                      .forGetter(BossConfig::spawnCost),
+                  Codec.STRING.optionalFieldOf(
+                          "loot_table_id",
+                          DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID)
+                      .forGetter(BossConfig::lootTableId),
+                  BossPhase.CODEC.listOf().optionalFieldOf("phases", DefaultValues.DEFAULT_BOSS_PHASES)
+                      .forGetter(BossConfig::phases),
+                  Codec.LONG.optionalFieldOf(
+                          "failure_cooldown_ticks",
+                          DefaultValues.DEFAULT_BOSS_FAILURE_COOLDOWN_TICKS)
+                      .forGetter(BossConfig::failureCooldownTicks),
+                  Codec.DOUBLE.optionalFieldOf(
+                          "failure_budget_refund",
+                          DefaultValues.DEFAULT_BOSS_FAILURE_BUDGET_REFUND)
+                      .forGetter(BossConfig::failureBudgetRefund),
+                  Codec.BOOL.optionalFieldOf(
+                          "non_blocking",
+                          DefaultValues.DEFAULT_BOSS_NON_BLOCKING)
+                      .forGetter(BossConfig::nonBlocking)
+              ).apply(instance, BossConfig::new)
+          );
+      }
 
     /** 序列化/反序列化编解码器。 */
     public static final Codec<BastionTypeConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -856,6 +877,12 @@ public record BastionTypeConfig(
          static final String DEFAULT_BOSS_LOOT_TABLE_ID = "";
          /** Boss 阶段配置默认：空列表表示无阶段行为。 */
          static final List<BossPhase> DEFAULT_BOSS_PHASES = List.of();
+         /** Boss 失败后的冷却时间（tick），默认 60 秒。 */
+         static final long DEFAULT_BOSS_FAILURE_COOLDOWN_TICKS = 1200L;
+         /** Boss 失败时资源退还比例（0.0-1.0）。 */
+         static final double DEFAULT_BOSS_FAILURE_BUDGET_REFUND = 0.5;
+         /** Boss 失败是否非阻塞（不阻止其他刷怪）。 */
+         static final boolean DEFAULT_BOSS_NON_BLOCKING = true;
 
         // ===== 菌毯衰败默认值 =====
 
