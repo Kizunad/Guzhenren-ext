@@ -108,6 +108,12 @@ public final class BastionAuraService {
         static final double TIER_MULTIPLIER = 2.0;
         /** 最大消耗上限。 */
         static final double MAX_DRAIN = 50.0;
+        /** 污染倍率：轻度。 */
+        static final double POLLUTION_LIGHT_MULTIPLIER = 1.1D;
+        /** 污染倍率：中度。 */
+        static final double POLLUTION_MEDIUM_MULTIPLIER = 1.25D;
+        /** 污染倍率：失控。 */
+        static final double POLLUTION_CRITICAL_MULTIPLIER = 1.5D;
         /** 魂魄最低保留值（光环不应直接杀死玩家）。 */
         static final double HUNPO_FLOOR = 1.0;
 
@@ -353,8 +359,16 @@ public final class BastionAuraService {
             ResourceConfig.TIER_1_BASE * Math.pow(ResourceConfig.TIER_MULTIPLIER, tier - 1)
         );
 
+        // 污染阶段倍率：污染越高，领域压制越强
+        double pollutionMultiplier = switch (bastion.getPollutionStage()) {
+            case NONE -> 1.0D;
+            case LIGHT -> ResourceConfig.POLLUTION_LIGHT_MULTIPLIER;
+            case MEDIUM -> ResourceConfig.POLLUTION_MEDIUM_MULTIPLIER;
+            case CRITICAL -> ResourceConfig.POLLUTION_CRITICAL_MULTIPLIER;
+        };
+
         // 应用距离衰减
-        double drain = baseDrain * falloff;
+        double drain = baseDrain * falloff * pollutionMultiplier;
 
         // 道途特化光环效果（如智道：疲劳+缓慢）
         dao.onAuraTick(player, tier, falloff);

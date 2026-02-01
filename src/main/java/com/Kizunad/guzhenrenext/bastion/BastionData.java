@@ -727,8 +727,21 @@ public record BastionData(
      }
 
     /** 返回当前污染值（0.0~1.0）。 */
-    public double pollution() {
-        return Math.max(0.0, pollution);
+     public double pollution() {
+         return Math.max(0.0, pollution);
+     }
+
+    /**
+     * 返回当前污染阶段。
+     * <p>
+     * 阶段分界（闭区间/左闭右开，1.0 固定落在 CRITICAL）：
+     * NONE 0-0.33、LIGHT 0.33-0.66、MEDIUM 0.66-0.9、CRITICAL 0.9-1.0。
+     * </p>
+     *
+     * @return 依据污染值计算的阶段
+     */
+    public PollutionStage getPollutionStage() {
+        return PollutionStage.from(pollution());
     }
 
     /**
