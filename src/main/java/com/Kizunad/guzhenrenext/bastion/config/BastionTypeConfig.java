@@ -30,13 +30,14 @@ import java.util.Optional;
  * @param aura            光环配置（影响半径与衰减）
  * @param energy          能源节点配置（影响资源池增长的额外加成）
  * @param hatchery        守卫孵化巢配置（Round 4.2：守卫产出机制地基，缺省为未启用）
- * @param elite           精英守卫配置（Round 7.1：倍率与技能池，缺省未启用）
- * @param boss            Boss 配置（Round 8.1：倍率与生成门槛，缺省未启用）
- * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
- * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
- * @param loot            战利品配置（可选）
- * @param highTier        高转内容配置（可选，7-9 转专属）
- */
+     * @param elite           精英守卫配置（Round 7.1：倍率与技能池，缺省未启用）
+     * @param boss            Boss 配置（Round 8.1：倍率与生成门槛，缺省未启用）
+     * @param capture         接管配置（Round 10.1：是否启用接管与窗口超时，缺省未启用）
+     * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
+     * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
+     * @param loot            战利品配置（可选）
+     * @param highTier        高转内容配置（可选，7-9 转专属）
+     */
 public record BastionTypeConfig(
         String id,
         String displayName,
@@ -46,20 +47,21 @@ public record BastionTypeConfig(
         SpawningConfig spawning,
         ExpansionConfig expansion,
         ConnectivityConfig connectivity,
-        ShellConfig shell,
-        DecayConfig decay,
-        EvolutionConfig evolution,
-        AuraConfig aura,
-        EnergyConfig energy,
-        HatcheryConfig hatchery,
-        EliteConfig elite,
-        BossConfig boss,
-        PollutionConfig pollution,
-        int anchorsWeight,
-        int myceliumWeight,
-        Optional<LootConfig> loot,
-        Optional<HighTierConfig> highTier,
-        Optional<GuardianShazhaoConfig> guardianShazhao
+         ShellConfig shell,
+         DecayConfig decay,
+         EvolutionConfig evolution,
+         AuraConfig aura,
+         EnergyConfig energy,
+         HatcheryConfig hatchery,
+         EliteConfig elite,
+         BossConfig boss,
+         PollutionConfig pollution,
+         CaptureConfig capture,
+         int anchorsWeight,
+         int myceliumWeight,
+         Optional<LootConfig> loot,
+         Optional<HighTierConfig> highTier,
+         Optional<GuardianShazhaoConfig> guardianShazhao
 ) {
 
     /**
@@ -96,23 +98,21 @@ public record BastionTypeConfig(
         private final Optional<GuardianShazhaoConfig> guardianShazhao;
         private final BossConfig boss;
         private final PollutionConfig pollution;
+        private final CaptureConfig capture;
 
-        private OptionalContentConfig(
-                ShellConfig shell,
-                EliteConfig elite,
-                Optional<LootConfig> loot,
-                Optional<HighTierConfig> highTier,
-                Optional<GuardianShazhaoConfig> guardianShazhao,
-                BossConfig boss,
-                PollutionConfig pollution
-        ) {
-            this.shell = shell;
-            this.elite = elite;
-            this.loot = loot;
-            this.highTier = highTier;
-            this.guardianShazhao = guardianShazhao;
-            this.boss = boss;
-            this.pollution = pollution;
+        private OptionalContentConfig(OptionalContentParams params) {
+            this.shell = params.shell();
+            this.elite = params.elite();
+            this.loot = params.loot();
+            this.highTier = params.highTier();
+            this.guardianShazhao = params.guardianShazhao();
+            this.boss = params.boss();
+            this.pollution = params.pollution();
+            this.capture = params.capture();
+        }
+
+        private OptionalContentParams toParams() {
+            return new OptionalContentParams(shell, elite, loot, highTier, guardianShazhao, boss, pollution, capture);
         }
 
         private ShellConfig shell() {
@@ -143,23 +143,50 @@ public record BastionTypeConfig(
             return pollution;
         }
 
-        private static final MapCodec<OptionalContentConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
-                    .forGetter(OptionalContentConfig::shell),
-                EliteConfig.CODEC.optionalFieldOf("elite", EliteConfig.DEFAULT)
-                    .forGetter(OptionalContentConfig::elite),
-                LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
-                HighTierConfig.CODEC.optionalFieldOf("high_tier")
-                    .forGetter(OptionalContentConfig::highTier),
-                GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
-                    .forGetter(OptionalContentConfig::guardianShazhao),
-                BossConfig.CODEC.optionalFieldOf("boss", BossConfig.DEFAULT)
-                    .forGetter(OptionalContentConfig::boss),
-                PollutionConfig.CODEC.optionalFieldOf("pollution", PollutionConfig.DEFAULT)
-                    .forGetter(OptionalContentConfig::pollution)
-            ).apply(instance, OptionalContentConfig::new)
-        );
+         private CaptureConfig capture() {
+             return capture;
+         }
+
+        private static final MapCodec<OptionalContentParams> OPTIONAL_CONTENT_PARAMS_CODEC =
+            RecordCodecBuilder.mapCodec(instance ->
+                instance.group(
+                    ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
+                        .forGetter(OptionalContentParams::shell),
+                    EliteConfig.CODEC.optionalFieldOf("elite", EliteConfig.DEFAULT)
+                        .forGetter(OptionalContentParams::elite),
+                    LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentParams::loot),
+                    HighTierConfig.CODEC.optionalFieldOf("high_tier")
+                        .forGetter(OptionalContentParams::highTier),
+                    GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
+                        .forGetter(OptionalContentParams::guardianShazhao),
+                    BossConfig.CODEC.optionalFieldOf("boss", BossConfig.DEFAULT)
+                        .forGetter(OptionalContentParams::boss),
+                    PollutionConfig.CODEC.optionalFieldOf("pollution", PollutionConfig.DEFAULT)
+                        .forGetter(OptionalContentParams::pollution),
+                    CaptureConfig.CODEC.optionalFieldOf("capture", CaptureConfig.DEFAULT)
+                        .forGetter(OptionalContentParams::capture)
+                ).apply(instance, OptionalContentParams::new)
+            );
+
+        private static final MapCodec<OptionalContentConfig> MAP_CODEC =
+            OPTIONAL_CONTENT_PARAMS_CODEC.xmap(OptionalContentConfig::new, OptionalContentConfig::toParams);
+
+        /**
+         * 内部参数载体，用于规避构造参数数量超限的 checkstyle 规则。
+         * <p>
+         * 通过将多字段聚合到单个参数对象，既满足编解码需求，又保持字段扁平的 JSON schema。
+         * </p>
+         */
+        private record OptionalContentParams(
+                ShellConfig shell,
+                EliteConfig elite,
+                Optional<LootConfig> loot,
+                Optional<HighTierConfig> highTier,
+                Optional<GuardianShazhaoConfig> guardianShazhao,
+                BossConfig boss,
+                PollutionConfig pollution,
+                CaptureConfig capture) {
+        }
     }
 
     /**
@@ -228,6 +255,42 @@ public record BastionTypeConfig(
                         DefaultValues.DEFAULT_POLLUTION_ITEM_USE_COOLDOWN_TICKS)
                     .forGetter(PollutionConfig::itemUseCooldownTicks)
             ).apply(instance, PollutionConfig::new)
+        );
+    }
+
+    /**
+     * 接管配置。
+     * <p>
+     * Round 10.1：下沉“是否启用接管系统”“可接管状态超时”与“是否要求净化阵法”到 JSON 配置。
+     * 兼容策略：默认关闭并使用 0 超时，保持旧 JSON/旧世界行为不变。
+     * </p>
+     *
+     * @param enabled                 是否启用接管系统
+     * @param capturableTimeoutTicks  可接管状态超时（tick），0 表示无超时
+     * @param requirePurificationArray 最终接管是否需要净化阵法
+     */
+    public record CaptureConfig(
+            boolean enabled,
+            long capturableTimeoutTicks,
+            boolean requirePurificationArray
+    ) {
+        public static final CaptureConfig DEFAULT = new CaptureConfig(
+            DefaultValues.DEFAULT_CAPTURE_ENABLED,
+            DefaultValues.DEFAULT_CAPTURE_TIMEOUT_TICKS,
+            DefaultValues.DEFAULT_CAPTURE_REQUIRE_PURIFICATION_ARRAY
+        );
+
+        public static final Codec<CaptureConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_CAPTURE_ENABLED)
+                    .forGetter(CaptureConfig::enabled),
+                Codec.LONG.optionalFieldOf("capturable_timeout_ticks",
+                        DefaultValues.DEFAULT_CAPTURE_TIMEOUT_TICKS)
+                    .forGetter(CaptureConfig::capturableTimeoutTicks),
+                Codec.BOOL.optionalFieldOf("require_purification_array",
+                        DefaultValues.DEFAULT_CAPTURE_REQUIRE_PURIFICATION_ARRAY)
+                    .forGetter(CaptureConfig::requirePurificationArray)
+            ).apply(instance, CaptureConfig::new)
         );
     }
 
@@ -556,13 +619,16 @@ public record BastionTypeConfig(
             // 可选内容配置。
             // 注意：这里用 MapCodec 进行字段分组以规避 16 参数限制，但字段仍位于根对象。
             OptionalContentConfig.MAP_CODEC.forGetter(config -> new OptionalContentConfig(
-                config.shell(),
-                config.elite(),
-                config.loot(),
-                config.highTier(),
-                config.guardianShazhao(),
-                config.boss(),
-                config.pollution()
+                new OptionalContentConfig.OptionalContentParams(
+                    config.shell(),
+                    config.elite(),
+                    config.loot(),
+                    config.highTier(),
+                    config.guardianShazhao(),
+                    config.boss(),
+                    config.pollution(),
+                    config.capture()
+                )
             ))
         ).apply(instance, (id,
                 displayName,
@@ -594,14 +660,15 @@ public record BastionTypeConfig(
             aura,
             energy,
             hatchery,
-            optionalContent.elite(),
-            optionalContent.boss(),
-            optionalContent.pollution(),
-            anchorsWeight,
-            myceliumWeight,
-            optionalContent.loot(),
-            optionalContent.highTier(),
-            optionalContent.guardianShazhao()
+             optionalContent.elite(),
+             optionalContent.boss(),
+             optionalContent.pollution(),
+             optionalContent.capture(),
+             anchorsWeight,
+             myceliumWeight,
+             optionalContent.loot(),
+             optionalContent.highTier(),
+             optionalContent.guardianShazhao()
         ))
     );
 
@@ -1047,6 +1114,14 @@ public record BastionTypeConfig(
          static final double DEFAULT_BOSS_FAILURE_BUDGET_REFUND = 0.5;
          /** Boss 失败是否非阻塞（不阻止其他刷怪）。 */
          static final boolean DEFAULT_BOSS_NON_BLOCKING = true;
+
+         // ===== 接管配置默认值（Round 10.1） =====
+         /** 是否启用接管系统，默认关闭以兼容旧 JSON。 */
+         static final boolean DEFAULT_CAPTURE_ENABLED = false;
+         /** 可接管状态超时（tick），0 表示无超时。 */
+         static final long DEFAULT_CAPTURE_TIMEOUT_TICKS = 0L;
+         /** 最终接管是否需要净化阵法。 */
+         static final boolean DEFAULT_CAPTURE_REQUIRE_PURIFICATION_ARRAY = false;
 
         // ===== 菌毯衰败默认值 =====
 

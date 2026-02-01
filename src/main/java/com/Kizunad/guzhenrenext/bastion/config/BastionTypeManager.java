@@ -155,6 +155,7 @@ public final class BastionTypeManager {
             BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.BossConfig.DEFAULT,
             BastionTypeConfig.PollutionConfig.DEFAULT,
+            BastionTypeConfig.CaptureConfig.DEFAULT,
             BastionTypeConfig.DEFAULT_ANCHORS_WEIGHT,
             BastionTypeConfig.DEFAULT_MYCELIUM_WEIGHT,
             Optional.empty(),

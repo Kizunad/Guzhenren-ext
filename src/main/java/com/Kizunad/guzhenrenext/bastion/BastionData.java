@@ -49,9 +49,10 @@ public record BastionData(
         int growthRadius,
         long growthCursor,
         double resourcePool,
-        BastionCounts counts,
-        Set<BastionModifier> modifiers,
-        BastionTiming timing
+         BastionCounts counts,
+         Set<BastionModifier> modifiers,
+         BastionTiming timing,
+         CaptureState captureState
 ) {
 
     /**
@@ -70,6 +71,49 @@ public record BastionData(
                 Codec.INT.optionalFieldOf("total_mycelium", 0).forGetter(BastionCounts::totalMycelium),
                 Codec.INT.optionalFieldOf("total_anchors", 0).forGetter(BastionCounts::totalAnchors)
             ).apply(instance, BastionCounts::new)
+        );
+    }
+
+    /**
+     * 接管原因枚举。
+     * <p>
+     * NONE 表示未可接管；BOSS_DEFEATED 与 PURIFICATION_READY 对应 10.1 规划的两个入口。
+     * </p>
+     */
+    public enum CaptureReason {
+        NONE,
+        BOSS_DEFEATED,
+        PURIFICATION_READY;
+
+        /** 序列化/反序列化编解码器。 */
+        public static final Codec<CaptureReason> CODEC = Codec.STRING.xmap(
+            value -> CaptureReason.valueOf(value.toUpperCase(java.util.Locale.ROOT)),
+            reason -> reason.name().toLowerCase(java.util.Locale.ROOT)
+        );
+    }
+
+    /**
+     * 接管状态信息。
+     * <p>
+     * 通过嵌套 record 规避 RecordCodecBuilder 16 参数限制，并保持旧存档兼容。
+     * </p>
+     *
+     * @param capturable               是否可接管
+     * @param reason                   可接管原因（NONE/BOSS_DEFEATED/PURIFICATION_READY）
+     * @param capturableUntilGameTime  可接管窗口截止时间（0 表示无限期）
+     */
+    public record CaptureState(boolean capturable, CaptureReason reason, long capturableUntilGameTime) {
+        public static final CaptureState DEFAULT = new CaptureState(false, CaptureReason.NONE, 0L);
+
+        /** 序列化/反序列化编解码器。 */
+        public static final Codec<CaptureState> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("capturable", false).forGetter(CaptureState::capturable),
+                CaptureReason.CODEC.optionalFieldOf("reason", CaptureReason.NONE)
+                    .forGetter(CaptureState::reason),
+                Codec.LONG.optionalFieldOf("capturable_until_game_time", 0L)
+                    .forGetter(CaptureState::capturableUntilGameTime)
+            ).apply(instance, CaptureState::new)
         );
     }
 
@@ -132,6 +176,37 @@ public record BastionData(
         }
     }
 
+    /**
+     * 附加状态分组。
+     * <p>
+     * 目的：把 counts / modifiers / timing / capture_state 打包为一组，避免 RecordCodecBuilder
+     * 16 参数限制，同时保持 JSON 扁平结构与旧存档兼容。
+     * </p>
+     */
+    private record AdditionalState(
+            BastionCounts counts,
+            Set<BastionModifier> modifiers,
+            BastionTiming timing,
+            CaptureState captureState) {
+        private static final AdditionalState DEFAULT = new AdditionalState(
+            BastionCounts.DEFAULT,
+            java.util.Set.of(),
+            BastionTiming.createDefault(0L),
+            CaptureState.DEFAULT
+        );
+
+        private static final MapCodec<AdditionalState> CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                BastionCounts.CODEC.optionalFieldOf("counts", BastionCounts.DEFAULT)
+                    .forGetter(AdditionalState::counts),
+                MODIFIERS_CODEC.forGetter(AdditionalState::modifiers),
+                BastionTiming.CODEC.fieldOf("timing").forGetter(AdditionalState::timing),
+                CaptureState.CODEC.optionalFieldOf("capture_state", CaptureState.DEFAULT)
+                    .forGetter(AdditionalState::captureState)
+            ).apply(instance, AdditionalState::new)
+        );
+    }
+
     /** 序列化/反序列化编解码器。 */
     public static final Codec<BastionData> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
@@ -149,11 +224,43 @@ public record BastionData(
             Codec.INT.fieldOf("growth_radius").forGetter(BastionData::growthRadius),
             Codec.LONG.fieldOf("growth_cursor").forGetter(BastionData::growthCursor),
             Codec.DOUBLE.fieldOf("resource_pool").forGetter(BastionData::resourcePool),
-            BastionCounts.CODEC.optionalFieldOf("counts", BastionCounts.DEFAULT)
-                .forGetter(BastionData::counts),
-            MODIFIERS_CODEC.forGetter(BastionData::modifiers),
-            BastionTiming.CODEC.fieldOf("timing").forGetter(BastionData::timing)
-        ).apply(instance, BastionData::new)
+            AdditionalState.CODEC.forGetter(data -> new AdditionalState(
+                data.counts == null ? BastionCounts.DEFAULT : data.counts,
+                data.modifiers,
+                data.timing,
+                data.captureState == null ? CaptureState.DEFAULT : data.captureState
+            ))
+        ).apply(instance, (id,
+                state,
+                corePos,
+                dimension,
+                bastionType,
+                primaryDao,
+                tier,
+                evolutionProgress,
+                totalNodes,
+                nodesByTier,
+                growthRadius,
+                growthCursor,
+                resourcePool,
+                additional) -> new BastionData(
+                id,
+                state,
+                corePos,
+                dimension,
+                bastionType,
+                primaryDao,
+                tier,
+                evolutionProgress,
+                totalNodes,
+                nodesByTier,
+                growthRadius,
+                growthCursor,
+                resourcePool,
+                additional.counts(),
+                additional.modifiers(),
+                additional.timing(),
+                additional.captureState()))
     );
 
     // ===== 时间字段的便捷访问器 =====
@@ -214,7 +321,8 @@ public record BastionData(
             0.0,            // 资源池
             BastionCounts.DEFAULT,
             java.util.Set.of(),
-            BastionTiming.createDefault(gameTime)
+            BastionTiming.createDefault(gameTime),
+            CaptureState.DEFAULT
         );
     }
 
@@ -245,7 +353,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, newTotal, newNodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, timing
+            growthCursor, resourcePool, counts, modifiers, timing, captureState
         );
     }
 
@@ -265,7 +373,7 @@ public record BastionData(
         return new BastionData(
             id, BastionState.DESTROYED, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -285,7 +393,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -300,7 +408,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, newTier,
             newProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, timing
+            growthCursor, resourcePool, counts, modifiers, timing, captureState
         );
     }
 
@@ -314,7 +422,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, newRadius,
-            growthCursor, resourcePool, counts, modifiers, timing
+            growthCursor, resourcePool, counts, modifiers, timing, captureState
         );
     }
 
@@ -328,7 +436,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            newCursor, resourcePool, counts, modifiers, timing
+            newCursor, resourcePool, counts, modifiers, timing, captureState
         );
     }
 
@@ -342,7 +450,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, newPool, counts, modifiers, timing
+            growthCursor, newPool, counts, modifiers, timing, captureState
         );
     }
 
@@ -359,7 +467,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, updatedCounts, modifiers, timing
+            growthCursor, resourcePool, updatedCounts, modifiers, timing, captureState
         );
     }
 
@@ -376,7 +484,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, updatedCounts, modifiers, timing
+            growthCursor, resourcePool, updatedCounts, modifiers, timing, captureState
         );
     }
 
@@ -396,7 +504,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -416,7 +524,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming
+            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -496,8 +604,50 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, counts,
             newModifiers == null ? java.util.Set.of() : java.util.Set.copyOf(newModifiers),
-            timing
+            timing,
+            captureState
         );
+    }
+
+    // ===== 接管状态相关便捷方法 =====
+
+    /**
+     * 创建接管状态更新后的副本。
+     *
+     * @param newCaptureState 新的接管状态（null 将回退为默认值）
+     * @return 更新后的 BastionData
+     */
+    public BastionData withCaptureState(CaptureState newCaptureState) {
+        CaptureState safe = newCaptureState == null ? CaptureState.DEFAULT : newCaptureState;
+        return new BastionData(
+            id, state, corePos, dimension, bastionType, primaryDao, tier,
+            evolutionProgress, totalNodes, nodesByTier, growthRadius,
+            growthCursor, resourcePool, counts, modifiers, timing, safe
+        );
+    }
+
+    /**
+     * 创建仅更新可接管标记的副本（原因与窗口保持不变）。
+     *
+     * @param capturable 是否可接管
+     * @return 更新后的 BastionData
+     */
+    public BastionData withCapturable(boolean capturable) {
+        CaptureState safe = captureState == null ? CaptureState.DEFAULT : captureState;
+        return withCaptureState(new CaptureState(capturable, safe.reason(), safe.capturableUntilGameTime()));
+    }
+
+    /**
+     * 创建接管原因与窗口更新后的副本。
+     *
+     * @param capturable             是否可接管
+     * @param reason                 可接管原因
+     * @param capturableUntilGameTime 可接管窗口截止时间（0 表示无限期）
+     * @return 更新后的 BastionData
+     */
+    public BastionData withCapturable(boolean capturable, CaptureReason reason, long capturableUntilGameTime) {
+        CaptureReason safeReason = reason == null ? CaptureReason.NONE : reason;
+        return withCaptureState(new CaptureState(capturable, safeReason, Math.max(0L, capturableUntilGameTime)));
     }
 
 }
