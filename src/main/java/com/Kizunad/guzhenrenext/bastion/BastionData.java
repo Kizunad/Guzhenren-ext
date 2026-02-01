@@ -31,6 +31,7 @@ import net.minecraft.world.level.Level;
  * @param growthRadius        当前扩张半径
  * @param growthCursor        扩张游标（用于确定性随机）
  * @param resourcePool        资源池（用于资源驱动扩张）
+ * @param pollution           污染值（0.0-1.0，表示基地污染程度，越高越脏）
  * @param counts              菌毯/Anchor 等额外计数（避免 CODEC 超出参数上限）
  * @param modifiers           基地词缀（生态演化/变异，默认空集）
  * @param timing              时间相关字段（封印、销毁、最后处理、离线累积）
@@ -46,9 +47,10 @@ public record BastionData(
         double evolutionProgress,
         int totalNodes,
         Map<Integer, Integer> nodesByTier,
-        int growthRadius,
-        long growthCursor,
-        double resourcePool,
+         int growthRadius,
+         long growthCursor,
+         double resourcePool,
+         double pollution,
          BastionCounts counts,
          Set<BastionModifier> modifiers,
          BastionTiming timing,
@@ -229,11 +231,12 @@ public record BastionData(
                 .forGetter(BastionData::nodesByTier),
             Codec.INT.fieldOf("growth_radius").forGetter(BastionData::growthRadius),
             Codec.LONG.fieldOf("growth_cursor").forGetter(BastionData::growthCursor),
-            Codec.DOUBLE.fieldOf("resource_pool").forGetter(BastionData::resourcePool),
-            AdditionalState.CODEC.forGetter(data -> new AdditionalState(
-                data.counts == null ? BastionCounts.DEFAULT : data.counts,
-                data.modifiers,
-                data.timing,
+             Codec.DOUBLE.fieldOf("resource_pool").forGetter(BastionData::resourcePool),
+             Codec.DOUBLE.optionalFieldOf("pollution", 0.0).forGetter(BastionData::pollution),
+             AdditionalState.CODEC.forGetter(data -> new AdditionalState(
+                 data.counts == null ? BastionCounts.DEFAULT : data.counts,
+                 data.modifiers,
+                 data.timing,
                 data.captureState == null ? CaptureState.DEFAULT : data.captureState
             ))
         ).apply(instance, (id,
@@ -247,9 +250,10 @@ public record BastionData(
                 totalNodes,
                 nodesByTier,
                 growthRadius,
-                growthCursor,
-                resourcePool,
-                additional) -> new BastionData(
+                 growthCursor,
+                 resourcePool,
+                 pollution,
+                 additional) -> new BastionData(
                 id,
                 state,
                 corePos,
@@ -262,11 +266,12 @@ public record BastionData(
                 nodesByTier,
                 growthRadius,
                 growthCursor,
-                resourcePool,
-                additional.counts(),
-                additional.modifiers(),
-                additional.timing(),
-                additional.captureState()))
+                 resourcePool,
+                 pollution,
+                 additional.counts(),
+                 additional.modifiers(),
+                 additional.timing(),
+                 additional.captureState()))
     );
 
     // ===== 时间字段的便捷访问器 =====
@@ -325,6 +330,7 @@ public record BastionData(
             1,              // 初始扩张半径
             0L,             // 扩张游标
             0.0,            // 资源池
+            0.0,            // 污染值
             BastionCounts.DEFAULT,
             java.util.Set.of(),
             BastionTiming.createDefault(gameTime),
@@ -359,7 +365,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, newTotal, newNodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, timing, captureState
+            growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState
         );
     }
 
@@ -379,7 +385,7 @@ public record BastionData(
         return new BastionData(
             id, BastionState.DESTROYED, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
+            growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -399,7 +405,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
+            growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -414,7 +420,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, newTier,
             newProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, timing, captureState
+            growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState
         );
     }
 
@@ -428,7 +434,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, newRadius,
-            growthCursor, resourcePool, counts, modifiers, timing, captureState
+            growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState
         );
     }
 
@@ -442,7 +448,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            newCursor, resourcePool, counts, modifiers, timing, captureState
+            newCursor, resourcePool, pollution, counts, modifiers, timing, captureState
         );
     }
 
@@ -456,7 +462,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, newPool, counts, modifiers, timing, captureState
+            growthCursor, newPool, pollution, counts, modifiers, timing, captureState
         );
     }
 
@@ -473,7 +479,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, updatedCounts, modifiers, timing, captureState
+            growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState
         );
     }
 
@@ -490,7 +496,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, updatedCounts, modifiers, timing, captureState
+            growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState
         );
     }
 
@@ -510,7 +516,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
+            growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -530,7 +536,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, newTiming, captureState
+            growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState
         );
     }
 
@@ -547,7 +553,7 @@ public record BastionData(
          return new BastionData(
              id, state, corePos, dimension, bastionType, primaryDao, tier,
              evolutionProgress, totalNodes, nodesByTier, growthRadius,
-             growthCursor, resourcePool, updatedCounts, modifiers, timing, captureState
+             growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState
          );
      }
 
@@ -625,7 +631,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts,
+            growthCursor, resourcePool, pollution, counts,
             newModifiers == null ? java.util.Set.of() : java.util.Set.copyOf(newModifiers),
             timing,
             captureState
@@ -645,7 +651,7 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, counts, modifiers, timing, safe
+            growthCursor, resourcePool, pollution, counts, modifiers, timing, safe
         );
     }
 
@@ -671,6 +677,26 @@ public record BastionData(
     public BastionData withCapturable(boolean capturable, CaptureReason reason, long capturableUntilGameTime) {
         CaptureReason safeReason = reason == null ? CaptureReason.NONE : reason;
         return withCaptureState(new CaptureState(capturable, safeReason, Math.max(0L, capturableUntilGameTime)));
+    }
+
+    /** 返回当前污染值（0.0~1.0）。 */
+    public double pollution() {
+        return Math.max(0.0, pollution);
+    }
+
+    /**
+     * 创建污染值更新后的副本。
+     *
+     * @param newPollution 新污染值（将被夹取到 0.0-1.0）
+     * @return 更新后的 BastionData
+     */
+    public BastionData withPollution(double newPollution) {
+        double clamped = Math.min(1.0, Math.max(0.0, newPollution));
+        return new BastionData(
+            id, state, corePos, dimension, bastionType, primaryDao, tier,
+            evolutionProgress, totalNodes, nodesByTier, growthRadius,
+            growthCursor, resourcePool, clamped, counts, modifiers, timing, captureState
+        );
     }
 
 }

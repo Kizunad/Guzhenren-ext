@@ -11,6 +11,7 @@ import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionGuardianHatcheryBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionReversalArrayBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionPurificationArrayBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionTurretBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionTrapBlock;
 import com.Kizunad.guzhenrenext.bastion.service.BastionEnergyBuildService;
@@ -119,6 +120,14 @@ public final class BastionBlocks {
         .requiresCorrectToolForDrops();
 
     /**
+     * 净化阵法属性：与逆转阵法一致的硬度/抗性。
+     */
+    private static final BlockBehaviour.Properties PURIFICATION_ARRAY_PROPERTIES = BlockBehaviour.Properties.of()
+        .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
+        .sound(SoundType.STONE)
+        .requiresCorrectToolForDrops();
+
+    /**
      * 菌毯方块属性：低硬度、覆盖物定位。
      */
     private static final BlockBehaviour.Properties MYCELIUM_PROPERTIES = BlockBehaviour.Properties.of()
@@ -222,6 +231,15 @@ public final class BastionBlocks {
         BLOCKS.register(
             "bastion_reversal_array",
             () -> new BastionReversalArrayBlock(REVERSAL_ARRAY_PROPERTIES)
+        );
+
+    /**
+     * 净化阵法方块 - 净化基地污染以进入可接管状态。
+     */
+    public static final DeferredHolder<Block, BastionPurificationArrayBlock> BASTION_PURIFICATION_ARRAY =
+        BLOCKS.register(
+            "bastion_purification_array",
+            () -> new BastionPurificationArrayBlock(PURIFICATION_ARRAY_PROPERTIES)
         );
 
     /**
@@ -350,10 +368,16 @@ public final class BastionBlocks {
     /**
      * 基地外壳方块物品（甲壳）。
      */
-    public static final DeferredHolder<Item, BlockItem> BASTION_CHITIN_SHELL_ITEM = ITEMS.register(
-        "bastion_chitin_shell",
-        () -> new BlockItem(BASTION_CHITIN_SHELL.get(), new Item.Properties())
-    );
+     public static final DeferredHolder<Item, BlockItem> BASTION_CHITIN_SHELL_ITEM = ITEMS.register(
+         "bastion_chitin_shell",
+         () -> new BlockItem(BASTION_CHITIN_SHELL.get(), new Item.Properties())
+     );
+
+     /** 净化阵法方块物品。 */
+     public static final DeferredHolder<Item, BlockItem> BASTION_PURIFICATION_ARRAY_ITEM = ITEMS.register(
+         "bastion_purification_array",
+         () -> new BlockItem(BASTION_PURIFICATION_ARRAY.get(), new Item.Properties())
+     );
 
     /** 炮台节点方块物品。 */
     public static final DeferredHolder<Item, BlockItem> BASTION_TURRET_ITEM = ITEMS.register(
