@@ -25,7 +25,7 @@
       "tier_multiplier": 1.15,
       "max_radius": 72,
       "max_per_tick": 4,
-      "spacing": 4
+      "spacing": 1
     },
     "anchor": {
       "build_cost": 50.0,
