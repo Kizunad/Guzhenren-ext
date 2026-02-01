@@ -453,11 +453,13 @@ public final class BastionTicker {
         int waterMax = Math.max(0, energyConfig.waterIntake().maxCount());
         int geoMax = Math.max(0, energyConfig.geothermal().maxCount());
         int windMax = Math.max(0, energyConfig.wind().maxCount());
+        int nightMax = Math.max(0, energyConfig.night().maxCount());
 
         int photoCount = 0;
         int waterCount = 0;
         int geoCount = 0;
         int windCount = 0;
+        int nightCount = 0;
 
         for (BastionEnergyType type : energyMap.values()) {
             if (type == null) {
@@ -484,12 +486,17 @@ public final class BastionTicker {
                         windCount++;
                     }
                 }
+                case NIGHT -> {
+                    if (nightCount < nightMax) {
+                        nightCount++;
+                    }
+                }
                 default -> {
                 }
             }
         }
 
-        return new EnergyCounts(photoCount, waterCount, geoCount, windCount);
+        return new EnergyCounts(photoCount, waterCount, geoCount, windCount, nightCount);
     }
 
     private static double calculateEnergyMultipliers(
@@ -498,7 +505,8 @@ public final class BastionTicker {
         return counts.photosynthesis() * energyConfig.photosynthesis().poolGainMultiplier()
             + counts.waterIntake() * energyConfig.waterIntake().poolGainMultiplier()
             + counts.geothermal() * energyConfig.geothermal().poolGainMultiplier()
-            + counts.wind() * energyConfig.wind().poolGainMultiplier();
+            + counts.wind() * energyConfig.wind().poolGainMultiplier()
+            + counts.night() * energyConfig.night().poolGainMultiplier();
     }
 
     private static double calculateEnergyFlatAdds(
@@ -507,13 +515,14 @@ public final class BastionTicker {
         return counts.photosynthesis() * energyConfig.photosynthesis().poolGainFlat()
             + counts.waterIntake() * energyConfig.waterIntake().poolGainFlat()
             + counts.geothermal() * energyConfig.geothermal().poolGainFlat()
-            + counts.wind() * energyConfig.wind().poolGainFlat();
+            + counts.wind() * energyConfig.wind().poolGainFlat()
+            + counts.night() * energyConfig.night().poolGainFlat();
     }
 
     private record EnergyContext(BastionTypeConfig.EnergyConfig config, EnergyCounts counts) {
     }
 
-    private record EnergyCounts(int photosynthesis, int waterIntake, int geothermal, int wind) {
+    private record EnergyCounts(int photosynthesis, int waterIntake, int geothermal, int wind, int night) {
     }
 
     /**

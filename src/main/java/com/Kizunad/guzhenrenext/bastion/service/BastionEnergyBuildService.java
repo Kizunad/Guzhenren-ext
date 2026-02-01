@@ -164,16 +164,27 @@ public final class BastionEnergyBuildService {
         int waterRadius = Math.max(1, energyConfig.waterIntake().scanRadius());
         int geothermalRadius = Math.max(1, energyConfig.geothermal().scanRadius());
         int windMinY = Math.max(1, energyConfig.wind().scanRadius());
+        BastionEnergyService.NightScanConfig nightScanConfig = new BastionEnergyService.NightScanConfig(
+            Math.max(1, energyConfig.night().scanRadius()),
+            Math.max(0, energyConfig.night().maxLightLevel()),
+            BastionEnergyService.ScanConfig.DAY_CYCLE_TICKS,
+            BastionEnergyService.ScanConfig.NIGHT_START_TICKS,
+            BastionEnergyService.ScanConfig.NIGHT_END_TICKS
+        );
+        BastionEnergyService.EnergyScanConfig energyScanConfig = new BastionEnergyService.EnergyScanConfig(
+            photoRadius,
+            waterRadius,
+            geothermalRadius,
+            windMinY
+        );
 
         for (BastionEnergyType type : energyConfig.normalizedPriorityOrder()) {
             boolean ok = BastionEnergyService.isEnergyTypeSatisfied(
                 type,
                 level,
                 anchorPos,
-                photoRadius,
-                waterRadius,
-                geothermalRadius,
-                windMinY
+                energyScanConfig,
+                nightScanConfig
             );
             if (ok) {
                 return type;
@@ -205,6 +216,7 @@ public final class BastionEnergyBuildService {
             case WATER_INTAKE -> energyConfig.waterIntake();
             case GEOTHERMAL -> energyConfig.geothermal();
             case WIND -> energyConfig.wind();
+            case NIGHT -> energyConfig.night().toEnergyNodeConfig();
         };
     }
 

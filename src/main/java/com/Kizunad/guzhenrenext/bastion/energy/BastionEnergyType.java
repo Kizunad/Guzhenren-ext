@@ -35,7 +35,12 @@ public enum BastionEnergyType implements StringRepresentable {
     /**
      * 风能：通过高空风力获取能量。
      */
-    WIND("wind");
+    WIND("wind"),
+
+    /**
+     * 夜能：通过夜间/低光照环境获取能量。
+     */
+    NIGHT("night");
 
     /**
      * 便于后续配置/网络/调试复用的通用 Codec。

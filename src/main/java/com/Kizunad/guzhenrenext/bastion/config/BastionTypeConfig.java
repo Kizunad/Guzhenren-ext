@@ -1337,6 +1337,8 @@ public record BastionTypeConfig(
         static final double DEFAULT_POOL_GAIN_MULTIPLIER = 0.0;
         static final double DEFAULT_POOL_GAIN_FLAT = 0.0;
         static final int DEFAULT_SCAN_RADIUS = 8;
+        /** 夜能允许的最大光照等级默认值。 */
+        static final int DEFAULT_NIGHT_MAX_LIGHT_LEVEL = 7;
 
         // ===== 威胁值默认值（Round 19） =====
         static final boolean DEFAULT_THREAT_ENABLED = false;
@@ -1434,7 +1436,8 @@ public record BastionTypeConfig(
                 com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.GEOTHERMAL,
                 com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.WATER_INTAKE,
                 com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.PHOTOSYNTHESIS,
-                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.WIND
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.WIND,
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.NIGHT
             );
 
         private DefaultValues() {
@@ -1454,12 +1457,14 @@ public record BastionTypeConfig(
      * @param waterIntake    汲水：依赖邻近水源的能源
      * @param geothermal     地热：依赖邻近岩浆/深层地形的能源
      * @param wind           风能：依赖高空风力（高度/无遮挡）
+     * @param night          夜能：依赖夜间/低光照环境的能源
      */
     public record EnergyConfig(
             EnergyNodeConfig photosynthesis,
             EnergyNodeConfig waterIntake,
             EnergyNodeConfig geothermal,
             EnergyNodeConfig wind,
+            NightEnergyNodeConfig night,
 
             /**
              * 同一 Anchor 多条件满足时的最终能源类型选择顺序（冲突优先级）。
@@ -1478,6 +1483,7 @@ public record BastionTypeConfig(
             EnergyNodeConfig.DEFAULT,
             EnergyNodeConfig.DEFAULT,
             EnergyNodeConfig.DEFAULT,
+            NightEnergyNodeConfig.DEFAULT,
             DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER
         );
 
@@ -1491,6 +1497,8 @@ public record BastionTypeConfig(
                     .forGetter(EnergyConfig::geothermal),
                 EnergyNodeConfig.CODEC.optionalFieldOf("wind", EnergyNodeConfig.DEFAULT)
                     .forGetter(EnergyConfig::wind),
+                NightEnergyNodeConfig.CODEC.optionalFieldOf("night", NightEnergyNodeConfig.DEFAULT)
+                    .forGetter(EnergyConfig::night),
                 com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.CODEC.listOf()
                     .optionalFieldOf("priority_order", DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER)
                     .forGetter(EnergyConfig::priorityOrder)
@@ -1557,6 +1565,57 @@ public record BastionTypeConfig(
                     .forGetter(EnergyNodeConfig::scanRadius)
             ).apply(instance, EnergyNodeConfig::new)
         );
+    }
+
+    /**
+     * 夜能节点配置：在通用能源节点参数基础上增加最大光照等级限制。
+     */
+    public record NightEnergyNodeConfig(
+            double buildCost,
+            int maxCount,
+            double poolGainMultiplier,
+            double poolGainFlat,
+            int scanRadius,
+            int maxLightLevel
+    ) {
+        public static final NightEnergyNodeConfig DEFAULT = new NightEnergyNodeConfig(
+            DefaultValues.DEFAULT_ENERGY_BUILD_COST,
+            DefaultValues.DEFAULT_ENERGY_MAX_COUNT,
+            DefaultValues.DEFAULT_POOL_GAIN_MULTIPLIER,
+            DefaultValues.DEFAULT_POOL_GAIN_FLAT,
+            DefaultValues.DEFAULT_SCAN_RADIUS,
+            DefaultValues.DEFAULT_NIGHT_MAX_LIGHT_LEVEL
+        );
+
+        public static final Codec<NightEnergyNodeConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.DOUBLE.optionalFieldOf("build_cost", DefaultValues.DEFAULT_ENERGY_BUILD_COST)
+                    .forGetter(NightEnergyNodeConfig::buildCost),
+                Codec.INT.optionalFieldOf("max_count", DefaultValues.DEFAULT_ENERGY_MAX_COUNT)
+                    .forGetter(NightEnergyNodeConfig::maxCount),
+                Codec.DOUBLE.optionalFieldOf("pool_gain_multiplier", DefaultValues.DEFAULT_POOL_GAIN_MULTIPLIER)
+                    .forGetter(NightEnergyNodeConfig::poolGainMultiplier),
+                Codec.DOUBLE.optionalFieldOf("pool_gain_flat", DefaultValues.DEFAULT_POOL_GAIN_FLAT)
+                    .forGetter(NightEnergyNodeConfig::poolGainFlat),
+                Codec.INT.optionalFieldOf("scan_radius", DefaultValues.DEFAULT_SCAN_RADIUS)
+                    .forGetter(NightEnergyNodeConfig::scanRadius),
+                Codec.INT.optionalFieldOf("max_light_level", DefaultValues.DEFAULT_NIGHT_MAX_LIGHT_LEVEL)
+                    .forGetter(NightEnergyNodeConfig::maxLightLevel)
+            ).apply(instance, NightEnergyNodeConfig::new)
+        );
+
+        /**
+         * 兼容使用 EnergyNodeConfig 形态的调用（如建造上限判定）。
+         */
+        public BastionTypeConfig.EnergyNodeConfig toEnergyNodeConfig() {
+            return new BastionTypeConfig.EnergyNodeConfig(
+                this.buildCost,
+                this.maxCount,
+                this.poolGainMultiplier,
+                this.poolGainFlat,
+                this.scanRadius
+            );
+        }
     }
 
     /**

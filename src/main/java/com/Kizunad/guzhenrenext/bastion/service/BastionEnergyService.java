@@ -60,7 +60,7 @@ public final class BastionEnergyService {
     /**
      * 扫描配置常量（避免 MagicNumber）。
      */
-    private static final class ScanConfig {
+    public static final class ScanConfig {
         /** 每隔多少 tick 才允许进行一次能源扫描。 */
         static final long ENERGY_SCAN_INTERVAL_TICKS = 40L;
         /** 单次扫描最多处理多少个 Anchor（预算）。 */
@@ -75,8 +75,28 @@ public final class BastionEnergyService {
         /** 风能遮挡检测高度（向上检查的格数）。 */
         static final int WIND_CLEARANCE_CHECK_HEIGHT = 3;
 
+        /** Minecraft 原版昼夜周期长度。 */
+        static final long DAY_CYCLE_TICKS = 24000L;
+        /** 夜间起始（含）。 */
+        static final long NIGHT_START_TICKS = 13000L;
+        /** 夜间结束（不含）。 */
+        static final long NIGHT_END_TICKS = 23000L;
+
         private ScanConfig() {
         }
+    }
+
+    /**
+     * 能源扫描配置聚合：收敛光合/汲水/地热/风的半径参数。
+     */
+    public record EnergyScanConfig(int photoRadius, int waterRadius, int geothermalRadius, int windMinY) {
+    }
+
+    /**
+     * 夜能扫描配置聚合，减少参数数量并集中魔法数。
+     */
+    public record NightScanConfig(int scanRadius, int maxLightLevel, long dayCycleLength, long nightStart,
+                                  long nightEnd) {
     }
 
     /**
@@ -103,10 +123,19 @@ public final class BastionEnergyService {
         BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
         BastionTypeConfig.EnergyConfig energyConfig = typeConfig.energy();
 
-        int photoRadius = Math.max(1, energyConfig.photosynthesis().scanRadius());
-        int waterRadius = Math.max(1, energyConfig.waterIntake().scanRadius());
-        int geothermalRadius = Math.max(1, energyConfig.geothermal().scanRadius());
-        int windMinY = Math.max(1, energyConfig.wind().scanRadius());
+        EnergyScanConfig energyScanConfig = new EnergyScanConfig(
+            Math.max(1, energyConfig.photosynthesis().scanRadius()),
+            Math.max(1, energyConfig.waterIntake().scanRadius()),
+            Math.max(1, energyConfig.geothermal().scanRadius()),
+            Math.max(1, energyConfig.wind().scanRadius())
+        );
+        NightScanConfig nightScanConfig = new NightScanConfig(
+            Math.max(1, energyConfig.night().scanRadius()),
+            Math.max(0, energyConfig.night().maxLightLevel()),
+            ScanConfig.DAY_CYCLE_TICKS,
+            ScanConfig.NIGHT_START_TICKS,
+            ScanConfig.NIGHT_END_TICKS
+        );
 
         // 运行时缓存写入入口。
         Map<BlockPos, BastionEnergyType> energyMap = savedData.getOrCreateAnchorEnergyMap(bastion.id());
@@ -160,10 +189,8 @@ public final class BastionEnergyService {
                         type,
                         level,
                         anchorPos,
-                        photoRadius,
-                        waterRadius,
-                        geothermalRadius,
-                        windMinY)) {
+                        energyScanConfig,
+                        nightScanConfig)) {
                     chosenType = type;
                     break;
                 }
@@ -206,20 +233,19 @@ public final class BastionEnergyService {
             BastionEnergyType energyType,
             ServerLevel level,
             BlockPos anchorPos,
-            int photoRadius,
-            int waterRadius,
-            int geothermalRadius,
-            int windMinY) {
+            EnergyScanConfig energyScanConfig,
+            NightScanConfig nightScanConfig) {
 
         if (energyType == null) {
             return false;
         }
 
         return switch (energyType) {
-            case PHOTOSYNTHESIS -> isPhotosynthesis(level, anchorPos, photoRadius);
-            case WATER_INTAKE -> isWaterIntake(level, anchorPos, waterRadius);
-            case GEOTHERMAL -> isGeothermal(level, anchorPos, geothermalRadius);
-            case WIND -> isWind(level, anchorPos, windMinY);
+            case PHOTOSYNTHESIS -> isPhotosynthesis(level, anchorPos, energyScanConfig.photoRadius());
+            case WATER_INTAKE -> isWaterIntake(level, anchorPos, energyScanConfig.waterRadius());
+            case GEOTHERMAL -> isGeothermal(level, anchorPos, energyScanConfig.geothermalRadius());
+            case WIND -> isWind(level, anchorPos, energyScanConfig.windMinY());
+            case NIGHT -> isNight(level, anchorPos, nightScanConfig);
         };
     }
 
@@ -285,6 +311,38 @@ public final class BastionEnergyService {
             }
         }
         return true;
+    }
+
+    /**
+     * 夜能判定：夜间或 Anchor 位置低光照（<= 配置阈值）。
+     * <p>
+     * 兼容策略：时间/光照均不满足时返回 false，不触发区块加载。
+     * </p>
+     */
+    private static boolean isNight(ServerLevel level, BlockPos anchorPos, NightScanConfig nightScanConfig) {
+        long dayTime = level.getDayTime() % nightScanConfig.dayCycleLength();
+        boolean isNightTime = dayTime >= nightScanConfig.nightStart() && dayTime < nightScanConfig.nightEnd();
+        if (isNightTime) {
+            return true;
+        }
+
+        // 扫描 Anchor 周边（含自身）光照是否低于等于阈值
+        int r = Math.max(1, nightScanConfig.scanRadius());
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dy = -r; dy <= r; dy++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    BlockPos pos = anchorPos.offset(dx, dy, dz);
+                    if (!level.isLoaded(pos)) {
+                        continue;
+                    }
+                    if (level.getMaxLocalRawBrightness(pos) <= nightScanConfig.maxLightLevel()) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
