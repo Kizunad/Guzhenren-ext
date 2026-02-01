@@ -31,6 +31,7 @@ import java.util.Optional;
  * @param energy          能源节点配置（影响资源池增长的额外加成）
  * @param hatchery        守卫孵化巢配置（Round 4.2：守卫产出机制地基，缺省为未启用）
  * @param elite           精英守卫配置（Round 7.1：倍率与技能池，缺省未启用）
+ * @param boss            Boss 配置（Round 8.1：倍率与生成门槛，缺省未启用）
  * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
  * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
  * @param loot            战利品配置（可选）
@@ -52,6 +53,7 @@ public record BastionTypeConfig(
          EnergyConfig energy,
          HatcheryConfig hatchery,
          EliteConfig elite,
+         BossConfig boss,
          int anchorsWeight,
          int myceliumWeight,
          Optional<LootConfig> loot,
@@ -80,30 +82,34 @@ public record BastionTypeConfig(
      * 可选内容配置（用于 codec 分组）。
      * <p>
      * 注意：BastionTypeConfig 字段较多，RecordCodecBuilder 的 group 有 16 参数限制。
-     * 这里使用 {@link MapCodec} 把 shell/elite 以及可选字段（loot/high_tier/guardian_shazhao）打包为 1 组，
-     * 但 JSON schema 不变：仍然是根对象上的字段（不会引入额外嵌套对象）。
+     * 这里使用 {@link MapCodec} 把 shell/elite/boss 以及可选字段
+     * （loot/high_tier/guardian_shazhao）打包为 1 组，但 JSON schema 不变：仍然是根对象上的字段
+     * （不会引入额外嵌套对象）。
      * </p>
      */
     private static final class OptionalContentConfig {
         private final ShellConfig shell;
         private final EliteConfig elite;
-        private final Optional<LootConfig> loot;
-        private final Optional<HighTierConfig> highTier;
-        private final Optional<GuardianShazhaoConfig> guardianShazhao;
+         private final Optional<LootConfig> loot;
+         private final Optional<HighTierConfig> highTier;
+         private final Optional<GuardianShazhaoConfig> guardianShazhao;
+         private final BossConfig boss;
 
-        private OptionalContentConfig(
-                ShellConfig shell,
-                EliteConfig elite,
-                Optional<LootConfig> loot,
-                Optional<HighTierConfig> highTier,
-                Optional<GuardianShazhaoConfig> guardianShazhao
-        ) {
-            this.shell = shell;
-            this.elite = elite;
-            this.loot = loot;
-            this.highTier = highTier;
-            this.guardianShazhao = guardianShazhao;
-        }
+         private OptionalContentConfig(
+                 ShellConfig shell,
+                 EliteConfig elite,
+                 Optional<LootConfig> loot,
+                 Optional<HighTierConfig> highTier,
+                 Optional<GuardianShazhaoConfig> guardianShazhao,
+                 BossConfig boss
+         ) {
+             this.shell = shell;
+             this.elite = elite;
+             this.loot = loot;
+             this.highTier = highTier;
+             this.guardianShazhao = guardianShazhao;
+             this.boss = boss;
+         }
 
         private ShellConfig shell() {
             return shell;
@@ -117,27 +123,34 @@ public record BastionTypeConfig(
             return loot;
         }
 
-        private Optional<HighTierConfig> highTier() {
-            return highTier;
-        }
+         private Optional<HighTierConfig> highTier() {
+             return highTier;
+         }
 
-        private Optional<GuardianShazhaoConfig> guardianShazhao() {
-            return guardianShazhao;
-        }
+         private Optional<GuardianShazhaoConfig> guardianShazhao() {
+             return guardianShazhao;
+         }
 
-        private static final MapCodec<OptionalContentConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
-                    .forGetter(OptionalContentConfig::shell),
-                EliteConfig.CODEC.optionalFieldOf("elite", EliteConfig.DEFAULT)
-                    .forGetter(OptionalContentConfig::elite),
-                LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
-                HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(OptionalContentConfig::highTier),
-                GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
-                    .forGetter(OptionalContentConfig::guardianShazhao)
-            ).apply(instance, OptionalContentConfig::new)
-        );
-    }
+         private BossConfig boss() {
+             return boss;
+         }
+
+         private static final MapCodec<OptionalContentConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
+             instance.group(
+                 ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
+                     .forGetter(OptionalContentConfig::shell),
+                 EliteConfig.CODEC.optionalFieldOf("elite", EliteConfig.DEFAULT)
+                     .forGetter(OptionalContentConfig::elite),
+                 LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
+                 HighTierConfig.CODEC.optionalFieldOf("high_tier")
+                     .forGetter(OptionalContentConfig::highTier),
+                 GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
+                     .forGetter(OptionalContentConfig::guardianShazhao),
+                 BossConfig.CODEC.optionalFieldOf("boss", BossConfig.DEFAULT)
+                     .forGetter(OptionalContentConfig::boss)
+             ).apply(instance, OptionalContentConfig::new)
+         );
+     }
 
     /**
      * 精英守卫配置。
@@ -165,9 +178,9 @@ public record BastionTypeConfig(
             int maxAlive,
             List<String> skillPool
     ) {
-        public static final EliteConfig DEFAULT = new EliteConfig(
-            DefaultValues.DEFAULT_ELITE_ENABLED,
-            DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER,
+         public static final EliteConfig DEFAULT = new EliteConfig(
+             DefaultValues.DEFAULT_ELITE_ENABLED,
+             DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER,
             DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER,
             DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER,
             DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER,
@@ -180,8 +193,8 @@ public record BastionTypeConfig(
             List.of()
         );
 
-        public static final Codec<EliteConfig> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
+         public static final Codec<EliteConfig> CODEC = RecordCodecBuilder.create(instance ->
+             instance.group(
                 Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_ELITE_ENABLED)
                     .forGetter(EliteConfig::enabled),
                 Codec.DOUBLE.optionalFieldOf(
@@ -222,9 +235,77 @@ public record BastionTypeConfig(
                     .forGetter(EliteConfig::maxAlive),
                 Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
                     .forGetter(EliteConfig::skillPool)
-            ).apply(instance, EliteConfig::new)
-        );
-    }
+             ).apply(instance, EliteConfig::new)
+         );
+     }
+
+     /**
+      * Boss 配置。
+      * <p>
+      * Round 8.1：定义 Boss 的倍率、转数门槛与生成冷却。
+      * </p>
+      */
+     public record BossConfig(
+             boolean enabled,
+             /** 最低转数要求（低于该转数不生成 Boss）。 */
+             int minTier,
+             /** Boss 生命倍率。 */
+             double healthMultiplier,
+             /** Boss 伤害倍率。 */
+             double damageMultiplier,
+             /** Boss 护甲倍率。 */
+             double armorMultiplier,
+             /** Boss 生成冷却（tick），基地级节流，默认 3 分钟。 */
+             long cooldownTicks,
+             /** Boss 生成所需资源池消耗。 */
+             double spawnCost,
+             /** Boss 掉落表 ID（空字符串表示不使用自定义掉落表）。 */
+             String lootTableId
+     ) {
+         public static final BossConfig DEFAULT = new BossConfig(
+             DefaultValues.DEFAULT_BOSS_ENABLED,
+             DefaultValues.DEFAULT_BOSS_MIN_TIER,
+             DefaultValues.DEFAULT_BOSS_HEALTH_MULTIPLIER,
+             DefaultValues.DEFAULT_BOSS_DAMAGE_MULTIPLIER,
+             DefaultValues.DEFAULT_BOSS_ARMOR_MULTIPLIER,
+             DefaultValues.DEFAULT_BOSS_COOLDOWN_TICKS,
+             DefaultValues.DEFAULT_BOSS_SPAWN_COST,
+             DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID
+         );
+
+         public static final Codec<BossConfig> CODEC = RecordCodecBuilder.create(instance ->
+             instance.group(
+                 Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_BOSS_ENABLED)
+                     .forGetter(BossConfig::enabled),
+                 Codec.INT.optionalFieldOf("min_tier", DefaultValues.DEFAULT_BOSS_MIN_TIER)
+                     .forGetter(BossConfig::minTier),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "health_multiplier",
+                         DefaultValues.DEFAULT_BOSS_HEALTH_MULTIPLIER)
+                     .forGetter(BossConfig::healthMultiplier),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "damage_multiplier",
+                         DefaultValues.DEFAULT_BOSS_DAMAGE_MULTIPLIER)
+                     .forGetter(BossConfig::damageMultiplier),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "armor_multiplier",
+                         DefaultValues.DEFAULT_BOSS_ARMOR_MULTIPLIER)
+                     .forGetter(BossConfig::armorMultiplier),
+                 Codec.LONG.optionalFieldOf(
+                         "cooldown_ticks",
+                         DefaultValues.DEFAULT_BOSS_COOLDOWN_TICKS)
+                     .forGetter(BossConfig::cooldownTicks),
+                 Codec.DOUBLE.optionalFieldOf(
+                         "spawn_cost",
+                         DefaultValues.DEFAULT_BOSS_SPAWN_COST)
+                     .forGetter(BossConfig::spawnCost),
+                 Codec.STRING.optionalFieldOf(
+                         "loot_table_id",
+                         DefaultValues.DEFAULT_BOSS_LOOT_TABLE_ID)
+                     .forGetter(BossConfig::lootTableId)
+             ).apply(instance, BossConfig::new)
+         );
+     }
 
     /** 序列化/反序列化编解码器。 */
     public static final Codec<BastionTypeConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -246,9 +327,9 @@ public record BastionTypeConfig(
             // 与可选内容一起打包以规避 RecordCodecBuilder 16 参数限制，同时保持 JSON 扁平。
             DecayConfig.CODEC.optionalFieldOf("decay", DecayConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::decay),
-            EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
-                .forGetter(BastionTypeConfig::evolution),
-            AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
+                 EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
+                     .forGetter(BastionTypeConfig::evolution),
+                AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::aura),
             EnergyConfig.CODEC.optionalFieldOf("energy", EnergyConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::energy),
@@ -269,7 +350,8 @@ public record BastionTypeConfig(
                 config.elite(),
                 config.loot(),
                 config.highTier(),
-                config.guardianShazhao()
+                config.guardianShazhao(),
+                config.boss()
             ))
         ).apply(instance, (id,
                 displayName,
@@ -302,6 +384,7 @@ public record BastionTypeConfig(
             energy,
             hatchery,
             optionalContent.elite(),
+            optionalContent.boss(),
             anchorsWeight,
             myceliumWeight,
             optionalContent.loot(),
@@ -708,6 +791,24 @@ public record BastionTypeConfig(
          static final double DEFAULT_ELITE_EXPERIENCE_MULTIPLIER = 3.0;
          /** 精英同时存活上限。 */
          static final int DEFAULT_ELITE_MAX_ALIVE = 1;
+
+         // ===== Boss 默认值（Round 8.1） =====
+         /** 是否启用 Boss 系统，缺省关闭以兼容旧 JSON。 */
+         static final boolean DEFAULT_BOSS_ENABLED = false;
+         /** Boss 生成最低转数要求。 */
+         static final int DEFAULT_BOSS_MIN_TIER = 5;
+         /** Boss 生命倍率默认值。 */
+         static final double DEFAULT_BOSS_HEALTH_MULTIPLIER = 5.0;
+         /** Boss 伤害倍率默认值。 */
+         static final double DEFAULT_BOSS_DAMAGE_MULTIPLIER = 3.0;
+         /** Boss 护甲倍率默认值。 */
+         static final double DEFAULT_BOSS_ARMOR_MULTIPLIER = 2.0;
+         /** Boss 生成冷却时间（tick），默认 3 分钟。 */
+         static final long DEFAULT_BOSS_COOLDOWN_TICKS = 3600L;
+         /** Boss 生成资源消耗。 */
+         static final double DEFAULT_BOSS_SPAWN_COST = 200.0;
+         /** Boss 掉落表 ID，空字符串表示不启用自定义掉落表。 */
+         static final String DEFAULT_BOSS_LOOT_TABLE_ID = "";
 
         // ===== 菌毯衰败默认值 =====
 
