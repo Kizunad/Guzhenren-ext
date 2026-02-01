@@ -20,7 +20,12 @@ public enum AuraNodeType implements StringRepresentable {
     /**
      * 减益型（压制玩家）。
      */
-    DEBUFF("debuff");
+    DEBUFF("debuff"),
+
+    /**
+     * 隐匿型（为守卫提供短时隐身）。
+     */
+    STEALTH("stealth");
 
     /**
      * 便于配置/网络/调试复用的通用 Codec。

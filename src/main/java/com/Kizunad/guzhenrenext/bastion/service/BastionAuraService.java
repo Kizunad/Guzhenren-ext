@@ -4,6 +4,9 @@ import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
+import com.Kizunad.guzhenrenext.bastion.aura.AuraNodeType;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAuraNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import java.util.List;
 import com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierSkillService;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
@@ -14,9 +17,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +68,17 @@ public final class BastionAuraService {
         static final long MESSAGE_COOLDOWN_MS = 10000L;
 
         private TimeConfig() {
+        }
+    }
+
+    /**
+     * 隐匿光环配置。
+     */
+    private static final class StealthConfig {
+        /** 隐身效果持续时间（刻），略高于检测间隔避免闪烁。 */
+        static final int EFFECT_DURATION_TICKS = 50;
+
+        private StealthConfig() {
         }
     }
 
@@ -157,6 +176,40 @@ public final class BastionAuraService {
                 PLAYER_IN_BASTION.remove(playerId);
                 sendLeaveMessage(player);
             }
+        }
+    }
+
+    /**
+     * 处理维度级光环效果（隐匿）。
+     * <p>
+     * 每秒扫描当前维度的活跃基地：
+     * <ul>
+     *   <li>基地必须存在 STEALTH 类型光环节点</li>
+     *   <li>对基地范围内的守卫实体施加短时隐身（非玩家）</li>
+     * </ul>
+     * 持续时间略大于检测间隔，保证不闪烁但不过度叠加。
+     * </p>
+     */
+    @SubscribeEvent
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+
+        long gameTime = level.getGameTime();
+        if (gameTime % TimeConfig.TICK_INTERVAL != 0) {
+            return;
+        }
+
+        BastionSavedData savedData = BastionSavedData.get(level);
+        for (BastionData bastion : savedData.getAllBastions()) {
+            if (bastion.getEffectiveState(gameTime) != BastionState.ACTIVE) {
+                continue;
+            }
+            if (!hasStealthAuraNode(level, savedData, bastion)) {
+                continue;
+            }
+            applyStealthToGuardians(level, bastion);
         }
     }
 
@@ -317,6 +370,73 @@ public final class BastionAuraService {
             falloff,
             actualDrain,
             resourceName);
+    }
+
+    /**
+     * 检查基地是否拥有 STEALTH 类型光环节点。
+     * <p>
+     * 利用 Anchor 缓存：遍历基地已记录的 Anchor，检查其上方的光环节点方块是否为
+     * STEALTH 类型。未找到则视为无隐匿光环。
+     * </p>
+     */
+    private static boolean hasStealthAuraNode(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion) {
+        java.util.Set<BlockPos> anchors = savedData.getAnchors(bastion.id());
+        if (anchors == null || anchors.isEmpty()) {
+            return false;
+        }
+
+        for (BlockPos anchorPos : anchors) {
+            BlockPos nodePos = anchorPos.above();
+            var state = level.getBlockState(nodePos);
+            if (!(state.getBlock() instanceof BastionAuraNodeBlock)) {
+                continue;
+            }
+            AuraNodeType type = state.getValue(BastionAuraNodeBlock.AURA_TYPE);
+            if (type == AuraNodeType.STEALTH) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 为基地范围内的守卫实体施加隐身效果。
+     * <p>
+     * 仅影响属于该基地的守卫（BastionGuardianData 判断），不影响玩家或其它实体。
+     * 以 auraRadius 为范围，垂直方向同样使用 radius 兜底覆盖高低差。
+     * </p>
+     */
+    private static void applyStealthToGuardians(ServerLevel level, BastionData bastion) {
+        int auraRadius = bastion.getAuraRadius();
+        if (auraRadius <= 0) {
+            return;
+        }
+
+        BlockPos core = bastion.corePos();
+        AABB box = new AABB(core).inflate(auraRadius, auraRadius, auraRadius);
+
+        List<Mob> guardians = level.getEntitiesOfClass(Mob.class, box, mob ->
+            BastionGuardianData.isGuardian(mob)
+                && BastionGuardianData.belongsToBastion(mob, bastion.id())
+        );
+
+        if (guardians.isEmpty()) {
+            return;
+        }
+
+        for (Mob guardian : guardians) {
+            guardian.addEffect(new MobEffectInstance(
+                MobEffects.INVISIBILITY,
+                StealthConfig.EFFECT_DURATION_TICKS,
+                0,
+                true,
+                false,
+                false
+            ));
+        }
     }
 
     // ===== 消息通知 =====
