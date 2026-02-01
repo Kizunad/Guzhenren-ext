@@ -151,6 +151,7 @@ public final class BastionTypeManager {
             BastionTypeConfig.EvolutionConfig.DEFAULT,
             BastionTypeConfig.AuraConfig.DEFAULT,
             BastionTypeConfig.EnergyConfig.DEFAULT,
+            BastionTypeConfig.EnergyLossConfig.DEFAULT,
             BastionTypeConfig.HatcheryConfig.DEFAULT,
             BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.BossConfig.DEFAULT,

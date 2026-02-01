@@ -52,6 +52,7 @@ public record BastionTypeConfig(
          EvolutionConfig evolution,
          AuraConfig aura,
          EnergyConfig energy,
+         EnergyLossConfig energyLoss,
          HatcheryConfig hatchery,
          EliteConfig elite,
          BossConfig boss,
@@ -160,9 +161,9 @@ public record BastionTypeConfig(
             return pollution;
         }
 
-         private CaptureConfig capture() {
-             return capture;
-         }
+        private CaptureConfig capture() {
+            return capture;
+        }
 
         private static final MapCodec<OptionalContentParams> OPTIONAL_CONTENT_PARAMS_CODEC =
             RecordCodecBuilder.mapCodec(instance ->
@@ -196,7 +197,7 @@ public record BastionTypeConfig(
          * 通过将多字段聚合到单个参数对象，既满足编解码需求，又保持字段扁平的 JSON schema。
          * </p>
          */
-        private record OptionalContentParams(
+     private record OptionalContentParams(
                 ShellConfig shell,
                 EliteConfig elite,
                 Optional<LootConfig> loot,
@@ -206,6 +207,50 @@ public record BastionTypeConfig(
                 ThreatConfig threat,
                 PollutionConfig pollution,
                 CaptureConfig capture) {
+        }
+    }
+
+    /**
+     * 能源相关配置打包（用于 codec 分组，保持 JSON 扁平）。
+     * <p>
+     * 目的：避免 RecordCodecBuilder 参数数量超限，同时保证 energy/energy_loss 仍位于根对象。
+     * </p>
+     */
+    private static final class EnergyContentConfig {
+        private final EnergyConfig energy;
+        private final EnergyLossConfig energyLoss;
+
+        private EnergyContentConfig(EnergyContentParams params) {
+            this.energy = params.energy();
+            this.energyLoss = params.energyLoss();
+        }
+
+        private EnergyContentParams toParams() {
+            return new EnergyContentParams(energy, energyLoss);
+        }
+
+        private EnergyConfig energy() {
+            return energy;
+        }
+
+        private EnergyLossConfig energyLoss() {
+            return energyLoss;
+        }
+
+        private static final MapCodec<EnergyContentParams> ENERGY_CONTENT_PARAMS_CODEC =
+            RecordCodecBuilder.mapCodec(instance ->
+                instance.group(
+                    EnergyConfig.CODEC.optionalFieldOf("energy", EnergyConfig.DEFAULT)
+                        .forGetter(EnergyContentParams::energy),
+                    EnergyLossConfig.CODEC.optionalFieldOf("energy_loss", EnergyLossConfig.DEFAULT)
+                        .forGetter(EnergyContentParams::energyLoss)
+                ).apply(instance, EnergyContentParams::new)
+            );
+
+        private static final MapCodec<EnergyContentConfig> MAP_CODEC =
+            ENERGY_CONTENT_PARAMS_CODEC.xmap(EnergyContentConfig::new, EnergyContentConfig::toParams);
+
+        private record EnergyContentParams(EnergyConfig energy, EnergyLossConfig energyLoss) {
         }
     }
 
@@ -650,12 +695,13 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::decay),
                  EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
                      .forGetter(BastionTypeConfig::evolution),
-                AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
-                .forGetter(BastionTypeConfig::aura),
-            EnergyConfig.CODEC.optionalFieldOf("energy", EnergyConfig.DEFAULT)
-                .forGetter(BastionTypeConfig::energy),
-            HatcheryConfig.CODEC.optionalFieldOf("hatchery", HatcheryConfig.DEFAULT)
-                .forGetter(BastionTypeConfig::hatchery),
+             AuraConfig.CODEC.optionalFieldOf("aura", AuraConfig.DEFAULT)
+                 .forGetter(BastionTypeConfig::aura),
+             EnergyContentConfig.MAP_CODEC.forGetter(config -> new EnergyContentConfig(
+                 new EnergyContentConfig.EnergyContentParams(config.energy(), config.energyLoss())
+             )),
+             HatcheryConfig.CODEC.optionalFieldOf("hatchery", HatcheryConfig.DEFAULT)
+                 .forGetter(BastionTypeConfig::hatchery),
             // 有效节点数（effectiveNodes）权重配置：
             // - anchorsWeight：Anchor（子核心/支撑节点）的权重
             // - myceliumWeight：菌毯（贴地蔓延主网）的权重
@@ -690,7 +736,7 @@ public record BastionTypeConfig(
                 decay,
                 evolution,
                 aura,
-                energy,
+                energyContent,
                 hatchery,
                 anchorsWeight,
                 myceliumWeight,
@@ -707,7 +753,8 @@ public record BastionTypeConfig(
             decay,
             evolution,
             aura,
-            energy,
+            energyContent.energy(),
+            energyContent.energyLoss(),
             hatchery,
              optionalContent.elite(),
              optionalContent.boss(),
@@ -1459,15 +1506,15 @@ public record BastionTypeConfig(
      * @param wind           风能：依赖高空风力（高度/无遮挡）
      * @param night          夜能：依赖夜间/低光照环境的能源
      */
-    public record EnergyConfig(
-            EnergyNodeConfig photosynthesis,
-            EnergyNodeConfig waterIntake,
-            EnergyNodeConfig geothermal,
-            EnergyNodeConfig wind,
-            NightEnergyNodeConfig night,
+     public record EnergyConfig(
+             EnergyNodeConfig photosynthesis,
+             EnergyNodeConfig waterIntake,
+             EnergyNodeConfig geothermal,
+             EnergyNodeConfig wind,
+             NightEnergyNodeConfig night,
 
-            /**
-             * 同一 Anchor 多条件满足时的最终能源类型选择顺序（冲突优先级）。
+             /**
+              * 同一 Anchor 多条件满足时的最终能源类型选择顺序（冲突优先级）。
              * <p>
              * 说明：能源节点的环境判定可能同时满足多个条件（例如附近同时有水与岩浆）。
              * Round 3.2 要求将该优先级配置化：由 bastion_type.energy.priority_order 控制。
@@ -1525,6 +1572,43 @@ public record BastionTypeConfig(
             ordered.addAll(DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER);
             return List.copyOf(ordered);
         }
+    }
+
+    /**
+     * 能源网络距离损耗配置。
+     * <p>
+     * Round 23：为能源网络引入距离相关的损耗机制，按配置计算衰减比例并用于扣减能源加成。
+     * </p>
+     * <p>
+     * 兼容策略：旧版 bastion_type JSON 默认 disabled，且所有字段使用 optionalFieldOf 回退默认值，
+     * 确保旧存档/旧配置行为不变。
+     * </p>
+     *
+     * @param enabled      是否启用距离损耗
+     * @param lossPerBlock 每格损耗比例（乘法叠加系数，1% = 0.01）
+     * @param maxLossRatio 最大损耗比例上限（0.5 = 最多扣掉 50%）
+     * @param baseDistance 免损耗基础距离（方块，<=该距离不损耗）
+     */
+    public record EnergyLossConfig(
+            boolean enabled,
+            double lossPerBlock,
+            double maxLossRatio,
+            int baseDistance
+    ) {
+        public static final EnergyLossConfig DEFAULT = new EnergyLossConfig(false, 0.01, 0.5, 16);
+
+        public static final Codec<EnergyLossConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DEFAULT.enabled())
+                    .forGetter(EnergyLossConfig::enabled),
+                Codec.DOUBLE.optionalFieldOf("loss_per_block", DEFAULT.lossPerBlock())
+                    .forGetter(EnergyLossConfig::lossPerBlock),
+                Codec.DOUBLE.optionalFieldOf("max_loss_ratio", DEFAULT.maxLossRatio())
+                    .forGetter(EnergyLossConfig::maxLossRatio),
+                Codec.INT.optionalFieldOf("base_distance", DEFAULT.baseDistance())
+                    .forGetter(EnergyLossConfig::baseDistance)
+            ).apply(instance, EnergyLossConfig::new)
+        );
     }
 
     /**

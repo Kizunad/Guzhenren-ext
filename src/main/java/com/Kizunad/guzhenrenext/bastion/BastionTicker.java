@@ -373,8 +373,12 @@ public final class BastionTicker {
         BastionEnergyService.tick(level, savedData, bastion, gameTime);
 
         EnergyContext energyContext = buildEnergyContext(savedData, bastion);
-        double mAdd = calculateEnergyMultipliers(energyContext.config(), energyContext.counts());
-        double flatAdd = calculateEnergyFlatAdds(energyContext.config(), energyContext.counts());
+        double lossRatio = calculateEnergyLossRatio(
+            energyContext.lossConfig(), bastion.corePos(), savedData.getOrCreateAnchorEnergyMap(bastion.id()));
+        double mAdd = calculateEnergyMultipliers(
+            energyContext.config(), energyContext.counts(), energyContext.lossConfig(), lossRatio);
+        double flatAdd = calculateEnergyFlatAdds(
+            energyContext.config(), energyContext.counts(), energyContext.lossConfig(), lossRatio);
         double multiplierFinal = poolMultiplier * (1.0 + Math.max(0.0, mAdd));
 
         double basePoolGain = calculatePoolGain(bastion, effectiveNodes, multiplierFinal);
@@ -437,10 +441,49 @@ public final class BastionTicker {
     private static EnergyContext buildEnergyContext(BastionSavedData savedData, BastionData bastion) {
         BastionTypeConfig typeConfigForEnergy = BastionTypeManager.getOrDefault(bastion.bastionType());
         BastionTypeConfig.EnergyConfig energyConfig = typeConfigForEnergy.energy();
+        BastionTypeConfig.EnergyLossConfig energyLossConfig = typeConfigForEnergy.energyLoss();
         Map<BlockPos, BastionEnergyType> energyMap = savedData.getOrCreateAnchorEnergyMap(bastion.id());
 
         EnergyCounts energyCounts = countEnergyNodes(energyConfig, energyMap);
-        return new EnergyContext(energyConfig, energyCounts);
+        return new EnergyContext(energyConfig, energyLossConfig, energyCounts);
+    }
+
+    /**
+     * 计算能源网络的距离损耗比例。
+     * <p>
+     * 距离定义：能源节点到基地核心的二维欧氏距离（忽略高度），采用 sqrt(dx^2+dz^2)。
+     * 仅当距离大于 baseDistance 时才产生损耗，且损耗上限为 maxLossRatio。
+     * </p>
+     */
+    private static double calculateEnergyLossRatio(
+            BastionTypeConfig.EnergyLossConfig lossConfig,
+            BlockPos corePos,
+            Map<BlockPos, BastionEnergyType> energyMap) {
+        if (lossConfig == null || !lossConfig.enabled()) {
+            return 0.0;
+        }
+
+        if (energyMap.isEmpty()) {
+            return 0.0;
+        }
+
+        double maxLoss = Math.min(1.0, Math.max(0.0, lossConfig.maxLossRatio()));
+        double lossPerBlock = Math.max(0.0, lossConfig.lossPerBlock());
+        int baseDistance = Math.max(0, lossConfig.baseDistance());
+
+        double maxRatioObserved = 0.0;
+        for (BlockPos nodePos : energyMap.keySet()) {
+            double dx = nodePos.getX() - corePos.getX();
+            double dz = nodePos.getZ() - corePos.getZ();
+            double distance = Math.sqrt(dx * dx + dz * dz);
+            double excess = Math.max(0.0, distance - baseDistance);
+            double ratio = Math.min(maxLoss, excess * lossPerBlock);
+            if (ratio > maxRatioObserved) {
+                maxRatioObserved = ratio;
+            }
+        }
+
+        return maxRatioObserved;
     }
 
     /**
@@ -501,25 +544,46 @@ public final class BastionTicker {
 
     private static double calculateEnergyMultipliers(
             BastionTypeConfig.EnergyConfig energyConfig,
-            EnergyCounts counts) {
-        return counts.photosynthesis() * energyConfig.photosynthesis().poolGainMultiplier()
+            EnergyCounts counts,
+            BastionTypeConfig.EnergyLossConfig lossConfig,
+            double lossRatio) {
+        double base = counts.photosynthesis() * energyConfig.photosynthesis().poolGainMultiplier()
             + counts.waterIntake() * energyConfig.waterIntake().poolGainMultiplier()
             + counts.geothermal() * energyConfig.geothermal().poolGainMultiplier()
             + counts.wind() * energyConfig.wind().poolGainMultiplier()
             + counts.night() * energyConfig.night().poolGainMultiplier();
+
+        if (!lossConfig.enabled()) {
+            return base;
+        }
+
+        double clampedLoss = Math.min(1.0, Math.max(0.0, lossRatio));
+        return base * (1.0 - clampedLoss);
     }
 
     private static double calculateEnergyFlatAdds(
             BastionTypeConfig.EnergyConfig energyConfig,
-            EnergyCounts counts) {
-        return counts.photosynthesis() * energyConfig.photosynthesis().poolGainFlat()
+            EnergyCounts counts,
+            BastionTypeConfig.EnergyLossConfig lossConfig,
+            double lossRatio) {
+        double base = counts.photosynthesis() * energyConfig.photosynthesis().poolGainFlat()
             + counts.waterIntake() * energyConfig.waterIntake().poolGainFlat()
             + counts.geothermal() * energyConfig.geothermal().poolGainFlat()
             + counts.wind() * energyConfig.wind().poolGainFlat()
             + counts.night() * energyConfig.night().poolGainFlat();
+
+        if (!lossConfig.enabled()) {
+            return base;
+        }
+
+        double clampedLoss = Math.min(1.0, Math.max(0.0, lossRatio));
+        return base * (1.0 - clampedLoss);
     }
 
-    private record EnergyContext(BastionTypeConfig.EnergyConfig config, EnergyCounts counts) {
+    private record EnergyContext(
+            BastionTypeConfig.EnergyConfig config,
+            BastionTypeConfig.EnergyLossConfig lossConfig,
+            EnergyCounts counts) {
     }
 
     private record EnergyCounts(int photosynthesis, int waterIntake, int geothermal, int wind, int night) {
