@@ -353,9 +353,21 @@ public final class BastionExpansionService {
      * </p>
      */
     private static void ensureFrontierCacheInitialized(BastionSavedData savedData, BastionData bastion) {
-        if (!savedData.hasFrontierCache(bastion.id())) {
-            savedData.initializeFrontierFromCore(bastion.id(), bastion.corePos());
-            LOGGER.debug("初始化基地 {} 的 frontier 缓存", bastion.id());
+        if (savedData.hasFrontierCache(bastion.id())) {
+            return;
+        }
+        // 初始化 frontier：包含核心位置
+        savedData.initializeFrontierFromCore(bastion.id(), bastion.corePos());
+
+        // 将现有 Anchor 也加入 frontier，使扩张可以从 Anchor 周围开始
+        java.util.Set<BlockPos> anchors = savedData.getAnchors(bastion.id());
+        if (anchors != null && !anchors.isEmpty()) {
+            java.util.Set<BlockPos> frontier = savedData.getFrontier(bastion.id());
+            frontier.addAll(anchors);
+            LOGGER.debug("初始化基地 {} 的 frontier 缓存，包含 {} 个 Anchor",
+                bastion.id(), anchors.size());
+        } else {
+            LOGGER.debug("初始化基地 {} 的 frontier 缓存（仅核心）", bastion.id());
         }
     }
 

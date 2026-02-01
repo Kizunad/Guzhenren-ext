@@ -75,10 +75,12 @@ public final class BastionTicker {
         static final double NO_PLAYER_POOL_MULTIPLIER = 0.5;
         /** 资源池每节点容量系数。 */
         static final double POOL_CAP_PER_NODE = 10.0;
-        /** 资源池基础获取系数。 */
-        static final double POOL_BASE_GAIN_FACTOR = 0.01;
-        /** 转数幂基数（用于计算转数加成）。 */
-        static final double TIER_POWER_BASE = 1.5;
+         /** 资源池基础获取系数。 */
+         static final double POOL_BASE_GAIN_FACTOR = 0.01;
+         /** 转数幂基数（用于计算转数加成）。 */
+         static final double TIER_POWER_BASE = 1.5;
+        /** 核心每 tick 基础产出（不依赖节点数量）。 */
+        static final double CORE_BASE_GAIN_PER_TICK = 0.5;
 
         private MultiplierConfig() {
         }
@@ -646,7 +648,10 @@ public final class BastionTicker {
 
     private static double calculatePoolGain(BastionData bastion, int effectiveNodes, double multiplier) {
         double tierFactor = Math.pow(MultiplierConfig.TIER_POWER_BASE, bastion.tier() - 1);
-        double baseGain = effectiveNodes * tierFactor * MultiplierConfig.POOL_BASE_GAIN_FACTOR;
+        // 核心自带基础产出（不依赖节点数量），确保新生成的基地也能逐步积累资源
+        double coreBaseGain = MultiplierConfig.CORE_BASE_GAIN_PER_TICK * tierFactor;
+        double nodeGain = effectiveNodes * tierFactor * MultiplierConfig.POOL_BASE_GAIN_FACTOR;
+        double baseGain = coreBaseGain + nodeGain;
         return baseGain * multiplier * TickConfig.TICK_INTERVAL;
     }
 
