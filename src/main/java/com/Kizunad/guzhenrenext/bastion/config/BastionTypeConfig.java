@@ -42,14 +42,15 @@ public record BastionTypeConfig(
         int maxTier,
         UpkeepConfig upkeep,
         SpawningConfig spawning,
-        ExpansionConfig expansion,
-        ConnectivityConfig connectivity,
-        DecayConfig decay,
-        EvolutionConfig evolution,
-        AuraConfig aura,
-        EnergyConfig energy,
-        HatcheryConfig hatchery,
-        int anchorsWeight,
+         ExpansionConfig expansion,
+         ConnectivityConfig connectivity,
+         ShellConfig shell,
+         DecayConfig decay,
+         EvolutionConfig evolution,
+         AuraConfig aura,
+         EnergyConfig energy,
+         HatcheryConfig hatchery,
+         int anchorsWeight,
         int myceliumWeight,
         Optional<LootConfig> loot,
         Optional<HighTierConfig> highTier,
@@ -81,24 +82,31 @@ public record BastionTypeConfig(
      * 但 JSON schema 不变：仍然是根对象上的 3 个字段（不会引入额外嵌套对象）。
      * </p>
      */
-    private static final class OptionalContentConfig {
-        private final Optional<LootConfig> loot;
-        private final Optional<HighTierConfig> highTier;
-        private final Optional<GuardianShazhaoConfig> guardianShazhao;
+     private static final class OptionalContentConfig {
+         private final ShellConfig shell;
+         private final Optional<LootConfig> loot;
+         private final Optional<HighTierConfig> highTier;
+         private final Optional<GuardianShazhaoConfig> guardianShazhao;
 
-        private OptionalContentConfig(
-                Optional<LootConfig> loot,
-                Optional<HighTierConfig> highTier,
-                Optional<GuardianShazhaoConfig> guardianShazhao
-        ) {
-            this.loot = loot;
-            this.highTier = highTier;
-            this.guardianShazhao = guardianShazhao;
-        }
+         private OptionalContentConfig(
+                 ShellConfig shell,
+                 Optional<LootConfig> loot,
+                 Optional<HighTierConfig> highTier,
+                 Optional<GuardianShazhaoConfig> guardianShazhao
+         ) {
+             this.shell = shell;
+             this.loot = loot;
+             this.highTier = highTier;
+             this.guardianShazhao = guardianShazhao;
+         }
 
-        private Optional<LootConfig> loot() {
-            return loot;
-        }
+         private ShellConfig shell() {
+             return shell;
+         }
+
+         private Optional<LootConfig> loot() {
+             return loot;
+         }
 
         private Optional<HighTierConfig> highTier() {
             return highTier;
@@ -110,6 +118,8 @@ public record BastionTypeConfig(
 
         private static final MapCodec<OptionalContentConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
+                ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
+                    .forGetter(OptionalContentConfig::shell),
                 LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
                 HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(OptionalContentConfig::highTier),
                 GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
@@ -134,6 +144,8 @@ public record BastionTypeConfig(
                 .forGetter(BastionTypeConfig::expansion),
             ConnectivityConfig.CODEC.optionalFieldOf("connectivity", ConnectivityConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::connectivity),
+            // 外壳（甲壳）配置：Round 6.2 引入，默认未启用，兼容旧 JSON。
+            // 与可选内容一起打包以规避 RecordCodecBuilder 16 参数限制，同时保持 JSON 扁平。
             DecayConfig.CODEC.optionalFieldOf("decay", DecayConfig.DEFAULT)
                 .forGetter(BastionTypeConfig::decay),
             EvolutionConfig.CODEC.optionalFieldOf("evolution", EvolutionConfig.DEFAULT)
@@ -155,6 +167,7 @@ public record BastionTypeConfig(
             // 可选内容配置。
             // 注意：这里用 MapCodec 进行字段分组以规避 16 参数限制，但字段仍位于根对象。
             OptionalContentConfig.MAP_CODEC.forGetter(config -> new OptionalContentConfig(
+                config.shell(),
                 config.loot(),
                 config.highTier(),
                 config.guardianShazhao()
@@ -183,6 +196,7 @@ public record BastionTypeConfig(
             spawning,
             expansion,
             connectivity,
+            optionalContent.shell(),
             decay,
             evolution,
             aura,
@@ -479,6 +493,59 @@ public record BastionTypeConfig(
         );
     }
 
+    // ===== 外壳（甲壳）配置 =====
+
+    /**
+     * 外壳（甲壳）配置。
+     * <p>
+     * Round 6.2：定义外壳再生的连通性要求和资源阈值。
+     * </p>
+     *
+     * @param enabled           是否启用外壳系统
+     * @param regenCostPerBlock 每个方块的再生成本
+     * @param regenCooldownTicks再生冷却时间（tick）
+     * @param maxShellBlocks    最大外壳方块数（0 表示不限制）
+     * @param resourceThreshold 资源池阈值：低于此值停止再生
+     */
+    public record ShellConfig(
+            boolean enabled,
+            double regenCostPerBlock,
+            long regenCooldownTicks,
+            int maxShellBlocks,
+            double resourceThreshold
+    ) {
+        public static final ShellConfig DEFAULT = new ShellConfig(
+            DefaultValues.DEFAULT_SHELL_ENABLED,
+            DefaultValues.DEFAULT_SHELL_REGEN_COST_PER_BLOCK,
+            DefaultValues.DEFAULT_SHELL_REGEN_COOLDOWN_TICKS,
+            DefaultValues.DEFAULT_SHELL_MAX_BLOCKS,
+            DefaultValues.DEFAULT_SHELL_RESOURCE_THRESHOLD
+        );
+
+        public static final Codec<ShellConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_SHELL_ENABLED)
+                    .forGetter(ShellConfig::enabled),
+                Codec.DOUBLE.optionalFieldOf(
+                        "regen_cost_per_block",
+                        DefaultValues.DEFAULT_SHELL_REGEN_COST_PER_BLOCK)
+                    .forGetter(ShellConfig::regenCostPerBlock),
+                Codec.LONG.optionalFieldOf(
+                        "regen_cooldown_ticks",
+                        DefaultValues.DEFAULT_SHELL_REGEN_COOLDOWN_TICKS)
+                    .forGetter(ShellConfig::regenCooldownTicks),
+                Codec.INT.optionalFieldOf(
+                        "max_shell_blocks",
+                        DefaultValues.DEFAULT_SHELL_MAX_BLOCKS)
+                    .forGetter(ShellConfig::maxShellBlocks),
+                Codec.DOUBLE.optionalFieldOf(
+                        "resource_threshold",
+                        DefaultValues.DEFAULT_SHELL_RESOURCE_THRESHOLD)
+                    .forGetter(ShellConfig::resourceThreshold)
+            ).apply(instance, ShellConfig::new)
+        );
+    }
+
     /**
      * 默认值常量。
      */
@@ -505,6 +572,18 @@ public record BastionTypeConfig(
          * </p>
          */
         static final int DEFAULT_CONNECTIVITY_BFS_BUDGET_NODES = 128;
+
+        // ===== 外壳（甲壳）默认值 =====
+        /** 是否启用外壳系统（默认关闭以兼容旧 JSON）。 */
+        static final boolean DEFAULT_SHELL_ENABLED = false;
+        /** 每个外壳方块的再生成本。 */
+        static final double DEFAULT_SHELL_REGEN_COST_PER_BLOCK = 1.0;
+        /** 外壳再生冷却时间（tick）。 */
+        static final long DEFAULT_SHELL_REGEN_COOLDOWN_TICKS = 100L;
+        /** 外壳方块数量上限（0 表示不限制）。 */
+        static final int DEFAULT_SHELL_MAX_BLOCKS = 0;
+        /** 资源池阈值：低于该值停止再生。 */
+        static final double DEFAULT_SHELL_RESOURCE_THRESHOLD = 0.0;
 
         // ===== 菌毯衰败默认值 =====
 
