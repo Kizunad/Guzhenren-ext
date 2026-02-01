@@ -139,7 +139,8 @@ public class ExampleGameTests {
             BastionTypeConfig.EnergyLossConfig.DEFAULT,
             BastionTypeConfig.NodeContentConfig.create(
                 BastionTypeConfig.HatcheryConfig.DEFAULT,
-                BastionTypeConfig.TurretConfig.DEFAULT
+                BastionTypeConfig.TurretConfig.DEFAULT,
+                BastionTypeConfig.TrapConfig.DEFAULT
             ),
             BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.BossConfig.DEFAULT,

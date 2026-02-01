@@ -28,18 +28,19 @@ import java.util.Optional;
  * @param decay           菌毯衰败配置（倒计时/预算/间隔；缺省回退旧常量，保证旧 JSON 行为不变）
  * @param evolution       进化配置
  * @param aura            光环配置（影响半径与衰减）
- * @param energy          能源节点配置（影响资源池增长的额外加成）
- * @param hatchery        守卫孵化巢配置（Round 4.2：守卫产出机制地基，缺省为未启用）
- * @param turret          炮台节点配置（Round 24：自动攻击敌对目标，缺省未启用）
-     * @param elite           精英守卫配置（Round 7.1：倍率与技能池，缺省未启用）
-     * @param boss            Boss 配置（Round 8.1：倍率与生成门槛，缺省未启用）
-     * @param capture         接管配置（Round 10.1：是否启用接管与窗口超时，缺省未启用）
-     * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
-     * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
+     * @param energy          能源节点配置（影响资源池增长的额外加成）
+     * @param hatchery        守卫孵化巢配置（Round 4.2：守卫产出机制地基，缺省为未启用）
+     * @param turret          炮台节点配置（Round 24：自动攻击敌对目标，缺省未启用）
+     * @param trap            陷阱节点配置（Round 25：范围减速与虚弱，缺省未启用）
+      * @param elite           精英守卫配置（Round 7.1：倍率与技能池，缺省未启用）
+      * @param boss            Boss 配置（Round 8.1：倍率与生成门槛，缺省未启用）
+      * @param capture         接管配置（Round 10.1：是否启用接管与窗口超时，缺省未启用）
+      * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
+      * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
      * @param loot            战利品配置（可选）
      * @param highTier        高转内容配置（可选，7-9 转专属）
      */
-     public record BastionTypeConfig(
+    public record BastionTypeConfig(
             String id,
             String displayName,
             BastionDao primaryDao,
@@ -57,14 +58,14 @@ import java.util.Optional;
             NodeContentConfig nodeContent,
              EliteConfig elite,
              BossConfig boss,
-             ThreatConfig threat,
-               PollutionConfig pollution,
-               CaptureConfig capture,
-               int anchorsWeight,
-               int myceliumWeight,
-               Optional<LootConfig> loot,
-              Optional<HighTierConfig> highTier,
-              Optional<GuardianShazhaoConfig> guardianShazhao
+            ThreatConfig threat,
+            PollutionConfig pollution,
+            CaptureConfig capture,
+            int anchorsWeight,
+            int myceliumWeight,
+            Optional<LootConfig> loot,
+            Optional<HighTierConfig> highTier,
+            Optional<GuardianShazhaoConfig> guardianShazhao
     ) {
         public HatcheryConfig hatchery() {
             return nodeContent == null ? HatcheryConfig.DEFAULT : nodeContent.hatchery();
@@ -72,6 +73,10 @@ import java.util.Optional;
 
         public TurretConfig turret() {
             return nodeContent == null ? TurretConfig.DEFAULT : nodeContent.turret();
+        }
+
+        public TrapConfig trap() {
+            return nodeContent == null ? TrapConfig.DEFAULT : nodeContent.trap();
         }
 
     /**
@@ -226,51 +231,59 @@ import java.util.Optional;
      */
     public static final class NodeContentConfig {
         public static final NodeContentConfig DEFAULT = new NodeContentConfig(
-            new NodeContentParams(HatcheryConfig.DEFAULT, TurretConfig.DEFAULT)
+            new NodeContentParams(HatcheryConfig.DEFAULT, TurretConfig.DEFAULT, TrapConfig.DEFAULT)
         );
 
         /**
          * 工厂方法：从显式的 hatchery/turret 配置创建 NodeContentConfig。
          * <p>外部调用使用此方法，避免直接依赖内部 NodeContentParams 可见性。</p>
          */
-        public static NodeContentConfig create(HatcheryConfig hatchery, TurretConfig turret) {
-            return new NodeContentConfig(new NodeContentParams(hatchery, turret));
+        public static NodeContentConfig create(HatcheryConfig hatchery, TurretConfig turret, TrapConfig trap) {
+            return new NodeContentConfig(new NodeContentParams(hatchery, turret, trap));
         }
 
         private final HatcheryConfig hatchery;
         private final TurretConfig turret;
+        private final TrapConfig trap;
 
-         private NodeContentConfig(NodeContentParams params) {
+        private NodeContentConfig(NodeContentParams params) {
             this.hatchery = params.hatchery();
             this.turret = params.turret();
+            this.trap = params.trap();
         }
 
-         private NodeContentParams toParams() {
-             return new NodeContentParams(hatchery, turret);
-         }
+        private NodeContentParams toParams() {
+            return new NodeContentParams(hatchery, turret, trap);
+        }
 
-         private HatcheryConfig hatchery() {
-             return hatchery;
-         }
+        private HatcheryConfig hatchery() {
+            return hatchery;
+        }
 
-         private TurretConfig turret() {
-             return turret;
-         }
+        private TurretConfig turret() {
+            return turret;
+        }
 
-         private static final MapCodec<NodeContentParams> NODE_CONTENT_PARAMS_CODEC =
-             RecordCodecBuilder.mapCodec(instance ->
-                 instance.group(
-                     HatcheryConfig.CODEC.optionalFieldOf("hatchery", HatcheryConfig.DEFAULT)
-                         .forGetter(NodeContentParams::hatchery),
-                     TurretConfig.CODEC.optionalFieldOf("turret", TurretConfig.DEFAULT)
-                         .forGetter(NodeContentParams::turret)
-                 ).apply(instance, NodeContentParams::new)
-             );
+        private TrapConfig trap() {
+            return trap;
+        }
 
-         private static final MapCodec<NodeContentConfig> MAP_CODEC =
-             NODE_CONTENT_PARAMS_CODEC.xmap(NodeContentConfig::new, NodeContentConfig::toParams);
+        private static final MapCodec<NodeContentParams> NODE_CONTENT_PARAMS_CODEC =
+            RecordCodecBuilder.mapCodec(instance ->
+                instance.group(
+                    HatcheryConfig.CODEC.optionalFieldOf("hatchery", HatcheryConfig.DEFAULT)
+                        .forGetter(NodeContentParams::hatchery),
+                    TurretConfig.CODEC.optionalFieldOf("turret", TurretConfig.DEFAULT)
+                        .forGetter(NodeContentParams::turret),
+                    TrapConfig.CODEC.optionalFieldOf("trap", TrapConfig.DEFAULT)
+                        .forGetter(NodeContentParams::trap)
+                ).apply(instance, NodeContentParams::new)
+            );
 
-        private record NodeContentParams(HatcheryConfig hatchery, TurretConfig turret) {
+        private static final MapCodec<NodeContentConfig> MAP_CODEC =
+            NODE_CONTENT_PARAMS_CODEC.xmap(NodeContentConfig::new, NodeContentConfig::toParams);
+
+        private record NodeContentParams(HatcheryConfig hatchery, TurretConfig turret, TrapConfig trap) {
         }
     }
 
@@ -764,9 +777,9 @@ import java.util.Optional;
              EnergyContentConfig.MAP_CODEC.forGetter(config -> new EnergyContentConfig(
                  new EnergyContentConfig.EnergyContentParams(config.energy(), config.energyLoss())
              )),
-             NodeContentConfig.MAP_CODEC.forGetter(config -> new NodeContentConfig(
-                 new NodeContentConfig.NodeContentParams(config.hatchery(), config.turret())
-             )),
+            NodeContentConfig.MAP_CODEC.forGetter(config -> new NodeContentConfig(
+                new NodeContentConfig.NodeContentParams(config.hatchery(), config.turret(), config.trap())
+            )),
             // 有效节点数（effectiveNodes）权重配置：
             // - anchorsWeight：Anchor（子核心/支撑节点）的权重
             // - myceliumWeight：菌毯（贴地蔓延主网）的权重
@@ -824,8 +837,8 @@ import java.util.Optional;
              optionalContent.elite(),
              optionalContent.boss(),
              optionalContent.threat(),
-              optionalContent.pollution(),
-              optionalContent.capture(),
+             optionalContent.pollution(),
+             optionalContent.capture(),
              anchorsWeight,
              myceliumWeight,
              optionalContent.loot(),
@@ -1278,6 +1291,18 @@ import java.util.Optional;
         /** 每次攻击的资源消耗默认值。 */
         static final double DEFAULT_TURRET_COST_PER_SHOT = 0.5;
 
+        // ===== 陷阱节点默认值（Round 25） =====
+        /** 是否启用陷阱系统（兼容旧 JSON，默认关闭）。 */
+        static final boolean DEFAULT_TRAP_ENABLED = false;
+        /** 陷阱触发半径（方块）。 */
+        static final int DEFAULT_TRAP_TRIGGER_RADIUS = 3;
+        /** 附加效果持续时间（tick）。 */
+        static final int DEFAULT_TRAP_EFFECT_DURATION = 100;
+        /** 陷阱冷却时间（tick）。 */
+        static final int DEFAULT_TRAP_COOLDOWN_TICKS = 200;
+        /** 每基地最大陷阱数量。 */
+        static final int DEFAULT_TRAP_MAX_COUNT = 8;
+
         // ===== 污染系统默认值（Round 9.1） =====
         /** 是否启用污染系统（兼容旧 JSON，默认关闭）。 */
         static final boolean DEFAULT_POLLUTION_ENABLED = false;
@@ -1616,6 +1641,50 @@ import java.util.Optional;
                 Codec.DOUBLE.optionalFieldOf("cost_per_shot", DefaultValues.DEFAULT_TURRET_COST_PER_SHOT)
                     .forGetter(TurretConfig::costPerShot)
             ).apply(instance, TurretConfig::new)
+        );
+    }
+
+    /**
+     * 陷阱节点配置。
+     * <p>
+     * Round 25：可选的陷阱节点配置，默认关闭以兼容旧 JSON。
+     * 所有字段使用 optionalFieldOf，缺失时回退 DEFAULT，保证存档/旧配置兼容。
+     * </p>
+     *
+     * @param enabled        是否启用陷阱系统
+     * @param triggerRadius  触发范围（方块）
+     * @param effectDuration 附加效果持续时间（tick）
+     * @param cooldownTicks  触发冷却（tick）
+     * @param maxCount       每基地最大陷阱数量
+     */
+    public record TrapConfig(
+            boolean enabled,
+            int triggerRadius,
+            int effectDuration,
+            int cooldownTicks,
+            int maxCount
+    ) {
+        public static final TrapConfig DEFAULT = new TrapConfig(
+            DefaultValues.DEFAULT_TRAP_ENABLED,
+            DefaultValues.DEFAULT_TRAP_TRIGGER_RADIUS,
+            DefaultValues.DEFAULT_TRAP_EFFECT_DURATION,
+            DefaultValues.DEFAULT_TRAP_COOLDOWN_TICKS,
+            DefaultValues.DEFAULT_TRAP_MAX_COUNT
+        );
+
+        public static final Codec<TrapConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_TRAP_ENABLED)
+                    .forGetter(TrapConfig::enabled),
+                Codec.INT.optionalFieldOf("trigger_radius", DefaultValues.DEFAULT_TRAP_TRIGGER_RADIUS)
+                    .forGetter(TrapConfig::triggerRadius),
+                Codec.INT.optionalFieldOf("effect_duration", DefaultValues.DEFAULT_TRAP_EFFECT_DURATION)
+                    .forGetter(TrapConfig::effectDuration),
+                Codec.INT.optionalFieldOf("cooldown_ticks", DefaultValues.DEFAULT_TRAP_COOLDOWN_TICKS)
+                    .forGetter(TrapConfig::cooldownTicks),
+                Codec.INT.optionalFieldOf("max_count", DefaultValues.DEFAULT_TRAP_MAX_COUNT)
+                    .forGetter(TrapConfig::maxCount)
+            ).apply(instance, TrapConfig::new)
         );
     }
 

@@ -140,6 +140,11 @@ public class BastionSavedData extends SavedData {
      */
     private final Map<UUID, Long> nextTurretTryTick = new HashMap<>();
 
+    /**
+     * Round 25：陷阱节点冷却（按坐标，不持久化）。
+     */
+    private final Map<BlockPos, Long> nextTrapTryTick = new HashMap<>();
+
     // ===== 回合2：连通性/衰败运行时状态（不持久化） =====
 
     /**
@@ -309,6 +314,35 @@ public class BastionSavedData extends SavedData {
      */
     public int getBastionCount() {
         return bastions.size();
+    }
+
+    /**
+     * 获取指定陷阱位置的下一次触发时间。
+     *
+     * @param pos 陷阱方块位置
+     * @return 允许触发的 gameTime，缺省为 0
+     */
+    public long getNextTrapTryTick(BlockPos pos) {
+        return nextTrapTryTick.getOrDefault(pos, 0L);
+    }
+
+    /**
+     * 更新指定陷阱位置的下一次触发时间。
+     *
+     * @param pos  陷阱方块位置
+     * @param tick 允许触发的 gameTime
+     */
+    public void setNextTrapTryTick(BlockPos pos, long tick) {
+        nextTrapTryTick.put(pos, tick);
+    }
+
+    /**
+     * 清理陷阱冷却缓存（方块被移除时调用）。
+     *
+     * @param pos 陷阱方块位置
+     */
+    public void clearTrapCooldown(BlockPos pos) {
+        nextTrapTryTick.remove(pos);
     }
 
     // ===== 空间查询 =====
