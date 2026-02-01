@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.bastion;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAuraNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAntiExplosionShellBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionChitinShellBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
@@ -169,6 +170,14 @@ public final class BastionBlocks {
         .sound(SoundType.STONE)
         .requiresCorrectToolForDrops();
 
+    /**
+     * 反爆外壳节点属性：中等硬度，类石材行为。
+     */
+    private static final BlockBehaviour.Properties ANTI_EXPLOSION_SHELL_PROPERTIES = BlockBehaviour.Properties.of()
+        .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
+        .sound(SoundType.STONE)
+        .requiresCorrectToolForDrops();
+
     // ===== 方块注册 =====
 
     /**
@@ -253,6 +262,15 @@ public final class BastionBlocks {
         () -> new BastionTrapBlock(TRAP_PROPERTIES)
     );
 
+    /**
+     * 反爆外壳节点方块（挂载在 Anchor 上）。
+     */
+    public static final DeferredHolder<Block, BastionAntiExplosionShellBlock> BASTION_ANTI_EXPLOSION_SHELL =
+        BLOCKS.register(
+            "bastion_anti_explosion_shell",
+            () -> new BastionAntiExplosionShellBlock(ANTI_EXPLOSION_SHELL_PROPERTIES)
+        );
+
     // ===== 物品注册（方块物品） =====
 
     /**
@@ -328,6 +346,12 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BlockItem> BASTION_TRAP_ITEM = ITEMS.register(
         "bastion_trap",
         () -> new BlockItem(BASTION_TRAP.get(), new Item.Properties())
+    );
+
+    /** 反爆外壳节点方块物品。 */
+    public static final DeferredHolder<Item, BlockItem> BASTION_ANTI_EXPLOSION_SHELL_ITEM = ITEMS.register(
+        "bastion_anti_explosion_shell",
+        () -> new BlockItem(BASTION_ANTI_EXPLOSION_SHELL.get(), new Item.Properties())
     );
 
     /**

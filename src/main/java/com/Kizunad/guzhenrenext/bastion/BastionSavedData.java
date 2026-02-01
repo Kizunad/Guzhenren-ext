@@ -670,6 +670,16 @@ public class BastionSavedData extends SavedData {
     }
 
     /**
+     * 获取基地的 Anchor 缓存。
+     *
+     * @param bastionId 基地 ID
+     * @return Anchor 位置集合（可能为空）
+     */
+    public java.util.Set<BlockPos> getAnchorCache(UUID bastionId) {
+        return anchorCache.getOrDefault(bastionId, java.util.Collections.emptySet());
+    }
+
+    /**
      * 检查节点是否在指定基地的缓存中。
      * <p>
      * 用于区分由扩张服务放置的节点和玩家手动放置的节点。
