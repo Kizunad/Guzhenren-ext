@@ -654,9 +654,10 @@ public final class BastionHatcheryService {
         int wArcher = Math.max(0, weights.archer());
         int wCaster = Math.max(0, weights.caster());
         int wHealer = Math.max(0, weights.healer());
+        int wBuffer = Math.max(0, weights.buffer());
 
         int total = wMinion + wRanged + wSupport + wElite + wBoss + wShieldMinion + wBerserker + wArcher + wCaster
-            + wHealer;
+            + wHealer + wBuffer;
         if (total <= 0) {
             return null;
         }
@@ -695,6 +696,10 @@ public final class BastionHatcheryService {
         cumulative += wHealer;
         if (roll < cumulative) {
             return BastionGuardianEntities.BASTION_HEALER.get();
+        }
+        cumulative += wBuffer;
+        if (roll < cumulative) {
+            return BastionGuardianEntities.BASTION_BUFFER_GUARDIAN.get();
         }
         cumulative += wElite;
         if (roll < cumulative) {

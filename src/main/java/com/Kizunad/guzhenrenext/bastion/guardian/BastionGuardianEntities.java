@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.bastion.guardian;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionArcherGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionBerserkerGuardian;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionBufferGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionCasterGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionEvokerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionIllusionerGuardian;
@@ -53,6 +54,9 @@ public final class BastionGuardianEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionIllusionerGuardian>> BASTION_ILLUSIONER =
         registerMob("bastion_illusioner_guardian", BastionIllusionerGuardian::new);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BastionBufferGuardian>> BASTION_BUFFER_GUARDIAN =
+        registerMob("bastion_buffer_guardian", BastionBufferGuardian::new);
 
     // ===== 魂道 =====
     public static final DeferredHolder<EntityType<?>, EntityType<BastionPhantomGuardian>> BASTION_PHANTOM =

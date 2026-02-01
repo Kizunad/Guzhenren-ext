@@ -38,6 +38,10 @@ public final class BastionGuardianEntityAttributes {
             BastionGuardianEntities.BASTION_ILLUSIONER.get(),
             net.minecraft.world.entity.monster.Illusioner.createAttributes().build()
         );
+        event.put(
+            BastionGuardianEntities.BASTION_BUFFER_GUARDIAN.get(),
+            net.minecraft.world.entity.monster.Illusioner.createAttributes().build()
+        );
 
         event.put(
             BastionGuardianEntities.BASTION_PHANTOM.get(),

@@ -38,6 +38,7 @@ public final class BastionGuardianRenderers {
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_HEALER.get(), WitchRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_EVOKER.get(), EvokerRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_ILLUSIONER.get(), IllusionerRenderer::new);
+        event.registerEntityRenderer(BastionGuardianEntities.BASTION_BUFFER_GUARDIAN.get(), IllusionerRenderer::new);
 
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_PHANTOM.get(), PhantomRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_VEX.get(), VexRenderer::new);
