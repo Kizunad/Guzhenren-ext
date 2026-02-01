@@ -157,6 +157,10 @@ public record BastionTypeConfig(
             long cooldownTicks,
             /** 生成精英消耗的资源池量。 */
             double spawnCost,
+            /** 精英掉落表 ID（ResourceLocation 字符串，空表示不使用）。 */
+            String lootTableId,
+            /** 精英击杀经验倍率。 */
+            double experienceMultiplier,
             /** 同时存活的精英上限。 */
             int maxAlive,
             List<String> skillPool
@@ -170,6 +174,8 @@ public record BastionTypeConfig(
             DefaultValues.DEFAULT_ELITE_MIN_TIER,
             DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS,
             DefaultValues.DEFAULT_ELITE_SPAWN_COST,
+            DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID,
+            DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER,
             DefaultValues.DEFAULT_ELITE_MAX_ALIVE,
             List.of()
         );
@@ -204,6 +210,14 @@ public record BastionTypeConfig(
                         "spawn_cost",
                         DefaultValues.DEFAULT_ELITE_SPAWN_COST)
                     .forGetter(EliteConfig::spawnCost),
+                Codec.STRING.optionalFieldOf(
+                        "loot_table_id",
+                        DefaultValues.DEFAULT_ELITE_LOOT_TABLE_ID)
+                    .forGetter(EliteConfig::lootTableId),
+                Codec.DOUBLE.optionalFieldOf(
+                        "experience_multiplier",
+                        DefaultValues.DEFAULT_ELITE_EXPERIENCE_MULTIPLIER)
+                    .forGetter(EliteConfig::experienceMultiplier),
                 Codec.INT.optionalFieldOf("max_alive", DefaultValues.DEFAULT_ELITE_MAX_ALIVE)
                     .forGetter(EliteConfig::maxAlive),
                 Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
@@ -688,6 +702,10 @@ public record BastionTypeConfig(
          static final long DEFAULT_ELITE_COOLDOWN_TICKS = 600L;
          /** 精英生成资源消耗。 */
          static final double DEFAULT_ELITE_SPAWN_COST = 50.0;
+         /** 精英掉落表 ID，空字符串表示不启用自定义掉落表。 */
+         static final String DEFAULT_ELITE_LOOT_TABLE_ID = "";
+         /** 精英经验倍率默认值。 */
+         static final double DEFAULT_ELITE_EXPERIENCE_MULTIPLIER = 3.0;
          /** 精英同时存活上限。 */
          static final int DEFAULT_ELITE_MAX_ALIVE = 1;
 
