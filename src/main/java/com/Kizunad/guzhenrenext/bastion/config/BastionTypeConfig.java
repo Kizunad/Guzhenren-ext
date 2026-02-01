@@ -173,20 +173,29 @@ public record BastionTypeConfig(
      * @param stages                       污染阶段配置列表（按阈值升序）
      * @param nodeDestructionPollutionGain 节点被破坏时增加的污染值
      * @param escalationCooldownTicks      激化冷却时间（tick），用于节流连续激化
+     * @param infiltrationItemPollutionGain 渗透道具单次增加的污染值
+     * @param purificationItemPollutionReduce 净化道具单次减少的污染值
+     * @param itemUseCooldownTicks         污染道具使用冷却时间（tick）
      */
     public record PollutionConfig(
             boolean enabled,
             int stageCount,
             List<PollutionStage> stages,
             double nodeDestructionPollutionGain,
-            long escalationCooldownTicks
+            long escalationCooldownTicks,
+            double infiltrationItemPollutionGain,
+            double purificationItemPollutionReduce,
+            long itemUseCooldownTicks
     ) {
         public static final PollutionConfig DEFAULT = new PollutionConfig(
             DefaultValues.DEFAULT_POLLUTION_ENABLED,
             DefaultValues.DEFAULT_POLLUTION_STAGE_COUNT,
             DefaultValues.DEFAULT_POLLUTION_STAGES,
             DefaultValues.DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN,
-            DefaultValues.DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS
+            DefaultValues.DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS,
+            DefaultValues.DEFAULT_POLLUTION_INFILTRATION_ITEM_GAIN,
+            DefaultValues.DEFAULT_POLLUTION_PURIFICATION_ITEM_REDUCE,
+            DefaultValues.DEFAULT_POLLUTION_ITEM_USE_COOLDOWN_TICKS
         );
 
         public static final Codec<PollutionConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -205,7 +214,19 @@ public record BastionTypeConfig(
                 Codec.LONG.optionalFieldOf(
                         "escalation_cooldown_ticks",
                         DefaultValues.DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS)
-                    .forGetter(PollutionConfig::escalationCooldownTicks)
+                    .forGetter(PollutionConfig::escalationCooldownTicks),
+                Codec.DOUBLE.optionalFieldOf(
+                        "infiltration_item_pollution_gain",
+                        DefaultValues.DEFAULT_POLLUTION_INFILTRATION_ITEM_GAIN)
+                    .forGetter(PollutionConfig::infiltrationItemPollutionGain),
+                Codec.DOUBLE.optionalFieldOf(
+                        "purification_item_pollution_reduce",
+                        DefaultValues.DEFAULT_POLLUTION_PURIFICATION_ITEM_REDUCE)
+                    .forGetter(PollutionConfig::purificationItemPollutionReduce),
+                Codec.LONG.optionalFieldOf(
+                        "item_use_cooldown_ticks",
+                        DefaultValues.DEFAULT_POLLUTION_ITEM_USE_COOLDOWN_TICKS)
+                    .forGetter(PollutionConfig::itemUseCooldownTicks)
             ).apply(instance, PollutionConfig::new)
         );
     }
@@ -941,6 +962,12 @@ public record BastionTypeConfig(
          static final double DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN = 0.1;
          /** 激化冷却时间（tick），避免连续触发。 */
          static final long DEFAULT_POLLUTION_ESCALATION_COOLDOWN_TICKS = 200L;
+         /** 渗透道具单次增加的污染值。 */
+         static final double DEFAULT_POLLUTION_INFILTRATION_ITEM_GAIN = 0.2;
+         /** 净化道具单次减少的污染值。 */
+         static final double DEFAULT_POLLUTION_PURIFICATION_ITEM_REDUCE = 0.15;
+         /** 污染道具使用冷却时间（tick）。 */
+         static final long DEFAULT_POLLUTION_ITEM_USE_COOLDOWN_TICKS = 100L;
 
         // ===== 连通性扫描默认值 =====
         /**
