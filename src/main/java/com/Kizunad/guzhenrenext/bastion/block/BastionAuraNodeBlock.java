@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.bastion.block;
 
 import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionNodePlacementHelper;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.aura.AuraNodeType;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
@@ -157,6 +158,11 @@ public class BastionAuraNodeBlock extends Block {
         BastionData owner = savedData.findOwnerBastion(anchorPos, MAX_OWNER_SEARCH_RADIUS);
         if (owner == null) {
             player.sendSystemMessage(Component.literal("§c该 Anchor 未归属于任何基地，无法建造光环节点"));
+            return false;
+        }
+
+        // 连通性校验：Anchor 必须与基地菌毯网络连通。
+        if (!BastionNodePlacementHelper.ensureConnected(level, savedData, owner, anchorPos, player)) {
             return false;
         }
 

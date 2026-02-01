@@ -552,7 +552,7 @@ public final class BastionBlocks {
     /**
      * 光环节点物品：在服务端放置时做“扣费/上限/归属”校验。
      */
-    private static final class BastionAuraNodeItem extends BlockItem {
+        private static final class BastionAuraNodeItem extends BlockItem {
 
         private BastionAuraNodeItem(Block block, Properties properties) {
             super(block, properties);
