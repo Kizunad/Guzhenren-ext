@@ -44,6 +44,7 @@ public final class BastionGuardianRenderers {
         );
 
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_VINDICATOR.get(), VindicatorRenderer::new);
+        event.registerEntityRenderer(BastionGuardianEntities.BASTION_SHIELD_GUARDIAN.get(), VindicatorRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_PILLAGER.get(), PillagerRenderer::new);
         event.registerEntityRenderer(BastionGuardianEntities.BASTION_IRON_GOLEM.get(), IronGolemRenderer::new);
 

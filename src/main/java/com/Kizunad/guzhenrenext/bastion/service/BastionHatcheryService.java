@@ -646,8 +646,9 @@ public final class BastionHatcheryService {
         int wSupport = Math.max(0, weights.support());
         int wElite = Math.max(0, weights.elite());
         int wBoss = Math.max(0, weights.boss());
+        int wShieldMinion = Math.max(0, weights.shieldMinion());
 
-        int total = wMinion + wRanged + wSupport + wElite + wBoss;
+        int total = wMinion + wRanged + wSupport + wElite + wBoss + wShieldMinion;
         if (total <= 0) {
             return null;
         }
@@ -666,6 +667,10 @@ public final class BastionHatcheryService {
         cumulative += wSupport;
         if (roll < cumulative) {
             return BastionGuardianEntities.BASTION_WITCH.get();
+        }
+        cumulative += wShieldMinion;
+        if (roll < cumulative) {
+            return BastionGuardianEntities.BASTION_SHIELD_GUARDIAN.get();
         }
         cumulative += wElite;
         if (roll < cumulative) {

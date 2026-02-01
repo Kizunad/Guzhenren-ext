@@ -762,13 +762,14 @@ public record BastionTypeConfig(
      * elite/boss 预留权重接口，默认 0（不参与抽取）。
      * </p>
      */
-    public record GuardianWeights(int minion, int ranged, int support, int elite, int boss) {
+    public record GuardianWeights(int minion, int ranged, int support, int elite, int boss, int shieldMinion) {
         public static final GuardianWeights DEFAULT = new GuardianWeights(
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_MINION,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_RANGED,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_SUPPORT,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_ELITE,
-            DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_SHIELD_MINION
         );
 
         public static final Codec<GuardianWeights> CODEC = RecordCodecBuilder.create(instance ->
@@ -792,7 +793,11 @@ public record BastionTypeConfig(
                 Codec.INT.optionalFieldOf(
                         "boss",
                         DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS)
-                    .forGetter(GuardianWeights::boss)
+                    .forGetter(GuardianWeights::boss),
+                Codec.INT.optionalFieldOf(
+                        "shield_minion",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_SHIELD_MINION)
+                    .forGetter(GuardianWeights::shieldMinion)
             ).apply(instance, GuardianWeights::new)
         );
     }
@@ -1225,6 +1230,13 @@ public record BastionTypeConfig(
         static final int DEFAULT_HATCHERY_WEIGHT_SUPPORT = 1;
         static final int DEFAULT_HATCHERY_WEIGHT_ELITE = 0;
         static final int DEFAULT_HATCHERY_WEIGHT_BOSS = 0;
+        /**
+         * Round 11：盾兵权重默认值。
+         * <p>
+         * 兼容策略：默认 0，保持旧 JSON 不产出盾兵。
+         * </p>
+         */
+        static final int DEFAULT_HATCHERY_WEIGHT_SHIELD_MINION = 0;
 
         /**
          * 能源冲突优先级默认值。
