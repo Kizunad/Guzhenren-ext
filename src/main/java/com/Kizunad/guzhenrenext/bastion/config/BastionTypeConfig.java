@@ -728,6 +728,7 @@ import java.util.Optional;
       * <p>
       * Round 8.1：定义 Boss 的倍率、转数门槛与生成冷却。
       * Round 8.2：引入分阶段行为（血量阈值→技能/倍率）。
+      * Round 36：引入威胁等级驱动的属性/奖励倍率。
       * </p>
       */
       public record BossConfig(
@@ -753,8 +754,50 @@ import java.util.Optional;
               /** 失败时资源退还比例（0.0-1.0）。 */
               double failureBudgetRefund,
               /** 是否非阻塞（失败不阻止其他刷怪）。 */
-              boolean nonBlocking
+              boolean nonBlocking,
+              /** 威胁等级倍率配置列表（空则回退为 1.0 倍）。 */
+              List<ThreatMultiplier> threatMultipliers
       ) {
+          /**
+           * 威胁等级倍率配置。
+           * <p>
+           * 语义：当基地威胁等级达到 threatLevel（1/2/3）及以上时，
+           * Boss 生成属性与掉落将乘以对应倍率。
+           * </p>
+           *
+           * @param threatLevel        威胁等级阈值（1-3，对应 LOW/MEDIUM/HIGH）
+           * @param attributeMultiplier 属性倍率（生命/伤害/护甲）
+           * @param rewardMultiplier    掉落倍率
+           */
+          public record ThreatMultiplier(
+                  int threatLevel,
+                  double attributeMultiplier,
+                  double rewardMultiplier
+          ) {
+              private static final int MIN_LEVEL = 1;
+              private static final int MAX_LEVEL = 3;
+              private static final double DEFAULT_ATTR_MULT = 1.0;
+              private static final double DEFAULT_REWARD_MULT = 1.0;
+
+              public static final ThreatMultiplier DEFAULT = new ThreatMultiplier(
+                  MIN_LEVEL,
+                  DEFAULT_ATTR_MULT,
+                  DEFAULT_REWARD_MULT
+              );
+
+              public static final Codec<ThreatMultiplier> CODEC = RecordCodecBuilder.create(instance ->
+                  instance.group(
+                      Codec.INT.optionalFieldOf("threat_level", MIN_LEVEL)
+                          .xmap(value -> Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, value)), v -> v)
+                          .forGetter(ThreatMultiplier::threatLevel),
+                      Codec.DOUBLE.optionalFieldOf("attribute_multiplier", DEFAULT_ATTR_MULT)
+                          .forGetter(ThreatMultiplier::attributeMultiplier),
+                      Codec.DOUBLE.optionalFieldOf("reward_multiplier", DEFAULT_REWARD_MULT)
+                          .forGetter(ThreatMultiplier::rewardMultiplier)
+                  ).apply(instance, ThreatMultiplier::new)
+              );
+          }
+
           public static final BossConfig DEFAULT = new BossConfig(
               DefaultValues.DEFAULT_BOSS_ENABLED,
               DefaultValues.DEFAULT_BOSS_MIN_TIER,
@@ -767,7 +810,8 @@ import java.util.Optional;
               DefaultValues.DEFAULT_BOSS_PHASES,
               DefaultValues.DEFAULT_BOSS_FAILURE_COOLDOWN_TICKS,
               DefaultValues.DEFAULT_BOSS_FAILURE_BUDGET_REFUND,
-              DefaultValues.DEFAULT_BOSS_NON_BLOCKING
+              DefaultValues.DEFAULT_BOSS_NON_BLOCKING,
+              DefaultValues.DEFAULT_BOSS_THREAT_MULTIPLIERS
           );
 
           public static final Codec<BossConfig> CODEC = RecordCodecBuilder.create(instance ->
@@ -813,7 +857,12 @@ import java.util.Optional;
                   Codec.BOOL.optionalFieldOf(
                           "non_blocking",
                           DefaultValues.DEFAULT_BOSS_NON_BLOCKING)
-                      .forGetter(BossConfig::nonBlocking)
+                      .forGetter(BossConfig::nonBlocking),
+                  ThreatMultiplier.CODEC.listOf()
+                      .optionalFieldOf(
+                          "threat_multipliers",
+                          DefaultValues.DEFAULT_BOSS_THREAT_MULTIPLIERS)
+                      .forGetter(BossConfig::threatMultipliers)
               ).apply(instance, BossConfig::new)
           );
       }
@@ -1450,7 +1499,7 @@ import java.util.Optional;
          /** 按道途划分的精英技能池默认值（空映射，兼容旧 JSON）。 */
          static final Map<BastionDao, EliteSkillPool> DEFAULT_ELITE_DAO_SKILL_POOLS = Map.of();
 
-         // ===== Boss 默认值（Round 8.1） =====
+         // ===== Boss 默认值（Round 8.1 + Round 36） =====
          /** 是否启用 Boss 系统，缺省关闭以兼容旧 JSON。 */
          static final boolean DEFAULT_BOSS_ENABLED = false;
          /** Boss 生成最低转数要求。 */
@@ -1475,6 +1524,8 @@ import java.util.Optional;
          static final double DEFAULT_BOSS_FAILURE_BUDGET_REFUND = 0.5;
          /** Boss 失败是否非阻塞（不阻止其他刷怪）。 */
          static final boolean DEFAULT_BOSS_NON_BLOCKING = true;
+         /** Boss 威胁等级倍率默认值：空列表表示 1.0 倍，不额外加成。 */
+         static final List<BossConfig.ThreatMultiplier> DEFAULT_BOSS_THREAT_MULTIPLIERS = List.of();
 
          // ===== 接管配置默认值（Round 10.1） =====
          /** 是否启用接管系统，默认关闭以兼容旧 JSON。 */

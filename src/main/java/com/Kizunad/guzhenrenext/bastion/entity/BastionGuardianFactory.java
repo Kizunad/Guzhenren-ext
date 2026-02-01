@@ -3,9 +3,11 @@ package com.Kizunad.guzhenrenext.bastion.entity;
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
+import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig.BossConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianEntities;
 import com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianStatsService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionThreatService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +16,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,9 +115,130 @@ public final class BastionGuardianFactory {
 
         // 立即应用高强度属性，避免首次 tick 前仍使用原版数值。
         boolean elite = entity.getType() == BastionGuardianEntities.BASTION_WARDEN.get();
+        boolean boss = entity.getType() == BastionGuardianEntities.BASTION_RAVAGER.get();
+        double attributeMultiplier = 1.0;
+        double rewardMultiplier = 1.0;
+        if (boss) {
+            attributeMultiplier = resolveBossAttributeMultiplier(bastion);
+            rewardMultiplier = resolveBossRewardMultiplier(bastion);
+            markBoss(entity, rewardMultiplier);
+        }
+
         BastionGuardianStatsService.applyGuardianStats(entity, bastion.primaryDao(), tier, elite);
+        if (boss && attributeMultiplier != 1.0d) {
+            applyBossAttributeMultiplier(entity, attributeMultiplier);
+        }
         entity.setHealth(entity.getMaxHealth());
         return entity;
+    }
+
+    /**
+     * 根据威胁等级和 Boss 配置确定属性倍率。
+     * <p>
+     * 规则：找到 threat_multipliers 中 threatLevel 小于等于当前等级的最大项，
+     * 若无匹配则回退 1.0。
+     * </p>
+     */
+    private static double resolveBossAttributeMultiplier(BastionData bastion) {
+        BossConfig bossConfig = BastionTypeManager.getOrDefault(bastion.bastionType()).boss();
+        if (bossConfig == null || bossConfig.threatMultipliers() == null || bossConfig.threatMultipliers().isEmpty()) {
+            return 1.0d;
+        }
+        int level = mapThreatTier(BastionThreatService.getThreatTier(bastion));
+        double best = 1.0d;
+        for (BossConfig.ThreatMultiplier multiplier : bossConfig.threatMultipliers()) {
+            if (multiplier == null) {
+                continue;
+            }
+            if (level >= multiplier.threatLevel()) {
+                best = Math.max(best, multiplier.attributeMultiplier());
+            }
+        }
+        return best;
+    }
+
+    /**
+     * 根据威胁等级和 Boss 配置确定奖励倍率（掉落）。
+     * <p>
+     * 规则同属性倍率：取满足阈值的最大 rewardMultiplier，默认 1.0。
+     * </p>
+     */
+    private static double resolveBossRewardMultiplier(BastionData bastion) {
+        BossConfig bossConfig = BastionTypeManager.getOrDefault(bastion.bastionType()).boss();
+        if (bossConfig == null || bossConfig.threatMultipliers() == null || bossConfig.threatMultipliers().isEmpty()) {
+            return 1.0d;
+        }
+        int level = mapThreatTier(BastionThreatService.getThreatTier(bastion));
+        double best = 1.0d;
+        for (BossConfig.ThreatMultiplier multiplier : bossConfig.threatMultipliers()) {
+            if (multiplier == null) {
+                continue;
+            }
+            if (level >= multiplier.threatLevel()) {
+                best = Math.max(best, multiplier.rewardMultiplier());
+            }
+        }
+        return best;
+    }
+
+    /**
+     * 把威胁等级映射为整数等级，方便比较。
+     */
+    private static int mapThreatTier(BastionThreatService.ThreatTier tier) {
+        return switch (tier) {
+            case HIGH -> ThreatLevelConstants.THREAT_LEVEL_HIGH;
+            case MEDIUM -> ThreatLevelConstants.THREAT_LEVEL_MEDIUM;
+            case LOW -> ThreatLevelConstants.THREAT_LEVEL_LOW;
+            default -> ThreatLevelConstants.THREAT_LEVEL_NONE;
+        };
+    }
+
+    /**
+     * 威胁等级常量，避免 MagicNumber。
+     */
+    private static final class ThreatLevelConstants {
+        private static final int THREAT_LEVEL_NONE = 0;
+        private static final int THREAT_LEVEL_LOW = 1;
+        private static final int THREAT_LEVEL_MEDIUM = 2;
+        private static final int THREAT_LEVEL_HIGH = 3;
+
+        private ThreatLevelConstants() {
+        }
+    }
+
+    /**
+     * 为 Boss 标记奖励倍率，供掉落事件读取。
+     */
+    private static void markBoss(Mob boss, double rewardMultiplier) {
+        CompoundTag data = boss.getPersistentData();
+        CompoundTag bossTag = new CompoundTag();
+        bossTag.putBoolean(BossRewardData.IS_BOSS_KEY, true);
+        bossTag.putDouble(BossRewardData.REWARD_MULTIPLIER_KEY, rewardMultiplier);
+        data.put(BossRewardData.ROOT_KEY, bossTag);
+    }
+
+    /**
+     * 按倍率增强 Boss 的关键属性，保持健康上限同步。
+     */
+    private static void applyBossAttributeMultiplier(Mob boss, double multiplier) {
+        scaleAttribute(boss, Attributes.MAX_HEALTH, multiplier);
+        scaleAttribute(boss, Attributes.ATTACK_DAMAGE, multiplier);
+        scaleAttribute(boss, Attributes.ARMOR, multiplier);
+        scaleAttribute(boss, Attributes.ARMOR_TOUGHNESS, multiplier);
+        if (boss.getHealth() > boss.getMaxHealth()) {
+            boss.setHealth(boss.getMaxHealth());
+        }
+    }
+
+    private static void scaleAttribute(
+            Mob mob,
+            net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
+            double multiplier) {
+        AttributeInstance instance = mob.getAttribute(attribute);
+        if (instance == null) {
+            return;
+        }
+        instance.setBaseValue(instance.getBaseValue() * multiplier);
     }
 
     private static boolean isWardenOnlyCandidate(String bastionType, int tier) {
