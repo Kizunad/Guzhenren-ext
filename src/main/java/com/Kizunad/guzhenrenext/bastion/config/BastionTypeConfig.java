@@ -44,21 +44,22 @@ public record BastionTypeConfig(
         int maxTier,
         UpkeepConfig upkeep,
         SpawningConfig spawning,
-         ExpansionConfig expansion,
-         ConnectivityConfig connectivity,
-         ShellConfig shell,
-         DecayConfig decay,
-         EvolutionConfig evolution,
-         AuraConfig aura,
-         EnergyConfig energy,
-         HatcheryConfig hatchery,
-         EliteConfig elite,
-         BossConfig boss,
-         int anchorsWeight,
-         int myceliumWeight,
-         Optional<LootConfig> loot,
-         Optional<HighTierConfig> highTier,
-         Optional<GuardianShazhaoConfig> guardianShazhao
+        ExpansionConfig expansion,
+        ConnectivityConfig connectivity,
+        ShellConfig shell,
+        DecayConfig decay,
+        EvolutionConfig evolution,
+        AuraConfig aura,
+        EnergyConfig energy,
+        HatcheryConfig hatchery,
+        EliteConfig elite,
+        BossConfig boss,
+        PollutionConfig pollution,
+        int anchorsWeight,
+        int myceliumWeight,
+        Optional<LootConfig> loot,
+        Optional<HighTierConfig> highTier,
+        Optional<GuardianShazhaoConfig> guardianShazhao
 ) {
 
     /**
@@ -87,29 +88,32 @@ public record BastionTypeConfig(
      * （不会引入额外嵌套对象）。
      * </p>
      */
-     private static final class OptionalContentConfig {
+    private static final class OptionalContentConfig {
         private final ShellConfig shell;
         private final EliteConfig elite;
         private final Optional<LootConfig> loot;
         private final Optional<HighTierConfig> highTier;
         private final Optional<GuardianShazhaoConfig> guardianShazhao;
         private final BossConfig boss;
+        private final PollutionConfig pollution;
 
-             private OptionalContentConfig(
-                     ShellConfig shell,
-                     EliteConfig elite,
-                     Optional<LootConfig> loot,
-                     Optional<HighTierConfig> highTier,
-            Optional<GuardianShazhaoConfig> guardianShazhao,
-            BossConfig boss
-     ) {
-         this.shell = shell;
-         this.elite = elite;
-         this.loot = loot;
-         this.highTier = highTier;
-         this.guardianShazhao = guardianShazhao;
-         this.boss = boss;
-     }
+        private OptionalContentConfig(
+                ShellConfig shell,
+                EliteConfig elite,
+                Optional<LootConfig> loot,
+                Optional<HighTierConfig> highTier,
+                Optional<GuardianShazhaoConfig> guardianShazhao,
+                BossConfig boss,
+                PollutionConfig pollution
+        ) {
+            this.shell = shell;
+            this.elite = elite;
+            this.loot = loot;
+            this.highTier = highTier;
+            this.guardianShazhao = guardianShazhao;
+            this.boss = boss;
+            this.pollution = pollution;
+        }
 
         private ShellConfig shell() {
             return shell;
@@ -123,34 +127,111 @@ public record BastionTypeConfig(
             return loot;
         }
 
-         private Optional<HighTierConfig> highTier() {
-             return highTier;
-         }
+        private Optional<HighTierConfig> highTier() {
+            return highTier;
+        }
 
-         private Optional<GuardianShazhaoConfig> guardianShazhao() {
-             return guardianShazhao;
-         }
+        private Optional<GuardianShazhaoConfig> guardianShazhao() {
+            return guardianShazhao;
+        }
 
-         private BossConfig boss() {
-             return boss;
-         }
+        private BossConfig boss() {
+            return boss;
+        }
 
-         private static final MapCodec<OptionalContentConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-             instance.group(
-                 ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
-                     .forGetter(OptionalContentConfig::shell),
-                 EliteConfig.CODEC.optionalFieldOf("elite", EliteConfig.DEFAULT)
-                     .forGetter(OptionalContentConfig::elite),
-                 LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
-                 HighTierConfig.CODEC.optionalFieldOf("high_tier")
-                     .forGetter(OptionalContentConfig::highTier),
-                 GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
-                     .forGetter(OptionalContentConfig::guardianShazhao),
-                 BossConfig.CODEC.optionalFieldOf("boss", BossConfig.DEFAULT)
-                     .forGetter(OptionalContentConfig::boss)
-             ).apply(instance, OptionalContentConfig::new)
-         );
-     }
+        private PollutionConfig pollution() {
+            return pollution;
+        }
+
+        private static final MapCodec<OptionalContentConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
+                    .forGetter(OptionalContentConfig::shell),
+                EliteConfig.CODEC.optionalFieldOf("elite", EliteConfig.DEFAULT)
+                    .forGetter(OptionalContentConfig::elite),
+                LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
+                HighTierConfig.CODEC.optionalFieldOf("high_tier")
+                    .forGetter(OptionalContentConfig::highTier),
+                GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
+                    .forGetter(OptionalContentConfig::guardianShazhao),
+                BossConfig.CODEC.optionalFieldOf("boss", BossConfig.DEFAULT)
+                    .forGetter(OptionalContentConfig::boss),
+                PollutionConfig.CODEC.optionalFieldOf("pollution", PollutionConfig.DEFAULT)
+                    .forGetter(OptionalContentConfig::pollution)
+            ).apply(instance, OptionalContentConfig::new)
+        );
+    }
+
+    /**
+     * 污染系统配置。
+     * <p>
+     * Round 9.1：为基地引入可配置的污染阶段与状态机，默认关闭以兼容旧 JSON。
+     * </p>
+     *
+     * @param enabled     是否启用污染系统
+     * @param stageCount  污染阶段数量（>0），用于驱动状态机阶梯
+     * @param stages      污染阶段配置列表（按阈值升序）
+     */
+    public record PollutionConfig(boolean enabled, int stageCount, List<PollutionStage> stages) {
+        public static final PollutionConfig DEFAULT = new PollutionConfig(
+            DefaultValues.DEFAULT_POLLUTION_ENABLED,
+            DefaultValues.DEFAULT_POLLUTION_STAGE_COUNT,
+            DefaultValues.DEFAULT_POLLUTION_STAGES
+        );
+
+        public static final Codec<PollutionConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_POLLUTION_ENABLED)
+                    .forGetter(PollutionConfig::enabled),
+                Codec.INT.optionalFieldOf("stage_count", DefaultValues.DEFAULT_POLLUTION_STAGE_COUNT)
+                    .forGetter(PollutionConfig::stageCount),
+                PollutionStage.CODEC.listOf()
+                    .optionalFieldOf("stages", DefaultValues.DEFAULT_POLLUTION_STAGES)
+                    .forGetter(PollutionConfig::stages)
+            ).apply(instance, PollutionConfig::new)
+        );
+    }
+
+    /**
+     * 单个污染阶段配置。
+     * <p>
+     * 用于定义污染状态机的阈值与效果强度，名称用于日志/调试或后续 UI 文本。
+     * </p>
+     *
+     * @param name                  阶段名称（如 "light"、"medium"、"out_of_control"）
+     * @param threshold             污染值阈值（0.0-1.0，含）
+     * @param playerDebuffStrength  对玩家的 debuff 强度
+     * @param bastionBuffStrength   对基地的 buff 强度
+     */
+    public record PollutionStage(
+            String name,
+            double threshold,
+            double playerDebuffStrength,
+            double bastionBuffStrength
+    ) {
+        private static final double MIN_THRESHOLD = 0.0;
+        private static final double MAX_THRESHOLD = 1.0;
+        private static final double DEFAULT_THRESHOLD = 0.0;
+        private static final double DEFAULT_PLAYER_DEBUFF_STRENGTH = 0.0;
+        private static final double DEFAULT_BASTION_BUFF_STRENGTH = 0.0;
+
+        public static final Codec<PollutionStage> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.STRING.fieldOf("name").forGetter(PollutionStage::name),
+                Codec.doubleRange(MIN_THRESHOLD, MAX_THRESHOLD)
+                    .optionalFieldOf("threshold", DEFAULT_THRESHOLD)
+                    .forGetter(PollutionStage::threshold),
+                Codec.DOUBLE.optionalFieldOf(
+                        "player_debuff_strength",
+                        DEFAULT_PLAYER_DEBUFF_STRENGTH)
+                    .forGetter(PollutionStage::playerDebuffStrength),
+                Codec.DOUBLE.optionalFieldOf(
+                        "bastion_buff_strength",
+                        DEFAULT_BASTION_BUFF_STRENGTH)
+                    .forGetter(PollutionStage::bastionBuffStrength)
+            ).apply(instance, PollutionStage::new)
+        );
+    }
 
      /**
       * 精英守卫配置。
@@ -417,7 +498,8 @@ public record BastionTypeConfig(
                 config.loot(),
                 config.highTier(),
                 config.guardianShazhao(),
-                config.boss()
+                config.boss(),
+                config.pollution()
             ))
         ).apply(instance, (id,
                 displayName,
@@ -451,6 +533,7 @@ public record BastionTypeConfig(
             hatchery,
             optionalContent.elite(),
             optionalContent.boss(),
+            optionalContent.pollution(),
             anchorsWeight,
             myceliumWeight,
             optionalContent.loot(),
@@ -804,6 +887,14 @@ public record BastionTypeConfig(
         static final int DEFAULT_ANCHORS_WEIGHT = 10;
         /** 有效节点数：菌毯权重默认值（兼容旧 JSON）。 */
         static final int DEFAULT_MYCELIUM_WEIGHT = 1;
+
+        // ===== 污染系统默认值（Round 9.1） =====
+        /** 是否启用污染系统（兼容旧 JSON，默认关闭）。 */
+        static final boolean DEFAULT_POLLUTION_ENABLED = false;
+        /** 污染阶段数量默认值。 */
+        static final int DEFAULT_POLLUTION_STAGE_COUNT = 3;
+        /** 污染阶段默认列表：留空表示无效果，仅为 schema 占位。 */
+        static final List<PollutionStage> DEFAULT_POLLUTION_STAGES = List.of();
 
         // ===== 连通性扫描默认值 =====
         /**

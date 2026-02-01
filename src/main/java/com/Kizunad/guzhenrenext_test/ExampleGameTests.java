@@ -139,6 +139,7 @@ public class ExampleGameTests {
             BastionTypeConfig.HatcheryConfig.DEFAULT,
             BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.BossConfig.DEFAULT,
+            BastionTypeConfig.PollutionConfig.DEFAULT,
             BastionTypeConfig.DEFAULT_ANCHORS_WEIGHT,
             BastionTypeConfig.DEFAULT_MYCELIUM_WEIGHT,
             Optional.empty(),
