@@ -83,6 +83,22 @@ public final class BastionAuraService {
     }
 
     /**
+     * 侦测光环配置。
+     */
+    private static final class DetectionConfig {
+        /**
+         * 发光效果持续时间（刻），略高于检测间隔但低于两倍，避免闪烁且不过度叠加。
+         */
+        static final int EFFECT_DURATION_TICKS = 40;
+
+        /** 方块中心偏移量（用于精确距离计算）。 */
+        static final double BLOCK_CENTER_OFFSET = 0.5D;
+
+        private DetectionConfig() {
+        }
+    }
+
+    /**
      * 主资源消耗配置（按道途分配）。
      */
     private static final class ResourceConfig {
@@ -210,6 +226,16 @@ public final class BastionAuraService {
                 continue;
             }
             applyStealthToGuardians(level, bastion);
+        }
+
+        for (BastionData bastion : savedData.getAllBastions()) {
+            if (bastion.getEffectiveState(gameTime) != BastionState.ACTIVE) {
+                continue;
+            }
+            if (!hasDetectionAuraNode(level, savedData, bastion)) {
+                continue;
+            }
+            applyDetectionToPlayers(level, bastion);
         }
     }
 
@@ -403,6 +429,36 @@ public final class BastionAuraService {
     }
 
     /**
+     * 检查基地是否拥有 DETECTION 类型光环节点。
+     * <p>
+     * 利用 Anchor 缓存：遍历基地已记录的 Anchor，检查其上方的光环节点方块是否为
+     * DETECTION 类型。未找到则视为无侦测光环。
+     * </p>
+     */
+    private static boolean hasDetectionAuraNode(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion) {
+        java.util.Set<BlockPos> anchors = savedData.getAnchors(bastion.id());
+        if (anchors == null || anchors.isEmpty()) {
+            return false;
+        }
+
+        for (BlockPos anchorPos : anchors) {
+            BlockPos nodePos = anchorPos.above();
+            var state = level.getBlockState(nodePos);
+            if (!(state.getBlock() instanceof BastionAuraNodeBlock)) {
+                continue;
+            }
+            AuraNodeType type = state.getValue(BastionAuraNodeBlock.AURA_TYPE);
+            if (type == AuraNodeType.DETECTION) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 为基地范围内的守卫实体施加隐身效果。
      * <p>
      * 仅影响属于该基地的守卫（BastionGuardianData 判断），不影响玩家或其它实体。
@@ -435,6 +491,46 @@ public final class BastionAuraService {
                 true,
                 false,
                 false
+            ));
+        }
+    }
+
+    /**
+     * 为基地范围内的玩家施加发光效果，方便守卫锁定目标。
+     * <p>
+     * 使用 auraRadius 作为半径，保持与光环覆盖一致；垂直方向同样使用 radius 防止高差漏网。
+     * 持续时间略高于检测间隔，确保不闪烁且不会叠加过度。
+     * </p>
+     */
+    private static void applyDetectionToPlayers(ServerLevel level, BastionData bastion) {
+        int auraRadius = bastion.getAuraRadius();
+        if (auraRadius <= 0) {
+            return;
+        }
+
+        BlockPos core = bastion.corePos();
+        AABB box = new AABB(core).inflate(auraRadius, auraRadius, auraRadius);
+        double maxDistSq = (double) auraRadius * auraRadius;
+
+        double cx = core.getX() + DetectionConfig.BLOCK_CENTER_OFFSET;
+        double cy = core.getY() + DetectionConfig.BLOCK_CENTER_OFFSET;
+        double cz = core.getZ() + DetectionConfig.BLOCK_CENTER_OFFSET;
+        List<ServerPlayer> players = level.getEntitiesOfClass(ServerPlayer.class, box, player ->
+            player.distanceToSqr(cx, cy, cz) <= maxDistSq
+        );
+
+        if (players.isEmpty()) {
+            return;
+        }
+
+        for (ServerPlayer player : players) {
+            player.addEffect(new MobEffectInstance(
+                MobEffects.GLOWING,
+                DetectionConfig.EFFECT_DURATION_TICKS,
+                0,
+                true,
+                true,
+                true
             ));
         }
     }

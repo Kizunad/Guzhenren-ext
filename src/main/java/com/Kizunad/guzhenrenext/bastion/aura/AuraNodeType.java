@@ -25,7 +25,12 @@ public enum AuraNodeType implements StringRepresentable {
     /**
      * 隐匿型（为守卫提供短时隐身）。
      */
-    STEALTH("stealth");
+    STEALTH("stealth"),
+
+    /**
+     * 侦测型（为范围内玩家施加发光效果，便于守卫发现）。
+     */
+    DETECTION("detection");
 
     /**
      * 便于配置/网络/调试复用的通用 Codec。
