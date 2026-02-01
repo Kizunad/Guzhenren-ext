@@ -1699,6 +1699,15 @@ public class GuzhenrenDebugCommand {
                 return 0;
             }
 
+            // 显示接管状态，便于调试
+            BastionData.CaptureState captureState = bastion.captureState() == null
+                ? BastionData.CaptureState.DEFAULT
+                : bastion.captureState();
+            String captureFlagText = captureState.capturable() ? "是" : "否";
+            String captureUntilText = captureState.capturableUntilGameTime() > 0
+                ? String.valueOf(captureState.capturableUntilGameTime())
+                : "无限期";
+
             String info = String.format(
                 "§e[基地信息]§r\n" +
                     "  ID: §b%s§r\n" +
@@ -1709,7 +1718,10 @@ public class GuzhenrenDebugCommand {
                     "  节点: §9%d§r\n" +
                     "  半径: §d%d§r\n" +
                     "  资源池: §6%.1f§r\n" +
-                    "  状态: §7%s§r",
+                    "  状态: §7%s§r\n" +
+                    "  接管可用: §a%s§r\n" +
+                    "  接管原因: §7%s§r\n" +
+                    "  接管窗口截止: §d%s§r",
                 bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH),
                 bastion.primaryDao().getSerializedName(),
                 bastion.corePos().toShortString(),
@@ -1719,7 +1731,10 @@ public class GuzhenrenDebugCommand {
                 bastion.totalNodes(),
                 bastion.growthRadius(),
                 bastion.resourcePool(),
-                bastion.getEffectiveState(level.getGameTime()).getSerializedName()
+                bastion.getEffectiveState(level.getGameTime()).getSerializedName(),
+                captureFlagText,
+                captureState.reason().name(),
+                captureUntilText
             );
 
             context.getSource().sendSuccess(
