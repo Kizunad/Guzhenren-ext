@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.bastion;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionAuraNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionGuardianHatcheryBlock;
@@ -127,6 +128,14 @@ public final class BastionBlocks {
         .sound(SoundType.STONE)
         .requiresCorrectToolForDrops();
 
+    /**
+     * 光环节点属性：中等硬度，类石材行为。
+     */
+    private static final BlockBehaviour.Properties AURA_NODE_PROPERTIES = BlockBehaviour.Properties.of()
+        .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
+        .sound(SoundType.STONE)
+        .requiresCorrectToolForDrops();
+
     // ===== 方块注册 =====
 
     /**
@@ -179,6 +188,14 @@ public final class BastionBlocks {
             () -> new BastionGuardianHatcheryBlock(HATCHERY_PROPERTIES)
         );
 
+    /**
+     * 光环节点方块（带 aura_type 属性）。
+     */
+    public static final DeferredHolder<Block, BastionAuraNodeBlock> BASTION_AURA_NODE = BLOCKS.register(
+        "bastion_aura_node",
+        () -> new BastionAuraNodeBlock(AURA_NODE_PROPERTIES)
+    );
+
     // ===== 物品注册（方块物品） =====
 
     /**
@@ -226,6 +243,14 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BlockItem> BASTION_GUARDIAN_HATCHERY_ITEM = ITEMS.register(
         "bastion_guardian_hatchery",
         () -> new BlockItem(BASTION_GUARDIAN_HATCHERY.get(), new Item.Properties())
+    );
+
+    /**
+     * 光环节点方块物品。
+     */
+    public static final DeferredHolder<Item, BlockItem> BASTION_AURA_NODE_ITEM = ITEMS.register(
+        "bastion_aura_node",
+        () -> new BlockItem(BASTION_AURA_NODE.get(), new Item.Properties())
     );
 
     /**
