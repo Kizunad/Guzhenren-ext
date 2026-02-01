@@ -60,6 +60,10 @@ public final class BastionGuardianEntityAttributes {
             net.minecraft.world.entity.monster.Vindicator.createAttributes().build()
         );
         event.put(
+            BastionGuardianEntities.BASTION_BERSERKER_GUARDIAN.get(),
+            net.minecraft.world.entity.monster.Vindicator.createAttributes().build()
+        );
+        event.put(
             BastionGuardianEntities.BASTION_PILLAGER.get(),
             net.minecraft.world.entity.monster.Pillager.createAttributes().build()
         );

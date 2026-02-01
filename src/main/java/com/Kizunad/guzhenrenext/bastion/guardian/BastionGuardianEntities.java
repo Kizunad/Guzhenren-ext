@@ -10,6 +10,7 @@ import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionRavagerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionVexGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionVindicatorGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionShieldGuardian;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionBerserkerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWardenGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWitherSkeletonGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWitchGuardian;
@@ -63,6 +64,9 @@ public final class BastionGuardianEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionShieldGuardian>> BASTION_SHIELD_GUARDIAN =
         registerMob("bastion_shield_guardian", BastionShieldGuardian::new);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BastionBerserkerGuardian>> BASTION_BERSERKER_GUARDIAN =
+        registerMob("bastion_berserker_guardian", BastionBerserkerGuardian::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionPillagerGuardian>> BASTION_PILLAGER =
         registerMob("bastion_pillager_guardian", BastionPillagerGuardian::new);
