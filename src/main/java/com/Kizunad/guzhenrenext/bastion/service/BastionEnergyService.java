@@ -69,6 +69,12 @@ public final class BastionEnergyService {
         /** 光合 skylight 阈值（0~15）。MVP 主要用 canSeeSky 判定，此阈值作为后备采样判断。 */
         static final int PHOTOSYNTHESIS_SKY_LIGHT_THRESHOLD = 12;
 
+        /** 风能默认最小高度阈值（Y 轴）。 */
+        static final int WIND_MIN_Y_DEFAULT = 80;
+
+        /** 风能遮挡检测高度（向上检查的格数）。 */
+        static final int WIND_CLEARANCE_CHECK_HEIGHT = 3;
+
         private ScanConfig() {
         }
     }
@@ -100,6 +106,7 @@ public final class BastionEnergyService {
         int photoRadius = Math.max(1, energyConfig.photosynthesis().scanRadius());
         int waterRadius = Math.max(1, energyConfig.waterIntake().scanRadius());
         int geothermalRadius = Math.max(1, energyConfig.geothermal().scanRadius());
+        int windMinY = Math.max(1, energyConfig.wind().scanRadius());
 
         // 运行时缓存写入入口。
         Map<BlockPos, BastionEnergyType> energyMap = savedData.getOrCreateAnchorEnergyMap(bastion.id());
@@ -149,7 +156,14 @@ public final class BastionEnergyService {
             // 能源类型不能再“固化为某一个”，必须按 bastion_type.energy.priority_order 的顺序做冲突收口。
             BastionEnergyType chosenType = null;
             for (BastionEnergyType type : energyConfig.normalizedPriorityOrder()) {
-                if (isEnergyTypeSatisfied(type, level, anchorPos, photoRadius, waterRadius, geothermalRadius)) {
+                if (isEnergyTypeSatisfied(
+                        type,
+                        level,
+                        anchorPos,
+                        photoRadius,
+                        waterRadius,
+                        geothermalRadius,
+                        windMinY)) {
                     chosenType = type;
                     break;
                 }
@@ -194,7 +208,8 @@ public final class BastionEnergyService {
             BlockPos anchorPos,
             int photoRadius,
             int waterRadius,
-            int geothermalRadius) {
+            int geothermalRadius,
+            int windMinY) {
 
         if (energyType == null) {
             return false;
@@ -204,6 +219,7 @@ public final class BastionEnergyService {
             case PHOTOSYNTHESIS -> isPhotosynthesis(level, anchorPos, photoRadius);
             case WATER_INTAKE -> isWaterIntake(level, anchorPos, waterRadius);
             case GEOTHERMAL -> isGeothermal(level, anchorPos, geothermalRadius);
+            case WIND -> isWind(level, anchorPos, windMinY);
         };
     }
 
@@ -244,6 +260,31 @@ public final class BastionEnergyService {
      */
     private static boolean isGeothermal(ServerLevel level, BlockPos anchorPos, int scanRadius) {
         return containsFluid(level, anchorPos, scanRadius, Fluids.LAVA);
+    }
+
+    /**
+     * 风能判定：Anchor 高度达到配置阈值（默认 80），可选再检查无遮挡。
+     * <p>
+     * 简化版：仅比较 Y 坐标是否不低于 minY，避免高频扫描额外负担；如需遮挡检查可在后续迭代补充。
+     * </p>
+     */
+    private static boolean isWind(ServerLevel level, BlockPos anchorPos, int configuredMinY) {
+        int requiredMinY = Math.max(ScanConfig.WIND_MIN_Y_DEFAULT, configuredMinY);
+        if (anchorPos.getY() < requiredMinY) {
+            return false;
+        }
+
+        for (int dy = 1; dy <= ScanConfig.WIND_CLEARANCE_CHECK_HEIGHT; dy++) {
+            BlockPos pos = anchorPos.above(dy);
+            if (!level.isLoaded(pos)) {
+                continue;
+            }
+            BlockState state = level.getBlockState(pos);
+            if (state.canOcclude()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

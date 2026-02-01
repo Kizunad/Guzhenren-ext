@@ -1433,7 +1433,8 @@ public record BastionTypeConfig(
             List.of(
                 com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.GEOTHERMAL,
                 com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.WATER_INTAKE,
-                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.PHOTOSYNTHESIS
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.PHOTOSYNTHESIS,
+                com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.WIND
             );
 
         private DefaultValues() {
@@ -1452,11 +1453,13 @@ public record BastionTypeConfig(
      * @param photosynthesis 光合：依赖天空光（skylight）的能源
      * @param waterIntake    汲水：依赖邻近水源的能源
      * @param geothermal     地热：依赖邻近岩浆/深层地形的能源
+     * @param wind           风能：依赖高空风力（高度/无遮挡）
      */
     public record EnergyConfig(
             EnergyNodeConfig photosynthesis,
             EnergyNodeConfig waterIntake,
             EnergyNodeConfig geothermal,
+            EnergyNodeConfig wind,
 
             /**
              * 同一 Anchor 多条件满足时的最终能源类型选择顺序（冲突优先级）。
@@ -1474,6 +1477,7 @@ public record BastionTypeConfig(
             EnergyNodeConfig.DEFAULT,
             EnergyNodeConfig.DEFAULT,
             EnergyNodeConfig.DEFAULT,
+            EnergyNodeConfig.DEFAULT,
             DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER
         );
 
@@ -1485,6 +1489,8 @@ public record BastionTypeConfig(
                     .forGetter(EnergyConfig::waterIntake),
                 EnergyNodeConfig.CODEC.optionalFieldOf("geothermal", EnergyNodeConfig.DEFAULT)
                     .forGetter(EnergyConfig::geothermal),
+                EnergyNodeConfig.CODEC.optionalFieldOf("wind", EnergyNodeConfig.DEFAULT)
+                    .forGetter(EnergyConfig::wind),
                 com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType.CODEC.listOf()
                     .optionalFieldOf("priority_order", DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER)
                     .forGetter(EnergyConfig::priorityOrder)
@@ -1502,12 +1508,12 @@ public record BastionTypeConfig(
          * 以保证“总能选出一个最终类型”，避免配置错误导致无法建造。
          * </p>
          */
-        public List<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> normalizedPriorityOrder() {
-            java.util.LinkedHashSet<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> ordered =
-                new java.util.LinkedHashSet<>();
-            if (priorityOrder != null) {
-                ordered.addAll(priorityOrder);
-            }
+         public List<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> normalizedPriorityOrder() {
+             java.util.LinkedHashSet<com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType> ordered =
+                 new java.util.LinkedHashSet<>();
+             if (priorityOrder != null) {
+                 ordered.addAll(priorityOrder);
+             }
             ordered.addAll(DefaultValues.DEFAULT_ENERGY_PRIORITY_ORDER);
             return List.copyOf(ordered);
         }

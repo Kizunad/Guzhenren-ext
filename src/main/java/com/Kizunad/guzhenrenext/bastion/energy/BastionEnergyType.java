@@ -30,7 +30,12 @@ public enum BastionEnergyType implements StringRepresentable {
     /**
      * 地热：通过地表/地下热量获取能量。
      */
-    GEOTHERMAL("geothermal");
+    GEOTHERMAL("geothermal"),
+
+    /**
+     * 风能：通过高空风力获取能量。
+     */
+    WIND("wind");
 
     /**
      * 便于后续配置/网络/调试复用的通用 Codec。

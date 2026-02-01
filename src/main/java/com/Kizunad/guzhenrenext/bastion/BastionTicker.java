@@ -372,48 +372,9 @@ public final class BastionTicker {
         // 说明：该缓存不持久化，且扫描成本较高，因此必须由 BastionEnergyService 进行预算化驱动。
         BastionEnergyService.tick(level, savedData, bastion, gameTime);
 
-        // 从缓存统计各能源类型数量，并按配置 maxCount 截断。
-        // 解释：maxCount 是“上限贡献数”，即使缓存里有更多同类能源挂载，也只取前 maxCount 个计入加成，
-        // 以避免通过堆量 Anchor 获得线性无限收益。
-        BastionTypeConfig typeConfigForEnergy = BastionTypeManager.getOrDefault(bastion.bastionType());
-        BastionTypeConfig.EnergyConfig energyConfig = typeConfigForEnergy.energy();
-        Map<BlockPos, BastionEnergyType> energyMap = savedData.getOrCreateAnchorEnergyMap(bastion.id());
-
-        int photoMax = Math.max(0, energyConfig.photosynthesis().maxCount());
-        int waterMax = Math.max(0, energyConfig.waterIntake().maxCount());
-        int geoMax = Math.max(0, energyConfig.geothermal().maxCount());
-        int photoCount = 0;
-        int waterCount = 0;
-        int geoCount = 0;
-        for (BastionEnergyType type : energyMap.values()) {
-            if (type == null) {
-                continue;
-            }
-            if (type == BastionEnergyType.PHOTOSYNTHESIS) {
-                if (photoCount < photoMax) {
-                    photoCount++;
-                }
-            } else if (type == BastionEnergyType.WATER_INTAKE) {
-                if (waterCount < waterMax) {
-                    waterCount++;
-                }
-            } else if (type == BastionEnergyType.GEOTHERMAL) {
-                if (geoCount < geoMax) {
-                    geoCount++;
-                }
-            }
-        }
-
-        // 能源加成策略：倍率是“加法语义”（mAdd=0.25 表示额外 +25%），最终 multiplier=poolMultiplier*(1+mAdd)。
-        // flat 为平坦增量，不参与倍率放大：
-        // - 原因：flat 用于表达“环境提供的固定供给”，若再乘倍率会形成乘法叠加，导致收益随节点/转数爆炸。
-        // - 设计：flat 仅与 TickInterval 线性累计，保持可控。
-        double mAdd = photoCount * energyConfig.photosynthesis().poolGainMultiplier()
-            + waterCount * energyConfig.waterIntake().poolGainMultiplier()
-            + geoCount * energyConfig.geothermal().poolGainMultiplier();
-        double flatAdd = photoCount * energyConfig.photosynthesis().poolGainFlat()
-            + waterCount * energyConfig.waterIntake().poolGainFlat()
-            + geoCount * energyConfig.geothermal().poolGainFlat();
+        EnergyContext energyContext = buildEnergyContext(savedData, bastion);
+        double mAdd = calculateEnergyMultipliers(energyContext.config(), energyContext.counts());
+        double flatAdd = calculateEnergyFlatAdds(energyContext.config(), energyContext.counts());
         double multiplierFinal = poolMultiplier * (1.0 + Math.max(0.0, mAdd));
 
         double basePoolGain = calculatePoolGain(bastion, effectiveNodes, multiplierFinal);
@@ -466,28 +427,126 @@ public final class BastionTicker {
 
         // 仅在完整刻时执行扩张和刷怪
         if (category == TickCategory.FULL) {
-            // 重新获取最新数据（savedData 已更新）
-            BastionData freshData = savedData.getBastion(bastion.id());
-                if (freshData != null) {
-                    // 扩张服务
-                    BastionExpansionService.tryExpand(level, savedData, freshData, gameTime);
-                     // 刷怪服务
-                     BastionSpawnService.trySpawn(level, savedData, freshData, gameTime);
+            handleFullTick(level, savedData, bastion, gameTime);
+        }
+    }
 
-                     // Round 4.2.1：孵化巢自动生成（基于菌毯数量阈值）
-                     BastionHatcheryService.tryAutoSpawnHatchery(level, savedData, freshData, gameTime);
+    /**
+     * 构建能源上下文：读取配置、缓存并按上限统计数量。
+     */
+    private static EnergyContext buildEnergyContext(BastionSavedData savedData, BastionData bastion) {
+        BastionTypeConfig typeConfigForEnergy = BastionTypeManager.getOrDefault(bastion.bastionType());
+        BastionTypeConfig.EnergyConfig energyConfig = typeConfigForEnergy.energy();
+        Map<BlockPos, BastionEnergyType> energyMap = savedData.getOrCreateAnchorEnergyMap(bastion.id());
 
-                     // Round 4.2：守卫孵化巢（GuardianHatchery）
-                     // 仅在 ACTIVE + FULL tick 驱动：
-                     // - 与刷怪/扩张同一节奏（每秒一次），避免离线/远离玩家时产生大量实体。
-                     // - 冷却与扣费由 BastionHatcheryService 自行处理。
-                     BastionHatcheryService.tick(level, savedData, freshData, gameTime);
+        EnergyCounts energyCounts = countEnergyNodes(energyConfig, energyMap);
+        return new EnergyContext(energyConfig, energyCounts);
+    }
 
-                    // 高转主动技能：仅在 FULL tick 驱动
-                    BastionHighTierSkillService.runActiveSkills(level, freshData, gameTime);
+    /**
+     * 统计各类能源节点数量，应用 maxCount 上限。
+     */
+    private static EnergyCounts countEnergyNodes(
+            BastionTypeConfig.EnergyConfig energyConfig,
+            Map<BlockPos, BastionEnergyType> energyMap) {
+        int photoMax = Math.max(0, energyConfig.photosynthesis().maxCount());
+        int waterMax = Math.max(0, energyConfig.waterIntake().maxCount());
+        int geoMax = Math.max(0, energyConfig.geothermal().maxCount());
+        int windMax = Math.max(0, energyConfig.wind().maxCount());
+
+        int photoCount = 0;
+        int waterCount = 0;
+        int geoCount = 0;
+        int windCount = 0;
+
+        for (BastionEnergyType type : energyMap.values()) {
+            if (type == null) {
+                continue;
+            }
+            switch (type) {
+                case PHOTOSYNTHESIS -> {
+                    if (photoCount < photoMax) {
+                        photoCount++;
+                    }
+                }
+                case WATER_INTAKE -> {
+                    if (waterCount < waterMax) {
+                        waterCount++;
+                    }
+                }
+                case GEOTHERMAL -> {
+                    if (geoCount < geoMax) {
+                        geoCount++;
+                    }
+                }
+                case WIND -> {
+                    if (windCount < windMax) {
+                        windCount++;
+                    }
+                }
+                default -> {
                 }
             }
         }
+
+        return new EnergyCounts(photoCount, waterCount, geoCount, windCount);
+    }
+
+    private static double calculateEnergyMultipliers(
+            BastionTypeConfig.EnergyConfig energyConfig,
+            EnergyCounts counts) {
+        return counts.photosynthesis() * energyConfig.photosynthesis().poolGainMultiplier()
+            + counts.waterIntake() * energyConfig.waterIntake().poolGainMultiplier()
+            + counts.geothermal() * energyConfig.geothermal().poolGainMultiplier()
+            + counts.wind() * energyConfig.wind().poolGainMultiplier();
+    }
+
+    private static double calculateEnergyFlatAdds(
+            BastionTypeConfig.EnergyConfig energyConfig,
+            EnergyCounts counts) {
+        return counts.photosynthesis() * energyConfig.photosynthesis().poolGainFlat()
+            + counts.waterIntake() * energyConfig.waterIntake().poolGainFlat()
+            + counts.geothermal() * energyConfig.geothermal().poolGainFlat()
+            + counts.wind() * energyConfig.wind().poolGainFlat();
+    }
+
+    private record EnergyContext(BastionTypeConfig.EnergyConfig config, EnergyCounts counts) {
+    }
+
+    private record EnergyCounts(int photosynthesis, int waterIntake, int geothermal, int wind) {
+    }
+
+    /**
+     * FULL 类别下的额外处理（扩张/刷怪/孵化/高转技能）。
+     */
+    private static void handleFullTick(
+            ServerLevel level,
+            BastionSavedData savedData,
+            BastionData bastion,
+            long gameTime) {
+        // 重新获取最新数据（savedData 已更新）
+        BastionData freshData = savedData.getBastion(bastion.id());
+        if (freshData == null) {
+            return;
+        }
+
+        // 扩张服务
+        BastionExpansionService.tryExpand(level, savedData, freshData, gameTime);
+        // 刷怪服务
+        BastionSpawnService.trySpawn(level, savedData, freshData, gameTime);
+
+        // Round 4.2.1：孵化巢自动生成（基于菌毯数量阈值）
+        BastionHatcheryService.tryAutoSpawnHatchery(level, savedData, freshData, gameTime);
+
+        // Round 4.2：守卫孵化巢（GuardianHatchery）
+        // 仅在 ACTIVE + FULL tick 驱动：
+        // - 与刷怪/扩张同一节奏（每秒一次），避免离线/远离玩家时产生大量实体。
+        // - 冷却与扣费由 BastionHatcheryService 自行处理。
+        BastionHatcheryService.tick(level, savedData, freshData, gameTime);
+
+        // 高转主动技能：仅在 FULL tick 驱动
+        BastionHighTierSkillService.runActiveSkills(level, freshData, gameTime);
+    }
 
     /**
      * 计算每刻间隔的资源池获取量。

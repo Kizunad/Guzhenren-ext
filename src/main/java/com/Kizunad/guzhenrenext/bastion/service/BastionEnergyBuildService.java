@@ -163,6 +163,7 @@ public final class BastionEnergyBuildService {
         int photoRadius = Math.max(1, energyConfig.photosynthesis().scanRadius());
         int waterRadius = Math.max(1, energyConfig.waterIntake().scanRadius());
         int geothermalRadius = Math.max(1, energyConfig.geothermal().scanRadius());
+        int windMinY = Math.max(1, energyConfig.wind().scanRadius());
 
         for (BastionEnergyType type : energyConfig.normalizedPriorityOrder()) {
             boolean ok = BastionEnergyService.isEnergyTypeSatisfied(
@@ -171,7 +172,8 @@ public final class BastionEnergyBuildService {
                 anchorPos,
                 photoRadius,
                 waterRadius,
-                geothermalRadius
+                geothermalRadius,
+                windMinY
             );
             if (ok) {
                 return type;
@@ -202,6 +204,7 @@ public final class BastionEnergyBuildService {
             case PHOTOSYNTHESIS -> energyConfig.photosynthesis();
             case WATER_INTAKE -> energyConfig.waterIntake();
             case GEOTHERMAL -> energyConfig.geothermal();
+            case WIND -> energyConfig.wind();
         };
     }
 
