@@ -1,20 +1,21 @@
 package com.Kizunad.guzhenrenext.bastion.guardian;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionArcherGuardian;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionBerserkerGuardian;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionCasterGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionEvokerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionIllusionerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionIronGolemGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionPhantomGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionPillagerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionRavagerGuardian;
+import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionShieldGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionVexGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionVindicatorGuardian;
-import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionShieldGuardian;
-import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionBerserkerGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWardenGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWitherSkeletonGuardian;
 import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionWitchGuardian;
-import com.Kizunad.guzhenrenext.bastion.guardian.entity.BastionArcherGuardian;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -74,6 +75,9 @@ public final class BastionGuardianEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionArcherGuardian>> BASTION_ARCHER_GUARDIAN =
         registerMob("bastion_archer_guardian", BastionArcherGuardian::new);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BastionCasterGuardian>> BASTION_CASTER_GUARDIAN =
+        registerMob("bastion_caster_guardian", BastionCasterGuardian::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<BastionIronGolemGuardian>> BASTION_IRON_GOLEM =
         registerMob("bastion_iron_golem_guardian", BastionIronGolemGuardian::new);

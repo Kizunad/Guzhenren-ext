@@ -72,6 +72,10 @@ public final class BastionGuardianEntityAttributes {
             net.minecraft.world.entity.monster.Skeleton.createAttributes().build()
         );
         event.put(
+            BastionGuardianEntities.BASTION_CASTER_GUARDIAN.get(),
+            net.minecraft.world.entity.monster.Blaze.createAttributes().build()
+        );
+        event.put(
             BastionGuardianEntities.BASTION_IRON_GOLEM.get(),
             net.minecraft.world.entity.animal.IronGolem.createAttributes().build()
         );

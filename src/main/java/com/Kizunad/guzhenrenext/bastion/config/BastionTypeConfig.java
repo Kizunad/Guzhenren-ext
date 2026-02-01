@@ -763,7 +763,7 @@ public record BastionTypeConfig(
      * </p>
      */
     public record GuardianWeights(int minion, int ranged, int support, int elite, int boss, int shieldMinion,
-                                  int berserker, int archer) {
+                                  int berserker, int archer, int caster) {
         public static final GuardianWeights DEFAULT = new GuardianWeights(
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_MINION,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_RANGED,
@@ -772,7 +772,8 @@ public record BastionTypeConfig(
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_BOSS,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_SHIELD_MINION,
             DefaultValues.DEFAULT_HATCHERY_WEIGHT_BERSERKER,
-            DefaultValues.DEFAULT_HATCHERY_WEIGHT_ARCHER
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_ARCHER,
+            DefaultValues.DEFAULT_HATCHERY_WEIGHT_CASTER
         );
 
         public static final Codec<GuardianWeights> CODEC = RecordCodecBuilder.create(instance ->
@@ -808,7 +809,11 @@ public record BastionTypeConfig(
                 Codec.INT.optionalFieldOf(
                         "archer",
                         DefaultValues.DEFAULT_HATCHERY_WEIGHT_ARCHER)
-                    .forGetter(GuardianWeights::archer)
+                    .forGetter(GuardianWeights::archer),
+                Codec.INT.optionalFieldOf(
+                        "caster",
+                        DefaultValues.DEFAULT_HATCHERY_WEIGHT_CASTER)
+                    .forGetter(GuardianWeights::caster)
             ).apply(instance, GuardianWeights::new)
         );
     }
@@ -1264,6 +1269,14 @@ public record BastionTypeConfig(
          * </p>
          */
         static final int DEFAULT_HATCHERY_WEIGHT_ARCHER = 0;
+
+        /**
+         * Round 14：术士权重默认值。
+         * <p>
+         * 兼容策略：默认 0，保持旧 JSON 不产出术士。
+         * </p>
+         */
+        static final int DEFAULT_HATCHERY_WEIGHT_CASTER = 0;
 
         /**
          * 能源冲突优先级默认值。
