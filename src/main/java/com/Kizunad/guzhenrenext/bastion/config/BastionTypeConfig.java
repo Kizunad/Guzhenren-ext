@@ -151,6 +151,14 @@ public record BastionTypeConfig(
             double damageMultiplier,
             double armorMultiplier,
             double speedMultiplier,
+            /** 最低转数要求（低于该转数不生成精英）。 */
+            int minTier,
+            /** 精英生成冷却（tick），基地级节流，避免刷屏。 */
+            long cooldownTicks,
+            /** 生成精英消耗的资源池量。 */
+            double spawnCost,
+            /** 同时存活的精英上限。 */
+            int maxAlive,
             List<String> skillPool
     ) {
         public static final EliteConfig DEFAULT = new EliteConfig(
@@ -159,6 +167,10 @@ public record BastionTypeConfig(
             DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER,
             DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER,
             DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER,
+            DefaultValues.DEFAULT_ELITE_MIN_TIER,
+            DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS,
+            DefaultValues.DEFAULT_ELITE_SPAWN_COST,
+            DefaultValues.DEFAULT_ELITE_MAX_ALIVE,
             List.of()
         );
 
@@ -182,6 +194,18 @@ public record BastionTypeConfig(
                         "speed_multiplier",
                         DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER)
                     .forGetter(EliteConfig::speedMultiplier),
+                Codec.INT.optionalFieldOf("min_tier", DefaultValues.DEFAULT_ELITE_MIN_TIER)
+                    .forGetter(EliteConfig::minTier),
+                Codec.LONG.optionalFieldOf(
+                        "cooldown_ticks",
+                        DefaultValues.DEFAULT_ELITE_COOLDOWN_TICKS)
+                    .forGetter(EliteConfig::cooldownTicks),
+                Codec.DOUBLE.optionalFieldOf(
+                        "spawn_cost",
+                        DefaultValues.DEFAULT_ELITE_SPAWN_COST)
+                    .forGetter(EliteConfig::spawnCost),
+                Codec.INT.optionalFieldOf("max_alive", DefaultValues.DEFAULT_ELITE_MAX_ALIVE)
+                    .forGetter(EliteConfig::maxAlive),
                 Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
                     .forGetter(EliteConfig::skillPool)
             ).apply(instance, EliteConfig::new)
@@ -658,6 +682,14 @@ public record BastionTypeConfig(
          static final double DEFAULT_ELITE_ARMOR_MULTIPLIER = 1.5;
          /** 精英移动速度倍率默认值。 */
          static final double DEFAULT_ELITE_SPEED_MULTIPLIER = 1.2;
+         /** 精英生成最低转数要求。 */
+         static final int DEFAULT_ELITE_MIN_TIER = 3;
+         /** 精英生成冷却时间（tick），默认 30 秒。 */
+         static final long DEFAULT_ELITE_COOLDOWN_TICKS = 600L;
+         /** 精英生成资源消耗。 */
+         static final double DEFAULT_ELITE_SPAWN_COST = 50.0;
+         /** 精英同时存活上限。 */
+         static final int DEFAULT_ELITE_MAX_ALIVE = 1;
 
         // ===== 菌毯衰败默认值 =====
 
