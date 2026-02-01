@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.bastion;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAuraNodeBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionChitinShellBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionGuardianHatcheryBlock;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.api.distmarker.Dist;
@@ -60,6 +62,11 @@ public final class BastionBlocks {
 
         /** 菌毯方块爆炸抗性。 */
         static final float MYCELIUM_BLAST_RESISTANCE = 0.2f;
+
+        /** 外壳方块硬度。 */
+        static final float CHITIN_SHELL_HARDNESS = 1.5f;
+        /** 外壳方块爆炸抗性。 */
+        static final float CHITIN_SHELL_BLAST_RESISTANCE = 3.0f;
 
         /** 节点方块硬度。 */
         static final float NODE_HARDNESS = 3.0f;
@@ -111,6 +118,14 @@ public final class BastionBlocks {
     private static final BlockBehaviour.Properties MYCELIUM_PROPERTIES = BlockBehaviour.Properties.of()
         .strength(BlockProperties.MYCELIUM_HARDNESS, BlockProperties.MYCELIUM_BLAST_RESISTANCE)
         .sound(SoundType.GRASS);
+
+    /**
+     * 外壳方块属性：低硬度、轻量防护。
+     */
+    private static final BlockBehaviour.Properties CHITIN_SHELL_PROPERTIES = BlockBehaviour.Properties.of()
+        .mapColor(MapColor.TERRACOTTA_BROWN)
+        .strength(BlockProperties.CHITIN_SHELL_HARDNESS, BlockProperties.CHITIN_SHELL_BLAST_RESISTANCE)
+        .requiresCorrectToolForDrops();
 
     /**
      * 能源节点属性：中等硬度，类石材行为。
@@ -196,6 +211,14 @@ public final class BastionBlocks {
         () -> new BastionAuraNodeBlock(AURA_NODE_PROPERTIES)
     );
 
+    /**
+     * 基地外壳方块（甲壳） - 轻量保护。
+     */
+    public static final DeferredHolder<Block, BastionChitinShellBlock> BASTION_CHITIN_SHELL = BLOCKS.register(
+        "bastion_chitin_shell",
+        () -> new BastionChitinShellBlock(CHITIN_SHELL_PROPERTIES)
+    );
+
     // ===== 物品注册（方块物品） =====
 
     /**
@@ -251,6 +274,14 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BlockItem> BASTION_AURA_NODE_ITEM = ITEMS.register(
         "bastion_aura_node",
         () -> new BastionAuraNodeBlock.BastionAuraNodeItem(BASTION_AURA_NODE.get(), new Item.Properties())
+    );
+
+    /**
+     * 基地外壳方块物品（甲壳）。
+     */
+    public static final DeferredHolder<Item, BlockItem> BASTION_CHITIN_SHELL_ITEM = ITEMS.register(
+        "bastion_chitin_shell",
+        () -> new BlockItem(BASTION_CHITIN_SHELL.get(), new Item.Properties())
     );
 
     /**
