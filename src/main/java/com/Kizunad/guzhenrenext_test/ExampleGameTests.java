@@ -137,6 +137,7 @@ public class ExampleGameTests {
             BastionTypeConfig.AuraConfig.DEFAULT,
             BastionTypeConfig.EnergyConfig.DEFAULT,
             BastionTypeConfig.HatcheryConfig.DEFAULT,
+            BastionTypeConfig.EliteConfig.DEFAULT,
             BastionTypeConfig.DEFAULT_ANCHORS_WEIGHT,
             BastionTypeConfig.DEFAULT_MYCELIUM_WEIGHT,
             Optional.empty(),

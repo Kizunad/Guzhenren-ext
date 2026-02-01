@@ -30,6 +30,7 @@ import java.util.Optional;
  * @param aura            光环配置（影响半径与衰减）
  * @param energy          能源节点配置（影响资源池增长的额外加成）
  * @param hatchery        守卫孵化巢配置（Round 4.2：守卫产出机制地基，缺省为未启用）
+ * @param elite           精英守卫配置（Round 7.1：倍率与技能池，缺省未启用）
  * @param anchorsWeight   有效节点数计算：Anchor 权重（缺省回退 10，保证旧 JSON 行为不变）
  * @param myceliumWeight  有效节点数计算：菌毯权重（缺省回退 1，保证旧 JSON 行为不变）
  * @param loot            战利品配置（可选）
@@ -50,11 +51,12 @@ public record BastionTypeConfig(
          AuraConfig aura,
          EnergyConfig energy,
          HatcheryConfig hatchery,
+         EliteConfig elite,
          int anchorsWeight,
-        int myceliumWeight,
-        Optional<LootConfig> loot,
-        Optional<HighTierConfig> highTier,
-        Optional<GuardianShazhaoConfig> guardianShazhao
+         int myceliumWeight,
+         Optional<LootConfig> loot,
+         Optional<HighTierConfig> highTier,
+         Optional<GuardianShazhaoConfig> guardianShazhao
 ) {
 
     /**
@@ -78,35 +80,42 @@ public record BastionTypeConfig(
      * 可选内容配置（用于 codec 分组）。
      * <p>
      * 注意：BastionTypeConfig 字段较多，RecordCodecBuilder 的 group 有 16 参数限制。
-     * 这里使用 {@link MapCodec} 把 3 个 Optional 字段（loot/high_tier/guardian_shazhao）打包为 1 组，
-     * 但 JSON schema 不变：仍然是根对象上的 3 个字段（不会引入额外嵌套对象）。
+     * 这里使用 {@link MapCodec} 把 shell/elite 以及可选字段（loot/high_tier/guardian_shazhao）打包为 1 组，
+     * 但 JSON schema 不变：仍然是根对象上的字段（不会引入额外嵌套对象）。
      * </p>
      */
-     private static final class OptionalContentConfig {
-         private final ShellConfig shell;
-         private final Optional<LootConfig> loot;
-         private final Optional<HighTierConfig> highTier;
-         private final Optional<GuardianShazhaoConfig> guardianShazhao;
+    private static final class OptionalContentConfig {
+        private final ShellConfig shell;
+        private final EliteConfig elite;
+        private final Optional<LootConfig> loot;
+        private final Optional<HighTierConfig> highTier;
+        private final Optional<GuardianShazhaoConfig> guardianShazhao;
 
-         private OptionalContentConfig(
-                 ShellConfig shell,
-                 Optional<LootConfig> loot,
-                 Optional<HighTierConfig> highTier,
-                 Optional<GuardianShazhaoConfig> guardianShazhao
-         ) {
-             this.shell = shell;
-             this.loot = loot;
-             this.highTier = highTier;
-             this.guardianShazhao = guardianShazhao;
-         }
+        private OptionalContentConfig(
+                ShellConfig shell,
+                EliteConfig elite,
+                Optional<LootConfig> loot,
+                Optional<HighTierConfig> highTier,
+                Optional<GuardianShazhaoConfig> guardianShazhao
+        ) {
+            this.shell = shell;
+            this.elite = elite;
+            this.loot = loot;
+            this.highTier = highTier;
+            this.guardianShazhao = guardianShazhao;
+        }
 
-         private ShellConfig shell() {
-             return shell;
-         }
+        private ShellConfig shell() {
+            return shell;
+        }
 
-         private Optional<LootConfig> loot() {
-             return loot;
-         }
+        private EliteConfig elite() {
+            return elite;
+        }
+
+        private Optional<LootConfig> loot() {
+            return loot;
+        }
 
         private Optional<HighTierConfig> highTier() {
             return highTier;
@@ -120,11 +129,62 @@ public record BastionTypeConfig(
             instance.group(
                 ShellConfig.CODEC.optionalFieldOf("shell", ShellConfig.DEFAULT)
                     .forGetter(OptionalContentConfig::shell),
+                EliteConfig.CODEC.optionalFieldOf("elite", EliteConfig.DEFAULT)
+                    .forGetter(OptionalContentConfig::elite),
                 LootConfig.CODEC.optionalFieldOf("loot").forGetter(OptionalContentConfig::loot),
                 HighTierConfig.CODEC.optionalFieldOf("high_tier").forGetter(OptionalContentConfig::highTier),
                 GuardianShazhaoConfig.CODEC.optionalFieldOf("guardian_shazhao")
                     .forGetter(OptionalContentConfig::guardianShazhao)
             ).apply(instance, OptionalContentConfig::new)
+        );
+    }
+
+    /**
+     * 精英守卫配置。
+     * <p>
+     * Round 7.1：定义精英守卫的属性倍率和技能池。
+     * </p>
+     */
+    public record EliteConfig(
+            boolean enabled,
+            double healthMultiplier,
+            double damageMultiplier,
+            double armorMultiplier,
+            double speedMultiplier,
+            List<String> skillPool
+    ) {
+        public static final EliteConfig DEFAULT = new EliteConfig(
+            DefaultValues.DEFAULT_ELITE_ENABLED,
+            DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER,
+            DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER,
+            DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER,
+            DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER,
+            List.of()
+        );
+
+        public static final Codec<EliteConfig> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", DefaultValues.DEFAULT_ELITE_ENABLED)
+                    .forGetter(EliteConfig::enabled),
+                Codec.DOUBLE.optionalFieldOf(
+                        "health_multiplier",
+                        DefaultValues.DEFAULT_ELITE_HEALTH_MULTIPLIER)
+                    .forGetter(EliteConfig::healthMultiplier),
+                Codec.DOUBLE.optionalFieldOf(
+                        "damage_multiplier",
+                        DefaultValues.DEFAULT_ELITE_DAMAGE_MULTIPLIER)
+                    .forGetter(EliteConfig::damageMultiplier),
+                Codec.DOUBLE.optionalFieldOf(
+                        "armor_multiplier",
+                        DefaultValues.DEFAULT_ELITE_ARMOR_MULTIPLIER)
+                    .forGetter(EliteConfig::armorMultiplier),
+                Codec.DOUBLE.optionalFieldOf(
+                        "speed_multiplier",
+                        DefaultValues.DEFAULT_ELITE_SPEED_MULTIPLIER)
+                    .forGetter(EliteConfig::speedMultiplier),
+                Codec.STRING.listOf().optionalFieldOf("skill_pool", List.of())
+                    .forGetter(EliteConfig::skillPool)
+            ).apply(instance, EliteConfig::new)
         );
     }
 
@@ -168,6 +228,7 @@ public record BastionTypeConfig(
             // 注意：这里用 MapCodec 进行字段分组以规避 16 参数限制，但字段仍位于根对象。
             OptionalContentConfig.MAP_CODEC.forGetter(config -> new OptionalContentConfig(
                 config.shell(),
+                config.elite(),
                 config.loot(),
                 config.highTier(),
                 config.guardianShazhao()
@@ -202,6 +263,7 @@ public record BastionTypeConfig(
             aura,
             energy,
             hatchery,
+            optionalContent.elite(),
             anchorsWeight,
             myceliumWeight,
             optionalContent.loot(),
@@ -576,14 +638,26 @@ public record BastionTypeConfig(
         // ===== 外壳（甲壳）默认值 =====
         /** 是否启用外壳系统（默认关闭以兼容旧 JSON）。 */
         static final boolean DEFAULT_SHELL_ENABLED = false;
-        /** 每个外壳方块的再生成本。 */
-        static final double DEFAULT_SHELL_REGEN_COST_PER_BLOCK = 1.0;
-        /** 外壳再生冷却时间（tick）。 */
-        static final long DEFAULT_SHELL_REGEN_COOLDOWN_TICKS = 100L;
-        /** 外壳方块数量上限（0 表示不限制）。 */
-        static final int DEFAULT_SHELL_MAX_BLOCKS = 0;
-        /** 资源池阈值：低于该值停止再生。 */
-        static final double DEFAULT_SHELL_RESOURCE_THRESHOLD = 0.0;
+         /** 每个外壳方块的再生成本。 */
+         static final double DEFAULT_SHELL_REGEN_COST_PER_BLOCK = 1.0;
+         /** 外壳再生冷却时间（tick）。 */
+         static final long DEFAULT_SHELL_REGEN_COOLDOWN_TICKS = 100L;
+         /** 外壳方块数量上限（0 表示不限制）。 */
+         static final int DEFAULT_SHELL_MAX_BLOCKS = 0;
+         /** 资源池阈值：低于该值停止再生。 */
+         static final double DEFAULT_SHELL_RESOURCE_THRESHOLD = 0.0;
+
+         // ===== 精英守卫默认值（Round 7.1） =====
+         /** 是否启用精英守卫系统，缺省关闭以兼容旧 JSON。 */
+         static final boolean DEFAULT_ELITE_ENABLED = false;
+         /** 精英生命倍率默认值。 */
+         static final double DEFAULT_ELITE_HEALTH_MULTIPLIER = 2.0;
+         /** 精英伤害倍率默认值。 */
+         static final double DEFAULT_ELITE_DAMAGE_MULTIPLIER = 1.5;
+         /** 精英护甲倍率默认值。 */
+         static final double DEFAULT_ELITE_ARMOR_MULTIPLIER = 1.5;
+         /** 精英移动速度倍率默认值。 */
+         static final double DEFAULT_ELITE_SPEED_MULTIPLIER = 1.2;
 
         // ===== 菌毯衰败默认值 =====
 
