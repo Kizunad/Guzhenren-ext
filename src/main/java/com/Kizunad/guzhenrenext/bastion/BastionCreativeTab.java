@@ -40,6 +40,8 @@ public final class BastionCreativeTab {
                     output.accept(BastionBlocks.BASTION_NODE_ITEM.get());
                     output.accept(BastionBlocks.BASTION_REVERSAL_ARRAY_ITEM.get());
                     output.accept(BastionBlocks.BASTION_SCOUT_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_SIEGE_BREACH_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_SIEGE_ARMOR_PIERCE_ITEM.get());
                 })
                 .build()
         );

@@ -31,6 +31,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import com.Kizunad.guzhenrenext.bastion.item.BastionScoutItem;
+import com.Kizunad.guzhenrenext.bastion.item.BastionSiegeItem;
 
 /**
  * 基地系统方块与物品注册表。
@@ -382,6 +383,24 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BastionScoutItem> BASTION_SCOUT_ITEM = ITEMS.register(
         "bastion_scout",
         () -> new BastionScoutItem(new Item.Properties())
+    );
+
+    /** 攻城道具：爆破（对基地方块额外破坏）。 */
+    public static final DeferredHolder<Item, BastionSiegeItem> BASTION_SIEGE_BREACH_ITEM = ITEMS.register(
+        "bastion_siege_breach",
+        () -> new BastionSiegeItem(
+            BastionSiegeItem.SiegeType.BREACH,
+            new Item.Properties()
+        )
+    );
+
+    /** 攻城道具：破甲（削弱守卫）。 */
+    public static final DeferredHolder<Item, BastionSiegeItem> BASTION_SIEGE_ARMOR_PIERCE_ITEM = ITEMS.register(
+        "bastion_siege_armor_pierce",
+        () -> new BastionSiegeItem(
+            BastionSiegeItem.SiegeType.ARMOR_PIERCE,
+            new Item.Properties()
+        )
     );
 
     /**
