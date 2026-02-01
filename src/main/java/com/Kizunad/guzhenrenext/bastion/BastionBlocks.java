@@ -246,11 +246,11 @@ public final class BastionBlocks {
     );
 
     /**
-     * 光环节点方块物品。
+     * 光环节点方块物品：放置时做“归属/成本/上限”校验。
      */
     public static final DeferredHolder<Item, BlockItem> BASTION_AURA_NODE_ITEM = ITEMS.register(
         "bastion_aura_node",
-        () -> new BlockItem(BASTION_AURA_NODE.get(), new Item.Properties())
+        () -> new BastionAuraNodeBlock.BastionAuraNodeItem(BASTION_AURA_NODE.get(), new Item.Properties())
     );
 
     /**
@@ -285,24 +285,24 @@ public final class BastionBlocks {
                     }
                 }
 
-                private boolean isShiftDownSafe() {
-                    if (FMLEnvironment.dist != Dist.CLIENT) {
-                        return false;
-                    }
-                    try {
-                        Class<?> screenClass = Class.forName(
-                            "net.minecraft.client.gui.screens.Screen"
-                        );
-                        java.lang.reflect.Method method = screenClass.getDeclaredMethod(
-                            "hasShiftDown"
-                        );
-                        Object result = method.invoke(null);
-                        return result instanceof Boolean bool && bool;
-                    } catch (ReflectiveOperationException e) {
-                        return false;
-                    }
-                }
+        private boolean isShiftDownSafe() {
+            if (FMLEnvironment.dist != Dist.CLIENT) {
+                return false;
             }
+            try {
+                Class<?> screenClass = Class.forName(
+                    "net.minecraft.client.gui.screens.Screen"
+                );
+                java.lang.reflect.Method method = screenClass.getDeclaredMethod(
+                    "hasShiftDown"
+                );
+                Object result = method.invoke(null);
+                return result instanceof Boolean bool && bool;
+            } catch (ReflectiveOperationException e) {
+                return false;
+            }
+        }
+    }
     );
 
     /**
@@ -374,7 +374,7 @@ public final class BastionBlocks {
     /**
      * 能源节点物品：在服务端放置时做“扣费/上限/归属”校验。
      */
-     private static final class BastionEnergyNodeItem extends BlockItem {
+    private static final class BastionEnergyNodeItem extends BlockItem {
 
         private BastionEnergyNodeItem(Block block, Properties properties) {
             super(block, properties);
@@ -416,6 +416,46 @@ public final class BastionBlocks {
             // 说明：tryBuildEnergyNode 内部已执行 setBlock。
             // 这里返回 true 仅用于告诉上层“放置成功”，由 BlockItem 流程处理消耗/统计。
             return ok;
+     }
+
+    /**
+     * 光环节点物品：在服务端放置时做“扣费/上限/归属”校验。
+     */
+    private static final class BastionAuraNodeItem extends BlockItem {
+
+        private BastionAuraNodeItem(Block block, Properties properties) {
+            super(block, properties);
+        }
+
+        @Override
+        protected boolean placeBlock(
+                BlockPlaceContext context,
+                net.minecraft.world.level.block.state.BlockState state) {
+            if (context == null) {
+                return false;
+            }
+
+            if (context.getLevel().isClientSide()) {
+                return super.placeBlock(context, state);
+            }
+
+            if (!(context.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel)
+                || !(context.getPlayer() instanceof net.minecraft.server.level.ServerPlayer serverPlayer)) {
+                return false;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(serverLevel);
+
+            boolean ok = BastionAuraNodeBlock.tryBuildAuraNode(
+                serverLevel,
+                savedData,
+                serverPlayer,
+                context.getClickedPos(),
+                state
+            );
+
+            return ok;
         }
     }
+}
 }

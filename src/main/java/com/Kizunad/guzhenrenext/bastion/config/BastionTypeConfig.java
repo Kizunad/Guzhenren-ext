@@ -573,6 +573,10 @@ public record BastionTypeConfig(
         static final AuraStackingMode DEFAULT_SAME_TYPE_STACKING = AuraStackingMode.MAX;
         /** 光环异类默认：可同时生效（兼容旧行为）。 */
         static final boolean DEFAULT_DIFFERENT_TYPES_COEXIST = true;
+        /** 光环节点建造成本默认值（兼容旧 JSON）。 */
+        static final double DEFAULT_AURA_BUILD_COST = 0.0;
+        /** 光环节点数量上限默认值（0 表示不启用上限，兼容旧 JSON）。 */
+        static final int DEFAULT_AURA_MAX_COUNT = 0;
 
         // ===== 能源节点默认值 =====
         static final double DEFAULT_ENERGY_BUILD_COST = 0.0;
@@ -990,30 +994,36 @@ public record BastionTypeConfig(
      * @param refNodesByTier  各转的满状态参考节点数（用于缩圈计算）
      * @param minScale        最小缩圈比例（节点全拆时仍保留的光环比例）
      */
-    public record AuraConfig(
-            AuraPolarity polarity,
-            int baseRadius,
-            double tierExponent,
-            int maxRadius,
-            double falloffPower,
-            double minFalloff,
-            List<Integer> refNodesByTier,
-            double minScale,
-            AuraStackingMode sameTypeStacking,
-            boolean differentTypesCoexist
-    ) {
-        public static final AuraConfig DEFAULT = new AuraConfig(
-            AuraPolarity.NEGATIVE,
-            DefaultValues.DEFAULT_AURA_BASE_RADIUS,
-            DefaultValues.DEFAULT_AURA_TIER_EXPONENT,
-            DefaultValues.DEFAULT_AURA_MAX_RADIUS,
-            DefaultValues.DEFAULT_FALLOFF_POWER,
-            DefaultValues.DEFAULT_MIN_FALLOFF,
-            DefaultValues.DEFAULT_REF_NODES_BY_TIER,
-            DefaultValues.DEFAULT_MIN_SCALE,
-            DefaultValues.DEFAULT_SAME_TYPE_STACKING,
-            DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST
-        );
+     public record AuraConfig(
+             AuraPolarity polarity,
+             int baseRadius,
+             double tierExponent,
+             int maxRadius,
+             double falloffPower,
+             double minFalloff,
+             List<Integer> refNodesByTier,
+             double minScale,
+             AuraStackingMode sameTypeStacking,
+             boolean differentTypesCoexist,
+             /** 光环节点建造成本（扣资源池）。 */
+             double buildCost,
+             /** 光环节点数量上限（0 表示不启用上限）。 */
+             int maxCount
+     ) {
+         public static final AuraConfig DEFAULT = new AuraConfig(
+             AuraPolarity.NEGATIVE,
+             DefaultValues.DEFAULT_AURA_BASE_RADIUS,
+             DefaultValues.DEFAULT_AURA_TIER_EXPONENT,
+             DefaultValues.DEFAULT_AURA_MAX_RADIUS,
+             DefaultValues.DEFAULT_FALLOFF_POWER,
+             DefaultValues.DEFAULT_MIN_FALLOFF,
+             DefaultValues.DEFAULT_REF_NODES_BY_TIER,
+             DefaultValues.DEFAULT_MIN_SCALE,
+             DefaultValues.DEFAULT_SAME_TYPE_STACKING,
+             DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST,
+             DefaultValues.DEFAULT_AURA_BUILD_COST,
+             DefaultValues.DEFAULT_AURA_MAX_COUNT
+         );
 
         /**
          * 兼容旧代码/旧配置的构造方法：缺省 polarity 为 NEGATIVE。
@@ -1021,23 +1031,24 @@ public record BastionTypeConfig(
          * 之所以固定为 NEGATIVE，是因为旧版本没有 polarity 字段时默认行为就是“压制玩家”。
          * </p>
          */
-        public AuraConfig(
-                int baseRadius,
-                double tierExponent,
-                int maxRadius,
-                double falloffPower,
-                double minFalloff,
-                List<Integer> refNodesByTier,
-                double minScale
-        ) {
-            this(AuraPolarity.NEGATIVE, baseRadius, tierExponent, maxRadius, falloffPower, minFalloff,
+         public AuraConfig(
+                 int baseRadius,
+                 double tierExponent,
+                 int maxRadius,
+                 double falloffPower,
+                 double minFalloff,
+                 List<Integer> refNodesByTier,
+                 double minScale
+         ) {
+             this(AuraPolarity.NEGATIVE, baseRadius, tierExponent, maxRadius, falloffPower, minFalloff,
                 refNodesByTier, minScale, DefaultValues.DEFAULT_SAME_TYPE_STACKING,
-                DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST);
-        }
+                DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST, DefaultValues.DEFAULT_AURA_BUILD_COST,
+                DefaultValues.DEFAULT_AURA_MAX_COUNT);
+         }
 
-        public static final Codec<AuraConfig> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                AuraPolarity.CODEC.optionalFieldOf("polarity", AuraPolarity.NEGATIVE)
+         public static final Codec<AuraConfig> CODEC = RecordCodecBuilder.create(instance ->
+             instance.group(
+                 AuraPolarity.CODEC.optionalFieldOf("polarity", AuraPolarity.NEGATIVE)
                     .forGetter(AuraConfig::polarity),
                 Codec.INT.optionalFieldOf("base_radius", DefaultValues.DEFAULT_AURA_BASE_RADIUS)
                     .forGetter(AuraConfig::baseRadius),
@@ -1052,16 +1063,20 @@ public record BastionTypeConfig(
                 Codec.INT.listOf().optionalFieldOf("ref_nodes_by_tier",
                         DefaultValues.DEFAULT_REF_NODES_BY_TIER)
                     .forGetter(AuraConfig::refNodesByTier),
-                Codec.DOUBLE.optionalFieldOf("min_scale", DefaultValues.DEFAULT_MIN_SCALE)
-                    .forGetter(AuraConfig::minScale),
-                AuraStackingMode.CODEC.optionalFieldOf("same_type_stacking",
-                        DefaultValues.DEFAULT_SAME_TYPE_STACKING)
-                    .forGetter(AuraConfig::sameTypeStacking),
-                Codec.BOOL.optionalFieldOf("different_types_coexist",
-                        DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST)
-                    .forGetter(AuraConfig::differentTypesCoexist)
-            ).apply(instance, AuraConfig::new)
-        );
+                 Codec.DOUBLE.optionalFieldOf("min_scale", DefaultValues.DEFAULT_MIN_SCALE)
+                     .forGetter(AuraConfig::minScale),
+                 AuraStackingMode.CODEC.optionalFieldOf("same_type_stacking",
+                         DefaultValues.DEFAULT_SAME_TYPE_STACKING)
+                     .forGetter(AuraConfig::sameTypeStacking),
+                 Codec.BOOL.optionalFieldOf("different_types_coexist",
+                         DefaultValues.DEFAULT_DIFFERENT_TYPES_COEXIST)
+                    .forGetter(AuraConfig::differentTypesCoexist),
+                 Codec.DOUBLE.optionalFieldOf("aura_build_cost", DefaultValues.DEFAULT_AURA_BUILD_COST)
+                     .forGetter(AuraConfig::buildCost),
+                 Codec.INT.optionalFieldOf("aura_max_count", DefaultValues.DEFAULT_AURA_MAX_COUNT)
+                     .forGetter(AuraConfig::maxCount)
+             ).apply(instance, AuraConfig::new)
+         );
 
         /**
          * 计算指定转数的光环半径。
