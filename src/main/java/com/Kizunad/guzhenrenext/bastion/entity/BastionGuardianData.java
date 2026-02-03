@@ -45,6 +45,9 @@ public final class BastionGuardianData {
     /** 基地转数键。 */
     private static final String TIER_KEY = "Tier";
 
+    /** 占领者 UUID 键。 */
+    private static final String CAPTURED_BY_KEY = "CapturedBy";
+
     /** 通用守卫标签（用于快速全局统计）。 */
     public static final String GUARDIAN_TAG = "bastion_guardian";
 
@@ -72,6 +75,21 @@ public final class BastionGuardianData {
         CompoundTag bastionTag = new CompoundTag();
         bastionTag.putString(BASTION_ID_KEY, bastionId.toString());
         bastionTag.putInt(TIER_KEY, tier);
+        persistentData.put(ROOT_TAG, bastionTag);
+    }
+
+    /**
+     * 标记守卫为已被占领（归属某玩家）。
+     *
+     * @param guardian  守卫实体
+     * @param ownerId   占领者 UUID
+     */
+    public static void markAsCaptured(Mob guardian, UUID ownerId) {
+        CompoundTag persistentData = guardian.getPersistentData();
+        CompoundTag bastionTag = persistentData.contains(ROOT_TAG)
+            ? persistentData.getCompound(ROOT_TAG)
+            : new CompoundTag();
+        bastionTag.putString(CAPTURED_BY_KEY, ownerId.toString());
         persistentData.put(ROOT_TAG, bastionTag);
     }
 
@@ -146,6 +164,32 @@ public final class BastionGuardianData {
     }
 
     /**
+     * 获取守卫的占领者 UUID。
+     *
+     * @param entity 实体
+     * @return 占领者 UUID，未被占领则返回 null
+     */
+    public static UUID getCapturedBy(Entity entity) {
+        if (!(entity instanceof Mob mob)) {
+            return null;
+        }
+        CompoundTag persistentData = mob.getPersistentData();
+        if (!persistentData.contains(ROOT_TAG)) {
+            return null;
+        }
+        CompoundTag bastionTag = persistentData.getCompound(ROOT_TAG);
+        if (!bastionTag.contains(CAPTURED_BY_KEY)) {
+            return null;
+        }
+        String uuidString = bastionTag.getString(CAPTURED_BY_KEY);
+        try {
+            return UUID.fromString(uuidString);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
      * 检查守卫是否属于指定基地。
      *
      * @param entity    实体
@@ -155,6 +199,18 @@ public final class BastionGuardianData {
     public static boolean belongsToBastion(Entity entity, UUID bastionId) {
         UUID guardianBastionId = getBastionId(entity);
         return guardianBastionId != null && guardianBastionId.equals(bastionId);
+    }
+
+    /**
+     * 检查守卫是否被指定玩家占领。
+     *
+     * @param entity   实体
+     * @param playerId 玩家 UUID
+     * @return true 如果守卫被该玩家占领
+     */
+    public static boolean isCapturedBy(Entity entity, UUID playerId) {
+        UUID capturedBy = getCapturedBy(entity);
+        return capturedBy != null && capturedBy.equals(playerId);
     }
 
     /**

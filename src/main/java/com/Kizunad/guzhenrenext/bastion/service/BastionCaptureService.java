@@ -4,8 +4,14 @@ import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
+import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 
 /**
  * 基地接管状态服务。
@@ -139,7 +145,33 @@ public final class BastionCaptureService {
         BastionData updated = bastion.withCaptured(player.getUUID(), gameTime);
         BastionSavedData.get(level).updateBastion(updated);
 
+        // 转换该基地所有守卫的阵营
+        convertGuardiansToFriendly(level, bastion, player.getUUID());
+
         return true;
+    }
+
+    /**
+     * 转换基地守卫为友方（不攻击占领者）。
+     */
+    private static void convertGuardiansToFriendly(ServerLevel level, BastionData bastion, UUID ownerId) {
+        final int minRadius = 64;
+        final int halfHeight = 32;
+        BlockPos core = bastion.corePos();
+        int radius = Math.max(bastion.growthRadius(), minRadius);
+        AABB box = new AABB(
+            core.getX() - radius, core.getY() - halfHeight, core.getZ() - radius,
+            core.getX() + radius, core.getY() + halfHeight, core.getZ() + radius
+        );
+
+        level.getEntitiesOfClass(Mob.class, box, mob ->
+            BastionGuardianData.belongsToBastion(mob, bastion.id())
+        ).forEach(mob -> {
+            BastionGuardianData.markAsCaptured(mob, ownerId);
+            if (mob.getTarget() instanceof Player target && target.getUUID().equals(ownerId)) {
+                mob.setTarget(null);
+            }
+        });
     }
 
     // TODO Round 34：在净化阵法完成的事件回调中调用此方法，

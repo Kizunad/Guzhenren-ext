@@ -124,7 +124,8 @@ public final class BastionGuardianRuntimeService {
         if (current != null
             && current.isAlive()
             && !current.isRemoved()
-            && !(current instanceof ServerPlayer player && isIgnoredPlayer(player))) {
+            && !(current instanceof ServerPlayer player
+            && (isIgnoredPlayer(player) || BastionGuardianData.isCapturedBy(guardian, player.getUUID())))) {
             // 当前目标合法，保留
             return;
         }
@@ -158,6 +159,9 @@ public final class BastionGuardianRuntimeService {
     private static boolean isTargetCandidate(ServerLevel level, Mob guardian, LivingEntity candidate) {
         if (candidate instanceof ServerPlayer player) {
             if (isIgnoredPlayer(player)) {
+                return false;
+            }
+            if (BastionGuardianData.isCapturedBy(guardian, player.getUUID())) {
                 return false;
             }
             java.util.UUID bastionId = BastionGuardianData.getBastionId(guardian);
