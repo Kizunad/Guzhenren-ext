@@ -557,26 +557,32 @@ public final class BastionInteractionService {
             BastionData bastion,
             ItemStack captureItem) {
         long gameTime = level.getGameTime();
-        BastionState currentState = bastion.getEffectiveState(gameTime);
+        BastionData.CaptureState captureState = bastion.captureState();
+        if (captureState == null) {
+            captureState = BastionData.CaptureState.DEFAULT;
+        }
 
-        // 仅允许占领 SEALED 或 DESTROYED 状态的基地
-        if (currentState == BastionState.ACTIVE) {
+        // 检查是否可接管
+        if (!captureState.capturable()) {
             player.sendSystemMessage(Component.literal(
-                "§c基地仍处于活跃状态！需要先封印或摧毁核心才能占领"
+                "§c基地尚未进入可接管状态！需要先击杀 Boss 或完成净化阵法"
             ));
             return InteractionResult.FAIL;
         }
 
-        // 完整实现：将基地标记为已接管，重置状态为 ACTIVE，清除封印/销毁时间。
+        // 检查可接管窗口是否超时
+        if (captureState.capturableUntilGameTime() > 0
+            && gameTime > captureState.capturableUntilGameTime()) {
+            player.sendSystemMessage(Component.literal("§c可接管窗口已超时"));
+            return InteractionResult.FAIL;
+        }
+
+        boolean success = BastionCaptureService.tryFinalizeCapture(level, bastion, player);
+        if (!success) {
+            return InteractionResult.FAIL;
+        }
 
         BastionSavedData savedData = BastionSavedData.get(level);
-
-        // 写入接管者并回到 ACTIVE（友方模式）。
-        BastionData captured = bastion.withCaptured(player.getUUID(), gameTime);
-        savedData.updateBastion(captured);
-
-        // 同步基地状态到客户端，确保 HUD/光环立即刷新
-        BastionNetworkHandler.syncToNearbyPlayers(level, captured);
 
         // 消耗占领物品
         if (!player.isCreative()) {

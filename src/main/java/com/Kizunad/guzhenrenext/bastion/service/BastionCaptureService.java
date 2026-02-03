@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 
 /**
@@ -97,6 +98,47 @@ public final class BastionCaptureService {
 
         BastionData updated = bastion.withCapturable(true, BastionData.CaptureReason.BOSS_DEFEATED, untilGameTime);
         BastionSavedData.get(level).updateBastion(updated);
+        return true;
+    }
+
+    /**
+     * 尝试最终占领基地。
+     * <p>
+     * 前置条件：基地处于 capturable 状态且窗口未超时。
+     * 占领后设置 captured=true, capturedBy=玩家UUID，清理 capturable 状态。
+     * </p>
+     *
+     * @param level   服务端世界
+     * @param bastion 目标基地
+     * @param player  占领者
+     * @return 是否成功占领
+     */
+    public static boolean tryFinalizeCapture(ServerLevel level, BastionData bastion, ServerPlayer player) {
+        if (level == null || bastion == null || player == null) {
+            return false;
+        }
+
+        BastionData.CaptureState captureState = bastion.captureState();
+        if (captureState == null) {
+            captureState = BastionData.CaptureState.DEFAULT;
+        }
+
+        // 检查可接管状态
+        if (!captureState.capturable()) {
+            return false;
+        }
+
+        // 检查窗口超时
+        long gameTime = level.getGameTime();
+        if (captureState.capturableUntilGameTime() > 0
+            && gameTime > captureState.capturableUntilGameTime()) {
+            return false;
+        }
+
+        // 设置为已占领
+        BastionData updated = bastion.withCaptured(player.getUUID(), gameTime);
+        BastionSavedData.get(level).updateBastion(updated);
+
         return true;
     }
 
