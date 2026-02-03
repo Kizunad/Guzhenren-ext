@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionModifier;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
+import com.Kizunad.guzhenrenext.bastion.service.BastionTalentService;
 import com.Kizunad.guzhenrenext.worldgen.BastionRuinLocator;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.LiuPaiHelper;
@@ -179,8 +180,22 @@ public class GuzhenrenDebugCommand {
             .then(
                 Commands.literal("breakthrough").executes(
                     GuzhenrenDebugCommand::breakthroughNearestSword
-                )
-            );
+            )
+            .then(
+                Commands.literal("talent")
+                    .then(
+                        Commands.literal("convert")
+                            .then(
+                                Commands.argument("amount", DoubleArgumentType.doubleArg(1.0))
+                                    .executes(GuzhenrenDebugCommand::convertTalentPoints)
+                            )
+                    )
+                    .then(
+                        Commands.literal("info")
+                            .executes(GuzhenrenDebugCommand::showTalentInfo)
+                    )
+            )
+        );
     }
 
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
@@ -818,6 +833,89 @@ public class GuzhenrenDebugCommand {
                 .getSource()
                 .sendFailure(Component.literal("执行出错: " + e.getMessage()));
             e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // ====== 天赋点命令 ======
+
+    private static int convertTalentPoints(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            double amount = DoubleArgumentType.getDouble(context, "amount");
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(player.blockPosition(), BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("附近未找到基地"));
+                return 0;
+            }
+
+            if (!bastion.isFriendlyTo(player.getUUID())) {
+                context.getSource().sendFailure(Component.literal("基地未被你占领，无法兑换天赋点"));
+                return 0;
+            }
+
+            BastionTalentService.ConversionResult result = BastionTalentService
+                .convertResourceToTalentPoints(bastion, amount);
+
+            savedData.updateBastion(result.updatedBastion());
+
+            context.getSource().sendSuccess(
+                () -> Component.literal(String.format(
+                    "已消耗 %.1f 资源，获得 %d 天赋点；剩余资源 %.1f",
+                    result.resourceSpent(),
+                    result.pointsGained(),
+                    result.updatedBastion().resourcePool()
+                )),
+                false
+            );
+            return 1;
+        } catch (IllegalArgumentException e) {
+            context.getSource().sendFailure(Component.literal(e.getMessage()));
+            return 0;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int showTalentInfo(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(player.blockPosition(), BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("附近未找到基地"));
+                return 0;
+            }
+
+            if (!bastion.isFriendlyTo(player.getUUID())) {
+                context.getSource().sendFailure(Component.literal("基地未被你占领，无法查看天赋点"));
+                return 0;
+            }
+
+            var talent = bastion.talentData();
+            context.getSource().sendSuccess(
+                () -> Component.literal(String.format(
+                    "基地天赋点: 可用 %d，已花费 %d，已解锁 %d 个节点",
+                    talent.availablePoints(),
+                    talent.totalPointsSpent(),
+                    talent.unlockedNodes().size()
+                )),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
             return 0;
         }
     }

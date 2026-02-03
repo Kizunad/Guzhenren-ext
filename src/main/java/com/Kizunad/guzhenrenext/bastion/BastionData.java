@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.bastion;
 
+import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentData;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -55,7 +56,8 @@ public record BastionData(
          Set<BastionModifier> modifiers,
          BastionTiming timing,
          CaptureState captureState,
-         long lastBossSpawnGameTime
+         long lastBossSpawnGameTime,
+         BastionTalentData talentData
 ) {
 
     /**
@@ -226,18 +228,20 @@ public record BastionData(
      * 16 参数限制，同时保持 JSON 扁平结构与旧存档兼容。
      * </p>
      */
-    private record AdditionalState(
-            BastionCounts counts,
-            Set<BastionModifier> modifiers,
-            BastionTiming timing,
-            CaptureState captureState,
-            long lastBossSpawnGameTime) {
+     private record AdditionalState(
+             BastionCounts counts,
+             Set<BastionModifier> modifiers,
+             BastionTiming timing,
+             CaptureState captureState,
+             long lastBossSpawnGameTime,
+             BastionTalentData talentData) {
         private static final AdditionalState DEFAULT = new AdditionalState(
             BastionCounts.DEFAULT,
             java.util.Set.of(),
             BastionTiming.createDefault(0L),
             CaptureState.DEFAULT,
-            0L
+            0L,
+            BastionTalentData.DEFAULT
         );
 
         private static final MapCodec<AdditionalState> CODEC = RecordCodecBuilder.mapCodec(instance ->
@@ -250,7 +254,11 @@ public record BastionData(
                 CaptureState.CODEC.optionalFieldOf("capture_state", CaptureState.DEFAULT)
                     .forGetter(AdditionalState::captureState),
                 Codec.LONG.optionalFieldOf("last_boss_spawn_game_time", 0L)
-                    .forGetter(AdditionalState::lastBossSpawnGameTime)
+                    .forGetter(AdditionalState::lastBossSpawnGameTime),
+                BastionTalentData.CODEC.optionalFieldOf(
+                    "talent_data",
+                    BastionTalentData.DEFAULT
+                ).forGetter(AdditionalState::talentData)
             ).apply(instance, AdditionalState::new)
         );
     }
@@ -272,14 +280,17 @@ public record BastionData(
             Codec.INT.fieldOf("growth_radius").forGetter(BastionData::growthRadius),
             Codec.LONG.fieldOf("growth_cursor").forGetter(BastionData::growthCursor),
              Codec.DOUBLE.fieldOf("resource_pool").forGetter(BastionData::resourcePool),
-             Codec.DOUBLE.optionalFieldOf("pollution", 0.0).forGetter(BastionData::pollution),
-             AdditionalState.CODEC.forGetter(data -> new AdditionalState(
-                 data.counts == null ? BastionCounts.DEFAULT : data.counts,
-                 data.modifiers,
-                 data.timing,
-                data.captureState == null ? CaptureState.DEFAULT : data.captureState,
-                 data.lastBossSpawnGameTime
-            ))
+              Codec.DOUBLE.optionalFieldOf("pollution", 0.0).forGetter(BastionData::pollution),
+              AdditionalState.CODEC.forGetter(data -> new AdditionalState(
+                  data.counts == null ? BastionCounts.DEFAULT : data.counts,
+                  data.modifiers,
+                  data.timing,
+                 data.captureState == null ? CaptureState.DEFAULT : data.captureState,
+                  data.lastBossSpawnGameTime,
+                  data.talentData == null
+                      ? BastionTalentData.DEFAULT
+                      : data.talentData
+             ))
         ).apply(instance, (id,
                 state,
                 corePos,
@@ -294,7 +305,7 @@ public record BastionData(
                  growthCursor,
                  resourcePool,
                  pollution,
-                  additional) -> new BastionData(
+                   additional) -> new BastionData(
                 id,
                 state,
                 corePos,
@@ -304,16 +315,17 @@ public record BastionData(
                 tier,
                 evolutionProgress,
                 totalNodes,
-                nodesByTier,
-                growthRadius,
-                growthCursor,
-                 resourcePool,
-                 pollution,
+                 nodesByTier,
+                 growthRadius,
+                 growthCursor,
+                  resourcePool,
+                  pollution,
                  additional.counts(),
                  additional.modifiers(),
                  additional.timing(),
                  additional.captureState(),
-                 additional.lastBossSpawnGameTime()))
+                 additional.lastBossSpawnGameTime(),
+                 additional.talentData()))
     );
 
     // ===== 时间字段的便捷访问器 =====
@@ -377,7 +389,49 @@ public record BastionData(
             java.util.Set.of(),
             BastionTiming.createDefault(gameTime),
             CaptureState.DEFAULT,
-            0L
+            0L,
+            com.Kizunad.guzhenrenext.bastion.talent.BastionTalentData.DEFAULT
+        );
+    }
+
+    /**
+     * 返回天赋数据（兼容旧存档 null）。
+     *
+     * @return 非空天赋数据
+     */
+    public BastionTalentData talentData() {
+        return talentData == null ? BastionTalentData.DEFAULT : talentData;
+    }
+
+    /**
+     * 创建天赋数据更新后的副本。
+     *
+     * @param newTalentData 新的天赋数据（null 将回退为默认值）
+     * @return 更新后的 BastionData
+     */
+    public BastionData withTalentData(BastionTalentData newTalentData) {
+        BastionTalentData safe = newTalentData == null ? BastionTalentData.DEFAULT : newTalentData;
+        return new BastionData(
+            id,
+            state,
+            corePos,
+            dimension,
+            bastionType,
+            primaryDao,
+            tier,
+            evolutionProgress,
+            totalNodes,
+            nodesByTier,
+            growthRadius,
+            growthCursor,
+            resourcePool,
+            pollution,
+            counts,
+            modifiers,
+            timing,
+            captureState,
+            lastBossSpawnGameTime,
+            safe
         );
     }
 
@@ -408,8 +462,9 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, newTotal, newNodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+             growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
+             lastBossSpawnGameTime,
+             talentData
         );
     }
 
@@ -430,7 +485,8 @@ public record BastionData(
             id, BastionState.DESTROYED, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
-            lastBossSpawnGameTime
+            lastBossSpawnGameTime,
+            talentData
         );
     }
 
@@ -451,7 +507,8 @@ public record BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
-            lastBossSpawnGameTime
+            lastBossSpawnGameTime,
+            talentData
         );
     }
 
@@ -466,8 +523,9 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, newTier,
             newProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+             growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
+             lastBossSpawnGameTime,
+             talentData
         );
     }
 
@@ -482,7 +540,8 @@ public record BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, newRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+            lastBossSpawnGameTime,
+            talentData
         );
     }
 
@@ -497,7 +556,8 @@ public record BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             newCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+            lastBossSpawnGameTime,
+            talentData
         );
     }
 
@@ -512,7 +572,8 @@ public record BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, newPool, pollution, counts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+            lastBossSpawnGameTime,
+            talentData
         );
     }
 
@@ -529,8 +590,9 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+             growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
+             lastBossSpawnGameTime,
+             talentData
         );
     }
 
@@ -547,8 +609,9 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+             growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
+             lastBossSpawnGameTime,
+             talentData
         );
     }
 
@@ -569,7 +632,8 @@ public record BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
-            lastBossSpawnGameTime
+            lastBossSpawnGameTime,
+            talentData
         );
     }
 
@@ -589,8 +653,9 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
-            lastBossSpawnGameTime
+             growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
+             lastBossSpawnGameTime,
+             talentData
         );
     }
 
@@ -607,8 +672,9 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
-            lastBossSpawnGameTime
+             growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
+             lastBossSpawnGameTime,
+             talentData
         );
     }
 
@@ -686,13 +752,14 @@ public record BastionData(
         return new BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
-            growthCursor, resourcePool, pollution, counts,
-            newModifiers == null ? java.util.Set.of() : java.util.Set.copyOf(newModifiers),
-            timing,
-            captureState,
-            lastBossSpawnGameTime
-        );
-    }
+             growthCursor, resourcePool, pollution, counts,
+             newModifiers == null ? java.util.Set.of() : java.util.Set.copyOf(newModifiers),
+             timing,
+             captureState,
+             lastBossSpawnGameTime,
+             talentData
+         );
+     }
 
     // ===== 接管状态相关便捷方法 =====
 
@@ -708,7 +775,8 @@ public record BastionData(
              id, state, corePos, dimension, bastionType, primaryDao, tier,
              evolutionProgress, totalNodes, nodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, counts, modifiers, timing, safe,
-             lastBossSpawnGameTime
+             lastBossSpawnGameTime,
+             talentData
          );
      }
 
@@ -779,9 +847,10 @@ public record BastionData(
               id, state, corePos, dimension, bastionType, primaryDao, tier,
               evolutionProgress, totalNodes, nodesByTier, growthRadius,
               growthCursor, resourcePool, clamped, counts, modifiers, timing, captureState,
-              lastBossSpawnGameTime
-          );
-      }
+              lastBossSpawnGameTime,
+              talentData
+           );
+       }
 
     /**
      * 创建接管后的副本：转为 ACTIVE、清空封印/摧毁时间并写入占领者。
@@ -819,7 +888,8 @@ public record BastionData(
             modifiers,
             newTiming,
             capturedState,
-            lastBossSpawnGameTime
+            lastBossSpawnGameTime,
+            talentData
         );
     }
 
@@ -834,7 +904,8 @@ public record BastionData(
             id, state, corePos, dimension, bastionType, primaryDao, tier,
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
-            gameTime
+            gameTime,
+            talentData
         );
     }
 
