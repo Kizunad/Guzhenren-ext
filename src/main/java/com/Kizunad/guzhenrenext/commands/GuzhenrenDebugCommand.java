@@ -6,6 +6,8 @@ import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionModifier;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.service.BastionTalentService;
+import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentNode;
+import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentRegistry;
 import com.Kizunad.guzhenrenext.worldgen.BastionRuinLocator;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.DaoHenHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.LiuPaiHelper;
@@ -84,6 +86,16 @@ public class GuzhenrenDebugCommand {
         return builder.buildFuture();
     };
 
+    /** 天赋节点建议提供器。 */
+    private static final SuggestionProvider<
+        CommandSourceStack
+    > TALENT_NODE_SUGGESTIONS = (context, builder) -> {
+        for (String nodeId : BastionTalentRegistry.getAllNodeIds()) {
+            builder.suggest(nodeId);
+        }
+        return builder.buildFuture();
+    };
+
     public static void register(
         CommandDispatcher<CommandSourceStack> dispatcher
     ) {
@@ -103,10 +115,11 @@ public class GuzhenrenDebugCommand {
                         )
                 )
                 .then(buildFlyingSwordCommands())
-                .then(buildBridgeCommands())
-                .then(buildDomainCommands())
-                .then(buildBastionCommands())
-                .then(buildBastionRuinCommands())
+            .then(buildBridgeCommands())
+            .then(buildDomainCommands())
+            .then(buildBastionCommands())
+            .then(buildBastionTalentCommands())
+            .then(buildBastionRuinCommands())
         );
     }
 
@@ -371,6 +384,35 @@ public class GuzhenrenDebugCommand {
             );
     }
 
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > buildBastionTalentCommands() {
+        return Commands.literal("bastion")
+            .then(
+                Commands.literal("talent")
+                    .then(
+                        Commands.literal("list")
+                            .executes(GuzhenrenDebugCommand::listTalentNodes)
+                    )
+                    .then(
+                        Commands.literal("unlock")
+                            .then(
+                                Commands.argument("node_id", StringArgumentType.word())
+                                    .suggests(TALENT_NODE_SUGGESTIONS)
+                                    .executes(GuzhenrenDebugCommand::unlockTalentNode)
+                            )
+                    )
+                    .then(
+                        Commands.literal("info")
+                            .then(
+                                Commands.argument("node_id", StringArgumentType.word())
+                                    .suggests(TALENT_NODE_SUGGESTIONS)
+                                    .executes(GuzhenrenDebugCommand::showTalentNodeInfo)
+                            )
+                    )
+            );
+    }
+
     private static int executeTeleport(CommandContext<CommandSourceStack> ctx, String bastionIdStr) {
         try {
             ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -386,6 +428,104 @@ public class GuzhenrenDebugCommand {
             ctx.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
             return 0;
         }
+    }
+
+    private static int listTalentNodes(CommandContext<CommandSourceStack> context) {
+        List<BastionTalentNode> nodes = BastionTalentRegistry.getAllNodes();
+        if (nodes.isEmpty()) {
+            context.getSource().sendSuccess(
+                () -> Component.literal("暂无天赋节点定义"),
+                false
+            );
+            return 0;
+        }
+
+        StringBuilder sb = new StringBuilder("§e[天赋列表]\n");
+        for (BastionTalentNode node : nodes) {
+            sb.append("- ")
+                .append(node.id())
+                .append(" (cost ")
+                .append(node.cost())
+                .append(") ")
+                .append(node.displayName())
+                .append("：")
+                .append(node.description())
+                .append("\n");
+        }
+
+        context.getSource().sendSuccess(
+            () -> Component.literal(sb.toString()),
+            false
+        );
+        return nodes.size();
+    }
+
+    private static int unlockTalentNode(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(player.blockPosition(), BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("附近未找到基地"));
+                return 0;
+            }
+
+            if (!bastion.isFriendlyTo(player.getUUID())) {
+                context.getSource().sendFailure(Component.literal("基地未被你占领，无法操作天赋"));
+                return 0;
+            }
+
+            String nodeId = StringArgumentType.getString(context, "node_id");
+            BastionTalentService.UnlockResult result = BastionTalentService.tryUnlockNode(bastion, nodeId);
+
+            if (!result.success()) {
+                context.getSource().sendFailure(Component.literal(result.message()));
+                return 0;
+            }
+
+            savedData.updateBastion(result.updatedBastion());
+            context.getSource().sendSuccess(
+                () -> Component.literal("解锁成功: " + nodeId + "，剩余点数 "
+                    + result.updatedBastion().talentData().availablePoints()),
+                false
+            );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int showTalentNodeInfo(CommandContext<CommandSourceStack> context) {
+        String nodeId = StringArgumentType.getString(context, "node_id");
+        BastionTalentNode node = BastionTalentRegistry.getNode(nodeId);
+        if (node == null) {
+            context.getSource().sendFailure(Component.literal("节点不存在"));
+            return 0;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(node.id()).append("\n")
+            .append("名称: ").append(node.displayName()).append("\n")
+            .append("描述: ").append(node.description()).append("\n")
+            .append("类型: ").append(node.type().name()).append("\n")
+            .append("消耗: ").append(node.cost()).append(" 点\n")
+            .append("效果: ").append(node.effectId()).append(" -> ").append(node.effectValue()).append("\n");
+
+        if (!node.prerequisites().isEmpty()) {
+            sb.append("前置: ").append(String.join(", ", node.prerequisites())).append("\n");
+        }
+        node.dao().ifPresent(dao -> sb.append("限定道途: ").append(dao.getSerializedName()).append("\n"));
+
+        context.getSource().sendSuccess(
+            () -> Component.literal(sb.toString()),
+            false
+        );
+        return 1;
     }
 
     private static int executeListCaptured(CommandContext<CommandSourceStack> ctx) {

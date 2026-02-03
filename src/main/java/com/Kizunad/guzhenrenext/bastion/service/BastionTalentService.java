@@ -2,6 +2,8 @@ package com.Kizunad.guzhenrenext.bastion.service;
 
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentData;
+import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentNode;
+import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentRegistry;
 
 /**
  * 基地天赋点兑换服务。
@@ -54,6 +56,69 @@ public final class BastionTalentService {
         BastionTalentData newTalent = bastion.talentData().withAddPoints(points);
         BastionData updated = bastion.withResourcePool(newPool).withTalentData(newTalent);
         return new ConversionResult(updated, points, requiredResource);
+    }
+
+    /**
+     * 解锁结果封装。
+     * <p>
+     * 成功时返回更新后的基地数据；失败时 updatedBastion 为空。
+     * </p>
+     *
+     * @param updatedBastion 更新后的基地数据（成功时非空）
+     * @param success        是否成功
+     * @param message        结果信息（失败原因或成功提示）
+     */
+    public record UnlockResult(BastionData updatedBastion, boolean success, String message) {
+        public static UnlockResult success(BastionData bastion) {
+            return new UnlockResult(bastion, true, "解锁成功");
+        }
+
+        public static UnlockResult failure(String msg) {
+            return new UnlockResult(null, false, msg);
+        }
+    }
+
+    /**
+     * 尝试解锁指定天赋节点。
+     * <p>
+     * 按顺序检查节点存在性、重复解锁、前置节点、点数是否充足。
+     * </p>
+     *
+     * @param bastion 基地数据
+     * @param nodeId  节点 id
+     * @return 解锁结果（失败包含原因）
+     */
+    public static UnlockResult tryUnlockNode(BastionData bastion, String nodeId) {
+        if (bastion == null) {
+            return UnlockResult.failure("基地数据为空");
+        }
+        if (nodeId == null || nodeId.isBlank()) {
+            return UnlockResult.failure("节点 ID 不能为空");
+        }
+
+        BastionTalentNode node = BastionTalentRegistry.getNode(nodeId);
+        if (node == null) {
+            return UnlockResult.failure("节点不存在");
+        }
+
+        BastionTalentData talentData = bastion.talentData();
+        if (talentData.isUnlocked(nodeId)) {
+            return UnlockResult.failure("节点已解锁");
+        }
+
+        for (String prerequisite : node.prerequisites()) {
+            if (!talentData.isUnlocked(prerequisite)) {
+                return UnlockResult.failure("前置节点未解锁: " + prerequisite);
+            }
+        }
+
+        if (talentData.availablePoints() < node.cost()) {
+            return UnlockResult.failure("天赋点不足");
+        }
+
+        BastionTalentData newTalent = talentData.withUnlock(nodeId, node.cost());
+        BastionData updated = bastion.withTalentData(newTalent);
+        return UnlockResult.success(updated);
     }
 
     /**
