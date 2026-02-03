@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -141,6 +142,13 @@ public final class BastionCaptureService {
             return false;
         }
 
+        // 检查并消耗念头
+        double currentNiantou = NianTouHelper.getAmount(player);
+        if (currentNiantou < CaptureConstants.CAPTURE_NIANTOU_COST) {
+            return false;
+        }
+        NianTouHelper.modify(player, -CaptureConstants.CAPTURE_NIANTOU_COST);
+
         // 设置为已占领
         BastionData updated = bastion.withCaptured(player.getUUID(), gameTime);
         BastionSavedData.get(level).updateBastion(updated);
@@ -151,12 +159,25 @@ public final class BastionCaptureService {
         return true;
     }
 
+    /** 占领相关常量。 */
+    private static final class CaptureConstants {
+        /** 占领基地所需念头消耗。 */
+        static final double CAPTURE_NIANTOU_COST = 100.0;
+        /** 搜索守卫的水平半径。 */
+        static final int GUARDIAN_SEARCH_RADIUS = 64;
+        /** 搜索守卫的垂直半径。 */
+        static final int GUARDIAN_SEARCH_HEIGHT = 32;
+
+        private CaptureConstants() {
+        }
+    }
+
     /**
      * 转换基地守卫为友方（不攻击占领者）。
      */
     private static void convertGuardiansToFriendly(ServerLevel level, BastionData bastion, UUID ownerId) {
-        final int minRadius = 64;
-        final int halfHeight = 32;
+        final int minRadius = CaptureConstants.GUARDIAN_SEARCH_RADIUS;
+        final int halfHeight = CaptureConstants.GUARDIAN_SEARCH_HEIGHT;
         BlockPos core = bastion.corePos();
         int radius = Math.max(bastion.growthRadius(), minRadius);
         AABB box = new AABB(
