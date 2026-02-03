@@ -91,7 +91,9 @@ public final class BastionExpansionService {
         BastionTypeConfig.MyceliumConfig myceliumConfig = expansionConfig.mycelium();
         BastionTypeConfig.AnchorConfig anchorConfig = expansionConfig.anchor();
 
-        double expansionCost = calculateExpansionCost(bastion, myceliumConfig);
+        double expansionSpeedMultiplier =
+            BastionTalentEffectService.getExpansionSpeedMultiplier(bastion);
+        double expansionCost = calculateExpansionCost(bastion, myceliumConfig) / expansionSpeedMultiplier;
         if (bastion.resourcePool() < expansionCost) {
             LOGGER.info("基地 {} 扩张跳过: 资源不足, pool={}, cost={}",
                 bastion.id(), String.format("%.2f", bastion.resourcePool()),
@@ -114,7 +116,9 @@ public final class BastionExpansionService {
         // 每次扩张 tick 前尝试生成 Anchor（冷却 + 失败回退，不阻塞菌毯扩张）。
         current = tryPlaceAnchor(level, savedData, current, gameTime, anchorConfig, myceliumConfig);
 
-        for (int i = 0; i < myceliumConfig.maxPerTick(); i++) {
+        int maxPerTick = (int) Math.max(1,
+            Math.round(myceliumConfig.maxPerTick() * expansionSpeedMultiplier));
+        for (int i = 0; i < maxPerTick; i++) {
             if (current.resourcePool() < expansionCost) {
                 break;
             }

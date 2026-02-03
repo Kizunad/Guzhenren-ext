@@ -11,6 +11,7 @@ import com.Kizunad.guzhenrenext.bastion.service.BastionExpansionService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionHatcheryService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionSpawnService;
 import com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierSkillService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionTalentEffectService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionTurretService;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -388,7 +389,8 @@ public final class BastionTicker {
             energyContext.config(), energyContext.counts(), energyContext.lossConfig(), lossRatio);
         double multiplierFinal = poolMultiplier * (1.0 + Math.max(0.0, mAdd));
 
-        double basePoolGain = calculatePoolGain(bastion, effectiveNodes, multiplierFinal);
+        double talentResourceMultiplier = BastionTalentEffectService.getResourceOutputMultiplier(bastion);
+        double basePoolGain = calculatePoolGain(bastion, effectiveNodes, multiplierFinal * talentResourceMultiplier);
         double poolGain = basePoolGain + flatAdd * TickConfig.TICK_INTERVAL;
         // 核心自带基础容量，确保即使没有节点也能积累资源
         double poolCap = MultiplierConfig.CORE_BASE_CAP

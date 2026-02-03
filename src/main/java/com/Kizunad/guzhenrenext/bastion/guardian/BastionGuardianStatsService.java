@@ -1,7 +1,11 @@
 package com.Kizunad.guzhenrenext.bastion.guardian;
 
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
+import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
+import com.Kizunad.guzhenrenext.bastion.service.BastionTalentEffectService;
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -106,6 +110,9 @@ public final class BastionGuardianStatsService {
             }
         }
 
+        // 天赋：守卫伤害加成（需找到守卫所属基地）
+        attack *= resolveGuardianDamageMultiplier(guardian);
+
         // 精英倍率（Warden 外观）
         if (elite) {
             health *= Stats.ELITE_HEALTH_MULT;
@@ -137,6 +144,22 @@ public final class BastionGuardianStatsService {
         // tier=3 -> 600
         // tier=4 -> 6000
         return Stats.BASE_ATTACK_TIER_1 * Math.pow(Stats.ATTACK_MULT_PER_TIER, safeTier - 1);
+    }
+
+    private static double resolveGuardianDamageMultiplier(Mob guardian) {
+        if (!(guardian.level() instanceof ServerLevel level)) {
+            return 1.0d;
+        }
+        java.util.UUID bastionId = BastionGuardianData.getBastionId(guardian);
+        if (bastionId == null) {
+            return 1.0d;
+        }
+        BastionSavedData savedData = BastionSavedData.get(level);
+        var bastion = savedData.getBastion(bastionId);
+        if (bastion == null) {
+            return 1.0d;
+        }
+        return BastionTalentEffectService.getGuardianDamageMultiplier(bastion);
     }
 
     private static void setBaseValueIfPresent(
