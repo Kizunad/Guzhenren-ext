@@ -29,6 +29,7 @@ import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
 import com.Kizunad.guzhenrenext.bastion.service.BastionGuardianUpkeepService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionTeleportService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionThreatService;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.mojang.brigadier.CommandDispatcher;
@@ -310,6 +311,17 @@ public class GuzhenrenDebugCommand {
                 )
             )
             .then(
+                Commands.literal("teleport")
+                    .then(
+                        Commands.argument("bastion_id", StringArgumentType.string())
+                            .executes(ctx -> executeTeleport(ctx, StringArgumentType.getString(ctx, "bastion_id")))
+                    )
+                    .then(
+                        Commands.literal("list")
+                            .executes(GuzhenrenDebugCommand::executeListCaptured)
+                    )
+            )
+            .then(
                 Commands.literal("modifier")
                     .then(
                         Commands.literal("add")
@@ -342,6 +354,50 @@ public class GuzhenrenDebugCommand {
                             .executes(GuzhenrenDebugCommand::listNearestBastionModifiers)
                     )
             );
+    }
+
+    private static int executeTeleport(CommandContext<CommandSourceStack> ctx, String bastionIdStr) {
+        try {
+            ServerPlayer player = ctx.getSource().getPlayerOrException();
+            ServerLevel level = ctx.getSource().getLevel();
+
+            UUID bastionId = UUID.fromString(bastionIdStr);
+            boolean success = BastionTeleportService.tryTeleport(level, player, bastionId);
+            return success ? 1 : 0;
+        } catch (IllegalArgumentException e) {
+            ctx.getSource().sendFailure(Component.literal("无效的基地 ID"));
+            return 0;
+        } catch (Exception e) {
+            ctx.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeListCaptured(CommandContext<CommandSourceStack> ctx) {
+        try {
+            ServerPlayer player = ctx.getSource().getPlayerOrException();
+            ServerLevel level = ctx.getSource().getLevel();
+
+            List<BastionData> captured = BastionTeleportService.getCapturedBastions(level, player.getUUID());
+            if (captured.isEmpty()) {
+                ctx.getSource().sendSuccess(() -> Component.literal("§e你尚未占领任何基地"), false);
+                return 0;
+            }
+
+            StringBuilder sb = new StringBuilder("§a已占领的基地:\n");
+            for (BastionData b : captured) {
+            sb.append(String.format("  - %s (%s, 转数%d)\n",
+                b.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH),
+                b.primaryDao().getSerializedName(),
+                b.tier()
+            ));
+        }
+            ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+            return captured.size();
+        } catch (Exception e) {
+            ctx.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
     }
 
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
