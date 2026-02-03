@@ -1500,10 +1500,10 @@ import java.util.Optional;
          static final Map<BastionDao, EliteSkillPool> DEFAULT_ELITE_DAO_SKILL_POOLS = Map.of();
 
          // ===== Boss 默认值（Round 8.1 + Round 36） =====
-         /** 是否启用 Boss 系统，缺省关闭以兼容旧 JSON。 */
-         static final boolean DEFAULT_BOSS_ENABLED = false;
-         /** Boss 生成最低转数要求。 */
-         static final int DEFAULT_BOSS_MIN_TIER = 5;
+         /** 是否启用 Boss 系统，默认启用以便测试。 */
+         static final boolean DEFAULT_BOSS_ENABLED = true;
+         /** Boss 生成最低转数要求（1 转即可生成，便于测试）。 */
+         static final int DEFAULT_BOSS_MIN_TIER = 1;
          /** Boss 生命倍率默认值。 */
          static final double DEFAULT_BOSS_HEALTH_MULTIPLIER = 5.0;
          /** Boss 伤害倍率默认值。 */
@@ -1512,8 +1512,8 @@ import java.util.Optional;
          static final double DEFAULT_BOSS_ARMOR_MULTIPLIER = 2.0;
          /** Boss 生成冷却时间（tick），默认 3 分钟。 */
          static final long DEFAULT_BOSS_COOLDOWN_TICKS = 3600L;
-         /** Boss 生成资源消耗。 */
-         static final double DEFAULT_BOSS_SPAWN_COST = 200.0;
+         /** Boss 生成资源消耗（降低以便测试）。 */
+         static final double DEFAULT_BOSS_SPAWN_COST = 20.0;
          /** Boss 掉落表 ID，空字符串表示不启用自定义掉落表。 */
          static final String DEFAULT_BOSS_LOOT_TABLE_ID = "";
          /** Boss 阶段配置默认：空列表表示无阶段行为。 */
