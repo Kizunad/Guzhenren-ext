@@ -681,8 +681,15 @@ public final class BastionInteractionService {
             }
         }
 
+        // 尝试触发 Boss
+        if (isCore && bastion.getEffectiveState(level.getGameTime()) == BastionState.ACTIVE) {
+            BastionBossService.tryTriggerBoss(level, bastion, player);
+        }
+
         // 触发防御反应（仅在 ACTIVE 状态）
         if (bastion.getEffectiveState(level.getGameTime()) == BastionState.ACTIVE) {
+            // 先尝试触发 Boss（符合条件时生成 BASTION_RAVAGER）
+            BastionBossService.tryTriggerBoss(level, bastion, player);
             triggerDefenseResponse(level, bastion, player);
             // 播放警报音效
             BastionSoundPlayer.playAlarm(level, bastion.corePos());
