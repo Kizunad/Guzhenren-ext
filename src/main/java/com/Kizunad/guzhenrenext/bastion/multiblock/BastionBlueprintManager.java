@@ -26,6 +26,14 @@ public final class BastionBlueprintManager {
 
     private final Map<String, BastionBlueprint> blueprints;
 
+    /** 默认管理器实例（懒加载单例）。 */
+    private static final class DefaultHolder {
+        private static final BastionBlueprintManager INSTANCE = createDefault();
+
+        private DefaultHolder() {
+        }
+    }
+
     private BastionBlueprintManager(Map<String, BastionBlueprint> blueprints) {
         this.blueprints = new HashMap<>(blueprints);
     }
@@ -51,6 +59,23 @@ public final class BastionBlueprintManager {
      */
     public Optional<BastionBlueprint> get(String id) {
         return Optional.ofNullable(blueprints.get(id));
+    }
+
+    /**
+     * 获取默认管理器实例。
+     * <p>
+     * 使用懒加载单例，避免重复注册内置蓝图。
+     * </p>
+     */
+    public static BastionBlueprintManager getDefault() {
+        return DefaultHolder.INSTANCE;
+    }
+
+    /**
+     * 获取所有蓝图 ID（只读）。
+     */
+    public static List<String> getAllBlueprintIds() {
+        return List.copyOf(getDefault().view().keySet());
     }
 
     /**

@@ -31,6 +31,9 @@ import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
+import com.Kizunad.guzhenrenext.bastion.multiblock.BastionBlueprint;
+import com.Kizunad.guzhenrenext.bastion.multiblock.BastionBlueprintManager;
+import com.Kizunad.guzhenrenext.bastion.multiblock.BastionBuildingService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionGuardianUpkeepService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionTeleportService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionThreatService;
@@ -347,6 +350,19 @@ public class GuzhenrenDebugCommand {
                     .then(
                         Commands.literal("list")
                             .executes(GuzhenrenDebugCommand::executeListCaptured)
+                    )
+            )
+            .then(
+                Commands.literal("build")
+                    .then(
+                        Commands.argument("blueprint_id", StringArgumentType.word())
+                            .suggests((ctx, builder) -> {
+                                for (String id : BastionBlueprintManager.getAllBlueprintIds()) {
+                                    builder.suggest(id);
+                                }
+                                return builder.buildFuture();
+                            })
+                            .executes(GuzhenrenDebugCommand::buildBlueprint)
                     )
             )
             .then(
@@ -763,6 +779,47 @@ public class GuzhenrenDebugCommand {
 
             context.getSource().sendSuccess(() -> msg, false);
             return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 按蓝图直接构建基地结构（仅放置必需方块）。
+     *
+     * @param context 命令上下文
+     * @return 结果码（1 成功，0 失败）
+     */
+    private static int buildBlueprint(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            String blueprintId = StringArgumentType.getString(context, "blueprint_id");
+            BastionBlueprint blueprint = BastionBlueprintManager.getDefault()
+                .get(blueprintId)
+                .orElse(null);
+            if (blueprint == null) {
+                context.getSource().sendFailure(Component.literal("未知蓝图: " + blueprintId));
+                return 0;
+            }
+
+            BlockPos center = player.blockPosition();
+            boolean canPlace = BastionBuildingService.canPlaceBlueprint(level, center, blueprint);
+            if (!canPlace) {
+                context.getSource().sendFailure(Component.literal("目标区域不可放置，存在阻挡方块"));
+                return 0;
+            }
+
+            int placed = BastionBuildingService.placeBlueprint(level, center, blueprint);
+            context.getSource().sendSuccess(
+                () -> Component.literal("已放置必需方块: " + placed),
+                false
+            );
+            return placed > 0 ? 1 : 0;
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("执行出错: " + e.getMessage()));
             return 0;
