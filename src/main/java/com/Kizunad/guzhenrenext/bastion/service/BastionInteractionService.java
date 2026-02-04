@@ -12,6 +12,7 @@ import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.Kizunad.guzhenrenext.bastion.network.BastionNetworkHandler;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -692,8 +693,9 @@ public final class BastionInteractionService {
             BastionBossService.tryTriggerBoss(level, bastion, player);
         }
 
-        // 触发防御反应（仅在 ACTIVE 状态）
-        if (bastion.getEffectiveState(level.getGameTime()) == BastionState.ACTIVE) {
+        // 触发防御反应（仅在 ACTIVE 状态且攻击者不是占领者）
+        if (bastion.getEffectiveState(level.getGameTime()) == BastionState.ACTIVE
+                && !bastion.isFriendlyTo(player.getUUID())) {
             // 先尝试触发 Boss（符合条件时生成 BASTION_RAVAGER）
             BastionBossService.tryTriggerBoss(level, bastion, player);
             triggerDefenseResponse(level, bastion, player);
@@ -729,8 +731,9 @@ public final class BastionInteractionService {
             LOGGER.debug("基地 {} 被攻击，刷新了 {} 个守卫", bastion.id(), spawned);
         }
 
-        // 吸引该基地的守卫仇恨（使用 PersistentData 精确匹配）
+        // 吸引该基地的守卫仇恨（使用 PersistentData 精确匹配，排除已被占领的守卫）
         double searchRadius = bastion.growthRadius();
+        final UUID attackerId = attacker.getUUID();
 
         level.getEntities(
             attacker,
@@ -738,6 +741,7 @@ public final class BastionInteractionService {
             entity -> entity instanceof net.minecraft.world.entity.Mob mob
                 && mob.isAlive()
                 && BastionGuardianData.belongsToBastion(mob, bastion.id())
+                && !BastionGuardianData.isCapturedBy(mob, attackerId)
         ).forEach(entity -> {
             if (entity instanceof net.minecraft.world.entity.Mob mob) {
                 mob.setTarget(attacker);

@@ -1528,8 +1528,8 @@ import java.util.Optional;
          static final List<BossConfig.ThreatMultiplier> DEFAULT_BOSS_THREAT_MULTIPLIERS = List.of();
 
          // ===== 接管配置默认值（Round 10.1） =====
-         /** 是否启用接管系统，默认关闭以兼容旧 JSON。 */
-         static final boolean DEFAULT_CAPTURE_ENABLED = false;
+         /** 是否启用接管系统，默认启用以便测试。 */
+         static final boolean DEFAULT_CAPTURE_ENABLED = true;
          /** 可接管状态超时（tick），0 表示无超时。 */
          static final long DEFAULT_CAPTURE_TIMEOUT_TICKS = 0L;
          /** 最终接管是否需要净化阵法。 */

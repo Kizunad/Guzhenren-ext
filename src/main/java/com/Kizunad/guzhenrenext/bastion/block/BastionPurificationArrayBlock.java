@@ -156,15 +156,18 @@ public class BastionPurificationArrayBlock extends Block {
     private static BastionData tryPurify(ServerLevel level, BastionData bastion, StructureType structure) {
         BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
         BastionTypeConfig.PollutionConfig pollution = typeConfig.pollution();
+
+        // 污染系统禁用时，直接标记为可接管（简化测试流程）
         if (pollution == null || !pollution.enabled()) {
-            return bastion;
+            LOGGER.info("净化阵法：污染系统禁用，基地 {} 直接标记为可接管", bastion.id());
+            return bastion.withCapturable(true, BastionData.CaptureReason.PURIFICATION_READY, 0L);
         }
 
         double currentPollution = bastion.pollution();
         double reduced = Math.max(0.0, currentPollution - structure.purifyAmount);
 
         if (currentPollution <= 0.0) {
-            return bastion;
+            return bastion.withCapturable(true, BastionData.CaptureReason.PURIFICATION_READY, 0L);
         }
 
         LOGGER.info("净化阵法：基地 {} 污染 {} -> {}", bastion.id(), currentPollution, reduced);
