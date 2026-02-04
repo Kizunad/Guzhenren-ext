@@ -37,6 +37,7 @@ import com.Kizunad.guzhenrenext.bastion.multiblock.BastionBuildingService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionGuardianUpkeepService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionTeleportService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionThreatService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionBossService;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -397,6 +398,10 @@ public class GuzhenrenDebugCommand {
                         Commands.literal("list")
                             .executes(GuzhenrenDebugCommand::listNearestBastionModifiers)
                     )
+            )
+            .then(
+                Commands.literal("spawn_boss")
+                    .executes(GuzhenrenDebugCommand::debugSpawnBoss)
             );
     }
 
@@ -716,6 +721,40 @@ public class GuzhenrenDebugCommand {
                     + " modifiers: " + modifierText),
                 false
             );
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("操作失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int debugSpawnBoss(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            if (!(player.level() instanceof ServerLevel level)) {
+                return 0;
+            }
+
+            BastionSavedData savedData = BastionSavedData.get(level);
+            BastionData bastion = savedData.findOwnerBastion(
+                player.blockPosition(), BastionConfig.SEARCH_RADIUS);
+            if (bastion == null) {
+                context.getSource().sendFailure(Component.literal("附近未找到基地"));
+                return 0;
+            }
+
+            context.getSource().sendSuccess(
+                () -> Component.literal(String.format(
+                    "§e尝试生成 Boss: 基地=%s, tier=%d, pool=%.1f, state=%s",
+                    bastion.id().toString().substring(0, BastionConfig.UUID_DISPLAY_LENGTH),
+                    bastion.tier(),
+                    bastion.resourcePool(),
+                    bastion.getEffectiveState(level.getGameTime()).getSerializedName()
+                )),
+                false
+            );
+
+            BastionBossService.tryTriggerBoss(level, bastion, player);
             return 1;
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("操作失败: " + e.getMessage()));

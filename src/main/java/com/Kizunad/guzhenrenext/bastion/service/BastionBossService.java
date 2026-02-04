@@ -19,6 +19,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 基地 Boss 服务 - 负责根据配置在攻击时触发 Boss 生成。
@@ -28,6 +30,8 @@ import net.minecraft.world.phys.AABB;
  * </p>
  */
 public final class BastionBossService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BastionBossService.class);
 
     private BastionBossService() {
         // 工具类
@@ -68,28 +72,40 @@ public final class BastionBossService {
      * @param attacker 攻击者
      */
     public static void tryTriggerBoss(ServerLevel level, BastionData bastion, ServerPlayer attacker) {
+        final int uuidDisplayLen = 8;
+        LOGGER.info("tryTriggerBoss: 基地={}, tier={}, resourcePool={}",
+            bastion.id().toString().substring(0, uuidDisplayLen), bastion.tier(), bastion.resourcePool());
+
         BastionTypeConfig.BossConfig bossConfig = BastionTypeManager
             .getOrDefault(bastion.bastionType())
             .boss();
 
         if (bossConfig == null || !bossConfig.enabled()) {
+            LOGGER.info("tryTriggerBoss: Boss 未启用或配置为 null, enabled={}",
+                bossConfig != null ? bossConfig.enabled() : "null");
             return;
         }
         if (bastion.tier() < bossConfig.minTier()) {
+            LOGGER.info("tryTriggerBoss: 转数不足, tier={}, minTier={}", bastion.tier(), bossConfig.minTier());
             return;
         }
 
         long gameTime = level.getGameTime();
         long lastSpawnTick = bastion.lastBossSpawnGameTime();
         if (lastSpawnTick > 0 && (gameTime - lastSpawnTick) < bossConfig.cooldownTicks()) {
+            LOGGER.info("tryTriggerBoss: 冷却中, lastSpawn={}, gameTime={}, cooldown={}",
+                lastSpawnTick, gameTime, bossConfig.cooldownTicks());
             return;
         }
 
         if (bastion.resourcePool() < bossConfig.spawnCost()) {
+            LOGGER.info("tryTriggerBoss: 资源不足, pool={}, cost={}",
+                bastion.resourcePool(), bossConfig.spawnCost());
             return;
         }
 
         if (hasAliveBoss(level, bastion)) {
+            LOGGER.info("tryTriggerBoss: 已有存活 Boss");
             return;
         }
 
@@ -100,9 +116,11 @@ public final class BastionBossService {
 
         Mob boss = spawnBoss(level, updated, attacker, bossConfig);
         if (boss == null) {
+            LOGGER.info("tryTriggerBoss: spawnBoss 返回 null");
             return;
         }
 
+        LOGGER.info("tryTriggerBoss: Boss 生成成功! 位置={}", boss.blockPosition());
         BastionSavedData savedData = BastionSavedData.get(level);
         savedData.updateBastion(updated);
     }
