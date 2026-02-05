@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.bastion.service;
 
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionModifier;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -36,6 +37,45 @@ public final class BastionModifierService {
 
     /** 分裂守卫的生命值比例（相较原体）。 */
     private static final float PROLIFERATING_HEALTH_RATIO = 0.5f;
+
+    /**
+     * 词缀视觉效果配置。
+     */
+    private static final class VisualConfig {
+        /** HARDENED 粒子数量。 */
+        static final int HARDENED_PARTICLE_COUNT = 4;
+        /** HARDENED 粒子扩散范围。 */
+        static final double HARDENED_SPREAD = 0.2;
+        /** HARDENED 粒子速度。 */
+        static final double HARDENED_SPEED = 0.01;
+
+        /** VOLATILE 粒子数量。 */
+        static final int VOLATILE_PARTICLE_COUNT = 6;
+        /** VOLATILE 粒子扩散范围。 */
+        static final double VOLATILE_SPREAD = 0.3;
+        /** VOLATILE 粒子速度。 */
+        static final double VOLATILE_SPEED = 0.02;
+
+        /** CLOAKED 粒子数量。 */
+        static final int CLOAKED_PARTICLE_COUNT = 4;
+        /** CLOAKED 粒子扩散范围。 */
+        static final double CLOAKED_SPREAD = 0.25;
+        /** CLOAKED 粒子速度。 */
+        static final double CLOAKED_SPEED = 0.05;
+
+        /** PROLIFERATING 粒子数量。 */
+        static final int PROLIFERATING_PARTICLE_COUNT = 5;
+        /** PROLIFERATING 粒子扩散范围。 */
+        static final double PROLIFERATING_SPREAD = 0.25;
+        /** PROLIFERATING 粒子速度。 */
+        static final double PROLIFERATING_SPEED = 0.01;
+
+        /** 粒子高度偏移比例。 */
+        static final double HEIGHT_OFFSET_RATIO = 0.5;
+
+        private VisualConfig() {
+        }
+    }
 
     /**
      * 守卫受到伤害时调用 - 应用 HARDENED 减伤。
@@ -164,5 +204,78 @@ public final class BastionModifierService {
             bastion.id(),
             com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData.getTier(guardian)
         );
+    }
+
+    /**
+     * 为指定词缀生成视觉粒子效果。
+     *
+     * @param level    服务端世界
+     * @param guardian 守卫实体
+     * @param modifier 词缀类型
+     */
+    public static void spawnModifierParticles(ServerLevel level, Mob guardian, BastionModifier modifier) {
+        if (level == null || guardian == null || modifier == null) {
+            return;
+        }
+
+        double x = guardian.getX();
+        double y = guardian.getY() + guardian.getBbHeight() * VisualConfig.HEIGHT_OFFSET_RATIO;
+        double z = guardian.getZ();
+
+        switch (modifier) {
+            case HARDENED -> level.sendParticles(
+                ParticleTypes.CRIT,
+                x, y, z,
+                VisualConfig.HARDENED_PARTICLE_COUNT,
+                VisualConfig.HARDENED_SPREAD,
+                VisualConfig.HARDENED_SPREAD,
+                VisualConfig.HARDENED_SPREAD,
+                VisualConfig.HARDENED_SPEED
+            );
+            case VOLATILE -> level.sendParticles(
+                ParticleTypes.FLAME,
+                x, y, z,
+                VisualConfig.VOLATILE_PARTICLE_COUNT,
+                VisualConfig.VOLATILE_SPREAD,
+                VisualConfig.VOLATILE_SPREAD,
+                VisualConfig.VOLATILE_SPREAD,
+                VisualConfig.VOLATILE_SPEED
+            );
+            case CLOAKED -> level.sendParticles(
+                ParticleTypes.PORTAL,
+                x, y, z,
+                VisualConfig.CLOAKED_PARTICLE_COUNT,
+                VisualConfig.CLOAKED_SPREAD,
+                VisualConfig.CLOAKED_SPREAD,
+                VisualConfig.CLOAKED_SPREAD,
+                VisualConfig.CLOAKED_SPEED
+            );
+            case PROLIFERATING -> level.sendParticles(
+                ParticleTypes.HAPPY_VILLAGER,
+                x, y, z,
+                VisualConfig.PROLIFERATING_PARTICLE_COUNT,
+                VisualConfig.PROLIFERATING_SPREAD,
+                VisualConfig.PROLIFERATING_SPREAD,
+                VisualConfig.PROLIFERATING_SPREAD,
+                VisualConfig.PROLIFERATING_SPEED
+            );
+            default -> { }
+        }
+    }
+
+    /**
+     * 为守卫生成所有激活词缀的视觉效果。
+     *
+     * @param level    服务端世界
+     * @param guardian 守卫实体
+     * @param bastion  基地数据
+     */
+    public static void spawnAllModifierParticles(ServerLevel level, Mob guardian, BastionData bastion) {
+        if (level == null || guardian == null || bastion == null) {
+            return;
+        }
+        for (BastionModifier modifier : bastion.modifiers()) {
+            spawnModifierParticles(level, guardian, modifier);
+        }
     }
 }
