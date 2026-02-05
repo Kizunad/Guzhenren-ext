@@ -92,6 +92,17 @@ public final class BastionNodeDropService {
         }
     }
 
+    /**
+     * 污染相关配置。
+     */
+    private static final class PollutionConfig {
+        /** 查找归属基地的搜索半径。 */
+        static final int BASTION_SEARCH_RADIUS = 128;
+
+        private PollutionConfig() {
+        }
+    }
+
     /** 玩家奖励汇总记录。 */
     private static final ConcurrentHashMap<UUID, RewardAggregator> REWARD_AGGREGATORS =
         new ConcurrentHashMap<>();
@@ -154,7 +165,7 @@ public final class BastionNodeDropService {
         BlockPos pos = event.getPos();
         var savedData = com.Kizunad.guzhenrenext.bastion.BastionSavedData.get(level);
         Optional<com.Kizunad.guzhenrenext.bastion.BastionData> bastionOpt =
-            Optional.ofNullable(savedData.findOwnerBastion(pos, 128));
+            Optional.ofNullable(savedData.findOwnerBastion(pos, PollutionConfig.BASTION_SEARCH_RADIUS));
 
         bastionOpt.ifPresent(bastion -> BastionPollutionService.onNodeDestroyed(level, bastion, pos));
     }
