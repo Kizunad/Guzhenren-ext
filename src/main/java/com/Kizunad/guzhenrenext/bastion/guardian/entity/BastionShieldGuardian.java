@@ -46,6 +46,8 @@ public class BastionShieldGuardian extends Vindicator {
         private static final float BLOCK_REFLECT_INACCURACY = 0.1f;
         private static final double BLOCK_REFLECT_TARGET_HEIGHT = 0.6d;
 
+        private static final double BLOCK_MIN_REFLECT_LEN_SQR = 1.0e-4;
+    
         private static final int TAUNT_COOLDOWN_TICKS = 600;
         private static final double TAUNT_RANGE = 8.0d;
         private static final int TAUNT_CHECK_INTERVAL_TICKS = 20;
@@ -165,7 +167,7 @@ public class BastionShieldGuardian extends Vindicator {
             );
             shootDir = targetPos.subtract(this.position());
         }
-        if (shootDir.lengthSqr() < 1.0e-4) {
+        if (shootDir.lengthSqr() < Config.BLOCK_MIN_REFLECT_LEN_SQR) {
             shootDir = fallbackDir;
         }
         projectile.setOwner(this);

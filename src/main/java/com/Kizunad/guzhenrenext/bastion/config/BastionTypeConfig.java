@@ -1427,12 +1427,19 @@ import java.util.Optional;
         static final int DEFAULT_TRAP_MAX_COUNT = 8;
 
         // ===== 污染系统默认值（Round 9.1） =====
-        /** 是否启用污染系统（兼容旧 JSON，默认关闭）。 */
-        static final boolean DEFAULT_POLLUTION_ENABLED = false;
+        /** 是否启用污染系统（默认启用以便测试）。 */
+        static final boolean DEFAULT_POLLUTION_ENABLED = true;
         /** 污染阶段数量默认值。 */
-        static final int DEFAULT_POLLUTION_STAGE_COUNT = 3;
-        /** 污染阶段默认列表：留空表示无效果，仅为 schema 占位。 */
-        static final List<PollutionStage> DEFAULT_POLLUTION_STAGES = List.of();
+        static final int DEFAULT_POLLUTION_STAGE_COUNT = 4;
+        /** 污染阶段默认列表：按阈值升序配置四个阶段。 */
+        static final List<PollutionStage> DEFAULT_POLLUTION_STAGES = List.of(
+            new PollutionStage("light", 0.25, 0.0, 0.1, List.of(), 0),
+            new PollutionStage("medium", 0.50, 0.1, 0.2, List.of("minecraft:slowness"), 200),
+            new PollutionStage("heavy", 0.75, 0.2, 0.3,
+                List.of("minecraft:slowness", "minecraft:weakness"), 300),
+            new PollutionStage("out_of_control", 1.0, 0.3, 0.5,
+                List.of("minecraft:slowness", "minecraft:weakness", "minecraft:mining_fatigue"), 400)
+        );
         /** 节点被破坏时增加的污染值。 */
         static final double DEFAULT_POLLUTION_NODE_DESTRUCTION_GAIN = 0.1;
          /** 激化冷却时间（tick），避免连续触发。 */

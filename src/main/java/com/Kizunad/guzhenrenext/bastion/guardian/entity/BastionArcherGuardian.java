@@ -57,7 +57,9 @@ public class BastionArcherGuardian extends AbstractSkeleton {
             return;
         }
         double targetSpeed = target.getDeltaMovement().horizontalDistance();
-        double leadSeconds = Config.LEAD_PREDICT_TICKS / 20.0d;
+        // 20 tick = 1s，用常量避免 MagicNumber。
+        final double ticksPerSecond = 20.0d;
+        double leadSeconds = Config.LEAD_PREDICT_TICKS / ticksPerSecond;
         Vec3 futurePos = target.position().add(target.getDeltaMovement().scale(leadSeconds));
         Vec3 eyePos = this.getEyePosition();
         Vec3 toPredicted = futurePos.subtract(eyePos);
