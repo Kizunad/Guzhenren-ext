@@ -7,9 +7,11 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.JingLiHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -125,9 +127,36 @@ public final class BastionNodeDropService {
         int tier = state.getValue(BastionAnchorBlock.TIER);
         BastionDao dao = state.getValue(BastionAnchorBlock.DAO);
 
+        // 污染：节点被破坏时增加污染值
+        tryIncreasePollutionOnNodeDestroyed(event, state);
+
         // 计算并给予奖励（使用玩家随机源）
         RandomSource random = player.getRandom();
         applyReward(player, dao, tier, random, event.getPos());
+    }
+
+    /**
+     * 节点破坏时增加污染值。
+     * <p>
+     * 仅处理扩张生成的 Anchor，并需要从方块状态中获取基地 ID。
+     * </p>
+     */
+    private static void tryIncreasePollutionOnNodeDestroyed(BlockEvent.BreakEvent event, BlockState state) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+
+        // 仅处理已生成的节点
+        if (!state.getValue(BastionAnchorBlock.GENERATED)) {
+            return;
+        }
+
+        BlockPos pos = event.getPos();
+        var savedData = com.Kizunad.guzhenrenext.bastion.BastionSavedData.get(level);
+        Optional<com.Kizunad.guzhenrenext.bastion.BastionData> bastionOpt =
+            Optional.ofNullable(savedData.findOwnerBastion(pos, 128));
+
+        bastionOpt.ifPresent(bastion -> BastionPollutionService.onNodeDestroyed(level, bastion, pos));
     }
 
     /**
