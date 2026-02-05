@@ -368,7 +368,7 @@ public final class BastionBossService {
      * 监听 Boss 受伤事件，驱动阶段切换。
      */
     @SubscribeEvent
-    public static void onBossHurt(LivingDamageEvent event) {
+    public static void onBossHurt(LivingDamageEvent.Post event) {
         if (!(event.getEntity() instanceof Mob mob)) {
             return;
         }
