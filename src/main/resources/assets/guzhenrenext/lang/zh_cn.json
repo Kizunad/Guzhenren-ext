@@ -50,6 +50,8 @@
   "block.guzhenrenext.bastion_core": "基地核心",
   "block.guzhenrenext.bastion_node": "基地菌毯",
   "block.guzhenrenext.bastion_anchor": "基地锚点",
+  "item.guzhenrenext.bastion_seal": "封印符",
+  "item.guzhenrenext.bastion_capture_token": "接管令牌",
   "tooltip.guzhenrenext.bastion_core.hint": "§7按住§eShift§7查看说明",
   "tooltip.guzhenrenext.bastion_core.desc.1": "§6用途：§f基地的核心方块（被破坏后基地进入 DESTROYED 并开始衰减）",
   "tooltip.guzhenrenext.bastion_core.desc.2": "§6机制：§f转数越高越坚固；部分词缀会进一步提高抗破坏性",
@@ -62,7 +64,5 @@
     "tooltip.guzhenrenext.bastion_reversal_array.desc.5": "§c风险：§f运行期间高概率引发猎手/辐射反扑",
 
     "advancement.guzhenrenext.bastion.reversal_array.title": "逆转阵法",
-    "advancement.guzhenrenext.bastion.reversal_array.desc": "用它偷取基地资源池并换取蛊虫（高风险）",
-    "block.guzhenrenext.bastion_node": "基地节点",
-    "block.guzhenrenext.bastion_core": "基地核心"
+    "advancement.guzhenrenext.bastion.reversal_array.desc": "用它偷取基地资源池并换取蛊虫（高风险）"
 }

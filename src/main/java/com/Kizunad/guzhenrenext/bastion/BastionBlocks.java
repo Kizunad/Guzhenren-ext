@@ -31,7 +31,9 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.Kizunad.guzhenrenext.bastion.item.BastionCaptureItem;
 import com.Kizunad.guzhenrenext.bastion.item.BastionScoutItem;
+import com.Kizunad.guzhenrenext.bastion.item.BastionSealItem;
 import com.Kizunad.guzhenrenext.bastion.item.BastionSiegeItem;
 
 /**
@@ -443,6 +445,18 @@ public final class BastionBlocks {
             BastionSiegeItem.SiegeType.ARMOR_PIERCE,
             new Item.Properties()
         )
+    );
+
+    /** 封印道具：临时封印基地核心。 */
+    public static final DeferredHolder<Item, BastionSealItem> BASTION_SEAL = ITEMS.register(
+        "bastion_seal",
+        () -> new BastionSealItem(new Item.Properties())
+    );
+
+    /** 占领令牌：用于接管已封印或可接管的基地。 */
+    public static final DeferredHolder<Item, BastionCaptureItem> BASTION_CAPTURE_TOKEN = ITEMS.register(
+        "bastion_capture_token",
+        () -> new BastionCaptureItem(new Item.Properties())
     );
 
     /**

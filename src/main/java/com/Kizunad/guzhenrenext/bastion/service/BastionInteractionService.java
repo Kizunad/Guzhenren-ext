@@ -6,6 +6,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionSoundPlayer;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
+import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
@@ -454,8 +455,8 @@ public final class BastionInteractionService {
                 return true;
             }
         }
-        // 临时：使用末影珍珠作为封印物品（测试用）
-        return stack.is(net.minecraft.world.item.Items.ENDER_PEARL);
+        // 正式封印物品
+        return stack.is(BastionBlocks.BASTION_SEAL.get());
     }
 
     /**
@@ -538,8 +539,8 @@ public final class BastionInteractionService {
                 return true;
             }
         }
-        // 临时：使用下界之星作为占领物品（测试用）
-        return stack.is(net.minecraft.world.item.Items.NETHER_STAR);
+        // 正式占领物品
+        return stack.is(BastionBlocks.BASTION_CAPTURE_TOKEN.get());
     }
 
     /**
