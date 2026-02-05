@@ -8,17 +8,27 @@ import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.Kizunad.guzhenrenext.bastion.entity.BossRewardData;
 import com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianEntities;
 import com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianStatsService;
+import java.util.Comparator;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +39,7 @@ import org.slf4j.LoggerFactory;
  * 包含冷却、资源消耗、存活检测与属性应用。
  * </p>
  */
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
 public final class BastionBossService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BastionBossService.class);
@@ -61,6 +72,39 @@ public final class BastionBossService {
         private static final int THREAT_LEVEL_HIGH = 3;
 
         private BossConstants() {
+        }
+    }
+
+    /** 阶段行为相关常量。 */
+    private static final class BossPhaseConstants {
+        /** 持久化根键。 */
+        private static final String ROOT_KEY = "BastionBoss";
+        /** 当前阶段索引键。 */
+        private static final String CURRENT_PHASE_KEY = "CurrentPhase";
+        /** 粒子数量。 */
+        private static final int PHASE_PARTICLE_COUNT = 20;
+        /** 粒子扩散半径。 */
+        private static final double PHASE_PARTICLE_DELTA = 0.5d;
+        /** 粒子速度。 */
+        private static final double PHASE_PARTICLE_SPEED = 0.1d;
+        /** 粒子高度偏移比例。 */
+        private static final double PHASE_HEIGHT_RATIO = 0.5d;
+        /** 阶段切换音量。 */
+        private static final float PHASE_SOUND_VOLUME = 1.0f;
+        /** 阶段切换音高。 */
+        private static final float PHASE_SOUND_PITCH = 1.0f;
+        /** 伤害倍率 AttributeModifier 名称。 */
+        private static final String DAMAGE_MODIFIER_NAME = "BastionBossPhaseDamage";
+        /** 速度倍率 AttributeModifier 名称。 */
+        private static final String SPEED_MODIFIER_NAME = "BastionBossPhaseSpeed";
+        /** 伤害倍率 AttributeModifier ID。 */
+        private static final ResourceLocation DAMAGE_MODIFIER_ID =
+            ResourceLocation.fromNamespaceAndPath("guzhenrenext", "boss_phase_damage");
+        /** 速度倍率 AttributeModifier ID。 */
+        private static final ResourceLocation SPEED_MODIFIER_ID =
+            ResourceLocation.fromNamespaceAndPath("guzhenrenext", "boss_phase_speed");
+
+        private BossPhaseConstants() {
         }
     }
 
@@ -313,6 +357,157 @@ public final class BastionBossService {
         bossTag.putBoolean(BossRewardData.IS_BOSS_KEY, true);
         bossTag.putDouble(BossRewardData.REWARD_MULTIPLIER_KEY, Math.max(1.0d, rewardMultiplier));
         data.put(BossRewardData.ROOT_KEY, bossTag);
+
+        // 初始化阶段数据：使用 -1 以保证首次跨阈值立即生效
+        CompoundTag phaseTag = data.getCompound(BossPhaseConstants.ROOT_KEY);
+        phaseTag.putInt(BossPhaseConstants.CURRENT_PHASE_KEY, -1);
+        data.put(BossPhaseConstants.ROOT_KEY, phaseTag);
+    }
+
+    /**
+     * 监听 Boss 受伤事件，驱动阶段切换。
+     */
+    @SubscribeEvent
+    public static void onBossHurt(LivingDamageEvent event) {
+        if (!(event.getEntity() instanceof Mob mob)) {
+            return;
+        }
+        if (!BossRewardData.isBoss(mob)) {
+            return;
+        }
+        tryHandlePhaseSwitch(mob);
+    }
+
+    /**
+     * 在 Boss 受伤时尝试切换阶段。
+     * <p>
+     * 基于当前血量比例选取满足阈值的最低阶段索引，存入 PersistentData 并应用属性/特效。
+     * </p>
+     *
+     * @param boss Boss 实体
+     */
+    public static void tryHandlePhaseSwitch(Mob boss) {
+        if (boss == null || boss.level().isClientSide()) {
+            return;
+        }
+        CompoundTag data = boss.getPersistentData();
+        CompoundTag root = data.getCompound(BossPhaseConstants.ROOT_KEY);
+        List<BastionTypeConfig.BossPhase> phases = resolveBossPhases(boss);
+        if (phases.isEmpty()) {
+            return;
+        }
+
+        int currentPhase = root.contains(BossPhaseConstants.CURRENT_PHASE_KEY)
+            ? root.getInt(BossPhaseConstants.CURRENT_PHASE_KEY)
+            : -1;
+        List<BastionTypeConfig.BossPhase> sortedPhases = phases.stream()
+            .sorted(Comparator.comparingDouble(BastionTypeConfig.BossPhase::healthThreshold))
+            .toList();
+
+        int targetPhase = resolveTargetPhaseIndex(boss, sortedPhases, currentPhase);
+        if (targetPhase == currentPhase || targetPhase < 0) {
+            return;
+        }
+
+        applyPhaseAttributes(boss, sortedPhases.get(targetPhase));
+        spawnPhaseEffects((ServerLevel) boss.level(), boss);
+        root.putInt(BossPhaseConstants.CURRENT_PHASE_KEY, targetPhase);
+        data.put(BossPhaseConstants.ROOT_KEY, root);
+    }
+
+    /**
+     * 计算当前应处于的阶段索引。
+     */
+    private static int resolveTargetPhaseIndex(
+            Mob boss,
+            List<BastionTypeConfig.BossPhase> phases,
+            int currentPhase) {
+        double ratio = boss.getHealth() / boss.getMaxHealth();
+        int target = currentPhase;
+        for (int i = 0; i < phases.size(); i++) {
+            BastionTypeConfig.BossPhase phase = phases.get(i);
+            if (ratio <= phase.healthThreshold()) {
+                target = i;
+                break;
+            }
+        }
+        return target;
+    }
+
+    /**
+     * 获取当前 Boss 配置的阶段列表。
+     */
+    private static List<BastionTypeConfig.BossPhase> resolveBossPhases(Mob boss) {
+        java.util.UUID bastionId = BastionGuardianData.getBastionId(boss);
+        if (bastionId == null) {
+            return List.of();
+        }
+        BastionTypeConfig config = BastionTypeManager.getOrDefaultByBastionId(bastionId);
+        if (config == null || config.boss() == null || config.boss().phases() == null) {
+            return List.of();
+        }
+        return config.boss().phases();
+    }
+
+    /**
+     * 应用阶段属性：移除旧修饰，按倍率添加新修饰。
+     */
+    private static void applyPhaseAttributes(Mob boss, BastionTypeConfig.BossPhase phase) {
+        applyModifier(boss, Attributes.ATTACK_DAMAGE,
+            BossPhaseConstants.DAMAGE_MODIFIER_ID,
+            BossPhaseConstants.DAMAGE_MODIFIER_NAME,
+            phase.damageMultiplier());
+        applyModifier(boss, Attributes.MOVEMENT_SPEED,
+            BossPhaseConstants.SPEED_MODIFIER_ID,
+            BossPhaseConstants.SPEED_MODIFIER_NAME,
+            phase.speedMultiplier());
+    }
+
+    private static void applyModifier(
+            Mob boss,
+            Holder<Attribute> attribute,
+            ResourceLocation id,
+            String name,
+            double multiplier) {
+        AttributeInstance instance = boss.getAttribute(attribute);
+        if (instance == null) {
+            return;
+        }
+
+        instance.removeModifier(id);
+        double base = instance.getBaseValue();
+        double delta = base * (Math.max(1.0d, multiplier) - 1.0d);
+        AttributeModifier modifier = new AttributeModifier(
+            id,
+            delta,
+            AttributeModifier.Operation.ADD_VALUE
+        );
+        instance.addPermanentModifier(modifier);
+    }
+
+    /**
+     * 阶段切换粒子与音效。
+     */
+    private static void spawnPhaseEffects(ServerLevel level, Mob boss) {
+        level.sendParticles(
+            ParticleTypes.EXPLOSION,
+            boss.getX(),
+            boss.getY() + boss.getBbHeight() * BossPhaseConstants.PHASE_HEIGHT_RATIO,
+            boss.getZ(),
+            BossPhaseConstants.PHASE_PARTICLE_COUNT,
+            BossPhaseConstants.PHASE_PARTICLE_DELTA,
+            BossPhaseConstants.PHASE_PARTICLE_DELTA,
+            BossPhaseConstants.PHASE_PARTICLE_DELTA,
+            BossPhaseConstants.PHASE_PARTICLE_SPEED
+        );
+        level.playSound(
+            null,
+            boss.blockPosition(),
+            SoundEvents.ENDER_DRAGON_GROWL,
+            SoundSource.HOSTILE,
+            BossPhaseConstants.PHASE_SOUND_VOLUME,
+            BossPhaseConstants.PHASE_SOUND_PITCH
+        );
     }
 
     /**

@@ -83,6 +83,25 @@ public final class BastionTypeManager {
     }
 
     /**
+     * 根据基地 UUID 获取配置；若未找到则返回默认配置。
+     *
+     * @param bastionId 基地 UUID
+     * @return 配置或默认配置
+     */
+    @Nullable
+    public static BastionTypeConfig getOrDefaultByBastionId(java.util.UUID bastionId) {
+        if (bastionId == null) {
+            return getOrDefault(DEFAULT_CONFIG_ID);
+        }
+        for (BastionTypeConfig config : CONFIGS.values()) {
+            if (config != null && config.id() != null && bastionId.toString().startsWith(config.id())) {
+                return config;
+            }
+        }
+        return getOrDefault(DEFAULT_CONFIG_ID);
+    }
+
+    /**
      * 根据道途获取适合的配置。
      *
      * @param dao 道途类型

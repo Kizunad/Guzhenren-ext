@@ -1516,8 +1516,12 @@ import java.util.Optional;
          static final double DEFAULT_BOSS_SPAWN_COST = 20.0;
          /** Boss 掉落表 ID，空字符串表示不启用自定义掉落表。 */
          static final String DEFAULT_BOSS_LOOT_TABLE_ID = "";
-         /** Boss 阶段配置默认：空列表表示无阶段行为。 */
-         static final List<BossPhase> DEFAULT_BOSS_PHASES = List.of();
+         /** Boss 阶段配置默认：按血量阈值递进，空列表视为错误。 */
+         static final List<BossPhase> DEFAULT_BOSS_PHASES = List.of(
+             new BossPhase(0.75, List.of(), 1.0, 1.0),
+             new BossPhase(0.50, List.of(), 1.3, 1.1),
+             new BossPhase(0.25, List.of(), 1.6, 1.2)
+         );
          /** Boss 失败后的冷却时间（tick），默认 60 秒。 */
          static final long DEFAULT_BOSS_FAILURE_COOLDOWN_TICKS = 1200L;
          /** Boss 失败时资源退还比例（0.0-1.0）。 */
