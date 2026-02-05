@@ -35,12 +35,20 @@ public class BastionBerserkerGuardian extends Vindicator {
         private static final double BERSERK_DAMAGE_BONUS = 0.5d;
         private static final int BERSERK_PARTICLE_INTERVAL_TICKS = 5;
         private static final double BERSERK_PARTICLE_SPREAD = 0.25d;
+        /** 狂暴粒子 Y 方向速度。 */
+        private static final double BERSERK_PARTICLE_VELOCITY_Y = 0.02d;
 
         private static final int CHARGE_COOLDOWN_TICKS = 300;
         private static final int CHARGE_DURATION_TICKS = 20;
         private static final double CHARGE_SPEED_MULTIPLIER = 1.6d;
         private static final double CHARGE_HIT_RANGE = 2.5d;
         private static final float CHARGE_BONUS_DAMAGE = 3.0f;
+        /** 触发冲锋的最小距离平方。 */
+        private static final double CHARGE_MIN_DISTANCE_SQR = 1.5d;
+        /** 冲锋时视角转向速度（度/tick）。 */
+        private static final float CHARGE_LOOK_SPEED = 30.0f;
+        /** 冲锋击中后的击退强度。 */
+        private static final double CHARGE_KNOCKBACK_STRENGTH = 0.4d;
 
         private Config() {
         }
@@ -141,7 +149,7 @@ public class BastionBerserkerGuardian extends Vindicator {
                 this.getRandomY(),
                 this.getRandomZ(spread),
                 0.0d,
-                0.02d,
+                Config.BERSERK_PARTICLE_VELOCITY_Y,
                 0.0d
             );
         }
@@ -202,7 +210,7 @@ public class BastionBerserkerGuardian extends Vindicator {
             if (now < BastionBerserkerGuardian.this.nextChargeGameTime) {
                 return false;
             }
-            return BastionBerserkerGuardian.this.distanceToSqr(target) > 1.5d;
+            return BastionBerserkerGuardian.this.distanceToSqr(target) > Config.CHARGE_MIN_DISTANCE_SQR;
         }
 
         @Override
@@ -227,7 +235,8 @@ public class BastionBerserkerGuardian extends Vindicator {
         @Override
         public void tick() {
             BastionBerserkerGuardian.this.chargingTicks++;
-            BastionBerserkerGuardian.this.getLookControl().setLookAt(this.chargeTarget, 30.0f, 30.0f);
+            BastionBerserkerGuardian.this.getLookControl().setLookAt(
+                this.chargeTarget, Config.CHARGE_LOOK_SPEED, Config.CHARGE_LOOK_SPEED);
             BastionBerserkerGuardian.this.getNavigation().moveTo(this.chargeTarget, CHARGE_NAV_SPEED);
             double distSq = BastionBerserkerGuardian.this.distanceToSqr(this.chargeTarget);
             if (!BastionBerserkerGuardian.this.hasChargeHit
@@ -250,9 +259,11 @@ public class BastionBerserkerGuardian extends Vindicator {
             }
             float baseDamage = (float) BastionBerserkerGuardian.this.getAttributeValue(Attributes.ATTACK_DAMAGE);
             float extra = Config.CHARGE_BONUS_DAMAGE;
-            DamageSource source = BastionBerserkerGuardian.this.damageSources().mobAttack(BastionBerserkerGuardian.this);
+            DamageSource source = BastionBerserkerGuardian.this.damageSources()
+                .mobAttack(BastionBerserkerGuardian.this);
             target.hurt(source, baseDamage + extra);
-            target.knockback(0.4d, BastionBerserkerGuardian.this.getX() - target.getX(),
+            target.knockback(Config.CHARGE_KNOCKBACK_STRENGTH,
+                BastionBerserkerGuardian.this.getX() - target.getX(),
                 BastionBerserkerGuardian.this.getZ() - target.getZ());
         }
     }

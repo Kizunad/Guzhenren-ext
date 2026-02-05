@@ -3,7 +3,6 @@ package com.Kizunad.guzhenrenext.bastion.service;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionModifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Mob;

@@ -1,7 +1,6 @@
 package com.Kizunad.guzhenrenext.bastion.guardian.entity;
 
 import com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianCombatRules;
-import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import java.util.EnumSet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -14,7 +13,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -53,6 +51,9 @@ public class BastionShieldGuardian extends Vindicator {
         private static final int TAUNT_CHECK_INTERVAL_TICKS = 20;
         private static final int ALLY_HURT_WINDOW_TICKS = 10;
 
+        /** 嘲讽目标的优先级。 */
+        private static final int TAUNT_GOAL_PRIORITY = 3;
+
         private Config() {
         }
     }
@@ -81,7 +82,7 @@ public class BastionShieldGuardian extends Vindicator {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(2, new ShieldBlockGoal());
-        this.goalSelector.addGoal(3, new TauntGoal());
+        this.goalSelector.addGoal(Config.TAUNT_GOAL_PRIORITY, new TauntGoal());
     }
 
     @Override
