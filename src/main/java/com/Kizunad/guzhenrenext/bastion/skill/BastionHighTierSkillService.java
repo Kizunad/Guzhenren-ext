@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
+import com.Kizunad.guzhenrenext.bastion.service.BastionTalentEffectService;
 import com.Kizunad.guzhenrenext.kongqiao.logic.IShazhaoEffect;
 import com.Kizunad.guzhenrenext.kongqiao.logic.ShazhaoEffectRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
@@ -98,7 +99,7 @@ public final class BastionHighTierSkillService {
         }
         final BastionTypeConfig.HighTierConfig highTier = typeConfig.highTier().get();
 
-        final double bonusMultiplier = resolveBonusMultiplier(highTier, bastion.tier());
+        final double bonusMultiplier = resolveBonusMultiplier(highTier, bastion.tier(), bastion);
 
         // 收集守卫（用于某些特效：例如命运丝线强化守卫）
         final List<Mob> guardians = collectGuardians(level, bastion);
@@ -187,7 +188,7 @@ public final class BastionHighTierSkillService {
         LAST_ACTIVE_TRIGGER_TICK.put(bastion.id(), gameTime);
 
         final BastionTypeConfig.HighTierConfig highTier = typeConfig.highTier().get();
-        final double bonusMultiplier = resolveBonusMultiplier(highTier, bastion.tier());
+        final double bonusMultiplier = resolveBonusMultiplier(highTier, bastion.tier(), bastion);
 
         final List<ServerPlayer> targets = collectPlayersInDomain(level, bastion);
         if (targets.isEmpty()) {
@@ -342,7 +343,10 @@ public final class BastionHighTierSkillService {
         );
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box)) {
             if (player.blockPosition().distSqr(core) <= (long) radius * radius) {
-                targets.add(player);
+                // 排除基地友方玩家（主人/接管者），高转技能只对敌对玩家生效
+                if (!bastion.isFriendlyTo(player.getUUID())) {
+                    targets.add(player);
+                }
             }
         }
         return targets;
@@ -386,18 +390,54 @@ public final class BastionHighTierSkillService {
         return entry != null && "active".equalsIgnoreCase(entry.category());
     }
 
+    /**
+     * 解析技能加成倍率。
+     * <p>
+     * 结合配置中的 bonusMultiplier 与基地主道途对应天赋效果，
+     * 将最终倍率用于被动效果与主动技能的统一加成计算。
+     * </p>
+     */
     private static double resolveBonusMultiplier(
         final BastionTypeConfig.HighTierConfig highTier,
-        final int tier
+        final int tier,
+        final BastionData bastion
     ) {
         if (highTier == null) {
             return 1.0;
         }
         final BastionTypeConfig.TierThreshold threshold = highTier.getThresholdForTier(tier);
-        if (threshold == null) {
-            return 1.0;
+        double baseMultiplier = 1.0;
+        if (threshold != null) {
+            baseMultiplier = Math.max(0.0, threshold.bonusMultiplier());
         }
-        return Math.max(0.0, threshold.bonusMultiplier());
+
+        // 没有基地上下文时，仅返回配置倍率。
+        if (bastion == null || bastion.primaryDao() == null) {
+            return baseMultiplier;
+        }
+
+        // 力道：力压群雄（狂暴额外伤害）
+        final double overwhelmBonus = BastionTalentEffectService.getLiDaoOverwhelmMultiplier(bastion);
+        // 智道：念头效率（影响技能效果）
+        final double niantouBonus = BastionTalentEffectService.getZhiDaoNiantouEfficiencyMultiplier(bastion);
+        // 魂道：灵魂折磨（死亡光环伤害）
+        final double tormentBonus = BastionTalentEffectService.getHunDaoTormentMultiplier(bastion);
+        // 木道：共生协同（守卫与植物共生输出）
+        final double synergyBonus = BastionTalentEffectService.getMuDaoGuardianSynergyMultiplier(bastion);
+
+        // 根据基地主道途选择对应的天赋倍率。
+        double talentMultiplier = 1.0;
+        switch (bastion.primaryDao()) {
+            case LI_DAO -> talentMultiplier = overwhelmBonus;
+            case ZHI_DAO -> talentMultiplier = niantouBonus;
+            case HUN_DAO -> talentMultiplier = tormentBonus;
+            case MU_DAO -> talentMultiplier = synergyBonus;
+            default -> {
+                // 其他道途暂不叠加额外技能倍率，保持默认 1.0。
+            }
+        }
+
+        return baseMultiplier * talentMultiplier;
     }
 
     private static Map<String, String> resolveMetadata(

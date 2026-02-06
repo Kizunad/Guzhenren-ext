@@ -1,11 +1,14 @@
 package com.Kizunad.guzhenrenext.bastion.service;
 
+import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.JingLiHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -168,6 +171,18 @@ public final class BastionGuardianAttackService {
         if (!BastionGuardianData.hasCompleteData(source)) {
             LOGGER.warn("守卫 {} 数据不完整，使用默认转数 {}",
                 source.getUUID(), tier);
+        }
+
+        // 友方保护：如果玩家是基地主人/接管者，跳过资源消耗和 debuff
+        if (player.level() instanceof ServerLevel serverLevel) {
+            java.util.UUID bastionId = BastionGuardianData.getBastionId(source);
+            if (bastionId != null) {
+                BastionData bastion = BastionSavedData.get(serverLevel).getBastion(bastionId);
+                if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                    LOGGER.debug("守卫攻击跳过友方玩家 {}", player.getName().getString());
+                    return;
+                }
+            }
         }
 
         // 计算并消耗资源

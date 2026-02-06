@@ -541,6 +541,10 @@ public final class BastionAuraService {
         }
 
         for (ServerPlayer player : players) {
+            // 排除基地友方玩家（主人/接管者），侦测光环只对敌对玩家生效
+            if (bastion.isFriendlyTo(player.getUUID())) {
+                continue;
+            }
             player.addEffect(new MobEffectInstance(
                 MobEffects.GLOWING,
                 DetectionConfig.EFFECT_DURATION_TICKS,

@@ -106,7 +106,7 @@ public class BastionTrapBlock extends Block {
         int cooldown = Math.max(1, trapConfig.cooldownTicks());
         savedData.setNextTrapTryTick(pos, gameTime + cooldown);
 
-        if (!isHostile(entity)) {
+        if (!isHostile(entity, bastion)) {
             return;
         }
 
@@ -115,19 +115,25 @@ public class BastionTrapBlock extends Block {
         int duration = Math.max(1, trapConfig.effectDuration());
 
         AABB box = new AABB(pos).inflate(radius);
-        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, this::isHostile)) {
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> isHostile(e, bastion))) {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, SLOWNESS_AMPLIFIER));
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, WEAKNESS_AMPLIFIER));
         }
     }
 
-    private boolean isHostile(LivingEntity entity) {
+    private boolean isHostile(LivingEntity entity, BastionData bastion) {
         if (entity == null || !entity.isAlive()) {
             return false;
         }
         if (entity instanceof Player player) {
             // 创造模式不应被陷阱影响。
-            return !player.isCreative();
+            if (player.isCreative()) {
+                return false;
+            }
+            // 基地友方（主人/接管者）不应被陷阱影响。
+            if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                return false;
+            }
         }
         return true;
     }
