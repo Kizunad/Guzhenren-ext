@@ -696,7 +696,9 @@ public final class BastionTicker {
         double coreBaseGain = MultiplierConfig.CORE_BASE_GAIN_PER_TICK * tierFactor;
         double nodeGain = effectiveNodes * tierFactor * MultiplierConfig.POOL_BASE_GAIN_FACTOR;
         double baseGain = coreBaseGain + nodeGain;
-        return baseGain * multiplier * TickConfig.TICK_INTERVAL;
+        // 木道天赋：提升真元回复效率（资源池增长）。
+        double muDaoRegenBonus = BastionTalentEffectService.getMuDaoResourceRegenMultiplier(bastion);
+        return baseGain * multiplier * muDaoRegenBonus * TickConfig.TICK_INTERVAL;
     }
 
     /**
@@ -714,7 +716,9 @@ public final class BastionTicker {
         long evolutionTime = evolutionConfig.baseEvolutionTicks()
             * (long) Math.pow(evolutionConfig.tierMultiplier(), bastion.tier() - 1);
         double progressPerTick = 1.0 / evolutionTime;
-        return progressPerTick * multiplier * TickConfig.TICK_INTERVAL;
+        // 智道天赋：提升转数推进效率（进化进度获取速度）。
+        double zhiDaoTierBonus = BastionTalentEffectService.getZhiDaoTierBonusMultiplier(bastion);
+        return progressPerTick * multiplier * zhiDaoTierBonus * TickConfig.TICK_INTERVAL;
     }
 
     /**

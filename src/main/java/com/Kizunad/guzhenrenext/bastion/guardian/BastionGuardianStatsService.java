@@ -64,6 +64,12 @@ public final class BastionGuardianStatsService {
         static final double LI_DAO_ATTACK_MULT = 1.35;
         static final double LI_DAO_ARMOR_MULT = 1.15;
 
+        // 道途效果数组索引
+        static final int EFFECT_INDEX_HEALTH = 0;
+        static final int EFFECT_INDEX_ATTACK = 1;
+        static final int EFFECT_INDEX_ARMOR = 2;
+        static final int EFFECT_INDEX_SPEED = 3;
+
         // ===== 精英倍率（Warden 外观） =====
         static final double ELITE_HEALTH_MULT = 1.8;
         static final double ELITE_ATTACK_MULT = 1.4;
@@ -115,6 +121,13 @@ public final class BastionGuardianStatsService {
 
         // 天赋：守卫减伤加成（通过提升护甲体现）
         armor *= resolveGuardianDamageReductionMultiplier(guardian);
+
+        // 道途专属天赋效果
+        double[] daoEffects = resolveDaoSpecificEffects(guardian, dao);
+        health *= daoEffects[Stats.EFFECT_INDEX_HEALTH];
+        attack *= daoEffects[Stats.EFFECT_INDEX_ATTACK];
+        armor *= daoEffects[Stats.EFFECT_INDEX_ARMOR];
+        speed *= daoEffects[Stats.EFFECT_INDEX_SPEED];
 
         // 精英倍率（Warden 外观）
         if (elite) {
@@ -179,6 +192,75 @@ public final class BastionGuardianStatsService {
             return 1.0d;
         }
         return BastionTalentEffectService.getGuardianDamageReductionMultiplier(bastion);
+    }
+
+    /**
+     * 解析道途专属天赋效果。
+     * <p>
+     * 返回四元组：[生命倍率, 攻击倍率, 护甲倍率, 速度倍率]。
+     * 不同道途应用不同的天赋效果：
+     * <ul>
+     *   <li>智道：念障壁垒（护甲）</li>
+     *   <li>魂道：魂障壁垒（护甲）</li>
+     *   <li>木道：木甲护体（护甲）、守卫繁茂（生命）</li>
+     *   <li>力道：攻击力、防御、守卫军令（攻击）、钢筋铁骨（护甲）、气血奔腾（速度）</li>
+     * </ul>
+     * </p>
+     *
+     * @param guardian 守卫实体
+     * @param dao      基地道途
+     * @return 效果倍率数组 [health, attack, armor, speed]
+     */
+    private static double[] resolveDaoSpecificEffects(Mob guardian, BastionDao dao) {
+        double healthMult = 1.0;
+        double attackMult = 1.0;
+        double armorMult = 1.0;
+        double speedMult = 1.0;
+
+        if (!(guardian.level() instanceof ServerLevel level)) {
+            return new double[]{healthMult, attackMult, armorMult, speedMult};
+        }
+        java.util.UUID bastionId = BastionGuardianData.getBastionId(guardian);
+        if (bastionId == null) {
+            return new double[]{healthMult, attackMult, armorMult, speedMult};
+        }
+        BastionSavedData savedData = BastionSavedData.get(level);
+        var bastion = savedData.getBastion(bastionId);
+        if (bastion == null) {
+            return new double[]{healthMult, attackMult, armorMult, speedMult};
+        }
+
+        // 根据道途应用对应的天赋效果
+        switch (dao) {
+            case ZHI_DAO -> {
+                // 念障壁垒：守卫精神护盾，减伤（通过护甲体现）
+                armorMult *= BastionTalentEffectService.getZhiDaoThoughtShieldMultiplier(bastion);
+            }
+            case HUN_DAO -> {
+                // 魂障壁垒：守卫魂障减伤
+                armorMult *= BastionTalentEffectService.getHunDaoSoulBarrierMultiplier(bastion);
+            }
+            case MU_DAO -> {
+                // 木甲护体：守卫木甲减伤
+                armorMult *= BastionTalentEffectService.getMuDaoBarkskinMultiplier(bastion);
+                // 守卫繁茂：守卫生命与再生
+                healthMult *= BastionTalentEffectService.getMuDaoGuardianBloomMultiplier(bastion);
+            }
+            case LI_DAO -> {
+                // 攻击力加成
+                attackMult *= BastionTalentEffectService.getLiDaoAttackPowerMultiplier(bastion);
+                // 防御加成（通过护甲体现）
+                armorMult *= BastionTalentEffectService.getLiDaoDefenseMultiplier(bastion);
+                // 守卫军令：守卫攻击协同
+                attackMult *= BastionTalentEffectService.getLiDaoGuardianTrainingMultiplier(bastion);
+                // 钢筋铁骨：守卫与自身减伤
+                armorMult *= BastionTalentEffectService.getLiDaoBulwarkMultiplier(bastion);
+                // 气血奔腾：移速加成
+                speedMult *= BastionTalentEffectService.getLiDaoHasteMultiplier(bastion);
+            }
+        }
+
+        return new double[]{healthMult, attackMult, armorMult, speedMult};
     }
 
     private static void setBaseValueIfPresent(

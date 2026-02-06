@@ -6,18 +6,20 @@ import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 /**
- * 友方基地产出服务：定期向附近容器产出原版物品。
+ * 友方基地产出服务：定期向附近容器产出蛊真人模组物品。
  * <p>
  * 设计目标：
  * <ul>
@@ -56,6 +58,41 @@ public final class BastionFriendlyProductionService {
         static final double DROP_CENTER_OFFSET = 0.5d;
 
         private Constants() {
+        }
+    }
+
+    /**
+     * 蛊真人物品 ID 映射。
+     * 按道途和转数分类，ID 格式为 "guzhenren:item_id"。
+     */
+    private static final class GuzhenrenItems {
+        // 智道物品 (念头、智壮蛊、恶念蛊等)
+        static final String ZHI_LOW = "nian_tou";            // 念头（低转 1-3）
+        static final String ZHI_MID = "zhi_zhuang_gu";       // 智壮蛊（中转 4-6）
+        static final String ZHI_HIGH = "e_nian_gu";          // 恶念蛊（高转 7-9）
+
+        // 魂道物品 (销魂蛊、大魂蛊、魂飞蛊等)
+        static final String HUN_LOW = "xiao_hun_gu";         // 销魂蛊（低转 1-3）
+        static final String HUN_MID = "dahungu";             // 大魂蛊（中转 4-6）
+        static final String HUN_HIGH = "hunfeigu";           // 魂飞蛊（高转 7-9）
+
+        // 木道物品 (草药类)
+        static final String MU_LOW = "zhi_xin_cao";          // 止心草（低转 1-3）
+        static final String MU_MID = "jin_zan_cao";          // 金盏草（中转 4-6）
+        static final String MU_HIGH = "xueliancao";          // 雪莲草（高转 7-9）
+
+        // 力道物品 (力量类蛊虫)
+        static final String LI_LOW = "jing_li_gu";           // 精力蛊（低转 1-3）
+        static final String LI_MID = "xiong_li_gu";          // 雄力蛊（中转 4-6）
+        static final String LI_HIGH = "man_li_tian_niu_gu"; // 蛮力天牛蛊（高转 7-9）
+
+        // 通用/默认物品
+        static final String DEFAULT = "gucaiyuanshi";        // 蛊材原石
+
+        // 模组 ID
+        static final String MOD_ID = "guzhenren";
+
+        private GuzhenrenItems() {
         }
     }
 
@@ -111,47 +148,77 @@ public final class BastionFriendlyProductionService {
     }
 
     /**
-     * 按道途 + 转数选择产物：
+     * 通过 ResourceLocation 获取蛊真人模组物品。
+     * 若物品不存在则返回空气物品。
+     *
+     * @param itemId 物品 ID（不含模组前缀）
+     * @return 对应的 Item 实例
+     */
+    private static Item getGuzhenrenItem(String itemId) {
+        ResourceLocation location = ResourceLocation.fromNamespaceAndPath(
+            GuzhenrenItems.MOD_ID, itemId);
+        return BuiltInRegistries.ITEM.get(location);
+    }
+
+    /**
+     * 按道途 + 转数选择产物（蛊真人模组物品）：
      * <ul>
-     *     <li>1-3 转：基础产物（低价值）。</li>
-     *     <li>4-9 转：进阶产物（高价值）。</li>
+     *     <li>1-3 转：低阶蛊虫/材料。</li>
+     *     <li>4-6 转：中阶蛊虫/材料。</li>
+     *     <li>7-9 转：高阶蛊虫/材料。</li>
      * </ul>
-     * 产物映射：智道=书籍/附魔瓶，魂道=骨头/骨块，木道=原木/树苗，力道=铁锭/金锭。
+     * 产物映射：智道=念头系，魂道=魂蛊系，木道=草药系，力道=力蛊系。
      * 数量在 1-3 之间随机，保持 MVP 资源节奏。
      */
     private static ItemStack chooseRewardStack(int tier, BastionDao dao, RandomSource random) {
         int amount = random.nextInt(Constants.MAX_COUNT - Constants.MIN_COUNT + 1)
             + Constants.MIN_COUNT;
-        ItemStack base;
         boolean isLowTier = tier <= Constants.LOW_TIER_MAX;
         boolean isMidTier = tier <= Constants.MID_TIER_MAX;
-        boolean isHighTier = tier <= Constants.HIGH_TIER_MAX;
+
+        String itemId;
         switch (dao) {
-            case ZHI_DAO -> base = isLowTier
-                ? new ItemStack(Items.BOOK, amount)
-                : new ItemStack(Items.EXPERIENCE_BOTTLE, amount);
-            case HUN_DAO -> base = isLowTier
-                ? new ItemStack(Items.BONE, amount)
-                : new ItemStack(Items.BONE_BLOCK, amount);
-            case MU_DAO -> base = isLowTier
-                ? new ItemStack(Items.OAK_LOG, amount)
-                : new ItemStack(Items.OAK_SAPLING, amount);
-            case LI_DAO -> {
+            case ZHI_DAO -> {
                 if (isLowTier) {
-                    base = new ItemStack(Items.IRON_INGOT, amount);
+                    itemId = GuzhenrenItems.ZHI_LOW;
                 } else if (isMidTier) {
-                    base = new ItemStack(Items.GOLD_INGOT, amount);
-                } else if (isHighTier) {
-                    // 力道高转：维持金锭，避免与钻石产出冲突。
-                    base = new ItemStack(Items.GOLD_INGOT, amount);
+                    itemId = GuzhenrenItems.ZHI_MID;
                 } else {
-                    // 超出规划转数：继续给金锭，避免空产物。
-                    base = new ItemStack(Items.GOLD_INGOT, amount);
+                    itemId = GuzhenrenItems.ZHI_HIGH;
                 }
             }
-            default -> base = new ItemStack(Items.IRON_INGOT, amount);
+            case HUN_DAO -> {
+                if (isLowTier) {
+                    itemId = GuzhenrenItems.HUN_LOW;
+                } else if (isMidTier) {
+                    itemId = GuzhenrenItems.HUN_MID;
+                } else {
+                    itemId = GuzhenrenItems.HUN_HIGH;
+                }
+            }
+            case MU_DAO -> {
+                if (isLowTier) {
+                    itemId = GuzhenrenItems.MU_LOW;
+                } else if (isMidTier) {
+                    itemId = GuzhenrenItems.MU_MID;
+                } else {
+                    itemId = GuzhenrenItems.MU_HIGH;
+                }
+            }
+            case LI_DAO -> {
+                if (isLowTier) {
+                    itemId = GuzhenrenItems.LI_LOW;
+                } else if (isMidTier) {
+                    itemId = GuzhenrenItems.LI_MID;
+                } else {
+                    itemId = GuzhenrenItems.LI_HIGH;
+                }
+            }
+            default -> itemId = GuzhenrenItems.DEFAULT;
         }
-        return base;
+
+        Item item = getGuzhenrenItem(itemId);
+        return new ItemStack(item, amount);
     }
 
     /**
