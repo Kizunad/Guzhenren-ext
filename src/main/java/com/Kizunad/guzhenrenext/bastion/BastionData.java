@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.bastion;
 
+import com.Kizunad.guzhenrenext.bastion.service.BastionTalentEffectService;
 import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentData;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -697,7 +698,9 @@ public record BastionData(
     public int getAuraRadius() {
         var typeConfig = com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager
             .getOrDefault(bastionType);
-        return typeConfig.aura().calculateEffectiveRadius(tier, totalNodes);
+        int baseRadius = typeConfig.aura().calculateEffectiveRadius(tier, totalNodes);
+        double multiplier = BastionTalentEffectService.getAuraRangeMultiplier(this);
+        return (int) Math.round(baseRadius * multiplier);
     }
 
     /**
