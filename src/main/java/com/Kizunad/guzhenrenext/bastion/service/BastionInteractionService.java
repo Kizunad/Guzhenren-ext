@@ -252,7 +252,16 @@ public final class BastionInteractionService {
                 // 潜行+空手：祭献真元
                 return handleSacrifice(level, savedData, player, bastion);
             } else {
-                // 空手：查看基地信息
+                // 非潜行+空手：检查是否为占领者且对着核心
+                if (state.getBlock() instanceof BastionCoreBlock) {
+                    BastionData.CaptureState captureState = bastion.captureState();
+                    if (captureState != null && captureState.isCapturedBy(player.getUUID())) {
+                        // 占领者：打开管理 GUI
+                        BastionManagementService.openManagementMenu(level, player, bastion, false);
+                        return InteractionResult.SUCCESS;
+                    }
+                }
+                // 非占领者或非核心：查看基地信息
                 return handleViewInfo(player, bastion, level.getGameTime());
             }
         } else if (isSealItem(heldItem)) {

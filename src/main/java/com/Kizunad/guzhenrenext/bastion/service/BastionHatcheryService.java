@@ -200,6 +200,12 @@ public final class BastionHatcheryService {
             // 标记归属（用于计数/规则/技能等）。
             BastionGuardianData.markAsGuardian(mob, current.id(), current.tier());
 
+            // 如果基地已被占领，将守卫也标记为属于占领者
+            if (current.isCaptured() && current.captureState() != null
+                && current.captureState().capturedBy() != null) {
+                BastionGuardianData.markAsCaptured(mob, current.captureState().capturedBy());
+            }
+
             boolean added = level.addFreshEntity(mob);
             if (!added) {
                 continue;

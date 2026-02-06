@@ -1,6 +1,6 @@
 {
     "parent": "minecraft:item/generated",
     "textures": {
-        "layer0": "guzhenrenext:item/bastion_seal"
+        "layer0": "minecraft:item/paper"
     }
 }

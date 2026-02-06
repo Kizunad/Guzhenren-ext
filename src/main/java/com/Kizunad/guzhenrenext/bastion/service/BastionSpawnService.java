@@ -329,6 +329,12 @@ public final class BastionSpawnService {
         // 使用 BastionGuardianData 标记守卫归属（通用标签 + PersistentData 完整 UUID + 转数）
         BastionGuardianData.markAsGuardian(guardian, bastion.id(), bastion.tier());
 
+        // 如果基地已被占领，将守卫也标记为属于占领者
+        if (bastion.isCaptured() && bastion.captureState() != null
+            && bastion.captureState().capturedBy() != null) {
+            BastionGuardianData.markAsCaptured(guardian, bastion.captureState().capturedBy());
+        }
+
         return level.addFreshEntity(guardian);
     }
 }

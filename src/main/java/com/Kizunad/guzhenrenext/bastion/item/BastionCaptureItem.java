@@ -9,6 +9,7 @@ import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.network.BastionNetworkHandler;
 import com.Kizunad.guzhenrenext.bastion.service.BastionCaptureService;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +51,9 @@ public class BastionCaptureItem extends Item {
 
     /** UUID 显示截取长度。 */
     private static final int UUID_DISPLAY_LENGTH = 8;
+
+    /** 占领基地所需念头。与服务端消耗保持一致。 */
+    private static final double CAPTURE_NIANTOU_COST = 100.0d;
 
     public BastionCaptureItem(Properties properties) {
         super(properties);
@@ -127,6 +131,15 @@ public class BastionCaptureItem extends Item {
             && captureState.capturableUntilGameTime() > 0
             && gameTime > captureState.capturableUntilGameTime()) {
             player.sendSystemMessage(Component.literal("§c可接管窗口已超时"));
+            return InteractionResultHolder.fail(stack);
+        }
+
+        double currentNiantou = NianTouHelper.getAmount(player);
+        if (currentNiantou < CAPTURE_NIANTOU_COST) {
+            player.sendSystemMessage(Component.translatable(
+                "message.guzhenrenext.bastion_capture.insufficient_niantou",
+                (int) CAPTURE_NIANTOU_COST
+            ));
             return InteractionResultHolder.fail(stack);
         }
 

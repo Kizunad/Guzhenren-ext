@@ -32,6 +32,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import com.Kizunad.guzhenrenext.bastion.item.BastionCaptureItem;
+import com.Kizunad.guzhenrenext.bastion.item.BastionManagementTokenItem;
 import com.Kizunad.guzhenrenext.bastion.item.BastionScoutItem;
 import com.Kizunad.guzhenrenext.bastion.item.BastionSealItem;
 import com.Kizunad.guzhenrenext.bastion.item.BastionSiegeItem;
@@ -43,6 +44,14 @@ import com.Kizunad.guzhenrenext.bastion.item.BastionSiegeItem;
  * </p>
  */
 public final class BastionBlocks {
+
+    /**
+     * 净化阵法 Tooltip 描述行数。
+     * <p>
+     * Checkstyle MagicNumber 规则仅豁免 -1/0/1/2，因此 3 需提取常量。
+     * </p>
+     */
+    private static final int PURIFICATION_ARRAY_TOOLTIP_DESC_LINE_COUNT = 3;
 
     private BastionBlocks() {
         // 工具类
@@ -335,7 +344,12 @@ public final class BastionBlocks {
      */
     public static final DeferredHolder<Item, BlockItem> BASTION_NODE_ITEM = ITEMS.register(
         "bastion_node",
-        () -> new BlockItem(BASTION_NODE.get(), new Item.Properties())
+        () -> new BastionTooltipBlockItem(
+            BASTION_NODE.get(),
+            new Item.Properties(),
+            "bastion_node",
+            2
+        )
     );
 
     /**
@@ -343,7 +357,12 @@ public final class BastionBlocks {
      */
     public static final DeferredHolder<Item, BlockItem> BASTION_ANCHOR_ITEM = ITEMS.register(
         "bastion_anchor",
-        () -> new BlockItem(BASTION_ANCHOR.get(), new Item.Properties())
+        () -> new BastionTooltipBlockItem(
+            BASTION_ANCHOR.get(),
+            new Item.Properties(),
+            "bastion_anchor",
+            2
+        )
     );
 
     /**
@@ -362,7 +381,12 @@ public final class BastionBlocks {
      */
     public static final DeferredHolder<Item, BlockItem> BASTION_ENERGY_NODE_ITEM = ITEMS.register(
         "bastion_energy_node",
-        () -> new BastionEnergyNodeItem(BASTION_ENERGY_NODE.get(), new Item.Properties())
+        () -> new BastionEnergyNodeItem(
+            BASTION_ENERGY_NODE.get(),
+            new Item.Properties(),
+            "bastion_energy_node",
+            2
+        )
     );
 
     /**
@@ -374,7 +398,12 @@ public final class BastionBlocks {
      */
     public static final DeferredHolder<Item, BlockItem> BASTION_GUARDIAN_HATCHERY_ITEM = ITEMS.register(
         "bastion_guardian_hatchery",
-        () -> new BlockItem(BASTION_GUARDIAN_HATCHERY.get(), new Item.Properties())
+        () -> new BastionTooltipBlockItem(
+            BASTION_GUARDIAN_HATCHERY.get(),
+            new Item.Properties(),
+            "bastion_guardian_hatchery",
+            2
+        )
     );
 
     /**
@@ -382,45 +411,80 @@ public final class BastionBlocks {
      */
     public static final DeferredHolder<Item, BlockItem> BASTION_AURA_NODE_ITEM = ITEMS.register(
         "bastion_aura_node",
-        () -> new BastionAuraNodeBlock.BastionAuraNodeItem(BASTION_AURA_NODE.get(), new Item.Properties())
+        () -> new BastionAuraNodeItem(
+            BASTION_AURA_NODE.get(),
+            new Item.Properties(),
+            "bastion_aura_node",
+            2
+        )
     );
 
     /**
      * 基地外壳方块物品（甲壳）。
      */
-     public static final DeferredHolder<Item, BlockItem> BASTION_CHITIN_SHELL_ITEM = ITEMS.register(
-         "bastion_chitin_shell",
-         () -> new BlockItem(BASTION_CHITIN_SHELL.get(), new Item.Properties())
-     );
+    public static final DeferredHolder<Item, BlockItem> BASTION_CHITIN_SHELL_ITEM = ITEMS.register(
+        "bastion_chitin_shell",
+        () -> new BastionTooltipBlockItem(
+            BASTION_CHITIN_SHELL.get(),
+            new Item.Properties(),
+            "bastion_chitin_shell",
+            2
+        )
+    );
 
-     /** 净化阵法方块物品。 */
-     public static final DeferredHolder<Item, BlockItem> BASTION_PURIFICATION_ARRAY_ITEM = ITEMS.register(
-         "bastion_purification_array",
-         () -> new BlockItem(BASTION_PURIFICATION_ARRAY.get(), new Item.Properties())
-     );
+    /** 净化阵法方块物品。 */
+    public static final DeferredHolder<Item, BlockItem> BASTION_PURIFICATION_ARRAY_ITEM = ITEMS.register(
+        "bastion_purification_array",
+        () -> new BastionTooltipBlockItem(
+            BASTION_PURIFICATION_ARRAY.get(),
+            new Item.Properties(),
+            "bastion_purification_array",
+            PURIFICATION_ARRAY_TOOLTIP_DESC_LINE_COUNT
+        )
+    );
 
     /** 炮台节点方块物品。 */
     public static final DeferredHolder<Item, BlockItem> BASTION_TURRET_ITEM = ITEMS.register(
         "bastion_turret",
-        () -> new BlockItem(BASTION_TURRET.get(), new Item.Properties())
+        () -> new BastionTooltipBlockItem(
+            BASTION_TURRET.get(),
+            new Item.Properties(),
+            "bastion_turret",
+            2
+        )
     );
 
     /** 陷阱节点方块物品。 */
     public static final DeferredHolder<Item, BlockItem> BASTION_TRAP_ITEM = ITEMS.register(
         "bastion_trap",
-        () -> new BlockItem(BASTION_TRAP.get(), new Item.Properties())
+        () -> new BastionTooltipBlockItem(
+            BASTION_TRAP.get(),
+            new Item.Properties(),
+            "bastion_trap",
+            2
+        )
     );
 
     /** 反爆外壳节点方块物品。 */
     public static final DeferredHolder<Item, BlockItem> BASTION_ANTI_EXPLOSION_SHELL_ITEM = ITEMS.register(
         "bastion_anti_explosion_shell",
-        () -> new BlockItem(BASTION_ANTI_EXPLOSION_SHELL.get(), new Item.Properties())
+        () -> new BastionTooltipBlockItem(
+            BASTION_ANTI_EXPLOSION_SHELL.get(),
+            new Item.Properties(),
+            "bastion_anti_explosion_shell",
+            2
+        )
     );
 
     /** 反火外壳节点方块物品。 */
     public static final DeferredHolder<Item, BlockItem> BASTION_ANTI_FIRE_SHELL_ITEM = ITEMS.register(
         "bastion_anti_fire_shell",
-        () -> new BlockItem(BASTION_ANTI_FIRE_SHELL.get(), new Item.Properties())
+        () -> new BastionTooltipBlockItem(
+            BASTION_ANTI_FIRE_SHELL.get(),
+            new Item.Properties(),
+            "bastion_anti_fire_shell",
+            2
+        )
     );
 
     /** 侦查道具，用于侦测附近基地信息。 */
@@ -457,6 +521,12 @@ public final class BastionBlocks {
     public static final DeferredHolder<Item, BastionCaptureItem> BASTION_CAPTURE_TOKEN = ITEMS.register(
         "bastion_capture_token",
         () -> new BastionCaptureItem(new Item.Properties())
+    );
+
+    /** 管理令牌：绑定 bastionId 后可远程打开管理 GUI。 */
+    public static final DeferredHolder<Item, BastionManagementTokenItem> BASTION_MANAGEMENT_TOKEN = ITEMS.register(
+        "bastion_management_token",
+        () -> new BastionManagementTokenItem(new Item.Properties())
     );
 
     /**
@@ -565,6 +635,63 @@ public final class BastionBlocks {
                 }
         );
 
+    /**
+     * 带通用 Tooltip 的基地方块物品。
+     */
+    private static class BastionTooltipBlockItem extends BlockItem {
+
+        private final String itemId;
+        private final int descLineCount;
+
+        BastionTooltipBlockItem(
+            Block block,
+            Properties properties,
+            String itemId,
+            int descLineCount
+        ) {
+            super(block, properties);
+            this.itemId = itemId;
+            this.descLineCount = descLineCount;
+        }
+
+        @Override
+        public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            java.util.List<Component> tooltip,
+            TooltipFlag flag
+        ) {
+            tooltip.add(Component.translatable("tooltip.guzhenrenext." + itemId + ".hint"));
+            super.appendHoverText(stack, context, tooltip, flag);
+
+            if (isShiftDownSafe()) {
+                for (int i = 1; i <= descLineCount; i++) {
+                    tooltip.add(Component.translatable(
+                        "tooltip.guzhenrenext." + itemId + ".desc." + i
+                    ));
+                }
+            }
+        }
+
+        private boolean isShiftDownSafe() {
+            if (FMLEnvironment.dist != Dist.CLIENT) {
+                return false;
+            }
+            try {
+                Class<?> screenClass = Class.forName(
+                    "net.minecraft.client.gui.screens.Screen"
+                );
+                java.lang.reflect.Method method = screenClass.getDeclaredMethod(
+                    "hasShiftDown"
+                );
+                Object result = method.invoke(null);
+                return result instanceof Boolean bool && bool;
+            } catch (ReflectiveOperationException e) {
+                return false;
+            }
+        }
+    }
+
     // ===== 注册方法 =====
 
     /**
@@ -580,16 +707,22 @@ public final class BastionBlocks {
     /**
      * 能源节点物品：在服务端放置时做“扣费/上限/归属”校验。
      */
-    private static final class BastionEnergyNodeItem extends BlockItem {
+    private static final class BastionEnergyNodeItem extends BastionTooltipBlockItem {
 
-        private BastionEnergyNodeItem(Block block, Properties properties) {
-            super(block, properties);
+        private BastionEnergyNodeItem(
+            Block block,
+            Properties properties,
+            String itemId,
+            int descLineCount
+        ) {
+            super(block, properties, itemId, descLineCount);
         }
 
         @Override
         protected boolean placeBlock(
-                BlockPlaceContext context,
-                net.minecraft.world.level.block.state.BlockState state) {
+            BlockPlaceContext context,
+            net.minecraft.world.level.block.state.BlockState state
+        ) {
             if (context == null) {
                 return false;
             }
@@ -622,21 +755,28 @@ public final class BastionBlocks {
             // 说明：tryBuildEnergyNode 内部已执行 setBlock。
             // 这里返回 true 仅用于告诉上层“放置成功”，由 BlockItem 流程处理消耗/统计。
             return ok;
-     }
+        }
+    }
 
     /**
      * 光环节点物品：在服务端放置时做“扣费/上限/归属”校验。
      */
-        private static final class BastionAuraNodeItem extends BlockItem {
+    private static final class BastionAuraNodeItem extends BastionTooltipBlockItem {
 
-        private BastionAuraNodeItem(Block block, Properties properties) {
-            super(block, properties);
+        private BastionAuraNodeItem(
+            Block block,
+            Properties properties,
+            String itemId,
+            int descLineCount
+        ) {
+            super(block, properties, itemId, descLineCount);
         }
 
         @Override
         protected boolean placeBlock(
-                BlockPlaceContext context,
-                net.minecraft.world.level.block.state.BlockState state) {
+            BlockPlaceContext context,
+            net.minecraft.world.level.block.state.BlockState state
+        ) {
             if (context == null) {
                 return false;
             }
@@ -663,5 +803,4 @@ public final class BastionBlocks {
             return ok;
         }
     }
-}
 }

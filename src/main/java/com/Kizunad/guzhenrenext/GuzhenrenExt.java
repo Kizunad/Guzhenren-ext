@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext;
 
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
+import com.Kizunad.guzhenrenext.bastion.menu.BastionMenus;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
@@ -34,6 +35,7 @@ public class GuzhenrenExt {
         // NpcKongqiaoInventoryBridge.register();
 
         KongqiaoMenus.register(modEventBus);
+        BastionMenus.register(modEventBus);
         KongqiaoAttachments.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntities.register(modEventBus);
         GuzhenrenExtNetworking.register(modEventBus);

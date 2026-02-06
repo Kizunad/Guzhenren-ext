@@ -15,11 +15,14 @@ import com.Kizunad.guzhenrenext.bastion.service.BastionTalentEffectService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionTurretService;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -103,6 +106,21 @@ public final class BastionTicker {
         static final long DESTRUCTION_REMOVAL_TICKS = 1800L;
 
         private DecayConfig() {
+        }
+    }
+
+    /**
+     * 升阶词缀赋予相关常量。
+     */
+    private static final class ModifierConfig {
+        /** 基础词缀赋予概率（1 转升阶后为 30%）。 */
+        static final double BASE_GRANT_CHANCE = 0.3;
+        /** 每提升一转额外增加的词缀赋予概率。 */
+        static final double GRANT_CHANCE_PER_TIER = 0.1;
+        /** 词缀随机选择使用的随机源。 */
+        static final RandomSource MODIFIER_RANDOM = RandomSource.create();
+
+        private ModifierConfig() {
         }
     }
 
@@ -415,6 +433,7 @@ public final class BastionTicker {
         double evolutionGain = calculateEvolutionGain(bastion, evolutionMultiplier);
         double newProgress = bastion.evolutionProgress() + evolutionGain;
         int newTier = bastion.tier();
+        BastionData bastionWithPossibleModifier = bastion;
 
         // 检查是否升阶（使用配置中的 maxTier）
         BastionTypeConfig typeConfig = BastionTypeManager.getOrDefault(bastion.bastionType());
@@ -431,6 +450,9 @@ public final class BastionTicker {
                 // 播放升级音效和粒子
                 BastionSoundPlayer.playEvolve(level, bastion.corePos());
                 BastionParticles.spawnEvolveParticles(level, bastion.corePos(), bastion.primaryDao());
+
+                // 升阶后尝试赋予词缀（概率随转数提升）。
+                bastionWithPossibleModifier = tryGrantModifier(bastion, newTier);
             } else {
                 // 阈值未满足，进度停滞在 1.0（不再累积）
                 newProgress = 1.0;
@@ -440,7 +462,7 @@ public final class BastionTicker {
         }
 
         // 构建更新后的基地
-        BastionData updated = bastion
+        BastionData updated = bastionWithPossibleModifier
             .withResourcePool(newPool)
             .withEvolution(newProgress, newTier)
             .withLastGameTime(gameTime);
@@ -760,6 +782,43 @@ public final class BastionTicker {
         }
 
         return true;
+    }
+
+    /**
+     * 尝试在基地升阶后赋予随机词缀。
+     * <p>
+     * 概率规则：基础 30%，每提升一转增加 10%。
+     * 若随机到已有词缀，则本次不重复添加。
+     * </p>
+     *
+     * @param bastion 升阶前基地数据
+     * @param newTier 升阶后的目标转数
+     * @return 可能更新过词缀集合的基地数据
+     */
+    private static BastionData tryGrantModifier(BastionData bastion, int newTier) {
+        double chance = ModifierConfig.BASE_GRANT_CHANCE
+            + (newTier - 1) * ModifierConfig.GRANT_CHANCE_PER_TIER;
+        double clampedChance = Math.min(1.0, chance);
+
+        if (ModifierConfig.MODIFIER_RANDOM.nextDouble() >= clampedChance) {
+            return bastion;
+        }
+
+        BastionModifier[] allModifiers = BastionModifier.values();
+        BastionModifier selected = allModifiers[ModifierConfig.MODIFIER_RANDOM.nextInt(allModifiers.length)];
+
+        Set<BastionModifier> currentModifiers = bastion.modifiers() == null
+            ? new HashSet<>()
+            : new HashSet<>(bastion.modifiers());
+        if (currentModifiers.contains(selected)) {
+            LOGGER.debug("基地 {} 词缀抽取命中重复词缀: {}，本次不添加",
+                bastion.id(), selected.getSerializedName());
+            return bastion;
+        }
+
+        currentModifiers.add(selected);
+        LOGGER.info("基地 {} 升阶后获得词缀: {}", bastion.id(), selected.getSerializedName());
+        return bastion.withModifiers(currentModifiers);
     }
 
     // ===== 刻类别枚举 =====

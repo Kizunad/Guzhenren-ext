@@ -113,6 +113,9 @@ public final class BastionGuardianStatsService {
         // 天赋：守卫伤害加成（需找到守卫所属基地）
         attack *= resolveGuardianDamageMultiplier(guardian);
 
+        // 天赋：守卫减伤加成（通过提升护甲体现）
+        armor *= resolveGuardianDamageReductionMultiplier(guardian);
+
         // 精英倍率（Warden 外观）
         if (elite) {
             health *= Stats.ELITE_HEALTH_MULT;
@@ -160,6 +163,22 @@ public final class BastionGuardianStatsService {
             return 1.0d;
         }
         return BastionTalentEffectService.getGuardianDamageMultiplier(bastion);
+    }
+
+    private static double resolveGuardianDamageReductionMultiplier(Mob guardian) {
+        if (!(guardian.level() instanceof ServerLevel level)) {
+            return 1.0d;
+        }
+        java.util.UUID bastionId = BastionGuardianData.getBastionId(guardian);
+        if (bastionId == null) {
+            return 1.0d;
+        }
+        BastionSavedData savedData = BastionSavedData.get(level);
+        var bastion = savedData.getBastion(bastionId);
+        if (bastion == null) {
+            return 1.0d;
+        }
+        return BastionTalentEffectService.getGuardianDamageReductionMultiplier(bastion);
     }
 
     private static void setBaseValueIfPresent(

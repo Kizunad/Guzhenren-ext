@@ -15,6 +15,7 @@ public final class BastionTalentEffectService {
 
     private static final String EFFECT_RESOURCE_OUTPUT = "resource_output";
     private static final String EFFECT_GUARDIAN_DAMAGE = "guardian_damage";
+    private static final String EFFECT_GUARDIAN_DAMAGE_REDUCTION = "guardian_damage_reduction";
     private static final String EFFECT_EXPANSION_SPEED = "expansion_speed";
 
     private BastionTalentEffectService() {
@@ -38,6 +39,16 @@ public final class BastionTalentEffectService {
      */
     public static double getGuardianDamageMultiplier(BastionData bastion) {
         return 1.0 + sumEffectValue(bastion, EFFECT_GUARDIAN_DAMAGE);
+    }
+
+    /**
+     * 获取守卫减伤倍率。
+     *
+     * @param bastion 基地数据
+     * @return 守卫减伤乘数
+     */
+    public static double getGuardianDamageReductionMultiplier(BastionData bastion) {
+        return 1.0 + sumEffectValue(bastion, EFFECT_GUARDIAN_DAMAGE_REDUCTION);
     }
 
     /**

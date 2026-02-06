@@ -35,14 +35,30 @@ public final class BastionCreativeTab {
                 .title(Component.translatable("itemGroup.guzhenrenext"))
                 .icon(() -> new ItemStack(BastionBlocks.BASTION_CORE_ITEM.get()))
                 .displayItems((parameters, output) -> {
-                    // 基地系统物品
+                    // 基地系统物品 - 核心/菌毯/锚点
                     output.accept(BastionBlocks.BASTION_CORE_ITEM.get());
                     output.accept(BastionBlocks.BASTION_NODE_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_ANCHOR_ITEM.get());
+                    // 功能节点
+                    output.accept(BastionBlocks.BASTION_ENERGY_NODE_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_AURA_NODE_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_GUARDIAN_HATCHERY_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_TURRET_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_TRAP_ITEM.get());
+                    // 外壳
+                    output.accept(BastionBlocks.BASTION_CHITIN_SHELL_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_ANTI_EXPLOSION_SHELL_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_ANTI_FIRE_SHELL_ITEM.get());
+                    // 阵法
                     output.accept(BastionBlocks.BASTION_REVERSAL_ARRAY_ITEM.get());
                     output.accept(BastionBlocks.BASTION_PURIFICATION_ARRAY_ITEM.get());
+                    // 侦查/攻城/封印/接管
                     output.accept(BastionBlocks.BASTION_SCOUT_ITEM.get());
                     output.accept(BastionBlocks.BASTION_SIEGE_BREACH_ITEM.get());
                     output.accept(BastionBlocks.BASTION_SIEGE_ARMOR_PIERCE_ITEM.get());
+                    output.accept(BastionBlocks.BASTION_SEAL.get());
+                    output.accept(BastionBlocks.BASTION_CAPTURE_TOKEN.get());
+                    output.accept(BastionBlocks.BASTION_MANAGEMENT_TOKEN.get());
                 })
                 .build()
         );
