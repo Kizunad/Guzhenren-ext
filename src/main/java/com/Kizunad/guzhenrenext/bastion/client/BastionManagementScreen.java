@@ -51,6 +51,8 @@ public class BastionManagementScreen
     private static final int BRANCH_MU = 3;
     private static final int BRANCH_LI = 4;
     private static final int NODE_LINE_SPACING = 2;
+    private static final int DETAIL_SECTION_HEIGHT_MULTIPLIER = 4;
+    private static final int TREE_INDENT_WIDTH = 12;
 
     private final Theme theme = Theme.vanilla();
     private int currentTab = TAB_OVERVIEW;
@@ -210,16 +212,22 @@ public class BastionManagementScreen
             String prefix = switch (status) {
                 case "unlocked" -> "§a[✓] ";
                 case "available" -> "§e[○] ";
+                case "insufficient_points" -> "§6[◇] ";
                 default -> "§7[✗] ";
             };
+
+            // 根据节点深度计算缩进
+            int depth = getNodeDepth(node);
+            int indent = depth * TREE_INDENT_WIDTH;
+            String treePrefix = depth > 0 ? "§8└ " : "";
 
             final int idx = nodeIndex;
             final String nodeId = node.id();
             Button nodeBtn = new Button(
-                Component.literal(prefix + node.displayName()),
+                Component.literal(treePrefix + prefix + node.displayName()),
                 theme
             );
-            nodeBtn.setFrame(0, y, panel.getWidth() - BUTTON_WIDTH - PADDING, LABEL_HEIGHT);
+            nodeBtn.setFrame(indent, y, panel.getWidth() - BUTTON_WIDTH - PADDING - indent, LABEL_HEIGHT);
             nodeBtn.setOnClick(() -> selectNode(nodeId));
             panel.addChild(nodeBtn);
 
@@ -228,6 +236,14 @@ public class BastionManagementScreen
                 unlockBtn.setFrame(panel.getWidth() - BUTTON_WIDTH, y, BUTTON_WIDTH, LABEL_HEIGHT);
                 unlockBtn.setOnClick(() -> unlockNode(idx));
                 panel.addChild(unlockBtn);
+            } else if ("insufficient_points".equals(status)) {
+                // 点数不足时显示灰色提示按钮
+                Button needPointsBtn = new Button(
+                    Component.literal("§7需要" + node.cost() + "点"),
+                    theme
+                );
+                needPointsBtn.setFrame(panel.getWidth() - BUTTON_WIDTH, y, BUTTON_WIDTH, LABEL_HEIGHT);
+                panel.addChild(needPointsBtn);
             }
 
             y += LABEL_HEIGHT + NODE_LINE_SPACING;
@@ -237,10 +253,25 @@ public class BastionManagementScreen
         if (selectedNodeId != null) {
             BastionTalentNode selected = BastionTalentRegistry.getNode(selectedNodeId);
             if (selected != null) {
-                int detailY = panel.getHeight() - BUTTON_HEIGHT - BUTTON_HEIGHT - BUTTON_HEIGHT;
+                int detailY = panel.getHeight() - BUTTON_HEIGHT * DETAIL_SECTION_HEIGHT_MULTIPLIER;
                 detailY = addLiteralLabel(panel, "§6选中：§f" + selected.displayName(), detailY);
                 detailY = addLiteralLabel(panel, "§7" + selected.description(), detailY);
-                addLiteralLabel(panel, "§e消耗：§f" + selected.cost() + " 点", detailY);
+                detailY = addLiteralLabel(
+                    panel,
+                    "§e消耗：§f" + selected.cost() + " 点  §7(拥有: " + menu.getTalentPoints() + ")",
+                    detailY
+                );
+                // 显示前置要求
+                if (!selected.prerequisites().isEmpty()) {
+                    StringBuilder prereqText = new StringBuilder("§e前置：");
+                    for (String prereq : selected.prerequisites()) {
+                        boolean met = menu.getUnlockedNodes().contains(prereq);
+                        BastionTalentNode prereqNode = BastionTalentRegistry.getNode(prereq);
+                        String name = prereqNode != null ? prereqNode.displayName() : prereq;
+                        prereqText.append(met ? "§a✓" : "§c✗").append(name).append(" ");
+                    }
+                    addLiteralLabel(panel, prereqText.toString(), detailY);
+                }
             }
         }
     }
@@ -295,19 +326,46 @@ public class BastionManagementScreen
         };
     }
 
+    /**
+     * 获取节点状态。
+     * @return 状态字符串：unlocked(已解锁)、available(可解锁)、insufficient_points(点数不足)、locked(前置未满足)
+     */
     private String getNodeStatus(BastionTalentNode node) {
         if (menu.getUnlockedNodes().contains(node.id())) {
             return "unlocked";
         }
+        // 检查前置条件
         for (String prereq : node.prerequisites()) {
             if (!menu.getUnlockedNodes().contains(prereq)) {
-                return "locked";
+                return "locked"; // 前置未满足
             }
         }
+        // 前置已满足，检查点数
         if (menu.getTalentPoints() >= node.cost()) {
             return "available";
         }
-        return "locked";
+        return "insufficient_points"; // 前置满足但点数不足
+    }
+
+    /**
+     * 计算节点在树中的深度（用于缩进显示）。
+     * @return 深度值，根节点为0
+     */
+    private int getNodeDepth(BastionTalentNode node) {
+        if (node.prerequisites().isEmpty()) {
+            return 0;
+        }
+        int maxParentDepth = 0;
+        for (String prereqId : node.prerequisites()) {
+            BastionTalentNode prereq = BastionTalentRegistry.getNode(prereqId);
+            if (prereq != null) {
+                int parentDepth = getNodeDepth(prereq);
+                if (parentDepth > maxParentDepth) {
+                    maxParentDepth = parentDepth;
+                }
+            }
+        }
+        return maxParentDepth + 1;
     }
 
     private void selectNode(String nodeId) {
