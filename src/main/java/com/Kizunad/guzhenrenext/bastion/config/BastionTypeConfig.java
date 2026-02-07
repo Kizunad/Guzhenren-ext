@@ -1401,8 +1401,8 @@ import java.util.Optional;
         static final int DEFAULT_MYCELIUM_WEIGHT = 1;
 
         // ===== 炮台节点默认值（Round 24） =====
-        /** 是否启用炮台系统（兼容旧 JSON，默认关闭）。 */
-        static final boolean DEFAULT_TURRET_ENABLED = false;
+        /** 是否启用炮台系统（默认开启，实现已完成）。 */
+        static final boolean DEFAULT_TURRET_ENABLED = true;
         /** 炮台攻击范围默认值（方块）。 */
         static final int DEFAULT_TURRET_RANGE = 16;
         /** 炮台伤害默认值。 */
@@ -1415,8 +1415,8 @@ import java.util.Optional;
         static final double DEFAULT_TURRET_COST_PER_SHOT = 0.5;
 
         // ===== 陷阱节点默认值（Round 25） =====
-        /** 是否启用陷阱系统（兼容旧 JSON，默认关闭）。 */
-        static final boolean DEFAULT_TRAP_ENABLED = false;
+        /** 是否启用陷阱系统（默认开启，实现已完成）。 */
+        static final boolean DEFAULT_TRAP_ENABLED = true;
         /** 陷阱触发半径（方块）。 */
         static final int DEFAULT_TRAP_TRIGGER_RADIUS = 3;
         /** 附加效果持续时间（tick）。 */

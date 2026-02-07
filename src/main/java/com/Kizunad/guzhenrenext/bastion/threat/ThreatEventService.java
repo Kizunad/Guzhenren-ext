@@ -442,10 +442,11 @@ public final class ThreatEventService {
     private static BastionModifier selectMutationModifier(
             BastionData bastion,
             RandomSource random) {
-        // MVP：先只在 HARDENED / VOLATILE 里选
         BastionModifier[] pool = new BastionModifier[] {
             BastionModifier.HARDENED,
-            BastionModifier.VOLATILE
+            BastionModifier.VOLATILE,
+            BastionModifier.CLOAKED,
+            BastionModifier.PROLIFERATING
         };
 
         java.util.List<BastionModifier> candidates = new java.util.ArrayList<>();

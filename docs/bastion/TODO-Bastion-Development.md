@@ -1,7 +1,43 @@
 # Bastion 未完成功能开发 TODO 列表
 
 > 生成时间：2026-02-05
+> 最后更新：2026-02-07
 > 基于代码搜索整理，按模块/依赖关系排序
+
+---
+
+## 已完成功能（2026-02-07 会话）
+
+### ✅ 词缀系统集成
+**状态**：已完成并提交 (fa49deb)
+- [x] `HARDENED` - 守卫受伤时减伤
+- [x] `VOLATILE` - 死亡时爆炸
+- [x] `CLOAKED` - 生成时隐身 + 首击伤害加成
+- [x] `PROLIFERATING` - 死亡时分裂生成新守卫
+- [x] 事件处理器 `BastionModifierEventHandler` 已创建
+- [x] 生成时词缀调用已集成到 `BastionHatcheryService`
+
+### ✅ 守卫行为（已发现完整实现）
+- [x] **BastionHealerGuardian** - HealAlliesGoal、目标优先级、治疗粒子
+- [x] **BastionBufferGuardian** - AuraBuffGoal、范围增益、粒子效果
+- [x] **BastionBerserkerGuardian** - 狂暴状态、ChargeAttackGoal、粒子效果
+- [x] **BastionShieldGuardian** - ShieldBlockGoal、投射物反弹、TauntGoal
+
+### ✅ 系统默认启用状态
+| 系统 | 默认值 | 状态 |
+|------|--------|------|
+| 污染系统 | `true` | ✅ 已启用 |
+| Boss 系统 | `true` | ✅ 已启用 |
+| 接管系统 | `true` | ✅ 已启用 |
+| Boss 阶段行为 | 已实现 | ✅ 已启用（含默认阶段配置） |
+
+### ✅ Boss 阶段行为
+**状态**：已完整实现
+- [x] 阶段切换机制（`tryHandlePhaseSwitch`）
+- [x] 血量阈值触发（`resolveTargetPhaseIndex`）
+- [x] 阶段属性变化（`applyPhaseAttributes`）
+- [x] 视觉/音效提示（`spawnPhaseEffects`）
+- [x] 默认阶段配置（75%/50%/25% 三阶段）
 
 ---
 
@@ -19,19 +55,7 @@
 - [ ] 添加本地化文本（`zh_cn.json`, `en_us.json`）
 - [ ] 更新 `BastionInteractionService` 使用正式物品
 
-### 1.2 守卫行为补全
-**当前状态**：6 种守卫实体均为 Round 11-16 最小实现，只有基础 AI
-**位置**：`bastion/guardian/entity/Bastion*Guardian.java`
-
-#### 1.2.1 BastionShieldGuardian（盾卫）
-- [ ] 实现格挡行为（减伤/反弹）
-- [ ] 实现嘲讽技能（吸引敌人仇恨）
-- [ ] 添加盾牌举起/放下动画状态
-
-#### 1.2.2 BastionBerserkerGuardian（狂战士）
-- [ ] 实现狂暴状态（低血量增伤）
-- [ ] 实现冲锋攻击
-- [ ] 添加狂暴视觉效果
+### 1.2 守卫行为补全（剩余）
 
 #### 1.2.3 BastionArcherGuardian（弓手）
 - [ ] 实现多重射击
@@ -43,50 +67,29 @@
 - [ ] 实现法术冷却管理
 - [ ] 添加施法动画和粒子效果
 
-#### 1.2.5 BastionHealerGuardian（治疗者）
-- [ ] 实现治疗光环/单体治疗
-- [ ] 实现治疗目标优先级（血量最低的友军）
-- [ ] 添加治疗视觉效果
-
-#### 1.2.6 BastionBufferGuardian（增益者）
-- [ ] 实现增益光环（攻击/防御/速度）
-- [ ] 实现增益目标选择逻辑
-- [ ] 添加增益视觉效果
-
-### 1.3 词缀/变异系统实现
-**当前状态**：4 种词缀效果均为"后续实现"占位
-**位置**：`BastionModifier.java`
-
-- [ ] `HARDENED` - 实现硬化效果（增加防御/减伤）
-- [ ] `VOLATILE` - 实现易爆效果（死亡爆炸/范围伤害）
-- [ ] `CLOAKED` - 实现隐匿效果（隐身/突袭）
-- [ ] `PROLIFERATING` - 实现增殖效果（分裂/召唤）
-- [ ] 为每种词缀添加视觉标识（粒子/光效）
-
-### 1.4 Boss 阶段行为实现
-**当前状态**：`BossPhase` 配置存在但默认为空列表
-**位置**：`BastionTypeConfig.java:750-751`, `BastionBossService.java`
-
-- [ ] 设计 Boss 阶段切换机制（血量阈值触发）
-- [ ] 实现阶段切换时的技能变化
-- [ ] 实现阶段切换时的属性变化
-- [ ] 添加阶段切换视觉/音效提示
-- [ ] 配置默认 Boss 阶段列表
-
 ---
 
 ## 优先级 2：系统完善（功能已有框架，需要启用/完善）
 
-### 2.1 污染系统启用
-**当前状态**：`DEFAULT_POLLUTION_ENABLED = false`
-**位置**：`BastionTypeConfig.java`, `BastionPurificationArrayBlock.java`
+### 2.1 炮台系统启用
+**当前状态**：`DEFAULT_TURRET_ENABLED = true`（已启用）
+**位置**：`BastionTypeConfig.java`, `BastionTurretService.java`
 
-- [ ] 完善污染扩散逻辑
-- [ ] 完善污染净化流程
-- [ ] 添加污染视觉效果（方块变色/粒子）
-- [ ] 测试验证后将默认值改为 `true`
+- [x] 炮台攻击逻辑已实现
+- [x] 将默认值改为 `true`
+- [ ] 完善 `isHostileToBastion` 敌对判定（当前非玩家全敌对）
+- [ ] 添加炮台瞄准/射击动画（可选）
 
-### 2.2 外壳系统启用
+### 2.2 陷阱系统启用
+**当前状态**：`DEFAULT_TRAP_ENABLED = true`（已启用）
+**位置**：`BastionTypeConfig.java`, `BastionTrapBlock.java`
+
+- [x] 陷阱触发逻辑已实现
+- [x] `isHostile` 敌对判定已实现
+- [x] 将默认值改为 `true`
+- [ ] 添加多种陷阱类型（可选）
+
+### 2.3 外壳系统启用
 **当前状态**：`DEFAULT_SHELL_ENABLED = false`
 **位置**：`BastionTypeConfig.java`
 
@@ -94,7 +97,7 @@
 - [ ] 完善外壳破坏/修复机制
 - [ ] 测试验证后将默认值改为 `true`
 
-### 2.3 精英怪系统启用
+### 2.4 精英怪系统启用
 **当前状态**：`DEFAULT_ELITE_ENABLED = false`
 **位置**：`BastionTypeConfig.java`
 
@@ -103,25 +106,7 @@
 - [ ] 完善精英怪掉落表
 - [ ] 测试验证后将默认值改为 `true`
 
-### 2.4 炮台系统启用
-**当前状态**：`DEFAULT_TURRET_ENABLED = false`
-**位置**：`BastionTypeConfig.java`, `BastionTurretService.java`
-
-- [ ] 完善炮台攻击逻辑
-- [ ] 完善 `isHostileToBastion` 敌对判定（当前非玩家全敌对）
-- [ ] 添加炮台瞄准/射击动画
-- [ ] 测试验证后将默认值改为 `true`
-
-### 2.5 陷阱系统启用
-**当前状态**：`DEFAULT_TRAP_ENABLED = false`
-**位置**：`BastionTypeConfig.java`, `BastionTrapBlock.java`
-
-- [ ] 完善陷阱触发逻辑
-- [ ] 完善 `isHostile` 敌对判定
-- [ ] 添加多种陷阱类型
-- [ ] 测试验证后将默认值改为 `true`
-
-### 2.6 能源损耗系统启用
+### 2.5 能源损耗系统启用
 **当前状态**：`DEFAULT_ENERGY_LOSS_ENABLED = false`
 **位置**：`BastionTypeConfig.java`, `BastionEnergyService.java`
 
@@ -129,12 +114,12 @@
 - [ ] 完善能源不足时的惩罚机制
 - [ ] 测试验证后将默认值改为 `true`
 
-### 2.7 威胁事件扩展
-**当前状态**：MVP 只在 HARDENED/VOLATILE 里选
+### 2.6 威胁事件扩展
+**当前状态**：已扩展至全部 4 种词缀
 **位置**：`ThreatEventService.java:445-449`
 
-- [ ] 启用 CLOAKED 威胁事件
-- [ ] 启用 PROLIFERATING 威胁事件
+- [x] 启用 CLOAKED 威胁事件
+- [x] 启用 PROLIFERATING 威胁事件
 - [ ] 添加更多威胁事件类型
 - [ ] 平衡威胁事件触发概率
 
