@@ -22,6 +22,8 @@
 - [x] **BastionBufferGuardian** - AuraBuffGoal、范围增益、粒子效果
 - [x] **BastionBerserkerGuardian** - 狂暴状态、ChargeAttackGoal、粒子效果
 - [x] **BastionShieldGuardian** - ShieldBlockGoal、投射物反弹、TauntGoal
+- [x] **BastionArcherGuardian** - 多重射击、瞄准预判、火焰箭、抛物线补偿
+- [x] **BastionCasterGuardian** - 火球/凋零骷髅头、法术冷却、施法粒子
 
 ### ✅ 系统默认启用状态
 | 系统 | 默认值 | 状态 |
@@ -54,18 +56,6 @@
 - [ ] 添加合成配方（`data/guzhenrenext/recipe/`）
 - [ ] 添加本地化文本（`zh_cn.json`, `en_us.json`）
 - [ ] 更新 `BastionInteractionService` 使用正式物品
-
-### 1.2 守卫行为补全（剩余）
-
-#### 1.2.3 BastionArcherGuardian（弓手）
-- [ ] 实现多重射击
-- [ ] 实现瞄准预判
-- [ ] 添加特殊箭矢类型
-
-#### 1.2.4 BastionCasterGuardian（法师）
-- [ ] 实现法术攻击（与道途关联）
-- [ ] 实现法术冷却管理
-- [ ] 添加施法动画和粒子效果
 
 ---
 
@@ -200,11 +190,10 @@
 ## 优先级 5：代码清理
 
 ### 5.1 清理遗留注释
-- [ ] `BastionCaptureService.java:198-201` - 清理 Round 34 TODO 注释
-- [ ] `BastionReversalArrayBlockEntity.java:159` - 确定 tag 命名规则（jiage_XXX）
+- [x] `BastionCaptureService.java:198-201` - 清理 Round 34 TODO 注释（已完成，方法已被调用）
 
-### 5.2 简化测试代码移除
-- [ ] `BastionPurificationArrayBlock.java:160-164` - 移除污染禁用时的简化逻辑（启用污染系统后）
+### 5.2 简化测试代码
+- [ ] `BastionPurificationArrayBlock.java:160-164` - 考虑简化污染禁用时的日志（保留回退逻辑）
 
 ---
 

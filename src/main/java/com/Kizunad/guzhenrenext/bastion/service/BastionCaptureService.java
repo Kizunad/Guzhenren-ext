@@ -194,10 +194,4 @@ public final class BastionCaptureService {
             }
         });
     }
-
-    // TODO Round 34：在净化阵法完成的事件回调中调用此方法，
-    // 例如在净化阵法完成后：BastionCaptureService.tryMarkCapturableViaPurification(level, bastionData)
-
-    // TODO Round 34：在 Boss 死亡事件回调中调用此方法，
-    // 例如在 Boss 击杀后：BastionCaptureService.tryMarkCapturableViaBossDefeat(level, bastionData)
 }
