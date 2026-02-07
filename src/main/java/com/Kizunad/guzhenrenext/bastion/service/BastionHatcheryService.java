@@ -211,6 +211,9 @@ public final class BastionHatcheryService {
                 continue;
             }
 
+            // 守卫成功入世界后再应用生成词缀，避免对失败生成实体做无效处理。
+            BastionModifierService.onGuardianSpawn(mob, current);
+
             // 生成成功后扣费并落盘。
             current = current.withResourcePool(Math.max(0.0, current.resourcePool() - costPerSpawn));
             savedData.updateBastion(current);
