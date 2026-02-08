@@ -8,8 +8,13 @@ import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
+import com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianRuntimeService;
+import com.Kizunad.guzhenrenext.bastion.service.BastionAuraService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionGuardianUpkeepService;
 import com.Kizunad.guzhenrenext.bastion.service.BastionSpawnService;
+import com.mojang.authlib.GameProfile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,9 +22,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
 @GameTestHolder("guzhenrenext")
@@ -65,7 +73,7 @@ public class ExampleGameTests {
      * 带来的边界不确定性，这里额外 +1 tick，保证“至少一次扫描”已发生在采样窗口之前。
      * </p>
      */
-    private static final int ENERGY_TEST_SCAN_SETTLE_TICKS = 2 * TICKS_PER_SECOND + 1;
+    private static final int ENERGY_TEST_SCAN_SETTLE_TICKS = 4 * TICKS_PER_SECOND + 1;
 
     /**
      * 断言下界：有环境（汲水）时的 pool 增长应显著高于无环境。
@@ -104,6 +112,33 @@ public class ExampleGameTests {
 
     /** 单个守卫每个维护间隔的固定费用（与 BastionGuardianUpkeepService 的当前常量保持一致）。 */
     private static final double UPKEEP_TEST_COST_PER_GUARDIAN = 1.0;
+
+    /** BastionRuntime 目标筛选私有方法名（反射调用，避免依赖 tick 时间对齐）。 */
+    private static final String METHOD_TICK_TARGETING = "tickTargeting";
+
+    /** BastionAuraService 私有方法名（反射调用，直接覆盖友方过滤与敌方生效回归）。 */
+    private static final String METHOD_APPLY_AURA_EFFECT = "applyAuraEffect";
+
+    /** 友方女巫守卫测试用玩家 UUID（需与 capturedBy 严格一致）。 */
+    private static final UUID TEST_FRIENDLY_PLAYER_ID =
+        UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+    /** 敌方回归测试用 owner UUID（与敌方 UUID 不同，用于验证敌方仍受影响）。 */
+    private static final UUID TEST_OWNER_PLAYER_ID =
+        UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+    /** 敌方回归测试用 enemy UUID。 */
+    private static final UUID TEST_ENEMY_PLAYER_ID =
+        UUID.fromString("33333333-3333-3333-3333-333333333333");
+
+    /** Bastion 友敌回归测试统一超时：用于包含反射调用与多断言的用例。 */
+    private static final int BASTION_FRIENDLY_REGRESSION_TIMEOUT_TICKS = 10 * TICKS_PER_SECOND;
+
+    /** 友敌回归测试核心坐标（相对坐标，写入数据前统一转 absolute）。 */
+    private static final BlockPos BASTION_TEST_CORE_REL = new BlockPos(0, 2, 0);
+
+    /** 友敌回归测试守卫刷出点（相对坐标）。 */
+    private static final BlockPos BASTION_TEST_GUARDIAN_REL = new BlockPos(2, 2, 2);
 
     /**
      * 构造 GameTest 用的 BastionTypeConfig。
@@ -483,5 +518,190 @@ public class ExampleGameTests {
                 helper.succeed();
             }
         );
+    }
+
+    @GameTest(template = "empty", timeoutTicks = BASTION_FRIENDLY_REGRESSION_TIMEOUT_TICKS)
+    public void testBastionWitchGuardianIgnoresFriendlyOwner(GameTestHelper helper) {
+        // 目标：覆盖“守卫友方免疫（Witch）”回归。
+        // 场景：基地 capturedBy 与玩家 UUID 一致时，女巫守卫已有目标也必须被 runtime 目标筛选剔除。
+        ServerLevel level = helper.getLevel();
+        BastionSavedData savedData = BastionSavedData.get(level);
+        long gameTime = level.getGameTime();
+
+        BlockPos coreAbs = helper.absolutePos(BASTION_TEST_CORE_REL);
+        BastionData friendlyBastion = BastionData.create(
+            coreAbs,
+            level.dimension(),
+            "default",
+            BastionDao.ZHI_DAO,
+            gameTime
+        ).withCaptured(TEST_FRIENDLY_PLAYER_ID, gameTime);
+        savedData.addBastion(friendlyBastion);
+
+        Mob witch = helper.spawn(EntityType.WITCH, BASTION_TEST_GUARDIAN_REL);
+        BastionGuardianData.markAsGuardian(witch, friendlyBastion.id(), friendlyBastion.tier());
+
+        ServerPlayer friendlyPlayer = createFakePlayer(level, TEST_FRIENDLY_PLAYER_ID, "friendly_owner");
+        witch.setTarget(friendlyPlayer);
+
+        try {
+            invokeGuardianTickTargeting(level, witch);
+        } catch (ReflectiveOperationException e) {
+            helper.fail("反射调用 tickTargeting 失败：" + e.getMessage());
+            return;
+        }
+
+        if (witch.getTarget() != null) {
+            helper.fail("友方玩家不应被女巫守卫保留为目标");
+            return;
+        }
+
+        friendlyPlayer.discard();
+        savedData.removeBastion(friendlyBastion.id());
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = BASTION_FRIENDLY_REGRESSION_TIMEOUT_TICKS)
+    public void testBastionZhiAuraIgnoresFriendlyOwner(GameTestHelper helper) {
+        // 目标：覆盖“智道光环友方免疫”回归。
+        // 场景：当玩家 UUID 与 capturedBy 一致时，applyAuraEffect 必须在入口直接短路，不施加 debuff。
+        ServerLevel level = helper.getLevel();
+        long gameTime = level.getGameTime();
+        ServerPlayer friendlyPlayer = createFakePlayer(level, TEST_FRIENDLY_PLAYER_ID, "friendly_aura_owner");
+        friendlyPlayer.removeAllEffects();
+
+        BlockPos coreAbs = helper.absolutePos(BASTION_TEST_CORE_REL);
+        BastionData friendlyBastion = BastionData.create(
+            coreAbs,
+            level.dimension(),
+            "default",
+            BastionDao.ZHI_DAO,
+            gameTime
+        ).withCaptured(TEST_FRIENDLY_PLAYER_ID, gameTime);
+
+        try {
+            invokeApplyAuraEffect(friendlyPlayer, friendlyBastion, coreAbs);
+        } catch (ReflectiveOperationException e) {
+            helper.fail("反射调用 applyAuraEffect 失败：" + e.getMessage());
+            return;
+        }
+
+        if (friendlyPlayer.hasEffect(MobEffects.DIG_SLOWDOWN)
+            || friendlyPlayer.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
+            helper.fail("友方玩家不应受到智道光环减速/挖掘疲劳影响");
+            return;
+        }
+
+        friendlyPlayer.discard();
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = BASTION_FRIENDLY_REGRESSION_TIMEOUT_TICKS)
+    public void testBastionEnemyStillAffectedByGuardianAndAura(GameTestHelper helper) {
+        // 目标：覆盖“敌方仍生效”回归，防止修复退化为全体免疫。
+        // 验证点：
+        // 1) 女巫守卫对敌方目标仍会保留锁定；
+        // 2) 智道光环对敌方仍施加 DIG_SLOWDOWN/MOVEMENT_SLOWDOWN。
+        ServerLevel level = helper.getLevel();
+        BastionSavedData savedData = BastionSavedData.get(level);
+        long gameTime = level.getGameTime();
+
+        BlockPos coreAbs = helper.absolutePos(BASTION_TEST_CORE_REL);
+        BastionData bastion = BastionData.create(
+            coreAbs,
+            level.dimension(),
+            "default",
+            BastionDao.ZHI_DAO,
+            gameTime
+        ).withCaptured(TEST_OWNER_PLAYER_ID, gameTime);
+        savedData.addBastion(bastion);
+
+        Mob witch = helper.spawn(EntityType.WITCH, BASTION_TEST_GUARDIAN_REL);
+        BastionGuardianData.markAsGuardian(witch, bastion.id(), bastion.tier());
+
+        ServerPlayer enemyPlayer = createFakePlayer(level, TEST_ENEMY_PLAYER_ID, "enemy_player");
+        enemyPlayer.removeAllEffects();
+        witch.setTarget(enemyPlayer);
+
+        try {
+            invokeGuardianTickTargeting(level, witch);
+        } catch (ReflectiveOperationException e) {
+            helper.fail("反射调用 tickTargeting 失败：" + e.getMessage());
+            return;
+        }
+
+        if (witch.getTarget() != enemyPlayer) {
+            helper.fail("敌方目标应继续被女巫守卫锁定");
+            return;
+        }
+
+        // 敌方光环回归断言：直接走道途特化入口，验证“非友方仍会获得智道减益”。
+        // 这里不依赖资源扣减分支，避免与玩家资源附件初始化耦合，聚焦本任务核心语义。
+        bastion.primaryDao().onAuraTick(enemyPlayer, bastion.tier(), 1.0D);
+
+        if (!enemyPlayer.hasEffect(MobEffects.DIG_SLOWDOWN)
+            || !enemyPlayer.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
+            helper.fail("敌方玩家应继续受到智道光环减速/挖掘疲劳影响");
+            return;
+        }
+
+        enemyPlayer.discard();
+        savedData.removeBastion(bastion.id());
+
+        helper.succeed();
+    }
+
+    /**
+     * 创建可用于 GameTest 的假玩家实例。
+     * <p>
+     * 说明：本测试关注的是 UUID 友敌语义与效果施加逻辑，
+     * 使用 FakePlayer 可避免引入人工联机与真实登录依赖。
+     * </p>
+     */
+    private static ServerPlayer createFakePlayer(ServerLevel level, UUID uuid, String name) {
+        return FakePlayerFactory.get(level, new GameProfile(uuid, name));
+    }
+
+    /**
+     * 通过反射调用 BastionGuardianRuntimeService 的私有目标筛选方法。
+     * <p>
+     * 使用该入口是为了将断言聚焦在“目标保留/重选语义”，避免 tick 间隔对齐带来的不确定性。
+     * </p>
+     */
+    private static void invokeGuardianTickTargeting(ServerLevel level, Mob guardian)
+            throws ReflectiveOperationException {
+        Method method = BastionGuardianRuntimeService.class.getDeclaredMethod(
+            METHOD_TICK_TARGETING,
+            ServerLevel.class,
+            Mob.class
+        );
+        method.setAccessible(true);
+        method.invoke(null, level, guardian);
+    }
+
+    /**
+     * 通过反射调用 BastionAuraService 的私有光环入口。
+     * <p>
+     * 使用该入口可直接验证友方短路与敌方生效两个核心行为，避免事件构造噪声干扰断言。
+     * </p>
+     */
+    private static void invokeApplyAuraEffect(ServerPlayer player, BastionData bastion, BlockPos playerPos)
+            throws ReflectiveOperationException {
+        Method method = BastionAuraService.class.getDeclaredMethod(
+            METHOD_APPLY_AURA_EFFECT,
+            ServerPlayer.class,
+            BastionData.class,
+            BlockPos.class
+        );
+        method.setAccessible(true);
+        try {
+            method.invoke(null, player, bastion, playerPos);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            String causeMessage = cause == null ? "<no-cause>" : cause.getClass().getSimpleName() + ": " + cause.getMessage();
+            throw new ReflectiveOperationException("applyAuraEffect 业务异常: " + causeMessage, e);
+        }
     }
 }

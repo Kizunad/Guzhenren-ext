@@ -1,5 +1,8 @@
 package com.Kizunad.guzhenrenext.bastion.guardian.entity;
 
+import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -7,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -51,6 +55,19 @@ public class BastionArcherGuardian extends AbstractSkeleton {
     public void performRangedAttack(LivingEntity target, float distanceFactor) {
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
+        }
+        // 远程入口 owner 过滤：
+        // 骷髅弓手在多重射击与 super 路径都会发射实体箭矢，
+        // 必须在共同入口先基于 bastion.isFriendlyTo(playerId) 短路，
+        // 确保 owner 在远程路径下不受守卫负面影响。
+        if (target instanceof Player player) {
+            var bastionId = BastionGuardianData.getBastionId(this);
+            if (bastionId != null) {
+                BastionData bastion = BastionSavedData.get(serverLevel).getBastion(bastionId);
+                if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                    return;
+                }
+            }
         }
         if (!this.canUseMultiShot()) {
             super.performRangedAttack(target, distanceFactor);

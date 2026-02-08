@@ -22,6 +22,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -196,7 +197,7 @@ public final class BastionGuardianShazhaoService {
             return null;
         }
 
-        var pool = guardianShazhao.get().activePool();
+        java.util.List<BastionTypeConfig.WeightedShazhao> pool = guardianShazhao.get().activePool();
         if (pool == null || pool.isEmpty()) {
             return null;
         }
@@ -204,7 +205,8 @@ public final class BastionGuardianShazhaoService {
         // 过滤满足 minTier 的条目，并按权重随机
         int totalWeight = 0;
         var eligible = new ArrayList<BastionTypeConfig.WeightedShazhao>();
-        for (var entry : pool) {
+        for (int i = 0; i < pool.size(); i++) {
+            BastionTypeConfig.WeightedShazhao entry = pool.get(i);
             if (entry == null) {
                 continue;
             }
@@ -223,7 +225,8 @@ public final class BastionGuardianShazhaoService {
 
         int roll = level.random.nextInt(totalWeight);
         int cumulative = 0;
-        for (var entry : eligible) {
+        for (int i = 0; i < eligible.size(); i++) {
+            BastionTypeConfig.WeightedShazhao entry = eligible.get(i);
             cumulative += entry.weight();
             if (roll < cumulative) {
                 try {
@@ -286,6 +289,12 @@ public final class BastionGuardianShazhaoService {
             if (BastionGuardianCombatRules.isGuardian(guardian)
                 && BastionGuardianCombatRules.isGuardian(target)) {
                 allied = BastionGuardianCombatRules.isSameBastion(guardian, target);
+            }
+            if (isFriendlyPlayerTarget(level, guardian, target)) {
+                // 友方玩家（owner/capturedBy）语义必须优先于 isAlliedTo：
+                // 即使原版阵营关系未标记 allied，也要在杀招入口强制视为友方，
+                // 防止友方落入敌方减益分支。
+                allied = true;
             }
 
             if (allied) {
@@ -375,6 +384,10 @@ public final class BastionGuardianShazhaoService {
             if (target.distanceToSqr(guardian) > radius * radius) {
                 continue;
             }
+            if (isFriendlyPlayerTarget(level, guardian, target)) {
+                // 魂道领域属于纯负面路径，owner 必须直接豁免。
+                continue;
+            }
             if (target.isAlliedTo(guardian)) {
                 continue;
             }
@@ -455,6 +468,10 @@ public final class BastionGuardianShazhaoService {
             if (target.distanceToSqr(guardian) > radius * radius) {
                 continue;
             }
+            if (isFriendlyPlayerTarget(level, guardian, target)) {
+                // 木道领域含减速与伤害，owner 在该路径下必须不受守卫负面影响。
+                continue;
+            }
             if (target.isAlliedTo(guardian)) {
                 continue;
             }
@@ -526,6 +543,10 @@ public final class BastionGuardianShazhaoService {
             if (target.distanceToSqr(guardian) > radius * radius) {
                 continue;
             }
+            if (isFriendlyPlayerTarget(level, guardian, target)) {
+                // 力道领域的击退/重力控制同属负面影响，对 owner 统一跳过。
+                continue;
+            }
             if (target.isAlliedTo(guardian)) {
                 continue;
             }
@@ -581,6 +602,18 @@ public final class BastionGuardianShazhaoService {
 
     private static String metaKey(String shazhaoId, String suffix) {
         return shazhaoId + "_" + suffix;
+    }
+
+    private static boolean isFriendlyPlayerTarget(ServerLevel level, Mob guardian, LivingEntity target) {
+        if (!(target instanceof Player player)) {
+            return false;
+        }
+        var bastionId = BastionGuardianData.getBastionId(guardian);
+        if (bastionId == null) {
+            return false;
+        }
+        BastionData bastion = BastionSavedData.get(level).getBastion(bastionId);
+        return bastion != null && bastion.isFriendlyTo(player.getUUID());
     }
 
     private static void applyRepel(Vec3 center, LivingEntity target, double strength) {

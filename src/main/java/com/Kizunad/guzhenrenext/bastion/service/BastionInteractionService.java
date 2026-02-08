@@ -745,6 +745,15 @@ public final class BastionInteractionService {
         double searchRadius = bastion.growthRadius();
         final UUID attackerId = attacker.getUUID();
 
+        // 详细说明：该路径会直接 setTarget(attacker)，属于“直设目标”入口。
+        // 若不在这里补齐友方判定，守卫可能绕过统一候选筛选逻辑，
+        // 将友方玩家（capturedBy owner）强制设为目标，导致 Witch 等守卫继续攻击友军。
+        // 因此在 setTarget 前增加 bastion.isFriendlyTo(attackerId) 硬过滤，
+        // 对友方直接短路；对非友方保持原有防御行为不变。
+        if (bastion.isFriendlyTo(attackerId)) {
+            return;
+        }
+
         level.getEntities(
             attacker,
             attacker.getBoundingBox().inflate(searchRadius),

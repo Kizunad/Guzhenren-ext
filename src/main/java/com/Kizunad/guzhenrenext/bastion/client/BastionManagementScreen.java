@@ -8,6 +8,7 @@ import com.Kizunad.guzhenrenext.bastion.menu.BastionManagementMenu;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.SolidPanel;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
+import com.Kizunad.tinyUI.controls.ScrollContainer;
 import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
@@ -26,7 +27,7 @@ public class BastionManagementScreen
     extends TinyUIContainerScreen<BastionManagementMenu> {
 
     private static final int WINDOW_WIDTH = 420;
-    private static final int WINDOW_HEIGHT = 300;
+    private static final int WINDOW_HEIGHT = 380;
     private static final int PADDING = 10;
     private static final int LABEL_HEIGHT = 14;
     private static final int LABEL_GAP = 4;
@@ -52,7 +53,9 @@ public class BastionManagementScreen
     private static final int BRANCH_LI = 4;
     private static final int NODE_LINE_SPACING = 2;
     private static final int DETAIL_SECTION_HEIGHT_MULTIPLIER = 4;
+    private static final int DETAIL_AREA_HEIGHT = LABEL_HEIGHT * 4 + LABEL_GAP * 3 + PADDING;
     private static final int TREE_INDENT_WIDTH = 12;
+    private static final int SCROLLBAR_MARGIN = 8;
 
     private final Theme theme = Theme.vanilla();
     private int currentTab = TAB_OVERVIEW;
@@ -194,19 +197,44 @@ public class BastionManagementScreen
         panel.addChild(branchLabel);
         y += LABEL_HEIGHT + PADDING;
 
+        // 计算滚动区域高度：预留详情区域（选中时）或底部边距
+        int scrollAreaHeight;
+        if (selectedNodeId != null) {
+            scrollAreaHeight = panel.getHeight() - y - DETAIL_AREA_HEIGHT;
+        } else {
+            scrollAreaHeight = panel.getHeight() - y - PADDING;
+        }
+
+        // 创建滚动容器
+        ScrollContainer scrollContainer = new ScrollContainer(theme);
+        scrollContainer.setFrame(0, y, panel.getWidth(), scrollAreaHeight);
+        panel.addChild(scrollContainer);
+
+        // 过滤当前分支的节点并计算内容高度
         java.util.List<BastionTalentNode> nodes = BastionTalentRegistry.getAllNodes();
+        java.util.List<BastionTalentNode> branchNodes = new java.util.ArrayList<>();
+        java.util.List<Integer> branchNodeIndices = new java.util.ArrayList<>();
         int nodeIndex = 0;
-        int listHeight = panel.getHeight() - y - BUTTON_HEIGHT - PADDING * 2;
-
         for (BastionTalentNode node : nodes) {
-            if (!matchesBranch(node, currentTalentBranch)) {
-                nodeIndex++;
-                continue;
+            if (matchesBranch(node, currentTalentBranch)) {
+                branchNodes.add(node);
+                branchNodeIndices.add(nodeIndex);
             }
+            nodeIndex++;
+        }
 
-            if (y + LABEL_HEIGHT > listHeight) {
-                break;
-            }
+        int contentHeight = branchNodes.size() * (LABEL_HEIGHT + NODE_LINE_SPACING);
+        int contentWidth = panel.getWidth() - SCROLLBAR_MARGIN;
+
+        // 创建内容面板
+        UIElement contentPanel = new UIElement() { };
+        contentPanel.setFrame(0, 0, contentWidth, Math.max(contentHeight, scrollAreaHeight));
+
+        // 添加节点按钮到内容面板
+        int nodeY = 0;
+        for (int i = 0; i < branchNodes.size(); i++) {
+            BastionTalentNode node = branchNodes.get(i);
+            final int idx = branchNodeIndices.get(i);
 
             String status = getNodeStatus(node);
             String prefix = switch (status) {
@@ -221,39 +249,39 @@ public class BastionManagementScreen
             int indent = depth * TREE_INDENT_WIDTH;
             String treePrefix = depth > 0 ? "§8└ " : "";
 
-            final int idx = nodeIndex;
             final String nodeId = node.id();
             Button nodeBtn = new Button(
                 Component.literal(treePrefix + prefix + node.displayName()),
                 theme
             );
-            nodeBtn.setFrame(indent, y, panel.getWidth() - BUTTON_WIDTH - PADDING - indent, LABEL_HEIGHT);
+            nodeBtn.setFrame(indent, nodeY, contentWidth - BUTTON_WIDTH - PADDING - indent, LABEL_HEIGHT);
             nodeBtn.setOnClick(() -> selectNode(nodeId));
-            panel.addChild(nodeBtn);
+            contentPanel.addChild(nodeBtn);
 
             if ("available".equals(status)) {
                 Button unlockBtn = new Button(Component.literal("§a解锁"), theme);
-                unlockBtn.setFrame(panel.getWidth() - BUTTON_WIDTH, y, BUTTON_WIDTH, LABEL_HEIGHT);
+                unlockBtn.setFrame(contentWidth - BUTTON_WIDTH, nodeY, BUTTON_WIDTH, LABEL_HEIGHT);
                 unlockBtn.setOnClick(() -> unlockNode(idx));
-                panel.addChild(unlockBtn);
+                contentPanel.addChild(unlockBtn);
             } else if ("insufficient_points".equals(status)) {
-                // 点数不足时显示灰色提示按钮
                 Button needPointsBtn = new Button(
                     Component.literal("§7需要" + node.cost() + "点"),
                     theme
                 );
-                needPointsBtn.setFrame(panel.getWidth() - BUTTON_WIDTH, y, BUTTON_WIDTH, LABEL_HEIGHT);
-                panel.addChild(needPointsBtn);
+                needPointsBtn.setFrame(contentWidth - BUTTON_WIDTH, nodeY, BUTTON_WIDTH, LABEL_HEIGHT);
+                contentPanel.addChild(needPointsBtn);
             }
 
-            y += LABEL_HEIGHT + NODE_LINE_SPACING;
-            nodeIndex++;
+            nodeY += LABEL_HEIGHT + NODE_LINE_SPACING;
         }
 
+        scrollContainer.setContent(contentPanel);
+
+        // 详情区域在滚动容器下方
         if (selectedNodeId != null) {
             BastionTalentNode selected = BastionTalentRegistry.getNode(selectedNodeId);
             if (selected != null) {
-                int detailY = panel.getHeight() - BUTTON_HEIGHT * DETAIL_SECTION_HEIGHT_MULTIPLIER;
+                int detailY = panel.getHeight() - DETAIL_AREA_HEIGHT + PADDING;
                 detailY = addLiteralLabel(panel, "§6选中：§f" + selected.displayName(), detailY);
                 detailY = addLiteralLabel(panel, "§7" + selected.description(), detailY);
                 detailY = addLiteralLabel(
@@ -261,7 +289,6 @@ public class BastionManagementScreen
                     "§e消耗：§f" + selected.cost() + " 点  §7(拥有: " + menu.getTalentPoints() + ")",
                     detailY
                 );
-                // 显示前置要求
                 if (!selected.prerequisites().isEmpty()) {
                     StringBuilder prereqText = new StringBuilder("§e前置：");
                     for (String prereq : selected.prerequisites()) {

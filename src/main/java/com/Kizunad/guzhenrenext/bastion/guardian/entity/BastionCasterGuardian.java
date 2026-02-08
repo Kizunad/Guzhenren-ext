@@ -1,5 +1,8 @@
 package com.Kizunad.guzhenrenext.bastion.guardian.entity;
 
+import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -8,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.level.Level;
@@ -72,6 +76,18 @@ public class BastionCasterGuardian extends Blaze implements RangedAttackMob {
     public void performRangedAttack(LivingEntity target, float distanceFactor) {
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
+        }
+        // 远程入口 owner 过滤：
+        // 即便目标已进入原版 RangedAttackGoal，本处仍需基于 bastion.isFriendlyTo(playerId)
+        // 做最终短路，防止友方玩家在火球/凋零头颅路径上承受负面效果。
+        if (target instanceof Player player) {
+            var bastionId = BastionGuardianData.getBastionId(this);
+            if (bastionId != null) {
+                BastionData bastion = BastionSavedData.get(serverLevel).getBastion(bastionId);
+                if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                    return;
+                }
+            }
         }
         long now = this.level().getGameTime();
         SpellType spell = this.chooseSpell(now);

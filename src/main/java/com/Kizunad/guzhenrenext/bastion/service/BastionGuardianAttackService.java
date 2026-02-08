@@ -144,14 +144,6 @@ public final class BastionGuardianAttackService {
     private static final java.util.Map<java.util.UUID, Long> MESSAGE_COOLDOWNS =
         new java.util.concurrent.ConcurrentHashMap<>();
 
-    // ===== 事件处理 =====
-
-    /**
-     * 处理生物伤害事件。
-     * <p>
-     * 当基地守卫对玩家造成伤害时，额外消耗玩家资源并施加 debuff。
-     * </p>
-     */
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent.Post event) {
         // 检查受害者是否为服务端玩家
@@ -161,21 +153,27 @@ public final class BastionGuardianAttackService {
         }
 
         // 检查攻击者是否为基地守卫
-        Entity source = event.getSource().getEntity();
-        if (source == null || !BastionGuardianData.isGuardian(source)) {
+        // 这里必须与 BastionGuardianCombatRules.resolveAttacker 语义对齐：
+        // 1) 直伤场景使用 source.getEntity()；
+        // 2) 间接伤害（如投射物）优先识别 owner；owner 为空时回退到 direct entity。
+        // 这样可保证“资源压制链路”在直伤与间接伤害下的友敌判定一致，
+        // 避免仅用 getEntity() 导致 owner 缺失时漏判，或与守卫互伤规则出现分叉行为。
+        Entity attacker = com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianCombatRules
+            .resolveAttacker(event.getSource());
+        if (attacker == null || !BastionGuardianData.isGuardian(attacker)) {
             return;
         }
 
         // 获取守卫转数（hasCompleteData 兜底：旧世界遗留守卫使用默认转数 1）
-        int tier = BastionGuardianData.getTier(source);
-        if (!BastionGuardianData.hasCompleteData(source)) {
+        int tier = BastionGuardianData.getTier(attacker);
+        if (!BastionGuardianData.hasCompleteData(attacker)) {
             LOGGER.warn("守卫 {} 数据不完整，使用默认转数 {}",
-                source.getUUID(), tier);
+                attacker.getUUID(), tier);
         }
 
         // 友方保护：如果玩家是基地主人/接管者，跳过资源消耗和 debuff
         if (player.level() instanceof ServerLevel serverLevel) {
-            java.util.UUID bastionId = BastionGuardianData.getBastionId(source);
+            java.util.UUID bastionId = BastionGuardianData.getBastionId(attacker);
             if (bastionId != null) {
                 BastionData bastion = BastionSavedData.get(serverLevel).getBastion(bastionId);
                 if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {

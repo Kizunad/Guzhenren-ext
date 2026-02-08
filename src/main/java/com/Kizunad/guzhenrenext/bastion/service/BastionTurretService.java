@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
+import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -67,7 +68,7 @@ public final class BastionTurretService {
 
             AABB box = new AABB(anchorPos).inflate(range);
             LivingEntity target = level
-                .getEntitiesOfClass(LivingEntity.class, box, e -> isHostileToBastion(e, bastion.id()))
+                .getEntitiesOfClass(LivingEntity.class, box, e -> isHostileToBastion(e, bastion, bastion.id()))
                 .stream()
                 .findFirst()
                 .orElse(null);
@@ -87,14 +88,24 @@ public final class BastionTurretService {
         }
     }
 
-    private static boolean isHostileToBastion(LivingEntity entity, UUID bastionId) {
+    private static boolean isHostileToBastion(LivingEntity entity, BastionData bastion, UUID bastionId) {
         if (entity == null || !entity.isAlive()) {
             return false;
         }
         if (entity instanceof Player player) {
-            return !player.isCreative();
+            if (player.isCreative()) {
+                return false;
+            }
+            BastionData.CaptureState captureState = bastion.captureState();
+            if (captureState != null && captureState.isCapturedBy(player.getUUID())) {
+                return false;
+            }
+            return true;
         }
-        // 非玩家：不属于该基地的守卫视为敌对（简化）。
+        // 非玩家：同基地守卫不视为敌对，避免炮台误伤己方守卫。
+        if (BastionGuardianData.belongsToBastion(entity, bastionId)) {
+            return false;
+        }
         return true;
     }
 }

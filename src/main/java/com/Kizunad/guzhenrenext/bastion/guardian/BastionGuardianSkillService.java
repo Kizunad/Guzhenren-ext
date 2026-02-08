@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.bastion.guardian;
 
 import com.Kizunad.guzhenrenext.bastion.BastionDao;
+import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import java.util.UUID;
 import java.util.List;
@@ -15,6 +17,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
@@ -401,6 +404,20 @@ public final class BastionGuardianSkillService {
         LivingEntity target = guardian.getTarget();
         if (target == null || !target.isAlive() || target.isRemoved()) {
             return;
+        }
+        // 技能入口 owner 过滤：
+        // guardian.getTarget() 可能来自原版 AI 或其他直设目标路径。
+        // 若这里不再基于 bastion.isFriendlyTo(playerId) 做一次硬过滤，
+        // 友方玩家会在技能分支继续吃到减益/伤害，形成与目标层语义不一致的漏口。
+        // 因此在统一技能入口短路，确保 owner 在技能路径下不受守卫负面影响。
+        if (target instanceof Player player) {
+            UUID bastionId = BastionGuardianData.getBastionId(guardian);
+            if (bastionId != null) {
+                BastionData bastion = BastionSavedData.get(level).getBastion(bastionId);
+                if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                    return;
+                }
+            }
         }
 
         // 按道途从技能池里选择一个技能释放
@@ -863,6 +880,16 @@ public final class BastionGuardianSkillService {
         }
 
         for (LivingEntity victim : victims) {
+            if (victim instanceof Player player) {
+                UUID bastionId = BastionGuardianData.getBastionId(guardian);
+                if (bastionId != null) {
+                    BastionData bastion = BastionSavedData.get(level).getBastion(bastionId);
+                    if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                        // 离道震荡波属于负面控制路径，owner 应与其他入口保持一致：直接跳过。
+                        continue;
+                    }
+                }
+            }
             if (BastionGuardianCombatRules.isGuardian(victim)
                 && !BastionGuardianCombatRules.canGuardianDamage(level, guardian, victim)) {
                 continue;

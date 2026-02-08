@@ -65,7 +65,20 @@ public final class BastionGuardianRuntimeService {
         if (bastionId == null) {
             return;
         }
-        BastionDao dao = resolveDao(level, bastionId);
+
+        BastionSavedData savedData = BastionSavedData.get(level);
+        BastionData bastion = savedData.getBastion(bastionId);
+        // 详细说明：守卫行为必须与基地有效状态保持一致。
+        // 当基地处于 SEALED / DESTROYED（或基地数据已被移除）时，守卫应立即停火，
+        // 防止状态切换后仍沿用旧目标继续攻击。
+        boolean active = bastion != null
+            && bastion.getEffectiveState(level.getGameTime()) == com.Kizunad.guzhenrenext.bastion.BastionState.ACTIVE;
+        if (!active) {
+            mob.setTarget(null);
+            return;
+        }
+
+        BastionDao dao = bastion.primaryDao();
         int tier = Math.max(Config.MIN_TIER, BastionGuardianData.getTier(mob));
         boolean elite = mob instanceof BastionWardenGuardian;
 
@@ -121,13 +134,30 @@ public final class BastionGuardianRuntimeService {
 
     private static void tickTargeting(ServerLevel level, Mob guardian) {
         LivingEntity current = guardian.getTarget();
-        if (current != null
-            && current.isAlive()
-            && !current.isRemoved()
-            && !(current instanceof ServerPlayer player
-            && (isIgnoredPlayer(player) || BastionGuardianData.isCapturedBy(guardian, player.getUUID())))) {
-            // 当前目标合法，保留
-            return;
+        if (current != null && current.isAlive() && !current.isRemoved()) {
+            boolean keepCurrentTarget = true;
+            if (current instanceof ServerPlayer player) {
+                // 详细说明：当前目标可能来自原版 AI（例如 Witch 的独立选敌），
+                // 若这里只校验 spectator/creative/capturedBy，会把“友方玩家”错误保留下来。
+                // 因此必须与候选筛选逻辑保持一致，补齐 bastion.isFriendlyTo(...) 硬过滤，
+                // 从目标“保留分支”直接短路，堵住目标层绕过漏洞。
+                if (isIgnoredPlayer(player)
+                    || BastionGuardianData.isCapturedBy(guardian, player.getUUID())) {
+                    keepCurrentTarget = false;
+                } else {
+                    java.util.UUID bastionId = BastionGuardianData.getBastionId(guardian);
+                    if (bastionId != null) {
+                        BastionData bastion = BastionSavedData.get(level).getBastion(bastionId);
+                        if (bastion != null && bastion.isFriendlyTo(player.getUUID())) {
+                            keepCurrentTarget = false;
+                        }
+                    }
+                }
+            }
+            if (keepCurrentTarget) {
+                // 当前目标合法，保留
+                return;
+            }
         }
 
         int range = (int) Math.round(guardian.getAttributeValue(Attributes.FOLLOW_RANGE));

@@ -341,6 +341,13 @@ public final class BastionAuraService {
      * @param playerPos 玩家位置
      */
     private static void applyAuraEffect(ServerPlayer player, BastionData bastion, BlockPos playerPos) {
+        // 友方过滤双保险：即使未来出现新的调用路径绕过 onPlayerTick 的列表预过滤，
+        // 这里也必须在进入任何道途特化光环逻辑前立即返回，
+        // 防止友方玩家误吃到智道减速/挖掘疲劳等负面效果。
+        if (bastion.isFriendlyTo(player.getUUID())) {
+            return;
+        }
+
         int tier = bastion.tier();
         BastionDao dao = bastion.primaryDao();
 
