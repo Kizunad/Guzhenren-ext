@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.bastion;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.blockentity.BastionReversalArrayBlockEntity;
+import com.Kizunad.guzhenrenext.bastion.blockentity.BastionWardingLanternBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -25,6 +26,15 @@ public final class BastionBlockEntities {
             () -> BlockEntityType.Builder.of(
                 BastionReversalArrayBlockEntity::new,
                 BastionBlocks.BASTION_REVERSAL_ARRAY.get()
+            ).build(null)
+        );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BastionWardingLanternBlockEntity>>
+        BASTION_WARDING_LANTERN = BLOCK_ENTITY_TYPES.register(
+            "bastion_warding_lantern",
+            () -> BlockEntityType.Builder.of(
+                BastionWardingLanternBlockEntity::new,
+                BastionBlocks.BASTION_WARDING_LANTERN.get()
             ).build(null)
         );
 

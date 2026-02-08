@@ -10,6 +10,7 @@ import com.Kizunad.guzhenrenext.bastion.block.BastionCoreBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionEnergyNodeBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionGuardianHatcheryBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
+import com.Kizunad.guzhenrenext.bastion.block.BastionWardingLanternBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionReversalArrayBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionPurificationArrayBlock;
 import com.Kizunad.guzhenrenext.bastion.block.BastionTurretBlock;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -108,6 +110,8 @@ public final class BastionBlocks {
         static final int AURA_NODE_LIGHT = 10;
         /** 反火外壳光照等级。 */
         static final int ANTI_FIRE_SHELL_LIGHT = 3;
+        /** 镇地灯光照等级。 */
+        static final int WARDING_LANTERN_LIGHT = 14;
 
         private BlockProperties() {
             // 工具类
@@ -227,6 +231,16 @@ public final class BastionBlocks {
         .requiresCorrectToolForDrops()
         .lightLevel(state -> BlockProperties.ANTI_FIRE_SHELL_LIGHT);
 
+    /**
+     * 镇地灯属性：中等硬度，金属质感，亮度较高，不可被活塞推动。
+     */
+    private static final BlockBehaviour.Properties WARDING_LANTERN_PROPERTIES = BlockBehaviour.Properties.of()
+        .strength(BlockProperties.NODE_HARDNESS, BlockProperties.NODE_BLAST_RESISTANCE)
+        .sound(SoundType.LANTERN)
+        .requiresCorrectToolForDrops()
+        .lightLevel(state -> BlockProperties.WARDING_LANTERN_LIGHT)
+        .pushReaction(PushReaction.BLOCK);
+
     // ===== 方块注册 =====
 
     /**
@@ -335,6 +349,14 @@ public final class BastionBlocks {
     public static final DeferredHolder<Block, BastionAntiFireShellBlock> BASTION_ANTI_FIRE_SHELL = BLOCKS.register(
         "bastion_anti_fire_shell",
         () -> new BastionAntiFireShellBlock(ANTI_FIRE_SHELL_PROPERTIES)
+    );
+
+    /**
+     * 镇地灯方块：用于标记/绑定基地。
+     */
+    public static final DeferredHolder<Block, BastionWardingLanternBlock> BASTION_WARDING_LANTERN = BLOCKS.register(
+        "bastion_warding_lantern",
+        () -> new BastionWardingLanternBlock(WARDING_LANTERN_PROPERTIES)
     );
 
     // ===== 物品注册（方块物品） =====
@@ -485,6 +507,12 @@ public final class BastionBlocks {
             "bastion_anti_fire_shell",
             2
         )
+    );
+
+    /** 镇地灯方块物品。 */
+    public static final DeferredHolder<Item, BlockItem> BASTION_WARDING_LANTERN_ITEM = ITEMS.register(
+        "bastion_warding_lantern",
+        () -> new BlockItem(BASTION_WARDING_LANTERN.get(), new Item.Properties())
     );
 
     /** 侦查道具，用于侦测附近基地信息。 */

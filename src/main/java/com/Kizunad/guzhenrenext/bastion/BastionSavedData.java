@@ -58,6 +58,13 @@ public class BastionSavedData extends SavedData {
     private static final long CHUNK_MASK = 0xFFFFFFFFL;
     /** 高位偏移量（z 坐标存储在高 32 位）。 */
     private static final int HIGH_BITS_SHIFT = 32;
+    /** 镇地灯保护半径（格）。 */
+    private static final int LANTERN_PROTECTION_RADIUS = 6;
+    /** 镇地灯保护半径平方（distSqr 比较值）。 */
+    private static final long LANTERN_PROTECTION_RADIUS_SQR =
+        (long) LANTERN_PROTECTION_RADIUS * LANTERN_PROTECTION_RADIUS;
+    /** 镇地灯最小可生效资源。 */
+    private static final double LANTERN_MIN_RESOURCE = 1.0D;
 
     /** 整个数据结构的编解码器。 */
     private static final Codec<Map<UUID, BastionData>> BASTIONS_CODEC =
@@ -119,6 +126,15 @@ public class BastionSavedData extends SavedData {
      * MVP：先仅用于“最小间距”校验与数量统计辅助，后续再扩展为独立的 anchorFrontier。</p>
      */
     private final Map<UUID, java.util.Set<BlockPos>> anchorCache = new HashMap<>();
+
+    /**
+     * 镇地灯运行时缓存（不持久化）。
+     * <p>
+     * 结构：bastionId -> (chunkPosLong -> 该 chunk 内灯笼坐标集合)。
+     * 仅用于扩张期快速过滤，禁止写入 NBT。
+     * </p>
+     */
+    private final Map<UUID, Map<Long, java.util.Set<BlockPos>>> lanternCache = new HashMap<>();
 
     /**
      * Anchor 自动生成冷却（不持久化）。
@@ -573,6 +589,12 @@ public class BastionSavedData extends SavedData {
         return chunkX | (chunkZ << HIGH_BITS_SHIFT);
     }
 
+    private static long chunkPosToLong(int chunkX, int chunkZ) {
+        long chunkXLong = (long) chunkX & CHUNK_MASK;
+        long chunkZLong = (long) chunkZ & CHUNK_MASK;
+        return chunkXLong | (chunkZLong << HIGH_BITS_SHIFT);
+    }
+
     /**
      * 将基地标记为已销毁并安排清理。
      *
@@ -750,6 +772,7 @@ public class BastionSavedData extends SavedData {
         frontierCache.remove(bastionId);
         nodeCache.remove(bastionId);
         anchorCache.remove(bastionId);
+        lanternCache.remove(bastionId);
         nextAnchorTryTick.remove(bastionId);
 
         // Round 4.2：清理孵化巢冷却缓存，避免内存泄露。
@@ -777,6 +800,104 @@ public class BastionSavedData extends SavedData {
         if (changed) {
             setDirty();
         }
+    }
+
+    /**
+     * 将镇地灯加入运行时缓存。
+     * <p>
+     * 说明：该缓存仅用于扩张候选过滤，不持久化。
+     * </p>
+     *
+     * @param bastionId 镇地灯归属基地 ID
+     * @param pos       镇地灯坐标
+     */
+    public void addLanternToCache(UUID bastionId, BlockPos pos) {
+        if (bastionId == null || pos == null) {
+            return;
+        }
+        Map<Long, java.util.Set<BlockPos>> byChunk =
+            lanternCache.computeIfAbsent(bastionId, k -> new HashMap<>());
+        long chunkKey = chunkPosToLong(pos);
+        byChunk.computeIfAbsent(chunkKey, k -> new java.util.HashSet<>()).add(pos.immutable());
+    }
+
+    /**
+     * 将镇地灯从运行时缓存移除。
+     *
+     * @param bastionId 镇地灯归属基地 ID
+     * @param pos       镇地灯坐标
+     */
+    public void removeLanternFromCache(UUID bastionId, BlockPos pos) {
+        if (bastionId == null || pos == null) {
+            return;
+        }
+        Map<Long, java.util.Set<BlockPos>> byChunk = lanternCache.get(bastionId);
+        if (byChunk == null || byChunk.isEmpty()) {
+            return;
+        }
+
+        long chunkKey = chunkPosToLong(pos);
+        java.util.Set<BlockPos> lanterns = byChunk.get(chunkKey);
+        if (lanterns != null) {
+            lanterns.remove(pos);
+            if (lanterns.isEmpty()) {
+                byChunk.remove(chunkKey);
+            }
+        }
+        if (byChunk.isEmpty()) {
+            lanternCache.remove(bastionId);
+        }
+    }
+
+    /**
+     * 检查目标位置是否会被基地镇地灯保护。
+     * <p>
+     * 只检查目标位置所在 chunk 及其 3x3 相邻 chunk 内的灯笼；
+     * 保护半径固定 6 格（distSqr <= 36）。
+     * </p>
+     * <p>
+     * 当基地资源不足 1.0 时，视为无法触发镇地灯保护并返回 false。
+     * 资源扣减由调用方在“成功拦截扩张”后统一处理。
+     * </p>
+     *
+     * @param bastionId 基地 ID
+     * @param targetPos 目标扩张坐标
+     * @return true 表示存在可生效的镇地灯保护
+     */
+    public boolean isProtectedByLantern(UUID bastionId, BlockPos targetPos) {
+        if (bastionId == null || targetPos == null) {
+            return false;
+        }
+
+        BastionData bastion = bastions.get(bastionId);
+        if (bastion == null
+                || bastion.state() == BastionState.DESTROYED
+                || bastion.resourcePool() < LANTERN_MIN_RESOURCE) {
+            return false;
+        }
+
+        Map<Long, java.util.Set<BlockPos>> byChunk = lanternCache.get(bastionId);
+        if (byChunk == null || byChunk.isEmpty()) {
+            return false;
+        }
+
+        int baseChunkX = targetPos.getX() >> CHUNK_SHIFT;
+        int baseChunkZ = targetPos.getZ() >> CHUNK_SHIFT;
+        for (int offsetX = -1; offsetX <= 1; offsetX++) {
+            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+                long chunkKey = chunkPosToLong(baseChunkX + offsetX, baseChunkZ + offsetZ);
+                java.util.Set<BlockPos> lanterns = byChunk.get(chunkKey);
+                if (lanterns == null || lanterns.isEmpty()) {
+                    continue;
+                }
+                for (BlockPos lanternPos : lanterns) {
+                    if (lanternPos.distSqr(targetPos) <= LANTERN_PROTECTION_RADIUS_SQR) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     // ===== 回合2：连通性/衰败 API（运行时） =====

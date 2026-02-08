@@ -56,8 +56,20 @@ public final class BastionExpansionService {
         /** Anchor 采样随机扰动常量（用于与菌毯扩张的随机序列错开）。 */
         static final int ANCHOR_RANDOM_SALT = 31;
 
+        /** 镇地灯成功拦截一次扩张尝试的资源消耗。 */
+        static final double LANTERN_BLOCK_COST = 1.0D;
+
         private Constants() {
         }
+    }
+
+    /**
+     * 扩张候选查询结果。
+     *
+     * @param bastion  可能已扣减镇地灯消耗后的基地快照
+     * @param candidate 最终可用候选；若为 null 表示本轮无可用位置
+     */
+    private record ExpansionCandidateResult(BastionData bastion, BlockPos candidate) {
     }
 
     // ===== 主扩张逻辑 =====
@@ -123,7 +135,16 @@ public final class BastionExpansionService {
                 break;
             }
 
-            BlockPos candidate = findExpansionCandidate(level, savedData, current, myceliumConfig);
+            BastionData persisted = savedData.getBastion(current.id());
+            if (persisted == null || !persisted.equals(current)) {
+                // 让 isProtectedByLantern 读取到与本次 tick 一致的资源池快照。
+                savedData.updateBastion(current);
+            }
+
+            ExpansionCandidateResult candidateResult =
+                findExpansionCandidate(level, savedData, current, myceliumConfig);
+            current = candidateResult.bastion();
+            BlockPos candidate = candidateResult.candidate();
             if (candidate == null) {
                 LOGGER.info("基地 {} 扩张中断: 找不到有效候选位置 (i={})", bastion.id(), i);
                 break;
@@ -144,11 +165,14 @@ public final class BastionExpansionService {
             }
         }
 
-        if (expandedCount > 0) {
+        if (!current.equals(bastion)) {
             // 修剪 frontier 缓存，移除已无邻接可扩张位置的节点
             pruneFrontierCache(level, savedData, current, myceliumConfig);
             savedData.updateBastion(current);
-            LOGGER.debug("基地 {} 扩张了 {} 个节点", bastion.id(), expandedCount);
+            LOGGER.debug("基地 {} 扩张后状态更新: expandedCount={}, resourcePool={} -> {}",
+                bastion.id(), expandedCount,
+                String.format("%.2f", bastion.resourcePool()),
+                String.format("%.2f", current.resourcePool()));
 
             // 扩张可能改变 totalNodes -> auraRadius（缩圈系数），按阈值同步
             BastionNetworkHandler.syncIfAuraRadiusChanged(level, current);
@@ -426,18 +450,19 @@ public final class BastionExpansionService {
      * @param expansionConfig 扩张配置
      * @return 候选位置，如果没有合适位置则返回 null
      */
-    private static BlockPos findExpansionCandidate(
+    private static ExpansionCandidateResult findExpansionCandidate(
             ServerLevel level,
             BastionSavedData savedData,
             BastionData bastion,
             BastionTypeConfig.MyceliumConfig expansionConfig) {
         // 使用 growthCursor 作为伪随机种子
         Random random = new Random(bastion.id().hashCode() ^ bastion.growthCursor());
+        BastionData current = bastion;
 
         // 从 frontier 缓存获取边界节点
         java.util.Set<BlockPos> frontier = savedData.getFrontier(bastion.id());
         if (frontier.isEmpty()) {
-            return null;
+            return new ExpansionCandidateResult(current, null);
         }
 
         // 获取步长配置
@@ -451,6 +476,7 @@ public final class BastionExpansionService {
         List<BlockPos> candidates = new ArrayList<>();
         int rejectedOutOfRadius = 0;
         int rejectedNotReplaceable = 0;
+        int rejectedByLantern = 0;
         for (int i = 0; i < Constants.CANDIDATE_SAMPLE_COUNT && !frontierList.isEmpty(); i++) {
             BlockPos sourceNode = frontierList.get(random.nextInt(frontierList.size()));
             Direction dir = selectExpansionDirection(random);
@@ -470,19 +496,25 @@ public final class BastionExpansionService {
                 rejectedNotReplaceable++;
                 continue;
             }
+            if (current.resourcePool() >= Constants.LANTERN_BLOCK_COST
+                    && savedData.isProtectedByLantern(current.id(), candidate)) {
+                rejectedByLantern++;
+                current = current.withResourcePool(current.resourcePool() - Constants.LANTERN_BLOCK_COST);
+                continue;
+            }
             candidates.add(candidate);
         }
 
         if (candidates.isEmpty()) {
             LOGGER.info("基地 {} findExpansionCandidate 失败: "
-                + "frontier.size={}, spacing={}, 拒绝原因: 超出半径={}, 不可替换={}",
+                + "frontier.size={}, spacing={}, 拒绝原因: 超出半径={}, 不可替换={}, 灯笼拦截={}",
                 bastion.id(), frontier.size(), spacing,
-                rejectedOutOfRadius, rejectedNotReplaceable);
-            return null;
+                rejectedOutOfRadius, rejectedNotReplaceable, rejectedByLantern);
+            return new ExpansionCandidateResult(current, null);
         }
 
         // 从候选中随机选择一个
-        return candidates.get(random.nextInt(candidates.size()));
+        return new ExpansionCandidateResult(current, candidates.get(random.nextInt(candidates.size())));
     }
 
     /**
@@ -548,6 +580,10 @@ public final class BastionExpansionService {
      * <p>
      * 注意：稀疏化由 findExpansionCandidate 的步长控制，此方法仅检查基本约束。
      * </p>
+     * <p>
+     * 表面爬行约束：扩张目标位置必须邻接至少一个坚实表面（地/墙/天花板），
+     * 使菌毯像地毯一样贴着表面生长，而非在空气中随机填充。
+     * </p>
      */
     private static boolean isValidExpansionTarget(
             ServerLevel level,
@@ -566,11 +602,41 @@ public final class BastionExpansionService {
             return false;
         }
 
-        // 允许空中扩张：移除贴地约束，使基地可以像垂髫一样在空中繁衍
+        // 表面爬行约束：扩张位置必须邻接至少一个坚实表面。
+        // 遍历六个方向，检查相邻方块是否对当前位置提供坚实表面支撑。
+        // 这使菌毯贴着地面/墙壁/天花板生长，而非在空中随机扩散。
+        if (!hasAdjacentSolidSurface(level, pos)) {
+            return false;
+        }
 
         // 检查是否已被其他基地占用
         // （非重叠约束由 BastionSavedData.canPlaceBastion 在创建时保证）
         return true;
+    }
+
+    /**
+     * 检查位置是否邻接至少一个坚实表面。
+     * <p>
+     * 遍历六个方向，检查相邻方块是否对当前位置提供 FULL 类型的坚实表面支撑。
+     * 例如：下方方块的 UP 面坚实 = 地面；上方方块的 DOWN 面坚实 = 天花板；
+     * 侧面方块的相应面坚实 = 墙壁。
+     * </p>
+     *
+     * @param level 服务端世界
+     * @param pos   待检查的位置
+     * @return 如果至少有一个方向邻接坚实表面则返回 true
+     */
+    private static boolean hasAdjacentSolidSurface(ServerLevel level, BlockPos pos) {
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockState neighborState = level.getBlockState(neighborPos);
+            // 检查邻居方块面向当前位置的那一面是否坚实
+            // dir.getOpposite() 是邻居方块朝向 pos 的面
+            if (neighborState.isFaceSturdy(level, neighborPos, dir.getOpposite())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
