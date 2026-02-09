@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.bastion;
 import com.Kizunad.guzhenrenext.bastion.service.BastionTalentEffectService;
 import com.Kizunad.guzhenrenext.bastion.talent.BastionTalentData;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
@@ -184,6 +185,25 @@ public record BastionData(
             .optionalFieldOf("modifiers", java.util.List.of())
             .xmap(java.util.Set::copyOf, java.util.List::copyOf);
 
+    /**
+     * nodes_by_tier 的键编解码器。
+     * <p>
+     * NBT 的 CompoundTag 约束：Map 的 key 必须是字符串，不能直接使用 int。
+     * 因此这里采用字符串键进行存档，并在读取时安全转换为 Integer。
+     * 若遇到非法键（例如历史异常数据），返回 DataResult.error，由上层 resultOrPartial 记录日志，避免崩溃。
+     * </p>
+     */
+    private static final Codec<Integer> NODES_BY_TIER_KEY_CODEC = Codec.STRING.comapFlatMap(
+        value -> {
+            try {
+                return DataResult.success(Integer.parseInt(value));
+            } catch (NumberFormatException exception) {
+                return DataResult.error(() -> "nodes_by_tier 包含非整数键: " + value);
+            }
+        },
+        Object::toString
+    );
+
     /** 默认最大转数（基础配置，可通过 BastionTypeConfig 扩展到 9）。 */
     public static final int DEFAULT_MAX_TIER = 9;
 
@@ -276,7 +296,7 @@ public record BastionData(
             Codec.INT.fieldOf("tier").forGetter(BastionData::tier),
             Codec.DOUBLE.fieldOf("evolution_progress").forGetter(BastionData::evolutionProgress),
             Codec.INT.fieldOf("total_nodes").forGetter(BastionData::totalNodes),
-            Codec.unboundedMap(Codec.INT, Codec.INT).fieldOf("nodes_by_tier")
+            Codec.unboundedMap(NODES_BY_TIER_KEY_CODEC, Codec.INT).fieldOf("nodes_by_tier")
                 .forGetter(BastionData::nodesByTier),
             Codec.INT.fieldOf("growth_radius").forGetter(BastionData::growthRadius),
             Codec.LONG.fieldOf("growth_cursor").forGetter(BastionData::growthCursor),

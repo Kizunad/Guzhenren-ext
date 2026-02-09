@@ -700,7 +700,9 @@ public class ExampleGameTests {
             method.invoke(null, player, bastion, playerPos);
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
-            String causeMessage = cause == null ? "<no-cause>" : cause.getClass().getSimpleName() + ": " + cause.getMessage();
+            String causeMessage = cause == null
+                ? "<no-cause>"
+                : cause.getClass().getSimpleName() + ": " + cause.getMessage();
             throw new ReflectiveOperationException("applyAuraEffect 业务异常: " + causeMessage, e);
         }
     }

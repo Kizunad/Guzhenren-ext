@@ -33,8 +33,10 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 @GameTestHolder("guzhenrenext")
 public class BastionExpansionTests {
 
-    /** 通用模板名。 */
+    /** 模板命名空间。 */
     private static final String TEMPLATE_NAMESPACE = "minecraft";
+
+    /** 通用模板名。 */
     private static final String EMPTY_TEMPLATE = "empty";
 
     /** 每秒 tick 数。 */
@@ -54,6 +56,39 @@ public class BastionExpansionTests {
 
     /** 地基半宽。 */
     private static final int FLOOR_HALF_WIDTH = 8;
+
+    /** 大范围清空半径（悬空场景）。 */
+    private static final int SURFACE_CLEAR_RADIUS = 12;
+
+    /** 首轮水平候选偏移（用于邻域稳定化清空）。 */
+    private static final int SURFACE_CARDINAL_OFFSET = 4;
+
+    /** 首轮垂直候选偏移（用于邻域稳定化清空）。 */
+    private static final int SURFACE_VERTICAL_OFFSET = 2;
+
+    /** 常规资源池（用于非资源耗尽场景）。 */
+    private static final double DEFAULT_RESOURCE_POOL = 20.0D;
+
+    /** 资源耗尽后的资源池值。 */
+    private static final double DEPLETED_RESOURCE_POOL = 0.0D;
+
+    /** 灯笼保护场景每 tick 最大扩张次数。 */
+    private static final int LANTERN_MAX_PER_TICK = 3;
+
+    /** 表面爬行场景扩张间距。 */
+    private static final int SURFACE_SPACING = 4;
+
+    /** 最小扩张配置中的最大半径。 */
+    private static final int TEST_CONFIG_MAX_RADIUS = 4;
+
+    /** 最小扩张配置中的层级倍率。 */
+    private static final double TEST_CONFIG_TIER_MULTIPLIER = 1.0D;
+
+    /** 悬空断言扫描的最低高度偏移。 */
+    private static final int SURFACE_SCAN_MIN_Y_OFFSET = -2;
+
+    /** 悬空断言扫描的最高高度偏移。 */
+    private static final int SURFACE_SCAN_MAX_Y_OFFSET = 2;
 
     /** 测试类型 ID：表面爬行。 */
     private static final String TEST_TYPE_SURFACE = "test_expansion_surface";
@@ -81,19 +116,34 @@ public class BastionExpansionTests {
             TEST_TYPE_SURFACE,
             0.0D,
             1,
-            2
+            SURFACE_SPACING
         );
         BastionTypeManager.register(testType);
 
         try {
-            placeCore(helper, CORE_REL);
-            // 封住上下方向，避免垂直候选因为“贴核心面”而误通过。
-            helper.setBlock(CORE_REL.above(), Blocks.STONE);
-            helper.setBlock(CORE_REL.below(), Blocks.STONE);
+            // 清空较大体积，避免模板结构中的方块为候选位置提供“邻接坚实面”。
+            // 注意：本用例故意不放置核心方块本体，只验证扩张候选是否会在纯空气中被拒绝。
+            clearCubeToAir(helper, CORE_REL, SURFACE_CLEAR_RADIUS);
+            // 关键稳定化：额外清空“首轮可能候选点及其邻域”，
+            // 避免模板边界残留方块为候选位提供附着面，导致偶发扩张成功。
+            clearCubeToAir(helper, CORE_REL.relative(Direction.EAST, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.WEST, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.SOUTH, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.NORTH, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.UP, SURFACE_VERTICAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.DOWN, SURFACE_VERTICAL_OFFSET), 1);
 
             ServerLevel level = helper.getLevel();
             BastionSavedData savedData = BastionSavedData.get(level);
-            BastionData bastion = createBastion(helper, level, TEST_TYPE_SURFACE, 20.0D);
+            BastionData bastion = createBastion(helper, level, TEST_TYPE_SURFACE, DEFAULT_RESOURCE_POOL);
+            // 二次清空，避免初始化边界时引入的任何临时方块影响“纯空气场”前提。
+            clearCubeToAir(helper, CORE_REL, SURFACE_CLEAR_RADIUS);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.EAST, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.WEST, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.SOUTH, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.NORTH, SURFACE_CARDINAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.UP, SURFACE_VERTICAL_OFFSET), 1);
+            clearCubeToAir(helper, CORE_REL.relative(Direction.DOWN, SURFACE_VERTICAL_OFFSET), 1);
 
             int expanded = BastionExpansionService.tryExpand(level, savedData, bastion, level.getGameTime());
             helper.assertValueEqual(expanded, 0, "悬空场景下不应生成菌毯");
@@ -119,7 +169,7 @@ public class BastionExpansionTests {
         BastionTypeConfig testType = createExpansionTestType(
             TEST_TYPE_LANTERN,
             0.0D,
-            3,
+            LANTERN_MAX_PER_TICK,
             1
         );
         BastionTypeManager.register(testType);
@@ -130,7 +180,7 @@ public class BastionExpansionTests {
 
             ServerLevel level = helper.getLevel();
             BastionSavedData savedData = BastionSavedData.get(level);
-            BastionData bastion = createBastion(helper, level, TEST_TYPE_LANTERN, 20.0D);
+            BastionData bastion = createBastion(helper, level, TEST_TYPE_LANTERN, DEFAULT_RESOURCE_POOL);
 
             BlockPos lanternRel = CORE_REL.relative(Direction.EAST, 2);
             BlockPos lanternAbs = helper.absolutePos(lanternRel);
@@ -189,7 +239,7 @@ public class BastionExpansionTests {
             helper.assertTrue(firstProtected, "资源池=1 时，第一次触发应被镇地灯拦截");
 
             // 模拟一次成功拦截后的资源扣减（与扩张服务中的语义一致：每次拦截消耗 1 点资源）。
-            BastionData depleted = bastion.withResourcePool(0.0D);
+            BastionData depleted = bastion.withResourcePool(DEPLETED_RESOURCE_POOL);
             savedData.updateBastion(depleted);
 
             boolean protectedAfterDepletion = savedData.isProtectedByLantern(depleted.id(), probeTargetAbs);
@@ -229,6 +279,19 @@ public class BastionExpansionTests {
     }
 
     /**
+     * 将以中心点为原点的立方体区域清空为空气。
+     */
+    private static void clearCubeToAir(GameTestHelper helper, BlockPos center, int radius) {
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    helper.setBlock(center.offset(x, y, z), Blocks.AIR);
+                }
+            }
+        }
+    }
+
+    /**
      * 创建并注册测试用基地数据。
      */
     private static BastionData createBastion(
@@ -258,7 +321,7 @@ public class BastionExpansionTests {
     private static void assertNoMyceliumAround(GameTestHelper helper, BlockPos centerAbs, int radius) {
         ServerLevel level = helper.getLevel();
         for (int x = -radius; x <= radius; x++) {
-            for (int y = -2; y <= 2; y++) {
+            for (int y = SURFACE_SCAN_MIN_Y_OFFSET; y <= SURFACE_SCAN_MAX_Y_OFFSET; y++) {
                 for (int z = -radius; z <= radius; z++) {
                     BlockPos pos = centerAbs.offset(x, y, z);
                     if (level.getBlockState(pos).is(BastionBlocks.BASTION_NODE.get())) {
@@ -307,8 +370,8 @@ public class BastionExpansionTests {
             + "\"expansion\":{"
             + "\"mycelium\":{"
             + "\"base_cost\":" + baseCost + ","
-            + "\"tier_multiplier\":1.0,"
-            + "\"max_radius\":16,"
+            + "\"tier_multiplier\":" + TEST_CONFIG_TIER_MULTIPLIER + ","
+            + "\"max_radius\":" + TEST_CONFIG_MAX_RADIUS + ","
             + "\"max_per_tick\":" + maxPerTick + ","
             + "\"spacing\":" + spacing
             + "}"

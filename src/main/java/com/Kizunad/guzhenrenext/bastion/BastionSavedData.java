@@ -2,10 +2,12 @@ package com.Kizunad.guzhenrenext.bastion;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.bastion.energy.BastionEnergyType;
+import com.Kizunad.guzhenrenext.bastion.territory.DaoMarkData;
 import com.mojang.serialization.Codec;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -38,15 +40,15 @@ public class BastionSavedData extends SavedData {
     /**
      * 菌毯归属索引（posAsLong -> bastionId）。
      * <p>
-     * 设计说明：
-     * <ul>
-     *     <li>Key 使用 {@link BlockPos#asLong()} 的十进制字符串：NBT 的 CompoundTag key 只能是 String。
-     *     十进制便于排查与日志定位；也避免引入额外编码约定（如 hex）。</li>
-     *     <li>Value 使用 UUID 字符串：与本文件中 bastions 的 UUID 编解码风格一致。</li>
-     * </ul>
+     * @deprecated 已迁移至 {@link #territory} (TAG_TERRITORY_DATA)。
+     * 仅在数据迁移时读取，不再写入。
      * </p>
      */
+    @Deprecated
     private static final String TAG_MYCELIUM_OWNER_INDEX = "mycelium_owner_index";
+
+    /** 仙窍领地数据（chunk-based）。 */
+    private static final String TAG_TERRITORY_DATA = "territory_data";
 
     /** Anchor 归属索引（posAsLong -> bastionId）。 */
     private static final String TAG_ANCHOR_OWNER_INDEX = "anchor_owner_index";
@@ -65,6 +67,10 @@ public class BastionSavedData extends SavedData {
         (long) LANTERN_PROTECTION_RADIUS * LANTERN_PROTECTION_RADIUS;
     /** 镇地灯最小可生效资源。 */
     private static final double LANTERN_MIN_RESOURCE = 1.0D;
+    /** 旧存档迁移时，道痕初始值上限。 */
+    private static final float MAX_INITIAL_MARK = 1.0F;
+    /** 旧存档迁移时，每个旧菌毯方块折算的道痕值。 */
+    private static final float MARK_PER_OLD_BLOCK = 0.05F;
 
     /** 整个数据结构的编解码器。 */
     private static final Codec<Map<UUID, BastionData>> BASTIONS_CODEC =
@@ -78,13 +84,9 @@ public class BastionSavedData extends SavedData {
 
     // ===== 回合2.1.1：归属索引（持久化） =====
 
-    /**
-     * 菌毯归属索引：key=BlockPos.asLong，value=基地 UUID。
-     * <p>
-     * 仅用于“精确坐标命中”的快速归属判断；当索引缺失时会回退到最近核心的旧逻辑。
-     * </p>
-     */
-    private final Map<Long, UUID> myceliumOwnerIndex = new HashMap<>();
+    /** 仙窍领地数据（替代原有的菌毯索引）。 */
+    private final com.Kizunad.guzhenrenext.bastion.territory.ApertureTerritory territory =
+        new com.Kizunad.guzhenrenext.bastion.territory.ApertureTerritory();
 
     /**
      * Anchor 归属索引：key=BlockPos.asLong，value=基地 UUID。
@@ -171,12 +173,25 @@ public class BastionSavedData extends SavedData {
      */
     private final Map<UUID, ConnectivityRuntime> connectivityRuntimes = new HashMap<>();
 
+
+    /**
+     * 区块级衰败倒计时（按基地）。
+     * <p>
+     * key=chunkKey（{@link net.minecraft.world.level.ChunkPos#asLong(int, int)}），value=剩余 tick。
+     * 运行时缓存，不写入 NBT。
+     * </p>
+     */
+    private final Map<UUID, Map<Long, Integer>> chunkDecayTicks = new HashMap<>();
+
     /**
      * 断连菌毯的衰败倒计时（按基地）。
      * <p>
      * key=菌毯位置，value=剩余 tick。不写入 NBT。
      * </p>
+     *
+     * @deprecated 将被区块级衰败缓存替代，保留用于兼容过渡。
      */
+    @Deprecated
     private final Map<UUID, Map<BlockPos, Integer>> myceliumDecayTicks = new HashMap<>();
 
     // ===== 回合3：能源挂载运行时缓存（不持久化） =====
@@ -243,8 +258,73 @@ public class BastionSavedData extends SavedData {
             });
         }
 
+        // 读取领地数据（新格式）
+        if (tag.contains(TAG_TERRITORY_DATA, Tag.TAG_COMPOUND)) {
+            CompoundTag territoryTag = tag.getCompound(TAG_TERRITORY_DATA);
+            com.Kizunad.guzhenrenext.bastion.territory.ApertureTerritory.CODEC
+                .parse(NbtOps.INSTANCE, territoryTag)
+                .resultOrPartial(LOGGER::error)
+                .ifPresent(loadedTerritory -> {
+                    loadedTerritory.getAllOwners().forEach(data.territory::setOwner);
+                    loadedTerritory.getAllDaoMarks().forEach(data.territory::setDaoMarks);
+                });
+        } else if (tag.contains(TAG_MYCELIUM_OWNER_INDEX, Tag.TAG_COMPOUND)) {
+            LOGGER.info("正在迁移 BastionSavedData：从 BlockPos 索引迁移至 ApertureTerritory...");
+            Map<Long, UUID> oldIndex = new HashMap<>();
+            readOwnerIndexIfPresent(tag, TAG_MYCELIUM_OWNER_INDEX, oldIndex);
+
+            Map<Long, Map<UUID, Integer>> chunkOwnerCounts = new HashMap<>();
+            for (Map.Entry<Long, UUID> entry : oldIndex.entrySet()) {
+                long chunkKey = chunkPosToLong(BlockPos.of(entry.getKey()));
+                Map<UUID, Integer> ownerCounts = chunkOwnerCounts.computeIfAbsent(chunkKey, key -> new HashMap<>());
+                UUID ownerId = entry.getValue();
+                ownerCounts.put(ownerId, ownerCounts.getOrDefault(ownerId, 0) + 1);
+            }
+
+            int migratedChunkCount = 0;
+            for (Map.Entry<Long, Map<UUID, Integer>> chunkEntry : chunkOwnerCounts.entrySet()) {
+                long chunkKey = chunkEntry.getKey();
+                UUID selectedOwnerId = null;
+                int selectedCount = 0;
+                for (Map.Entry<UUID, Integer> ownerCountEntry : chunkEntry.getValue().entrySet()) {
+                    UUID candidateOwnerId = ownerCountEntry.getKey();
+                    int candidateCount = ownerCountEntry.getValue();
+                    if (selectedOwnerId == null
+                        || candidateCount > selectedCount
+                        || (candidateCount == selectedCount
+                            && candidateOwnerId.toString().compareTo(selectedOwnerId.toString()) < 0)) {
+                        selectedOwnerId = candidateOwnerId;
+                        selectedCount = candidateCount;
+                    }
+                }
+
+                BastionData ownerBastion = data.getBastion(selectedOwnerId);
+                if (ownerBastion == null || ownerBastion.state() == BastionState.DESTROYED) {
+                    continue;
+                }
+
+                data.territory.setOwner(chunkKey, selectedOwnerId);
+                float mark = Math.min(MAX_INITIAL_MARK, selectedCount * MARK_PER_OLD_BLOCK);
+                DaoMarkData daoMarks;
+                switch (ownerBastion.primaryDao()) {
+                    case ZHI_DAO -> daoMarks = new DaoMarkData(mark, 0.0F, 0.0F, 0.0F);
+                    case HUN_DAO -> daoMarks = new DaoMarkData(0.0F, mark, 0.0F, 0.0F);
+                    case MU_DAO -> daoMarks = new DaoMarkData(0.0F, 0.0F, mark, 0.0F);
+                    case LI_DAO -> daoMarks = new DaoMarkData(0.0F, 0.0F, 0.0F, mark);
+                    default -> daoMarks = DaoMarkData.EMPTY;
+                }
+                data.territory.setDaoMarks(chunkKey, daoMarks);
+                migratedChunkCount++;
+            }
+
+            LOGGER.info("迁移完成，共转换 {} 个区块归属（旧记录数：{}）。", migratedChunkCount, oldIndex.size());
+            if (migratedChunkCount > 0) {
+                data.setDirty();
+            }
+        }
+
         // 回合2.1.1：归属索引（旧存档缺失时视为空 map，保持兼容）。
-        readOwnerIndexIfPresent(tag, TAG_MYCELIUM_OWNER_INDEX, data.myceliumOwnerIndex);
+        // myceliumOwnerIndex 已废弃，不再读取到 map 中
         readOwnerIndexIfPresent(tag, TAG_ANCHOR_OWNER_INDEX, data.anchorOwnerIndex);
 
         return data;
@@ -256,9 +336,16 @@ public class BastionSavedData extends SavedData {
         result.resultOrPartial(LOGGER::error).ifPresent(nbt -> {
             tag.put(TAG_BASTIONS, nbt);
         });
+        
+        // 持久化领地数据
+        var territoryResult = com.Kizunad.guzhenrenext.bastion.territory.ApertureTerritory.CODEC
+            .encodeStart(NbtOps.INSTANCE, territory);
+        territoryResult.resultOrPartial(LOGGER::error).ifPresent(nbt -> {
+            tag.put(TAG_TERRITORY_DATA, nbt);
+        });
 
-        // 回合2.1.1：仅持久化 owner 索引。运行时大集合（frontier/visited 等）严格不写入。
-        writeOwnerIndexIfNotEmpty(tag, TAG_MYCELIUM_OWNER_INDEX, myceliumOwnerIndex);
+        // 回合2.1.1：仅持久化 owner 索引。
+        // TAG_MYCELIUM_OWNER_INDEX 已移除，不再写入。
         writeOwnerIndexIfNotEmpty(tag, TAG_ANCHOR_OWNER_INDEX, anchorOwnerIndex);
         return tag;
     }
@@ -402,7 +489,7 @@ public class BastionSavedData extends SavedData {
     /**
      * 通过“归属索引”查找该位置的基地。
      * <p>
-     * 优先级：Anchor 索引 -> 菌毯索引。
+     * 优先级：Anchor 索引 -> 领地索引。
      * <br>
      * 若索引命中但对应基地已不存在/已销毁，会自动清理该索引项并返回 null，调用方应继续走 fallback。
      * </p>
@@ -413,7 +500,24 @@ public class BastionSavedData extends SavedData {
         if (owner != null) {
             return owner;
         }
-        return findOwnerFromIndexMap(myceliumOwnerIndex, pos);
+        
+        // 领地索引查询 (Chunk-based)
+        long chunkKey = chunkPosToLong(pos);
+        UUID bastionId = territory.getOwner(chunkKey);
+        
+        if (bastionId == null) {
+            return null;
+        }
+        
+        BastionData bastion = bastions.get(bastionId);
+        if (bastion == null || bastion.state() == BastionState.DESTROYED) {
+            // 索引“撒谎”：基地不存在/已销毁。这里自愈。
+            territory.setOwner(chunkKey, null);
+            setDirty();
+            return null;
+        }
+        
+        return bastion;
     }
 
     @Nullable
@@ -438,17 +542,102 @@ public class BastionSavedData extends SavedData {
     // ===== 回合2.1.1：索引维护 API =====
 
     /**
-     * 写入菌毯归属索引。
+     * 读取指定 chunk 的领土归属。
      * <p>
-     * 仅在“扩张成功放置菌毯”时调用，避免把玩家随手放置的装饰误当作强绑定数据。</p>
+     * 该方法是对 {@link #territory} 的只读透传，不暴露内部可变结构。
+     * </p>
+     *
+     * @param chunkKey chunk 键（ChunkPos.toLong）
+     * @return 归属基地 UUID；若无归属返回 null
      */
-    public void indexMyceliumOwner(UUID bastionId, BlockPos pos) {
-        putOwnerIndex(myceliumOwnerIndex, bastionId, pos);
+    @Nullable
+    public UUID getTerritoryOwner(long chunkKey) {
+        return territory.getOwner(chunkKey);
     }
 
-    /** 清理菌毯归属索引（方块移除时兜底）。 */
+    /**
+     * 读取指定 chunk 的道痕数据。
+     * <p>
+     * 无数据时返回 {@link DaoMarkData#EMPTY}，避免调用方处理 null。
+     * </p>
+     *
+     * @param chunkKey chunk 键（ChunkPos.toLong）
+     * @return 道痕数据（永不为 null）
+     */
+    public DaoMarkData getTerritoryDaoMarks(long chunkKey) {
+        return territory.getDaoMarks(chunkKey);
+    }
+
+    /**
+     * 在归属发生变化时更新 chunk 归属。
+     * <p>
+     * 仅当新旧值不相等时才写入并调用 {@link #setDirty()}。
+     * </p>
+     *
+     * @param chunkKey chunk 键（ChunkPos.toLong）
+     * @param owner 新归属（null 表示清除归属）
+     * @return 若实际发生变更返回 true，否则返回 false
+     */
+    public boolean setTerritoryOwnerIfChanged(long chunkKey, @Nullable UUID owner) {
+        UUID currentOwner = territory.getOwner(chunkKey);
+        if (Objects.equals(currentOwner, owner)) {
+            return false;
+        }
+        territory.setOwner(chunkKey, owner);
+        setDirty();
+        return true;
+    }
+
+    /**
+     * 在道痕发生变化时更新 chunk 道痕。
+     * <p>
+     * 当入参为 null 时按 {@link DaoMarkData#EMPTY} 处理；
+     * 仅当新旧值不相等时才写入并调用 {@link #setDirty()}。
+     * </p>
+     *
+     * @param chunkKey chunk 键（ChunkPos.toLong）
+     * @param marks 新道痕（null 视为 EMPTY）
+     * @return 若实际发生变更返回 true，否则返回 false
+     */
+    public boolean setTerritoryDaoMarksIfChanged(long chunkKey, DaoMarkData marks) {
+        DaoMarkData normalizedMarks = marks == null ? DaoMarkData.EMPTY : marks;
+        DaoMarkData currentMarks = territory.getDaoMarks(chunkKey);
+        if (Objects.equals(currentMarks, normalizedMarks)) {
+            return false;
+        }
+        territory.setDaoMarks(chunkKey, normalizedMarks);
+        setDirty();
+        return true;
+    }
+
+    /**
+     * 写入菌毯归属索引（现已升级为领地归属）。
+     * <p>
+     * 仅在“扩张成功放置菌毯”时调用。
+     * </p>
+     */
+    public void indexMyceliumOwner(UUID bastionId, BlockPos pos) {
+        if (bastionId == null || pos == null) {
+            return;
+        }
+        long chunkKey = chunkPosToLong(pos);
+        UUID current = territory.getOwner(chunkKey);
+        if (!bastionId.equals(current)) {
+            territory.setOwner(chunkKey, bastionId);
+            setDirty();
+        }
+    }
+
+    /** 清理菌毯归属索引（现为清理 chunk 归属）。 */
     public void clearMyceliumOwnerIndex(BlockPos pos) {
-        removeOwnerIndex(myceliumOwnerIndex, pos);
+        if (pos == null) {
+            return;
+        }
+        long chunkKey = chunkPosToLong(pos);
+        if (territory.getOwner(chunkKey) != null) {
+            territory.setOwner(chunkKey, null);
+            setDirty();
+        }
     }
 
     /** 写入 Anchor 归属索引。 */
@@ -788,7 +977,7 @@ public class BastionSavedData extends SavedData {
 
         // 回合2.1.1：清理持久化 owner 索引中的“悬空引用”，避免后续查询命中已删除基地。
         // 这里按 value 扫描移除即可：基地删除是低频操作，允许 O(N) 清理。
-        removeOwnerIndexEntriesByBastionId(myceliumOwnerIndex, bastionId);
+        territory.removeTerritoryByBastionId(bastionId);
         removeOwnerIndexEntriesByBastionId(anchorOwnerIndex, bastionId);
     }
 
@@ -933,6 +1122,14 @@ public class BastionSavedData extends SavedData {
         return myceliumDecayTicks.computeIfAbsent(bastionId, k -> new HashMap<>());
     }
 
+
+    /**
+     * 获取或创建区块级衰败倒计时映射。
+     */
+    public Map<Long, Integer> getOrCreateChunkDecayMap(UUID bastionId) {
+        return chunkDecayTicks.computeIfAbsent(bastionId, k -> new HashMap<>());
+    }
+
     /**
      * 清理某个位置的菌毯衰败记录（用于方块移除兜底）。
      */
@@ -940,6 +1137,17 @@ public class BastionSavedData extends SavedData {
         Map<BlockPos, Integer> map = myceliumDecayTicks.get(bastionId);
         if (map != null) {
             map.remove(pos);
+        }
+    }
+
+
+    /**
+     * 清理某个区块的衰败记录（用于区块恢复/移除时兜底）。
+     */
+    public void clearChunkDecay(UUID bastionId, long chunkKey) {
+        Map<Long, Integer> map = chunkDecayTicks.get(bastionId);
+        if (map != null) {
+            map.remove(chunkKey);
         }
     }
 

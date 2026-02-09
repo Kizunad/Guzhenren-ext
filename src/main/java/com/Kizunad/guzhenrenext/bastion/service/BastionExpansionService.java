@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.bastion.service;
 
 import com.Kizunad.guzhenrenext.bastion.BastionBlocks;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
+import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
 import com.Kizunad.guzhenrenext.bastion.block.BastionAnchorBlock;
@@ -9,12 +10,15 @@ import com.Kizunad.guzhenrenext.bastion.block.BastionMyceliumBlock;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeConfig;
 import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.network.BastionNetworkHandler;
+import com.Kizunad.guzhenrenext.bastion.territory.DaoMarkData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
@@ -59,6 +63,24 @@ public final class BastionExpansionService {
         /** 镇地灯成功拦截一次扩张尝试的资源消耗。 */
         static final double LANTERN_BLOCK_COST = 1.0D;
 
+        /** Chunk 中心偏移（相对 chunk 原点）。 */
+        static final int CHUNK_CENTER_OFFSET = 8;
+
+        /** 领土道痕注入公式中的 α（基础注入强度）。 */
+        static final float TERRITORY_INJECTION_ALPHA = 0.20F;
+        /** 领土道痕饱和上限 S。 */
+        static final float TERRITORY_DAO_SATURATION = 1.0F;
+        /** 领土蔓延阈值（邻接 chunk 的 mark >= 阈值 * S 时允许 claim）。 */
+        static final float SPREAD_THRESHOLD_RATIO = 0.60F;
+        /** 判定有效注入的最小道痕增量（避免浮点噪声）。 */
+        static final float MIN_EFFECTIVE_DAO_DELTA = 1.0E-4F;
+
+        /** 资源消耗与 ΔM 的比例常量：cost = baseCost * ratio * ΔM。 */
+        static final double RESOURCE_COST_PER_DAO_MARK_RATIO = 1.0D;
+
+        /** 低概率方块装饰概率（百分比）；仅做视觉反馈，不参与领土判定。 */
+        static final int DECORATIVE_NODE_CHANCE_PERCENT = 10;
+
         private Constants() {
         }
     }
@@ -67,9 +89,29 @@ public final class BastionExpansionService {
      * 扩张候选查询结果。
      *
      * @param bastion  可能已扣减镇地灯消耗后的基地快照
-     * @param candidate 最终可用候选；若为 null 表示本轮无可用位置
+     * @param candidateChunk 最终可用候选 chunk；若为 null 表示本轮无可用位置
+     * @param candidateCenter 候选 chunk 的中心方块位置（用于距离/灯笼判定）
      */
-    private record ExpansionCandidateResult(BastionData bastion, BlockPos candidate) {
+    private record ExpansionCandidateResult(BastionData bastion, ChunkPos candidateChunk, BlockPos candidateCenter) {
+    }
+
+    /**
+     * 单次领土注入的计算结果。
+     *
+     * @param deltaMark      本轮可注入的主道痕增量（ΔM）
+     * @param newlyClaimed   是否发生 owner: null -> bastion.id 的首次 claim
+     * @param updatedMarks   注入后的 chunk 道痕数据
+     * @param newGrowthRadius 该 chunk 对应的建议增长半径
+     */
+    private record TerritoryInjectionProposal(
+            float deltaMark,
+            boolean newlyClaimed,
+            DaoMarkData updatedMarks,
+            int newGrowthRadius) {
+
+        private static TerritoryInjectionProposal empty() {
+            return new TerritoryInjectionProposal(0.0F, false, DaoMarkData.EMPTY, 0);
+        }
     }
 
     // ===== 主扩张逻辑 =====
@@ -144,25 +186,59 @@ public final class BastionExpansionService {
             ExpansionCandidateResult candidateResult =
                 findExpansionCandidate(level, savedData, current, myceliumConfig);
             current = candidateResult.bastion();
-            BlockPos candidate = candidateResult.candidate();
-            if (candidate == null) {
-                LOGGER.info("基地 {} 扩张中断: 找不到有效候选位置 (i={})", bastion.id(), i);
+            ChunkPos candidateChunk = candidateResult.candidateChunk();
+            BlockPos candidateCenter = candidateResult.candidateCenter();
+            if (candidateChunk == null || candidateCenter == null) {
+                LOGGER.info("基地 {} 扩张中断: 找不到有效候选 chunk (i={})", bastion.id(), i);
                 break;
             }
 
-            if (placeMycelium(level, savedData, candidate, current)) {
-                // 计算新节点到核心的距离，更新扩张半径
-                int distToCore = (int) Math.ceil(Math.sqrt(candidate.distSqr(current.corePos())));
-                int newGrowthRadius = Math.max(current.growthRadius(), distToCore);
-
-                // 更新基地数据
-                current = current
-                    .withResourcePool(current.resourcePool() - expansionCost)
-                    .withGrowthCursor(current.growthCursor() + 1)
-                    .withGrowthRadius(newGrowthRadius)
-                    .withMyceliumCountDelta(1);
-                expandedCount++;
+            TerritoryInjectionProposal proposal =
+                calculateTerritoryInjection(savedData, current, candidateChunk, candidateCenter, myceliumConfig);
+            if (proposal.deltaMark() <= Constants.MIN_EFFECTIVE_DAO_DELTA) {
+                continue;
             }
+
+            double dynamicExpansionCost = expansionCost
+                * Constants.RESOURCE_COST_PER_DAO_MARK_RATIO
+                * proposal.deltaMark();
+            if (current.resourcePool() < dynamicExpansionCost) {
+                break;
+            }
+
+            UUID ownerBefore = savedData.getTerritoryOwner(candidateChunk.toLong());
+            if (ownerBefore != null && !ownerBefore.equals(current.id())) {
+                continue;
+            }
+
+            if (proposal.newlyClaimed()) {
+                if (!savedData.setTerritoryOwnerIfChanged(candidateChunk.toLong(), current.id())) {
+                    // 并发兜底：若 claim 失败，重新检查归属，确保不会覆盖他人领土。
+                    UUID latestOwner = savedData.getTerritoryOwner(candidateChunk.toLong());
+                    if (latestOwner != null && !latestOwner.equals(current.id())) {
+                        continue;
+                    }
+                }
+            }
+
+            if (!savedData.setTerritoryDaoMarksIfChanged(candidateChunk.toLong(), proposal.updatedMarks())) {
+                continue;
+            }
+
+            // 领土驱动的数据化扩张：成功判定基于 chunk 道痕实增（ΔM>0），
+            // 方块仅作为低概率视觉装饰，不再承担领土归属语义。
+            maybePlaceDecorativeMycelium(level, candidateCenter, current);
+
+            int newGrowthRadius = Math.max(current.growthRadius(), proposal.newGrowthRadius());
+            current = current
+                .withResourcePool(current.resourcePool() - dynamicExpansionCost)
+                .withGrowthCursor(current.growthCursor() + 1)
+                .withGrowthRadius(newGrowthRadius);
+            if (proposal.newlyClaimed()) {
+                // 历史字段 totalMycelium 在新模型中复用为“领土 chunk 数”。
+                current = current.withMyceliumCountDelta(1);
+            }
+            expandedCount++;
         }
 
         if (!current.equals(bastion)) {
@@ -326,29 +402,29 @@ public final class BastionExpansionService {
         return belowState.isFaceSturdy(level, below, Direction.UP);
     }
 
-    private static boolean placeMycelium(
+    /**
+     * 低概率放置菌毯方块作为视觉装饰。
+     * <p>
+     * 关键约束：领土归属与扩张成功判定已完全数据化（chunk territory + DaoMark），
+     * 这里仅用于让玩家仍能看到“菌毯生长”的反馈，不得写 owner，不得参与 success gate。
+     * </p>
+     */
+    private static void maybePlaceDecorativeMycelium(
             ServerLevel level,
-            BastionSavedData savedData,
             BlockPos pos,
             BastionData bastion) {
+        Random random = new Random(bastion.id().hashCode() ^ bastion.growthCursor());
+        if (random.nextInt(Constants.PERCENT_BASE) >= Constants.DECORATIVE_NODE_CHANCE_PERCENT) {
+            return;
+        }
+
         Block nodeBlock = BastionBlocks.BASTION_NODE.get();
         if (!(nodeBlock instanceof BastionMyceliumBlock myceliumBlock)) {
-            return false;
+            return;
         }
 
         BlockState nodeState = myceliumBlock.withDao(bastion.primaryDao());
-        boolean placed = level.setBlock(pos, nodeState, Block.UPDATE_ALL);
-        if (!placed) {
-            return false;
-        }
-
-        // 回合2.1.1：写入菌毯归属索引（持久化）。
-        // 只在"扩张服务成功放置"时写入，避免误标记玩家随手放置的装饰方块。
-        savedData.indexMyceliumOwner(bastion.id(), pos);
-
-        // 将新节点添加到缓存（用于 frontier 追踪，非持久化）。
-        savedData.addNodeToCache(bastion.id(), pos);
-        return true;
+        level.setBlock(pos, nodeState, Block.UPDATE_ALL);
     }
 
     /**
@@ -438,17 +514,11 @@ public final class BastionExpansionService {
     // ===== 候选位置选择 =====
 
     /**
-     * 查找扩张候选位置。
+     * 查找扩张候选 chunk。
      * <p>
-     * 使用 frontier 缓存和确定性随机从边界节点的邻接位置中选择。
-     * 步长使用 nodeSpacing 配置，确保节点稀疏分布。
+     * 仍使用 frontier bounded sampling（O(samples)）避免全图扫描；
+     * 但候选最终映射为 chunk center，以便切换到领土数据化扩张。
      * </p>
-     *
-     * @param level           服务端世界
-     * @param savedData       基地存储数据
-     * @param bastion         基地数据
-     * @param expansionConfig 扩张配置
-     * @return 候选位置，如果没有合适位置则返回 null
      */
     private static ExpansionCandidateResult findExpansionCandidate(
             ServerLevel level,
@@ -462,7 +532,7 @@ public final class BastionExpansionService {
         // 从 frontier 缓存获取边界节点
         java.util.Set<BlockPos> frontier = savedData.getFrontier(bastion.id());
         if (frontier.isEmpty()) {
-            return new ExpansionCandidateResult(current, null);
+            return new ExpansionCandidateResult(current, null, null);
         }
 
         // 获取步长配置
@@ -472,10 +542,10 @@ public final class BastionExpansionService {
         // 转为列表以支持随机访问
         List<BlockPos> frontierList = new ArrayList<>(frontier);
 
-        // 采样候选位置
-        List<BlockPos> candidates = new ArrayList<>();
+        // 采样候选 chunk
+        List<ChunkPos> candidateChunks = new ArrayList<>();
         int rejectedOutOfRadius = 0;
-        int rejectedNotReplaceable = 0;
+        int rejectedInvalidTarget = 0;
         int rejectedByLantern = 0;
         for (int i = 0; i < Constants.CANDIDATE_SAMPLE_COUNT && !frontierList.isEmpty(); i++) {
             BlockPos sourceNode = frontierList.get(random.nextInt(frontierList.size()));
@@ -484,37 +554,139 @@ public final class BastionExpansionService {
             // 根据方向使用不同步长
             int step = dir.getAxis() == Direction.Axis.Y ? ySpacing : spacing;
             BlockPos candidate = sourceNode.relative(dir, step);
+            ChunkPos candidateChunk = new ChunkPos(candidate);
+            BlockPos candidateCenter = chunkCenterToBlockPos(candidateChunk, bastion.corePos().getY());
 
-            // 检查候选位置有效性（允许空中扩张，不检查地面）
+            // 检查候选位置有效性：必须满足半径、可替换、邻接坚实表面（表面爬行约束）。
             int maxRadius = expansionConfig.maxRadius();
-            if (candidate.distSqr(bastion.corePos()) > (long) maxRadius * maxRadius) {
+            if (candidateCenter.distSqr(bastion.corePos()) > (long) maxRadius * maxRadius) {
                 rejectedOutOfRadius++;
                 continue;
             }
-            BlockState targetState = level.getBlockState(candidate);
-            if (!targetState.canBeReplaced()) {
-                rejectedNotReplaceable++;
+            if (!isValidExpansionTarget(level, bastion, candidateCenter, expansionConfig)) {
+                rejectedInvalidTarget++;
                 continue;
             }
             if (current.resourcePool() >= Constants.LANTERN_BLOCK_COST
-                    && savedData.isProtectedByLantern(current.id(), candidate)) {
+                    && savedData.isProtectedByLantern(current.id(), candidateCenter)) {
                 rejectedByLantern++;
                 current = current.withResourcePool(current.resourcePool() - Constants.LANTERN_BLOCK_COST);
                 continue;
             }
-            candidates.add(candidate);
+            candidateChunks.add(candidateChunk);
         }
 
-        if (candidates.isEmpty()) {
+        if (candidateChunks.isEmpty()) {
             LOGGER.info("基地 {} findExpansionCandidate 失败: "
-                + "frontier.size={}, spacing={}, 拒绝原因: 超出半径={}, 不可替换={}, 灯笼拦截={}",
+                + "frontier.size={}, spacing={}, 拒绝原因: 超出半径={}, 非法目标(含表面约束)={}, 灯笼拦截={}",
                 bastion.id(), frontier.size(), spacing,
-                rejectedOutOfRadius, rejectedNotReplaceable, rejectedByLantern);
-            return new ExpansionCandidateResult(current, null);
+                rejectedOutOfRadius, rejectedInvalidTarget, rejectedByLantern);
+            return new ExpansionCandidateResult(current, null, null);
         }
 
-        // 从候选中随机选择一个
-        return new ExpansionCandidateResult(current, candidates.get(random.nextInt(candidates.size())));
+        // 从候选中随机选择一个 chunk
+        ChunkPos chosenChunk = candidateChunks.get(random.nextInt(candidateChunks.size()));
+        BlockPos chosenCenter = chunkCenterToBlockPos(chosenChunk, bastion.corePos().getY());
+        return new ExpansionCandidateResult(current, chosenChunk, chosenCenter);
+    }
+
+    private static BlockPos chunkCenterToBlockPos(ChunkPos chunkPos, int y) {
+        int x = chunkPos.getMinBlockX() + Constants.CHUNK_CENTER_OFFSET;
+        int z = chunkPos.getMinBlockZ() + Constants.CHUNK_CENTER_OFFSET;
+        return new BlockPos(x, y, z);
+    }
+
+    private static TerritoryInjectionProposal calculateTerritoryInjection(
+            BastionSavedData savedData,
+            BastionData bastion,
+            ChunkPos targetChunk,
+            BlockPos targetCenter,
+            BastionTypeConfig.MyceliumConfig expansionConfig) {
+        long chunkKey = targetChunk.toLong();
+        UUID owner = savedData.getTerritoryOwner(chunkKey);
+        if (owner != null && !owner.equals(bastion.id())) {
+            return TerritoryInjectionProposal.empty();
+        }
+
+        boolean unclaimed = owner == null;
+        if (unclaimed && !canClaimFromNeighbor(savedData, bastion.id(), bastion.primaryDao(), targetChunk)) {
+            return TerritoryInjectionProposal.empty();
+        }
+
+        DaoMarkData currentMarks = savedData.getTerritoryDaoMarks(chunkKey);
+        float currentPrimaryMark = getPrimaryDaoMark(currentMarks, bastion.primaryDao());
+        float saturation = Constants.TERRITORY_DAO_SATURATION;
+        if (currentPrimaryMark >= saturation) {
+            return TerritoryInjectionProposal.empty();
+        }
+
+        int maxRadius = Math.max(1, expansionConfig.maxRadius());
+        double normalizedDistanceSquared = targetCenter.distSqr(bastion.corePos())
+            / ((double) maxRadius * maxRadius);
+
+        double attenuation = Math.exp(-normalizedDistanceSquared);
+        double growthFactor = 1.0D - currentPrimaryMark / saturation;
+        float rawDelta = (float) (Constants.TERRITORY_INJECTION_ALPHA * growthFactor * attenuation);
+        float maxAllowedDelta = saturation - currentPrimaryMark;
+        float delta = clamp(rawDelta, 0.0F, maxAllowedDelta);
+        if (delta <= Constants.MIN_EFFECTIVE_DAO_DELTA) {
+            return TerritoryInjectionProposal.empty();
+        }
+
+        DaoMarkData updatedMarks = setPrimaryDaoMark(currentMarks, bastion.primaryDao(), currentPrimaryMark + delta);
+        int distToCore = (int) Math.ceil(Math.sqrt(targetCenter.distSqr(bastion.corePos())));
+        return new TerritoryInjectionProposal(delta, unclaimed, updatedMarks, distToCore);
+    }
+
+    private static boolean canClaimFromNeighbor(
+            BastionSavedData savedData,
+            UUID bastionId,
+            BastionDao primaryDao,
+            ChunkPos targetChunk) {
+        float spreadThreshold = Constants.SPREAD_THRESHOLD_RATIO * Constants.TERRITORY_DAO_SATURATION;
+        for (ChunkPos neighbor : getFourNeighbors(targetChunk)) {
+            long neighborKey = neighbor.toLong();
+            UUID owner = savedData.getTerritoryOwner(neighborKey);
+            if (!bastionId.equals(owner)) {
+                continue;
+            }
+            DaoMarkData marks = savedData.getTerritoryDaoMarks(neighborKey);
+            if (getPrimaryDaoMark(marks, primaryDao) >= spreadThreshold) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static ChunkPos[] getFourNeighbors(ChunkPos center) {
+        return new ChunkPos[] {
+            new ChunkPos(center.x + 1, center.z),
+            new ChunkPos(center.x - 1, center.z),
+            new ChunkPos(center.x, center.z + 1),
+            new ChunkPos(center.x, center.z - 1)
+        };
+    }
+
+    private static float getPrimaryDaoMark(DaoMarkData marks, BastionDao dao) {
+        return switch (dao) {
+            case ZHI_DAO -> marks.zhiDao();
+            case HUN_DAO -> marks.hunDao();
+            case MU_DAO -> marks.muDao();
+            case LI_DAO -> marks.liDao();
+        };
+    }
+
+    private static DaoMarkData setPrimaryDaoMark(DaoMarkData marks, BastionDao dao, float value) {
+        return switch (dao) {
+            case ZHI_DAO -> new DaoMarkData(value, marks.hunDao(), marks.muDao(), marks.liDao());
+            case HUN_DAO -> new DaoMarkData(marks.zhiDao(), value, marks.muDao(), marks.liDao());
+            case MU_DAO -> new DaoMarkData(marks.zhiDao(), marks.hunDao(), value, marks.liDao());
+            case LI_DAO -> new DaoMarkData(marks.zhiDao(), marks.hunDao(), marks.muDao(), value);
+        };
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     /**

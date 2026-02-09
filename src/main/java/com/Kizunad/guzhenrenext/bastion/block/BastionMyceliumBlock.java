@@ -76,9 +76,6 @@ public class BastionMyceliumBlock extends Block {
         // 回合2.1.1：findOwnerBastion 会优先查索引，因此可在半径不足时仍命中正确归属。
         BastionData owner = savedData.findOwnerBastion(pos, MAX_OWNER_SEARCH_RADIUS);
 
-        // 回合2.1.1：清理索引（幂等）。
-        // 注意：必须在 owner 查询之后执行，否则会破坏“优先索引命中”的效果。
-        savedData.clearMyceliumOwnerIndex(pos);
         if (owner == null) {
             return;
         }
@@ -89,10 +86,9 @@ public class BastionMyceliumBlock extends Block {
         // 清理运行时衰败状态，防止 map 残留。
         savedData.clearMyceliumDecay(owner.id(), pos);
 
-        // 计数：菌毯属于 counts.totalMycelium。
-        // 注意：这里不尝试修正 totalNodes/nodesByTier（它们当前用于核心/旧机制）。
-        BastionData updated = owner.withMyceliumCountDelta(-1);
-        savedData.updateBastion(updated);
+        // 这里不再修改 totalMycelium：其语义已复用为“领土 chunk 数”，
+        // 仅应由 territory claim/decay 逻辑驱动，不能被装饰菌毯破坏影响。
+        // 当前函数只保留最小化缓存修复，避免连通性/衰败状态出现脏数据。
     }
 
     @Override
