@@ -38,6 +38,7 @@ import net.minecraft.world.level.Level;
  * @param counts              菌毯/Anchor 等额外计数（避免 CODEC 超出参数上限）
  * @param modifiers           基地词缀（生态演化/变异，默认空集）
  * @param timing              时间相关字段（封印、销毁、最后处理、离线累积）
+ * @param spiritData          地灵（狐仙）相关持久化数据
  */
 public record BastionData(
         UUID id,
@@ -59,8 +60,9 @@ public record BastionData(
          BastionTiming timing,
          CaptureState captureState,
          long lastBossSpawnGameTime,
-         BastionTalentData talentData
-) {
+         BastionTalentData talentData,
+         SpiritData spiritData
+ ) {
 
     /**
      * 额外计数信息。
@@ -255,14 +257,16 @@ public record BastionData(
              BastionTiming timing,
              CaptureState captureState,
              long lastBossSpawnGameTime,
-             BastionTalentData talentData) {
+             BastionTalentData talentData,
+             SpiritData spiritData) {
         private static final AdditionalState DEFAULT = new AdditionalState(
             BastionCounts.DEFAULT,
             java.util.Set.of(),
             BastionTiming.createDefault(0L),
             CaptureState.DEFAULT,
             0L,
-            BastionTalentData.DEFAULT
+            BastionTalentData.DEFAULT,
+            SpiritData.DEFAULT
         );
 
         private static final MapCodec<AdditionalState> CODEC = RecordCodecBuilder.mapCodec(instance ->
@@ -279,7 +283,9 @@ public record BastionData(
                 BastionTalentData.CODEC.optionalFieldOf(
                     "talent_data",
                     BastionTalentData.DEFAULT
-                ).forGetter(AdditionalState::talentData)
+                ).forGetter(AdditionalState::talentData),
+                SpiritData.CODEC.optionalFieldOf("spirit_data", SpiritData.DEFAULT)
+                    .forGetter(AdditionalState::spiritData)
             ).apply(instance, AdditionalState::new)
         );
     }
@@ -302,16 +308,19 @@ public record BastionData(
             Codec.LONG.fieldOf("growth_cursor").forGetter(BastionData::growthCursor),
              Codec.DOUBLE.fieldOf("resource_pool").forGetter(BastionData::resourcePool),
               Codec.DOUBLE.optionalFieldOf("pollution", 0.0).forGetter(BastionData::pollution),
-              AdditionalState.CODEC.forGetter(data -> new AdditionalState(
-                  data.counts == null ? BastionCounts.DEFAULT : data.counts,
-                  data.modifiers,
-                  data.timing,
-                 data.captureState == null ? CaptureState.DEFAULT : data.captureState,
-                  data.lastBossSpawnGameTime,
-                  data.talentData == null
-                      ? BastionTalentData.DEFAULT
-                      : data.talentData
-             ))
+               AdditionalState.CODEC.forGetter(data -> new AdditionalState(
+                   data.counts == null ? BastionCounts.DEFAULT : data.counts,
+                   data.modifiers,
+                   data.timing,
+                  data.captureState == null ? CaptureState.DEFAULT : data.captureState,
+                   data.lastBossSpawnGameTime,
+                   data.talentData == null
+                       ? BastionTalentData.DEFAULT
+                       : data.talentData,
+                   data.spiritData == null
+                       ? SpiritData.DEFAULT
+                       : data.spiritData
+              ))
         ).apply(instance, (id,
                 state,
                 corePos,
@@ -342,12 +351,25 @@ public record BastionData(
                   resourcePool,
                   pollution,
                  additional.counts(),
-                 additional.modifiers(),
-                 additional.timing(),
-                 additional.captureState(),
-                 additional.lastBossSpawnGameTime(),
-                 additional.talentData()))
+                  additional.modifiers(),
+                  additional.timing(),
+                  additional.captureState(),
+                  additional.lastBossSpawnGameTime(),
+                  additional.talentData(),
+                  additional.spiritData()))
     );
+
+    /**
+     * 规范化记录字段，确保 nullable 字段始终可安全访问。
+     */
+    public BastionData {
+        counts = counts == null ? BastionCounts.DEFAULT : counts;
+        modifiers = modifiers == null ? java.util.Set.of() : java.util.Set.copyOf(modifiers);
+        timing = timing == null ? BastionTiming.createDefault(0L) : timing;
+        captureState = captureState == null ? CaptureState.DEFAULT : captureState;
+        talentData = talentData == null ? BastionTalentData.DEFAULT : talentData;
+        spiritData = spiritData == null ? SpiritData.DEFAULT : spiritData;
+    }
 
     // ===== 时间字段的便捷访问器 =====
 
@@ -411,7 +433,8 @@ public record BastionData(
             BastionTiming.createDefault(gameTime),
             CaptureState.DEFAULT,
             0L,
-            com.Kizunad.guzhenrenext.bastion.talent.BastionTalentData.DEFAULT
+            com.Kizunad.guzhenrenext.bastion.talent.BastionTalentData.DEFAULT,
+            SpiritData.DEFAULT
         );
     }
 
@@ -422,6 +445,15 @@ public record BastionData(
      */
     public BastionTalentData talentData() {
         return talentData == null ? BastionTalentData.DEFAULT : talentData;
+    }
+
+    /**
+     * 返回地灵数据（兼容旧存档 null）。
+     *
+     * @return 非空地灵数据
+     */
+    public SpiritData spiritData() {
+        return spiritData == null ? SpiritData.DEFAULT : spiritData;
     }
 
     /**
@@ -452,6 +484,40 @@ public record BastionData(
             timing,
             captureState,
             lastBossSpawnGameTime,
+            safe,
+            spiritData
+        );
+    }
+
+    /**
+     * 创建地灵数据更新后的副本。
+     *
+     * @param newSpiritData 新的地灵数据（null 将回退为默认值）
+     * @return 更新后的 BastionData
+     */
+    public BastionData withSpiritData(SpiritData newSpiritData) {
+        SpiritData safe = newSpiritData == null ? SpiritData.DEFAULT : newSpiritData;
+        return new BastionData(
+            id,
+            state,
+            corePos,
+            dimension,
+            bastionType,
+            primaryDao,
+            tier,
+            evolutionProgress,
+            totalNodes,
+            nodesByTier,
+            growthRadius,
+            growthCursor,
+            resourcePool,
+            pollution,
+            counts,
+            modifiers,
+            timing,
+            captureState,
+            lastBossSpawnGameTime,
+            talentData,
             safe
         );
     }
@@ -485,7 +551,8 @@ public record BastionData(
             evolutionProgress, newTotal, newNodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
         );
     }
 
@@ -507,7 +574,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
             lastBossSpawnGameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 
@@ -529,7 +597,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
             lastBossSpawnGameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 
@@ -546,7 +615,8 @@ public record BastionData(
             newProgress, totalNodes, nodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
         );
     }
 
@@ -562,7 +632,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, newRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
             lastBossSpawnGameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 
@@ -578,7 +649,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             newCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
             lastBossSpawnGameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 
@@ -594,7 +666,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, newPool, pollution, counts, modifiers, timing, captureState,
             lastBossSpawnGameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 
@@ -613,7 +686,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
         );
     }
 
@@ -632,7 +706,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
         );
     }
 
@@ -654,7 +729,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
             lastBossSpawnGameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 
@@ -676,7 +752,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, counts, modifiers, newTiming, captureState,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
         );
     }
 
@@ -695,7 +772,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, updatedCounts, modifiers, timing, captureState,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
         );
     }
 
@@ -780,7 +858,8 @@ public record BastionData(
              timing,
              captureState,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
          );
      }
 
@@ -799,7 +878,8 @@ public record BastionData(
              evolutionProgress, totalNodes, nodesByTier, growthRadius,
              growthCursor, resourcePool, pollution, counts, modifiers, timing, safe,
              lastBossSpawnGameTime,
-             talentData
+             talentData,
+             spiritData
          );
      }
 
@@ -871,9 +951,10 @@ public record BastionData(
               evolutionProgress, totalNodes, nodesByTier, growthRadius,
               growthCursor, resourcePool, clamped, counts, modifiers, timing, captureState,
               lastBossSpawnGameTime,
-              talentData
-           );
-       }
+              talentData,
+              spiritData
+            );
+        }
 
     /**
      * 创建接管后的副本：转为 ACTIVE、清空封印/摧毁时间并写入占领者。
@@ -912,7 +993,8 @@ public record BastionData(
             newTiming,
             capturedState,
             lastBossSpawnGameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 
@@ -928,7 +1010,8 @@ public record BastionData(
             evolutionProgress, totalNodes, nodesByTier, growthRadius,
             growthCursor, resourcePool, pollution, counts, modifiers, timing, captureState,
             gameTime,
-            talentData
+            talentData,
+            spiritData
         );
     }
 

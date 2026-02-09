@@ -2,7 +2,7 @@ package com.Kizunad.guzhenrenext;
 
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
-import com.Kizunad.guzhenrenext.bastion.menu.BastionMenus;
+import com.Kizunad.guzhenrenext.bastion.ui.BastionMenus;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
@@ -35,6 +35,7 @@ public class GuzhenrenExt {
         // NpcKongqiaoInventoryBridge.register();
 
         KongqiaoMenus.register(modEventBus);
+        com.Kizunad.guzhenrenext.bastion.menu.BastionMenus.register(modEventBus);
         BastionMenus.register(modEventBus);
         KongqiaoAttachments.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntities.register(modEventBus);
@@ -55,6 +56,8 @@ public class GuzhenrenExt {
 
         // Bastion guardians
         com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianEntities.register(modEventBus);
+        // Bastion entities
+        com.Kizunad.guzhenrenext.bastion.entity.BastionEntities.register(modEventBus);
         // Client 渲染注册通过 @EventBusSubscriber(Dist.CLIENT) 自动挂载。
 
         // Worldgen
