@@ -8,6 +8,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -39,9 +40,6 @@ public final class BastionBoundaryRenderer {
 
     /** 边界线高度偏移（避免 Z-Fighting）。 */
     private static final float HEIGHT_OFFSET = 0.1f;
-
-    /** 边界线段数（圆形近似）。 */
-    private static final int SEGMENTS = 64;
 
     /** 边界线透明度（ACTIVE）。 */
     private static final float ALPHA_ACTIVE = 0.6f;
@@ -75,6 +73,27 @@ public final class BastionBoundaryRenderer {
 
     /** 方块中心偏移量。 */
     private static final double BLOCK_CENTER_OFFSET = 0.5;
+
+    /** chunk 坐标位移量。 */
+    private static final int CHUNK_SHIFT = 4;
+
+    /** chunk 大小。 */
+    private static final int CHUNK_SIZE = 16;
+
+    /** chunk 掩码。 */
+    private static final int CHUNK_MASK = 15;
+
+    /** 半个 chunk 大小。 */
+    private static final int HALF_CHUNK = 8;
+
+    /** 渲染缓冲距离平方。 */
+    private static final int RENDER_BUFFER_SQR = 256;
+
+    /** Alpha通道在数组中的索引。 */
+    private static final int ALPHA_INDEX = 3;
+
+    /** 半个方块偏移量。 */
+    private static final double HALF_BLOCK_OFFSET = 0.5;
 
     /** 缓存的 level 身份（用于世界切换检测）。 */
     private static Object lastClientLevelIdentity;
@@ -127,8 +146,8 @@ public final class BastionBoundaryRenderer {
     /**
      * 渲染单个基地的边界。
      * <p>
-     * 使用 auraRadius（光环影响半径）而非 growthRadius（节点扩张半径）进行渲染，
-     * 确保玩家看到的边界与实际效果判定范围一致。
+     * 使用 auraRadius（光环影响半径）近似计算覆盖的区块，并渲染区块边界网格。
+     * 这与 ApertureTerritory 的区块制领地逻辑保持一致。
      * </p>
      */
     private static void renderBastionBoundary(
@@ -148,7 +167,7 @@ public final class BastionBoundaryRenderer {
 
         poseStack.pushPose();
 
-        // 计算渲染位置（相对于相机）
+        // 计算渲染中心点（以核心方块中心为原点，带高度偏移）
         double renderX = bastion.corePos().getX() + BLOCK_CENTER_OFFSET - cameraPos.x;
         double renderY = bastion.corePos().getY() + HEIGHT_OFFSET - cameraPos.y;
         double renderZ = bastion.corePos().getZ() + BLOCK_CENTER_OFFSET - cameraPos.z;
@@ -160,7 +179,7 @@ public final class BastionBoundaryRenderer {
         float blue;
         float alpha;
 
-        // 使用 gameTime 动态派生有效状态（处理封印到期自动变回 ACTIVE）
+        // 使用 gameTime 动态派生有效状态
         BastionState effectiveState = bastion.getEffectiveState(gameTime);
 
         switch (effectiveState) {
@@ -188,52 +207,112 @@ public final class BastionBoundaryRenderer {
             }
         }
 
-        // 使用 auraRadius 渲染圆形边界（与效果判定范围一致）
-        renderCircle(poseStack, buffer, bastion.auraRadius(), red, green, blue, alpha);
+        // 渲染区块领地网格
+        renderTerritoryGrid(
+                poseStack,
+                buffer,
+                bastion.corePos(),
+                bastion.auraRadius(),
+                new float[]{red, green, blue, alpha}
+        );
 
         poseStack.popPose();
     }
 
     /**
-     * 渲染圆形边界线。
+     * 渲染区块领地网格。
+     * <p>
+     * 遍历光环范围内的所有区块，绘制其边界。
+     * </p>
      */
-    private static void renderCircle(
+    private static void renderTerritoryGrid(
             final PoseStack poseStack,
             final MultiBufferSource buffer,
-            final float radius,
-            final float red,
-            final float green,
-            final float blue,
-            final float alpha) {
+            final BlockPos corePos,
+            final int radius,
+            final float[] rgba) {
         final VertexConsumer consumer = buffer.getBuffer(RenderType.lines());
         final Matrix4f matrix = poseStack.last().pose();
 
-        final float angleStep = (float) (2.0 * Math.PI / SEGMENTS);
+        float red = rgba[0];
+        float green = rgba[1];
+        float blue = rgba[2];
+        float alpha = rgba[ALPHA_INDEX];
 
-        for (int i = 0; i < SEGMENTS; i++) {
-            float angle1 = i * angleStep;
-            float angle2 = (i + 1) * angleStep;
+        // 核心所在的区块坐标
+        int coreChunkX = corePos.getX() >> CHUNK_SHIFT;
+        int coreChunkZ = corePos.getZ() >> CHUNK_SHIFT;
 
-            float x1 = (float) (Math.cos(angle1) * radius);
-            float z1 = (float) (Math.sin(angle1) * radius);
-            float x2 = (float) (Math.cos(angle2) * radius);
-            float z2 = (float) (Math.sin(angle2) * radius);
+        // 计算受影响的区块范围（简单近似：覆盖半径的区块）
+        int chunkRadius = (radius + CHUNK_MASK) >> CHUNK_SHIFT;
+        int minCx = coreChunkX - chunkRadius;
+        int maxCx = coreChunkX + chunkRadius;
+        int minCz = coreChunkZ - chunkRadius;
+        int maxCz = coreChunkZ + chunkRadius;
 
-            // 计算法线方向（用于线条渲染）
-            float nx = x2 - x1;
-            float nz = z2 - z1;
-            float len = (float) Math.sqrt(nx * nx + nz * nz);
-            if (len > 0) {
-                nx /= len;
-                nz /= len;
+        // 核心中心相对于渲染原点(0,0,0)的偏移是0
+        // 但我们需要计算区块角点相对于渲染原点的坐标
+        // 渲染原点 = corePos.getX() + 0.5, corePos.getZ() + 0.5
+        double coreCenterX = corePos.getX() + HALF_BLOCK_OFFSET;
+        double coreCenterZ = corePos.getZ() + HALF_BLOCK_OFFSET;
+
+        long radiusSq = (long) radius * radius;
+
+        for (int cx = minCx; cx <= maxCx; cx++) {
+            for (int cz = minCz; cz <= maxCz; cz++) {
+                // 计算区块中心，判断是否在半径内
+                int chunkCenterX = (cx << CHUNK_SHIFT) + HALF_CHUNK;
+                int chunkCenterZ = (cz << CHUNK_SHIFT) + HALF_CHUNK;
+                double distSq = (chunkCenterX - coreCenterX) * (chunkCenterX - coreCenterX)
+                        + (chunkCenterZ - coreCenterZ) * (chunkCenterZ - coreCenterZ);
+
+                // 如果区块中心在半径内（或接近边缘），则视为领地的一部分
+                // 这里稍微放宽判断，或者严格按照 ApertureTerritory 的逻辑（通常是只要包含核心半径内的块）
+                // 为了视觉美观，使用 center dist <= radius + 8 (半个区块缓冲)
+                if (distSq <= radiusSq + RENDER_BUFFER_SQR) { // +16^2 buffer roughly
+                    // 计算该区块相对于渲染原点的四个角坐标
+                    float x1 = (float) ((cx << CHUNK_SHIFT) - coreCenterX);
+                    float z1 = (float) ((cz << CHUNK_SHIFT) - coreCenterZ);
+                    float x2 = x1 + CHUNK_SIZE;
+                    float z2 = z1 + CHUNK_SIZE;
+
+                    // 绘制矩形（四条边）
+                    // 优化：相邻区块的边会重叠，渲染两次问题不大，或者可以只画两条边？
+                    // 为了完整性，画四条边简单直接。
+
+                    // Line 1: x1,z1 -> x2,z1
+                    consumer.addVertex(matrix, x1, 0, z1)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+                    consumer.addVertex(matrix, x2, 0, z1)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+
+                    // Line 2: x2,z1 -> x2,z2
+                    consumer.addVertex(matrix, x2, 0, z1)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+                    consumer.addVertex(matrix, x2, 0, z2)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+
+                    // Line 3: x2,z2 -> x1,z2
+                    consumer.addVertex(matrix, x2, 0, z2)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+                    consumer.addVertex(matrix, x1, 0, z2)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+
+                    // Line 4: x1,z2 -> x1,z1
+                    consumer.addVertex(matrix, x1, 0, z2)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+                    consumer.addVertex(matrix, x1, 0, z1)
+                            .setColor(red, green, blue, alpha)
+                            .setNormal(poseStack.last(), 0, 1, 0);
+                }
             }
-
-            consumer.addVertex(matrix, x1, 0, z1)
-                .setColor(red, green, blue, alpha)
-                .setNormal(poseStack.last(), nx, 0, nz);
-            consumer.addVertex(matrix, x2, 0, z2)
-                .setColor(red, green, blue, alpha)
-                .setNormal(poseStack.last(), nx, 0, nz);
         }
     }
 }
