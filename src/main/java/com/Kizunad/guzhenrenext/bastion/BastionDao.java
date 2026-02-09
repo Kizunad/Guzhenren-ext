@@ -85,16 +85,17 @@ public enum BastionDao implements StringRepresentable {
     }
 
     /**
-     * 智道光环：挖掘疲劳 + 缓慢。
-     * <p>
-     * 设计：
-     * <ul>
-     *   <li>效果每秒刷新一次，持续 2 秒，避免边界抖动。</li>
-     *   <li>等级随转数提升，并受距离衰减影响（边缘更弱）。</li>
-     * </ul>
-     * </p>
+     * 应用道途光环效果。
+     *
+     * @param player  玩家
+     * @param tier    基地转数
+     * @param falloff 距离衰减系数（0.0-1.0）
      */
-    private static void applyZhiDaoAura(ServerPlayer player, int tier, double falloff) {
+    public void onAuraTick(ServerPlayer player, int tier, double falloff) {
+        if (player == null) {
+            return;
+        }
+
         // falloff 在边缘可能接近 minFalloff（默认 5%），这里不做过多数学变换。
         int tierBonus = Math.max(0, tier - 1);
         int amplifier = Math.min(Constants.MAX_AMPLIFIER, tierBonus / 2);
@@ -105,30 +106,52 @@ public enum BastionDao implements StringRepresentable {
         }
 
         int duration = Constants.EFFECT_DURATION_TICKS;
-        player.addEffect(new MobEffectInstance(
-            MobEffects.DIG_SLOWDOWN,
-            duration,
-            amplifier,
-            false,
-            false,
-            true
-        ));
-        player.addEffect(new MobEffectInstance(
-            MobEffects.MOVEMENT_SLOWDOWN,
-            duration,
-            amplifier,
-            false,
-            false,
-            true
-        ));
-    }
 
-    public void onAuraTick(ServerPlayer player, int tier, double falloff) {
-        if (player == null) {
-            return;
-        }
         switch (this) {
-            case ZHI_DAO -> applyZhiDaoAura(player, tier, falloff);
+            case ZHI_DAO -> {
+                // 智道：水下呼吸
+                player.addEffect(new MobEffectInstance(
+                    MobEffects.CONDUIT_POWER,
+                    duration,
+                    amplifier,
+                    false,
+                    false,
+                    true
+                ));
+            }
+            case HUN_DAO -> {
+                // 魂道：夜视
+                player.addEffect(new MobEffectInstance(
+                    MobEffects.NIGHT_VISION,
+                    duration,
+                    0, // 夜视无需等级
+                    false,
+                    false,
+                    true
+                ));
+            }
+            case MU_DAO -> {
+                // 木道：生命恢复
+                player.addEffect(new MobEffectInstance(
+                    MobEffects.REGENERATION,
+                    duration,
+                    Math.min(1, amplifier), // 限制最高等级，避免过于 OP
+                    false,
+                    false,
+                    true
+                ));
+            }
+            case LI_DAO -> {
+                // 力道：力量
+                player.addEffect(new MobEffectInstance(
+                    MobEffects.DAMAGE_BOOST,
+                    duration,
+                    amplifier,
+                    false,
+                    false,
+                    true
+                ));
+            }
             default -> {
                 // no-op
             }

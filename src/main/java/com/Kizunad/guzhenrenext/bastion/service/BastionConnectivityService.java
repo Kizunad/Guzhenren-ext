@@ -39,14 +39,6 @@ public final class BastionConnectivityService {
          */
         private static final int CHUNK_FULL_BLOCKS = 15;
 
-        /**
-         * 区块几何重叠半径补偿。
-         * <p>
-         * 该值近似区块半对角线，用于让“圆形覆盖”在区块尺度下更稳定。
-         * </p>
-         */
-        private static final int CHUNK_OVERLAP_OFFSET = 12;
-
         private Config() {
         }
     }
@@ -75,10 +67,8 @@ public final class BastionConnectivityService {
             return;
         }
 
-        // 几何重叠判定：distSqr(chunkCenter, core/anchor) <= (auraRadius + offset)^2。
         int auraRadius = Math.max(1, typeConfig.aura().baseRadius());
-        int overlapRadius = auraRadius + Config.CHUNK_OVERLAP_OFFSET;
-        long overlapRadiusSqr = (long) overlapRadius * overlapRadius;
+        long auraRadiusSqr = (long) auraRadius * auraRadius;
         int decayTotalTicks = Math.max(1, typeConfig.decay().totalTicks());
 
         java.util.List<BlockPos> activeAnchors = new java.util.ArrayList<>();
@@ -93,7 +83,7 @@ public final class BastionConnectivityService {
         }
 
         // 仅扫描核心附近潜在领土窗口，owner 判定由 ApertureTerritory API（savedData.getTerritoryOwner）提供。
-        int maxTerritoryRadius = Math.max(1, typeConfig.expansion().mycelium().maxRadius()) + overlapRadius;
+        int maxTerritoryRadius = Math.max(1, typeConfig.expansion().mycelium().maxRadius()) + auraRadius;
         int chunkRadius = (maxTerritoryRadius + Config.CHUNK_FULL_BLOCKS) >> Config.CHUNK_SHIFT;
         int coreChunkX = bastion.corePos().getX() >> Config.CHUNK_SHIFT;
         int coreChunkZ = bastion.corePos().getZ() >> Config.CHUNK_SHIFT;
@@ -117,10 +107,10 @@ public final class BastionConnectivityService {
                     bastion.corePos().getY(),
                     (chunkZ << Config.CHUNK_SHIFT) + Config.CHUNK_CENTER_OFFSET);
 
-                boolean connected = chunkCenter.distSqr(bastion.corePos()) <= overlapRadiusSqr;
+                boolean connected = chunkCenter.distSqr(bastion.corePos()) <= auraRadiusSqr;
                 if (!connected) {
                     for (BlockPos anchorPos : activeAnchors) {
-                        if (chunkCenter.distSqr(anchorPos) <= overlapRadiusSqr) {
+                        if (chunkCenter.distSqr(anchorPos) <= auraRadiusSqr) {
                             connected = true;
                             break;
                         }
@@ -146,38 +136,6 @@ public final class BastionConnectivityService {
     private static boolean isChunkLoaded(ServerLevel level, BlockPos pos) {
         ChunkPos chunkPos = new ChunkPos(pos);
         return level.hasChunk(chunkPos.x, chunkPos.z);
-    }
-
-    /**
-     * 兼容保留：历史 BFS 网络节点判定。
-     * <p>
-     * 当前版本连通性已切换为“区块几何重叠”策略，本方法仅用于保留旧逻辑语义，
-     * 便于后续逐步清理 BFS 相关调用，不再参与主流程。
-     * </p>
-     *
-     * @deprecated 已被几何覆盖判定替代，暂时保留避免一次性删除旧语义。
-     */
-    @Deprecated
-    private static boolean isNetworkNode(
-            ServerLevel level,
-            BastionSavedData savedData,
-            BastionData bastion,
-            BlockPos pos) {
-        if (pos.equals(bastion.corePos())) {
-            return true;
-        }
-
-        if (!isChunkLoaded(level, pos)) {
-            return false;
-        }
-
-        BlockState state = level.getBlockState(pos);
-        if (state.getBlock() instanceof BastionAnchorBlock) {
-            return savedData.isAnchorInCache(bastion.id(), pos)
-                || savedData.isNodeInCache(bastion.id(), pos);
-        }
-
-        return savedData.isNodeInCache(bastion.id(), pos);
     }
 
     private static void tickDecay(ServerLevel level, BastionSavedData savedData, BastionData bastion, long gameTime) {

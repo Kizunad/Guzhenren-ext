@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.bastion.service;
 
+import com.Kizunad.guzhenrenext.bastion.BastionDao;
 import com.Kizunad.guzhenrenext.bastion.BastionData;
 import com.Kizunad.guzhenrenext.bastion.BastionSavedData;
 import com.Kizunad.guzhenrenext.bastion.BastionState;
@@ -8,10 +9,14 @@ import com.Kizunad.guzhenrenext.bastion.config.BastionTypeManager;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianData;
 import com.Kizunad.guzhenrenext.bastion.entity.BastionGuardianFactory;
 import java.util.Random;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -254,13 +259,13 @@ public final class BastionSpawnService {
 
         if (sampledNodes.isEmpty()) {
             // 如果没有缓存节点，回退到核心位置
-            BlockPos validPos = findValidSpawnHeightAboveNode(level, bastion.corePos());
+            BlockPos validPos = findValidSpawnHeightAboveNode(level, bastion.corePos(), bastion);
             return validPos;
         }
 
         // 对每个节点，向上搜索可站立空间
         for (BlockPos nodePos : sampledNodes) {
-            BlockPos validPos = findValidSpawnHeightAboveNode(level, nodePos);
+            BlockPos validPos = findValidSpawnHeightAboveNode(level, nodePos, bastion);
             if (validPos != null) {
                 return validPos;
             }
@@ -276,13 +281,14 @@ public final class BastionSpawnService {
      *
      * @param level   服务端世界
      * @param nodePos 菌毯节点位置
+     * @param bastion 基地数据
      * @return 可站立位置，如果没有合适位置则返回 null
      */
-    private static BlockPos findValidSpawnHeightAboveNode(ServerLevel level, BlockPos nodePos) {
+    private static BlockPos findValidSpawnHeightAboveNode(ServerLevel level, BlockPos nodePos, BastionData bastion) {
         // 从节点上方 1 格开始向上搜索
         for (int dy = 1; dy <= Constants.SPAWN_HEIGHT_CHECK + 1; dy++) {
             BlockPos checkPos = nodePos.above(dy);
-            if (isValidSpawnLocation(level, checkPos)) {
+            if (isValidSpawnLocation(level, checkPos, bastion)) {
                 return checkPos;
             }
         }
@@ -290,14 +296,106 @@ public final class BastionSpawnService {
     }
 
     /**
-     * 检查位置是否适合刷怪。
+     * 检查给定的自然刷怪是否被领地道途允许。
+     * <p>
+     * 此方法应由自然刷怪事件调用（如 checkSpawn）。
+     * </p>
+     *
+     * @param level 服务端世界
+     * @param pos   刷怪位置
+     * @param mob   尝试生成的实体
+     * @return 如果允许生成返回 true，否则返回 false
      */
-    private static boolean isValidSpawnLocation(ServerLevel level, BlockPos pos) {
-        BlockState groundState = level.getBlockState(pos.below());
+    public static boolean isNaturalSpawnAllowed(ServerLevel level, BlockPos pos, Mob mob) {
+        BastionSavedData savedData = BastionSavedData.get(level);
+        // 获取所在区块的领地归属
+        long chunkKey = new ChunkPos(pos).toLong();
+        UUID ownerId = savedData.getTerritoryOwner(chunkKey);
+
+        if (ownerId == null) {
+            // 无领地，不干预
+            return true;
+        }
+
+        BastionData bastion = savedData.getBastion(ownerId);
+        if (bastion == null) {
+            return true;
+        }
+
+        // 仅在 ACTIVE 状态下生效？或者一直生效？
+        // 假设领地影响一直存在（只要领地还在）。
+        
+        return isMobTypeAllowedByDao(bastion.primaryDao(), mob.getType().getCategory());
+    }
+
+    /**
+     * 根据道途判断实体类型是否允许。
+     */
+    private static boolean isMobTypeAllowedByDao(BastionDao dao, MobCategory category) {
+        switch (dao) {
+            case ZHI_DAO -> {
+                // 智道：允许水生，拒绝怪物
+                // ZHI (Wisdom/Water): Allow Water/Ambient. Deny Monster.
+                if (category == MobCategory.MONSTER) {
+                    return false;
+                }
+                return true;
+            }
+            case HUN_DAO -> {
+                // 魂道：允许怪物，拒绝动物
+                // HUN (Soul): Allow Monster. Deny Animal.
+                if (category == MobCategory.CREATURE || category == MobCategory.AMBIENT
+                        || category == MobCategory.WATER_CREATURE) {
+                    return false;
+                }
+                return true;
+            }
+            case MU_DAO -> {
+                // 木道：允许动物，拒绝怪物
+                // MU (Wood/Life): Allow Animal. Deny Monster.
+                if (category == MobCategory.MONSTER) {
+                    return false;
+                }
+                return true;
+            }
+            case LI_DAO -> {
+                // 力道：允许怪物
+                // LI (Strength): Allow Monster.
+                // 暂不拒绝其他类型，或者也可以像魂道一样倾向于战斗。
+                // 保持默认行为。
+                return true;
+            }
+            default -> {
+                return true;
+            }
+        }
+    }
+
+    /**
+     * 检查位置是否适合刷怪。
+     * <p>
+     * 加入道途特化过滤逻辑：
+     * <ul>
+     *   <li>智道：允许在水中刷怪。</li>
+     * </ul>
+     * </p>
+     */
+    private static boolean isValidSpawnLocation(ServerLevel level, BlockPos pos, BastionData bastion) {
         BlockState feetState = level.getBlockState(pos);
+        BlockState groundState = level.getBlockState(pos.below());
         BlockState headState = level.getBlockState(pos.above());
 
-        // 需要实心地面 + 两格空气
+        // 智道特化：允许在水中生成
+        if (bastion.primaryDao() == BastionDao.ZHI_DAO) {
+            FluidState fluid = feetState.getFluidState();
+            // 如果脚下是水（且头部是水或空气），且地面是固体（或海底）
+            if (fluid.is(net.minecraft.tags.FluidTags.WATER)) {
+                // 简单放宽：只要是在水里就算合法（假设生成的守卫能适应水）
+                return groundState.isSolid() || groundState.getFluidState().is(net.minecraft.tags.FluidTags.WATER);
+            }
+        }
+
+        // 默认逻辑：实心地面 + 两格空气
         return groundState.isSolid()
             && feetState.isAir()
             && headState.isAir();

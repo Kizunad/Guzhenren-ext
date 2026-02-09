@@ -171,6 +171,7 @@ public class BastionSavedData extends SavedData {
      * 注意：该结构只用于“非实时、预算化”的 BFS 扫描；不写入 NBT。
      * </p>
      */
+    @Deprecated
     private final Map<UUID, ConnectivityRuntime> connectivityRuntimes = new HashMap<>();
 
 
@@ -553,6 +554,18 @@ public class BastionSavedData extends SavedData {
     @Nullable
     public UUID getTerritoryOwner(long chunkKey) {
         return territory.getOwner(chunkKey);
+    }
+
+    /**
+     * 获取领地归属快照（只读）。
+     * <p>
+     * 该方法用于按 chunk 维度批量遍历领土归属，调用方不得修改返回 Map。
+     * </p>
+     *
+     * @return 领地归属快照（key=chunkKey，value=bastionId）
+     */
+    public Map<Long, UUID> getTerritoryOwnersSnapshot() {
+        return territory.getAllOwners();
     }
 
     /**
@@ -1105,6 +1118,7 @@ public class BastionSavedData extends SavedData {
     /**
      * 获取或创建连通性运行时状态。
      */
+    @Deprecated
     public ConnectivityRuntime getOrCreateConnectivityRuntime(UUID bastionId, BlockPos corePos) {
         ConnectivityRuntime runtime = connectivityRuntimes.get(bastionId);
         if (runtime != null) {
@@ -1188,6 +1202,7 @@ public class BastionSavedData extends SavedData {
     /**
      * 连通性扫描运行时状态（不持久化）。
      */
+    @Deprecated
     public static final class ConnectivityRuntime {
 
         /** 当前扫描的核心位置（用于在基地搬迁/重建时刷新）。 */
