@@ -2,7 +2,6 @@ package com.Kizunad.guzhenrenext;
 
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
-import com.Kizunad.guzhenrenext.bastion.ui.BastionMenus;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
@@ -35,30 +34,13 @@ public class GuzhenrenExt {
         // NpcKongqiaoInventoryBridge.register();
 
         KongqiaoMenus.register(modEventBus);
-        com.Kizunad.guzhenrenext.bastion.menu.BastionMenus.register(modEventBus);
-        BastionMenus.register(modEventBus);
+        // Bastion 系统已移除，待重写
         KongqiaoAttachments.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntities.register(modEventBus);
         GuzhenrenExtNetworking.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.logic.GuModEffects.registerAll();
         com.Kizunad.guzhenrenext.kongqiao.logic.ShazhaoModEffects.registerAll();
         com.Kizunad.guzhenrenext.registry.ModMobEffects.register(modEventBus);
-
-        // Bastion 高转技能/特效注册
-        com.Kizunad.guzhenrenext.bastion.skill.BastionHighTierEffectRegistry.registerAll();
-
-        // Bastion system registration
-        com.Kizunad.guzhenrenext.bastion.BastionBlocks.register(modEventBus);
-        com.Kizunad.guzhenrenext.bastion.BastionBlockEntities.register(modEventBus);
-        com.Kizunad.guzhenrenext.bastion.BastionSounds.register(modEventBus);
-        com.Kizunad.guzhenrenext.bastion.BastionCreativeTab.register(modEventBus);
-        com.Kizunad.guzhenrenext.bastion.BastionTicker.register();
-
-        // Bastion guardians
-        com.Kizunad.guzhenrenext.bastion.guardian.BastionGuardianEntities.register(modEventBus);
-        // Bastion entities
-        com.Kizunad.guzhenrenext.bastion.entity.BastionEntities.register(modEventBus);
-        // Client 渲染注册通过 @EventBusSubscriber(Dist.CLIENT) 自动挂载。
 
         // Worldgen
         com.Kizunad.guzhenrenext.worldgen.GuzhenrenExtWorldGen.register(modEventBus);
@@ -98,7 +80,6 @@ public class GuzhenrenExt {
     private void onAddReloadListeners(net.neoforged.neoforge.event.AddReloadListenerEvent event) {
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataLoader());
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataLoader());
-        event.addListener(new com.Kizunad.guzhenrenext.bastion.config.BastionTypeDataLoader());
-        event.addListener(new com.Kizunad.guzhenrenext.bastion.config.BastionBreakingDataLoader());
+        // Bastion 系统已移除，待重写
     }
 }
