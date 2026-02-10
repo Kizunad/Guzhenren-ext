@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge;
 
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoI18n;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.SolidPanel;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHelpScreen;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.InventoryUI;
 import com.Kizunad.tinyUI.controls.Label;
@@ -11,6 +12,7 @@ import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
 import com.Kizunad.tinyUI.theme.Theme;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
@@ -31,6 +33,7 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
     private static final int PLAYER_SLOT_PADDING = 0;
     private static final int PLAYER_INV_START_INDEX = 1;
     private static final int ELEMENT_SPACING = 4;
+    private static final int HELP_BUTTON_WIDTH = 20;
     private static final int SECTION_EXTRA_GAP = 8;
     private static final int PROGRESS_BAR_SEGMENTS = 10;
 
@@ -98,6 +101,8 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
             TITLE_HEIGHT
         );
         background.addChild(titleLabel);
+
+        background.addChild(createHelpButton());
 
         int inputSlotY = PANEL_PADDING + TITLE_HEIGHT + SECTION_GAP;
         int inputSlotX = (WINDOW_WIDTH - SLOT_SIZE) / 2;
@@ -234,6 +239,27 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
 
         claimButton.setEnabled(canClaim);
         cancelButton.setEnabled(active);
+    }
+
+    /**
+     * 创建标题栏右侧的帮助按钮。
+     */
+    private Button createHelpButton() {
+        final Button helpButton = new Button(
+            KongqiaoI18n.text(KongqiaoI18n.FORGE_BUTTON_HELP),
+            theme
+        );
+        helpButton.setFrame(
+            WINDOW_WIDTH - PANEL_PADDING - HELP_BUTTON_WIDTH,
+            PANEL_PADDING,
+            HELP_BUTTON_WIDTH,
+            TITLE_HEIGHT
+        );
+        helpButton.setOnClick(() -> {
+            final Minecraft mc = Minecraft.getInstance();
+            mc.tell(() -> mc.setScreen(new FlyingSwordHelpScreen()));
+        });
+        return helpButton;
     }
 
     private String buildProgressBar(int percent) {
