@@ -54,6 +54,80 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.forge.button.claim";
     public static final String FORGE_BUTTON_CANCEL =
         "screen.guzhenrenext.forge.button.cancel";
+    public static final String FORGE_BUTTON_HELP =
+        "screen.guzhenrenext.forge.button.help";
+    public static final String HELP_TITLE =
+        "screen.guzhenrenext.forge.help.title";
+    public static final String HELP_TAB_OVERVIEW =
+        "screen.guzhenrenext.forge.help.tab.overview";
+    public static final String HELP_TAB_QUALITY =
+        "screen.guzhenrenext.forge.help.tab.quality";
+    public static final String HELP_TAB_COMBAT =
+        "screen.guzhenrenext.forge.help.tab.combat";
+    public static final String HELP_TAB_GROWTH =
+        "screen.guzhenrenext.forge.help.tab.growth";
+    public static final String HELP_OVERVIEW_TITLE =
+        "screen.guzhenrenext.forge.help.overview.title";
+    public static final String HELP_OVERVIEW_STEP1 =
+        "screen.guzhenrenext.forge.help.overview.step1";
+    public static final String HELP_OVERVIEW_STEP2 =
+        "screen.guzhenrenext.forge.help.overview.step2";
+    public static final String HELP_OVERVIEW_STEP3 =
+        "screen.guzhenrenext.forge.help.overview.step3";
+    public static final String HELP_OVERVIEW_STEP4 =
+        "screen.guzhenrenext.forge.help.overview.step4";
+    public static final String HELP_OVERVIEW_STEP5 =
+        "screen.guzhenrenext.forge.help.overview.step5";
+    public static final String HELP_OVERVIEW_KEYS_TITLE =
+        "screen.guzhenrenext.forge.help.overview.keys_title";
+    public static final String HELP_OVERVIEW_KEY_SELECT =
+        "screen.guzhenrenext.forge.help.overview.key_select";
+    public static final String HELP_OVERVIEW_KEY_MODE =
+        "screen.guzhenrenext.forge.help.overview.key_mode";
+    public static final String HELP_OVERVIEW_KEY_RECALL =
+        "screen.guzhenrenext.forge.help.overview.key_recall";
+    public static final String HELP_OVERVIEW_KEY_RESTORE =
+        "screen.guzhenrenext.forge.help.overview.key_restore";
+    public static final String HELP_OVERVIEW_KEY_HUD =
+        "screen.guzhenrenext.forge.help.overview.key_hud";
+    public static final String HELP_OVERVIEW_NOTE =
+        "screen.guzhenrenext.forge.help.overview.note";
+    public static final String HELP_QUALITY_TITLE =
+        "screen.guzhenrenext.forge.help.quality.title";
+    public static final String HELP_QUALITY_DESC =
+        "screen.guzhenrenext.forge.help.quality.desc";
+    public static final String HELP_QUALITY_ENTRY =
+        "screen.guzhenrenext.forge.help.quality.entry";
+    public static final String HELP_QUALITY_DAOHEN_TITLE =
+        "screen.guzhenrenext.forge.help.quality.daohen_title";
+    public static final String HELP_QUALITY_DAOHEN_DESC =
+        "screen.guzhenrenext.forge.help.quality.daohen_desc";
+    public static final String HELP_QUALITY_DAOHEN_NOTE =
+        "screen.guzhenrenext.forge.help.quality.daohen_note";
+    public static final String HELP_COMBAT_TITLE =
+        "screen.guzhenrenext.forge.help.combat.title";
+    public static final String HELP_COMBAT_MODE_ORBIT =
+        "screen.guzhenrenext.forge.help.combat.mode_orbit";
+    public static final String HELP_COMBAT_MODE_HOVER =
+        "screen.guzhenrenext.forge.help.combat.mode_hover";
+    public static final String HELP_COMBAT_MODE_GUARD =
+        "screen.guzhenrenext.forge.help.combat.mode_guard";
+    public static final String HELP_COMBAT_MODE_HUNT =
+        "screen.guzhenrenext.forge.help.combat.mode_hunt";
+    public static final String HELP_COMBAT_IMPRINT_TITLE =
+        "screen.guzhenrenext.forge.help.combat.imprint_title";
+    public static final String HELP_COMBAT_IMPRINT_DESC =
+        "screen.guzhenrenext.forge.help.combat.imprint_desc";
+    public static final String HELP_GROWTH_TITLE =
+        "screen.guzhenrenext.forge.help.growth.title";
+    public static final String HELP_GROWTH_EXP_DESC =
+        "screen.guzhenrenext.forge.help.growth.exp_desc";
+    public static final String HELP_GROWTH_LEVEL_DESC =
+        "screen.guzhenrenext.forge.help.growth.level_desc";
+    public static final String HELP_GROWTH_BREAKTHROUGH_DESC =
+        "screen.guzhenrenext.forge.help.growth.breakthrough_desc";
+    public static final String HELP_BUTTON_CLOSE =
+        "screen.guzhenrenext.forge.help.button.close";
 
     private KongqiaoI18n() {}
 
