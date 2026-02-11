@@ -7,6 +7,7 @@ import com.Kizunad.guzhenrenext.kongqiao.network.ServerboundTweakConfigUpdatePay
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.domain.network.ClientboundDomainRemovePayload;
 import com.Kizunad.guzhenrenext.kongqiao.domain.network.ClientboundDomainSyncPayload;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge.ClientboundForgeDaoSyncPayload;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -62,6 +63,11 @@ public final class GuzhenrenExtNetworking {
             ClientboundKongqiaoSyncPayload.TYPE,
             ClientboundKongqiaoSyncPayload.STREAM_CODEC,
             ClientboundKongqiaoSyncPayload::handle
+        );
+        registrar.playToClient(
+            ClientboundForgeDaoSyncPayload.TYPE,
+            ClientboundForgeDaoSyncPayload.STREAM_CODEC,
+            ClientboundForgeDaoSyncPayload::handle
         );
 
         registrar.playToClient(
