@@ -1,7 +1,9 @@
 package com.Kizunad.guzhenrenext.xianqiao.daomark;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.registries.Registries;
@@ -108,7 +110,10 @@ public final class DaoMarkDiffusionService {
     private static void diffuseChunkSections(
         ServerLevel level, ChunkPos chunkPos, DaoChunkAttachment attachment
     ) {
-        for (Map.Entry<Integer, DaoSectionData> entry : attachment.getSections().entrySet()) {
+        // 这里必须先做快照：扩散到上下 Section 时可能命中同一 Chunk，并通过 getOrCreate 修改原 Map，
+        // 若直接遍历 entrySet 会触发 ConcurrentModificationException。
+        List<Map.Entry<Integer, DaoSectionData>> snapshot = new ArrayList<>(attachment.getSections().entrySet());
+        for (Map.Entry<Integer, DaoSectionData> entry : snapshot) {
             int sectionY = entry.getKey();
             DaoSectionData source = entry.getValue();
             diffuseSection(level, chunkPos, sectionY, source);

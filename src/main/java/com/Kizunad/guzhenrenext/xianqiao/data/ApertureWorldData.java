@@ -36,11 +36,25 @@ public class ApertureWorldData extends SavedData {
 
     private static final String KEY_LAST_LOGOUT_TIMES = "lastLogoutTimes";
 
+    private static final String KEY_RETURN_POSITIONS = "returnPositions";
+
     private static final String KEY_OWNER = "owner";
 
     private static final String KEY_INFO = "info";
 
     private static final String KEY_LAST_LOGOUT_TIME = "lastLogoutTime";
+
+    private static final String KEY_DIMENSION_KEY = "dimensionKey";
+
+    private static final String KEY_X = "x";
+
+    private static final String KEY_Y = "y";
+
+    private static final String KEY_Z = "z";
+
+    private static final String KEY_Y_ROT = "yRot";
+
+    private static final String KEY_X_ROT = "xRot";
 
     private static final int TAG_COMPOUND = Tag.TAG_COMPOUND;
 
@@ -79,6 +93,8 @@ public class ApertureWorldData extends SavedData {
     private final Set<UUID> initializedApertures = new HashSet<>();
 
     private final Map<UUID, Long> lastLogoutTimes = new HashMap<>();
+
+    private final Map<UUID, ReturnPosition> returnPositions = new HashMap<>();
 
     /**
      * 分配一个新的仙窍信息；若已有记录，则直接返回既有信息。
@@ -264,6 +280,18 @@ public class ApertureWorldData extends SavedData {
         return lastLogoutTimes.getOrDefault(owner, UNRECORDED_LOGOUT_TIME);
     }
 
+    public void setReturnPosition(UUID owner, ReturnPosition position) {
+        ReturnPosition previous = returnPositions.put(owner, position);
+        if (!position.equals(previous)) {
+            setDirty();
+        }
+    }
+
+    @Nullable
+    public ReturnPosition getReturnPosition(UUID owner) {
+        return returnPositions.get(owner);
+    }
+
     /**
      * 更新指定玩家仙窍的下次灾劫触发刻（绝对游戏时间）。
      *
@@ -382,6 +410,15 @@ public class ApertureWorldData extends SavedData {
             logoutList.add(logoutTag);
         }
         tag.put(KEY_LAST_LOGOUT_TIMES, logoutList);
+
+        ListTag returnPositionList = new ListTag();
+        for (Map.Entry<UUID, ReturnPosition> entry : returnPositions.entrySet()) {
+            CompoundTag returnTag = new CompoundTag();
+            returnTag.putUUID(KEY_OWNER, entry.getKey());
+            returnTag.put(KEY_INFO, entry.getValue().save());
+            returnPositionList.add(returnTag);
+        }
+        tag.put(KEY_RETURN_POSITIONS, returnPositionList);
         return tag;
     }
 
@@ -423,6 +460,21 @@ public class ApertureWorldData extends SavedData {
                 UUID owner = logoutTag.getUUID(KEY_OWNER);
                 long logoutTick = logoutTag.getLong(KEY_LAST_LOGOUT_TIME);
                 data.lastLogoutTimes.put(owner, logoutTick);
+            }
+        }
+
+        if (tag.contains(KEY_RETURN_POSITIONS, TAG_LIST)) {
+            ListTag returnPositionList = tag.getList(KEY_RETURN_POSITIONS, TAG_COMPOUND);
+            for (int i = 0; i < returnPositionList.size(); i++) {
+                CompoundTag returnTag = returnPositionList.getCompound(i);
+                if (!returnTag.hasUUID(KEY_OWNER) || !returnTag.contains(KEY_INFO, TAG_COMPOUND)) {
+                    continue;
+                }
+                UUID owner = returnTag.getUUID(KEY_OWNER);
+                ReturnPosition position = ReturnPosition.load(returnTag.getCompound(KEY_INFO));
+                if (position != null) {
+                    data.returnPositions.put(owner, position);
+                }
             }
         }
         return data;
@@ -520,6 +572,40 @@ public class ApertureWorldData extends SavedData {
                 frozen,
                 normalizedFavorability,
                 normalizedTier
+            );
+        }
+    }
+
+    public record ReturnPosition(String dimensionKey, double x, double y, double z, float yRot, float xRot) {
+
+        public CompoundTag save() {
+            CompoundTag tag = new CompoundTag();
+            tag.putString(KEY_DIMENSION_KEY, dimensionKey);
+            tag.putDouble(KEY_X, x);
+            tag.putDouble(KEY_Y, y);
+            tag.putDouble(KEY_Z, z);
+            tag.putFloat(KEY_Y_ROT, yRot);
+            tag.putFloat(KEY_X_ROT, xRot);
+            return tag;
+        }
+
+        @Nullable
+        public static ReturnPosition load(CompoundTag tag) {
+            if (!tag.contains(KEY_DIMENSION_KEY) || !tag.contains(KEY_X) || !tag.contains(KEY_Y)
+                || !tag.contains(KEY_Z) || !tag.contains(KEY_Y_ROT) || !tag.contains(KEY_X_ROT)) {
+                return null;
+            }
+            String storedDimensionKey = tag.getString(KEY_DIMENSION_KEY);
+            if (storedDimensionKey.isEmpty()) {
+                return null;
+            }
+            return new ReturnPosition(
+                storedDimensionKey,
+                tag.getDouble(KEY_X),
+                tag.getDouble(KEY_Y),
+                tag.getDouble(KEY_Z),
+                tag.getFloat(KEY_Y_ROT),
+                tag.getFloat(KEY_X_ROT)
             );
         }
     }
