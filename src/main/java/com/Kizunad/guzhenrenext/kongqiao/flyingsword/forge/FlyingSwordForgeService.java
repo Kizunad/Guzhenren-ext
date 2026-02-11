@@ -137,6 +137,7 @@ public final class FlyingSwordForgeService {
             "已吸收 " + daoKey + " 道痕 +" + zPoints +
             " (累计: " + forge.getDaoMark(daoKey) + ")"
         );
+        player.sendSystemMessage(Component.literal("[飞剑培养] 已吸收 " + daoKey + " 道痕 +" + zPoints));
 
         return true;
     }

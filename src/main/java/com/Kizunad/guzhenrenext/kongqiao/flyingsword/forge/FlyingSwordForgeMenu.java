@@ -3,6 +3,8 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.tinyUI.demo.TinyUISlot;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -14,6 +16,7 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 飞剑培养菜单。
@@ -41,6 +44,13 @@ public class FlyingSwordForgeMenu extends AbstractContainerMenu {
     private final Container inputContainer;
     private final ContainerData data;
     private final Player player;
+
+    /** 客户端侧道痕缓存（由 ClientboundForgeDaoSyncPayload 更新）。 */
+    private Map<String, Integer> clientDaoMarks = new HashMap<>();
+    /** 客户端侧道痕总分缓存。 */
+    private int clientTotalScore = 0;
+    /** 客户端侧最近操作反馈消息缓存。 */
+    private String clientLastMessage = "";
 
     public FlyingSwordForgeMenu(int containerId, Inventory playerInventory) {
         this(
@@ -203,6 +213,23 @@ public class FlyingSwordForgeMenu extends AbstractContainerMenu {
         data.set(DATA_FED_SWORD_COUNT, forge.getFedSwordCount());
         data.set(DATA_REQUIRED_SWORD_COUNT, forge.getRequiredSwordCount());
         data.set(DATA_CAN_CLAIM, forge.canClaim() ? 1 : 0);
+
+        // 同步道痕明细 + 反馈消息到客户端（ContainerData 无法传 Map/String，使用专用网络包）。
+        Map<String, Integer> marks = forge.getDaoMarks();
+        int totalScore = 0;
+        for (Integer value : marks.values()) {
+            if (value != null && value > 0) {
+                totalScore += value;
+            }
+        }
+        PacketDistributor.sendToPlayer(
+            serverPlayer,
+            new ClientboundForgeDaoSyncPayload(
+                new HashMap<>(marks),
+                totalScore,
+                forge.getLastMessage()
+            )
+        );
     }
 
     public int getDataActive() {
@@ -237,5 +264,33 @@ public class FlyingSwordForgeMenu extends AbstractContainerMenu {
             return 0;
         }
         return Math.min(PERCENT_100, (getDataFedSwordCount() * PERCENT_100) / required);
+    }
+
+    /**
+     * 接收服务端推送的道痕同步数据，更新客户端缓存。
+     *
+     * @param marks 各道的累计分
+     * @param total 道痕总分
+     * @param msg 最近操作反馈消息
+     */
+    public void applyDaoSync(Map<String, Integer> marks, int total, String msg) {
+        this.clientDaoMarks = marks != null ? new HashMap<>(marks) : new HashMap<>();
+        this.clientTotalScore = total;
+        this.clientLastMessage = msg != null ? msg : "";
+    }
+
+    /** 获取客户端缓存的道痕明细。 */
+    public Map<String, Integer> getClientDaoMarks() {
+        return clientDaoMarks;
+    }
+
+    /** 获取客户端缓存的道痕总分。 */
+    public int getClientTotalScore() {
+        return clientTotalScore;
+    }
+
+    /** 获取客户端缓存的最近反馈消息。 */
+    public String getClientLastMessage() {
+        return clientLastMessage;
     }
 }

@@ -1,7 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
@@ -18,7 +17,6 @@ public record ClientboundForgeDaoSyncPayload(
 ) implements CustomPacketPayload {
 
     private static final String PACKET_PATH = "forge_dao_sync";
-    private static final String APPLY_DAO_SYNC_METHOD = "applyDaoSync";
 
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(
         GuzhenrenExt.MODID,
@@ -63,36 +61,19 @@ public record ClientboundForgeDaoSyncPayload(
         return TYPE;
     }
 
+    /**
+     * 客户端接收处理：将道痕数据更新到当前打开的锻造菜单缓存中。
+     */
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.screen instanceof FlyingSwordForgeScreen forgeScreen) {
-                tryApplyDaoSync(
-                    forgeScreen.getMenu(),
+                forgeScreen.getMenu().applyDaoSync(
                     this.daoMarks,
                     this.totalScore,
                     this.lastMessage
                 );
             }
         });
-    }
-
-    private static void tryApplyDaoSync(
-        Object menu,
-        Map<String, Integer> daoMarks,
-        int totalScore,
-        String lastMessage
-    ) {
-        try {
-            Method applyMethod = menu.getClass().getMethod(
-                APPLY_DAO_SYNC_METHOD,
-                Map.class,
-                int.class,
-                String.class
-            );
-            applyMethod.invoke(menu, daoMarks, totalScore, lastMessage);
-        } catch (ReflectiveOperationException ex) {
-            return;
-        }
     }
 }
