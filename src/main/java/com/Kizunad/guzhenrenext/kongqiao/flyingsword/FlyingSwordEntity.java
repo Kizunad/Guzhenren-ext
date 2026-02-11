@@ -67,6 +67,24 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
             EntityDataSerializers.ITEM_STACK
         );
 
+    private static final EntityDataAccessor<Integer> QUALITY_TIER =
+        SynchedEntityData.defineId(
+            FlyingSwordEntity.class,
+            EntityDataSerializers.INT
+        );
+
+    private static final EntityDataAccessor<Integer> SWORD_LEVEL =
+        SynchedEntityData.defineId(
+            FlyingSwordEntity.class,
+            EntityDataSerializers.INT
+        );
+
+    private static final EntityDataAccessor<Integer> SWORD_EXP =
+        SynchedEntityData.defineId(
+            FlyingSwordEntity.class,
+            EntityDataSerializers.INT
+        );
+
     // ===== 运行时缓存 =====
 
     @Nullable
@@ -109,6 +127,9 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
         builder.define(OWNER, Optional.empty());
         builder.define(AI_MODE, SwordAIMode.ORBIT.ordinal());
         builder.define(DISPLAY_ITEM_STACK, new ItemStack(Items.IRON_SWORD));
+        builder.define(QUALITY_TIER, 0);
+        builder.define(SWORD_LEVEL, 1);
+        builder.define(SWORD_EXP, 0);
     }
 
     @Override
@@ -251,6 +272,22 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
         return swordAttributes;
     }
 
+    /**
+     * 将 swordAttributes 的品质/等级/经验写入 entityData（仅服务端调用）。
+     * <p>
+     * 通过 SynchedEntityData 自动同步到客户端，
+     * 客户端在 {@link #onSyncedDataUpdated(EntityDataAccessor)} 中更新本地镜像。
+     * </p>
+     */
+    public void syncAttributesToEntityData() {
+        if (level().isClientSide()) {
+            return;
+        }
+        entityData.set(QUALITY_TIER, swordAttributes.getQuality().ordinal());
+        entityData.set(SWORD_LEVEL, swordAttributes.getLevel());
+        entityData.set(SWORD_EXP, swordAttributes.getExperience());
+    }
+
     // ===== Cached Target =====
 
     @Nullable
@@ -348,6 +385,7 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
         // Sword Attributes（使用新的品质/等级系统）
         if (tag.contains("Attributes")) {
             swordAttributes.readFromNBT(tag.getCompound("Attributes"));
+            syncAttributesToEntityData();
         }
     }
 
@@ -355,6 +393,10 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
      * 获取当前品质。
      */
     public SwordQuality getQuality() {
+        if (level().isClientSide()) {
+            int tier = entityData.get(QUALITY_TIER);
+            return SwordQuality.fromTier(tier);
+        }
         return swordAttributes.getQuality();
     }
 
@@ -362,6 +404,9 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
      * 获取当前等级。
      */
     public int getSwordLevel() {
+        if (level().isClientSide()) {
+            return entityData.get(SWORD_LEVEL);
+        }
         return swordAttributes.getLevel();
     }
 
@@ -369,7 +414,33 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
      * 获取当前经验。
      */
     public int getSwordExperience() {
+        if (level().isClientSide()) {
+            return entityData.get(SWORD_EXP);
+        }
         return swordAttributes.getExperience();
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (!level().isClientSide()) {
+            return;
+        }
+        if (key.equals(QUALITY_TIER)) {
+            swordAttributes.getGrowthData().setQualityRaw(
+                SwordQuality.fromTier(entityData.get(QUALITY_TIER))
+            );
+            swordAttributes.recalculateFromGrowth();
+        } else if (key.equals(SWORD_LEVEL)) {
+            swordAttributes.getGrowthData().setLevelRaw(
+                entityData.get(SWORD_LEVEL)
+            );
+            swordAttributes.recalculateFromGrowth();
+        } else if (key.equals(SWORD_EXP)) {
+            swordAttributes.getGrowthData().setExperienceRaw(
+                entityData.get(SWORD_EXP)
+            );
+        }
     }
 
     /**
@@ -379,7 +450,11 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
      * @return 升级结果
      */
     public SwordGrowthData.ExpAddResult addExperience(int amount) {
-        return swordAttributes.addExperience(amount);
+        SwordGrowthData.ExpAddResult result = swordAttributes.addExperience(
+            amount
+        );
+        syncAttributesToEntityData();
+        return result;
     }
 
     /**
@@ -388,7 +463,9 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
      * @return 突破结果
      */
     public SwordExpCalculator.BreakthroughResult tryBreakthrough() {
-        return swordAttributes.tryBreakthrough();
+        SwordExpCalculator.BreakthroughResult result = swordAttributes.tryBreakthrough();
+        syncAttributesToEntityData();
+        return result;
     }
 
     /**
@@ -414,5 +491,6 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
     @Deprecated
     public void readAttributesFromTag(CompoundTag tag) {
         swordAttributes.readFromNBT(tag);
+        syncAttributesToEntityData();
     }
 }

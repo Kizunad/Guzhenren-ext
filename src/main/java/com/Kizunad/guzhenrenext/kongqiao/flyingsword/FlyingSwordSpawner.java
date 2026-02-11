@@ -97,6 +97,7 @@ public final class FlyingSwordSpawner {
                 attrs.getGrowthData().setExperienceRaw(recalled.experience);
                 attrs.recalculateFromGrowth();
                 attrs.durability = recalled.durability;
+                sword.syncAttributesToEntityData();
             }
         } catch (Exception ignored) {}
 
