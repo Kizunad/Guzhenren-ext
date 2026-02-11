@@ -2,6 +2,8 @@ package com.Kizunad.guzhenrenext.xianqiao;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.xianqiao.dimension.ApertureVoidChunkGenerator;
+import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoDataComponents;
+import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -38,5 +40,7 @@ public final class XianqiaoRegistries {
      */
     public static void register(IEventBus modEventBus) {
         CHUNK_GENERATORS.register(modEventBus);
+        XianqiaoItems.register(modEventBus);
+        XianqiaoDataComponents.register(modEventBus);
     }
 }
