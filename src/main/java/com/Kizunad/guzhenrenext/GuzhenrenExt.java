@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.config.ClientConfig;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
+import com.Kizunad.guzhenrenext.xianqiao.command.ApertureCommand;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -78,6 +79,7 @@ public class GuzhenrenExt {
 
     private void registerCommands(RegisterCommandsEvent event) {
         GuzhenrenDebugCommand.register(event.getDispatcher());
+        ApertureCommand.register(event.getDispatcher());
     }
 
     private void onAddReloadListeners(net.neoforged.neoforge.event.AddReloadListenerEvent event) {

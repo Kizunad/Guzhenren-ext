@@ -1,7 +1,9 @@
 package com.Kizunad.guzhenrenext.xianqiao.data;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -28,6 +30,8 @@ public class ApertureWorldData extends SavedData {
     private static final String KEY_NEXT_INDEX = "nextIndex";
 
     private static final String KEY_APERTURES = "apertures";
+
+    private static final String KEY_INITIALIZED_APERTURES = "initializedApertures";
 
     private static final String KEY_OWNER = "owner";
 
@@ -56,6 +60,8 @@ public class ApertureWorldData extends SavedData {
     private int nextIndex = DEFAULT_NEXT_INDEX;
 
     private final Map<UUID, ApertureInfo> apertures = new HashMap<>();
+
+    private final Set<UUID> initializedApertures = new HashSet<>();
 
     /**
      * 分配一个新的仙窍信息；若已有记录，则直接返回既有信息。
@@ -109,6 +115,27 @@ public class ApertureWorldData extends SavedData {
         return allocateAperture(owner);
     }
 
+    /**
+     * 判断指定玩家的仙窍是否已经执行过首次初始化。
+     *
+     * @param owner 玩家 UUID
+     * @return 已初始化返回 true，否则 false
+     */
+    public boolean isApertureInitialized(UUID owner) {
+        return initializedApertures.contains(owner);
+    }
+
+    /**
+     * 将指定玩家仙窍标记为已初始化。
+     *
+     * @param owner 玩家 UUID
+     */
+    public void markApertureInitialized(UUID owner) {
+        if (initializedApertures.add(owner)) {
+            setDirty();
+        }
+    }
+
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putInt(KEY_NEXT_INDEX, nextIndex);
@@ -121,6 +148,14 @@ public class ApertureWorldData extends SavedData {
             list.add(apertureTag);
         }
         tag.put(KEY_APERTURES, list);
+
+        ListTag initializedList = new ListTag();
+        for (UUID owner : initializedApertures) {
+            CompoundTag initializedTag = new CompoundTag();
+            initializedTag.putUUID(KEY_OWNER, owner);
+            initializedList.add(initializedTag);
+        }
+        tag.put(KEY_INITIALIZED_APERTURES, initializedList);
         return tag;
     }
 
@@ -138,6 +173,17 @@ public class ApertureWorldData extends SavedData {
                 UUID owner = apertureTag.getUUID(KEY_OWNER);
                 CompoundTag infoTag = apertureTag.getCompound(KEY_INFO);
                 data.apertures.put(owner, ApertureInfo.load(infoTag));
+            }
+        }
+
+        if (tag.contains(KEY_INITIALIZED_APERTURES, TAG_LIST)) {
+            ListTag initializedList = tag.getList(KEY_INITIALIZED_APERTURES, TAG_COMPOUND);
+            for (int i = 0; i < initializedList.size(); i++) {
+                CompoundTag initializedTag = initializedList.getCompound(i);
+                if (!initializedTag.hasUUID(KEY_OWNER)) {
+                    continue;
+                }
+                data.initializedApertures.add(initializedTag.getUUID(KEY_OWNER));
             }
         }
         return data;

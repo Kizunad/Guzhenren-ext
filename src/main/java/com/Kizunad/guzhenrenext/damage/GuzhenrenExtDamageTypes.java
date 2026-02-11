@@ -12,6 +12,7 @@ public final class GuzhenrenExtDamageTypes {
     public static final ResourceKey<DamageType> BIAN_HUA_DAO = key("bian_hua_dao");
     public static final ResourceKey<DamageType> BING_DAO = key("bing_dao");
     public static final ResourceKey<DamageType> BING_XUE_DAO = key("bing_xue_dao");
+    public static final ResourceKey<DamageType> CHAOS_EROSION = key("chaos_erosion");
     public static final ResourceKey<DamageType> DAN_DAO = key("dan_dao");
     public static final ResourceKey<DamageType> DAO_DAO = key("dao_dao");
     public static final ResourceKey<DamageType> DU_DAO = key("du_dao");

@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.xianqiao;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks;
+import com.Kizunad.guzhenrenext.xianqiao.daomark.XianqiaoAttachments;
 import com.Kizunad.guzhenrenext.xianqiao.dimension.ApertureVoidChunkGenerator;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoDataComponents;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
@@ -40,6 +42,8 @@ public final class XianqiaoRegistries {
      */
     public static void register(IEventBus modEventBus) {
         CHUNK_GENERATORS.register(modEventBus);
+        XianqiaoAttachments.register(modEventBus);
+        XianqiaoBlocks.register(modEventBus);
         XianqiaoItems.register(modEventBus);
         XianqiaoDataComponents.register(modEventBus);
     }
