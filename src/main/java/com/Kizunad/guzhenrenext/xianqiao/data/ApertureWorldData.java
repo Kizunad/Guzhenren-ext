@@ -33,9 +33,13 @@ public class ApertureWorldData extends SavedData {
 
     private static final String KEY_INITIALIZED_APERTURES = "initializedApertures";
 
+    private static final String KEY_LAST_LOGOUT_TIMES = "lastLogoutTimes";
+
     private static final String KEY_OWNER = "owner";
 
     private static final String KEY_INFO = "info";
+
+    private static final String KEY_LAST_LOGOUT_TIME = "lastLogoutTime";
 
     private static final int TAG_COMPOUND = Tag.TAG_COMPOUND;
 
@@ -57,11 +61,15 @@ public class ApertureWorldData extends SavedData {
 
     private static final long DEFAULT_TRIBULATION_CYCLE = (long) DAY_TICKS * TRIBULATION_CYCLE_DAYS;
 
+    private static final long UNRECORDED_LOGOUT_TIME = -1L;
+
     private int nextIndex = DEFAULT_NEXT_INDEX;
 
     private final Map<UUID, ApertureInfo> apertures = new HashMap<>();
 
     private final Set<UUID> initializedApertures = new HashSet<>();
+
+    private final Map<UUID, Long> lastLogoutTimes = new HashMap<>();
 
     /**
      * 分配一个新的仙窍信息；若已有记录，则直接返回既有信息。
@@ -161,6 +169,59 @@ public class ApertureWorldData extends SavedData {
         }
     }
 
+    /**
+     * 设置玩家最后离线时间（以维度 gameTime 计）。
+     *
+     * @param owner 玩家 UUID
+     * @param gameTime 离线时游戏刻
+     */
+    public void setLastLogoutTime(UUID owner, long gameTime) {
+        Long previous = lastLogoutTimes.put(owner, gameTime);
+        if (previous == null || previous.longValue() != gameTime) {
+            setDirty();
+        }
+    }
+
+    /**
+     * 读取玩家最后离线时间。
+     *
+     * @param owner 玩家 UUID
+     * @return 最后离线刻；若无记录返回 {@value #UNRECORDED_LOGOUT_TIME}
+     */
+    public long getLastLogoutTime(UUID owner) {
+        return lastLogoutTimes.getOrDefault(owner, UNRECORDED_LOGOUT_TIME);
+    }
+
+    /**
+     * 推进灾劫倒计时（聚合扣减）。
+     * <p>
+     * 本方法将 {@code nextTribulationTick} 视作“剩余倒计时”，
+     * 按离线时长整体扣减，最低不小于 0。
+     * </p>
+     *
+     * @param owner 玩家 UUID
+     * @param elapsedTicks 离线流逝 tick
+     */
+    public void updateTribulationTick(UUID owner, long elapsedTicks) {
+        if (elapsedTicks <= 0L) {
+            return;
+        }
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        long updatedTribulationTick = Math.max(0L, existing.nextTribulationTick() - elapsedTicks);
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            existing.currentRadius(),
+            existing.timeSpeed(),
+            updatedTribulationTick,
+            existing.isFrozen()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putInt(KEY_NEXT_INDEX, nextIndex);
@@ -181,6 +242,15 @@ public class ApertureWorldData extends SavedData {
             initializedList.add(initializedTag);
         }
         tag.put(KEY_INITIALIZED_APERTURES, initializedList);
+
+        ListTag logoutList = new ListTag();
+        for (Map.Entry<UUID, Long> entry : lastLogoutTimes.entrySet()) {
+            CompoundTag logoutTag = new CompoundTag();
+            logoutTag.putUUID(KEY_OWNER, entry.getKey());
+            logoutTag.putLong(KEY_LAST_LOGOUT_TIME, entry.getValue());
+            logoutList.add(logoutTag);
+        }
+        tag.put(KEY_LAST_LOGOUT_TIMES, logoutList);
         return tag;
     }
 
@@ -209,6 +279,19 @@ public class ApertureWorldData extends SavedData {
                     continue;
                 }
                 data.initializedApertures.add(initializedTag.getUUID(KEY_OWNER));
+            }
+        }
+
+        if (tag.contains(KEY_LAST_LOGOUT_TIMES, TAG_LIST)) {
+            ListTag logoutList = tag.getList(KEY_LAST_LOGOUT_TIMES, TAG_COMPOUND);
+            for (int i = 0; i < logoutList.size(); i++) {
+                CompoundTag logoutTag = logoutList.getCompound(i);
+                if (!logoutTag.hasUUID(KEY_OWNER) || !logoutTag.contains(KEY_LAST_LOGOUT_TIME)) {
+                    continue;
+                }
+                UUID owner = logoutTag.getUUID(KEY_OWNER);
+                long logoutTick = logoutTag.getLong(KEY_LAST_LOGOUT_TIME);
+                data.lastLogoutTimes.put(owner, logoutTick);
             }
         }
         return data;

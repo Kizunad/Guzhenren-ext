@@ -2,9 +2,11 @@ package com.Kizunad.guzhenrenext.xianqiao.client;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 /**
@@ -12,6 +14,10 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
  */
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class XianqiaoClientEvents {
+
+    /** 仙窍维度 type 对应的天空特效注册键。 */
+    private static final ResourceLocation APERTURE_EFFECTS_ID =
+        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, "aperture_world");
 
     private XianqiaoClientEvents() {
     }
@@ -22,5 +28,13 @@ public final class XianqiaoClientEvents {
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(XianqiaoMenus.RESOURCE_CONTROLLER.get(), ResourceControllerScreen::new);
+    }
+
+    /**
+     * 注册仙窍维度天空特效。
+     */
+    @SubscribeEvent
+    public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
+        event.register(APERTURE_EFFECTS_ID, ApertureSkyRenderer.INSTANCE);
     }
 }
