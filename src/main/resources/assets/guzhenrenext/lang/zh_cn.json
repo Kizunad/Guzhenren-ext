@@ -170,5 +170,16 @@
     "screen.guzhenrenext.spirit_management.total_anchors": "§e锚点总数：§f%s",
     "screen.guzhenrenext.spirit_management.favorability": "§e好感度：§f%s",
     "screen.guzhenrenext.spirit_management.expression": "§e表情：§f%s",
-    "message.guzhenrenext.land_spirit.not_owner": "地灵轻轻摇头：此处仙窍事务，唯有主人可问。"
+    "message.guzhenrenext.land_spirit.not_owner": "地灵轻轻摇头：此处仙窍事务，唯有主人可问。",
+    "screen.guzhenrenext.spirit_management.current_stage": "§e当前阶段：§f%s - %s",
+    "screen.guzhenrenext.spirit_management.next_stage": "§7下一阶段需要：转数 ≥ %s，好感度 ≥ %s",
+    "screen.guzhenrenext.spirit_management.max_stage_reached": "§7已达最高阶段",
+    "screen.guzhenrenext.spirit_management.stage.0": "地灵本体",
+    "screen.guzhenrenext.spirit_management.stage.1": "身外化身",
+    "screen.guzhenrenext.spirit_management.stage.2": "护体罡气",
+    "screen.guzhenrenext.spirit_management.stage.3": "虚空搬运",
+    "screen.guzhenrenext.spirit_management.stage.4": "灵犀镇压",
+    "screen.guzhenrenext.spirit_management.stage.5": "万界共鸣",
+    "command.guzhenrenext.spirit.aperture_not_loaded": "仙窍维度未加载。",
+    "command.guzhenrenext.spirit.no_aperture": "该玩家尚无仙窍信息。"
 }

@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.xianqiao.spirit;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
+import com.Kizunad.guzhenrenext.xianqiao.service.SpiritUnlockService;
 import java.util.UUID;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -39,11 +40,29 @@ public class LandSpiritMenu extends AbstractContainerMenu {
     /** 数据槽：下次灾劫倒计时（tick，int 上限截断）。 */
     private static final int DATA_TRIBULATION_REMAINING_TICKS = 5;
 
+    /** 数据槽：地灵好感度（favorability * 10，保留 1 位小数）。 */
+    private static final int DATA_FAVORABILITY_PERMILLE = 6;
+
+    /** 数据槽：地灵转数（tier）。 */
+    private static final int DATA_TIER = 7;
+
+    /** 数据槽：当前阶段（stage）。 */
+    private static final int DATA_CURRENT_STAGE = 8;
+
+    /** 数据槽：下一阶段所需最小转数。 */
+    private static final int DATA_NEXT_STAGE_MIN_TIER = 9;
+
+    /** 数据槽：下一阶段所需最小好感度（favorability * 10）。 */
+    private static final int DATA_NEXT_STAGE_MIN_FAVORABILITY_PERMILLE = 10;
+
     /** ContainerData 字段总数。 */
-    private static final int DATA_FIELDS = 6;
+    private static final int DATA_FIELDS = 11;
 
     /** 时间流速千分比基准。 */
     private static final int PERMILLE_BASE = 1000;
+
+    /** 好感度缩放因子：favorability * 10 保留 1 位小数。 */
+    private static final int FAVORABILITY_PERMILLE_FACTOR = 10;
 
     private final ContainerData data;
 
@@ -84,6 +103,8 @@ public class LandSpiritMenu extends AbstractContainerMenu {
                 if (info == null) {
                     return 0;
                 }
+                int currentStage = SpiritUnlockService.computeStage(info.tier(), info.favorability());
+                int nextStage = SpiritUnlockService.getNextStage(currentStage);
                 return switch (index) {
                     case DATA_CENTER_X -> info.center().getX();
                     case DATA_CENTER_Y -> info.center().getY();
@@ -91,6 +112,14 @@ public class LandSpiritMenu extends AbstractContainerMenu {
                     case DATA_RADIUS -> info.currentRadius();
                     case DATA_TIME_SPEED_PERMILLE -> Math.round(info.timeSpeed() * PERMILLE_BASE);
                     case DATA_TRIBULATION_REMAINING_TICKS -> getSafeTribulationRemainingTicks(info, apertureLevel);
+                    case DATA_FAVORABILITY_PERMILLE -> Math.round(info.favorability() * FAVORABILITY_PERMILLE_FACTOR);
+                    case DATA_TIER -> info.tier();
+                    case DATA_CURRENT_STAGE -> currentStage;
+                    case DATA_NEXT_STAGE_MIN_TIER -> SpiritUnlockService.getMinTierForStage(nextStage);
+                    case DATA_NEXT_STAGE_MIN_FAVORABILITY_PERMILLE ->
+                        Math.round(
+                            SpiritUnlockService.getMinFavorabilityForStage(nextStage) * FAVORABILITY_PERMILLE_FACTOR
+                        );
                     default -> 0;
                 };
             }
@@ -170,5 +199,40 @@ public class LandSpiritMenu extends AbstractContainerMenu {
      */
     public int getTribulationRemainingTicks() {
         return data.get(DATA_TRIBULATION_REMAINING_TICKS);
+    }
+
+    /**
+     * 获取地灵好感度（favorability * 10）。
+     */
+    public int getFavorabilityPermille() {
+        return data.get(DATA_FAVORABILITY_PERMILLE);
+    }
+
+    /**
+     * 获取地灵转数（tier）。
+     */
+    public int getTier() {
+        return data.get(DATA_TIER);
+    }
+
+    /**
+     * 获取地灵当前阶段（stage）。
+     */
+    public int getCurrentStage() {
+        return data.get(DATA_CURRENT_STAGE);
+    }
+
+    /**
+     * 获取下一阶段所需最小转数。
+     */
+    public int getNextStageMinTier() {
+        return data.get(DATA_NEXT_STAGE_MIN_TIER);
+    }
+
+    /**
+     * 获取下一阶段所需最小好感度（favorability * 10）。
+     */
+    public int getNextStageMinFavorabilityPermille() {
+        return data.get(DATA_NEXT_STAGE_MIN_FAVORABILITY_PERMILLE);
     }
 }

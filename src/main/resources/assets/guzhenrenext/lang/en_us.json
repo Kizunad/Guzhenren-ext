@@ -80,5 +80,16 @@
     "screen.guzhenrenext.spirit_management.total_anchors": "§eTotal Anchors: §f%s",
     "screen.guzhenrenext.spirit_management.favorability": "§eFavorability: §f%s",
     "screen.guzhenrenext.spirit_management.expression": "§eExpression: §f%s",
-    "message.guzhenrenext.land_spirit.not_owner": "The land spirit gently shakes its head: only the owner may manage this aperture."
+    "message.guzhenrenext.land_spirit.not_owner": "The land spirit gently shakes its head: only the owner may manage this aperture.",
+    "screen.guzhenrenext.spirit_management.current_stage": "§eCurrent Stage: §f%s - %s",
+    "screen.guzhenrenext.spirit_management.next_stage": "§7Next stage requires: Tier ≥ %s, Favorability ≥ %s",
+    "screen.guzhenrenext.spirit_management.max_stage_reached": "§7Max stage reached",
+    "screen.guzhenrenext.spirit_management.stage.0": "Land Spirit Core",
+    "screen.guzhenrenext.spirit_management.stage.1": "Astral Projection",
+    "screen.guzhenrenext.spirit_management.stage.2": "Protective Aura",
+    "screen.guzhenrenext.spirit_management.stage.3": "Void Transport",
+    "screen.guzhenrenext.spirit_management.stage.4": "Spirit Suppression",
+    "screen.guzhenrenext.spirit_management.stage.5": "Universal Resonance",
+    "command.guzhenrenext.spirit.aperture_not_loaded": "Aperture dimension not loaded.",
+    "command.guzhenrenext.spirit.no_aperture": "This player has no aperture info."
 }

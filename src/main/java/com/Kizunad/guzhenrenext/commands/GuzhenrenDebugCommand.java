@@ -22,6 +22,10 @@ import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.service.SpiritFavorabilityService;
+import com.Kizunad.guzhenrenext.xianqiao.service.SpiritUnlockService;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -34,10 +38,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -48,6 +55,21 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * </p>
  */
 public class GuzhenrenDebugCommand {
+
+    /** 仙窍维度键。 */
+    private static final ResourceKey<Level> APERTURE_DIMENSION = ResourceKey.create(
+        Registries.DIMENSION,
+        ResourceLocation.fromNamespaceAndPath("guzhenrenext", "aperture_world")
+    );
+
+    /** spirit set_favorability 最小值。 */
+    private static final double SPIRIT_FAVORABILITY_MIN = 0.0D;
+
+    /** spirit set_favorability 最大值。 */
+    private static final double SPIRIT_FAVORABILITY_MAX = 100.0D;
+
+    /** spirit set_tier 最小层级。 */
+    private static final int SPIRIT_MIN_TIER = 1;
 
     private static final double DOMAIN_MAX_RADIUS = 256.0;
 
@@ -86,9 +108,10 @@ public class GuzhenrenDebugCommand {
                         )
                 )
                 .then(buildFlyingSwordCommands())
-            .then(buildBridgeCommands())
-            .then(buildDomainCommands())
-            // bastion 子系统已移除，对应调试子命令已下线。
+                .then(buildBridgeCommands())
+                .then(buildDomainCommands())
+                .then(buildSpiritCommands())
+                // bastion 子系统已移除，对应调试子命令已下线。
         );
     }
 
@@ -231,6 +254,338 @@ public class GuzhenrenDebugCommand {
                     ).executes(GuzhenrenDebugCommand::removeDomain)
                 )
             );
+    }
+
+    /**
+     * 构建地灵信任度/转数/Stage 调试子命令。
+     * <p>
+     * 命令树：
+     * guzhrenren_debug spirit set_favorability <value:0..100>
+     * guzhrenren_debug spirit add_favorability <delta:double>
+     * guzhrenren_debug spirit set_tier <value:int(1..)>
+     * guzhrenren_debug spirit stage
+     * </p>
+     */
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<
+        CommandSourceStack
+    > buildSpiritCommands() {
+        return Commands.literal("spirit")
+            .then(
+                Commands.literal("set_favorability")
+                    .then(
+                        Commands.argument(
+                            "value",
+                            DoubleArgumentType.doubleArg(
+                                SPIRIT_FAVORABILITY_MIN,
+                                SPIRIT_FAVORABILITY_MAX
+                            )
+                        ).executes(
+                            GuzhenrenDebugCommand::setSpiritFavorabilityAbsolute
+                        )
+                    )
+            )
+            .then(
+                Commands.literal("add_favorability")
+                    .then(
+                        Commands.argument("delta", DoubleArgumentType.doubleArg())
+                            .executes(GuzhenrenDebugCommand::addSpiritFavorability)
+                    )
+            )
+            .then(
+                Commands.literal("set_tier")
+                    .then(
+                        Commands.argument(
+                            "value",
+                            IntegerArgumentType.integer(SPIRIT_MIN_TIER)
+                        ).executes(GuzhenrenDebugCommand::setSpiritTier)
+                    )
+            )
+            .then(Commands.literal("stage").executes(GuzhenrenDebugCommand::querySpiritStage));
+    }
+
+    /**
+     * 获取仙窍维度。
+     * <p>
+     * 所有 spirit 子命令都依赖仙窍维度存档数据；若维度不存在，统一给出失败提示。
+     * </p>
+     */
+    private static ServerLevel getApertureLevelOrFail(CommandSourceStack source) {
+        ServerLevel apertureLevel = source.getServer().getLevel(APERTURE_DIMENSION);
+        if (apertureLevel == null) {
+            source.sendFailure(Component.literal("仙窍维度未加载。"));
+            return null;
+        }
+        return apertureLevel;
+    }
+
+    /**
+     * 读取执行者的仙窍信息。
+     * <p>
+     * 仅用于 spirit 调试命令；无仙窍记录时直接返回失败，避免后续服务调用语义不明确。
+     * </p>
+     */
+    private static ApertureInfo getApertureInfoOrFail(
+        CommandSourceStack source,
+        ServerLevel apertureLevel,
+        UUID ownerUuid
+    ) {
+        ApertureWorldData worldData = ApertureWorldData.get(apertureLevel);
+        ApertureInfo info = worldData.getAperture(ownerUuid);
+        if (info == null) {
+            source.sendFailure(Component.literal("未找到玩家仙窍数据，请先创建仙窍。"));
+            return null;
+        }
+        return info;
+    }
+
+    /**
+     * 绝对设置地灵好感度。
+     * <p>
+     * 由于服务层仅暴露增量入口，因此这里先读取当前值，计算 delta=target-current，
+     * 再调用 tryAddFavorability 完成写入。
+     * </p>
+     */
+    private static int setSpiritFavorabilityAbsolute(
+        CommandContext<CommandSourceStack> context
+    ) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            ServerLevel apertureLevel = getApertureLevelOrFail(context.getSource());
+            if (apertureLevel == null) {
+                return 0;
+            }
+            ApertureInfo info = getApertureInfoOrFail(
+                context.getSource(),
+                apertureLevel,
+                player.getUUID()
+            );
+            if (info == null) {
+                return 0;
+            }
+
+            float targetFavorability = (float) DoubleArgumentType.getDouble(
+                context,
+                "value"
+            );
+            float currentFavorability = SpiritFavorabilityService.getFavorability(
+                apertureLevel,
+                player.getUUID()
+            );
+            float delta = targetFavorability - currentFavorability;
+            boolean changed = SpiritFavorabilityService.tryAddFavorability(
+                apertureLevel,
+                player.getUUID(),
+                delta,
+                SpiritFavorabilityService.Reason.DEBUG_COMMAND
+            );
+            float afterFavorability = SpiritFavorabilityService.getFavorability(
+                apertureLevel,
+                player.getUUID()
+            );
+
+            context
+                .getSource()
+                .sendSuccess(
+                    () ->
+                        Component.literal(
+                            String.format(
+                                "spirit 好感度设置: %.2f -> %.2f (目标 %.2f, changed=%s)",
+                                currentFavorability,
+                                afterFavorability,
+                                targetFavorability,
+                                changed
+                            )
+                        ),
+                    true
+                );
+            return 1;
+        } catch (Exception e) {
+            context
+                .getSource()
+                .sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 增量修改地灵好感度。
+     * <p>
+     * delta 不做命令层限幅，可正可负；最终由 SpiritFavorabilityService 统一 clamp。
+     * </p>
+     */
+    private static int addSpiritFavorability(
+        CommandContext<CommandSourceStack> context
+    ) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            ServerLevel apertureLevel = getApertureLevelOrFail(context.getSource());
+            if (apertureLevel == null) {
+                return 0;
+            }
+            ApertureInfo info = getApertureInfoOrFail(
+                context.getSource(),
+                apertureLevel,
+                player.getUUID()
+            );
+            if (info == null) {
+                return 0;
+            }
+
+            float delta = (float) DoubleArgumentType.getDouble(context, "delta");
+            float beforeFavorability = SpiritFavorabilityService.getFavorability(
+                apertureLevel,
+                player.getUUID()
+            );
+            boolean changed = SpiritFavorabilityService.tryAddFavorability(
+                apertureLevel,
+                player.getUUID(),
+                delta,
+                SpiritFavorabilityService.Reason.DEBUG_COMMAND
+            );
+            float afterFavorability = SpiritFavorabilityService.getFavorability(
+                apertureLevel,
+                player.getUUID()
+            );
+
+            context
+                .getSource()
+                .sendSuccess(
+                    () ->
+                        Component.literal(
+                            String.format(
+                                "spirit 好感度增量: %.2f + %.2f -> %.2f (changed=%s)",
+                                beforeFavorability,
+                                delta,
+                                afterFavorability,
+                                changed
+                            )
+                        ),
+                    true
+                );
+            return 1;
+        } catch (Exception e) {
+            context
+                .getSource()
+                .sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 设置地灵转数（tier）。
+     */
+    private static int setSpiritTier(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            ServerLevel apertureLevel = getApertureLevelOrFail(context.getSource());
+            if (apertureLevel == null) {
+                return 0;
+            }
+            ApertureInfo beforeInfo = getApertureInfoOrFail(
+                context.getSource(),
+                apertureLevel,
+                player.getUUID()
+            );
+            if (beforeInfo == null) {
+                return 0;
+            }
+
+            int targetTier = IntegerArgumentType.getInteger(context, "value");
+            ApertureWorldData worldData = ApertureWorldData.get(apertureLevel);
+            worldData.updateTier(player.getUUID(), targetTier);
+            ApertureInfo afterInfo = worldData.getAperture(player.getUUID());
+            if (afterInfo == null) {
+                context
+                    .getSource()
+                    .sendFailure(Component.literal("更新 tier 后读取玩家仙窍数据失败。"));
+                return 0;
+            }
+
+            context
+                .getSource()
+                .sendSuccess(
+                    () ->
+                        Component.literal(
+                            "spirit tier 设置: " +
+                            beforeInfo.tier() +
+                            " -> " +
+                            afterInfo.tier()
+                        ),
+                    true
+                );
+            return 1;
+        } catch (Exception e) {
+            context
+                .getSource()
+                .sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 查询地灵阶段详情。
+     * <p>
+     * 输出项包含：tier、favorability、currentStage、stageName、nextStage 门槛。
+     * </p>
+     */
+    private static int querySpiritStage(CommandContext<CommandSourceStack> context) {
+        try {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            ServerLevel apertureLevel = getApertureLevelOrFail(context.getSource());
+            if (apertureLevel == null) {
+                return 0;
+            }
+            ApertureInfo info = getApertureInfoOrFail(
+                context.getSource(),
+                apertureLevel,
+                player.getUUID()
+            );
+            if (info == null) {
+                return 0;
+            }
+
+            int tier = info.tier();
+            float favorability = info.favorability();
+            int currentStage = SpiritUnlockService.computeStage(tier, favorability);
+            String stageName = SpiritUnlockService.getStageDisplayName(currentStage);
+            int nextStage = SpiritUnlockService.getNextStage(currentStage);
+            int nextMinTier = SpiritUnlockService.getMinTierForStage(nextStage);
+            float nextMinFavorability = SpiritUnlockService.getMinFavorabilityForStage(
+                nextStage
+            );
+            int maxStage = SpiritUnlockService.getMaxStage();
+
+            context
+                .getSource()
+                .sendSuccess(
+                    () ->
+                        Component.literal(
+                            String.format(
+                                "spirit stage | tier=%d favorability=%.2f currentStage=%d stageName=%s " +
+                                "nextStage=%d nextMinTier=%d nextMinFavorability=%.2f maxStage=%d",
+                                tier,
+                                favorability,
+                                currentStage,
+                                stageName,
+                                nextStage,
+                                nextMinTier,
+                                nextMinFavorability,
+                                maxStage
+                            )
+                        ),
+                    false
+                );
+            return 1;
+        } catch (Exception e) {
+            context
+                .getSource()
+                .sendFailure(Component.literal("执行出错: " + e.getMessage()));
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     // bastion 子系统已移除：相关调试命令与实现已删除。

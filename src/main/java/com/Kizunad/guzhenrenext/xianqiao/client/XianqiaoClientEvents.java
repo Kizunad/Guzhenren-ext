@@ -30,6 +30,7 @@ public final class XianqiaoClientEvents {
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(XianqiaoMenus.RESOURCE_CONTROLLER.get(), ResourceControllerScreen::new);
+        event.register(XianqiaoMenus.LAND_SPIRIT.get(), LandSpiritScreen::new);
     }
 
     /**

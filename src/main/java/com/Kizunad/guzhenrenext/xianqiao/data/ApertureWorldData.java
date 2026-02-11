@@ -62,6 +62,14 @@ public class ApertureWorldData extends SavedData {
 
     private static final long DEFAULT_TRIBULATION_CYCLE = (long) DAY_TICKS * TRIBULATION_CYCLE_DAYS;
 
+    private static final float DEFAULT_FAVORABILITY = 0.0F;
+
+    private static final float MIN_FAVORABILITY = 0.0F;
+
+    private static final float MAX_FAVORABILITY = 100.0F;
+
+    private static final int DEFAULT_TIER = 1;
+
     private static final long UNRECORDED_LOGOUT_TIME = -1L;
 
     private int nextIndex = DEFAULT_NEXT_INDEX;
@@ -92,7 +100,9 @@ public class ApertureWorldData extends SavedData {
             DEFAULT_INITIAL_RADIUS,
             DEFAULT_TIME_SPEED,
             DEFAULT_TRIBULATION_CYCLE,
-            false
+            false,
+            DEFAULT_FAVORABILITY,
+            DEFAULT_TIER
         );
         apertures.put(owner, created);
         setDirty();
@@ -143,7 +153,68 @@ public class ApertureWorldData extends SavedData {
             newRadius,
             existing.timeSpeed(),
             existing.nextTribulationTick(),
-            existing.isFrozen()
+            existing.isFrozen(),
+            existing.favorability(),
+            existing.tier()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    /**
+     * 更新指定玩家仙窍好感度。
+     * <p>
+     * 由于 {@link ApertureInfo} 为不可变 record，更新时需要构造新实例并替换映射。
+     * 新值会被限制在 [{@value #MIN_FAVORABILITY}, {@value #MAX_FAVORABILITY}] 区间内，
+     * 以避免脏数据破坏后续逻辑。
+     * </p>
+     *
+     * @param owner 玩家 UUID
+     * @param newFavorability 新好感度
+     */
+    public void updateFavorability(UUID owner, float newFavorability) {
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        float clampedFavorability = clampFavorability(newFavorability);
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            existing.currentRadius(),
+            existing.timeSpeed(),
+            existing.nextTribulationTick(),
+            existing.isFrozen(),
+            clampedFavorability,
+            existing.tier()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    /**
+     * 更新指定玩家仙窍层级。
+     * <p>
+     * 由于 {@link ApertureInfo} 为不可变 record，更新时需要构造新实例并替换映射。
+     * 层级最低为 {@value #DEFAULT_TIER}，可防止外部输入非法值导致数据越界。
+     * </p>
+     *
+     * @param owner 玩家 UUID
+     * @param newTier 新层级
+     */
+    public void updateTier(UUID owner, int newTier) {
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        int normalizedTier = normalizeTier(newTier);
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            existing.currentRadius(),
+            existing.timeSpeed(),
+            existing.nextTribulationTick(),
+            existing.isFrozen(),
+            existing.favorability(),
+            normalizedTier
         );
         apertures.put(owner, updated);
         setDirty();
@@ -212,7 +283,9 @@ public class ApertureWorldData extends SavedData {
             existing.currentRadius(),
             existing.timeSpeed(),
             nextTick,
-            existing.isFrozen()
+            existing.isFrozen(),
+            existing.favorability(),
+            existing.tier()
         );
         apertures.put(owner, updated);
         setDirty();
@@ -243,10 +316,32 @@ public class ApertureWorldData extends SavedData {
             existing.currentRadius(),
             existing.timeSpeed(),
             updatedTribulationTick,
-            existing.isFrozen()
+            existing.isFrozen(),
+            existing.favorability(),
+            existing.tier()
         );
         apertures.put(owner, updated);
         setDirty();
+    }
+
+    /**
+     * 归一化层级值，确保层级至少为 1。
+     *
+     * @param tier 原始层级
+     * @return 归一化后的合法层级
+     */
+    private static int normalizeTier(int tier) {
+        return Math.max(DEFAULT_TIER, tier);
+    }
+
+    /**
+     * 限制好感度区间，确保数值位于 [0, 100]。
+     *
+     * @param favorability 原始好感度
+     * @return 限幅后的好感度
+     */
+    private static float clampFavorability(float favorability) {
+        return Math.max(MIN_FAVORABILITY, Math.min(MAX_FAVORABILITY, favorability));
     }
 
     /**
@@ -360,7 +455,9 @@ public class ApertureWorldData extends SavedData {
         int currentRadius,
         float timeSpeed,
         long nextTribulationTick,
-        boolean isFrozen
+        boolean isFrozen,
+        float favorability,
+        int tier
     ) {
 
         private static final String KEY_CENTER_X = "centerX";
@@ -377,6 +474,10 @@ public class ApertureWorldData extends SavedData {
 
         private static final String KEY_IS_FROZEN = "isFrozen";
 
+        private static final String KEY_FAVORABILITY = "favorability";
+
+        private static final String KEY_TIER = "tier";
+
         public CompoundTag save() {
             CompoundTag tag = new CompoundTag();
             tag.putInt(KEY_CENTER_X, center.getX());
@@ -386,6 +487,8 @@ public class ApertureWorldData extends SavedData {
             tag.putFloat(KEY_TIME_SPEED, timeSpeed);
             tag.putLong(KEY_NEXT_TRIBULATION_TICK, nextTribulationTick);
             tag.putBoolean(KEY_IS_FROZEN, isFrozen);
+            tag.putFloat(KEY_FAVORABILITY, favorability);
+            tag.putInt(KEY_TIER, tier);
             return tag;
         }
 
@@ -399,7 +502,25 @@ public class ApertureWorldData extends SavedData {
             float speed = tag.getFloat(KEY_TIME_SPEED);
             long tribulationTick = tag.getLong(KEY_NEXT_TRIBULATION_TICK);
             boolean frozen = tag.getBoolean(KEY_IS_FROZEN);
-            return new ApertureInfo(centerPos, radius, speed, tribulationTick, frozen);
+
+            // 兼容旧存档：缺少新字段时回退到默认值。
+            float storedFavorability = tag.contains(KEY_FAVORABILITY)
+                ? tag.getFloat(KEY_FAVORABILITY)
+                : DEFAULT_FAVORABILITY;
+            float normalizedFavorability = clampFavorability(storedFavorability);
+
+            int storedTier = tag.contains(KEY_TIER) ? tag.getInt(KEY_TIER) : DEFAULT_TIER;
+            int normalizedTier = normalizeTier(storedTier);
+
+            return new ApertureInfo(
+                centerPos,
+                radius,
+                speed,
+                tribulationTick,
+                frozen,
+                normalizedFavorability,
+                normalizedTier
+            );
         }
     }
 }
