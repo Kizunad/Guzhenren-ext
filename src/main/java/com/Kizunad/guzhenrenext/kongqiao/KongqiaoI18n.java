@@ -56,6 +56,12 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.forge.button.cancel";
     public static final String FORGE_BUTTON_HELP =
         "screen.guzhenrenext.forge.button.help";
+    public static final String FORGE_DAO_TOTAL =
+        "screen.guzhenrenext.forge.dao.total";
+    public static final String FORGE_DAO_NONE =
+        "screen.guzhenrenext.forge.dao.none";
+    public static final String FORGE_DAO_SEPARATOR =
+        "screen.guzhenrenext.forge.dao.separator";
     public static final String HELP_TITLE =
         "screen.guzhenrenext.forge.help.title";
     public static final String HELP_TAB_OVERVIEW =
@@ -128,6 +134,52 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.forge.help.growth.breakthrough_desc";
     public static final String HELP_BUTTON_CLOSE =
         "screen.guzhenrenext.forge.help.button.close";
+
+    public static final String DAO_HUN_DAO = "guzhenrenext.dao.hundao";
+    public static final String DAO_GU_DAO = "guzhenrenext.dao.gudao";
+    public static final String DAO_MU_DAO = "guzhenrenext.dao.mudao";
+    public static final String DAO_HUO_DAO = "guzhenrenext.dao.yandao";
+    public static final String DAO_JIAN_DAO = "guzhenrenext.dao.jiandao";
+    public static final String DAO_DAO_DAO = "guzhenrenext.dao.daodao";
+    public static final String DAO_XUE_DAO = "guzhenrenext.dao.xuedao";
+    public static final String DAO_LIAN_DAO = "guzhenrenext.dao.liandao";
+    public static final String DAO_LV_DAO = "guzhenrenext.dao.lvdao";
+    public static final String DAO_TIAN_DAO = "guzhenrenext.dao.tiandao";
+    public static final String DAO_QI_DAO = "guzhenrenext.dao.qidao";
+    public static final String DAO_NU_DAO = "guzhenrenext.dao.nudao";
+    public static final String DAO_TOU_DAO = "guzhenrenext.dao.toudao";
+    public static final String DAO_XIN_DAO = "guzhenrenext.dao.xindao";
+    public static final String DAO_YING_DAO = "guzhenrenext.dao.yingdao";
+    public static final String DAO_XING_DAO = "guzhenrenext.dao.xingdao";
+    public static final String DAO_YUE_DAO = "guzhenrenext.dao.yuedao";
+    public static final String DAO_YUN_DAO = "guzhenrenext.dao.yundao";
+    public static final String DAO_YUN_DAO_2 = "guzhenrenext.dao.yundao2";
+    public static final String DAO_ZHI_DAO = "guzhenrenext.dao.zhidao";
+    public static final String DAO_ZHEN_DAO = "guzhenrenext.dao.zhendao";
+    public static final String DAO_ZHOU_DAO = "guzhenrenext.dao.zhoudao";
+    public static final String DAO_JIN_DAO = "guzhenrenext.dao.jindao";
+    public static final String DAO_JIN_DAO_2 = "guzhenrenext.dao.jindao2";
+    public static final String DAO_YIN_DAO = "guzhenrenext.dao.yindao";
+    public static final String DAO_REN_DAO = "guzhenrenext.dao.rendao";
+    public static final String DAO_LI_DAO = "guzhenrenext.dao.lidao";
+    public static final String DAO_LEI_DAO = "guzhenrenext.dao.leidao";
+    public static final String DAO_DU_DAO = "guzhenrenext.dao.dudao";
+    public static final String DAO_SHUI_DAO = "guzhenrenext.dao.shuidao";
+    public static final String DAO_TU_DAO = "guzhenrenext.dao.tudao";
+    public static final String DAO_YU_DAO = "guzhenrenext.dao.yudao";
+    public static final String DAO_SHI_DAO = "guzhenrenext.dao.shidao";
+    public static final String DAO_DAN_DAO = "guzhenrenext.dao.dandao";
+    public static final String DAO_HUA_DAO = "guzhenrenext.dao.huadao";
+    public static final String DAO_AN_DAO = "guzhenrenext.dao.andao";
+    public static final String DAO_HUAN_DAO = "guzhenrenext.dao.huandao";
+    public static final String DAO_MENG_DAO = "guzhenrenext.dao.mengdao";
+    public static final String DAO_BING_DAO = "guzhenrenext.dao.bingdao";
+    public static final String DAO_BING_XUE_DAO = "guzhenrenext.dao.bingxuedao";
+    public static final String DAO_BIAN_HUA_DAO = "guzhenrenext.dao.bianhuadao";
+    public static final String DAO_XU_DAO = "guzhenrenext.dao.xudao";
+    public static final String DAO_FENG_DAO = "guzhenrenext.dao.fengdao";
+    public static final String DAO_GUANG_DAO = "guzhenrenext.dao.guangdao";
+    public static final String DAO_GENERIC = "guzhenrenext.dao.generic";
 
     private KongqiaoI18n() {}
 
