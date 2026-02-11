@@ -4,9 +4,12 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.damage.GuzhenrenExtDamageTypes;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
-import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkDiffusionService;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -19,6 +22,12 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  */
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
 public final class ChaosErosionHandler {
+
+    /** 仙窍维度键。 */
+    private static final ResourceKey<Level> APERTURE_DIMENSION = ResourceKey.create(
+        Registries.DIMENSION,
+        ResourceLocation.fromNamespaceAndPath("guzhenrenext", "aperture_world")
+    );
 
     /** 检查间隔（tick）。 */
     private static final int CHECK_INTERVAL_TICKS = 20;
@@ -39,7 +48,7 @@ public final class ChaosErosionHandler {
      */
     @SubscribeEvent
     public static void onServerTick(final ServerTickEvent.Post event) {
-        ServerLevel apertureLevel = event.getServer().getLevel(DaoMarkDiffusionService.APERTURE_DIMENSION);
+        ServerLevel apertureLevel = event.getServer().getLevel(APERTURE_DIMENSION);
         if (apertureLevel == null) {
             return;
         }
