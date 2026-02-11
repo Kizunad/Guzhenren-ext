@@ -52,5 +52,6 @@ public final class XianqiaoRegistries {
         XianqiaoMenus.register(modEventBus);
         XianqiaoItems.register(modEventBus);
         XianqiaoDataComponents.register(modEventBus);
+        XianqiaoCreativeTab.register(modEventBus);
     }
 }
