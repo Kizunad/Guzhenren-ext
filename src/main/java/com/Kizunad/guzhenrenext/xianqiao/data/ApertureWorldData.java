@@ -116,6 +116,31 @@ public class ApertureWorldData extends SavedData {
     }
 
     /**
+     * 更新指定玩家仙窍半径。
+     * <p>
+     * 由于 {@link ApertureInfo} 为不可变 record，更新时需要构造新实例并替换映射。
+     * </p>
+     *
+     * @param owner 玩家 UUID
+     * @param newRadius 新半径
+     */
+    public void updateRadius(UUID owner, int newRadius) {
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            newRadius,
+            existing.timeSpeed(),
+            existing.nextTribulationTick(),
+            existing.isFrozen()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    /**
      * 判断指定玩家的仙窍是否已经执行过首次初始化。
      *
      * @param owner 玩家 UUID

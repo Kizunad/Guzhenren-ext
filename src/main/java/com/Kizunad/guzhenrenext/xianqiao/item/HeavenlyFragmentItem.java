@@ -1,16 +1,38 @@
 package com.Kizunad.guzhenrenext.xianqiao.item;
 
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.service.FragmentPlacementService;
 import java.util.List;
+import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 /**
  * 九天碎片物品。
  */
 public class HeavenlyFragmentItem extends Item {
+
+    /** 仙窍维度键。 */
+    private static final ResourceKey<Level> APERTURE_DIMENSION = ResourceKey.create(
+        Registries.DIMENSION,
+        ResourceLocation.fromNamespaceAndPath("guzhenrenext", "aperture_world")
+    );
+
+    /** 成功放置时消耗物品数量。 */
+    private static final int FRAGMENT_CONSUME_COUNT = 1;
 
     /**
      * 一天对应的游戏刻数。
@@ -24,6 +46,58 @@ public class HeavenlyFragmentItem extends Item {
 
     public HeavenlyFragmentItem(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (level.isClientSide) {
+            return InteractionResultHolder.pass(stack);
+        }
+
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return InteractionResultHolder.fail(stack);
+        }
+        if (!serverLevel.dimension().equals(APERTURE_DIMENSION)) {
+            player.sendSystemMessage(Component.literal("九天碎片只能在仙窍维度中使用。"));
+            return InteractionResultHolder.fail(stack);
+        }
+
+        UUID owner = player.getUUID();
+        ApertureWorldData worldData = ApertureWorldData.get(serverLevel);
+        ApertureInfo apertureInfo = worldData.getAperture(owner);
+        if (apertureInfo == null) {
+            player.sendSystemMessage(Component.literal("未找到你的仙窍信息，无法放置九天碎片。"));
+            return InteractionResultHolder.fail(stack);
+        }
+        if (!isInsideAperture(player.blockPosition(), apertureInfo)) {
+            player.sendSystemMessage(Component.literal("你必须站在自己的仙窍范围内才能放置九天碎片。"));
+            return InteractionResultHolder.fail(stack);
+        }
+
+        boolean placed = FragmentPlacementService.placeFragment(serverLevel, player, apertureInfo);
+        if (!placed) {
+            player.sendSystemMessage(Component.literal("九天碎片放置失败，请检查目标区域后重试。"));
+            return InteractionResultHolder.fail(stack);
+        }
+        stack.shrink(FRAGMENT_CONSUME_COUNT);
+        return InteractionResultHolder.success(stack);
+    }
+
+    /**
+     * 判断给定位置是否位于玩家仙窍半径内（XZ 平面）。
+     *
+     * @param playerPos 玩家方块坐标
+     * @param info 仙窍信息
+     * @return 在范围内返回 true，否则返回 false
+     */
+    private static boolean isInsideAperture(BlockPos playerPos, ApertureInfo info) {
+        BlockPos center = info.center();
+        long deltaX = (long) playerPos.getX() - center.getX();
+        long deltaZ = (long) playerPos.getZ() - center.getZ();
+        long distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
+        long radius = info.currentRadius();
+        return distanceSquared <= radius * radius;
     }
 
     @Override
