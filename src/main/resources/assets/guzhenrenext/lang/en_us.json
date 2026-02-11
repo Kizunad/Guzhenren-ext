@@ -69,5 +69,6 @@
     "screen.guzhenrenext.spirit_management.total_mycelium": "§eTotal Mycelium: §f%s",
     "screen.guzhenrenext.spirit_management.total_anchors": "§eTotal Anchors: §f%s",
     "screen.guzhenrenext.spirit_management.favorability": "§eFavorability: §f%s",
-    "screen.guzhenrenext.spirit_management.expression": "§eExpression: §f%s"
+    "screen.guzhenrenext.spirit_management.expression": "§eExpression: §f%s",
+    "message.guzhenrenext.land_spirit.not_owner": "The land spirit gently shakes its head: only the owner may manage this aperture."
 }

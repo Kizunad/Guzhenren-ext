@@ -2,10 +2,12 @@ package com.Kizunad.guzhenrenext.xianqiao.client;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.XianqiaoEntities;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
@@ -36,5 +38,13 @@ public final class XianqiaoClientEvents {
     @SubscribeEvent
     public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
         event.register(APERTURE_EFFECTS_ID, ApertureSkyRenderer.INSTANCE);
+    }
+
+    /**
+     * 注册地灵实体渲染器。
+     */
+    @SubscribeEvent
+    public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(XianqiaoEntities.LAND_SPIRIT.get(), LandSpiritRenderer::new);
     }
 }

@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.resource;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.LandSpiritMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -23,6 +24,18 @@ public final class XianqiaoMenus {
     > RESOURCE_CONTROLLER = MENUS.register(
         "resource_controller",
         () -> IMenuTypeExtension.create(ResourceControllerMenu::fromNetwork)
+    );
+
+    /** 地灵管理菜单。 */
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<LandSpiritMenu>
+    > LAND_SPIRIT = MENUS.register(
+        "land_spirit",
+        () -> IMenuTypeExtension.create(
+            (containerId, inventory, ignoredBuffer) ->
+                new LandSpiritMenu(containerId, inventory)
+        )
     );
 
     private XianqiaoMenus() {

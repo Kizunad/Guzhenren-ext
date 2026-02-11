@@ -8,6 +8,7 @@ import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoDataComponents;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoBlockEntities;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.XianqiaoEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -47,6 +48,7 @@ public final class XianqiaoRegistries {
         XianqiaoAttachments.register(modEventBus);
         XianqiaoBlocks.register(modEventBus);
         XianqiaoBlockEntities.register(modEventBus);
+        XianqiaoEntities.register(modEventBus);
         XianqiaoMenus.register(modEventBus);
         XianqiaoItems.register(modEventBus);
         XianqiaoDataComponents.register(modEventBus);

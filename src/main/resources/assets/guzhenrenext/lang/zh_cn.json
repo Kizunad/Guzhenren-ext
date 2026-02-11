@@ -159,5 +159,6 @@
     "screen.guzhenrenext.spirit_management.total_mycelium": "§e菌毯总数：§f%s",
     "screen.guzhenrenext.spirit_management.total_anchors": "§e锚点总数：§f%s",
     "screen.guzhenrenext.spirit_management.favorability": "§e好感度：§f%s",
-    "screen.guzhenrenext.spirit_management.expression": "§e表情：§f%s"
+    "screen.guzhenrenext.spirit_management.expression": "§e表情：§f%s",
+    "message.guzhenrenext.land_spirit.not_owner": "地灵轻轻摇头：此处仙窍事务，唯有主人可问。"
 }
