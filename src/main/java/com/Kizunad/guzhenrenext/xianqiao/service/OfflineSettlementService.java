@@ -93,7 +93,7 @@ public final class OfflineSettlementService {
             giveDiamonds(player, totalDiamonds);
         }
 
-        worldData.updateTribulationTick(player.getUUID(), offlineTicks);
+        worldData.reduceTribulationTick(player.getUUID(), offlineTicks);
         worldData.setLastLogoutTime(player.getUUID(), currentGameTime);
 
         long remainingTribulationTick = Math.max(0L, apertureInfo.nextTribulationTick() - offlineTicks);

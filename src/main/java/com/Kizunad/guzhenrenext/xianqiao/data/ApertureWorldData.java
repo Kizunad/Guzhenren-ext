@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.data;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -193,16 +194,42 @@ public class ApertureWorldData extends SavedData {
     }
 
     /**
-     * 推进灾劫倒计时（聚合扣减）。
+     * 更新指定玩家仙窍的下次灾劫触发刻（绝对游戏时间）。
+     *
+     * @param owner 玩家 UUID
+     * @param nextTick 下次灾劫触发刻
+     */
+    public void updateTribulationTick(UUID owner, long nextTick) {
+        if (nextTick < 0L) {
+            return;
+        }
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            existing.currentRadius(),
+            existing.timeSpeed(),
+            nextTick,
+            existing.isFrozen()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    /**
+     * 按离线时长扣减灾劫剩余时间（向下不低于 0）。
      * <p>
-     * 本方法将 {@code nextTribulationTick} 视作“剩余倒计时”，
-     * 按离线时长整体扣减，最低不小于 0。
+     * 该方法用于兼容离线聚合结算模型：
+     * 当存档中的 {@code nextTribulationTick} 仍被作为“剩余刻”使用时，
+     * 可通过此方法统一扣减。
      * </p>
      *
      * @param owner 玩家 UUID
-     * @param elapsedTicks 离线流逝 tick
+     * @param elapsedTicks 流逝 tick
      */
-    public void updateTribulationTick(UUID owner, long elapsedTicks) {
+    public void reduceTribulationTick(UUID owner, long elapsedTicks) {
         if (elapsedTicks <= 0L) {
             return;
         }
@@ -220,6 +247,15 @@ public class ApertureWorldData extends SavedData {
         );
         apertures.put(owner, updated);
         setDirty();
+    }
+
+    /**
+     * 获取全部仙窍数据快照。
+     *
+     * @return 不可变快照（key 为 owner UUID，value 为仙窍信息）
+     */
+    public Map<UUID, ApertureInfo> getAllApertures() {
+        return Collections.unmodifiableMap(new HashMap<>(apertures));
     }
 
     @Override
