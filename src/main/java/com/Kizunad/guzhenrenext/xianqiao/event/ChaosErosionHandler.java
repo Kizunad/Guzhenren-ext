@@ -5,10 +5,13 @@ import com.Kizunad.guzhenrenext.damage.GuzhenrenExtDamageTypes;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -34,6 +37,8 @@ public final class ChaosErosionHandler {
 
     /** 允许越界缓冲（方块）。 */
     private static final int BOUNDARY_BUFFER = 16;
+
+    private static final int WARNING_BUFFER = 8;
 
     /** 越界伤害值。 */
     private static final float CHAOS_DAMAGE = 5000.0F;
@@ -80,8 +85,20 @@ public final class ChaosErosionHandler {
         double horizontalDistanceSquared = deltaX * deltaX + deltaZ * deltaZ;
 
         int maxDistance = apertureInfo.currentRadius() + BOUNDARY_BUFFER;
+        int warningDistance = Math.max(0, maxDistance - WARNING_BUFFER);
         int maxDistanceSquared = maxDistance * maxDistance;
+        int warningDistanceSquared = warningDistance * warningDistance;
+
+        if (horizontalDistanceSquared <= warningDistanceSquared) {
+            return;
+        }
+
         if (horizontalDistanceSquared <= maxDistanceSquared) {
+            player.displayClientMessage(
+                Component.translatable("warning.guzhenrenext.chaos_erosion_approaching"),
+                true
+            );
+            player.playNotifySound(SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.HOSTILE, 1.0F, 1.0F);
             return;
         }
 
