@@ -45,6 +45,9 @@ public class GuzhenrenExt {
         // Worldgen
         com.Kizunad.guzhenrenext.worldgen.GuzhenrenExtWorldGen.register(modEventBus);
 
+        // 仙窍系统
+        com.Kizunad.guzhenrenext.xianqiao.XianqiaoRegistries.register(modEventBus);
+
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onAddReloadListeners);
 

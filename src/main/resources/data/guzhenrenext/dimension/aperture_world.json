@@ -1,0 +1,10 @@
+{
+  "type": "guzhenrenext:aperture_world",
+  "generator": {
+    "type": "guzhenrenext:aperture_void",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "guzhenrenext:aperture_void"
+    }
+  }
+}
