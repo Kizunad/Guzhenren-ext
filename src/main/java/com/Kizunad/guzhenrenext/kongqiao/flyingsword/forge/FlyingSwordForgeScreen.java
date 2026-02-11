@@ -12,6 +12,9 @@ import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.layout.Anchor;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
 import com.Kizunad.tinyUI.theme.Theme;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -36,10 +39,14 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
     private static final int HELP_BUTTON_WIDTH = 20;
     private static final int SECTION_EXTRA_GAP = 8;
     private static final int PROGRESS_BAR_SEGMENTS = 10;
+    private static final int DAO_AREA_X_OFFSET = 12;
 
     private final Theme theme = Theme.vanilla();
     private Label progressLabel;
     private Label statusLabel;
+    private Label daoMarksLabel;
+    private Label daoTotalLabel;
+    private Label feedbackLabel;
     private Button claimButton;
     private Button cancelButton;
 
@@ -111,6 +118,14 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
         inputSlot.setFrame(inputSlotX, inputSlotY, SLOT_SIZE, SLOT_SIZE);
         background.addChild(inputSlot);
 
+        addDaoLabels(background, inputSlotX, inputSlotY);
+        addFeedbackAndStatusLabels(background, inputSlotY);
+        addButtonsAndInventory(background, inputSlotY);
+
+        updateLabels();
+    }
+
+    private void addDaoLabels(SolidPanel background, int inputSlotX, int inputSlotY) {
         Label inputHint = new Label(
             Component.literal("放入核心剑/材料剑/蛊虫"),
             theme
@@ -123,6 +138,24 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
         );
         background.addChild(inputHint);
 
+        int daoAreaX = inputSlotX + SLOT_SIZE + DAO_AREA_X_OFFSET;
+        int daoAreaWidth = WINDOW_WIDTH - PANEL_PADDING - daoAreaX;
+
+        daoMarksLabel = new Label(Component.empty(), theme);
+        daoMarksLabel.setFrame(daoAreaX, inputSlotY, daoAreaWidth, LABEL_HEIGHT);
+        background.addChild(daoMarksLabel);
+
+        daoTotalLabel = new Label(Component.empty(), theme);
+        daoTotalLabel.setFrame(
+            daoAreaX,
+            inputSlotY + LABEL_HEIGHT + ELEMENT_SPACING,
+            daoAreaWidth,
+            LABEL_HEIGHT
+        );
+        background.addChild(daoTotalLabel);
+    }
+
+    private void addFeedbackAndStatusLabels(SolidPanel background, int inputSlotY) {
         int progressY = inputSlotY + SLOT_SIZE + LABEL_HEIGHT + SECTION_GAP;
         progressLabel = new Label(Component.literal("进度: 0/64 (0%)"), theme);
         progressLabel.setFrame(
@@ -142,7 +175,20 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
         );
         background.addChild(statusLabel);
 
-        int buttonY = progressY + PROGRESS_BAR_HEIGHT + LABEL_HEIGHT + SECTION_GAP + SECTION_EXTRA_GAP;
+        feedbackLabel = new Label(Component.empty(), theme);
+        feedbackLabel.setFrame(
+            PANEL_PADDING,
+            progressY + PROGRESS_BAR_HEIGHT + ELEMENT_SPACING + LABEL_HEIGHT + ELEMENT_SPACING,
+            WINDOW_WIDTH - PANEL_PADDING * 2,
+            LABEL_HEIGHT
+        );
+        background.addChild(feedbackLabel);
+    }
+
+    private void addButtonsAndInventory(SolidPanel background, int inputSlotY) {
+        int progressY = inputSlotY + SLOT_SIZE + LABEL_HEIGHT + SECTION_GAP;
+        int buttonY = progressY + PROGRESS_BAR_HEIGHT + LABEL_HEIGHT + ELEMENT_SPACING
+            + LABEL_HEIGHT + SECTION_GAP + SECTION_EXTRA_GAP;
         int buttonsWidth = BUTTON_WIDTH * 2 + BUTTON_GAP;
         int buttonStartX = (WINDOW_WIDTH - buttonsWidth) / 2;
 
@@ -181,6 +227,10 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
         });
         background.addChild(cancelButton);
 
+        addPlayerInventory(background, buttonY);
+    }
+
+    private void addPlayerInventory(SolidPanel background, int buttonY) {
         int playerInvY = buttonY + BUTTON_HEIGHT + SECTION_GAP + SECTION_EXTRA_GAP;
         Label playerLabel = new Label(
             KongqiaoI18n.text(KongqiaoI18n.COMMON_PLAYER_INVENTORY),
@@ -209,8 +259,6 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
             playerGrid.getHeight()
         );
         background.addChild(playerGrid);
-
-        updateLabels();
     }
 
     private void updateLabels() {
@@ -239,6 +287,44 @@ public class FlyingSwordForgeScreen extends TinyUIContainerScreen<FlyingSwordFor
 
         claimButton.setEnabled(canClaim);
         cancelButton.setEnabled(active);
+
+        // === 道痕明细 ===
+        Map<String, Integer> daoMap = menu.getClientDaoMarks();
+        if (daoMarksLabel != null) {
+            if (daoMap == null || daoMap.isEmpty()) {
+                daoMarksLabel.setText(KongqiaoI18n.text(KongqiaoI18n.FORGE_DAO_NONE));
+            } else {
+                // 按分数降序排列，相同分数按 key 字典序
+                List<Map.Entry<String, Integer>> sorted = new ArrayList<>(daoMap.entrySet());
+                sorted.sort((a, b) -> {
+                    int cmp = Integer.compare(b.getValue(), a.getValue());
+                    return cmp != 0 ? cmp : a.getKey().compareTo(b.getKey());
+                });
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < sorted.size(); i++) {
+                    if (i > 0) {
+                        sb.append(KongqiaoI18n.text(KongqiaoI18n.FORGE_DAO_SEPARATOR).getString());
+                    }
+                    Map.Entry<String, Integer> entry = sorted.get(i);
+                    // 用 getString() 获取翻译后的中文名
+                    String daoName = Component.translatable("guzhenrenext.dao." + entry.getKey()).getString();
+                    sb.append(daoName).append(entry.getValue());
+                }
+                daoMarksLabel.setText(Component.literal(sb.toString()));
+            }
+        }
+
+        // === 道痕总分 ===
+        if (daoTotalLabel != null) {
+            int total = menu.getClientTotalScore();
+            daoTotalLabel.setText(KongqiaoI18n.text(KongqiaoI18n.FORGE_DAO_TOTAL, total));
+        }
+
+        // === 操作反馈 ===
+        if (feedbackLabel != null) {
+            String msg = menu.getClientLastMessage();
+            feedbackLabel.setText(Component.literal(msg != null ? msg : ""));
+        }
     }
 
     /**
