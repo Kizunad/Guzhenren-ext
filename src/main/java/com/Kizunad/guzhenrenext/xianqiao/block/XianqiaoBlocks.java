@@ -1,6 +1,9 @@
 package com.Kizunad.guzhenrenext.xianqiao.block;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.resource.ResourceComponentBlock;
+import com.Kizunad.guzhenrenext.xianqiao.resource.ResourceControllerBlock;
+import java.util.function.Supplier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -37,6 +40,36 @@ public final class XianqiaoBlocks {
         ITEMS.register(
             "aperture_core",
             () -> new BlockItem(APERTURE_CORE.get(), new Item.Properties())
+        );
+
+    /**
+     * 资源点核心控制器方块。
+     */
+    public static final DeferredBlock<ResourceControllerBlock> RESOURCE_CONTROLLER =
+        BLOCKS.register("resource_controller", (Supplier<ResourceControllerBlock>) () -> new ResourceControllerBlock());
+
+    /**
+     * 时场组件方块。
+     */
+    public static final DeferredBlock<ResourceComponentBlock> TIME_FIELD_COMPONENT =
+        BLOCKS.register("time_field_component", () -> new ResourceComponentBlock());
+
+    /**
+     * 资源点控制器方块物品。
+     */
+    public static final DeferredItem<BlockItem> RESOURCE_CONTROLLER_ITEM =
+        ITEMS.register(
+            "resource_controller",
+            () -> new BlockItem(RESOURCE_CONTROLLER.get(), new Item.Properties())
+        );
+
+    /**
+     * 时场组件方块物品。
+     */
+    public static final DeferredItem<BlockItem> TIME_FIELD_COMPONENT_ITEM =
+        ITEMS.register(
+            "time_field_component",
+            () -> new BlockItem(TIME_FIELD_COMPONENT.get(), new Item.Properties())
         );
 
     private XianqiaoBlocks() {

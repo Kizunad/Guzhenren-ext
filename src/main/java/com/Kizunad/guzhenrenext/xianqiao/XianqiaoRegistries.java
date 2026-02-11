@@ -6,6 +6,8 @@ import com.Kizunad.guzhenrenext.xianqiao.daomark.XianqiaoAttachments;
 import com.Kizunad.guzhenrenext.xianqiao.dimension.ApertureVoidChunkGenerator;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoDataComponents;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
+import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoBlockEntities;
+import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -44,6 +46,8 @@ public final class XianqiaoRegistries {
         CHUNK_GENERATORS.register(modEventBus);
         XianqiaoAttachments.register(modEventBus);
         XianqiaoBlocks.register(modEventBus);
+        XianqiaoBlockEntities.register(modEventBus);
+        XianqiaoMenus.register(modEventBus);
         XianqiaoItems.register(modEventBus);
         XianqiaoDataComponents.register(modEventBus);
     }
