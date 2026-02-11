@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "": {
+            "model": "guzhenrenext:block/resource_controller"
+        }
+    }
+}
