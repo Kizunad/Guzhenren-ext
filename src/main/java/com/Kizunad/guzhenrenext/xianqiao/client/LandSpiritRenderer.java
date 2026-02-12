@@ -21,7 +21,11 @@ public class LandSpiritRenderer
     /** 影子半径。 */
     private static final float SHADOW_RADIUS = 0.35F;
 
-    /** 占位纹理。 */
+    /**
+     * TODO: 后续替换为自定义地灵纹理（guzhenrenext:textures/entity/land_spirit.png）。
+     * 当前按计划约束不新增美术资源，先复用原版 Steve 皮肤作为占位，保证可见轮廓与调试可读性。
+     * 当前渲染仍走半透明 RenderType，已可模拟灵体效果。
+     */
     private static final ResourceLocation TEXTURE =
         ResourceLocation.withDefaultNamespace("textures/entity/steve.png");
 
