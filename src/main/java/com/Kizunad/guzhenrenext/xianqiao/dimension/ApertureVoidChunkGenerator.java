@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
@@ -51,6 +52,10 @@ public class ApertureVoidChunkGenerator extends ChunkGenerator {
      */
     private static final int BASE_HEIGHT = 64;
 
+    private static final int CENTER_RADIUS = 16;
+
+    private static final int CHUNK_SIDE_LENGTH = 16;
+
     /**
      * Codec：仅序列化/反序列化生物群系来源。
      */
@@ -87,7 +92,35 @@ public class ApertureVoidChunkGenerator extends ChunkGenerator {
         RandomState randomState,
         ChunkAccess chunk
     ) {
-        // 虚空维度不构建地表。
+        ChunkPos chunkPos = chunk.getPos();
+        int minBlockX = chunkPos.getMinBlockX();
+        int minBlockZ = chunkPos.getMinBlockZ();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
+        for (int localX = 0; localX < CHUNK_SIDE_LENGTH; localX++) {
+            int worldX = minBlockX + localX;
+            if (Math.abs(worldX) > CENTER_RADIUS) {
+                continue;
+            }
+
+            for (int localZ = 0; localZ < CHUNK_SIDE_LENGTH; localZ++) {
+                int worldZ = minBlockZ + localZ;
+                if (Math.abs(worldZ) > CENTER_RADIUS) {
+                    continue;
+                }
+
+                BlockState surfaceState = resolveCenterSurfaceBlock(worldX, worldZ);
+                mutablePos.set(worldX, BASE_HEIGHT, worldZ);
+                chunk.setBlockState(mutablePos, surfaceState, false);
+            }
+        }
+    }
+
+    private BlockState resolveCenterSurfaceBlock(int worldX, int worldZ) {
+        if (worldZ >= 0) {
+            return worldX >= 0 ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.SAND.defaultBlockState();
+        }
+        return worldX >= 0 ? Blocks.MYCELIUM.defaultBlockState() : Blocks.SNOW_BLOCK.defaultBlockState();
     }
 
     @Override
