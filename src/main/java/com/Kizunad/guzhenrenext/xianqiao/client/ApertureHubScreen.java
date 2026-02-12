@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.client;
 
 import com.Kizunad.guzhenrenext.xianqiao.block.ApertureHubMenu;
+import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.service.SpiritUnlockService;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
@@ -28,7 +29,6 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     private static final int CONTENT_PADDING = 8;
     private static final int LINE_HEIGHT = 14;
     private static final int TEXT_COLOR = 0xFFE0E0E0;
-    private static final int PLACEHOLDER_COLOR = 0xFF9A9A9A;
     private static final int FIRST_LINE_Y = 8;
     private static final double PERCENT_BASE = 100.0D;
     private static final long TICKS_PER_SECOND = 20L;
@@ -40,6 +40,7 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     private static final int TAB_TRIBULATION = 3;
     private static final int TAB_DAOMARK = 4;
     private static final int TAB_COUNT = 5;
+    private static final int DAOMARK_TYPE_COUNT = DaoType.values().length;
 
     private final Theme theme;
     private final List<UIElement> tabPanels;
@@ -55,6 +56,9 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     private Label spiritFavorabilityLabel;
     private Label spiritTierLabel;
     private Label spiritStageLabel;
+
+    private Label tribulationCountdownLabel;
+    private Label tribulationStatusLabel;
 
     public ApertureHubScreen(
         ApertureHubMenu menu,
@@ -125,17 +129,17 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
         main.addChild(spiritPanel);
         tabPanels.add(spiritPanel);
 
-        UIElement resourcePanel = createPlaceholderPanel(contentWidth, contentHeight);
+        UIElement resourcePanel = createResourcePanel(contentWidth, contentHeight);
         resourcePanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
         main.addChild(resourcePanel);
         tabPanels.add(resourcePanel);
 
-        UIElement tribulationPanel = createPlaceholderPanel(contentWidth, contentHeight);
+        UIElement tribulationPanel = createTribulationPanel(contentWidth, contentHeight);
         tribulationPanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
         main.addChild(tribulationPanel);
         tabPanels.add(tribulationPanel);
 
-        UIElement daomarkPanel = createPlaceholderPanel(contentWidth, contentHeight);
+        UIElement daomarkPanel = createDaomarkPanel(contentWidth, contentHeight);
         daomarkPanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
         main.addChild(daomarkPanel);
         tabPanels.add(daomarkPanel);
@@ -143,16 +147,18 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
         switchTab(TAB_OVERVIEW);
         updateOverviewTabData();
         updateSpiritTabData();
+        updateTribulationTabData();
     }
 
     @Override
     protected void containerTick() {
         super.containerTick();
-        if (overviewRadiusLabel == null || spiritStageLabel == null) {
+        if (overviewRadiusLabel == null || spiritStageLabel == null || tribulationStatusLabel == null) {
             return;
         }
         updateOverviewTabData();
         updateSpiritTabData();
+        updateTribulationTabData();
     }
 
     @Override
@@ -207,12 +213,59 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
         return panel;
     }
 
-    private UIElement createPlaceholderPanel(final int width, final int height) {
+    private UIElement createResourcePanel(final int width, final int height) {
         UIElement panel = new UIElement() { };
-        Label label = new Label("开发中...", theme);
-        label.setFrame(FIRST_LINE_Y, FIRST_LINE_Y, width - FIRST_LINE_Y * 2, LINE_HEIGHT);
-        label.setColor(PLACEHOLDER_COLOR);
-        panel.addChild(label);
+
+        Label titleLabel = createDataLabel(panel, FIRST_LINE_Y, width);
+        titleLabel.setText(Component.literal("§e资源控制器状态"));
+
+        Label statusLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
+        statusLabel.setText(Component.literal("资源系统状态：请查看资源控制器方块"));
+
+        Label hintLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
+        hintLabel.setText(Component.literal("请在仙窍范围内放置资源控制器方块"));
+
+        Label detailLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
+        detailLabel.setText(Component.literal("右键资源控制器查看详细产出与效率信息"));
+
+        Label auraHintLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_DAOMARK, width);
+        auraHintLabel.setText(Component.literal("时道灵气会直接影响资源产出效率"));
+
+        panel.setFrame(MAIN_X, MAIN_Y, width, height);
+        return panel;
+    }
+
+    private UIElement createTribulationPanel(final int width, final int height) {
+        UIElement panel = new UIElement() { };
+
+        Label titleLabel = createDataLabel(panel, FIRST_LINE_Y, width);
+        titleLabel.setText(Component.literal("§e灾劫信息"));
+
+        tribulationCountdownLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
+        tribulationStatusLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
+
+        Label tipLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
+        tipLabel.setText(Component.literal("提示：灾劫详情可通过灾劫管理器日志查看"));
+
+        panel.setFrame(MAIN_X, MAIN_Y, width, height);
+        return panel;
+    }
+
+    private UIElement createDaomarkPanel(final int width, final int height) {
+        UIElement panel = new UIElement() { };
+
+        Label titleLabel = createDataLabel(panel, FIRST_LINE_Y, width);
+        titleLabel.setText(Component.literal("§e道痕灵气信息"));
+
+        Label typeLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
+        typeLabel.setText(Component.literal("道痕灵气系统目前包含 " + DAOMARK_TYPE_COUNT + " 种道类型"));
+
+        Label commandLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
+        commandLabel.setText(Component.literal("详细灵气分布请使用 §b/xianqiao daomark§r 命令查看"));
+
+        Label detectorLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
+        detectorLabel.setText(Component.literal("或使用道痕检测器在仙窍范围内进行现场检测"));
+
         panel.setFrame(MAIN_X, MAIN_Y, width, height);
         return panel;
     }
@@ -257,6 +310,13 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
                 "当前阶段：" + stageIndex + " - " + SpiritUnlockService.getStageDisplayName(stageIndex)
             )
         );
+    }
+
+    private void updateTribulationTabData() {
+        long ticks = menu.getTribulationTick();
+        boolean isPeacePeriod = ticks > 0;
+        tribulationCountdownLabel.setText(Component.literal("距离下次灾劫：" + formatTribulationTime(ticks)));
+        tribulationStatusLabel.setText(Component.literal("灾劫状态：" + (isPeacePeriod ? "平静期" : "灾劫进行中")));
     }
 
     private static String formatTimeSpeed(final int percent) {
