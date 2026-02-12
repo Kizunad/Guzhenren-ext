@@ -4,8 +4,10 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -41,6 +43,8 @@ public class LandSpiritEntity extends PathfinderMob {
     /** NBT：主人 UUID。 */
     private static final String KEY_OWNER_UUID = "OwnerUUID";
 
+    private static final String KEY_BOUND_CORE_POS = "BoundCorePos";
+
     /**
      * 仙窍维度键。
      */
@@ -70,6 +74,9 @@ public class LandSpiritEntity extends PathfinderMob {
     /** 主人 UUID（仅服务端权威）。 */
     @Nullable
     private UUID ownerUUID;
+
+    @Nullable
+    private BlockPos boundCorePos;
 
     public LandSpiritEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -109,6 +116,15 @@ public class LandSpiritEntity extends PathfinderMob {
     @Nullable
     public UUID getOwnerUUID() {
         return ownerUUID;
+    }
+
+    public void setBoundCorePos(@Nullable BlockPos boundCorePos) {
+        this.boundCorePos = boundCorePos == null ? null : boundCorePos.immutable();
+    }
+
+    @Nullable
+    public BlockPos getBoundCorePos() {
+        return boundCorePos;
     }
 
     /**
@@ -164,6 +180,9 @@ public class LandSpiritEntity extends PathfinderMob {
         if (ownerUUID != null) {
             compound.putUUID(KEY_OWNER_UUID, ownerUUID);
         }
+        if (boundCorePos != null) {
+            compound.putLong(KEY_BOUND_CORE_POS, boundCorePos.asLong());
+        }
     }
 
     @Override
@@ -173,6 +192,11 @@ public class LandSpiritEntity extends PathfinderMob {
             ownerUUID = compound.getUUID(KEY_OWNER_UUID);
         } else {
             ownerUUID = null;
+        }
+        if (compound.contains(KEY_BOUND_CORE_POS, Tag.TAG_LONG)) {
+            boundCorePos = BlockPos.of(compound.getLong(KEY_BOUND_CORE_POS));
+        } else {
+            boundCorePos = null;
         }
     }
 }

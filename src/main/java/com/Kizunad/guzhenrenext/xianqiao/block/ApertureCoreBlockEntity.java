@@ -33,6 +33,8 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
     /** NBT key：核心归属者 UUID。 */
     private static final String KEY_OWNER_UUID = "ownerUUID";
 
+    private static final String KEY_BOUND_SPIRIT_UUID = "boundSpiritUUID";
+
     /** 菜单字段总数。 */
     private static final int MENU_DATA_FIELDS = 7;
 
@@ -68,6 +70,9 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
 
     @Nullable
     private UUID ownerUUID;
+
+    @Nullable
+    private UUID boundSpiritUUID;
 
     private final ContainerData menuData = new ContainerData() {
         @Override
@@ -144,6 +149,16 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
         return ownerUUID;
     }
 
+    @Nullable
+    public UUID getBoundSpiritUUID() {
+        return boundSpiritUUID;
+    }
+
+    public void setBoundSpiritUUID(@Nullable UUID spiritUUID) {
+        boundSpiritUUID = spiritUUID;
+        setChanged();
+    }
+
     public ContainerData getMenuData() {
         return menuData;
     }
@@ -166,6 +181,9 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
         if (ownerUUID != null) {
             tag.putUUID(KEY_OWNER_UUID, ownerUUID);
         }
+        if (boundSpiritUUID != null) {
+            tag.putUUID(KEY_BOUND_SPIRIT_UUID, boundSpiritUUID);
+        }
     }
 
     @Override
@@ -175,6 +193,11 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
             ownerUUID = tag.getUUID(KEY_OWNER_UUID);
         } else {
             ownerUUID = null;
+        }
+        if (tag.hasUUID(KEY_BOUND_SPIRIT_UUID)) {
+            boundSpiritUUID = tag.getUUID(KEY_BOUND_SPIRIT_UUID);
+        } else {
+            boundSpiritUUID = null;
         }
     }
 }

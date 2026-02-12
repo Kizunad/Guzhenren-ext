@@ -1,12 +1,13 @@
 package com.Kizunad.guzhenrenext.xianqiao.command;
 
 import com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks;
+import com.Kizunad.guzhenrenext.xianqiao.block.ApertureCoreBlockEntity;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ReturnPosition;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.LandSpiritEntity;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.XianqiaoEntities;
-import java.util.List;
+import java.util.UUID;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -22,7 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * 仙窍进出传送命令。
@@ -52,9 +53,6 @@ public final class ApertureCommand {
 
     /** 箱子相对核心的 Z 偏移。 */
     private static final int CHEST_OFFSET_Z = 0;
-
-    /** 检测地灵是否存在时的搜索半径。 */
-    private static final int SPIRIT_SEARCH_RADIUS = 16;
 
     private ApertureCommand() {
     }
@@ -226,11 +224,6 @@ public final class ApertureCommand {
      * @param center 当前玩家仙窍核心坐标
      */
     private static void ensureLandSpiritExists(ServerLevel level, ServerPlayer player, BlockPos center) {
-        AABB searchBox = new AABB(center).inflate(SPIRIT_SEARCH_RADIUS);
-        List<LandSpiritEntity> landSpiritEntities = level.getEntitiesOfClass(LandSpiritEntity.class, searchBox);
-        if (!landSpiritEntities.isEmpty()) {
-            return;
-        }
         spawnLandSpirit(level, player, center);
     }
 
@@ -242,11 +235,26 @@ public final class ApertureCommand {
      * @param center 仙窍核心坐标
      */
     private static void spawnLandSpirit(ServerLevel level, ServerPlayer player, BlockPos center) {
+        BlockEntity blockEntity = level.getBlockEntity(center);
+        if (!(blockEntity instanceof ApertureCoreBlockEntity coreBlockEntity)) {
+            return;
+        }
+
+        UUID boundSpiritUUID = coreBlockEntity.getBoundSpiritUUID();
+        if (boundSpiritUUID != null) {
+            if (level.getEntity(boundSpiritUUID) instanceof LandSpiritEntity) {
+                player.sendSystemMessage(Component.literal("地灵已存在，无需重复生成。"));
+                return;
+            }
+            coreBlockEntity.setBoundSpiritUUID(null);
+        }
+
         LandSpiritEntity entity = XianqiaoEntities.LAND_SPIRIT.get().create(level);
         if (entity == null) {
             return;
         }
         entity.setOwnerUUID(player.getUUID());
+        entity.setBoundCorePos(center);
         entity.moveTo(
             center.getX() + BLOCK_CENTER_OFFSET,
             center.getY() + SPAWN_Y_OFFSET,
@@ -254,6 +262,8 @@ public final class ApertureCommand {
             player.getYRot(),
             player.getXRot()
         );
-        level.addFreshEntity(entity);
+        if (level.addFreshEntity(entity)) {
+            coreBlockEntity.setBoundSpiritUUID(entity.getUUID());
+        }
     }
 }
