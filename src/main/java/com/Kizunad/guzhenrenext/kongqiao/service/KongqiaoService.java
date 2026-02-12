@@ -198,4 +198,27 @@ public final class KongqiaoService {
         };
         player.openMenu(provider);
     }
+
+    public static void openFlyingSwordTrainingMenu(ServerPlayer player) {
+        if (player.level().isClientSide()) {
+            return;
+        }
+        MenuProvider provider = new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.translatable("menu.guzhenrenext.flying_sword_training");
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(
+                int containerId,
+                Inventory playerInventory,
+                Player playerEntity
+            ) {
+                return new com.Kizunad.guzhenrenext.kongqiao.flyingsword.training
+                    .FlyingSwordTrainingMenu(containerId, playerInventory);
+            }
+        };
+        player.openMenu(provider);
+    }
 }

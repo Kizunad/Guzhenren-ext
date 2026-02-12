@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.client;
 
 import com.Kizunad.guzhenrenext.network.ServerboundKongqiaoActionPayload;
+import com.Kizunad.guzhenrenext.network.ServerboundOpenTrainingGuiPayload;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -33,6 +34,11 @@ public final class KongqiaoKeyMappings {
         GLFW.GLFW_KEY_UNKNOWN,
         CATEGORY
     );
+    public static final KeyMapping KEY_TRAINING = new KeyMapping(
+        "key.guzhenrenext.flyingsword.training",
+        GLFW.GLFW_KEY_K,
+        CATEGORY
+    );
 
     private KongqiaoKeyMappings() {}
 
@@ -50,6 +56,13 @@ public final class KongqiaoKeyMappings {
         }
         while (ATTACK_SCREEN_KEY.consumeClick()) {
             send(ServerboundKongqiaoActionPayload.Action.OPEN_ATTACK);
+        }
+        boolean requestOpenTraining = false;
+        while (KEY_TRAINING.consumeClick()) {
+            requestOpenTraining = true;
+        }
+        if (requestOpenTraining) {
+            PacketDistributor.sendToServer(new ServerboundOpenTrainingGuiPayload());
         }
     }
 

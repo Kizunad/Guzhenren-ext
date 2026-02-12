@@ -133,7 +133,7 @@ Task 3: 网络与按键绑定 (入口)
 
 ---
 
-- [ ] 3. 网络与按键绑定
+- [x] 3. 网络与按键绑定
 
   **What to do**:
   - 注册 KeyMapping `KEY_TRAINING` (默认 K)。
@@ -142,7 +142,7 @@ Task 3: 网络与按键绑定 (入口)
   - Server 端处理包 → `player.openMenu(...)`。
 
   **Acceptance Criteria**:
-  - [ ] 按 K 键能打开界面
+  - [x] 按 K 键能打开界面
 
   **Commit**: YES
   - Message: `feat(flyingsword): bind training GUI to key K`

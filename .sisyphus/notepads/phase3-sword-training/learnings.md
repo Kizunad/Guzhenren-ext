@@ -14,3 +14,9 @@
 - **TinyUISlot integration**: Created `TinyUISlotItemHandler` to bridge `TinyUISlot` (dynamic positioning) and `SlotItemHandler` (item validation/constraints). This allows us to use NeoForge's ItemHandler capabilities while keeping TinyUI's flexible layout.
 - **Slot validation**: Enforced slot validation (Sword vs Fuel) in `FlyingSwordTrainingMenu` by overriding `mayPlace` in anonymous classes of `TinyUISlotItemHandler`. This ensures server-side security.
 - **Checkstyle Compliance**: Extracted UI layout constants (sizes, paddings, gaps) into static final fields in `FlyingSwordTrainingScreen` to satisfy strict MagicNumber checks.
+
+## 2026-02-13 Task3 按键与网络 Learnings
+- 复用 `KongqiaoKeyMappings + KongqiaoClientEvents.registerKeys` 的链路注册新按键最稳妥，能避免引入并行的输入系统。
+- 对“打开界面”型按键，在 tick 内用 `while (consumeClick())` 汇总成单个布尔标记再发一次包，可实现同帧防抖并减少重复包。
+- 新增无负载打开包时，沿用 `StreamCodec.unit(new Payload())` 可保持与现有空包风格一致。
+- 服务端打开训练界面复用 `KongqiaoService` 的 `MenuProvider + player.openMenu(...)` 模式，能与既有菜单生命周期保持一致。
