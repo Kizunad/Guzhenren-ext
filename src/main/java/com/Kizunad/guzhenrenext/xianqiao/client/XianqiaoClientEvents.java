@@ -31,6 +31,7 @@ public final class XianqiaoClientEvents {
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(XianqiaoMenus.RESOURCE_CONTROLLER.get(), ResourceControllerScreen::new);
         event.register(XianqiaoMenus.LAND_SPIRIT.get(), LandSpiritScreen::new);
+        event.register(XianqiaoMenus.APERTURE_HUB.get(), ApertureHubScreen::new);
     }
 
     /**
