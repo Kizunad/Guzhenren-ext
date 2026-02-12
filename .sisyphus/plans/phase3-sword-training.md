@@ -49,10 +49,10 @@
 - 网络包（打开 GUI）
 
 ### Definition of Done
-- [ ] `./gradlew checkstyleMain` → BUILD SUCCESSFUL
-- [ ] 放入飞剑和元石后，进度条开始走
-- [ ] 经验值确实增加
-- [ ] 物品存取正常，无刷物品 bug
+- [x] `./gradlew checkstyleMain` → BUILD SUCCESSFUL
+- [x] 放入飞剑和元石后，进度条开始走
+- [x] 经验值确实增加
+- [x] 物品存取正常，无刷物品 bug
 
 ### Must Have
 - Attachment 持久化
