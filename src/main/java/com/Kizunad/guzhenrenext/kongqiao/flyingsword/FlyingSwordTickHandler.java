@@ -7,6 +7,7 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordRunti
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordSelectionAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingService;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -63,6 +64,8 @@ public final class FlyingSwordTickHandler {
         ) {
             return;
         }
+
+        FlyingSwordTrainingService.tick(player);
         // Phase 2：后续在此调用 AI/同步/战斗模块。
     }
 }

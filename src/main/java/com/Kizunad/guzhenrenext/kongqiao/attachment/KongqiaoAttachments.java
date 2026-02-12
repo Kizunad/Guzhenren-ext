@@ -130,6 +130,20 @@ public final class KongqiaoAttachments {
                     .build()
         );
 
+    public static final DeferredHolder<
+        AttachmentType<?>,
+        AttachmentType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingAttachment>
+    > FLYING_SWORD_TRAINING =
+        ATTACHMENT_TYPES.register(
+            "flying_sword_training",
+            () ->
+                AttachmentType.serializable(
+                        com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingAttachment::new
+                    )
+                    .copyOnDeath()
+                    .build()
+        );
+
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<ActivePassives>> ACTIVE_PASSIVES =
         ATTACHMENT_TYPES.register(
             "active_passives",
@@ -323,5 +337,20 @@ public final class KongqiaoAttachments {
             );
         }
         return entity.getData(FLYING_SWORD_FORGE.get());
+    }
+
+    public static com.Kizunad.guzhenrenext.kongqiao.flyingsword.training
+        .FlyingSwordTrainingAttachment getFlyingSwordTraining(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!entity.hasData(FLYING_SWORD_TRAINING.get())) {
+            entity.setData(
+                FLYING_SWORD_TRAINING.get(),
+                new com.Kizunad.guzhenrenext.kongqiao.flyingsword.training
+                    .FlyingSwordTrainingAttachment()
+            );
+        }
+        return entity.getData(FLYING_SWORD_TRAINING.get());
     }
 }
