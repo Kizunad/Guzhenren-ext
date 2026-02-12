@@ -59,6 +59,10 @@ public class TribulationManager {
     /** 入侵阶段每只存活灾兽每 tick 造成的抽象损坏。 */
     private static final float INVASION_DAMAGE_PER_MOB_PER_TICK = 0.01F;
 
+    private static final double BLOCK_CENTER_OFFSET = 0.5D;
+
+    private static final float FULL_CIRCLE_DEGREES = 360.0F;
+
     /** 灾兽死亡后扩散道痕的固定强度。 */
     private static final int KILL_AURA_AMOUNT = 100;
 
@@ -214,7 +218,7 @@ public class TribulationManager {
         BlockPos target = randomPosInAperture(random, apertureInfo.center(), apertureInfo.currentRadius());
         LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level);
         if (lightning != null) {
-            lightning.moveTo(target.getX() + 0.5D, target.getY(), target.getZ() + 0.5D);
+            lightning.moveTo(target.getX() + BLOCK_CENTER_OFFSET, target.getY(), target.getZ() + BLOCK_CENTER_OFFSET);
             lightning.setVisualOnly(false);
             level.addFreshEntity(lightning);
         }
@@ -279,7 +283,8 @@ public class TribulationManager {
             if (mob == null) {
                 continue;
             }
-            mob.moveTo(spawnX + 0.5D, spawnY, spawnZ + 0.5D, random.nextFloat() * 360.0F, 0.0F);
+            mob.moveTo(spawnX + BLOCK_CENTER_OFFSET, spawnY, spawnZ + BLOCK_CENTER_OFFSET,
+                random.nextFloat() * FULL_CIRCLE_DEGREES, 0.0F);
             mob.setPersistenceRequired();
             if (level.addFreshEntity(mob)) {
                 UUID uuid = mob.getUUID();

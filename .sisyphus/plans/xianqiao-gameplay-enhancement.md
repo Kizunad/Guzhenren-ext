@@ -100,7 +100,7 @@
 - [x] Task 2: Implement Spirit Binding (Entity/BE/Command)
 - [x] Task 3: Implement 4-Quadrant Terrain
 - [x] Task 4: Upgrade Resource Controller (Inventory/Structure)
-- [ ] Task 5: Final Build Verification
+- [x] Task 5: Final Build Verification
 
 **Dependencies**:
 - Task 2 需要修改 3 个文件，需同步进行。
