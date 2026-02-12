@@ -88,8 +88,14 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
 
     @Override
     protected void initUI(final UIRoot root) {
+        // 清理旧的组件引用，防止 resize 时列表无限增长导致 switchTab 逻辑错误
+        this.tabPanels.clear();
+        this.tabButtons.clear();
+
+        // 动态计算居中坐标，确保在窗口大小改变时界面始终居中
         int rootX = (this.width - WINDOW_WIDTH) / 2;
         int rootY = (this.height - WINDOW_HEIGHT) / 2;
+        // 更新视口大小以匹配当前屏幕
         root.setViewport(this.width, this.height);
 
         UIElement main = new UIElement() { };
@@ -161,6 +167,7 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
         main.addChild(daomarkPanel);
         tabPanels.add(daomarkPanel);
 
+        // 切换到总览页并刷新数据
         switchTab(TAB_OVERVIEW);
         updateOverviewTabData();
         updateSpiritTabData();
