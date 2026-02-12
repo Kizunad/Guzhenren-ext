@@ -26,6 +26,10 @@ public class ResourceControllerMenu extends AbstractContainerMenu {
 
     private static final int OUTPUT_SLOT_Y = 35;
 
+    private static final int INPUT_SLOT_X = 56;
+
+    private static final int INPUT_SLOT_Y = 35;
+
     private static final int PLAYER_INV_X_START = 8;
 
     private static final int PLAYER_INV_Y_START = 84;
@@ -99,7 +103,8 @@ public class ResourceControllerMenu extends AbstractContainerMenu {
     }
 
     private void addControllerSlots() {
-        addSlot(new OutputSlot(container, ResourceControllerBlockEntity.OUTPUT_SLOT, OUTPUT_SLOT_X, OUTPUT_SLOT_Y));
+        addSlot(new OutputSlot(container, ResourceControllerBlockEntity.SLOT_OUTPUT, OUTPUT_SLOT_X, OUTPUT_SLOT_Y));
+        addSlot(new Slot(container, ResourceControllerBlockEntity.SLOT_INPUT, INPUT_SLOT_X, INPUT_SLOT_Y));
     }
 
     private void addPlayerSlots(Inventory playerInventory) {
@@ -143,7 +148,9 @@ public class ResourceControllerMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
         } else {
-            return ItemStack.EMPTY;
+            if (!moveItemStackTo(stack, ResourceControllerBlockEntity.SLOT_INPUT, containerSlots, false)) {
+                return ItemStack.EMPTY;
+            }
         }
 
         if (stack.isEmpty()) {

@@ -54,6 +54,8 @@ public final class XianqiaoBlocks {
     public static final DeferredBlock<ResourceComponentBlock> TIME_FIELD_COMPONENT =
         BLOCKS.register("time_field_component", () -> new ResourceComponentBlock());
 
+    public static final DeferredBlock<ResourceComponentBlock> RESOURCE_COMPONENT = TIME_FIELD_COMPONENT;
+
     /**
      * 资源点控制器方块物品。
      */

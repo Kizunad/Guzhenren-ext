@@ -99,7 +99,7 @@
 - [x] Task 1: Verify & Fix GUI Centering
 - [x] Task 2: Implement Spirit Binding (Entity/BE/Command)
 - [x] Task 3: Implement 4-Quadrant Terrain
-- [ ] Task 4: Upgrade Resource Controller (Inventory/Structure)
+- [x] Task 4: Upgrade Resource Controller (Inventory/Structure)
 - [ ] Task 5: Final Build Verification
 
 **Dependencies**:

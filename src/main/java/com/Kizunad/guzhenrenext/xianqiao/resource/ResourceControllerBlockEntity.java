@@ -37,11 +37,14 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class ResourceControllerBlockEntity extends BlockEntity implements MenuProvider, Container {
 
-    /** 库存槽位总数（当前仅产出槽）。 */
-    public static final int INVENTORY_SIZE = 1;
+    /** 库存槽位总数（产出槽 + 输入槽）。 */
+    public static final int INVENTORY_SIZE = 2;
 
-    /** 产出槽索引。 */
-    public static final int OUTPUT_SLOT = 0;
+    /** 产出槽索引（只出不进）。 */
+    public static final int SLOT_OUTPUT = 0;
+
+    /** 输入槽索引（只进不出，作为运行前置条件）。 */
+    public static final int SLOT_INPUT = 1;
 
     /** 结构重检间隔（tick）。 */
     private static final int STRUCTURE_RECHECK_INTERVAL = 100;
@@ -138,6 +141,11 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
         com.Kizunad.guzhenrenext.xianqiao.resource.ResourceComponentBlock
     > COMPONENT_BLOCK = com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks.TIME_FIELD_COMPONENT;
 
+    /** 底座结构要求：控制器下方必须是资源组件方块。 */
+    private static final net.neoforged.neoforge.registries.DeferredBlock<
+        com.Kizunad.guzhenrenext.xianqiao.resource.ResourceComponentBlock
+    > RESOURCE_COMPONENT_BLOCK = com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks.RESOURCE_COMPONENT;
+
     /** 默认产出物。 */
     private static final ItemStack OUTPUT_TEMPLATE = new ItemStack(Items.CLOCK);
 
@@ -213,6 +221,10 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
             return;
         }
 
+        if (items.get(SLOT_INPUT).isEmpty()) {
+            return;
+        }
+
         float efficiency = getCurrentEfficiency();
         float timeMultiplier = getApertureTimeSpeed();
         float baseSpeed = BASE_SPEED_MIN + componentCount * BASE_SPEED_PER_COMPONENT;
@@ -235,6 +247,15 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
         if (level == null) {
             isFormed = false;
             componentCount = 0;
+            return;
+        }
+
+        if (!checkStructure()) {
+            isFormed = false;
+            componentCount = 0;
+            if (progress > 0) {
+                progress = 0;
+            }
             return;
         }
 
@@ -266,6 +287,14 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
         if (!isFormed && progress > 0) {
             progress = 0;
         }
+    }
+
+    private boolean checkStructure() {
+        if (level == null) {
+            return false;
+        }
+        BlockPos belowPos = worldPosition.below();
+        return level.getBlockState(belowPos).is(RESOURCE_COMPONENT_BLOCK.get());
     }
 
     private int getCurrentAura() {
@@ -354,11 +383,11 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
      * @return true 表示成功入库；false 表示槽位已满
      */
     private boolean outputItems() {
-        ItemStack output = items.get(OUTPUT_SLOT);
+        ItemStack output = items.get(SLOT_OUTPUT);
         if (output.isEmpty()) {
             ItemStack created = OUTPUT_TEMPLATE.copy();
             created.setCount(OUTPUT_COUNT_PER_CYCLE);
-            items.set(OUTPUT_SLOT, created);
+            items.set(SLOT_OUTPUT, created);
             return true;
         }
         if (!ItemStack.isSameItemSameComponents(output, OUTPUT_TEMPLATE)) {
@@ -398,6 +427,7 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        clearItemList();
         progress = tag.getFloat(KEY_PROGRESS);
         int loadedProgressScale = tag.getInt(KEY_PROGRESS_SCALE);
         if (loadedProgressScale > 0 && loadedProgressScale != PROGRESS_SCALE) {
@@ -409,11 +439,8 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
         if (tag.contains(KEY_ITEMS)) {
             CompoundTag itemsTag = tag.getCompound(KEY_ITEMS);
             ContainerHelper.loadAllItems(itemsTag, items, registries);
-        } else {
-            for (int index = 0; index < items.size(); index++) {
-                items.set(index, ItemStack.EMPTY);
-            }
         }
+        normalizeInventoryAfterLoad();
     }
 
     @Override
@@ -470,15 +497,35 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
     }
 
     @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        return slot == SLOT_INPUT;
+    }
+
+    @Override
     public boolean stillValid(Player player) {
         return Container.stillValidBlockEntity(this, player);
     }
 
     @Override
     public void clearContent() {
-        for (int i = 0; i < items.size(); i++) {
-            items.set(i, ItemStack.EMPTY);
-        }
+        clearItemList();
         setChanged();
+    }
+
+    private void clearItemList() {
+        for (int index = 0; index < items.size(); index++) {
+            items.set(index, ItemStack.EMPTY);
+        }
+    }
+
+    private void normalizeInventoryAfterLoad() {
+        for (int index = 0; index < items.size(); index++) {
+            if (items.get(index) == null) {
+                items.set(index, ItemStack.EMPTY);
+            }
+        }
+        if (items.get(SLOT_INPUT).isEmpty()) {
+            items.set(SLOT_INPUT, ItemStack.EMPTY);
+        }
     }
 }
