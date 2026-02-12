@@ -15,6 +15,21 @@ import java.util.Locale;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
+/**
+ * 仙窍中枢管理界面（Aperture Hub Screen）。
+ * <p>
+ * 基于 TinyUI 的多 Tab 容器界面，整合仙窍核心的全部信息展示：
+ * 1) 总览 Tab：仙窍半径、时间倍率、层级、冻结状态、灾劫倒计时、好感度；
+ * 2) 地灵 Tab：好感度、转数、当前阶段；
+ * 3) 资源 Tab：引导玩家查看资源控制器方块；
+ * 4) 灾劫 Tab：灾劫倒计时和状态；
+ * 5) 道痕 Tab：道痕系统概述和命令提示。
+ * </p>
+ * <p>
+ * 所有数据通过 {@link ApertureHubMenu} 的 ContainerData 从服务端同步，
+ * 界面每 tick 刷新一次展示数据。
+ * </p>
+ */
 public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
 
     private static final int WINDOW_WIDTH = 280;
