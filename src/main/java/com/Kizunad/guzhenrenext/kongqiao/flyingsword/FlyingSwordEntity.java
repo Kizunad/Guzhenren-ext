@@ -3,16 +3,22 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai.SwordAIDriver;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai.SwordAIMode;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.SwordSpiritData;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordExpCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthData;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.quality.SwordQuality;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,6 +27,7 @@ import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -85,6 +92,26 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
             EntityDataSerializers.INT
         );
 
+    private static final EntityDataAccessor<Integer> AFFINITY =
+        SynchedEntityData.defineId(
+            FlyingSwordEntity.class,
+            EntityDataSerializers.INT
+        );
+
+    private static final int PET_COOLDOWN_TICKS = 1200;
+
+    private static final int FEED_AFFINITY_GAIN = 10;
+
+    private static final int PET_AFFINITY_GAIN = 5;
+
+    private static final int HEART_PARTICLE_COUNT = 5;
+
+    private static final double PARTICLE_SPREAD = 0.5D;
+
+    private static final float INTERACTION_SOUND_VOLUME = 1.0F;
+
+    private static final float INTERACTION_SOUND_PITCH = 1.0F;
+
     // ===== 运行时缓存 =====
 
     @Nullable
@@ -97,6 +124,8 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
 
     private final FlyingSwordAttributes swordAttributes =
         new FlyingSwordAttributes();
+
+    private long lastPetTime;
 
     // ===== 构造 =====
 
@@ -130,6 +159,7 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
         builder.define(QUALITY_TIER, 0);
         builder.define(SWORD_LEVEL, 1);
         builder.define(SWORD_EXP, 0);
+        builder.define(AFFINITY, 0);
     }
 
     @Override
@@ -286,6 +316,14 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
         entityData.set(QUALITY_TIER, swordAttributes.getQuality().ordinal());
         entityData.set(SWORD_LEVEL, swordAttributes.getLevel());
         entityData.set(SWORD_EXP, swordAttributes.getExperience());
+        entityData.set(AFFINITY, swordAttributes.getSpiritData().getAffinity());
+    }
+
+    public void syncSpiritDataToEntityData() {
+        if (level().isClientSide()) {
+            return;
+        }
+        entityData.set(AFFINITY, swordAttributes.getSpiritData().getAffinity());
     }
 
     // ===== Cached Target =====
@@ -322,6 +360,72 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
             cachedTarget
         );
         this.cachedTarget = newTarget;
+    }
+
+    @Override
+    public InteractionResult mobInteract(
+        Player player,
+        InteractionHand hand
+    ) {
+        if (level().isClientSide() || !isOwnedBy(player)) {
+            return super.mobInteract(player, hand);
+        }
+
+        SwordSpiritData spirit = swordAttributes.getSpiritData();
+        ItemStack stack = player.getItemInHand(hand);
+
+        if (!stack.isEmpty()) {
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+            spirit.addAffinity(FEED_AFFINITY_GAIN);
+            syncSpiritDataToEntityData();
+
+            playSound(
+                SoundEvents.GENERIC_EAT,
+                INTERACTION_SOUND_VOLUME,
+                INTERACTION_SOUND_PITCH
+            );
+            spawnHeartParticles();
+
+            return InteractionResult.SUCCESS;
+        }
+
+        if (player.isShiftKeyDown()) {
+            long currentTime = level().getGameTime();
+            if (currentTime - lastPetTime >= PET_COOLDOWN_TICKS) {
+                lastPetTime = currentTime;
+                spirit.addAffinity(PET_AFFINITY_GAIN);
+                syncSpiritDataToEntityData();
+
+                playSound(
+                    SoundEvents.WOLF_WHINE,
+                    INTERACTION_SOUND_VOLUME,
+                    INTERACTION_SOUND_PITCH
+                );
+                spawnHeartParticles();
+
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
+    private void spawnHeartParticles() {
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                ParticleTypes.HEART,
+                getX(),
+                getY() + getBbHeight(),
+                getZ(),
+                HEART_PARTICLE_COUNT,
+                PARTICLE_SPREAD,
+                PARTICLE_SPREAD,
+                PARTICLE_SPREAD,
+                0.0D
+            );
+        }
     }
 
     // ===== Despawn Control =====
@@ -418,6 +522,10 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
             return entityData.get(SWORD_EXP);
         }
         return swordAttributes.getExperience();
+    }
+
+    public int getAffinity() {
+        return entityData.get(AFFINITY);
     }
 
     @Override
