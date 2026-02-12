@@ -88,10 +88,12 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
 
     @Override
     protected void initUI(final UIRoot root) {
-        root.setViewport(WINDOW_WIDTH, WINDOW_HEIGHT);
+        int rootX = (this.width - WINDOW_WIDTH) / 2;
+        int rootY = (this.height - WINDOW_HEIGHT) / 2;
+        root.setViewport(this.width, this.height);
 
         UIElement main = new UIElement() { };
-        main.setFrame(MAIN_X, MAIN_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
+        main.setFrame(rootX, rootY, WINDOW_WIDTH, WINDOW_HEIGHT);
         root.addChild(main);
 
         int availableWidth = WINDOW_WIDTH - MAIN_PADDING * 2;
