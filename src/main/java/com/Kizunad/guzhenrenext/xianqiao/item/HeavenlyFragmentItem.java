@@ -6,12 +6,15 @@ import com.Kizunad.guzhenrenext.xianqiao.service.FragmentPlacementService;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -75,11 +78,30 @@ public class HeavenlyFragmentItem extends Item {
             return InteractionResultHolder.fail(stack);
         }
 
+        if (player.isShiftKeyDown()) {
+            Direction direction = player.getDirection();
+            int placementDistance = apertureInfo.currentRadius() + FragmentPlacementService.EXTENSION_DISTANCE;
+            BlockPos targetPos = apertureInfo.center().offset(
+                direction.getStepX() * placementDistance,
+                0,
+                direction.getStepZ() * placementDistance
+            );
+            player.displayClientMessage(
+                Component.literal("§6当前朝向：" + getDirectionName(direction)
+                    + " | 扩展至 (" + targetPos.getX() + ", " + targetPos.getZ()
+                    + ") | 松开Shift右键确认放置"),
+                true
+            );
+            return InteractionResultHolder.success(stack);
+        }
+
         boolean placed = FragmentPlacementService.placeFragment(serverLevel, player, apertureInfo);
         if (!placed) {
+            player.playNotifySound(SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
             player.sendSystemMessage(Component.literal("九天碎片放置失败，请检查目标区域后重试。"));
             return InteractionResultHolder.fail(stack);
         }
+        player.playNotifySound(SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.PLAYERS, 1.0F, 1.0F);
         stack.shrink(FRAGMENT_CONSUME_COUNT);
         return InteractionResultHolder.success(stack);
     }
@@ -98,6 +120,16 @@ public class HeavenlyFragmentItem extends Item {
         long distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
         long radius = info.currentRadius();
         return distanceSquared <= radius * radius;
+    }
+
+    private static String getDirectionName(Direction direction) {
+        return switch (direction) {
+            case NORTH -> "北方";
+            case SOUTH -> "南方";
+            case EAST -> "东方";
+            case WEST -> "西方";
+            default -> direction.getName();
+        };
     }
 
     @Override
