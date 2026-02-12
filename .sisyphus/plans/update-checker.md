@@ -128,7 +128,7 @@ Enable in-game update notifications for `guzhenrenext` users when a new version 
     print("QA: TOML Injection Verified")
     ```
 
-- [ ] 2. Create update.json template
+- [x] 2. Create update.json template
 
   **What to do**:
   - Create `update.json` in project root.
