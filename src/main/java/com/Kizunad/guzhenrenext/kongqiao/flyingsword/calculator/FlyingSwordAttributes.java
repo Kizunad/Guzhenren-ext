@@ -42,6 +42,7 @@ public class FlyingSwordAttributes {
     private static final String TAG_ATTACK_COOLDOWN = "AttackCooldown";
     private static final String TAG_MAX_DURABILITY = "MaxDurability";
     private static final String TAG_IMPRINT = "Imprint";
+    private static final String TAG_SPIRIT_DATA = "SpiritData";
 
     // ==================== 默认值（凡品1级） ====================
 
@@ -62,6 +63,9 @@ public class FlyingSwordAttributes {
 
     /** 飞剑成长数据（品质、等级、经验） */
     private final SwordGrowthData growthData;
+
+    /** 剑灵数据（好感度、心情） */
+    private final SwordSpiritData spiritData = new SwordSpiritData();
 
     // ==================== 运动属性 ====================
 
@@ -163,6 +167,15 @@ public class FlyingSwordAttributes {
      */
     public SwordGrowthData getGrowthData() {
         return growthData;
+    }
+
+    /**
+     * 获取剑灵数据（直接引用，修改会反映到本实例）。
+     *
+     * @return 剑灵数据引用
+     */
+    public SwordSpiritData getSpiritData() {
+        return spiritData;
     }
 
     /**
@@ -435,6 +448,9 @@ public class FlyingSwordAttributes {
         tag.putDouble(TAG_MAX_DURABILITY, maxDurability);
         tag.putInt(TAG_ATTACK_COOLDOWN, attackCooldown);
 
+        // 剑灵数据
+        tag.put(TAG_SPIRIT_DATA, spiritData.toNBT());
+
         if (!imprint.isEmpty()) {
             tag.put(TAG_IMPRINT, imprint.toNBT());
         }
@@ -467,6 +483,15 @@ public class FlyingSwordAttributes {
          if (tag.contains(TAG_DURABILITY)) {
              attrs.durability = tag.getDouble(TAG_DURABILITY);
          }
+
+        // 读取剑灵数据
+        if (tag.contains(TAG_SPIRIT_DATA)) {
+            SwordSpiritData loaded = SwordSpiritData.fromNBT(
+                tag.getCompound(TAG_SPIRIT_DATA)
+            );
+            attrs.spiritData.setAffinity(loaded.getAffinity());
+            attrs.spiritData.setMood(loaded.getMood());
+        }
  
         if (tag.contains(TAG_IMPRINT, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
             var imprintTag = tag.getCompound(TAG_IMPRINT);
@@ -507,6 +532,15 @@ public class FlyingSwordAttributes {
         // 读取当前耐久
         if (tag.contains(TAG_DURABILITY)) {
             this.durability = tag.getDouble(TAG_DURABILITY);
+        }
+
+        // 读取剑灵数据
+        if (tag.contains(TAG_SPIRIT_DATA)) {
+            SwordSpiritData loaded = SwordSpiritData.fromNBT(
+                tag.getCompound(TAG_SPIRIT_DATA)
+            );
+            spiritData.setAffinity(loaded.getAffinity());
+            spiritData.setMood(loaded.getMood());
         }
 
         if (tag.contains(TAG_IMPRINT, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
