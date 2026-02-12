@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.resource;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.block.ApertureHubMenu;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.LandSpiritMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -24,6 +25,15 @@ public final class XianqiaoMenus {
     > RESOURCE_CONTROLLER = MENUS.register(
         "resource_controller",
         () -> IMenuTypeExtension.create(ResourceControllerMenu::fromNetwork)
+    );
+
+    /** 仙窍中枢菜单。 */
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<ApertureHubMenu>
+    > APERTURE_HUB = MENUS.register(
+        "aperture_hub",
+        () -> IMenuTypeExtension.create(ApertureHubMenu::fromNetwork)
     );
 
     /** 地灵管理菜单。 */

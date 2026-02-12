@@ -112,7 +112,7 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return null;
+        return new ApertureHubMenu(containerId, playerInventory, menuData);
     }
 
     /**
