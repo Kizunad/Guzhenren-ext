@@ -55,6 +55,15 @@ public final class KongqiaoMenus {
         )
     );
 
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingMenu>
+    > FLYING_SWORD_TRAINING = MENUS.register("flying_sword_training", () ->
+        IMenuTypeExtension.create(
+            com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingMenu::fromNetwork
+        )
+    );
+
     public static void register(IEventBus bus) {
         MENUS.register(bus);
     }

@@ -41,6 +41,10 @@ public final class KongqiaoClientEvents {
             KongqiaoMenus.FLYING_SWORD_FORGE.get(),
             com.Kizunad.guzhenrenext.kongqiao.flyingsword.forge.FlyingSwordForgeScreen::new
         );
+        event.register(
+            KongqiaoMenus.FLYING_SWORD_TRAINING.get(),
+            com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingScreen::new
+        );
     }
 
     @SubscribeEvent

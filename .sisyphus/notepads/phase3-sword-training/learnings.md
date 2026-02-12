@@ -8,3 +8,9 @@
 
 ## 2026-02-13 Task1 提交策略
 - 按“每个 task 提交一次”执行，Task1 提交仅包含训练后端、注册/tick 挂接、燃料 tag、计划勾选与 notepad 记录，避免混入 Task2/Task3。
+
+## 2026-02-13 Task2 Menu & UI Learnings
+- **ContainerData pattern**: Successfully used ContainerData to sync primitive data (fuel, exp) from server attachment to client screen. This is cleaner than custom packets for simple integers.
+- **TinyUISlot integration**: Created `TinyUISlotItemHandler` to bridge `TinyUISlot` (dynamic positioning) and `SlotItemHandler` (item validation/constraints). This allows us to use NeoForge's ItemHandler capabilities while keeping TinyUI's flexible layout.
+- **Slot validation**: Enforced slot validation (Sword vs Fuel) in `FlyingSwordTrainingMenu` by overriding `mayPlace` in anonymous classes of `TinyUISlotItemHandler`. This ensures server-side security.
+- **Checkstyle Compliance**: Extracted UI layout constants (sizes, paddings, gaps) into static final fields in `FlyingSwordTrainingScreen` to satisfy strict MagicNumber checks.

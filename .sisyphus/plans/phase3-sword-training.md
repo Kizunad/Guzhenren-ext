@@ -109,7 +109,7 @@ Task 3: 网络与按键绑定 (入口)
 
 ---
 
-- [ ] 2. 实现 Menu 与 Screen
+- [x] 2. 实现 Menu 与 Screen
 
   **What to do**:
   - 创建 `FlyingSwordTrainingMenu` (extends AbstractContainerMenu)：
@@ -125,8 +125,8 @@ Task 3: 网络与按键绑定 (入口)
   - `FlyingSwordForgeMenu.java` (参考写法)
 
   **Acceptance Criteria**:
-  - [ ] GUI 能打开，能看到槽位
-  - [ ] 进度条能动
+  - [x] GUI 能打开，能看到槽位
+  - [x] 进度条能动
 
   **Commit**: YES
   - Message: `feat(flyingsword): add training GUI`
