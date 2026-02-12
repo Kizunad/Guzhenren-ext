@@ -112,6 +112,15 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
 
     private static final float INTERACTION_SOUND_PITCH = 1.0F;
 
+    /** 高好感度阈值（超过此值触发回血加成）。 */
+    private static final int HIGH_AFFINITY_THRESHOLD = 500;
+
+    /** 每秒 tick 数（用于每秒触发逻辑）。 */
+    private static final int TICKS_PER_SECOND = 20;
+
+    /** 高好感度每秒额外回血量。 */
+    private static final float SPIRIT_REGEN_AMOUNT = 1.0F;
+
     // ===== 运行时缓存 =====
 
     @Nullable
@@ -337,8 +346,6 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
         this.cachedTarget = target;
     }
 
-    // ===== Tick =====
-
     @Override
     public void tick() {
         super.tick();
@@ -360,6 +367,23 @@ public class FlyingSwordEntity extends PathfinderMob implements OwnableEntity {
             cachedTarget
         );
         this.cachedTarget = newTarget;
+
+        // 高好感度：额外生命回复
+        tickSpiritRegenBonus();
+    }
+
+    /**
+     * 高好感度回血加成。
+     * <p>
+     * 当好感度超过阈值时，每秒额外恢复 1 点生命值。
+     * </p>
+     */
+    private void tickSpiritRegenBonus() {
+        int affinity = swordAttributes.getSpiritData().getAffinity();
+        if (affinity > HIGH_AFFINITY_THRESHOLD
+            && tickCount % TICKS_PER_SECOND == 0) {
+            heal(SPIRIT_REGEN_AMOUNT);
+        }
     }
 
     @Override

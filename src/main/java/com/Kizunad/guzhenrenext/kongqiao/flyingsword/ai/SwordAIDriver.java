@@ -28,6 +28,9 @@ public final class SwordAIDriver {
 
     private SwordAIDriver() {}
 
+    /** 低好感度偷懒概率（30%）。 */
+    private static final float LAZY_CHANCE = 0.3F;
+
     /**
      * AI tick 主入口。
      * <p>
@@ -51,6 +54,13 @@ public final class SwordAIDriver {
 
         SwordAIMode mode = sword.getAIModeEnum();
 
+        // 低好感度偷懒检查：好感度为负时，30% 概率跳过战斗相关 AI
+        if (shouldSpiritLaze(sword, mode)) {
+            // 偷懒时回退到环绕模式
+            SwordMotionDriver.tickOrbit(sword, owner);
+            return null;
+        }
+
         return switch (mode) {
             case ORBIT -> {
                 tickOrbit(sword, owner);
@@ -67,6 +77,34 @@ public final class SwordAIDriver {
                 yield null;
             }
         };
+    }
+
+    /**
+     * 判断剑灵是否因低好感度而偷懒。
+     * <p>
+     * 只有战斗模式（GUARD/HUNT）才会受影响，
+     * 其他模式不受好感度影响。
+     * </p>
+     *
+     * @param sword 飞剑实体
+     * @param mode  当前 AI 模式
+     * @return 是否偷懒
+     */
+    private static boolean shouldSpiritLaze(
+        FlyingSwordEntity sword, SwordAIMode mode
+    ) {
+        // 只有战斗模式受影响
+        if (mode != SwordAIMode.GUARD && mode != SwordAIMode.HUNT) {
+            return false;
+        }
+
+        int affinity = sword.getAffinity();
+        if (affinity >= 0) {
+            return false;
+        }
+
+        // 好感度为负时，30% 概率偷懒
+        return sword.getRandom().nextFloat() < LAZY_CHANCE;
     }
 
     /**
