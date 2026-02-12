@@ -108,7 +108,7 @@ Task 4: 网络交互与 Sync (联调)
 
 ---
 
-- [ ] 2. 实现 Synergy (共鸣) 基础
+- [x] 2. 实现 Synergy (共鸣) 基础
 
   **What to do**:
   - 创建 `ClusterSynergyHelper`：

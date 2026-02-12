@@ -6,3 +6,8 @@
 - deploy 的“从存储恢复”分支通过 RecalledSword.displayItemUUID 作为目标键，恢复成功后从 storage 移除并增加算力负载。
 - recall 统一走 FlyingSwordController.finishRecall 负责落库存储，随后刷新 activeSwords/currentLoad，减少重复存储逻辑。
 - 算力规则落地为常量：Max = 10 + 魂道*0.1 + 智道*0.2；Cost = 1 + 品质阶*2，避免魔法数裸露。
+
+[2026-02-13T10:14:13+13:00] Task2 Synergy 基础实现总结
+- evaluate 规则：在 `ClusterSynergyHelper.evaluate(List<FlyingSwordEntity> activeSwords)` 中按“同名标识（当前取展示物品注册名）”计数，任一标识数量达到 `3` 即触发基础共鸣，产出 `+10%` 攻击增益（`SYNERGY_ATTACK_BONUS = 0.10F`）。
+- 结果结构采用可扩展设计：返回 `ClusterSynergyResult(attackMultiplier, effects, triggers)`，其中 `effects`（效果键值映射）与 `triggers`（触发明细）为后续多共鸣规则、UI 展示、网络同步预留稳定消费接口，避免未来反复改调用方签名。
+- 战斗链路接线点：在 `SwordCombatOps.calculateDamage(...)` 中新增 `resolveClusterSynergyAttackMultiplier(...)`，通过玩家 `FlyingSwordClusterAttachment.activeSwords` 过滤当前活跃飞剑后调用 `ClusterSynergyHelper.evaluate(...)`，最终将倍率并入伤害计算：`baseDamage * speedBonus * synergyAttackMultiplier`。

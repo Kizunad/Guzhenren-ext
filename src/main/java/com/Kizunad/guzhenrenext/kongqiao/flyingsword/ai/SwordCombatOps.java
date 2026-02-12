@@ -1,23 +1,31 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai;
 
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordConstants;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordController;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordClusterAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.cluster.ClusterSynergyHelper;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.effects.FlyingSwordEffects;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordExpCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthData;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthTuning;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import static com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordDaoProcRegistry.ProcSpec;
 
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordDaoProcRegistry;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.integration.domain.SwordSpeedModifiers;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.FlyingSwordCooldownOps;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -246,7 +254,52 @@ import net.minecraft.world.phys.Vec3;
                 speedRatio * SwordGrowthTuning.SPEED_DAMAGE_BONUS_COEF
             );
 
-        return (float) (baseDamage * speedBonus);
+        float synergyAttackMultiplier = resolveClusterSynergyAttackMultiplier(sword, owner);
+
+        return (float) (baseDamage * speedBonus * synergyAttackMultiplier);
+    }
+
+    /**
+     * 解析集群共鸣攻击倍率。
+     * <p>
+     * 仅在“玩家主人 + 服务端 + 已激活飞剑集合”条件下参与计算，
+     * 其余场景回退为 1.0，不影响原有战斗路径。
+     * </p>
+     */
+    private static float resolveClusterSynergyAttackMultiplier(
+        FlyingSwordEntity sword,
+        LivingEntity owner
+    ) {
+        if (sword == null || owner == null) {
+            return 1.0F;
+        }
+        if (!(owner instanceof Player player)) {
+            return 1.0F;
+        }
+        if (!(owner.level() instanceof ServerLevel serverLevel)) {
+            return 1.0F;
+        }
+
+        FlyingSwordClusterAttachment cluster =
+            KongqiaoAttachments.getFlyingSwordCluster(player);
+        if (cluster == null) {
+            return 1.0F;
+        }
+
+        List<FlyingSwordEntity> ownedSwords =
+            FlyingSwordController.getPlayerSwords(serverLevel, player);
+        List<FlyingSwordEntity> activeSwords = new ArrayList<>();
+        for (FlyingSwordEntity ownedSword : ownedSwords) {
+            if (ownedSword == null) {
+                continue;
+            }
+            UUID swordUuid = ownedSword.getUUID();
+            if (cluster.hasActiveSword(swordUuid)) {
+                activeSwords.add(ownedSword);
+            }
+        }
+
+        return ClusterSynergyHelper.evaluate(activeSwords).attackMultiplier();
     }
 
     /**
