@@ -64,6 +64,15 @@ public final class KongqiaoMenus {
         )
     );
 
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<com.Kizunad.guzhenrenext.kongqiao.flyingsword.cluster.FlyingSwordClusterMenu>
+    > FLYING_SWORD_CLUSTER = MENUS.register("flying_sword_cluster", () ->
+        IMenuTypeExtension.create(
+            com.Kizunad.guzhenrenext.kongqiao.flyingsword.cluster.FlyingSwordClusterMenu::fromNetwork
+        )
+    );
+
     public static void register(IEventBus bus) {
         MENUS.register(bus);
     }

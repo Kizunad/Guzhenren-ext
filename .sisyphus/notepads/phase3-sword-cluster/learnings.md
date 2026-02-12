@@ -11,3 +11,8 @@
 - evaluate 规则：在 `ClusterSynergyHelper.evaluate(List<FlyingSwordEntity> activeSwords)` 中按“同名标识（当前取展示物品注册名）”计数，任一标识数量达到 `3` 即触发基础共鸣，产出 `+10%` 攻击增益（`SYNERGY_ATTACK_BONUS = 0.10F`）。
 - 结果结构采用可扩展设计：返回 `ClusterSynergyResult(attackMultiplier, effects, triggers)`，其中 `effects`（效果键值映射）与 `triggers`（触发明细）为后续多共鸣规则、UI 展示、网络同步预留稳定消费接口，避免未来反复改调用方签名。
 - 战斗链路接线点：在 `SwordCombatOps.calculateDamage(...)` 中新增 `resolveClusterSynergyAttackMultiplier(...)`，通过玩家 `FlyingSwordClusterAttachment.activeSwords` 过滤当前活跃飞剑后调用 `ClusterSynergyHelper.evaluate(...)`，最终将倍率并入伤害计算：`baseDamage * speedBonus * synergyAttackMultiplier`。
+
+[2026-02-13T10:45:00+13:00] Task3 Screen 构造函数适配要点
+- Screen 注册接口 `RegisterMenuScreensEvent.register` 要求构造函数签名必须是 `(M menu, Inventory inv, Component title)`，不能包含额外自定义参数（如 `Theme`）。
+- 解决方案：在 Screen 构造函数内部自行初始化依赖（如 `Theme.vanilla()`），移除外部注入的 `Theme` 参数，确保 `::new` 引用与接口签名匹配。
+- 此外，TinyUI 的 `TinyUIContainerScreen` 内部虽然设计了 Theme 注入，但在 NeoForge 标准注册流程下，通常需要通过此方式适配或使用工厂方法。

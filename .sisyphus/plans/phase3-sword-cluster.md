@@ -121,7 +121,7 @@ Task 4: 网络交互与 Sync (联调)
 
 ---
 
-- [ ] 3. TinyUI 界面实现
+- [x] 3. TinyUI 界面实现
 
   **What to do**:
   - **Learning**: 阅读 `com.Kizunad.tinyUI.demo` 代码。
