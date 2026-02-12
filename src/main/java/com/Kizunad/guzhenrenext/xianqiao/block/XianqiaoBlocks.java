@@ -31,7 +31,7 @@ public final class XianqiaoBlocks {
      * 仙窍核心方块。
      */
     public static final DeferredBlock<ApertureCoreBlock> APERTURE_CORE =
-        BLOCKS.register("aperture_core", ApertureCoreBlock::new);
+        BLOCKS.register("aperture_core", (Supplier<ApertureCoreBlock>) () -> new ApertureCoreBlock());
 
     /**
      * 仙窍核心方块对应物品。

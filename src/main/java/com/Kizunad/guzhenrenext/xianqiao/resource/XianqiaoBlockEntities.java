@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.resource;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.block.ApertureCoreBlockEntity;
 import com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,6 +25,17 @@ public final class XianqiaoBlockEntities {
         "resource_controller",
         () -> BlockEntityType.Builder
             .of(ResourceControllerBlockEntity::new, XianqiaoBlocks.RESOURCE_CONTROLLER.get())
+            .build(null)
+    );
+
+    /** 仙窍核心方块实体。 */
+    public static final DeferredHolder<
+        BlockEntityType<?>,
+        BlockEntityType<ApertureCoreBlockEntity>
+    > APERTURE_CORE = BLOCK_ENTITIES.register(
+        "aperture_core",
+        () -> BlockEntityType.Builder
+            .of(ApertureCoreBlockEntity::new, XianqiaoBlocks.APERTURE_CORE.get())
             .build(null)
     );
 
