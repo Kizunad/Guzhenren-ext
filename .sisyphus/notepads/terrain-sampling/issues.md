@@ -19,3 +19,14 @@
 ## 2026-02-13T21:43 working-tree-scope-cleanup
 
 - 清理动作说明：已恢复 `phase3-sword-cluster` notepad 改动并移除无关报告文件，当前仅保留 terrain-sampling 目标文件变更。
+
+## 2026-02-13 任务3问题记录
+
+- 问题：本环境存在 LSP 初始化超时历史，无法稳定依赖 `lsp_diagnostics` 作为唯一验证信号。
+- 处理：本任务按要求以 `./gradlew checkstyleMain` 作为主验证路径，并在交付前仍补跑一次 changed file 的 LSP 诊断尝试。
+
+## 2026-02-13 任务4问题记录
+
+- 问题：本次任务对新增测试文件执行 `lsp_diagnostics` 时依旧在 `initialize` 阶段超时（`LSP request timeout (method: initialize)`）。
+- 影响：无法提供“changed file 的 LSP 0 诊断”机器化结果。
+- 处理：继续以 `./gradlew checkstyleMain` 与 `./gradlew compileJava` 作为可执行校验兜底，并在本次交付中明确披露该限制。

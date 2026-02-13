@@ -269,7 +269,7 @@ Wave 3（Wave 2 完成后）：
   - Message: `feat(xianqiao): 添加仙窍区域精确复制工具 ApertureRegionCopier`
   - Files: `src/main/java/com/Kizunad/guzhenrenext/xianqiao/service/ApertureRegionCopier.java`
 
-- [ ] 3. 集成初始化流程（ApertureCommand）
+- [x] 3. 集成初始化流程（ApertureCommand）
 
   **要做什么**：
   - 修改 `ApertureCommand.initializeApertureIfNeeded`，在现有平台/核心/箱子之后，调用 `OverworldTerrainSampler.sampleAndPlace` 放置 4 块地形
@@ -314,7 +314,7 @@ Wave 3（Wave 2 完成后）：
   - Message: `feat(xianqiao): 仙窍初始化时从主世界采样放置四块自然地形`
   - Files: `ApertureCommand.java`
 
-- [ ] 4. 编写 GameTest
+- [x] 4. 编写 GameTest
 
   **要做什么**：
   - 创建 GameTest 测试类（位置参考现有 GameTest 文件结构）

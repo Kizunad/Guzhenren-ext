@@ -5,8 +5,10 @@ import com.Kizunad.guzhenrenext.xianqiao.block.ApertureCoreBlockEntity;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ReturnPosition;
+import com.Kizunad.guzhenrenext.xianqiao.service.OverworldTerrainSampler;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.LandSpiritEntity;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.XianqiaoEntities;
+import com.mojang.logging.LogUtils;
 import java.util.UUID;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -14,21 +16,27 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import org.slf4j.Logger;
 
 /**
  * 仙窍进出传送命令。
  */
 public final class ApertureCommand {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     /** 仙窍维度键。 */
     private static final ResourceKey<Level> APERTURE_DIMENSION = ResourceKey.create(
@@ -53,6 +61,8 @@ public final class ApertureCommand {
 
     /** 箱子相对核心的 Z 偏移。 */
     private static final int CHEST_OFFSET_Z = 0;
+
+    private static final int TERRAIN_SAMPLE_OFFSET = 16;
 
     private ApertureCommand() {
     }
@@ -191,7 +201,88 @@ public final class ApertureCommand {
         BlockPos center = apertureInfo.center();
         createInitialPlatform(level, center);
         spawnLandSpirit(level, player, center);
+        sampleInitialTerrains(level, player, center);
         worldData.markApertureInitialized(player.getUUID());
+    }
+
+    private static void sampleInitialTerrains(ServerLevel apertureLevel, ServerPlayer player, BlockPos center) {
+        ServerLevel overworldLevel = player.server.getLevel(Level.OVERWORLD);
+        if (overworldLevel == null) {
+            LOGGER.warn("[ApertureCommand] 主世界未加载，跳过仙窍四向地形采样。玩家={}", player.getName().getString());
+            return;
+        }
+
+        Holder<Biome> eastBiome = overworldLevel.registryAccess()
+            .lookupOrThrow(Registries.BIOME)
+            .getOrThrow(Biomes.PLAINS);
+        Holder<Biome> southBiome = overworldLevel.registryAccess()
+            .lookupOrThrow(Registries.BIOME)
+            .getOrThrow(Biomes.FOREST);
+        Holder<Biome> westBiome = overworldLevel.registryAccess()
+            .lookupOrThrow(Registries.BIOME)
+            .getOrThrow(Biomes.DESERT);
+        Holder<Biome> northBiome = overworldLevel.registryAccess()
+            .lookupOrThrow(Registries.BIOME)
+            .getOrThrow(Biomes.TAIGA);
+        RandomSource random = player.getRandom();
+
+        sampleTerrainWithWarn(
+            overworldLevel,
+            apertureLevel,
+            center.offset(TERRAIN_SAMPLE_OFFSET, 0, 0),
+            eastBiome,
+            random,
+            "东"
+        );
+        sampleTerrainWithWarn(
+            overworldLevel,
+            apertureLevel,
+            center.offset(0, 0, TERRAIN_SAMPLE_OFFSET),
+            southBiome,
+            random,
+            "南"
+        );
+        sampleTerrainWithWarn(
+            overworldLevel,
+            apertureLevel,
+            center.offset(-TERRAIN_SAMPLE_OFFSET, 0, 0),
+            westBiome,
+            random,
+            "西"
+        );
+        sampleTerrainWithWarn(
+            overworldLevel,
+            apertureLevel,
+            center.offset(0, 0, -TERRAIN_SAMPLE_OFFSET),
+            northBiome,
+            random,
+            "北"
+        );
+    }
+
+    private static void sampleTerrainWithWarn(
+        ServerLevel overworldLevel,
+        ServerLevel apertureLevel,
+        BlockPos targetAnchor,
+        Holder<Biome> targetBiome,
+        RandomSource random,
+        String directionName
+    ) {
+        boolean sampled = OverworldTerrainSampler.sampleAndPlace(
+            overworldLevel,
+            apertureLevel,
+            targetAnchor,
+            targetBiome,
+            null,
+            random
+        );
+        if (!sampled) {
+            LOGGER.warn(
+                "[ApertureCommand] 仙窍{}向地形采样失败，已降级跳过。目标锚点={}。",
+                directionName,
+                targetAnchor
+            );
+        }
     }
 
     /**

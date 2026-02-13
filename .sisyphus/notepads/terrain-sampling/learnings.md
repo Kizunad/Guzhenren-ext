@@ -31,3 +31,16 @@
 ## 2026-02-13T21:43 working-tree-scope-cleanup
 
 - 已执行 terrain-sampling 交付范围收敛：保留 Task1/Task2 相关实现与本计划 notepad 记录，移除无关任务遗留改动。
+
+## 2026-02-13 任务3：ApertureCommand 初始化接线
+
+- 将四向地形采样接线放在 `initializeApertureIfNeeded` 的初始化收尾阶段，位于平台与地灵创建之后、`markApertureInitialized` 之前，保证不打乱既有初始化主流程。
+- 采样目标锚点按核心 `center` 的固定平面偏移布局：东 `(+16,0,0)`、南 `(0,0,+16)`、西 `(-16,0,0)`、北 `(0,0,-16)`。
+- 目标 biome 统一采用 `Biomes.PLAINS` 常量并通过 biome registry 获取 `Holder<Biome>`，满足“明确常量”要求且避免 magic 字符串。
+- 失败策略采用“主世界不可用整段跳过 + 单方向失败仅告警继续”，确保初始化过程不会因采样失败中断。
+
+## 2026-02-13 任务4：TerrainSampling GameTest 编写
+
+- `OverworldTerrainSampler.sampleAndPlace` 的“底层替换”可通过显式源锚点 + 固定高度基准稳定复现：先在采样中心放置基准方块，再在 `sourceMinY` 预置流体/砂子/普通方块，即可稳定触发底层分支。
+- 为避免砂子在同 tick 下落导致断言不稳定，需要在砂子下方预置支撑方块（石头），从而保证“非底层保留原状”断言稳定。
+- `ApertureRegionCopier.copyRegion` 的 NBT 保真验证可用“1x1x1 箱子区域 + 槽位0钻石x1”最小闭环；断言目标方块类型与槽位物品即可覆盖 BE 存在性与 NBT 载入链路。
