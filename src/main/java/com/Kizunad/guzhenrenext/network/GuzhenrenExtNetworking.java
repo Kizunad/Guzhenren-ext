@@ -64,6 +64,16 @@ public final class GuzhenrenExtNetworking {
             ServerboundOpenTrainingGuiPayload.STREAM_CODEC,
             ServerboundOpenTrainingGuiPayload::handle
         );
+        registrar.playToServer(
+            ServerboundOpenClusterGuiPayload.TYPE,
+            ServerboundOpenClusterGuiPayload.STREAM_CODEC,
+            ServerboundOpenClusterGuiPayload::handle
+        );
+        registrar.playToServer(
+            ServerboundClusterActionPayload.TYPE,
+            ServerboundClusterActionPayload.STREAM_CODEC,
+            ServerboundClusterActionPayload::handle
+        );
         registrar.playToClient(
             ClientboundKongqiaoSyncPayload.TYPE,
             ClientboundKongqiaoSyncPayload.STREAM_CODEC,
@@ -74,7 +84,11 @@ public final class GuzhenrenExtNetworking {
             ClientboundForgeDaoSyncPayload.STREAM_CODEC,
             ClientboundForgeDaoSyncPayload::handle
         );
-
+        registrar.playToClient(
+            ClientboundClusterStatePayload.TYPE,
+            ClientboundClusterStatePayload.STREAM_CODEC,
+            ClientboundClusterStatePayload::handle
+        );
         registrar.playToClient(
             PacketSyncNianTouUnlocks.TYPE,
             PacketSyncNianTouUnlocks.STREAM_CODEC,

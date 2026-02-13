@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.client;
 
 import com.Kizunad.guzhenrenext.network.ServerboundKongqiaoActionPayload;
+import com.Kizunad.guzhenrenext.network.ServerboundOpenClusterGuiPayload;
 import com.Kizunad.guzhenrenext.network.ServerboundOpenTrainingGuiPayload;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -39,6 +40,11 @@ public final class KongqiaoKeyMappings {
         GLFW.GLFW_KEY_K,
         CATEGORY
     );
+    public static final KeyMapping KEY_CLUSTER = new KeyMapping(
+        "key.guzhenrenext.flyingsword.cluster",
+        GLFW.GLFW_KEY_C,
+        CATEGORY
+    );
 
     private KongqiaoKeyMappings() {}
 
@@ -63,6 +69,13 @@ public final class KongqiaoKeyMappings {
         }
         if (requestOpenTraining) {
             PacketDistributor.sendToServer(new ServerboundOpenTrainingGuiPayload());
+        }
+        boolean requestOpenCluster = false;
+        while (KEY_CLUSTER.consumeClick()) {
+            requestOpenCluster = true;
+        }
+        if (requestOpenCluster) {
+            PacketDistributor.sendToServer(new ServerboundOpenClusterGuiPayload());
         }
     }
 

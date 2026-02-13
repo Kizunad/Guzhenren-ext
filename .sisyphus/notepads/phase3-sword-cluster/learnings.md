@@ -16,3 +16,9 @@
 - Screen 注册接口 `RegisterMenuScreensEvent.register` 要求构造函数签名必须是 `(M menu, Inventory inv, Component title)`，不能包含额外自定义参数（如 `Theme`）。
 - 解决方案：在 Screen 构造函数内部自行初始化依赖（如 `Theme.vanilla()`），移除外部注入的 `Theme` 参数，确保 `::new` 引用与接口签名匹配。
 - 此外，TinyUI 的 `TinyUIContainerScreen` 内部虽然设计了 Theme 注入，但在 NeoForge 标准注册流程下，通常需要通过此方式适配或使用工厂方法。
+
+[2026-02-13T11:12:00+13:00] Task4-子步骤（开屏链路）实现要点
+- 复用 `ServerboundOpenTrainingGuiPayload` 模式可快速落地“按键请求服务端开 GUI”：`StreamCodec.unit(new Payload()) + context.enqueueWork + ServerPlayer 判定`。
+- 空窍侧按键建议集中在 `KongqiaoKeyMappings`，并在 `KongqiaoClientEvents.registerKeys` 显式注册，避免仅声明不生效。
+- `KongqiaoService` 作为菜单打开入口可保持一致职责：payload 不直接构建 menu，而是调用 service 的 `openFlyingSwordClusterMenu`。
+- 本子步骤只做 open 链路，避免提前引入 action/state payload，可显著降低一次改动面和 checkstyle/build 风险。

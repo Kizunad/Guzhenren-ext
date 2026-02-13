@@ -5,3 +5,6 @@
 
 [2026-02-13T10:14:13+13:00] Task2 caveat
 - 当前“同名判定”基于 `displayItem` 的物品注册名（Item ID），不区分同物品下的 NBT/组件差异；这符合基础版最小侵入目标，但若后续需要更细粒度共鸣（如同名且同品质/同词条），需扩展 identifier 解析策略并保持与 UI/同步口径一致。
+
+[2026-02-13T11:12:00+13:00] Task4-子步骤 caveat
+- `KEY_CLUSTER` 默认绑定 `C`，与主模块 `GuKeyBindings` 中 `FLYING_SWORD_RECALL_NEAREST` 默认键位冲突；当前按“本子步骤要求 C 开 Cluster”执行，后续需统一按键策略以避免双触发风险。

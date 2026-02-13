@@ -57,6 +57,7 @@ public final class KongqiaoClientEvents {
         event.register(KongqiaoKeyMappings.ATTACK_SWAP_KEY);
         event.register(KongqiaoKeyMappings.ATTACK_SCREEN_KEY);
         event.register(KongqiaoKeyMappings.KEY_TRAINING);
+        event.register(KongqiaoKeyMappings.KEY_CLUSTER);
     }
 
     @SubscribeEvent

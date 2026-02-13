@@ -221,4 +221,27 @@ public final class KongqiaoService {
         };
         player.openMenu(provider);
     }
+
+    public static void openFlyingSwordClusterMenu(ServerPlayer player) {
+        if (player.level().isClientSide()) {
+            return;
+        }
+        MenuProvider provider = new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.translatable("menu.guzhenrenext.flying_sword_cluster");
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(
+                int containerId,
+                Inventory playerInventory,
+                Player playerEntity
+            ) {
+                return new com.Kizunad.guzhenrenext.kongqiao.flyingsword.cluster
+                    .FlyingSwordClusterMenu(containerId, playerInventory);
+            }
+        };
+        player.openMenu(provider);
+    }
 }

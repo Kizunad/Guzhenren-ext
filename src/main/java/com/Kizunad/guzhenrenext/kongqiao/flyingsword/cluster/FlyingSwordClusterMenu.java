@@ -3,8 +3,6 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword.cluster;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.tinyUI.demo.TinyUISlot;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -83,10 +81,14 @@ public class FlyingSwordClusterMenu extends AbstractContainerMenu {
     }
 
     public int getComputePower() {
-        return data.get(DATA_COMPUTE_POWER);
+        int fromData = data.get(DATA_COMPUTE_POWER);
+        int fromSync = ClusterClientStateCache.getCurrentLoad();
+        return Math.max(fromData, fromSync);
     }
 
     public int getMaxComputePower() {
-        return data.get(DATA_MAX_COMPUTE_POWER);
+        int fromData = data.get(DATA_MAX_COMPUTE_POWER);
+        int fromSync = ClusterClientStateCache.getMaxComputation();
+        return Math.max(fromData, fromSync);
     }
 }

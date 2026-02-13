@@ -1,5 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.cluster;
 
+import com.Kizunad.guzhenrenext.network.ServerboundClusterActionPayload;
+import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
 import com.Kizunad.tinyUI.controls.ScrollContainer;
 import com.Kizunad.tinyUI.core.InteractiveElement;
@@ -10,8 +12,10 @@ import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
 import com.Kizunad.tinyUI.theme.Theme;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 飞剑集群控制界面。
@@ -27,13 +31,33 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
     private static final int LIST_WIDTH = 180;
     private static final int LIST_ITEM_HEIGHT = 24;
     private static final int SIDEBAR_WIDTH = 100;
-    private static final int GAP = 10;
     private static final int PADDING = 8;
-    
+    private static final int SCROLL_BAR_SPACE = 10;
+    private static final int LIST_ITEM_GAP = 2;
+    private static final int NAME_LABEL_X = 5;
+    private static final int NAME_LABEL_Y = 4;
+    private static final int NAME_LABEL_WIDTH = 100;
+    private static final int LABEL_HEIGHT = 16;
+    private static final int STATUS_INDICATOR_X = 110;
+    private static final int STATUS_INDICATOR_WIDTH = 50;
+    private static final int SIDEBAR_TITLE_HEIGHT = 20;
+    private static final int COMPUTE_BOX_Y = 30;
+    private static final int COMPUTE_BOX_HEIGHT = 60;
+    private static final int COMPUTE_TEXT_OFFSET_X = 5;
+    private static final int COMPUTE_TEXT_OFFSET_Y = 15;
+    private static final int ACTION_BUTTON_WIDTH = 90;
+    private static final int ACTION_BUTTON_HEIGHT = 18;
+    private static final int ACTION_BUTTON_X = 0;
+    private static final int RECALL_BUTTON_Y = 100;
+    private static final int DEPLOY_BUTTON_Y = 124;
+    private static final int ACTIVE_COLOR = 0xFF00FF00;
+    private static final int IDLE_COLOR = 0xFFAAAAAA;
+    private static final UUID EMPTY_UUID = new UUID(0L, 0L);
+
     private final Theme theme;
-    
-    // 模拟数据模型，后续对接真实数据
+
     private final List<FlyingSwordInfo> swords = new ArrayList<>();
+    private UUID selectedSwordUuid = EMPTY_UUID;
 
     public FlyingSwordClusterScreen(
         FlyingSwordClusterMenu menu,
@@ -42,10 +66,24 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
     ) {
         super(menu, playerInventory, title);
         this.theme = Theme.vanilla();
-        // Mock data
-        swords.add(new FlyingSwordInfo("Iron Sword", 1, 10, true));
-        swords.add(new FlyingSwordInfo("Gold Sword", 5, 25, false));
-        swords.add(new FlyingSwordInfo("Diamond Sword", 10, 50, true));
+        List<UUID> activeUuids = ClusterClientStateCache.getActiveSwordUuids();
+        for (UUID activeUuid : activeUuids) {
+            if (activeUuid == null) {
+                continue;
+            }
+            swords.add(
+                new FlyingSwordInfo(
+                    activeUuid.toString().substring(0, LABEL_HEIGHT),
+                    LABEL_HEIGHT,
+                    0,
+                    true,
+                    activeUuid
+                )
+            );
+        }
+        if (!activeUuids.isEmpty() && activeUuids.get(0) != null) {
+            selectedSwordUuid = activeUuids.get(0);
+        }
     }
 
     @Override
@@ -61,14 +99,12 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
         main.setFrame(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         root.addChild(main);
 
-        // Layout: List (Left) | Sidebar (Right)
         UIElement listContainer = createListSection();
         UIElement sidebar = createSidebar();
 
         main.addChild(listContainer);
         main.addChild(sidebar);
 
-        // Simple manual layout for now
         listContainer.setFrame(PADDING, PADDING, LIST_WIDTH, WINDOW_HEIGHT - 2 * PADDING);
         sidebar.setFrame(LIST_WIDTH + 2 * PADDING, PADDING, SIDEBAR_WIDTH, WINDOW_HEIGHT - 2 * PADDING);
     }
@@ -79,19 +115,17 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
 
         UIElement listContent = new UIElement() {};
         
-        // Populate list
         int y = 0;
         for (FlyingSwordInfo info : swords) {
             UIElement cell = createSwordCell(info);
-            cell.setFrame(0, y, LIST_WIDTH - 10, LIST_ITEM_HEIGHT); // -10 for scrollbar space
+            cell.setFrame(0, y, LIST_WIDTH - SCROLL_BAR_SPACE, LIST_ITEM_HEIGHT);
             listContent.addChild(cell);
-            y += LIST_ITEM_HEIGHT + 2;
+            y += LIST_ITEM_HEIGHT + LIST_ITEM_GAP;
         }
-        
-        // Auto-size content height
-        listContent.setFrame(0, 0, LIST_WIDTH - 10, y);
+
+        listContent.setFrame(0, 0, LIST_WIDTH - SCROLL_BAR_SPACE, y);
         scroll.addChild(listContent);
-        
+
         return scroll;
     }
 
@@ -112,13 +146,12 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
         };
 
         Label nameLabel = new Label(info.name + " (Lv." + info.level + ")", theme);
-        nameLabel.setFrame(5, 4, 100, 16);
+        nameLabel.setFrame(NAME_LABEL_X, NAME_LABEL_Y, NAME_LABEL_WIDTH, LABEL_HEIGHT);
         cell.addChild(nameLabel);
 
         String statusText = info.active ? "Active" : "Idle";
-        int statusColor = info.active ? 0xFF00FF00 : 0xFFAAAAAA;
-        
-        // Custom draw for status
+        int statusColor = info.active ? ACTIVE_COLOR : IDLE_COLOR;
+
         UIElement statusIndicator = new UIElement() {
             @Override
             protected void onRender(UIRenderContext context, double mouseX, double mouseY, float partialTicks) {
@@ -130,8 +163,27 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
                 );
             }
         };
-        statusIndicator.setFrame(110, 4, 50, 16);
+        statusIndicator.setFrame(
+            STATUS_INDICATOR_X,
+            NAME_LABEL_Y,
+            STATUS_INDICATOR_WIDTH,
+            LABEL_HEIGHT
+        );
         cell.addChild(statusIndicator);
+        cell.onMouseClick(0, 0, 0);
+        cell.setFocusable(false);
+        cell.setEnabled(true);
+
+        InteractiveElement clickTarget = new InteractiveElement() {
+            @Override
+            public boolean onMouseClick(double mouseX, double mouseY, int button) {
+                selectedSwordUuid = info.uuid;
+                return true;
+            }
+        };
+        clickTarget.setFrame(0, 0, LIST_WIDTH - SCROLL_BAR_SPACE, LIST_ITEM_HEIGHT);
+        clickTarget.setFocusable(false);
+        cell.addChild(clickTarget);
 
         return cell;
     }
@@ -140,12 +192,11 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
         UIElement sidebar = new UIElement() {};
         
         Label title = new Label("Cluster Stats", theme);
-        title.setFrame(0, 0, SIDEBAR_WIDTH, 20);
+        title.setFrame(0, 0, SIDEBAR_WIDTH, SIDEBAR_TITLE_HEIGHT);
         sidebar.addChild(title);
 
-        // Compute Power Placeholder
         UIElement computeBox = new UIElement() {
-             @Override
+            @Override
             protected void onRender(UIRenderContext context, double mouseX, double mouseY, float partialTicks) {
                 context.drawRect(
                     getAbsoluteX(),
@@ -156,16 +207,42 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
                 );
                 context.drawText(
                     "CP: " + getMenu().getComputePower() + "/" + getMenu().getMaxComputePower(),
-                    getAbsoluteX() + 5,
-                    getAbsoluteY() + 15,
+                    getAbsoluteX() + COMPUTE_TEXT_OFFSET_X,
+                    getAbsoluteY() + COMPUTE_TEXT_OFFSET_Y,
                     theme.getTextColor()
                 );
             }
         };
-        computeBox.setFrame(0, 30, SIDEBAR_WIDTH, 60);
+        computeBox.setFrame(0, COMPUTE_BOX_Y, SIDEBAR_WIDTH, COMPUTE_BOX_HEIGHT);
         sidebar.addChild(computeBox);
 
+        Button recallButton = new Button("Recall", theme);
+        recallButton.setFrame(
+            ACTION_BUTTON_X,
+            RECALL_BUTTON_Y,
+            ACTION_BUTTON_WIDTH,
+            ACTION_BUTTON_HEIGHT
+        );
+        recallButton.setOnClick(() -> sendAction(ServerboundClusterActionPayload.Action.RECALL));
+        sidebar.addChild(recallButton);
+
+        Button deployButton = new Button("Deploy", theme);
+        deployButton.setFrame(
+            ACTION_BUTTON_X,
+            DEPLOY_BUTTON_Y,
+            ACTION_BUTTON_WIDTH,
+            ACTION_BUTTON_HEIGHT
+        );
+        deployButton.setOnClick(() -> sendAction(ServerboundClusterActionPayload.Action.DEPLOY));
+        sidebar.addChild(deployButton);
+
         return sidebar;
+    }
+
+    private void sendAction(ServerboundClusterActionPayload.Action action) {
+        PacketDistributor.sendToServer(
+            new ServerboundClusterActionPayload(action, selectedSwordUuid)
+        );
     }
 
     @Override
@@ -176,5 +253,11 @@ public class FlyingSwordClusterScreen extends TinyUIContainerScreen<FlyingSwordC
     /**
      * 临时数据结构，后续替换为真实 Entity/Data
      */
-    private record FlyingSwordInfo(String name, int level, int cost, boolean active) {}
+    private record FlyingSwordInfo(
+        String name,
+        int level,
+        int cost,
+        boolean active,
+        UUID uuid
+    ) {}
 }

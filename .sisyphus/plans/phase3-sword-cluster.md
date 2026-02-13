@@ -139,7 +139,7 @@ Task 4: 网络交互与 Sync (联调)
 
 ---
 
-- [ ] 4. 网络与集成
+- [x] 4. 网络与集成
 
   **What to do**:
   - 注册 `ServerboundClusterActionPayload` (Deploy/Recall)。
