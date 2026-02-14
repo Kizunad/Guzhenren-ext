@@ -178,6 +178,34 @@ public class ApertureWorldData extends SavedData {
     }
 
     /**
+     * 更新指定玩家仙窍中心坐标。
+     * <p>
+     * 由于 {@link ApertureInfo} 为不可变 record，更新时需要构造新实例并替换映射。
+     * 该方法用于在初始化阶段把核心 Y 对齐到采样后地形高度，避免传送点与真实核心位置不一致。
+     * </p>
+     *
+     * @param owner 玩家 UUID
+     * @param newCenter 新中心坐标
+     */
+    public void updateCenter(UUID owner, BlockPos newCenter) {
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        ApertureInfo updated = new ApertureInfo(
+            newCenter,
+            existing.currentRadius(),
+            existing.timeSpeed(),
+            existing.nextTribulationTick(),
+            existing.isFrozen(),
+            existing.favorability(),
+            existing.tier()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    /**
      * 更新指定玩家仙窍好感度。
      * <p>
      * 由于 {@link ApertureInfo} 为不可变 record，更新时需要构造新实例并替换映射。

@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.slf4j.Logger;
 
 /**
@@ -62,7 +63,14 @@ public final class ApertureCommand {
     /** 箱子相对核心的 Z 偏移。 */
     private static final int CHEST_OFFSET_Z = 0;
 
-    private static final int TERRAIN_SAMPLE_OFFSET = 16;
+    /** 对角采样相对核心的 X/Z 偏移。 */
+    private static final int TERRAIN_SAMPLE_DIAGONAL_OFFSET = 16;
+
+    /** 2x2 采样覆盖区相对中心的最小 X/Z 偏移。 */
+    private static final int SAMPLE_COVERAGE_MIN_OFFSET = -16;
+
+    /** 2x2 采样覆盖区相对中心的最大 X/Z 偏移。 */
+    private static final int SAMPLE_COVERAGE_MAX_OFFSET = 15;
 
     private ApertureCommand() {
     }
@@ -96,8 +104,11 @@ public final class ApertureCommand {
         }
 
         ApertureWorldData worldData = ApertureWorldData.get(apertureLevel);
-        ApertureInfo apertureInfo = worldData.getOrAllocate(player.getUUID());
+        UUID owner = player.getUUID();
+        ApertureInfo apertureInfo = worldData.getOrAllocate(owner);
         initializeApertureIfNeeded(apertureLevel, worldData, player, apertureInfo);
+        // 初始化后重新读取一次，确保后续传送使用 updateCenter 持久化后的最新 coreY。
+        apertureInfo = worldData.getOrAllocate(owner);
         ensureLandSpiritExists(apertureLevel, player, apertureInfo.center());
 
         ServerLevel currentLevel = player.serverLevel();
@@ -198,11 +209,40 @@ public final class ApertureCommand {
             return;
         }
 
-        BlockPos center = apertureInfo.center();
-        createInitialPlatform(level, center);
-        spawnLandSpirit(level, player, center);
-        sampleInitialTerrains(level, player, center);
+        BlockPos originalCenter = apertureInfo.center();
+        sampleInitialTerrains(level, player, originalCenter);
+        BlockPos resolvedCenter = resolvePlatformCenterAfterSampling(level, originalCenter);
+        worldData.updateCenter(player.getUUID(), resolvedCenter);
+        createInitialPlatform(level, resolvedCenter);
+        spawnLandSpirit(level, player, resolvedCenter);
         worldData.markApertureInitialized(player.getUUID());
+    }
+
+    /**
+     * 在 2x2 采样区域内解析最高层，并据此计算平台核心坐标。
+     * <p>
+     * 平台底层应落在最高地形层上，因此核心 Y 取「最高层 + 1」。
+     * 为避免越界，这里会对 coreY 执行维度高度 clamp。
+     * </p>
+     *
+     * @param level 仙窍维度
+     * @param center 采样锚点参考中心
+     * @return 对齐后的核心坐标（X/Z 不变，仅 Y 动态调整）
+     */
+    private static BlockPos resolvePlatformCenterAfterSampling(ServerLevel level, BlockPos center) {
+        int highestY = level.getMinBuildHeight();
+        for (int xOffset = SAMPLE_COVERAGE_MIN_OFFSET; xOffset <= SAMPLE_COVERAGE_MAX_OFFSET; xOffset++) {
+            for (int zOffset = SAMPLE_COVERAGE_MIN_OFFSET; zOffset <= SAMPLE_COVERAGE_MAX_OFFSET; zOffset++) {
+                int sampleX = center.getX() + xOffset;
+                int sampleZ = center.getZ() + zOffset;
+                int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ) - 1;
+                highestY = Math.max(highestY, surfaceY);
+            }
+        }
+
+        int rawCoreY = highestY + SPAWN_Y_OFFSET;
+        int clampedCoreY = Math.max(level.getMinBuildHeight() + 1, Math.min(level.getMaxBuildHeight() - 1, rawCoreY));
+        return new BlockPos(center.getX(), clampedCoreY, center.getZ());
     }
 
     private static void sampleInitialTerrains(ServerLevel apertureLevel, ServerPlayer player, BlockPos center) {
@@ -211,17 +251,18 @@ public final class ApertureCommand {
             LOGGER.warn("[ApertureCommand] 主世界未加载，跳过仙窍四向地形采样。玩家={}", player.getName().getString());
             return;
         }
+        BlockPos searchOrigin = player.blockPosition();
 
-        Holder<Biome> eastBiome = overworldLevel.registryAccess()
+        Holder<Biome> northEastBiome = overworldLevel.registryAccess()
             .lookupOrThrow(Registries.BIOME)
             .getOrThrow(Biomes.PLAINS);
-        Holder<Biome> southBiome = overworldLevel.registryAccess()
+        Holder<Biome> northWestBiome = overworldLevel.registryAccess()
             .lookupOrThrow(Registries.BIOME)
             .getOrThrow(Biomes.FOREST);
-        Holder<Biome> westBiome = overworldLevel.registryAccess()
+        Holder<Biome> southWestBiome = overworldLevel.registryAccess()
             .lookupOrThrow(Registries.BIOME)
             .getOrThrow(Biomes.DESERT);
-        Holder<Biome> northBiome = overworldLevel.registryAccess()
+        Holder<Biome> southEastBiome = overworldLevel.registryAccess()
             .lookupOrThrow(Registries.BIOME)
             .getOrThrow(Biomes.TAIGA);
         RandomSource random = player.getRandom();
@@ -229,34 +270,38 @@ public final class ApertureCommand {
         sampleTerrainWithWarn(
             overworldLevel,
             apertureLevel,
-            center.offset(TERRAIN_SAMPLE_OFFSET, 0, 0),
-            eastBiome,
+            center.offset(-TERRAIN_SAMPLE_DIAGONAL_OFFSET, 0, -TERRAIN_SAMPLE_DIAGONAL_OFFSET),
+            northWestBiome,
+            searchOrigin,
             random,
-            "东"
+            "西北"
         );
         sampleTerrainWithWarn(
             overworldLevel,
             apertureLevel,
-            center.offset(0, 0, TERRAIN_SAMPLE_OFFSET),
-            southBiome,
+            center.offset(0, 0, -TERRAIN_SAMPLE_DIAGONAL_OFFSET),
+            northEastBiome,
+            searchOrigin,
             random,
-            "南"
+            "东北"
         );
         sampleTerrainWithWarn(
             overworldLevel,
             apertureLevel,
-            center.offset(-TERRAIN_SAMPLE_OFFSET, 0, 0),
-            westBiome,
+            center.offset(-TERRAIN_SAMPLE_DIAGONAL_OFFSET, 0, 0),
+            southWestBiome,
+            searchOrigin,
             random,
-            "西"
+            "西南"
         );
         sampleTerrainWithWarn(
             overworldLevel,
             apertureLevel,
-            center.offset(0, 0, -TERRAIN_SAMPLE_OFFSET),
-            northBiome,
+            center.offset(0, 0, 0),
+            southEastBiome,
+            searchOrigin,
             random,
-            "北"
+            "东南"
         );
     }
 
@@ -265,6 +310,7 @@ public final class ApertureCommand {
         ServerLevel apertureLevel,
         BlockPos targetAnchor,
         Holder<Biome> targetBiome,
+        BlockPos searchOrigin,
         RandomSource random,
         String directionName
     ) {
@@ -274,6 +320,7 @@ public final class ApertureCommand {
             targetAnchor,
             targetBiome,
             null,
+            searchOrigin,
             random
         );
         if (!sampled) {
