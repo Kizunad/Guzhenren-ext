@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkApi;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.service.ApertureBoundaryService;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -86,10 +87,7 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
     private static final int PERCENT_SCALE = 100;
 
     /** 判定仙窍归属的额外缓冲。 */
-    private static final int APERTURE_RADIUS_BUFFER = 16;
-
-    /** 每个区块边长（用于区块内坐标匹配）。 */
-    private static final int CHUNK_SIZE = 16;
+    private static final int APERTURE_BOUNDARY_BUFFER = 16;
 
     /** 每轮产出数量。 */
     private static final int OUTPUT_COUNT_PER_CYCLE = 1;
@@ -343,8 +341,6 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
             return 1.0F;
         }
 
-        int controllerChunkX = SectionPos.blockToSectionCoord(worldPosition.getX());
-        int controllerChunkZ = SectionPos.blockToSectionCoord(worldPosition.getZ());
         ApertureWorldData worldData = ApertureWorldData.get(serverLevel);
         List<? extends Player> players = serverLevel.players();
         for (Player player : players) {
@@ -352,25 +348,14 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
             if (info == null) {
                 continue;
             }
-            int allowedRadius = info.currentRadius() + APERTURE_RADIUS_BUFFER;
-            long maxDistanceSquared = (long) allowedRadius * allowedRadius;
-            long deltaX = worldPosition.getX() - info.center().getX();
-            long deltaZ = worldPosition.getZ() - info.center().getZ();
-            long horizontalDistanceSquared = deltaX * deltaX + deltaZ * deltaZ;
-            if (horizontalDistanceSquared <= maxDistanceSquared) {
-                int ownerCenterChunkX = SectionPos.blockToSectionCoord(info.center().getX());
-                int ownerCenterChunkZ = SectionPos.blockToSectionCoord(info.center().getZ());
-                int minChunkX = ownerCenterChunkX - (allowedRadius / CHUNK_SIZE) - 1;
-                int maxChunkX = ownerCenterChunkX + (allowedRadius / CHUNK_SIZE) + 1;
-                int minChunkZ = ownerCenterChunkZ - (allowedRadius / CHUNK_SIZE) - 1;
-                int maxChunkZ = ownerCenterChunkZ + (allowedRadius / CHUNK_SIZE) + 1;
-                boolean chunkMatched = controllerChunkX >= minChunkX
-                    && controllerChunkX <= maxChunkX
-                    && controllerChunkZ >= minChunkZ
-                    && controllerChunkZ <= maxChunkZ;
-                if (!chunkMatched) {
-                    continue;
-                }
+            boolean insideAperture = ApertureBoundaryService.containsBlock(info, worldPosition);
+            boolean insideBufferedAperture = ApertureBoundaryService.containsChunkWithBlockBuffer(
+                info,
+                SectionPos.blockToSectionCoord(worldPosition.getX()),
+                SectionPos.blockToSectionCoord(worldPosition.getZ()),
+                APERTURE_BOUNDARY_BUFFER
+            );
+            if (insideAperture || insideBufferedAperture) {
                 return info.timeSpeed();
             }
         }

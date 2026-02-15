@@ -36,28 +36,37 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
     private static final String KEY_BOUND_SPIRIT_UUID = "boundSpiritUUID";
 
     /** 菜单字段总数。 */
-    private static final int MENU_DATA_FIELDS = 7;
+    private static final int MENU_DATA_FIELDS = 10;
 
-    /** 菜单字段索引：当前半径。 */
-    private static final int MENU_DATA_RADIUS = 0;
+    /** 菜单字段索引：边界最小 chunk X。 */
+    private static final int MENU_DATA_MIN_CHUNK_X = 0;
+
+    /** 菜单字段索引：边界最大 chunk X。 */
+    private static final int MENU_DATA_MAX_CHUNK_X = 1;
+
+    /** 菜单字段索引：边界最小 chunk Z。 */
+    private static final int MENU_DATA_MIN_CHUNK_Z = 2;
+
+    /** 菜单字段索引：边界最大 chunk Z。 */
+    private static final int MENU_DATA_MAX_CHUNK_Z = 3;
 
     /** 菜单字段索引：时间倍率（放大 100 倍）。 */
-    private static final int MENU_DATA_TIME_SPEED = 1;
+    private static final int MENU_DATA_TIME_SPEED = 4;
 
     /** 菜单字段索引：灾劫刻低 16 位。 */
-    private static final int MENU_DATA_TRIBULATION_LOW = 2;
+    private static final int MENU_DATA_TRIBULATION_LOW = 5;
 
     /** 菜单字段索引：灾劫刻高 16 位。 */
-    private static final int MENU_DATA_TRIBULATION_HIGH = 3;
+    private static final int MENU_DATA_TRIBULATION_HIGH = 6;
 
     /** 菜单字段索引：好感度（放大 100 倍）。 */
-    private static final int MENU_DATA_FAVORABILITY = 4;
+    private static final int MENU_DATA_FAVORABILITY = 7;
 
     /** 菜单字段索引：转数。 */
-    private static final int MENU_DATA_TIER = 5;
+    private static final int MENU_DATA_TIER = 8;
 
     /** 菜单字段索引：冻结状态（0/1）。 */
-    private static final int MENU_DATA_FROZEN = 6;
+    private static final int MENU_DATA_FROZEN = 9;
 
     /** 数值缩放：保留两位小数。 */
     private static final int SCALE_HUNDRED = 100;
@@ -82,7 +91,10 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
                 return 0;
             }
             return switch (index) {
-                case MENU_DATA_RADIUS -> apertureInfo.currentRadius();
+                case MENU_DATA_MIN_CHUNK_X -> apertureInfo.minChunkX();
+                case MENU_DATA_MAX_CHUNK_X -> apertureInfo.maxChunkX();
+                case MENU_DATA_MIN_CHUNK_Z -> apertureInfo.minChunkZ();
+                case MENU_DATA_MAX_CHUNK_Z -> apertureInfo.maxChunkZ();
                 case MENU_DATA_TIME_SPEED -> (int) (apertureInfo.timeSpeed() * SCALE_HUNDRED);
                 case MENU_DATA_TRIBULATION_LOW -> (int) (apertureInfo.nextTribulationTick() & LOWER_16_MASK);
                 case MENU_DATA_TRIBULATION_HIGH ->

@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.damage.GuzhenrenExtDamageTypes;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.service.ApertureBoundaryService;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -20,7 +21,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 /**
  * 混沌侵蚀边界保护处理器。
  * <p>
- * 每秒检查一次仙窍维度内玩家位置，若超过仙窍半径加缓冲区则施加高额混沌侵蚀伤害。
+ * 每秒检查一次仙窍维度内玩家位置，若超出仙窍边界（min/max chunk 闭区间）加缓冲区则施加高额混沌侵蚀伤害。
  * </p>
  */
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -80,20 +81,21 @@ public final class ChaosErosionHandler {
             return;
         }
 
-        double deltaX = player.getX() - apertureInfo.center().getX();
-        double deltaZ = player.getZ() - apertureInfo.center().getZ();
-        double horizontalDistanceSquared = deltaX * deltaX + deltaZ * deltaZ;
+        long outsideDistanceSquared = ApertureBoundaryService.getOutsideDistanceSquared(
+            apertureInfo,
+            player.blockPosition()
+        );
 
-        int maxDistance = apertureInfo.currentRadius() + BOUNDARY_BUFFER;
+        int maxDistance = BOUNDARY_BUFFER;
         int warningDistance = Math.max(0, maxDistance - WARNING_BUFFER);
         int maxDistanceSquared = maxDistance * maxDistance;
         int warningDistanceSquared = warningDistance * warningDistance;
 
-        if (horizontalDistanceSquared <= warningDistanceSquared) {
+        if (outsideDistanceSquared <= warningDistanceSquared) {
             return;
         }
 
-        if (horizontalDistanceSquared <= maxDistanceSquared) {
+        if (outsideDistanceSquared <= maxDistanceSquared) {
             player.displayClientMessage(
                 Component.translatable("warning.guzhenrenext.chaos_erosion_approaching"),
                 true

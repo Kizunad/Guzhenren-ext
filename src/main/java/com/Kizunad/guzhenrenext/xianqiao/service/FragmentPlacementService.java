@@ -15,13 +15,16 @@ import net.minecraft.world.level.block.Blocks;
  * 九天碎片放置服务。
  * <p>
  * 该服务负责将碎片沿玩家朝向投放到当前仙窍边界外，
- * 并完成基础地形搭建、领土半径扩张以及初始土道灵气注入。
+ * 并完成基础地形搭建、领土 chunk 边界扩张以及初始土道灵气注入。
  * </p>
  */
 public final class FragmentPlacementService {
 
-    /** 每次扩张距离（方块）。 */
-    public static final int EXTENSION_DISTANCE = 16;
+    /** Minecraft 单个 chunk 的方块边长。 */
+    private static final int CHUNK_BLOCK_SIZE = 16;
+
+    /** 每次使用碎片时，边界四向统一扩张的 chunk 数。 */
+    public static final int BOUNDARY_CHUNK_INCREMENT = 1;
 
     /** 平台半边长度（5x5 平台对应半边 2）。 */
     public static final int PLATFORM_HALF_SIZE = 2;
@@ -48,20 +51,50 @@ public final class FragmentPlacementService {
      */
     public static boolean placeFragment(ServerLevel level, Player player, ApertureInfo info) {
         Direction direction = player.getDirection();
-        int placementDistance = info.currentRadius() + EXTENSION_DISTANCE;
-        BlockPos targetPos = info.center().offset(
-            direction.getStepX() * placementDistance,
-            0,
-            direction.getStepZ() * placementDistance
-        );
+        BlockPos targetPos = resolvePlacementTarget(info, direction);
 
         buildStonePlatform(level, targetPos);
 
         ApertureWorldData worldData = ApertureWorldData.get(level);
-        worldData.updateRadius(player.getUUID(), info.currentRadius() + EXTENSION_DISTANCE);
+        worldData.expandBoundaryByChunkDelta(player.getUUID(), BOUNDARY_CHUNK_INCREMENT);
         DaoMarkApi.addAura(level, targetPos, DaoType.EARTH, INITIAL_AURA_AMOUNT);
-        player.sendSystemMessage(Component.literal("九天碎片放置成功，仙窍边界向前扩张 16 格。"));
+        player.sendSystemMessage(Component.literal("九天碎片放置成功，仙窍边界向四周各扩张 1 个区块。"));
         return true;
+    }
+
+    /**
+     * 计算九天碎片的目标放置点。
+     * <p>
+     * 目标点与真实扩张语义保持一致：
+     * 每次扩张都会让 min/max chunk 边界四向各 +1 chunk，
+     * 因此放置点应位于“当前边界再向朝向外侧推进 1 chunk”处。
+     * </p>
+     *
+     * @param info 当前仙窍边界信息
+     * @param direction 玩家朝向
+     * @return 与本次扩张行为对齐的放置目标坐标
+     */
+    public static BlockPos resolvePlacementTarget(ApertureInfo info, Direction direction) {
+        int centerChunkX = Math.floorDiv(info.center().getX(), CHUNK_BLOCK_SIZE);
+        int centerChunkZ = Math.floorDiv(info.center().getZ(), CHUNK_BLOCK_SIZE);
+        int eastHalfRange = Math.max(0, info.maxChunkX() - centerChunkX);
+        int westHalfRange = Math.max(0, centerChunkX - info.minChunkX());
+        int southHalfRange = Math.max(0, info.maxChunkZ() - centerChunkZ);
+        int northHalfRange = Math.max(0, centerChunkZ - info.minChunkZ());
+
+        int placementDistance = switch (direction) {
+            case EAST -> (eastHalfRange + BOUNDARY_CHUNK_INCREMENT) * CHUNK_BLOCK_SIZE;
+            case WEST -> (westHalfRange + BOUNDARY_CHUNK_INCREMENT) * CHUNK_BLOCK_SIZE;
+            case SOUTH -> (southHalfRange + BOUNDARY_CHUNK_INCREMENT) * CHUNK_BLOCK_SIZE;
+            case NORTH -> (northHalfRange + BOUNDARY_CHUNK_INCREMENT) * CHUNK_BLOCK_SIZE;
+            default -> (northHalfRange + BOUNDARY_CHUNK_INCREMENT) * CHUNK_BLOCK_SIZE;
+        };
+
+        return info.center().offset(
+            direction.getStepX() * placementDistance,
+            0,
+            direction.getStepZ() * placementDistance
+        );
     }
 
     /**

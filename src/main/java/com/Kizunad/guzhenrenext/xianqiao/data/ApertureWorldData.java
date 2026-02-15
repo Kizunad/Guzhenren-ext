@@ -66,7 +66,9 @@ public class ApertureWorldData extends SavedData {
 
     private static final int DEFAULT_CENTER_Y = 64;
 
-    private static final int DEFAULT_INITIAL_RADIUS = 48;
+    private static final int CHUNK_BLOCK_SIZE = 16;
+
+    private static final int DEFAULT_INITIAL_RANGE_CHUNKS = 4;
 
     private static final float DEFAULT_TIME_SPEED = 1.0F;
 
@@ -110,10 +112,16 @@ public class ApertureWorldData extends SavedData {
 
         int centerX = nextIndex * APERTURE_SPACING;
         nextIndex++;
+        BlockPos centerPos = new BlockPos(centerX, DEFAULT_CENTER_Y, 0);
+        int centerChunkX = Math.floorDiv(centerPos.getX(), CHUNK_BLOCK_SIZE);
+        int centerChunkZ = Math.floorDiv(centerPos.getZ(), CHUNK_BLOCK_SIZE);
 
         ApertureInfo created = new ApertureInfo(
-            new BlockPos(centerX, DEFAULT_CENTER_Y, 0),
-            DEFAULT_INITIAL_RADIUS,
+            centerPos,
+            centerChunkX - DEFAULT_INITIAL_RANGE_CHUNKS,
+            centerChunkX + DEFAULT_INITIAL_RANGE_CHUNKS,
+            centerChunkZ - DEFAULT_INITIAL_RANGE_CHUNKS,
+            centerChunkZ + DEFAULT_INITIAL_RANGE_CHUNKS,
             DEFAULT_TIME_SPEED,
             DEFAULT_TRIBULATION_CYCLE,
             false,
@@ -151,22 +159,31 @@ public class ApertureWorldData extends SavedData {
     }
 
     /**
-     * 更新指定玩家仙窍半径。
+     * 按“旧半径语义”重算仙窍 chunk 边界（过渡 API）。
      * <p>
-     * 由于 {@link ApertureInfo} 为不可变 record，更新时需要构造新实例并替换映射。
+     * 该方法仅用于业务层迁移期间兼容旧调用方：
+     * 外部仍以“中心点 + 方块半径”思考时，数据层会将其转换为 chunk 边界并作为最终真源存储。
+     * 术语契约：range = chunk range；边界 = min/max chunk 闭区间。
      * </p>
      *
      * @param owner 玩家 UUID
-     * @param newRadius 新半径
+     * @param newRadius 新半径（方块）
      */
-    public void updateRadius(UUID owner, int newRadius) {
+    public void updateBoundaryByRadius(UUID owner, int newRadius) {
         ApertureInfo existing = apertures.get(owner);
         if (existing == null) {
             return;
         }
+        int normalizedRadius = Math.max(0, newRadius);
+        int chunkRadius = (normalizedRadius + CHUNK_BLOCK_SIZE - 1) / CHUNK_BLOCK_SIZE;
+        int centerChunkX = Math.floorDiv(existing.center().getX(), CHUNK_BLOCK_SIZE);
+        int centerChunkZ = Math.floorDiv(existing.center().getZ(), CHUNK_BLOCK_SIZE);
         ApertureInfo updated = new ApertureInfo(
             existing.center(),
-            newRadius,
+            centerChunkX - chunkRadius,
+            centerChunkX + chunkRadius,
+            centerChunkZ - chunkRadius,
+            centerChunkZ + chunkRadius,
             existing.timeSpeed(),
             existing.nextTribulationTick(),
             existing.isFrozen(),
@@ -175,6 +192,56 @@ public class ApertureWorldData extends SavedData {
         );
         apertures.put(owner, updated);
         setDirty();
+    }
+
+    /**
+     * 旧半径更新入口（兼容过渡，非真源）。
+     * <p>
+     * 仅用于尚未迁移完成的旧调用方；业务判定与存储真源均应使用 chunk 边界语义。
+     * </p>
+     *
+     * @param owner 玩家 UUID
+     * @param newRadius 新半径（方块）
+     */
+    public void updateRadius(UUID owner, int newRadius) {
+        updateBoundaryByRadius(owner, newRadius);
+    }
+
+    /**
+     * 按 chunk 增量向四周扩展仙窍边界。
+     * <p>
+     * 该方法直接操作 min/max chunk 边界，是新的主数据 API。
+     * </p>
+     *
+     * @param owner 玩家 UUID
+     * @param chunkIncrement 每个方向扩展的 chunk 数（必须大于 0）
+     */
+    public void expandBoundaryByChunkDelta(UUID owner, int chunkIncrement) {
+        if (chunkIncrement <= 0) {
+            return;
+        }
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            existing.minChunkX() - chunkIncrement,
+            existing.maxChunkX() + chunkIncrement,
+            existing.minChunkZ() - chunkIncrement,
+            existing.maxChunkZ() + chunkIncrement,
+            existing.timeSpeed(),
+            existing.nextTribulationTick(),
+            existing.isFrozen(),
+            existing.favorability(),
+            existing.tier()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    public void expandBoundaryByChunks(UUID owner, int chunkIncrement) {
+        expandBoundaryByChunkDelta(owner, chunkIncrement);
     }
 
     /**
@@ -194,7 +261,10 @@ public class ApertureWorldData extends SavedData {
         }
         ApertureInfo updated = new ApertureInfo(
             newCenter,
-            existing.currentRadius(),
+            existing.minChunkX(),
+            existing.maxChunkX(),
+            existing.minChunkZ(),
+            existing.maxChunkZ(),
             existing.timeSpeed(),
             existing.nextTribulationTick(),
             existing.isFrozen(),
@@ -224,7 +294,10 @@ public class ApertureWorldData extends SavedData {
         float clampedFavorability = clampFavorability(newFavorability);
         ApertureInfo updated = new ApertureInfo(
             existing.center(),
-            existing.currentRadius(),
+            existing.minChunkX(),
+            existing.maxChunkX(),
+            existing.minChunkZ(),
+            existing.maxChunkZ(),
             existing.timeSpeed(),
             existing.nextTribulationTick(),
             existing.isFrozen(),
@@ -253,7 +326,10 @@ public class ApertureWorldData extends SavedData {
         int normalizedTier = normalizeTier(newTier);
         ApertureInfo updated = new ApertureInfo(
             existing.center(),
-            existing.currentRadius(),
+            existing.minChunkX(),
+            existing.maxChunkX(),
+            existing.minChunkZ(),
+            existing.maxChunkZ(),
             existing.timeSpeed(),
             existing.nextTribulationTick(),
             existing.isFrozen(),
@@ -336,7 +412,10 @@ public class ApertureWorldData extends SavedData {
         }
         ApertureInfo updated = new ApertureInfo(
             existing.center(),
-            existing.currentRadius(),
+            existing.minChunkX(),
+            existing.maxChunkX(),
+            existing.minChunkZ(),
+            existing.maxChunkZ(),
             existing.timeSpeed(),
             nextTick,
             existing.isFrozen(),
@@ -369,7 +448,10 @@ public class ApertureWorldData extends SavedData {
         long updatedTribulationTick = Math.max(0L, existing.nextTribulationTick() - elapsedTicks);
         ApertureInfo updated = new ApertureInfo(
             existing.center(),
-            existing.currentRadius(),
+            existing.minChunkX(),
+            existing.maxChunkX(),
+            existing.minChunkZ(),
+            existing.maxChunkZ(),
             existing.timeSpeed(),
             updatedTribulationTick,
             existing.isFrozen(),
@@ -532,7 +614,10 @@ public class ApertureWorldData extends SavedData {
      */
     public record ApertureInfo(
         BlockPos center,
-        int currentRadius,
+        int minChunkX,
+        int maxChunkX,
+        int minChunkZ,
+        int maxChunkZ,
         float timeSpeed,
         long nextTribulationTick,
         boolean isFrozen,
@@ -546,7 +631,13 @@ public class ApertureWorldData extends SavedData {
 
         private static final String KEY_CENTER_Z = "centerZ";
 
-        private static final String KEY_CURRENT_RADIUS = "currentRadius";
+        private static final String KEY_MIN_CHUNK_X = "minChunkX";
+
+        private static final String KEY_MAX_CHUNK_X = "maxChunkX";
+
+        private static final String KEY_MIN_CHUNK_Z = "minChunkZ";
+
+        private static final String KEY_MAX_CHUNK_Z = "maxChunkZ";
 
         private static final String KEY_TIME_SPEED = "timeSpeed";
 
@@ -558,12 +649,26 @@ public class ApertureWorldData extends SavedData {
 
         private static final String KEY_TIER = "tier";
 
+        public ApertureInfo {
+            int normalizedMinChunkX = Math.min(minChunkX, maxChunkX);
+            int normalizedMaxChunkX = Math.max(minChunkX, maxChunkX);
+            int normalizedMinChunkZ = Math.min(minChunkZ, maxChunkZ);
+            int normalizedMaxChunkZ = Math.max(minChunkZ, maxChunkZ);
+            minChunkX = normalizedMinChunkX;
+            maxChunkX = normalizedMaxChunkX;
+            minChunkZ = normalizedMinChunkZ;
+            maxChunkZ = normalizedMaxChunkZ;
+        }
+
         public CompoundTag save() {
             CompoundTag tag = new CompoundTag();
             tag.putInt(KEY_CENTER_X, center.getX());
             tag.putInt(KEY_CENTER_Y, center.getY());
             tag.putInt(KEY_CENTER_Z, center.getZ());
-            tag.putInt(KEY_CURRENT_RADIUS, currentRadius);
+            tag.putInt(KEY_MIN_CHUNK_X, minChunkX);
+            tag.putInt(KEY_MAX_CHUNK_X, maxChunkX);
+            tag.putInt(KEY_MIN_CHUNK_Z, minChunkZ);
+            tag.putInt(KEY_MAX_CHUNK_Z, maxChunkZ);
             tag.putFloat(KEY_TIME_SPEED, timeSpeed);
             tag.putLong(KEY_NEXT_TRIBULATION_TICK, nextTribulationTick);
             tag.putBoolean(KEY_IS_FROZEN, isFrozen);
@@ -572,13 +677,35 @@ public class ApertureWorldData extends SavedData {
             return tag;
         }
 
+        /**
+         * 读取当前仙窍“兼容半径”（方块）。
+         * <p>
+         * 兼容过渡，非真源：真实数据源已切换为 min/max chunk 闭区间边界。
+         * 术语契约：range = chunk range；边界 = min/max chunk 闭区间。
+         * 当调用方全部迁移到边界语义后，应移除该方法。
+         * </p>
+         *
+         * @return 基于中心 chunk 到边界 chunk 估算得到的兼容半径（方块）
+         */
+        public int currentRadius() {
+            int centerChunkX = Math.floorDiv(center.getX(), CHUNK_BLOCK_SIZE);
+            int centerChunkZ = Math.floorDiv(center.getZ(), CHUNK_BLOCK_SIZE);
+            int xHalfRange = Math.min(centerChunkX - minChunkX, maxChunkX - centerChunkX);
+            int zHalfRange = Math.min(centerChunkZ - minChunkZ, maxChunkZ - centerChunkZ);
+            int chunkHalfRange = Math.max(0, Math.min(xHalfRange, zHalfRange));
+            return chunkHalfRange * CHUNK_BLOCK_SIZE;
+        }
+
         public static ApertureInfo load(CompoundTag tag) {
             BlockPos centerPos = new BlockPos(
                 tag.getInt(KEY_CENTER_X),
                 tag.getInt(KEY_CENTER_Y),
                 tag.getInt(KEY_CENTER_Z)
             );
-            int radius = tag.getInt(KEY_CURRENT_RADIUS);
+            int storedMinChunkX = tag.getInt(KEY_MIN_CHUNK_X);
+            int storedMaxChunkX = tag.getInt(KEY_MAX_CHUNK_X);
+            int storedMinChunkZ = tag.getInt(KEY_MIN_CHUNK_Z);
+            int storedMaxChunkZ = tag.getInt(KEY_MAX_CHUNK_Z);
             float speed = tag.getFloat(KEY_TIME_SPEED);
             long tribulationTick = tag.getLong(KEY_NEXT_TRIBULATION_TICK);
             boolean frozen = tag.getBoolean(KEY_IS_FROZEN);
@@ -594,7 +721,10 @@ public class ApertureWorldData extends SavedData {
 
             return new ApertureInfo(
                 centerPos,
-                radius,
+                storedMinChunkX,
+                storedMaxChunkX,
+                storedMinChunkZ,
+                storedMaxChunkZ,
                 speed,
                 tribulationTick,
                 frozen,

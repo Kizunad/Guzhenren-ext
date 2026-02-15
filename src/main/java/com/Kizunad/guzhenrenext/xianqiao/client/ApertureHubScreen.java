@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Inventory;
  * 仙窍中枢管理界面（Aperture Hub Screen）。
  * <p>
  * 基于 TinyUI 的多 Tab 容器界面，整合仙窍核心的全部信息展示：
- * 1) 总览 Tab：仙窍半径、时间倍率、层级、冻结状态、灾劫倒计时、好感度；
+ * 1) 总览 Tab：仙窍 chunk 边界、跨度、时间倍率、层级、冻结状态、灾劫倒计时、好感度；
  * 2) 地灵 Tab：好感度、转数、当前阶段；
  * 3) 资源 Tab：引导玩家查看资源控制器方块；
  * 4) 灾劫 Tab：灾劫倒计时和状态；
@@ -61,7 +61,8 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     private final List<UIElement> tabPanels;
     private final List<Button> tabButtons;
 
-    private Label overviewRadiusLabel;
+    private Label overviewBoundaryLabel;
+    private Label overviewChunkSpanLabel;
     private Label overviewTimeSpeedLabel;
     private Label overviewTierLabel;
     private Label overviewFrozenLabel;
@@ -177,7 +178,7 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     @Override
     protected void containerTick() {
         super.containerTick();
-        if (overviewRadiusLabel == null || spiritStageLabel == null || tribulationStatusLabel == null) {
+        if (overviewBoundaryLabel == null || spiritStageLabel == null || tribulationStatusLabel == null) {
             return;
         }
         updateOverviewTabData();
@@ -217,12 +218,13 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     private UIElement createOverviewPanel(final int width, final int height) {
         UIElement panel = new UIElement() { };
 
-        overviewRadiusLabel = createDataLabel(panel, FIRST_LINE_Y, width);
-        overviewTimeSpeedLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
-        overviewTierLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
-        overviewFrozenLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
-        overviewTribulationLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_DAOMARK, width);
-        overviewFavorabilityLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_COUNT, width);
+        overviewBoundaryLabel = createDataLabel(panel, FIRST_LINE_Y, width);
+        overviewChunkSpanLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
+        overviewTimeSpeedLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
+        overviewTierLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
+        overviewFrozenLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_DAOMARK, width);
+        overviewTribulationLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_COUNT, width);
+        overviewFavorabilityLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * (TAB_COUNT + 1), width);
 
         panel.setFrame(MAIN_X, MAIN_Y, width, height);
         return panel;
@@ -303,7 +305,22 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     }
 
     private void updateOverviewTabData() {
-        overviewRadiusLabel.setText(Component.literal("仙窍半径：" + menu.getRadius()));
+        overviewBoundaryLabel.setText(
+            Component.literal(
+                "仙窍 chunk 边界：X["
+                    + menu.getMinChunkX()
+                    + ", "
+                    + menu.getMaxChunkX()
+                    + "] Z["
+                    + menu.getMinChunkZ()
+                    + ", "
+                    + menu.getMaxChunkZ()
+                    + "]"
+            )
+        );
+        overviewChunkSpanLabel.setText(
+            Component.literal("chunk 跨度：X " + menu.getChunkSpanX() + "，Z " + menu.getChunkSpanZ())
+        );
         overviewTimeSpeedLabel.setText(
             Component.literal("时间倍率：" + formatTimeSpeed(menu.getTimeSpeedPercent()) + "x")
         );

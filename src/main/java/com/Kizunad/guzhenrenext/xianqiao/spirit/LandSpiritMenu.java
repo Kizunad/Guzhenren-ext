@@ -5,22 +5,25 @@ import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
 import com.Kizunad.guzhenrenext.xianqiao.service.SpiritUnlockService;
 import java.util.UUID;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.server.level.ServerLevel;
 
 /**
  * 地灵管理菜单（仅数据同步，不包含物品槽）。
  * <p>
  * 本菜单用于同步仙窍基础信息：
- * 坐标、半径、时间流速、下次灾劫倒计时。
+ * 坐标、chunk 边界、时间流速、下次灾劫倒计时。
  * </p>
  */
 public class LandSpiritMenu extends AbstractContainerMenu {
+
+    /** 单个 chunk 的方块边长（用于兼容展示值换算）。 */
+    private static final int CHUNK_SIZE_BLOCKS = 16;
 
     /** 数据槽：中心 X。 */
     private static final int DATA_CENTER_X = 0;
@@ -31,32 +34,41 @@ public class LandSpiritMenu extends AbstractContainerMenu {
     /** 数据槽：中心 Z。 */
     private static final int DATA_CENTER_Z = 2;
 
-    /** 数据槽：当前半径。 */
-    private static final int DATA_RADIUS = 3;
+    /** 数据槽：边界最小 chunk X。 */
+    private static final int DATA_MIN_CHUNK_X = 3;
+
+    /** 数据槽：边界最大 chunk X。 */
+    private static final int DATA_MAX_CHUNK_X = 4;
+
+    /** 数据槽：边界最小 chunk Z。 */
+    private static final int DATA_MIN_CHUNK_Z = 5;
+
+    /** 数据槽：边界最大 chunk Z。 */
+    private static final int DATA_MAX_CHUNK_Z = 6;
 
     /** 数据槽：时间流速（千分比）。 */
-    private static final int DATA_TIME_SPEED_PERMILLE = 4;
+    private static final int DATA_TIME_SPEED_PERMILLE = 7;
 
     /** 数据槽：下次灾劫倒计时（tick，int 上限截断）。 */
-    private static final int DATA_TRIBULATION_REMAINING_TICKS = 5;
+    private static final int DATA_TRIBULATION_REMAINING_TICKS = 8;
 
     /** 数据槽：地灵好感度（favorability * 10，保留 1 位小数）。 */
-    private static final int DATA_FAVORABILITY_PERMILLE = 6;
+    private static final int DATA_FAVORABILITY_PERMILLE = 9;
 
     /** 数据槽：地灵转数（tier）。 */
-    private static final int DATA_TIER = 7;
+    private static final int DATA_TIER = 10;
 
     /** 数据槽：当前阶段（stage）。 */
-    private static final int DATA_CURRENT_STAGE = 8;
+    private static final int DATA_CURRENT_STAGE = 11;
 
     /** 数据槽：下一阶段所需最小转数。 */
-    private static final int DATA_NEXT_STAGE_MIN_TIER = 9;
+    private static final int DATA_NEXT_STAGE_MIN_TIER = 12;
 
     /** 数据槽：下一阶段所需最小好感度（favorability * 10）。 */
-    private static final int DATA_NEXT_STAGE_MIN_FAVORABILITY_PERMILLE = 10;
+    private static final int DATA_NEXT_STAGE_MIN_FAVORABILITY_PERMILLE = 13;
 
     /** ContainerData 字段总数。 */
-    private static final int DATA_FIELDS = 11;
+    private static final int DATA_FIELDS = 14;
 
     /** 时间流速千分比基准。 */
     private static final int PERMILLE_BASE = 1000;
@@ -109,7 +121,10 @@ public class LandSpiritMenu extends AbstractContainerMenu {
                     case DATA_CENTER_X -> info.center().getX();
                     case DATA_CENTER_Y -> info.center().getY();
                     case DATA_CENTER_Z -> info.center().getZ();
-                    case DATA_RADIUS -> info.currentRadius();
+                    case DATA_MIN_CHUNK_X -> info.minChunkX();
+                    case DATA_MAX_CHUNK_X -> info.maxChunkX();
+                    case DATA_MIN_CHUNK_Z -> info.minChunkZ();
+                    case DATA_MAX_CHUNK_Z -> info.maxChunkZ();
                     case DATA_TIME_SPEED_PERMILLE -> Math.round(info.timeSpeed() * PERMILLE_BASE);
                     case DATA_TRIBULATION_REMAINING_TICKS -> getSafeTribulationRemainingTicks(info, apertureLevel);
                     case DATA_FAVORABILITY_PERMILLE -> Math.round(info.favorability() * FAVORABILITY_PERMILLE_FACTOR);
@@ -180,11 +195,45 @@ public class LandSpiritMenu extends AbstractContainerMenu {
         return data.get(DATA_CENTER_Z);
     }
 
+    /** 获取边界最小 chunk X。 */
+    public int getMinChunkX() {
+        return data.get(DATA_MIN_CHUNK_X);
+    }
+
+    /** 获取边界最大 chunk X。 */
+    public int getMaxChunkX() {
+        return data.get(DATA_MAX_CHUNK_X);
+    }
+
+    /** 获取边界最小 chunk Z。 */
+    public int getMinChunkZ() {
+        return data.get(DATA_MIN_CHUNK_Z);
+    }
+
+    /** 获取边界最大 chunk Z。 */
+    public int getMaxChunkZ() {
+        return data.get(DATA_MAX_CHUNK_Z);
+    }
+
+    /** 获取 X 轴 chunk 跨度（闭区间）。 */
+    public int getChunkSpanX() {
+        return getMaxChunkX() - getMinChunkX() + 1;
+    }
+
+    /** 获取 Z 轴 chunk 跨度（闭区间）。 */
+    public int getChunkSpanZ() {
+        return getMaxChunkZ() - getMinChunkZ() + 1;
+    }
+
     /**
-     * 获取仙窍当前半径。
+     * 获取兼容展示距离（由 chunk 边界推导，供旧界面过渡展示）。
+     * <p>
+     * 兼容过渡，非真源：range = chunk range；边界 = min/max chunk 闭区间。
+     * </p>
      */
     public int getRadius() {
-        return data.get(DATA_RADIUS);
+        int chunkHalfRange = Math.max(0, Math.min(getChunkSpanX(), getChunkSpanZ()) / 2);
+        return chunkHalfRange * CHUNK_SIZE_BLOCKS;
     }
 
     /**

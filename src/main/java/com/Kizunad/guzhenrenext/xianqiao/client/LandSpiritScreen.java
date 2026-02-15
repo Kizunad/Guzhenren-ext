@@ -89,7 +89,28 @@ public class LandSpiritScreen extends AbstractContainerScreen<LandSpiritMenu> {
         );
         line++;
 
-        drawLine(guiGraphics, Component.literal("当前半径：" + menu.getRadius()), line);
+        drawLine(
+            guiGraphics,
+            Component.literal(
+                "chunk 边界：X["
+                    + menu.getMinChunkX()
+                    + ", "
+                    + menu.getMaxChunkX()
+                    + "] Z["
+                    + menu.getMinChunkZ()
+                    + ", "
+                    + menu.getMaxChunkZ()
+                    + "]"
+            ),
+            line
+        );
+        line++;
+
+        drawLine(
+            guiGraphics,
+            Component.literal("chunk 跨度：X " + menu.getChunkSpanX() + "，Z " + menu.getChunkSpanZ()),
+            line
+        );
         line++;
 
         double timeSpeed = menu.getTimeSpeedPermille() / TIME_SPEED_PERMILLE_BASE;

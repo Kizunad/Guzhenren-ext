@@ -168,7 +168,7 @@
     "screen.guzhenrenext.spirit_management.threat": "§e威胁：§f%s",
     "screen.guzhenrenext.spirit_management.talent_points": "§e天赋点：§f%s",
     "screen.guzhenrenext.spirit_management.dao": "§e道途：§f%s",
-    "screen.guzhenrenext.spirit_management.aura_radius": "§e光环半径：§f%s",
+    "screen.guzhenrenext.spirit_management.aura_radius": "§eChunk边界：§f%s",
     "screen.guzhenrenext.spirit_management.total_nodes": "§e节点总数：§f%s",
     "screen.guzhenrenext.spirit_management.total_mycelium": "§e菌毯总数：§f%s",
     "screen.guzhenrenext.spirit_management.total_anchors": "§e锚点总数：§f%s",

@@ -5,10 +5,13 @@ import com.Kizunad.guzhenrenext.xianqiao.block.ApertureCoreBlockEntity;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ReturnPosition;
+import com.Kizunad.guzhenrenext.xianqiao.service.ApertureInitialTerrainStrategy;
 import com.Kizunad.guzhenrenext.xianqiao.service.OverworldTerrainSampler;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.LandSpiritEntity;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.XianqiaoEntities;
 import com.mojang.logging.LogUtils;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -29,7 +32,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.slf4j.Logger;
 
@@ -62,9 +64,6 @@ public final class ApertureCommand {
 
     /** 箱子相对核心的 Z 偏移。 */
     private static final int CHEST_OFFSET_Z = 0;
-
-    /** 对角采样相对核心的 X/Z 偏移。 */
-    private static final int TERRAIN_SAMPLE_DIAGONAL_OFFSET = 16;
 
     /** 2x2 采样覆盖区相对中心的最小 X/Z 偏移。 */
     private static final int SAMPLE_COVERAGE_MIN_OFFSET = -16;
@@ -248,76 +247,146 @@ public final class ApertureCommand {
     private static void sampleInitialTerrains(ServerLevel apertureLevel, ServerPlayer player, BlockPos center) {
         ServerLevel overworldLevel = player.server.getLevel(Level.OVERWORLD);
         if (overworldLevel == null) {
-            LOGGER.warn("[ApertureCommand] 主世界未加载，跳过仙窍四向地形采样。玩家={}", player.getName().getString());
+            LOGGER.warn("[ApertureCommand] 主世界未加载，跳过仙窍初始化地形采样。玩家={}", player.getName().getString());
             return;
         }
         BlockPos searchOrigin = player.blockPosition();
-
-        Holder<Biome> northEastBiome = overworldLevel.registryAccess()
-            .lookupOrThrow(Registries.BIOME)
-            .getOrThrow(Biomes.PLAINS);
-        Holder<Biome> northWestBiome = overworldLevel.registryAccess()
-            .lookupOrThrow(Registries.BIOME)
-            .getOrThrow(Biomes.FOREST);
-        Holder<Biome> southWestBiome = overworldLevel.registryAccess()
-            .lookupOrThrow(Registries.BIOME)
-            .getOrThrow(Biomes.DESERT);
-        Holder<Biome> southEastBiome = overworldLevel.registryAccess()
-            .lookupOrThrow(Registries.BIOME)
-            .getOrThrow(Biomes.TAIGA);
         RandomSource random = player.getRandom();
+        ApertureInitialTerrainStrategy.InitialSamplingPlan samplingPlan = ApertureInitialTerrainStrategy.buildPlan(
+            player,
+            center
+        );
+        LOGGER.info(
+            "[ApertureCommand] 开始执行仙窍初始化采样策略。玩家={}，道途={}，槽位数={}",
+            player.getName().getString(),
+            samplingPlan.daoType(),
+            samplingPlan.tasks().size()
+        );
 
-        sampleTerrainWithWarn(
-            overworldLevel,
-            apertureLevel,
-            center.offset(-TERRAIN_SAMPLE_DIAGONAL_OFFSET, 0, -TERRAIN_SAMPLE_DIAGONAL_OFFSET),
-            northWestBiome,
-            searchOrigin,
-            random,
-            "西北"
-        );
-        sampleTerrainWithWarn(
-            overworldLevel,
-            apertureLevel,
-            center.offset(0, 0, -TERRAIN_SAMPLE_DIAGONAL_OFFSET),
-            northEastBiome,
-            searchOrigin,
-            random,
-            "东北"
-        );
-        sampleTerrainWithWarn(
-            overworldLevel,
-            apertureLevel,
-            center.offset(-TERRAIN_SAMPLE_DIAGONAL_OFFSET, 0, 0),
-            southWestBiome,
-            searchOrigin,
-            random,
-            "西南"
-        );
-        sampleTerrainWithWarn(
-            overworldLevel,
-            apertureLevel,
-            center.offset(0, 0, 0),
-            southEastBiome,
-            searchOrigin,
-            random,
-            "东南"
+        int successCount = 0;
+        for (ApertureInitialTerrainStrategy.SamplingTask samplingTask : samplingPlan.tasks()) {
+            if (sampleTerrainByStrategy(overworldLevel, apertureLevel, samplingTask, searchOrigin, random)) {
+                successCount++;
+            }
+        }
+        LOGGER.info(
+            "[ApertureCommand] 仙窍初始化采样策略结束。玩家={}，成功槽位={}/{}。",
+            player.getName().getString(),
+            successCount,
+            samplingPlan.tasks().size()
         );
     }
 
-    private static void sampleTerrainWithWarn(
+    private static boolean sampleTerrainByStrategy(
         ServerLevel overworldLevel,
         ServerLevel apertureLevel,
-        BlockPos targetAnchor,
+        ApertureInitialTerrainStrategy.SamplingTask samplingTask,
+        BlockPos searchOrigin,
+        RandomSource random
+    ) {
+        List<ResourceKey<Biome>> triedBiomes = new ArrayList<>();
+        for (ResourceKey<Biome> biomeKey : samplingTask.priorityBiomes()) {
+            triedBiomes.add(biomeKey);
+            Holder<Biome> targetBiome = resolveBiomeHolder(overworldLevel, biomeKey);
+            if (targetBiome == null) {
+                continue;
+            }
+            if (
+                sampleTerrainWithWarn(
+                    overworldLevel,
+                    apertureLevel,
+                    samplingTask,
+                    targetBiome,
+                    searchOrigin,
+                    random
+                )
+            ) {
+                LOGGER.info(
+                    "[ApertureCommand] 仙窍{}向命中候选 biome={}，目标锚点={}。",
+                    samplingTask.directionName(),
+                    biomeKey.location(),
+                    samplingTask.targetAnchor()
+                );
+                return true;
+            }
+            LOGGER.warn(
+                "[ApertureCommand] 仙窍{}向候选地形采样失败。biome={}，目标锚点={}。",
+                samplingTask.directionName(),
+                biomeKey.location(),
+                samplingTask.targetAnchor()
+            );
+        }
+
+        ResourceKey<Biome> fallbackBiomeKey = ApertureInitialTerrainStrategy.pickRandomFallbackBiome(
+            random,
+            triedBiomes
+        );
+        if (fallbackBiomeKey == null) {
+            LOGGER.warn(
+                "[ApertureCommand] 仙窍{}向无可用随机回退 biome，最终跳过。目标锚点={}。",
+                samplingTask.directionName(),
+                samplingTask.targetAnchor()
+            );
+            return false;
+        }
+        LOGGER.info(
+            "[ApertureCommand] 仙窍{}向触发随机回退，选中 biome={}，目标锚点={}。",
+            samplingTask.directionName(),
+            fallbackBiomeKey.location(),
+            samplingTask.targetAnchor()
+        );
+
+        Holder<Biome> fallbackBiome = resolveBiomeHolder(overworldLevel, fallbackBiomeKey);
+        if (fallbackBiome == null) {
+            return false;
+        }
+        boolean sampled = sampleTerrainWithWarn(
+            overworldLevel,
+            apertureLevel,
+            samplingTask,
+            fallbackBiome,
+            searchOrigin,
+            random
+        );
+        if (sampled) {
+            LOGGER.info(
+                "[ApertureCommand] 仙窍{}向通过随机回退成功。最终 biome={}，目标锚点={}。",
+                samplingTask.directionName(),
+                fallbackBiomeKey.location(),
+                samplingTask.targetAnchor()
+            );
+        } else {
+            LOGGER.warn(
+                "[ApertureCommand] 仙窍{}向候选与回退均失败。最终回退 biome={}，目标锚点={}。",
+                samplingTask.directionName(),
+                fallbackBiomeKey.location(),
+                samplingTask.targetAnchor()
+            );
+        }
+        return sampled;
+    }
+
+    private static Holder<Biome> resolveBiomeHolder(ServerLevel overworldLevel, ResourceKey<Biome> biomeKey) {
+        try {
+            return overworldLevel.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(biomeKey);
+        } catch (IllegalStateException exception) {
+            LOGGER.warn("[ApertureCommand] 解析 biome 失败：{}，已跳过本次尝试。", biomeKey.location(), exception);
+            return null;
+        }
+    }
+
+    private static boolean sampleTerrainWithWarn(
+        ServerLevel overworldLevel,
+        ServerLevel apertureLevel,
+        ApertureInitialTerrainStrategy.SamplingTask samplingTask,
         Holder<Biome> targetBiome,
         BlockPos searchOrigin,
-        RandomSource random,
-        String directionName
+        RandomSource random
     ) {
         boolean sampled = OverworldTerrainSampler.sampleAndPlace(
             overworldLevel,
             apertureLevel,
-            targetAnchor,
+            samplingTask.targetAnchor(),
             targetBiome,
             null,
             searchOrigin,
@@ -325,11 +394,12 @@ public final class ApertureCommand {
         );
         if (!sampled) {
             LOGGER.warn(
-                "[ApertureCommand] 仙窍{}向地形采样失败，已降级跳过。目标锚点={}。",
-                directionName,
-                targetAnchor
+                "[ApertureCommand] 仙窍{}向地形采样失败。目标锚点={}。",
+                samplingTask.directionName(),
+                samplingTask.targetAnchor()
             );
         }
+        return sampled;
     }
 
     /**
@@ -354,7 +424,7 @@ public final class ApertureCommand {
      * 保证玩家仙窍中存在地灵。
      * <p>
      * 该方法用于补偿历史数据：旧版本只建平台不生成地灵。
-     * 当玩家再次进入仙窍时，如果核心附近半径范围内未检索到地灵，则自动补生成一只并认主。
+     * 当玩家再次进入仙窍时，如果核心附近范围内未检索到地灵，则自动补生成一只并认主。
      * </p>
      *
      * @param level 仙窍维度

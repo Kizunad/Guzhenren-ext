@@ -13,36 +13,45 @@ import net.minecraft.world.item.ItemStack;
  * 仙窍中枢菜单（Aperture Hub）。
  * <p>
  * 该菜单仅负责服务端到客户端的数据同步与展示，不承载任何物品槽位：
- * 1) 通过 {@link ContainerData} 同步仙窍核心的 7 个状态字段；
+ * 1) 通过 {@link ContainerData} 同步仙窍核心的 10 个状态字段；
  * 2) 不提供背包交互，因此 {@code quickMoveStack} 恒返回空；
  * 3) 使用玩家打开菜单时的位置作为有效性参考点，避免无效远距离操作。
  * </p>
  */
 public class ApertureHubMenu extends AbstractContainerMenu {
 
-    /** 字段索引：当前半径。 */
-    private static final int DATA_RADIUS = 0;
+    /** 字段索引：边界最小 chunk X。 */
+    private static final int DATA_MIN_CHUNK_X = 0;
+
+    /** 字段索引：边界最大 chunk X。 */
+    private static final int DATA_MAX_CHUNK_X = 1;
+
+    /** 字段索引：边界最小 chunk Z。 */
+    private static final int DATA_MIN_CHUNK_Z = 2;
+
+    /** 字段索引：边界最大 chunk Z。 */
+    private static final int DATA_MAX_CHUNK_Z = 3;
 
     /** 字段索引：时间倍率百分值（原值 ×100）。 */
-    private static final int DATA_TIME_SPEED_PERCENT = 1;
+    private static final int DATA_TIME_SPEED_PERCENT = 4;
 
     /** 字段索引：灾劫刻低 16 位。 */
-    private static final int DATA_TRIBULATION_LOW = 2;
+    private static final int DATA_TRIBULATION_LOW = 5;
 
     /** 字段索引：灾劫刻高 16 位。 */
-    private static final int DATA_TRIBULATION_HIGH = 3;
+    private static final int DATA_TRIBULATION_HIGH = 6;
 
     /** 字段索引：好感度百分值（原值 ×100）。 */
-    private static final int DATA_FAVORABILITY_PERCENT = 4;
+    private static final int DATA_FAVORABILITY_PERCENT = 7;
 
     /** 字段索引：转数。 */
-    private static final int DATA_TIER = 5;
+    private static final int DATA_TIER = 8;
 
     /** 字段索引：冻结状态（0/1）。 */
-    private static final int DATA_FROZEN = 6;
+    private static final int DATA_FROZEN = 9;
 
     /** 容器数据总字段数。 */
-    private static final int DATA_FIELDS = 7;
+    private static final int DATA_FIELDS = 10;
 
     /** 远程校验：允许交互的最大距离平方（8 格 -> 64）。 */
     private static final double MAX_VALID_DISTANCE_SQR = 64.0D;
@@ -118,11 +127,34 @@ public class ApertureHubMenu extends AbstractContainerMenu {
         return ItemStack.EMPTY;
     }
 
-    /**
-     * 获取当前仙窍半径。
-     */
-    public int getRadius() {
-        return data.get(DATA_RADIUS);
+    /** 获取边界最小 chunk X。 */
+    public int getMinChunkX() {
+        return data.get(DATA_MIN_CHUNK_X);
+    }
+
+    /** 获取边界最大 chunk X。 */
+    public int getMaxChunkX() {
+        return data.get(DATA_MAX_CHUNK_X);
+    }
+
+    /** 获取边界最小 chunk Z。 */
+    public int getMinChunkZ() {
+        return data.get(DATA_MIN_CHUNK_Z);
+    }
+
+    /** 获取边界最大 chunk Z。 */
+    public int getMaxChunkZ() {
+        return data.get(DATA_MAX_CHUNK_Z);
+    }
+
+    /** 获取 X 轴 chunk 跨度（闭区间，含两端）。 */
+    public int getChunkSpanX() {
+        return getMaxChunkX() - getMinChunkX() + 1;
+    }
+
+    /** 获取 Z 轴 chunk 跨度（闭区间，含两端）。 */
+    public int getChunkSpanZ() {
+        return getMaxChunkZ() - getMinChunkZ() + 1;
     }
 
     /**

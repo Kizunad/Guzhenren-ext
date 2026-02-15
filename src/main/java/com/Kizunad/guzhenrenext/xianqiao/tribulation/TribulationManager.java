@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -53,8 +54,8 @@ public class TribulationManager {
     /** 入侵阶段首次生成的灾兽数量。 */
     private static final int INVASION_SPAWN_COUNT = 6;
 
-    /** 灾兽边缘生成点，距离仙窍边界的内缩偏移。 */
-    private static final int INVASION_EDGE_OFFSET = 2;
+    /** 灾兽边缘生成点，距离仙窍边界的内缩区块偏移。 */
+    private static final int INVASION_EDGE_CHUNK_OFFSET = 1;
 
     /** 入侵阶段每只存活灾兽每 tick 造成的抽象损坏。 */
     private static final float INVASION_DAMAGE_PER_MOB_PER_TICK = 0.01F;
@@ -75,8 +76,11 @@ public class TribulationManager {
     /** 将 damageAccumulated 归一化为 damageRatio 的分母。 */
     private static final float DAMAGE_NORMALIZATION = 100.0F;
 
-    /** 成功防御后的半径奖励值。 */
-    private static final int REWARD_RADIUS_BONUS = 2;
+    /** 成功防御后的边界奖励值（每方向扩展区块数）。 */
+    private static final int REWARD_BOUNDARY_CHUNK_DELTA = 1;
+
+    /** 一个区块包含的方块边长。 */
+    private static final int CHUNK_SIZE_BLOCKS = 16;
 
     /** 失败后核心灵气惩罚值。 */
     private static final int FAILURE_AURA_PENALTY = 120;
@@ -196,7 +200,7 @@ public class TribulationManager {
         }
         RandomSource random = level.getRandom();
         for (int i = 0; i < OMEN_PERTURB_SAMPLES; i++) {
-            BlockPos target = randomPosInAperture(random, apertureInfo.center(), apertureInfo.currentRadius());
+            BlockPos target = randomPosInAperture(random, apertureInfo);
             DaoType type = DAO_TYPES[random.nextInt(DAO_TYPES.length)];
             int amount = OMEN_PERTURB_MIN + random.nextInt(OMEN_PERTURB_RANGE);
             if (random.nextBoolean()) {
@@ -215,7 +219,7 @@ public class TribulationManager {
             return;
         }
         RandomSource random = level.getRandom();
-        BlockPos target = randomPosInAperture(random, apertureInfo.center(), apertureInfo.currentRadius());
+        BlockPos target = randomPosInAperture(random, apertureInfo);
         LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level);
         if (lightning != null) {
             lightning.moveTo(target.getX() + BLOCK_CENTER_OFFSET, target.getY(), target.getZ() + BLOCK_CENTER_OFFSET);
@@ -252,8 +256,7 @@ public class TribulationManager {
 
         ApertureWorldData worldData = ApertureWorldData.get(level);
         if (score >= REWARD_SCORE_THRESHOLD) {
-            int rewardRadius = apertureInfo.currentRadius() + REWARD_RADIUS_BONUS;
-            worldData.updateRadius(owner, rewardRadius);
+            worldData.expandBoundaryByChunkDelta(owner, REWARD_BOUNDARY_CHUNK_DELTA);
             DaoMarkApi.addAura(level, apertureInfo.center(), REWARD_DAO, SUCCESS_AURA_REWARD);
         } else if (damageRatio > FAILURE_DAMAGE_RATIO) {
             DaoMarkApi.consumeAura(level, apertureInfo.center(), REWARD_DAO, FAILURE_AURA_PENALTY);
@@ -271,19 +274,15 @@ public class TribulationManager {
      */
     private void spawnInvasionEnemies(ServerLevel level, ApertureInfo apertureInfo) {
         RandomSource random = level.getRandom();
-        int spawnRadius = Math.max(1, apertureInfo.currentRadius() - INVASION_EDGE_OFFSET);
         for (int i = 0; i < INVASION_SPAWN_COUNT; i++) {
-            double angle = random.nextDouble() * Math.PI * 2.0D;
-            int spawnX = apertureInfo.center().getX() + (int) Math.round(Math.cos(angle) * spawnRadius);
-            int spawnZ = apertureInfo.center().getZ() + (int) Math.round(Math.sin(angle) * spawnRadius);
-            int spawnY = apertureInfo.center().getY() + 1;
+            BlockPos spawnPos = randomEdgePosInAperture(random, apertureInfo, INVASION_EDGE_CHUNK_OFFSET);
 
             EntityType<? extends Mob> type = random.nextBoolean() ? EntityType.ZOMBIE : EntityType.SKELETON;
             Mob mob = type.create(level);
             if (mob == null) {
                 continue;
             }
-            mob.moveTo(spawnX + BLOCK_CENTER_OFFSET, spawnY, spawnZ + BLOCK_CENTER_OFFSET,
+            mob.moveTo(spawnPos.getX() + BLOCK_CENTER_OFFSET, spawnPos.getY(), spawnPos.getZ() + BLOCK_CENTER_OFFSET,
                 random.nextFloat() * FULL_CIRCLE_DEGREES, 0.0F);
             mob.setPersistenceRequired();
             if (level.addFreshEntity(mob)) {
@@ -324,13 +323,72 @@ public class TribulationManager {
     }
 
     /**
-     * 在仙窍范围内随机生成一个位置（y 固定为核心层）。
+     * 在仙窍区块边界内随机生成一个位置（y 固定为核心层）。
      */
-    private static BlockPos randomPosInAperture(RandomSource random, BlockPos center, int radius) {
-        int boundedRadius = Math.max(1, radius);
-        int x = center.getX() + random.nextInt(boundedRadius * 2 + 1) - boundedRadius;
-        int z = center.getZ() + random.nextInt(boundedRadius * 2 + 1) - boundedRadius;
-        return new BlockPos(x, center.getY() + 1, z);
+    private static BlockPos randomPosInAperture(RandomSource random, ApertureInfo info) {
+        int randomChunkX = Mth.nextInt(random, info.minChunkX(), info.maxChunkX());
+        int randomChunkZ = Mth.nextInt(random, info.minChunkZ(), info.maxChunkZ());
+        int randomBlockX = random.nextInt(CHUNK_SIZE_BLOCKS);
+        int randomBlockZ = random.nextInt(CHUNK_SIZE_BLOCKS);
+        int x = randomChunkX * CHUNK_SIZE_BLOCKS + randomBlockX;
+        int z = randomChunkZ * CHUNK_SIZE_BLOCKS + randomBlockZ;
+        return new BlockPos(x, info.center().getY() + 1, z);
+    }
+
+    /**
+     * 在仙窍边缘区块带随机生成一个位置（y 固定为核心层）。
+     * <p>
+     * 该方法不再使用“中心点 + 半径”的圆形/方形距离公式，
+     * 而是直接在 min/max chunk 语义下抽样边缘区块。
+     * </p>
+     *
+     * @param random 随机源
+     * @param info 仙窍边界信息
+     * @param edgeChunkOffset 向内收缩的区块偏移量（0 表示最外层）
+     * @return 位于边缘区块带内的随机方块位置
+     */
+    private static BlockPos randomEdgePosInAperture(RandomSource random, ApertureInfo info, int edgeChunkOffset) {
+        int normalizedOffset = Math.max(0, edgeChunkOffset);
+        int minChunkX = info.minChunkX() + normalizedOffset;
+        int maxChunkX = info.maxChunkX() - normalizedOffset;
+        int minChunkZ = info.minChunkZ() + normalizedOffset;
+        int maxChunkZ = info.maxChunkZ() - normalizedOffset;
+
+        if (minChunkX > maxChunkX || minChunkZ > maxChunkZ) {
+            return randomPosInAperture(random, info);
+        }
+
+        int width = maxChunkX - minChunkX + 1;
+        int depth = maxChunkZ - minChunkZ + 1;
+        int perimeter = width * 2 + Math.max(0, depth - 2) * 2;
+        if (perimeter <= 0) {
+            return randomPosInAperture(random, info);
+        }
+
+        int index = random.nextInt(perimeter);
+        int chunkX;
+        int chunkZ;
+        if (index < width) {
+            chunkX = minChunkX + index;
+            chunkZ = minChunkZ;
+        } else if (index < width + Math.max(0, depth - 2)) {
+            int offset = index - width;
+            chunkX = maxChunkX;
+            chunkZ = minChunkZ + 1 + offset;
+        } else if (index < width * 2 + Math.max(0, depth - 2)) {
+            int offset = index - (width + Math.max(0, depth - 2));
+            chunkX = maxChunkX - offset;
+            chunkZ = maxChunkZ;
+        } else {
+            int offset = index - (width * 2 + Math.max(0, depth - 2));
+            chunkX = minChunkX;
+            chunkZ = maxChunkZ - 1 - offset;
+        }
+
+        ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
+        int x = chunkPos.getMinBlockX() + random.nextInt(CHUNK_SIZE_BLOCKS);
+        int z = chunkPos.getMinBlockZ() + random.nextInt(CHUNK_SIZE_BLOCKS);
+        return new BlockPos(x, info.center().getY() + 1, z);
     }
 
     /**

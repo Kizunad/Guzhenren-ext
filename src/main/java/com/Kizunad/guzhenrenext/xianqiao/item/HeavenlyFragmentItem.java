@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.xianqiao.item;
 
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.service.ApertureBoundaryService;
 import com.Kizunad.guzhenrenext.xianqiao.service.FragmentPlacementService;
 import java.util.List;
 import java.util.UUID;
@@ -80,16 +81,11 @@ public class HeavenlyFragmentItem extends Item {
 
         if (player.isShiftKeyDown()) {
             Direction direction = player.getDirection();
-            int placementDistance = apertureInfo.currentRadius() + FragmentPlacementService.EXTENSION_DISTANCE;
-            BlockPos targetPos = apertureInfo.center().offset(
-                direction.getStepX() * placementDistance,
-                0,
-                direction.getStepZ() * placementDistance
-            );
+            BlockPos targetPos = FragmentPlacementService.resolvePlacementTarget(apertureInfo, direction);
             player.displayClientMessage(
                 Component.literal("§6当前朝向：" + getDirectionName(direction)
                     + " | 扩展至 (" + targetPos.getX() + ", " + targetPos.getZ()
-                    + ") | 松开Shift右键确认放置"),
+                    + ") | 本次边界四向各 +1 区块 | 松开Shift右键确认放置"),
                 true
             );
             return InteractionResultHolder.success(stack);
@@ -107,19 +103,14 @@ public class HeavenlyFragmentItem extends Item {
     }
 
     /**
-     * 判断给定位置是否位于玩家仙窍半径内（XZ 平面）。
+     * 判断给定位置是否位于玩家仙窍边界内（XZ 平面）。
      *
      * @param playerPos 玩家方块坐标
      * @param info 仙窍信息
      * @return 在范围内返回 true，否则返回 false
      */
     private static boolean isInsideAperture(BlockPos playerPos, ApertureInfo info) {
-        BlockPos center = info.center();
-        long deltaX = (long) playerPos.getX() - center.getX();
-        long deltaZ = (long) playerPos.getZ() - center.getZ();
-        long distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
-        long radius = info.currentRadius();
-        return distanceSquared <= radius * radius;
+        return ApertureBoundaryService.containsBlock(info, playerPos);
     }
 
     private static String getDirectionName(Direction direction) {
