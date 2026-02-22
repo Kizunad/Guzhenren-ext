@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext;
 
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
+import com.Kizunad.guzhenrenext.config.CommonConfig;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
@@ -53,6 +54,7 @@ public class GuzhenrenExt {
         NeoForge.EVENT_BUS.addListener(this::onAddReloadListeners);
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        modContainer.registerConfig(ModConfig.Type.COMMON, CommonConfig.SPEC);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             runClientBootstrap(modContainer);

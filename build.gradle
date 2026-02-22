@@ -45,7 +45,7 @@ tasks.withType(Checkstyle).configureEach {
 sourceSets {
     main {
         java {
-            // 从主编译中排除 CustomNPCs 及其桥接实现和测试
+            // 从主编译中排除 CustomNPCs 与其测试，避免 customnpcs 入口触发 dangling entrypoint
             exclude 'com/Kizunad/customNPCs/**'
             exclude 'com/Kizunad/customNPCs_test/**'
             exclude 'com/Kizunad/guzhenrenext/customNPCImpl/**'
@@ -230,6 +230,9 @@ neoForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            if (project.hasProperty('batch')) {
+                systemProperty 'neoforge.test.batch', project.property('batch')
+            }
         }
 
         data {

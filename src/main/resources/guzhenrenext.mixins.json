@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.Kizunad.guzhenrenext.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "GameTestRegistryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

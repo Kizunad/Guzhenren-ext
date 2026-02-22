@@ -1,4 +1,4 @@
-package com.Kizunad.customNPCs_test;
+package com.Kizunad.customNPCs_test.archive;
 
 import com.Kizunad.customNPCs_test.utils.TestBatches;
 import net.minecraft.gametest.framework.GameTest;
@@ -9,39 +9,34 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 public class NpcMindGameTests {
 
     private static final String EMPTY_TEMPLATE = "empty";
-    private static final String BATCH_BASE = TestBatches.BASE;
-    private static final String BATCH_GOAP = TestBatches.GOAP;
-    private static final String BATCH_REAL_API = TestBatches.REAL_API;
-    private static final String BATCH_PERF = TestBatches.PERFORMANCE;
-    private static final String BATCH_LLM = TestBatches.REAL_API;
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 260)
+    @GameTest(template = EMPTY_TEMPLATE, batch = TestBatches.ARCHIVED, timeoutTicks = 260)
     public void testCookGoalProducesCookedFood(GameTestHelper helper) {
         com.Kizunad.customNPCs_test.goals.CookGoalTests.testCookGoalProducesCookedFood(
             helper
         );
     }
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 220)
+    @GameTest(template = EMPTY_TEMPLATE, batch = TestBatches.ARCHIVED, timeoutTicks = 220)
     public void testCraftItemGoalManualPlan(GameTestHelper helper) {
         com.Kizunad.customNPCs_test.goals.CraftItemGoalTests.testCraftItemGoalManualPlan(
             helper
         );
     }
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP, timeoutTicks = 240)
+    @GameTest(template = EMPTY_TEMPLATE, batch = TestBatches.ARCHIVED, timeoutTicks = 240)
     public void testHuntGoalAttacksWeakerEntities(GameTestHelper helper) {
         com.Kizunad.customNPCs_test.goals.HuntGoalTests.testHuntGoalAttacksWeakerEntities(
             helper
         );
     }
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP)
+    @GameTest(template = EMPTY_TEMPLATE, batch = TestBatches.ARCHIVED)
     public void testRangedAttackPostFire(GameTestHelper helper) {
         com.Kizunad.customNPCs_test.tests.RangedAttackFixTests.testRangedAttackPostFire(helper);
     }
 
-    @GameTest(template = EMPTY_TEMPLATE, batch = BATCH_GOAP)
+    @GameTest(template = EMPTY_TEMPLATE, batch = TestBatches.ARCHIVED)
     public void testRangedAttackStuckDetection(GameTestHelper helper) {
         com.Kizunad.customNPCs_test.tests.RangedAttackFixTests.testRangedAttackStuckDetection(helper);
     }

@@ -27,3 +27,6 @@ version="${mod_version}"
 displayName="tinyUI Helper"
 authors="${mod_authors}"
 description="Standalone tinyUI helper and demo commands."
+
+[[mixins]]
+config="guzhenrenext.mixins.json"

@@ -10,6 +10,7 @@ public final class TestBatches {
     public static final String GOAP = "guzhenrenext_goap";
     public static final String REAL_API = "guzhenrenext_real_api";
     public static final String PERFORMANCE = "guzhenrenext_perf";
+    public static final String ARCHIVED = "archived";
 
     private TestBatches() {
     }
