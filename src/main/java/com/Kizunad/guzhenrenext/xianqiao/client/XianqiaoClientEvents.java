@@ -4,6 +4,9 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.XianqiaoEntities;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.ChickenRenderer;
+import net.minecraft.client.renderer.entity.CowRenderer;
+import net.minecraft.client.renderer.entity.SheepRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -32,6 +35,9 @@ public final class XianqiaoClientEvents {
         event.register(XianqiaoMenus.RESOURCE_CONTROLLER.get(), ResourceControllerScreen::new);
         event.register(XianqiaoMenus.LAND_SPIRIT.get(), LandSpiritScreen::new);
         event.register(XianqiaoMenus.APERTURE_HUB.get(), ApertureHubScreen::new);
+        event.register(XianqiaoMenus.ALCHEMY_FURNACE.get(), AlchemyFurnaceScreen::new);
+        event.register(XianqiaoMenus.STORAGE_GU.get(), StorageGuScreen::new);
+        event.register(XianqiaoMenus.CLUSTER_NPC.get(), ClusterNpcScreen::new);
     }
 
     /**
@@ -48,5 +54,9 @@ public final class XianqiaoClientEvents {
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(XianqiaoEntities.LAND_SPIRIT.get(), LandSpiritRenderer::new);
+        event.registerEntityRenderer(XianqiaoEntities.CLUSTER_NPC.get(), ClusterNpcRenderer::new);
+        event.registerEntityRenderer(XianqiaoEntities.XIAN_COW.get(), CowRenderer::new);
+        event.registerEntityRenderer(XianqiaoEntities.XIAN_CHICKEN.get(), ChickenRenderer::new);
+        event.registerEntityRenderer(XianqiaoEntities.XIAN_SHEEP.get(), SheepRenderer::new);
     }
 }

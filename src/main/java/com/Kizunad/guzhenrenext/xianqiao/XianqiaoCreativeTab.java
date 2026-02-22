@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.xianqiao;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks;
+import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingItems;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -27,7 +28,7 @@ public final class XianqiaoCreativeTab {
     /**
      * 仙窍创意标签页。
      *
-     * <p>图标使用九天碎片，展示内容仅包含当前仙窍系统已注册的 3 个方块物品与 1 个基础物品。
+     * <p>图标使用九天碎片，展示内容包含仙窍核心方块、炼丹炉方块与基础丹药。
      */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> XIANQIAO =
         CREATIVE_MODE_TABS.register(
@@ -39,7 +40,18 @@ public final class XianqiaoCreativeTab {
                     output.accept(XianqiaoBlocks.APERTURE_CORE_ITEM.get());
                     output.accept(XianqiaoBlocks.RESOURCE_CONTROLLER_ITEM.get());
                     output.accept(XianqiaoBlocks.TIME_FIELD_COMPONENT_ITEM.get());
+                    output.accept(FarmingItems.ALCHEMY_FURNACE_ITEM.get());
+                    output.accept(FarmingItems.CUI_SHENG_DAN.get());
+                    output.accept(FarmingItems.HU_TI_DAN.get());
+                    output.accept(FarmingItems.HUI_CHUN_DAN.get());
+                    output.accept(FarmingItems.RUN_ZE_DAN.get());
                     output.accept(XianqiaoItems.HEAVENLY_FRAGMENT.get());
+                    output.accept(XianqiaoItems.STORAGE_GU.get());
+                    output.accept(XianqiaoItems.TRANSFER_GU.get());
+                    output.accept(XianqiaoItems.CLUSTER_NPC_SPAWN_EGG.get());
+                    output.accept(XianqiaoItems.XIAN_COW_SPAWN_EGG.get());
+                    output.accept(XianqiaoItems.XIAN_CHICKEN_SPAWN_EGG.get());
+                    output.accept(XianqiaoItems.XIAN_SHEEP_SPAWN_EGG.get());
                 })
                 .build()
         );

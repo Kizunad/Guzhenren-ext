@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "HFH",
+    "F F",
+    "HFH"
+  ],
+  "key": {
+    "H": {
+      "item": "guzhenrenext:heavenly_fragment"
+    },
+    "F": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "id": "guzhenrenext:storage_gu",
+    "count": 1
+  }
+}

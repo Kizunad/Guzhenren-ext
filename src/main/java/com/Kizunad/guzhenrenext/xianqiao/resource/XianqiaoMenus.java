@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.resource;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.alchemy.menu.AlchemyFurnaceMenu;
 import com.Kizunad.guzhenrenext.xianqiao.block.ApertureHubMenu;
 import com.Kizunad.guzhenrenext.xianqiao.spirit.LandSpiritMenu;
 import net.minecraft.core.registries.Registries;
@@ -46,6 +47,32 @@ public final class XianqiaoMenus {
             (containerId, inventory, ignoredBuffer) ->
                 new LandSpiritMenu(containerId, inventory)
         )
+    );
+
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<AlchemyFurnaceMenu>
+    > ALCHEMY_FURNACE = MENUS.register(
+        "alchemy_furnace",
+        () -> IMenuTypeExtension.create(AlchemyFurnaceMenu::fromNetwork)
+    );
+
+    /** 储物蛊菜单。 */
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<com.Kizunad.guzhenrenext.xianqiao.item.StorageGuMenu>
+    > STORAGE_GU = MENUS.register(
+        "storage_gu",
+        () -> IMenuTypeExtension.create(com.Kizunad.guzhenrenext.xianqiao.item.StorageGuMenu::fromNetwork)
+    );
+
+    /** 集群 NPC 菜单。 */
+    public static final DeferredHolder<
+        MenuType<?>,
+        MenuType<com.Kizunad.guzhenrenext.xianqiao.spirit.ClusterNpcMenu>
+    > CLUSTER_NPC = MENUS.register(
+        "cluster_npc",
+        () -> IMenuTypeExtension.create(com.Kizunad.guzhenrenext.xianqiao.spirit.ClusterNpcMenu::fromNetwork)
     );
 
     private XianqiaoMenus() {

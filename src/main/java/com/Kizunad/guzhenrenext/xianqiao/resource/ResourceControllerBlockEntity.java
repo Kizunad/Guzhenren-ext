@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.resource;
 
+import com.Kizunad.guzhenrenext.xianqiao.alchemy.effect.PillEffectState;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkApi;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
@@ -88,6 +89,9 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
 
     /** 判定仙窍归属的额外缓冲。 */
     private static final int APERTURE_BOUNDARY_BUFFER = 16;
+
+    /** 润泽丹未激活时的默认倍率。 */
+    private static final float RUN_ZE_DEFAULT_MULTIPLIER = 1.0F;
 
     /** 每轮产出数量。 */
     private static final int OUTPUT_COUNT_PER_CYCLE = 1;
@@ -225,8 +229,9 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
 
         float efficiency = getCurrentEfficiency();
         float timeMultiplier = getApertureTimeSpeed();
+        float runZeMultiplier = getRunZeAccelerationMultiplier();
         float baseSpeed = BASE_SPEED_MIN + componentCount * BASE_SPEED_PER_COMPONENT;
-        progress += baseSpeed * efficiency * timeMultiplier;
+        progress += baseSpeed * efficiency * timeMultiplier * runZeMultiplier;
 
         while (progress >= MAX_PROGRESS) {
             if (!outputItems()) {
@@ -318,7 +323,7 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
             return 0;
         }
         float baseSpeed = BASE_SPEED_MIN + componentCount * BASE_SPEED_PER_COMPONENT;
-        float speed = baseSpeed * getCurrentEfficiency() * getApertureTimeSpeed();
+        float speed = baseSpeed * getCurrentEfficiency() * getApertureTimeSpeed() * getRunZeAccelerationMultiplier();
         if (speed <= 0) {
             return 0;
         }
@@ -341,6 +346,39 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
             return 1.0F;
         }
 
+        Player ownerPlayer = findApertureOwnerPlayer(serverLevel);
+        if (ownerPlayer == null) {
+            return 1.0F;
+        }
+
+        ApertureWorldData worldData = ApertureWorldData.get(serverLevel);
+        ApertureInfo ownerAperture = worldData.getAperture(ownerPlayer.getUUID());
+        if (ownerAperture == null) {
+            return 1.0F;
+        }
+        return ownerAperture.timeSpeed();
+    }
+
+    private float getRunZeAccelerationMultiplier() {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return RUN_ZE_DEFAULT_MULTIPLIER;
+        }
+
+        Player ownerPlayer = findApertureOwnerPlayer(serverLevel);
+        if (ownerPlayer == null) {
+            return RUN_ZE_DEFAULT_MULTIPLIER;
+        }
+
+        long currentGameTime = serverLevel.getGameTime();
+        if (!PillEffectState.isRunZeAccelerationActive(ownerPlayer, currentGameTime)) {
+            PillEffectState.clearRunZeAccelerationState(ownerPlayer);
+            return RUN_ZE_DEFAULT_MULTIPLIER;
+        }
+        return (float) PillEffectState.readRunZeAccelerationMultiplier(ownerPlayer);
+    }
+
+    @Nullable
+    private Player findApertureOwnerPlayer(ServerLevel serverLevel) {
         ApertureWorldData worldData = ApertureWorldData.get(serverLevel);
         List<? extends Player> players = serverLevel.players();
         for (Player player : players) {
@@ -356,10 +394,10 @@ public class ResourceControllerBlockEntity extends BlockEntity implements MenuPr
                 APERTURE_BOUNDARY_BUFFER
             );
             if (insideAperture || insideBufferedAperture) {
-                return info.timeSpeed();
+                return player;
             }
         }
-        return 1.0F;
+        return null;
     }
 
     /**

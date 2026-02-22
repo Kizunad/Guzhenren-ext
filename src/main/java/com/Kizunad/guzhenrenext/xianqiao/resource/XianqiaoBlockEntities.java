@@ -1,8 +1,10 @@
 package com.Kizunad.guzhenrenext.xianqiao.resource;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.alchemy.blockentity.AlchemyFurnaceBlockEntity;
 import com.Kizunad.guzhenrenext.xianqiao.block.ApertureCoreBlockEntity;
 import com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks;
+import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -36,6 +38,16 @@ public final class XianqiaoBlockEntities {
         "aperture_core",
         () -> BlockEntityType.Builder
             .of(ApertureCoreBlockEntity::new, XianqiaoBlocks.APERTURE_CORE.get())
+            .build(null)
+    );
+
+    public static final DeferredHolder<
+        BlockEntityType<?>,
+        BlockEntityType<AlchemyFurnaceBlockEntity>
+    > ALCHEMY_FURNACE = BLOCK_ENTITIES.register(
+        "alchemy_furnace",
+        () -> BlockEntityType.Builder
+            .of(AlchemyFurnaceBlockEntity::new, FarmingBlocks.ALCHEMY_FURNACE.get())
             .build(null)
     );
 

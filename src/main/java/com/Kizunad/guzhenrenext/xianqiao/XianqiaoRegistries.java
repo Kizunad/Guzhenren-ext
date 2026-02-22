@@ -4,6 +4,8 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.xianqiao.block.XianqiaoBlocks;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.XianqiaoAttachments;
 import com.Kizunad.guzhenrenext.xianqiao.dimension.ApertureVoidChunkGenerator;
+import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingBlocks;
+import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingItems;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoDataComponents;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoBlockEntities;
@@ -47,6 +49,8 @@ public final class XianqiaoRegistries {
         CHUNK_GENERATORS.register(modEventBus);
         XianqiaoAttachments.register(modEventBus);
         XianqiaoBlocks.register(modEventBus);
+        FarmingBlocks.register(modEventBus);
+        FarmingItems.register(modEventBus);
         XianqiaoBlockEntities.register(modEventBus);
         XianqiaoEntities.register(modEventBus);
         XianqiaoMenus.register(modEventBus);
