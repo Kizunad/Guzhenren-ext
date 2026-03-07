@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:apple"
+    },
+    {
+      "item": "minecraft:wheat"
+    }
+  ],
+  "result": {
+    "id": "minecraft:bread",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "core",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_069",
+      "guzhenrenext:task13a/net_078"
+    ],
+    "manifest_index": 79
+  }
+}

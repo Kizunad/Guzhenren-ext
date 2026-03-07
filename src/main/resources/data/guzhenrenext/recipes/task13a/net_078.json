@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:bread"
+    },
+    {
+      "item": "minecraft:apple"
+    }
+  ],
+  "result": {
+    "id": "minecraft:gunpowder",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "core",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_068",
+      "guzhenrenext:task13a/net_077"
+    ],
+    "manifest_index": 78
+  }
+}
