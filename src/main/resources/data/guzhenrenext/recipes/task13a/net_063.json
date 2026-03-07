@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:turtle_scute"
+    },
+    {
+      "item": "minecraft:blaze_powder"
+    }
+  ],
+  "result": {
+    "id": "minecraft:string",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "core",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_053",
+      "guzhenrenext:task13a/net_062"
+    ],
+    "manifest_index": 63
+  }
+}
