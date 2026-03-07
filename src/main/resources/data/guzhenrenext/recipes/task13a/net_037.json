@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:gunpowder"
+    },
+    {
+      "item": "minecraft:bread"
+    }
+  ],
+  "result": {
+    "id": "minecraft:iron_nugget",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "advanced",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_027",
+      "guzhenrenext:task13a/net_036"
+    ],
+    "manifest_index": 37
+  }
+}
