@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:cocoa_beans"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    }
+  ],
+  "result": {
+    "id": "minecraft:sweet_berries",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "basic",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_007"
+    ],
+    "manifest_index": 8
+  }
+}
