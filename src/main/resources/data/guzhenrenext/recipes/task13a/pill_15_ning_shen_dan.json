@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:nether_star"
+    },
+    {
+      "item": "minecraft:wheat"
+    },
+    {
+      "item": "minecraft:clock"
+    }
+  ],
+  "result": {
+    "id": "guzhenrenext:ning_shen_dan",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "core",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_085",
+      "guzhenrenext:task13a/net_015"
+    ],
+    "manifest_index": 15
+  }
+}
