@@ -7,6 +7,7 @@ import com.Kizunad.guzhenrenext.xianqiao.alchemy.item.PillItem;
 import com.Kizunad.guzhenrenext.xianqiao.alchemy.item.PillQuality;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemNameBlockItem;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -25,6 +26,27 @@ public final class FarmingItems {
     public static final DeferredItem<BlockItem> ALCHEMY_FURNACE_ITEM = ITEMS.register(
         "alchemy_furnace",
         () -> new BlockItem(FarmingBlocks.ALCHEMY_FURNACE.get(), new Item.Properties())
+    );
+
+    /** 青亚草作物入口。 */
+    public static final DeferredItem<ItemNameBlockItem> QING_YA_GRASS_ITEM = ITEMS.register(
+        "qing_ya_grass",
+        () -> new ItemNameBlockItem(FarmingBlocks.QING_YA_GRASS.get(), new Item.Properties())
+    );
+
+    public static final DeferredItem<BlockItem> LIGHTNING_ATTRACTING_FERN_ITEM = ITEMS.register(
+        "lightning_attracting_fern",
+        () -> new BlockItem(FarmingBlocks.LIGHTNING_ATTRACTING_FERN.get(), new Item.Properties())
+    );
+
+    public static final DeferredItem<BlockItem> MAN_EATING_SPORE_BLOSSOM_ITEM = ITEMS.register(
+        "man_eating_spore_blossom",
+        () -> new BlockItem(FarmingBlocks.MAN_EATING_SPORE_BLOSSOM.get(), new Item.Properties())
+    );
+
+    public static final DeferredItem<BlockItem> CAVE_VINES_ITEM = ITEMS.register(
+        "cave_vines",
+        () -> new BlockItem(FarmingBlocks.CAVE_VINES.get(), new Item.Properties())
     );
 
     /** 催生丹。 */
