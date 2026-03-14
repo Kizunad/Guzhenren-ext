@@ -1,6 +1,5 @@
 package com.Kizunad.guzhenrenext.xianqiao.farming;
 
-import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -138,7 +137,7 @@ public class ManEatingSporeBlossomBlock extends BushBlock {
             blossomPos.getX() + BLOCK_CENTER_OFFSET,
             blossomPos.getY() + BLOCK_CENTER_OFFSET,
             blossomPos.getZ() + BLOCK_CENTER_OFFSET,
-            XianqiaoItems.XUE_PO_LI.toStack(PROOF_DROP_COUNT)
+            FarmingItems.XUE_PO_LI.toStack(PROOF_DROP_COUNT)
         );
         level.addFreshEntity(proofDrop);
     }

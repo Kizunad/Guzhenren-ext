@@ -1,6 +1,5 @@
 package com.Kizunad.guzhenrenext.xianqiao.farming;
 
-import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -83,7 +82,7 @@ public class LightningAttractingFernBlock extends BushBlock {
             fernPos.getX() + BLOCK_CENTER_OFFSET,
             fernPos.getY() + BLOCK_CENTER_OFFSET,
             fernPos.getZ() + BLOCK_CENTER_OFFSET,
-            XianqiaoItems.LEI_YING_SHA.toStack(PROOF_DROP_COUNT)
+            FarmingItems.LEI_YING_SHA.toStack(PROOF_DROP_COUNT)
         );
         proofDrop.setCustomName(Component.literal(SUCCESS_DROP_NAME_TAG));
         proofDrop.setCustomNameVisible(true);

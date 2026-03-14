@@ -1,8 +1,8 @@
 package com.Kizunad.guzhenrenext_test.xianqiao;
 
 import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingBlocks;
+import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingItems;
 import com.Kizunad.guzhenrenext.xianqiao.farming.ManEatingSporeBlossomBlock;
-import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -61,7 +61,7 @@ public class Task19PD01ManEatingFlowerGameTests {
                 "happy path: 服务端应对附近实体造成可观测伤害"
             );
             helper.assertTrue(
-                countItems(drops, XianqiaoItems.XUE_PO_LI.get()) >= PROOF_DROP_MIN_COUNT,
+                countItems(drops, FarmingItems.XUE_PO_LI.get()) >= PROOF_DROP_MIN_COUNT,
                 "happy path: 触发后应产出证明物 XUE_PO_LI"
             );
             helper.succeed();
@@ -104,7 +104,7 @@ public class Task19PD01ManEatingFlowerGameTests {
                 "failure path: 非法环境触发后方块不应保持稳定存在"
             );
             helper.assertTrue(
-                countItems(drops, XianqiaoItems.XUE_PO_LI.get()) == 0,
+                countItems(drops, FarmingItems.XUE_PO_LI.get()) == 0,
                 "failure path: 非法环境下不应产出 XUE_PO_LI"
             );
             helper.succeed();

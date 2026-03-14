@@ -49,6 +49,21 @@ public final class FarmingItems {
         () -> new BlockItem(FarmingBlocks.CAVE_VINES.get(), new Item.Properties())
     );
 
+    public static final DeferredItem<Item> LEI_YING_SHA = ITEMS.register(
+        "lei_ying_sha",
+        () -> new Item(new Item.Properties())
+    );
+
+    public static final DeferredItem<Item> XUE_PO_LI = ITEMS.register(
+        "xue_po_li",
+        () -> new Item(new Item.Properties())
+    );
+
+    public static final DeferredItem<Item> JIN_SUI_XIE = ITEMS.register(
+        "jin_sui_xie",
+        () -> new Item(new Item.Properties())
+    );
+
     /** 催生丹。 */
     public static final DeferredItem<PillItem> CUI_SHENG_DAN = ITEMS.register(
         "cui_sheng_dan",

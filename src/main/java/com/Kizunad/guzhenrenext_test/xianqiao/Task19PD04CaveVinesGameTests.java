@@ -1,7 +1,7 @@
 package com.Kizunad.guzhenrenext_test.xianqiao;
 
 import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingBlocks;
-import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
+import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingItems;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -74,7 +74,7 @@ public class Task19PD04CaveVinesGameTests {
             // then: 必须出现可观察结果（金髓屑 + 命名反馈）。
             helper.assertTrue(
                 drops.stream().anyMatch(
-                    entity -> entity.getItem().is(XianqiaoItems.JIN_SUI_XIE.get())
+                    entity -> entity.getItem().is(FarmingItems.JIN_SUI_XIE.get())
                         && entity.hasCustomName()
                         && EXPECTED_SUCCESS_NAME_TAG.equals(entity.getCustomName().getString())
                 ),
@@ -128,7 +128,7 @@ public class Task19PD04CaveVinesGameTests {
             );
             List<ItemEntity> drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class, dropArea);
             helper.assertTrue(
-                drops.stream().noneMatch(entity -> entity.getItem().is(XianqiaoItems.JIN_SUI_XIE.get())),
+                drops.stream().noneMatch(entity -> entity.getItem().is(FarmingItems.JIN_SUI_XIE.get())),
                 "failure path: 无矿块邻接时不应产出金髓屑"
             );
             helper.succeed();

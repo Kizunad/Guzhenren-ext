@@ -1,8 +1,8 @@
 package com.Kizunad.guzhenrenext_test.xianqiao;
 
 import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingBlocks;
+import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingItems;
 import com.Kizunad.guzhenrenext.xianqiao.farming.LightningAttractingFernBlock;
-import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -65,7 +65,7 @@ public class Task19PD02LightningFernGameTests {
                 "happy path: 触发后应生成至少一个 LightningBolt，证明雷击效果已发生"
             );
             helper.assertTrue(
-                countItems(drops, XianqiaoItems.LEI_YING_SHA.get()) >= PROOF_DROP_MIN_COUNT,
+                countItems(drops, FarmingItems.LEI_YING_SHA.get()) >= PROOF_DROP_MIN_COUNT,
                 "happy path: 触发后应掉落带命名反馈的雷萤砂（LEI_YING_SHA）"
             );
             helper.succeed();
@@ -108,7 +108,7 @@ public class Task19PD02LightningFernGameTests {
                 "failure path: 上方遮挡时不应生成 LightningBolt"
             );
             helper.assertTrue(
-                countItems(drops, XianqiaoItems.LEI_YING_SHA.get()) == 0,
+                countItems(drops, FarmingItems.LEI_YING_SHA.get()) == 0,
                 "failure path: 上方遮挡时不应产出 LEI_YING_SHA"
             );
             helper.succeed();

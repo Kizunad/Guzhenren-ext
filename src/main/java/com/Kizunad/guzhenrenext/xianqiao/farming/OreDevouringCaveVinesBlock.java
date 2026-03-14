@@ -1,6 +1,5 @@
 package com.Kizunad.guzhenrenext.xianqiao.farming;
 
-import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -64,7 +63,7 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
             orePos.getX() + BLOCK_CENTER_OFFSET,
             orePos.getY() + BLOCK_CENTER_OFFSET,
             orePos.getZ() + BLOCK_CENTER_OFFSET,
-            XianqiaoItems.JIN_SUI_XIE.toStack(DROP_SINGLE_COUNT)
+            FarmingItems.JIN_SUI_XIE.toStack(DROP_SINGLE_COUNT)
         );
         essenceDrop.setCustomName(Component.literal(SUCCESS_NAME_TAG));
         essenceDrop.setCustomNameVisible(true);
