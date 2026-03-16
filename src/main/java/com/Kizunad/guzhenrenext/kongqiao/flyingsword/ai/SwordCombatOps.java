@@ -46,9 +46,12 @@ import net.minecraft.world.phys.Vec3;
  public final class SwordCombatOps {
  
      private static final String IMPRINT_PROC_DOMAIN_PREFIX = "imprint/";
- 
+
      private static final int DEFAULT_MOB_EFFECT_AMPLIFIER = 0;
      private static final int TIER_DURATION_TICKS_PER_LEVEL = 10;
+     private static final double BENMING_ATTACK_MULTIPLIER_BASE = 1.0D;
+     private static final double BENMING_ATTACK_BONUS_PER_RESONANCE = 0.10D;
+     private static final double BENMING_ATTACK_BONUS_CAP = 0.20D;
  
      private SwordCombatOps() {}
 
@@ -233,20 +236,34 @@ import net.minecraft.world.phys.Vec3;
     }
 
     public static float calculateDamage(
-         FlyingSwordEntity sword,
-         LivingEntity owner
-     ) {
+        FlyingSwordEntity sword,
+        LivingEntity owner
+    ) {
         FlyingSwordAttributes attrs = sword.getSwordAttributes();
+        float synergyAttackMultiplier = resolveClusterSynergyAttackMultiplier(sword, owner);
 
+        return calculateNormalAttackDamage(
+            attrs,
+            owner,
+            sword.getDeltaMovement().length(),
+            synergyAttackMultiplier
+        );
+    }
+
+    private static float calculateNormalAttackDamage(
+        FlyingSwordAttributes attrs,
+        LivingEntity owner,
+        double currentSpeed,
+        float synergyAttackMultiplier
+    ) {
         applyImprintPassiveMultipliers(attrs);
 
         // 获取有效伤害（包含品质、等级、临时修正）
         double baseDamage = attrs.getEffectiveDamage();
 
-
         // 速度加成（速度越快伤害越高）
         double speedRatio =
-            sword.getDeltaMovement().length() / attrs.getEffectiveSpeedMax();
+            currentSpeed / attrs.getEffectiveSpeedMax();
         double speedBonus =
             1.0 +
             Math.min(
@@ -254,9 +271,48 @@ import net.minecraft.world.phys.Vec3;
                 speedRatio * SwordGrowthTuning.SPEED_DAMAGE_BONUS_COEF
             );
 
-        float synergyAttackMultiplier = resolveClusterSynergyAttackMultiplier(sword, owner);
+        double benmingAttackMultiplier = resolveBenmingResonanceAttackMultiplier(attrs, owner);
 
-        return (float) (baseDamage * speedBonus * synergyAttackMultiplier);
+        return (float) (
+            baseDamage * speedBonus * benmingAttackMultiplier * synergyAttackMultiplier
+        );
+    }
+
+    private static double resolveBenmingResonanceAttackMultiplier(
+        FlyingSwordAttributes attrs,
+        LivingEntity owner
+    ) {
+        if (attrs == null || owner == null) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        FlyingSwordAttributes.BenmingSwordBond bond = attrs.getBond();
+        if (bond == null) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        String ownerUuid = bond.getOwnerUuid();
+        if (ownerUuid == null || ownerUuid.isBlank()) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+        if (!owner.getUUID().toString().equals(ownerUuid)) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        double resonance = bond.getResonance();
+        if (
+            resonance <= 0.0D ||
+            Double.isNaN(resonance) ||
+            Double.isInfinite(resonance)
+        ) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        double resonanceBonus = Math.min(
+            BENMING_ATTACK_BONUS_CAP,
+            Math.max(0.0D, resonance) * BENMING_ATTACK_BONUS_PER_RESONANCE
+        );
+        return BENMING_ATTACK_MULTIPLIER_BASE + resonanceBonus;
     }
 
     /**

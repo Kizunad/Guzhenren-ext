@@ -3,8 +3,11 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai.SwordAIMode;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordSelectionAttachment;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.effects.FlyingSwordEffects;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordBondService;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordResourceTransaction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -244,6 +247,145 @@ public final class FlyingSwordController {
         return nearest;
     }
 
+    public static BenmingSwordBondService.Result queryBenmingSword(
+        ServerLevel level,
+        ServerPlayer owner
+    ) {
+        if (level == null || owner == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.QUERY,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final List<BenmingSwordBondService.SwordBondPort> swords = toBondPorts(
+            getPlayerSwords(level, owner)
+        );
+        final BenmingSwordBondService.PlayerBondCachePort cache =
+            toBondCachePort(KongqiaoAttachments.getFlyingSwordState(owner));
+        return BenmingSwordBondService.queryBoundSword(
+            owner.getUUID().toString(),
+            swords,
+            cache,
+            level.getGameTime()
+        );
+    }
+
+    public static BenmingSwordBondService.Result bindSelectedOrNearestSwordAsBenming(
+        ServerLevel level,
+        ServerPlayer owner
+    ) {
+        if (level == null || owner == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.BIND,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        if (sword == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.BIND,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final List<BenmingSwordBondService.SwordBondPort> swords = toBondPorts(
+            getPlayerSwords(level, owner)
+        );
+        final BenmingSwordBondService.PlayerBondCachePort cache =
+            toBondCachePort(KongqiaoAttachments.getFlyingSwordState(owner));
+        return BenmingSwordBondService.bind(
+            owner.getUUID().toString(),
+            new EntitySwordBondPort(sword),
+            swords,
+            cache,
+            level.getGameTime()
+        );
+    }
+
+    public static BenmingSwordBondService.Result activeUnbindSelectedOrNearestBenmingSword(
+        ServerLevel level,
+        ServerPlayer owner
+    ) {
+        if (level == null || owner == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.ACTIVE_UNBIND,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        if (sword == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.ACTIVE_UNBIND,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final String ownerUuid = owner.getUUID().toString();
+        final String bondOwnerUuid = sword.getSwordAttributes().getBond().getOwnerUuid();
+        final String stableSwordId = sword.getSwordAttributes().getStableSwordId();
+        if (!ownerUuid.equals(bondOwnerUuid)) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.ACTIVE_UNBIND,
+                BenmingSwordBondService.FailureReason.TARGET_NOT_BOUND_TO_PLAYER,
+                stableSwordId
+            );
+        }
+
+        final BenmingSwordResourceTransaction.Result consumeResult =
+            BenmingSwordResourceTransaction.tryConsume(
+                owner,
+                BenmingSwordBondService.defaultActiveUnbindRequest()
+            );
+        final BenmingSwordBondService.PlayerBondCachePort cache =
+            toBondCachePort(KongqiaoAttachments.getFlyingSwordState(owner));
+        return BenmingSwordBondService.activeUnbind(
+            ownerUuid,
+            new EntitySwordBondPort(sword),
+            cache,
+            consumeResult,
+            level.getGameTime()
+        );
+    }
+
+    public static BenmingSwordBondService.Result forcedUnbindSelectedOrNearestBenmingSword(
+        ServerLevel level,
+        ServerPlayer owner
+    ) {
+        if (level == null || owner == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.FORCED_UNBIND,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        if (sword == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.FORCED_UNBIND,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final BenmingSwordBondService.PlayerBondCachePort cache =
+            toBondCachePort(KongqiaoAttachments.getFlyingSwordState(owner));
+        return BenmingSwordBondService.forcedUnbind(
+            owner.getUUID().toString(),
+            new EntitySwordBondPort(sword),
+            cache,
+            level.getGameTime()
+        );
+    }
+
     /**
      * 从存储中恢复一把飞剑（优先恢复最前面的可用项）。
      */
@@ -276,6 +418,11 @@ public final class FlyingSwordController {
                 FlyingSwordSpawner.restoreFromStorage(level, owner, rec);
             if (sword != null) {
                 storage.remove(i);
+                FlyingSwordStateAttachment state =
+                    KongqiaoAttachments.getFlyingSwordState(owner);
+                if (state != null) {
+                    state.markBondCacheDirty();
+                }
                 FlyingSwordSelectionAttachment selection =
                     KongqiaoAttachments.getFlyingSwordSelection(owner);
                 if (selection != null) {
@@ -328,6 +475,11 @@ public final class FlyingSwordController {
             if (sword != null) {
                 restored++;
                 storage.remove(i);
+                FlyingSwordStateAttachment state =
+                    KongqiaoAttachments.getFlyingSwordState(owner);
+                if (state != null) {
+                    state.markBondCacheDirty();
+                }
                 i--;
             }
         }
@@ -336,5 +488,126 @@ public final class FlyingSwordController {
             Component.literal("[飞剑] 已恢复飞剑: " + restored)
         );
         return restored;
+    }
+
+    private static List<BenmingSwordBondService.SwordBondPort> toBondPorts(
+        List<FlyingSwordEntity> swords
+    ) {
+        final List<BenmingSwordBondService.SwordBondPort> ports =
+            new ArrayList<>();
+        if (swords == null) {
+            return ports;
+        }
+        for (FlyingSwordEntity sword : swords) {
+            if (sword != null) {
+                ports.add(new EntitySwordBondPort(sword));
+            }
+        }
+        return ports;
+    }
+
+    private static BenmingSwordBondService.PlayerBondCachePort toBondCachePort(
+        FlyingSwordStateAttachment state
+    ) {
+        return new AttachmentBondCachePort(state);
+    }
+
+    private static final class EntitySwordBondPort
+        implements BenmingSwordBondService.SwordBondPort {
+
+        private final FlyingSwordEntity sword;
+
+        private EntitySwordBondPort(FlyingSwordEntity sword) {
+            this.sword = sword;
+        }
+
+        @Override
+        public String getStableSwordId() {
+            if (sword == null) {
+                return "";
+            }
+            return sword.getSwordAttributes().getStableSwordId();
+        }
+
+        @Override
+        public String getBondOwnerUuid() {
+            if (sword == null) {
+                return "";
+            }
+            return sword.getSwordAttributes().getBond().getOwnerUuid();
+        }
+
+        @Override
+        public double getBondResonance() {
+            if (sword == null) {
+                return 0.0D;
+            }
+            return sword.getSwordAttributes().getBond().getResonance();
+        }
+
+        @Override
+        public void setBondOwnerUuid(String ownerUuid) {
+            if (sword == null) {
+                return;
+            }
+            sword.getSwordAttributes().getBond().setOwnerUuid(ownerUuid);
+            sword.syncAttributesToEntityData();
+        }
+
+        @Override
+        public void setBondResonance(double resonance) {
+            if (sword == null) {
+                return;
+            }
+            sword.getSwordAttributes().getBond().setResonance(resonance);
+            sword.syncAttributesToEntityData();
+        }
+    }
+
+    private static final class AttachmentBondCachePort
+        implements BenmingSwordBondService.PlayerBondCachePort {
+
+        private final FlyingSwordStateAttachment state;
+
+        private AttachmentBondCachePort(FlyingSwordStateAttachment state) {
+            this.state = state;
+        }
+
+        @Override
+        public String getBondedSwordId() {
+            if (state == null) {
+                return "";
+            }
+            return state.getBondedSwordId();
+        }
+
+        @Override
+        public boolean isBondCacheDirty() {
+            return state == null || state.isBondCacheDirty();
+        }
+
+        @Override
+        public void updateBondCache(String stableSwordId, long resolvedTick) {
+            if (state == null) {
+                return;
+            }
+            state.updateBondCache(stableSwordId, resolvedTick);
+        }
+
+        @Override
+        public void markBondCacheDirty() {
+            if (state == null) {
+                return;
+            }
+            state.markBondCacheDirty();
+        }
+
+        @Override
+        public void clearBondCache() {
+            if (state == null) {
+                return;
+            }
+            state.clearBondCache();
+        }
     }
 }

@@ -4,6 +4,8 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntities;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.quality.SwordQuality;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -26,6 +28,7 @@ public class FlyingSwordSyncTests {
     private static final int ENTITY_RELATIVE_Z = 2;
     private static final int KING_QUALITY_LEVEL = 10;
     private static final int EXP_TO_ADD = 100;
+    private static final String OWNER_KEY = "Owner";
 
     /**
      * 测试：从 NBT 读取 Attributes 后，品质与等级应同步到实体读取接口。
@@ -74,6 +77,45 @@ public class FlyingSwordSyncTests {
         helper.assertTrue(
             sword.getSwordExperience() > 0,
             "调用 addExperience 后，飞剑经验应大于 0"
+        );
+
+        helper.succeed();
+    }
+
+    @GameTest(
+        template = "empty",
+        timeoutTicks = TEST_TIMEOUT_TICKS,
+        batch = "benming_sync_non_benming_regression"
+    )
+    public void testLegacyOwnerSyncShouldRemainStableWithoutBond(GameTestHelper helper) {
+        FlyingSwordEntity sword = createSwordInTestSpace(helper);
+        CompoundTag loadTag = new CompoundTag();
+        UUID legacyOwnerUuid = UUID.nameUUIDFromBytes(
+            "legacy_owner".getBytes(StandardCharsets.UTF_8)
+        );
+        loadTag.putUUID(OWNER_KEY, legacyOwnerUuid);
+
+        CompoundTag attributesTag = new FlyingSwordAttributes(
+            SwordQuality.KING,
+            KING_QUALITY_LEVEL
+        )
+            .toNBT();
+        attributesTag.remove("bond");
+        loadTag.put("Attributes", attributesTag);
+
+        sword.readAdditionalSaveData(loadTag);
+
+        helper.assertTrue(
+            legacyOwnerUuid.equals(sword.getOwnerUUID()),
+            "缺失 bond 的旧档读档后，Owner UUID 应与 legacy 写入值完全一致"
+        );
+        helper.assertTrue(
+            sword.getQuality() == SwordQuality.KING,
+            "缺失 bond 的旧档读档后，品质同步应保持旧行为"
+        );
+        helper.assertTrue(
+            sword.getSwordLevel() == KING_QUALITY_LEVEL,
+            "缺失 bond 的旧档读档后，等级同步应保持旧行为"
         );
 
         helper.succeed();

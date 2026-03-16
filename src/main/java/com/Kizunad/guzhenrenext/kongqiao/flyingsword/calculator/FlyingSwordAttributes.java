@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthData;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthTuning;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordStatCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.quality.SwordQuality;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 
@@ -43,6 +44,8 @@ public class FlyingSwordAttributes {
     private static final String TAG_MAX_DURABILITY = "MaxDurability";
     private static final String TAG_IMPRINT = "Imprint";
     private static final String TAG_SPIRIT_DATA = "SpiritData";
+    private static final String TAG_STABLE_SWORD_ID = "stableSwordId";
+    private static final String TAG_BOND = "bond";
 
     // ==================== 默认值（凡品1级） ====================
 
@@ -66,6 +69,12 @@ public class FlyingSwordAttributes {
 
     /** 剑灵数据（好感度、心情） */
     private final SwordSpiritData spiritData = new SwordSpiritData();
+
+    /** 飞剑稳定标识（规范主键，不依赖实体 UUID）。 */
+    private String stableSwordId = UUID.randomUUID().toString();
+
+    /** 本命绑定主状态（最小字段：ownerUuid + resonance）。 */
+    private final BenmingSwordBond bond = new BenmingSwordBond();
 
     // ==================== 运动属性 ====================
 
@@ -176,6 +185,18 @@ public class FlyingSwordAttributes {
      */
     public SwordSpiritData getSpiritData() {
         return spiritData;
+    }
+
+    public String getStableSwordId() {
+        return stableSwordId;
+    }
+
+    public void setStableSwordId(@Nullable String stableSwordId) {
+        this.stableSwordId = normalizeStableSwordId(stableSwordId);
+    }
+
+    public BenmingSwordBond getBond() {
+        return bond;
     }
 
     /**
@@ -433,6 +454,8 @@ public class FlyingSwordAttributes {
     public CompoundTag toNBT() {
         CompoundTag tag = new CompoundTag();
 
+        stableSwordId = normalizeStableSwordId(stableSwordId);
+
         // 成长数据
         tag.put(TAG_GROWTH_DATA, growthData.toNBT());
 
@@ -450,6 +473,9 @@ public class FlyingSwordAttributes {
 
         // 剑灵数据
         tag.put(TAG_SPIRIT_DATA, spiritData.toNBT());
+
+        tag.putString(TAG_STABLE_SWORD_ID, stableSwordId);
+        tag.put(TAG_BOND, bond.toNBT());
 
         if (!imprint.isEmpty()) {
             tag.put(TAG_IMPRINT, imprint.toNBT());
@@ -479,10 +505,22 @@ public class FlyingSwordAttributes {
 
         FlyingSwordAttributes attrs = new FlyingSwordAttributes(growthData);
 
-         // 读取当前耐久
-         if (tag.contains(TAG_DURABILITY)) {
-             attrs.durability = tag.getDouble(TAG_DURABILITY);
-         }
+        if (tag.contains(TAG_STABLE_SWORD_ID, net.minecraft.nbt.Tag.TAG_STRING)) {
+            attrs.stableSwordId = normalizeStableSwordId(
+                tag.getString(TAG_STABLE_SWORD_ID)
+            );
+        }
+
+        if (tag.contains(TAG_BOND, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+            attrs.bond.copyFrom(BenmingSwordBond.fromNBT(tag.getCompound(TAG_BOND)));
+        } else {
+            attrs.bond.resetToUnbound();
+        }
+
+        // 读取当前耐久
+        if (tag.contains(TAG_DURABILITY)) {
+            attrs.durability = tag.getDouble(TAG_DURABILITY);
+        }
 
         // 读取剑灵数据
         if (tag.contains(TAG_SPIRIT_DATA)) {
@@ -501,8 +539,8 @@ public class FlyingSwordAttributes {
                     .getMarks()
             );
         }
- 
-         return attrs;
+
+        return attrs;
     }
 
     /**
@@ -513,6 +551,20 @@ public class FlyingSwordAttributes {
     public void readFromNBT(@Nullable CompoundTag tag) {
         if (tag == null) {
             return;
+        }
+
+        if (tag.contains(TAG_STABLE_SWORD_ID, net.minecraft.nbt.Tag.TAG_STRING)) {
+            this.stableSwordId = normalizeStableSwordId(
+                tag.getString(TAG_STABLE_SWORD_ID)
+            );
+        } else {
+            this.stableSwordId = normalizeStableSwordId(this.stableSwordId);
+        }
+
+        if (tag.contains(TAG_BOND, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+            this.bond.copyFrom(BenmingSwordBond.fromNBT(tag.getCompound(TAG_BOND)));
+        } else {
+            this.bond.resetToUnbound();
         }
 
         // 读取成长数据
@@ -560,6 +612,73 @@ public class FlyingSwordAttributes {
      */
     public FlyingSwordAttributes copy() {
         return fromNBT(toNBT());
+    }
+
+    private static String normalizeStableSwordId(@Nullable String id) {
+        if (id == null || id.isBlank()) {
+            return UUID.randomUUID().toString();
+        }
+        return id;
+    }
+
+    public static class BenmingSwordBond {
+
+        private static final String TAG_OWNER_UUID = "ownerUuid";
+        private static final String TAG_RESONANCE = "resonance";
+
+        private String ownerUuid = "";
+        private double resonance = 0.0;
+
+        public String getOwnerUuid() {
+            return ownerUuid;
+        }
+
+        public void setOwnerUuid(@Nullable String ownerUuid) {
+            this.ownerUuid = ownerUuid == null ? "" : ownerUuid;
+        }
+
+        public double getResonance() {
+            return resonance;
+        }
+
+        public void setResonance(double resonance) {
+            this.resonance = resonance;
+        }
+
+        public void resetToUnbound() {
+            this.ownerUuid = "";
+            this.resonance = 0.0;
+        }
+
+        public void copyFrom(@Nullable BenmingSwordBond other) {
+            if (other == null) {
+                resetToUnbound();
+                return;
+            }
+            this.ownerUuid = other.ownerUuid;
+            this.resonance = other.resonance;
+        }
+
+        public CompoundTag toNBT() {
+            CompoundTag tag = new CompoundTag();
+            tag.putString(TAG_OWNER_UUID, ownerUuid);
+            tag.putDouble(TAG_RESONANCE, resonance);
+            return tag;
+        }
+
+        public static BenmingSwordBond fromNBT(@Nullable CompoundTag tag) {
+            BenmingSwordBond data = new BenmingSwordBond();
+            if (tag == null) {
+                return data;
+            }
+            if (tag.contains(TAG_OWNER_UUID, net.minecraft.nbt.Tag.TAG_STRING)) {
+                data.ownerUuid = tag.getString(TAG_OWNER_UUID);
+            }
+            if (tag.contains(TAG_RESONANCE)) {
+                data.resonance = tag.getDouble(TAG_RESONANCE);
+            }
+            return data;
+        }
     }
 
     /**
