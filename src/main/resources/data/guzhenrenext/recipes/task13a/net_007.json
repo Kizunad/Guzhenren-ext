@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:sweet_berries"
+    },
+    {
+      "item": "minecraft:cocoa_beans"
+    }
+  ],
+  "result": {
+    "id": "minecraft:feather",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "basic",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_006"
+    ],
+    "manifest_index": 7
+  }
+}

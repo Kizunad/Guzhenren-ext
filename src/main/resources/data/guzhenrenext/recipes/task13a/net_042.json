@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "item": "minecraft:turtle_scute"
+    }
+  ],
+  "result": {
+    "id": "minecraft:porkchop",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "advanced",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_032",
+      "guzhenrenext:task13a/net_041"
+    ],
+    "manifest_index": 42
+  }
+}

@@ -1,6 +1,16 @@
 package com.Kizunad.guzhenrenext.xianqiao.spirit;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.ApertureGuardianEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.CalamityBeastEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.DaoDevouringMiteEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.MimicSlimeEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.MutatedSpiritFoxEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.SacrificialSheepEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.StoneVeinSentinelEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.SymbioticSpiritBeeEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.TreasureMinkEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.deep.VoidWalkerEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -34,6 +44,26 @@ public final class XianqiaoEntities {
 
     /** 仙羊实体注册名。 */
     public static final String XIAN_SHEEP_ID = "xian_sheep";
+
+    public static final String TREASURE_MINK_ID = "treasure_mink";
+
+    public static final String MUTATED_SPIRIT_FOX_ID = "mutated_spirit_fox";
+
+    public static final String APERTURE_GUARDIAN_ID = "aperture_guardian";
+
+    public static final String SACRIFICIAL_SHEEP_ID = "sacrificial_sheep";
+
+    public static final String DAO_DEVOURING_MITE_ID = "dao_devouring_mite";
+
+    public static final String STONE_VEIN_SENTINEL_ID = "stone_vein_sentinel";
+
+    public static final String MIMIC_SLIME_ID = "mimic_slime";
+
+    public static final String VOID_WALKER_ID = "void_walker";
+
+    public static final String CALAMITY_BEAST_ID = "calamity_beast";
+
+    public static final String SYMBIOTIC_SPIRIT_BEE_ID = "symbiotic_spirit_bee";
 
     /** 地灵实体宽度。 */
     private static final float LAND_SPIRIT_WIDTH = 0.6F;
@@ -79,6 +109,25 @@ public final class XianqiaoEntities {
 
     /** 仙羊高度（与原版羊一致）。 */
     private static final float XIAN_SHEEP_HEIGHT = 1.3F;
+
+    private static final int DEEP_CREATURE_TRACKING_RANGE = 10;
+
+    private static final float FOX_WIDTH = 0.6F;
+    private static final float FOX_HEIGHT = 0.7F;
+    private static final float GOLEM_WIDTH = 1.4F;
+    private static final float GOLEM_HEIGHT = 2.7F;
+    private static final float ENDERMITE_WIDTH = 0.4F;
+    private static final float ENDERMITE_HEIGHT = 0.3F;
+    private static final float SNOW_GOLEM_WIDTH = 0.7F;
+    private static final float SNOW_GOLEM_HEIGHT = 1.9F;
+    private static final float SLIME_WIDTH = 0.8F;
+    private static final float SLIME_HEIGHT = 0.8F;
+    private static final float ENDERMAN_WIDTH = 0.6F;
+    private static final float ENDERMAN_HEIGHT = 2.9F;
+    private static final float RAVAGER_WIDTH = 1.95F;
+    private static final float RAVAGER_HEIGHT = 2.2F;
+    private static final float BEE_WIDTH = 0.7F;
+    private static final float BEE_HEIGHT = 0.6F;
 
     private XianqiaoEntities() {
     }
@@ -174,6 +223,136 @@ public final class XianqiaoEntities {
                     )
         );
 
+    public static final DeferredHolder<EntityType<?>, EntityType<TreasureMinkEntity>> TREASURE_MINK =
+        ENTITY_TYPES.register(
+            TREASURE_MINK_ID,
+            () ->
+                EntityType.Builder
+                    .<TreasureMinkEntity>of(TreasureMinkEntity::new, MobCategory.CREATURE)
+                    .sized(FOX_WIDTH, FOX_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, TREASURE_MINK_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<MutatedSpiritFoxEntity>> MUTATED_SPIRIT_FOX =
+        ENTITY_TYPES.register(
+            MUTATED_SPIRIT_FOX_ID,
+            () ->
+                EntityType.Builder
+                    .<MutatedSpiritFoxEntity>of(MutatedSpiritFoxEntity::new, MobCategory.CREATURE)
+                    .sized(FOX_WIDTH, FOX_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, MUTATED_SPIRIT_FOX_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<ApertureGuardianEntity>> APERTURE_GUARDIAN =
+        ENTITY_TYPES.register(
+            APERTURE_GUARDIAN_ID,
+            () ->
+                EntityType.Builder
+                    .<ApertureGuardianEntity>of(ApertureGuardianEntity::new, MobCategory.MONSTER)
+                    .sized(GOLEM_WIDTH, GOLEM_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, APERTURE_GUARDIAN_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<SacrificialSheepEntity>> SACRIFICIAL_SHEEP =
+        ENTITY_TYPES.register(
+            SACRIFICIAL_SHEEP_ID,
+            () ->
+                EntityType.Builder
+                    .<SacrificialSheepEntity>of(SacrificialSheepEntity::new, MobCategory.CREATURE)
+                    .sized(XIAN_SHEEP_WIDTH, XIAN_SHEEP_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, SACRIFICIAL_SHEEP_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<DaoDevouringMiteEntity>> DAO_DEVOURING_MITE =
+        ENTITY_TYPES.register(
+            DAO_DEVOURING_MITE_ID,
+            () ->
+                EntityType.Builder
+                    .<DaoDevouringMiteEntity>of(DaoDevouringMiteEntity::new, MobCategory.MONSTER)
+                    .sized(ENDERMITE_WIDTH, ENDERMITE_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, DAO_DEVOURING_MITE_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<StoneVeinSentinelEntity>> STONE_VEIN_SENTINEL =
+        ENTITY_TYPES.register(
+            STONE_VEIN_SENTINEL_ID,
+            () ->
+                EntityType.Builder
+                    .<StoneVeinSentinelEntity>of(StoneVeinSentinelEntity::new, MobCategory.CREATURE)
+                    .sized(SNOW_GOLEM_WIDTH, SNOW_GOLEM_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, STONE_VEIN_SENTINEL_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<MimicSlimeEntity>> MIMIC_SLIME =
+        ENTITY_TYPES.register(
+            MIMIC_SLIME_ID,
+            () ->
+                EntityType.Builder
+                    .<MimicSlimeEntity>of(MimicSlimeEntity::new, MobCategory.MONSTER)
+                    .sized(SLIME_WIDTH, SLIME_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, MIMIC_SLIME_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<VoidWalkerEntity>> VOID_WALKER =
+        ENTITY_TYPES.register(
+            VOID_WALKER_ID,
+            () ->
+                EntityType.Builder
+                    .<VoidWalkerEntity>of(VoidWalkerEntity::new, MobCategory.MONSTER)
+                    .sized(ENDERMAN_WIDTH, ENDERMAN_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, VOID_WALKER_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<CalamityBeastEntity>> CALAMITY_BEAST =
+        ENTITY_TYPES.register(
+            CALAMITY_BEAST_ID,
+            () ->
+                EntityType.Builder
+                    .<CalamityBeastEntity>of(CalamityBeastEntity::new, MobCategory.MONSTER)
+                    .sized(RAVAGER_WIDTH, RAVAGER_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, CALAMITY_BEAST_ID).toString()
+                    )
+        );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<SymbioticSpiritBeeEntity>> SYMBIOTIC_SPIRIT_BEE =
+        ENTITY_TYPES.register(
+            SYMBIOTIC_SPIRIT_BEE_ID,
+            () ->
+                EntityType.Builder
+                    .<SymbioticSpiritBeeEntity>of(SymbioticSpiritBeeEntity::new, MobCategory.CREATURE)
+                    .sized(BEE_WIDTH, BEE_HEIGHT)
+                    .clientTrackingRange(DEEP_CREATURE_TRACKING_RANGE)
+                    .build(
+                        ResourceLocation.fromNamespaceAndPath(GuzhenrenExt.MODID, SYMBIOTIC_SPIRIT_BEE_ID).toString()
+                    )
+        );
+
     /**
     * 注册实体类型。
     *
@@ -204,6 +383,31 @@ public final class XianqiaoEntities {
             event.put(XIAN_COW.get(), Cow.createAttributes().build());
             event.put(XIAN_CHICKEN.get(), Chicken.createAttributes().build());
             event.put(XIAN_SHEEP.get(), Sheep.createAttributes().build());
+            event.put(TREASURE_MINK.get(), net.minecraft.world.entity.animal.Fox.createAttributes().build());
+            event.put(
+                MUTATED_SPIRIT_FOX.get(),
+                net.minecraft.world.entity.animal.Fox.createAttributes().build()
+            );
+            event.put(
+                APERTURE_GUARDIAN.get(),
+                net.minecraft.world.entity.animal.IronGolem.createAttributes().build()
+            );
+            event.put(SACRIFICIAL_SHEEP.get(), Sheep.createAttributes().build());
+            event.put(
+                DAO_DEVOURING_MITE.get(),
+                net.minecraft.world.entity.monster.Endermite.createAttributes().build()
+            );
+            event.put(
+                STONE_VEIN_SENTINEL.get(),
+                net.minecraft.world.entity.animal.SnowGolem.createAttributes().build()
+            );
+            event.put(MIMIC_SLIME.get(), net.minecraft.world.entity.Mob.createMobAttributes().build());
+            event.put(VOID_WALKER.get(), net.minecraft.world.entity.monster.EnderMan.createAttributes().build());
+            event.put(CALAMITY_BEAST.get(), net.minecraft.world.entity.monster.Ravager.createAttributes().build());
+            event.put(
+                SYMBIOTIC_SPIRIT_BEE.get(),
+                net.minecraft.world.entity.animal.Bee.createAttributes().build()
+            );
         }
     }
 }

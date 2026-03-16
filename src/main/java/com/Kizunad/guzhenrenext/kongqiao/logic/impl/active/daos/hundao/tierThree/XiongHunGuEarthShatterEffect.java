@@ -62,8 +62,8 @@ public class XiongHunGuEarthShatterEffect implements IGuEffect {
 
     private static final ResourceLocation BEAR_PHANTOM_TEXTURE =
         ResourceLocation.fromNamespaceAndPath(
-            GuzhenrenExt.MODID,
-            "textures/effects/bear_phantom.png"
+            "minecraft",
+            "textures/block/stone.png"
         );
 
     private static final float BEAR_PHANTOM_ASPECT = 1365.0F / 768.0F;

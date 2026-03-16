@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "guzhenrenext:item/storage_gu"
+    "layer0": "minecraft:item/iron_ingot"
   }
 }

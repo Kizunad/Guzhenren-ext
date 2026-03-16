@@ -72,6 +72,8 @@ public class ApertureWorldData extends SavedData {
 
     private static final float DEFAULT_TIME_SPEED = 1.0F;
 
+    private static final float MIN_TIME_SPEED = 0.05F;
+
     private static final int DAY_TICKS = 24000;
 
     private static final int TRIBULATION_CYCLE_DAYS = 20;
@@ -302,6 +304,49 @@ public class ApertureWorldData extends SavedData {
             existing.nextTribulationTick(),
             existing.isFrozen(),
             clampedFavorability,
+            existing.tier()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    public void updateTimeSpeed(UUID owner, float newTimeSpeed) {
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        float normalizedTimeSpeed = Math.max(MIN_TIME_SPEED, newTimeSpeed);
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            existing.minChunkX(),
+            existing.maxChunkX(),
+            existing.minChunkZ(),
+            existing.maxChunkZ(),
+            normalizedTimeSpeed,
+            existing.nextTribulationTick(),
+            existing.isFrozen(),
+            existing.favorability(),
+            existing.tier()
+        );
+        apertures.put(owner, updated);
+        setDirty();
+    }
+
+    public void updateFrozen(UUID owner, boolean frozen) {
+        ApertureInfo existing = apertures.get(owner);
+        if (existing == null) {
+            return;
+        }
+        ApertureInfo updated = new ApertureInfo(
+            existing.center(),
+            existing.minChunkX(),
+            existing.maxChunkX(),
+            existing.minChunkZ(),
+            existing.maxChunkZ(),
+            existing.timeSpeed(),
+            existing.nextTribulationTick(),
+            frozen,
+            existing.favorability(),
             existing.tier()
         );
         apertures.put(owner, updated);

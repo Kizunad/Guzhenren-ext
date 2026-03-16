@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:porkchop"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "id": "minecraft:wheat",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "basic",
+    "prerequisite_recipe_ids": [],
+    "manifest_index": 1
+  }
+}

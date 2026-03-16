@@ -90,6 +90,9 @@ public final class OverworldTerrainSampler {
     /** chunk 边长常量，用于坐标对齐。 */
     private static final int CHUNK_SIZE = 16;
 
+    /** 固定采样总高度（含底层与顶层，闭区间）。 */
+    private static final int FIXED_SAMPLE_HEIGHT = SAMPLE_Y_BELOW_SURFACE + SAMPLE_Y_ABOVE_SURFACE + 1;
+
     private OverworldTerrainSampler() {
     }
 
@@ -166,27 +169,36 @@ public final class OverworldTerrainSampler {
 
         int alignedSourceMinX = alignToChunkMin(sourceAnchor.getX());
         int alignedSourceMinZ = alignToChunkMin(sourceAnchor.getZ());
-        int centerX = alignedSourceMinX + CHUNK_SIZE / 2;
-        int centerZ = alignedSourceMinZ + CHUNK_SIZE / 2;
-        int surfaceY = overworldLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centerX, centerZ) - 1;
+        int sourceMinY;
+        int sourceMaxY;
+        if (explicitSourceAnchor != null) {
+            // 显式源锚点模式：保持底层锚点与固定窗口高度，避免动态修正导致底层替换不稳定。
+            sourceMinY = Math.max(overworldLevel.getMinBuildHeight(), sourceAnchor.getY());
+            sourceMaxY = Math.min(overworldLevel.getMaxBuildHeight() - 1, sourceMinY + FIXED_SAMPLE_HEIGHT - 1);
+        } else {
+            int centerX = alignedSourceMinX + CHUNK_SIZE / 2;
+            int centerZ = alignedSourceMinZ + CHUNK_SIZE / 2;
+            int surfaceY = overworldLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centerX, centerZ) - 1;
 
-        int sourceMinY = Math.max(overworldLevel.getMinBuildHeight(), surfaceY - SAMPLE_Y_BELOW_SURFACE);
-        int sourceMaxY = Math.min(overworldLevel.getMaxBuildHeight() - 1, surfaceY + SAMPLE_Y_ABOVE_SURFACE);
-        if (sourceMinY > sourceMaxY) {
-            return false;
+            sourceMinY = Math.max(overworldLevel.getMinBuildHeight(), surfaceY - SAMPLE_Y_BELOW_SURFACE);
+            sourceMaxY = Math.min(overworldLevel.getMaxBuildHeight() - 1, surfaceY + SAMPLE_Y_ABOVE_SURFACE);
+            if (sourceMinY > sourceMaxY) {
+                return false;
+            }
+
+            if (isSampleTooSparse(overworldLevel, alignedSourceMinX, alignedSourceMinZ, sourceMinY, sourceMaxY)) {
+                sourceMinY = Math.max(overworldLevel.getMinBuildHeight(), sourceMinY - LOW_DENSITY_EXTRA_DOWN_LAYERS);
+            }
+
+            sourceMinY = liftBottomUntilNoBedrock(
+                overworldLevel,
+                alignedSourceMinX,
+                alignedSourceMinZ,
+                sourceMinY,
+                sourceMaxY
+            );
         }
 
-        if (isSampleTooSparse(overworldLevel, alignedSourceMinX, alignedSourceMinZ, sourceMinY, sourceMaxY)) {
-            sourceMinY = Math.max(overworldLevel.getMinBuildHeight(), sourceMinY - LOW_DENSITY_EXTRA_DOWN_LAYERS);
-        }
-
-        sourceMinY = liftBottomUntilNoBedrock(
-            overworldLevel,
-            alignedSourceMinX,
-            alignedSourceMinZ,
-            sourceMinY,
-            sourceMaxY
-        );
         if (sourceMinY > sourceMaxY) {
             return false;
         }

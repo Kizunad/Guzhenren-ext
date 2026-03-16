@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:glowstone_dust"
+    },
+    {
+      "item": "minecraft:feather"
+    }
+  ],
+  "result": {
+    "id": "minecraft:blaze_powder",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "basic",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_004"
+    ],
+    "manifest_index": 5
+  }
+}
