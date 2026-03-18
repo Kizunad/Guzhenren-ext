@@ -6,8 +6,12 @@ import com.Kizunad.guzhenrenext.client.gui.SkillWheelScreen;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.TweakScreen;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHudState;
 import com.Kizunad.guzhenrenext.network.PacketOpenNianTouGui;
+import com.Kizunad.guzhenrenext.network.ServerboundBenmingSwordActionPayload;
 import com.Kizunad.guzhenrenext.network.ServerboundFlyingSwordActionPayload;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -106,9 +110,78 @@ public final class GuClientEvents {
             );
         }
 
+        while (GuKeyBindings.FLYING_SWORD_BENMING_ACTION.consumeClick()) {
+            PacketDistributor.sendToServer(resolveBenmingActionPayload());
+        }
+
         // 切换飞剑 HUD 显示
         while (GuKeyBindings.FLYING_SWORD_TOGGLE_HUD.consumeClick()) {
             FlyingSwordHudState.toggleHud();
         }
+    }
+
+    static ServerboundBenmingSwordActionPayload resolveBenmingActionPayload() {
+        return BenmingClientActionResolver.createPayload(
+            Screen.hasShiftDown(),
+            Screen.hasControlDown()
+        );
+    }
+}
+
+final class BenmingClientActionResolver {
+
+    private BenmingClientActionResolver() {}
+
+    static String resolveActionName(final boolean shiftDown, final boolean controlDown) {
+        if (controlDown) {
+            return "BURST_ATTEMPT";
+        }
+        if (shiftDown) {
+            return "SWITCH_RESONANCE";
+        }
+        return "RITUAL_BIND";
+    }
+
+    static ServerboundBenmingSwordActionPayload createPayload(
+        final boolean shiftDown,
+        final boolean controlDown
+    ) {
+        return createPayload(resolveActionName(shiftDown, controlDown));
+    }
+
+    private static ServerboundBenmingSwordActionPayload createPayload(
+        final String actionName
+    ) {
+        try {
+            final Class<?> actionClass = Class.forName(
+                "com.Kizunad.guzhenrenext.network.BenmingAction"
+            );
+            final Constructor<ServerboundBenmingSwordActionPayload> constructor =
+                resolvePayloadConstructor(actionClass);
+            return constructor.newInstance(resolveActionConstant(actionClass, actionName));
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("无法构造本命动作数据包: " + actionName, exception);
+        }
+    }
+
+    private static Constructor<ServerboundBenmingSwordActionPayload> resolvePayloadConstructor(
+        final Class<?> actionClass
+    ) throws NoSuchMethodException {
+        final Constructor<ServerboundBenmingSwordActionPayload> constructor =
+            ServerboundBenmingSwordActionPayload.class.getDeclaredConstructor(actionClass);
+        constructor.setAccessible(true);
+        return constructor;
+    }
+
+    private static Object resolveActionConstant(
+        final Class<?> actionClass,
+        final String actionName
+    ) throws ReflectiveOperationException {
+        final Method valueOfMethod = Enum.class.getMethod(
+            "valueOf",
+            Class.class,
+            String.class
+        );
+        return valueOfMethod.invoke(null, actionClass.asSubclass(Enum.class), actionName);
     }
 }

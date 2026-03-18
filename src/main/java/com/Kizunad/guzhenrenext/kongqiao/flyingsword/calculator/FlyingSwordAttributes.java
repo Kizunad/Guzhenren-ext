@@ -1,10 +1,13 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator;
 
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordExpCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthData;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordGrowthTuning;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.growth.SwordStatCalculator;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.quality.SwordQuality;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -113,6 +116,56 @@ public class FlyingSwordAttributes {
 
     /** 伤害临时倍率 */
     private transient double damageMultiplier = 1.0;
+
+    /**
+     * 共鸣战斗映射最小冷却。
+     * <p>
+     * 说明：即便攻相提供追击/追打优势，也不能把冷却压到 0，避免出现异常高频攻击。
+     * </p>
+     */
+    private static final int RESONANCE_MIN_ATTACK_COOLDOWN_TICKS = 1;
+
+    /** 召回稳定性速度下限，避免极低速时出现除零或不稳定结果。 */
+    private static final double RECALL_STABILITY_SPEED_FLOOR = 0.05D;
+
+    /**
+     * 缺省共鸣档位。
+     * <p>
+     * 对应“未缔结 / 未同步 / 未知分型”场景，所有倍率均保持基线，确保旧档与异常输入安全回退。
+     * </p>
+     */
+    private static final ResonanceMappedProfile BASELINE_RESONANCE_PROFILE =
+        new ResonanceMappedProfile(1.0D, 1.0D, 1.0D, 1.0D, 1.0D, 1.0D);
+
+    private static final double OFFENSE_DAMAGE_MULTIPLIER = 1.22D;
+    private static final double OFFENSE_SPEED_MULTIPLIER = 1.08D;
+    private static final double OFFENSE_PURSUIT_SPEED_MULTIPLIER = 1.12D;
+    private static final double OFFENSE_ATTACK_COOLDOWN_MULTIPLIER = 0.86D;
+    private static final double OFFENSE_GUARD_DURABILITY_COST_MULTIPLIER = 1.18D;
+    private static final double OFFENSE_RECALL_STABILITY_MULTIPLIER = 0.88D;
+
+    private static final double DEFENSE_DAMAGE_MULTIPLIER = 0.92D;
+    private static final double DEFENSE_SPEED_MULTIPLIER = 0.94D;
+    private static final double DEFENSE_PURSUIT_SPEED_MULTIPLIER = 0.90D;
+    private static final double DEFENSE_ATTACK_COOLDOWN_MULTIPLIER = 1.12D;
+    private static final double DEFENSE_GUARD_DURABILITY_COST_MULTIPLIER = 0.82D;
+    private static final double DEFENSE_RECALL_STABILITY_MULTIPLIER = 1.20D;
+
+    private static final double SPIRIT_DAMAGE_MULTIPLIER = 1.05D;
+    private static final double SPIRIT_SPEED_MULTIPLIER = 1.06D;
+    private static final double SPIRIT_PURSUIT_SPEED_MULTIPLIER = 1.08D;
+    private static final double SPIRIT_ATTACK_COOLDOWN_MULTIPLIER = 0.95D;
+    private static final double SPIRIT_GUARD_DURABILITY_COST_MULTIPLIER = 0.95D;
+    private static final double SPIRIT_RECALL_STABILITY_MULTIPLIER = 1.10D;
+
+    /**
+     * 三相共鸣统一映射表。
+     * <p>
+     * 这里集中定义“手感差异”倍率，避免 Combat/HUD/调用方各自硬编码分型逻辑。
+     * </p>
+     */
+    private static final Map<FlyingSwordResonanceType, ResonanceMappedProfile>
+        RESONANCE_PROFILE_MAP = createResonanceProfileMap();
 
     private final com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprint imprint =
         new com.Kizunad.guzhenrenext.kongqiao.flyingsword.imprint.FlyingSwordImprint();
@@ -338,6 +391,161 @@ public class FlyingSwordAttributes {
     public double getEffectiveDamage() {
         return damage * damageMultiplier;
     }
+
+    /**
+     * 获取带共鸣映射的有效伤害。
+     *
+     * @param resonanceRaw 共鸣原始字符串（可为空/未知）
+     * @return 最终伤害值（含既有 multiplier + 三相映射）
+     */
+    public double getEffectiveDamage(@Nullable String resonanceRaw) {
+        ResonanceMappedProfile profile = resolveResonanceProfile(resonanceRaw);
+        return getEffectiveDamage() * profile.damageMultiplier();
+    }
+
+    /**
+     * 获取带共鸣映射的有效速度上限。
+     *
+     * @param resonanceRaw 共鸣原始字符串（可为空/未知）
+     * @return 最终速度上限（含既有 multiplier + 三相映射）
+     */
+    public double getEffectiveSpeedMax(@Nullable String resonanceRaw) {
+        ResonanceMappedProfile profile = resolveResonanceProfile(resonanceRaw);
+        return getEffectiveSpeedMax() * profile.speedMultiplier();
+    }
+
+    /**
+     * 获取带共鸣映射的追击速度。
+     * <p>
+     * 语义：用于战斗追击段落的速度倾向，和一般巡航速度区分开。
+     * </p>
+     *
+     * @param resonanceRaw 共鸣原始字符串（可为空/未知）
+     * @return 最终追击速度
+     */
+    public double getEffectivePursuitSpeed(@Nullable String resonanceRaw) {
+        ResonanceMappedProfile profile = resolveResonanceProfile(resonanceRaw);
+        return getEffectiveSpeedMax(resonanceRaw) * profile.pursuitSpeedMultiplier();
+    }
+
+    /**
+     * 获取带共鸣映射的攻击冷却。
+     * <p>
+     * 攻相更偏追打（冷却更短），御相偏稳守（冷却更长），灵相居中。
+     * </p>
+     *
+     * @param resonanceRaw 共鸣原始字符串（可为空/未知）
+     * @return 映射后的攻击冷却 tick
+     */
+    public int getEffectiveAttackCooldown(@Nullable String resonanceRaw) {
+        ResonanceMappedProfile profile = resolveResonanceProfile(resonanceRaw);
+        long mapped = Math.round(attackCooldown * profile.attackCooldownMultiplier());
+        return (int) Math.max(RESONANCE_MIN_ATTACK_COOLDOWN_TICKS, mapped);
+    }
+
+    /**
+     * 获取护持耐久消耗倍率。
+     * <p>
+     * 倍率越低表示越“扛打”（同样护持动作消耗更少耐久），倍率越高表示更激进易损。
+     * </p>
+     *
+     * @param resonanceRaw 共鸣原始字符串（可为空/未知）
+     * @return 护持耐久消耗倍率
+     */
+    public double getGuardDurabilityCostMultiplier(@Nullable String resonanceRaw) {
+        return resolveResonanceProfile(resonanceRaw).guardDurabilityCostMultiplier();
+    }
+
+    /**
+     * 根据护持倍率计算实际耐久消耗。
+     *
+     * @param baseCost     基础消耗
+     * @param resonanceRaw 共鸣原始字符串（可为空/未知）
+     * @return 映射后耐久消耗（负值输入会回退为 0）
+     */
+    public double mapGuardDurabilityCost(double baseCost, @Nullable String resonanceRaw) {
+        double normalized = Math.max(0.0D, baseCost);
+        return normalized * getGuardDurabilityCostMultiplier(resonanceRaw);
+    }
+
+    /**
+     * 获取召回稳定性分值。
+     * <p>
+     * 基线由当前转向能力与速度比值构成，再叠加三相修正。
+     * 分值越高表示召回时更稳，更不容易出现“高速甩尾”手感。
+     * </p>
+     *
+     * @param resonanceRaw 共鸣原始字符串（可为空/未知）
+     * @return 召回稳定性分值（非负）
+     */
+    public double getRecallStabilityScore(@Nullable String resonanceRaw) {
+        ResonanceMappedProfile profile = resolveResonanceProfile(resonanceRaw);
+        double baseStability = Math.max(0.0D, turnRate)
+            * Math.max(0.0D, getEffectiveSpeedBase())
+            / Math.max(RECALL_STABILITY_SPEED_FLOOR, getEffectiveSpeedMax());
+        return baseStability * profile.recallStabilityMultiplier();
+    }
+
+    private static ResonanceMappedProfile resolveResonanceProfile(@Nullable String resonanceRaw) {
+        return FlyingSwordResonanceType.resolve(resonanceRaw)
+            .map(type -> RESONANCE_PROFILE_MAP.getOrDefault(type, BASELINE_RESONANCE_PROFILE))
+            .orElse(BASELINE_RESONANCE_PROFILE);
+    }
+
+    private static Map<FlyingSwordResonanceType, ResonanceMappedProfile> createResonanceProfileMap() {
+        EnumMap<FlyingSwordResonanceType, ResonanceMappedProfile> map =
+            new EnumMap<>(FlyingSwordResonanceType.class);
+
+        // 攻（烈）：强化输出与追击节奏，但牺牲护持/召回稳定性。
+        map.put(
+            FlyingSwordResonanceType.OFFENSE,
+            new ResonanceMappedProfile(
+                OFFENSE_DAMAGE_MULTIPLIER,
+                OFFENSE_SPEED_MULTIPLIER,
+                OFFENSE_PURSUIT_SPEED_MULTIPLIER,
+                OFFENSE_ATTACK_COOLDOWN_MULTIPLIER,
+                OFFENSE_GUARD_DURABILITY_COST_MULTIPLIER,
+                OFFENSE_RECALL_STABILITY_MULTIPLIER
+            )
+        );
+
+        // 御（稳）：强化护持与召回稳定，牺牲一部分伤害与压制节奏。
+        map.put(
+            FlyingSwordResonanceType.DEFENSE,
+            new ResonanceMappedProfile(
+                DEFENSE_DAMAGE_MULTIPLIER,
+                DEFENSE_SPEED_MULTIPLIER,
+                DEFENSE_PURSUIT_SPEED_MULTIPLIER,
+                DEFENSE_ATTACK_COOLDOWN_MULTIPLIER,
+                DEFENSE_GUARD_DURABILITY_COST_MULTIPLIER,
+                DEFENSE_RECALL_STABILITY_MULTIPLIER
+            )
+        );
+
+        // 灵（巧）：偏机动与效率的中间档，兼顾追击与稳定。
+        map.put(
+            FlyingSwordResonanceType.SPIRIT,
+            new ResonanceMappedProfile(
+                SPIRIT_DAMAGE_MULTIPLIER,
+                SPIRIT_SPEED_MULTIPLIER,
+                SPIRIT_PURSUIT_SPEED_MULTIPLIER,
+                SPIRIT_ATTACK_COOLDOWN_MULTIPLIER,
+                SPIRIT_GUARD_DURABILITY_COST_MULTIPLIER,
+                SPIRIT_RECALL_STABILITY_MULTIPLIER
+            )
+        );
+
+        return map;
+    }
+
+    private record ResonanceMappedProfile(
+        double damageMultiplier,
+        double speedMultiplier,
+        double pursuitSpeedMultiplier,
+        double attackCooldownMultiplier,
+        double guardDurabilityCostMultiplier,
+        double recallStabilityMultiplier
+    ) {}
 
     // ==================== 临时修正操作 ====================
 

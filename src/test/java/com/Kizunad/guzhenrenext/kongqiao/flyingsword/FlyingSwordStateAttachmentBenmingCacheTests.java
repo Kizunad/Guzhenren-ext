@@ -25,7 +25,35 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
     private static final String BONDED_SWORD_ID_KEY = "BondedSwordId";
     private static final String BOND_CACHE_DIRTY_KEY = "BondCacheDirty";
     private static final String LAST_RESOLVED_TICK_KEY = "LastResolvedTick";
+    private static final String RESONANCE_TYPE_KEY = "ResonanceType";
+    private static final String OVERLOAD_KEY = "Overload";
+    private static final String BURST_COOLDOWN_UNTIL_TICK_KEY = "BurstCooldownUntilTick";
+    private static final String BURST_ACTIVE_UNTIL_TICK_KEY = "BurstActiveUntilTick";
+    private static final String BURST_AFTERSHOCK_UNTIL_TICK_KEY =
+        "BurstAftershockUntilTick";
+    private static final String RITUAL_LOCK_UNTIL_TICK_KEY = "RitualLockUntilTick";
+    private static final String RESONANCE_LEVEL_KEY = "ResonanceLevel";
+    private static final String LAST_OVERLOAD_TICK_KEY = "LastOverloadTick";
+    private static final String OVERLOAD_BACKLASH_UNTIL_TICK_KEY =
+        "OverloadBacklashUntilTick";
+    private static final String OVERLOAD_RECOVERY_UNTIL_TICK_KEY =
+        "OverloadRecoveryUntilTick";
+    private static final String LAST_COMBAT_TICK_KEY = "LastCombatTick";
     private static final String CACHE_SWORD_ID = "benming-cache-stable-sword-01";
+    private static final String RESONANCE_TYPE = "sword-fire";
+    private static final double OVERLOAD = 12.5D;
+    private static final long BURST_COOLDOWN_UNTIL_TICK = 5678L;
+    private static final long BURST_ACTIVE_UNTIL_TICK = 5789L;
+    private static final long BURST_AFTERSHOCK_UNTIL_TICK = 5890L;
+    private static final long RITUAL_LOCK_UNTIL_TICK = 6789L;
+    private static final int RESONANCE_LEVEL = 3;
+    private static final long LAST_OVERLOAD_TICK = 3456L;
+    private static final long OVERLOAD_BACKLASH_UNTIL_TICK = 7890L;
+    private static final long OVERLOAD_RECOVERY_UNTIL_TICK = 7999L;
+    private static final long LAST_COMBAT_TICK = 8123L;
+    private static final double DEFAULT_OVERLOAD = 0.0D;
+    private static final long DEFAULT_NON_NEGATIVE_TICK = 0L;
+    private static final int DEFAULT_RESONANCE_LEVEL = 0;
     private static final String CACHE_ONLY_KEY_BOND = "bond";
     private static final String CACHE_ONLY_KEY_OWNER_UUID = "ownerUuid";
     private static final String CACHE_ONLY_KEY_RESONANCE = "resonance";
@@ -46,12 +74,34 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
         final Object state = api.newAttachment();
         api.setInitialized(state, true);
         api.updateBondCache(state, CACHE_SWORD_ID, RESOLVED_TICK);
+        api.setResonanceType(state, RESONANCE_TYPE);
+        api.setOverload(state, OVERLOAD);
+        api.setBurstCooldownUntilTick(state, BURST_COOLDOWN_UNTIL_TICK);
+        api.setBurstActiveUntilTick(state, BURST_ACTIVE_UNTIL_TICK);
+        api.setBurstAftershockUntilTick(state, BURST_AFTERSHOCK_UNTIL_TICK);
+        api.setRitualLockUntilTick(state, RITUAL_LOCK_UNTIL_TICK);
+        api.setResonanceLevel(state, RESONANCE_LEVEL);
+        api.setLastOverloadTick(state, LAST_OVERLOAD_TICK);
+        api.setOverloadBacklashUntilTick(state, OVERLOAD_BACKLASH_UNTIL_TICK);
+        api.setOverloadRecoveryUntilTick(state, OVERLOAD_RECOVERY_UNTIL_TICK);
+        api.setLastCombatTick(state, LAST_COMBAT_TICK);
 
         final Object serialized = api.serialize(state);
         assertTrue(api.contains(serialized, INITIALIZED_KEY));
         assertTrue(api.contains(serialized, BONDED_SWORD_ID_KEY));
         assertTrue(api.contains(serialized, BOND_CACHE_DIRTY_KEY));
         assertTrue(api.contains(serialized, LAST_RESOLVED_TICK_KEY));
+        assertTrue(api.contains(serialized, RESONANCE_TYPE_KEY));
+        assertTrue(api.contains(serialized, OVERLOAD_KEY));
+        assertTrue(api.contains(serialized, BURST_COOLDOWN_UNTIL_TICK_KEY));
+        assertTrue(api.contains(serialized, BURST_ACTIVE_UNTIL_TICK_KEY));
+        assertTrue(api.contains(serialized, BURST_AFTERSHOCK_UNTIL_TICK_KEY));
+        assertTrue(api.contains(serialized, RITUAL_LOCK_UNTIL_TICK_KEY));
+        assertTrue(api.contains(serialized, RESONANCE_LEVEL_KEY));
+        assertTrue(api.contains(serialized, LAST_OVERLOAD_TICK_KEY));
+        assertTrue(api.contains(serialized, OVERLOAD_BACKLASH_UNTIL_TICK_KEY));
+        assertTrue(api.contains(serialized, OVERLOAD_RECOVERY_UNTIL_TICK_KEY));
+        assertTrue(api.contains(serialized, LAST_COMBAT_TICK_KEY));
 
         final Object restored = api.newAttachment();
         api.deserialize(restored, serialized);
@@ -59,6 +109,26 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
         assertEquals(CACHE_SWORD_ID, api.getBondedSwordId(restored));
         assertFalse(api.isBondCacheDirty(restored));
         assertEquals(RESOLVED_TICK, api.getLastResolvedTick(restored));
+        assertEquals(RESONANCE_TYPE, api.getResonanceType(restored));
+        assertEquals(OVERLOAD, api.getOverload(restored));
+        assertEquals(BURST_COOLDOWN_UNTIL_TICK, api.getBurstCooldownUntilTick(restored));
+        assertEquals(BURST_ACTIVE_UNTIL_TICK, api.getBurstActiveUntilTick(restored));
+        assertEquals(
+            BURST_AFTERSHOCK_UNTIL_TICK,
+            api.getBurstAftershockUntilTick(restored)
+        );
+        assertEquals(RITUAL_LOCK_UNTIL_TICK, api.getRitualLockUntilTick(restored));
+        assertEquals(RESONANCE_LEVEL, api.getResonanceLevel(restored));
+        assertEquals(LAST_OVERLOAD_TICK, api.getLastOverloadTick(restored));
+        assertEquals(
+            OVERLOAD_BACKLASH_UNTIL_TICK,
+            api.getOverloadBacklashUntilTick(restored)
+        );
+        assertEquals(
+            OVERLOAD_RECOVERY_UNTIL_TICK,
+            api.getOverloadRecoveryUntilTick(restored)
+        );
+        assertEquals(LAST_COMBAT_TICK, api.getLastCombatTick(restored));
 
         final Object legacyTag = api.newCompoundTag();
         api.putBoolean(legacyTag, INITIALIZED_KEY, true);
@@ -68,6 +138,86 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
         assertEquals("", api.getBondedSwordId(legacyRestored));
         assertTrue(api.isBondCacheDirty(legacyRestored));
         assertEquals(UNRESOLVED_TICK, api.getLastResolvedTick(legacyRestored));
+        assertEquals("", api.getResonanceType(legacyRestored));
+        assertEquals(DEFAULT_OVERLOAD, api.getOverload(legacyRestored));
+        assertEquals(
+            DEFAULT_NON_NEGATIVE_TICK,
+            api.getBurstCooldownUntilTick(legacyRestored)
+        );
+        assertEquals(
+            DEFAULT_NON_NEGATIVE_TICK,
+            api.getBurstActiveUntilTick(legacyRestored)
+        );
+        assertEquals(
+            DEFAULT_NON_NEGATIVE_TICK,
+            api.getBurstAftershockUntilTick(legacyRestored)
+        );
+        assertEquals(
+            DEFAULT_NON_NEGATIVE_TICK,
+            api.getRitualLockUntilTick(legacyRestored)
+        );
+        assertEquals(DEFAULT_RESONANCE_LEVEL, api.getResonanceLevel(legacyRestored));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getLastOverloadTick(legacyRestored));
+        assertEquals(
+            DEFAULT_NON_NEGATIVE_TICK,
+            api.getOverloadBacklashUntilTick(legacyRestored)
+        );
+        assertEquals(
+            DEFAULT_NON_NEGATIVE_TICK,
+            api.getOverloadRecoveryUntilTick(legacyRestored)
+        );
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getLastCombatTick(legacyRestored));
+    }
+
+    @Test
+    void deserializeNullTagFallsBackToDefaultState() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object state = api.newAttachment();
+        api.setInitialized(state, true);
+        api.updateBondCache(state, CACHE_SWORD_ID, RESOLVED_TICK);
+        api.setOverload(state, OVERLOAD);
+        api.setBurstCooldownUntilTick(state, BURST_COOLDOWN_UNTIL_TICK);
+        api.setResonanceLevel(state, RESONANCE_LEVEL);
+        api.setLastOverloadTick(state, LAST_OVERLOAD_TICK);
+        api.setOverloadBacklashUntilTick(state, OVERLOAD_BACKLASH_UNTIL_TICK);
+        api.setOverloadRecoveryUntilTick(state, OVERLOAD_RECOVERY_UNTIL_TICK);
+        api.setLastCombatTick(state, LAST_COMBAT_TICK);
+
+        api.deserialize(state, null);
+        assertFalse(api.isInitialized(state));
+        assertEquals("", api.getBondedSwordId(state));
+        assertTrue(api.isBondCacheDirty(state));
+        assertEquals(UNRESOLVED_TICK, api.getLastResolvedTick(state));
+        assertEquals(DEFAULT_OVERLOAD, api.getOverload(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getBurstCooldownUntilTick(state));
+        assertEquals(DEFAULT_RESONANCE_LEVEL, api.getResonanceLevel(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getLastOverloadTick(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getOverloadBacklashUntilTick(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getOverloadRecoveryUntilTick(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getLastCombatTick(state));
+    }
+
+    @Test
+    void deserializeNegativeSerializedValuesNormalizesToNonNegativeDefaults() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object serialized = api.newCompoundTag();
+        api.putDouble(serialized, OVERLOAD_KEY, -1.0D);
+        api.putLong(serialized, LAST_OVERLOAD_TICK_KEY, -2L);
+        api.putInt(serialized, RESONANCE_LEVEL_KEY, -3);
+        api.putLong(serialized, OVERLOAD_BACKLASH_UNTIL_TICK_KEY, -4L);
+        api.putLong(serialized, OVERLOAD_RECOVERY_UNTIL_TICK_KEY, -5L);
+        api.putLong(serialized, LAST_COMBAT_TICK_KEY, -6L);
+
+        final Object state = api.newAttachment();
+        api.deserialize(state, serialized);
+        assertEquals(DEFAULT_OVERLOAD, api.getOverload(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getLastOverloadTick(state));
+        assertEquals(DEFAULT_RESONANCE_LEVEL, api.getResonanceLevel(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getOverloadBacklashUntilTick(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getOverloadRecoveryUntilTick(state));
+        assertEquals(DEFAULT_NON_NEGATIVE_TICK, api.getLastCombatTick(state));
     }
 
     @Test
@@ -160,6 +310,103 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
             attachmentClass.getMethod("clearBondCache").invoke(state);
         }
 
+        void setResonanceType(Object state, String resonanceType) throws Exception {
+            attachmentClass.getMethod("setResonanceType", String.class)
+                .invoke(state, resonanceType);
+        }
+
+        String getResonanceType(Object state) throws Exception {
+            return (String) attachmentClass.getMethod("getResonanceType").invoke(state);
+        }
+
+        void setOverload(Object state, double overload) throws Exception {
+            attachmentClass.getMethod("setOverload", double.class).invoke(state, overload);
+        }
+
+        double getOverload(Object state) throws Exception {
+            return (double) attachmentClass.getMethod("getOverload").invoke(state);
+        }
+
+        void setBurstCooldownUntilTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setBurstCooldownUntilTick", long.class)
+                .invoke(state, tick);
+        }
+
+        long getBurstCooldownUntilTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getBurstCooldownUntilTick").invoke(state);
+        }
+
+        void setBurstActiveUntilTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setBurstActiveUntilTick", long.class)
+                .invoke(state, tick);
+        }
+
+        long getBurstActiveUntilTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getBurstActiveUntilTick").invoke(state);
+        }
+
+        void setBurstAftershockUntilTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setBurstAftershockUntilTick", long.class)
+                .invoke(state, tick);
+        }
+
+        long getBurstAftershockUntilTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getBurstAftershockUntilTick")
+                .invoke(state);
+        }
+
+        void setRitualLockUntilTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setRitualLockUntilTick", long.class).invoke(state, tick);
+        }
+
+        long getRitualLockUntilTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getRitualLockUntilTick").invoke(state);
+        }
+
+        void setResonanceLevel(Object state, int level) throws Exception {
+            attachmentClass.getMethod("setResonanceLevel", int.class).invoke(state, level);
+        }
+
+        int getResonanceLevel(Object state) throws Exception {
+            return (int) attachmentClass.getMethod("getResonanceLevel").invoke(state);
+        }
+
+        void setLastOverloadTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setLastOverloadTick", long.class).invoke(state, tick);
+        }
+
+        long getLastOverloadTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getLastOverloadTick").invoke(state);
+        }
+
+        void setOverloadBacklashUntilTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setOverloadBacklashUntilTick", long.class)
+                .invoke(state, tick);
+        }
+
+        long getOverloadBacklashUntilTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getOverloadBacklashUntilTick")
+                .invoke(state);
+        }
+
+        void setOverloadRecoveryUntilTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setOverloadRecoveryUntilTick", long.class)
+                .invoke(state, tick);
+        }
+
+        long getOverloadRecoveryUntilTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getOverloadRecoveryUntilTick")
+                .invoke(state);
+        }
+
+        void setLastCombatTick(Object state, long tick) throws Exception {
+            attachmentClass.getMethod("setLastCombatTick", long.class).invoke(state, tick);
+        }
+
+        long getLastCombatTick(Object state) throws Exception {
+            return (long) attachmentClass.getMethod("getLastCombatTick").invoke(state);
+        }
+
         String getBondedSwordId(Object state) throws Exception {
             return (String) attachmentClass.getMethod("getBondedSwordId").invoke(state);
         }
@@ -183,6 +430,20 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
         void putBoolean(Object tag, String key, boolean value) throws Exception {
             compoundTagClass.getMethod("putBoolean", String.class, boolean.class)
                 .invoke(tag, key, value);
+        }
+
+        void putLong(Object tag, String key, long value) throws Exception {
+            compoundTagClass.getMethod("putLong", String.class, long.class)
+                .invoke(tag, key, value);
+        }
+
+        void putDouble(Object tag, String key, double value) throws Exception {
+            compoundTagClass.getMethod("putDouble", String.class, double.class)
+                .invoke(tag, key, value);
+        }
+
+        void putInt(Object tag, String key, int value) throws Exception {
+            compoundTagClass.getMethod("putInt", String.class, int.class).invoke(tag, key, value);
         }
 
         boolean contains(Object tag, String key) throws Exception {

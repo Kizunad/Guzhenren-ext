@@ -72,6 +72,8 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.forge.help.tab.combat";
     public static final String HELP_TAB_GROWTH =
         "screen.guzhenrenext.forge.help.tab.growth";
+    public static final String HELP_TAB_BENMING =
+        "screen.guzhenrenext.forge.help.tab.benming";
     public static final String HELP_OVERVIEW_TITLE =
         "screen.guzhenrenext.forge.help.overview.title";
     public static final String HELP_OVERVIEW_STEP1 =
@@ -96,6 +98,8 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.forge.help.overview.key_restore";
     public static final String HELP_OVERVIEW_KEY_HUD =
         "screen.guzhenrenext.forge.help.overview.key_hud";
+    public static final String HELP_OVERVIEW_KEY_BENMING_ACTION =
+        "screen.guzhenrenext.forge.help.overview.key_benming_action";
     public static final String HELP_OVERVIEW_NOTE =
         "screen.guzhenrenext.forge.help.overview.note";
     public static final String HELP_QUALITY_TITLE =
@@ -132,8 +136,180 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.forge.help.growth.level_desc";
     public static final String HELP_GROWTH_BREAKTHROUGH_DESC =
         "screen.guzhenrenext.forge.help.growth.breakthrough_desc";
+    public static final String HELP_BENMING_TITLE =
+        "screen.guzhenrenext.forge.help.benming.title";
+    public static final String HELP_BENMING_OVERVIEW =
+        "screen.guzhenrenext.forge.help.benming.overview";
+    public static final String HELP_BENMING_GUIDE_TITLE =
+        "screen.guzhenrenext.forge.help.benming.guide.title";
+    public static final String HELP_BENMING_GUIDE_DESC =
+        "screen.guzhenrenext.forge.help.benming.guide.desc";
+    public static final String HELP_BENMING_BOND_TITLE =
+        "screen.guzhenrenext.forge.help.benming.bond.title";
+    public static final String HELP_BENMING_BOND_ENTRY =
+        "screen.guzhenrenext.forge.help.benming.bond.entry";
+    public static final String HELP_BENMING_BOND_AFTER_SUCCESS =
+        "screen.guzhenrenext.forge.help.benming.bond.after_success";
+    public static final String HELP_BENMING_FAIL_BOND =
+        "screen.guzhenrenext.forge.help.benming.fail.bond";
+    public static final String HELP_BENMING_RESONANCE_TITLE =
+        "screen.guzhenrenext.forge.help.benming.resonance.title";
+    public static final String HELP_BENMING_RESONANCE_GUIDE =
+        "screen.guzhenrenext.forge.help.benming.resonance.guide";
+    public static final String HELP_BENMING_RESONANCE_OFFENSE =
+        "screen.guzhenrenext.forge.help.benming.resonance.offense";
+    public static final String HELP_BENMING_RESONANCE_DEFENSE =
+        "screen.guzhenrenext.forge.help.benming.resonance.defense";
+    public static final String HELP_BENMING_RESONANCE_SPIRIT =
+        "screen.guzhenrenext.forge.help.benming.resonance.spirit";
+    public static final String HELP_BENMING_RISK_TITLE =
+        "screen.guzhenrenext.forge.help.benming.risk.title";
+    public static final String HELP_BENMING_OVERLOAD_WARNING =
+        "screen.guzhenrenext.forge.help.benming.overload.warning";
+    public static final String HELP_BENMING_BACKLASH_RECOVERY =
+        "screen.guzhenrenext.forge.help.benming.backlash.recovery";
+    public static final String HELP_BENMING_BURST_TITLE =
+        "screen.guzhenrenext.forge.help.benming.burst.title";
+    public static final String HELP_BENMING_BURST_WINDOW =
+        "screen.guzhenrenext.forge.help.benming.burst.window";
+    public static final String HELP_BENMING_BURST_EFFECT =
+        "screen.guzhenrenext.forge.help.benming.burst.effect";
+    public static final String HELP_BENMING_AFTERSHOCK_RULE =
+        "screen.guzhenrenext.forge.help.benming.aftershock.rule";
+    public static final String HELP_BENMING_FAIL_TITLE =
+        "screen.guzhenrenext.forge.help.benming.fail.title";
+    public static final String HELP_BENMING_FAIL_NO_SELECTED_SWORD =
+        "screen.guzhenrenext.forge.help.benming.fail.no_selected_sword";
+    public static final String HELP_BENMING_FAIL_NOT_BONDED =
+        "screen.guzhenrenext.forge.help.benming.fail.not_bonded";
+    public static final String HELP_BENMING_FAIL_BOND_COOLDOWN =
+        "screen.guzhenrenext.forge.help.benming.fail.bond_cooldown";
+    public static final String HELP_BENMING_FAIL_RESOURCE_INSUFFICIENT =
+        "screen.guzhenrenext.forge.help.benming.fail.resource_insufficient";
+    public static final String HELP_BENMING_FAIL_RESONANCE_LOCKED =
+        "screen.guzhenrenext.forge.help.benming.fail.resonance_locked";
+    public static final String HELP_BENMING_FAIL_OVERLOAD_TOO_HIGH =
+        "screen.guzhenrenext.forge.help.benming.fail.overload_too_high";
+    public static final String HELP_BENMING_FAIL_BURST_NOT_READY =
+        "screen.guzhenrenext.forge.help.benming.fail.burst_not_ready";
+    public static final String HELP_BENMING_FAIL_BURST_COOLDOWN =
+        "screen.guzhenrenext.forge.help.benming.fail.burst_cooldown";
+    public static final String HELP_BENMING_FAIL_AFTERSHOCK_ACTIVE =
+        "screen.guzhenrenext.forge.help.benming.fail.aftershock_active";
+    public static final String HELP_BENMING_FAIL_WITHDRAWN_OR_ILLEGAL_DETACH =
+        "screen.guzhenrenext.forge.help.benming.fail.withdrawn_or_illegal_detach";
     public static final String HELP_BUTTON_CLOSE =
         "screen.guzhenrenext.forge.help.button.close";
+    public static final String BENMING_GUIDE_BOND_START =
+        "message.guzhenrenext.flyingsword.benming.guide.bond_start";
+    public static final String BENMING_GUIDE_AFTER_BOND =
+        "message.guzhenrenext.flyingsword.benming.guide.after_bond";
+    public static final String BENMING_GUIDE_BOND_FAIL_NEXT_STEP =
+        "message.guzhenrenext.flyingsword.benming.guide.bond_fail_next_step";
+    public static final String BENMING_GUIDE_RESONANCE_FIRST_CHOICE =
+        "message.guzhenrenext.flyingsword.benming.guide.resonance_first_choice";
+    public static final String BENMING_GUIDE_OVERLOAD_FIRST_WARNING =
+        "message.guzhenrenext.flyingsword.benming.guide.overload_first_warning";
+    public static final String BENMING_GUIDE_BACKLASH_FIRST_TIME =
+        "message.guzhenrenext.flyingsword.benming.guide.backlash_first_time";
+    public static final String BENMING_GUIDE_BURST_READY_FIRST_TIME =
+        "message.guzhenrenext.flyingsword.benming.guide.burst_ready_first_time";
+    public static final String BENMING_GUIDE_AFTERSHOCK_FIRST_TIME =
+        "message.guzhenrenext.flyingsword.benming.guide.aftershock_first_time";
+    public static final String BENMING_FEEDBACK_SYSTEM_DISABLED =
+        "message.guzhenrenext.flyingsword.benming.feedback.system_disabled";
+    public static final String BENMING_FEEDBACK_QUERY_SUCCESS =
+        "message.guzhenrenext.flyingsword.benming.feedback.query.success";
+    public static final String BENMING_FEEDBACK_BOND_SUCCESS =
+        "message.guzhenrenext.flyingsword.benming.feedback.bond.success";
+    public static final String BENMING_FEEDBACK_ACTIVE_UNBIND_SUCCESS =
+        "message.guzhenrenext.flyingsword.benming.feedback.active_unbind.success";
+    public static final String BENMING_FEEDBACK_FORCED_UNBIND_SUCCESS =
+        "message.guzhenrenext.flyingsword.benming.feedback.forced_unbind.success";
+    public static final String BENMING_FEEDBACK_RESONANCE_SWITCH_SUCCESS =
+        "message.guzhenrenext.flyingsword.benming.feedback.resonance_switch.success";
+    public static final String BENMING_FEEDBACK_BURST_ATTEMPT_SUCCESS =
+        "message.guzhenrenext.flyingsword.benming.feedback.burst_attempt.success";
+    public static final String BENMING_FEEDBACK_INVALID_QUERY =
+        "message.guzhenrenext.flyingsword.benming.feedback.invalid.query";
+    public static final String BENMING_FEEDBACK_INVALID_RESONANCE_SWITCH =
+        "message.guzhenrenext.flyingsword.benming.feedback.invalid.resonance_switch";
+    public static final String BENMING_FEEDBACK_INVALID_BURST_ATTEMPT =
+        "message.guzhenrenext.flyingsword.benming.feedback.invalid.burst_attempt";
+    public static final String BENMING_FEEDBACK_INVALID_TARGET =
+        "message.guzhenrenext.flyingsword.benming.feedback.invalid.target";
+    public static final String BENMING_FEEDBACK_FAIL_NOT_BONDED =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.not_bonded";
+    public static final String BENMING_FEEDBACK_FAIL_ALREADY_BONDED =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.already_bonded";
+    public static final String BENMING_FEEDBACK_FAIL_BOUND_TO_OTHER =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.bound_to_other";
+    public static final String BENMING_FEEDBACK_FAIL_NOT_PLAYER_BENMING =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.not_player_benming";
+    public static final String BENMING_FEEDBACK_FAIL_MULTIPLE_BONDED =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.multiple_bonded";
+    public static final String BENMING_FEEDBACK_FAIL_ACTIVE_UNBIND_COST =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.active_unbind_cost";
+    public static final String BENMING_FEEDBACK_FAIL_RITUAL_RESOURCE =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.ritual_resource";
+    public static final String BENMING_FEEDBACK_FAIL_RITUAL_STATE =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.ritual_state";
+    public static final String BENMING_FEEDBACK_FAIL_RITUAL_COOLDOWN =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.ritual_cooldown";
+    public static final String BENMING_FEEDBACK_FAIL_RITUAL_DUPLICATE =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.ritual_duplicate";
+    public static final String BENMING_FEEDBACK_FAIL_RITUAL_TARGET_MISMATCH =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.ritual_target_mismatch";
+    public static final String BENMING_FEEDBACK_FAIL_STATE_ATTACHMENT_MISSING =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.state_attachment_missing";
+    public static final String BENMING_FEEDBACK_FAIL_NO_TARGET_SWORD =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.no_target_sword";
+    public static final String BENMING_FEEDBACK_FAIL_TARGET_NOT_CURRENT_BENMING =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.target_not_current_benming";
+    public static final String BENMING_FEEDBACK_FAIL_BOND_STATE_INVALID =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.bond_state_invalid";
+    public static final String BENMING_FEEDBACK_FAIL_RESONANCE_TYPE_INVALID =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.resonance_type_invalid";
+    public static final String BENMING_FEEDBACK_FAIL_BURST_COOLDOWN =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.burst_cooldown";
+    public static final String BENMING_FEEDBACK_FAIL_BURST_RESOURCE =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.burst_resource";
+    public static final String BENMING_FEEDBACK_FAIL_BURST_OVERLOAD =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.burst_overload";
+    public static final String BENMING_HUD_BADGE_MARK =
+        "hud.guzhenrenext.flyingsword.benming.badge.mark";
+    public static final String BENMING_HUD_BADGE_OVERLOAD_WARNING =
+        "hud.guzhenrenext.flyingsword.benming.badge.overload_warning";
+    public static final String BENMING_HUD_BADGE_BURST_READY =
+        "hud.guzhenrenext.flyingsword.benming.badge.burst_ready";
+    public static final String BENMING_HUD_BADGE_AFTERSHOCK =
+        "hud.guzhenrenext.flyingsword.benming.badge.aftershock";
+    public static final String BENMING_HUD_RESONANCE_OFFENSE_SHORT =
+        "hud.guzhenrenext.flyingsword.benming.resonance.offense.short";
+    public static final String BENMING_HUD_RESONANCE_DEFENSE_SHORT =
+        "hud.guzhenrenext.flyingsword.benming.resonance.defense.short";
+    public static final String BENMING_HUD_RESONANCE_SPIRIT_SHORT =
+        "hud.guzhenrenext.flyingsword.benming.resonance.spirit.short";
+    public static final String BENMING_HUD_OVERLOAD_TEXT =
+        "hud.guzhenrenext.flyingsword.benming.overload.text";
+    public static final String RESONANCE_OFFENSE_NAME =
+        "screen.guzhenrenext.forge.help.resonance.offense.name";
+    public static final String RESONANCE_OFFENSE_DESC =
+        "screen.guzhenrenext.forge.help.resonance.offense.desc";
+    public static final String RESONANCE_OFFENSE_COLOR_SEMANTIC =
+        "screen.guzhenrenext.forge.help.resonance.offense.color_semantic";
+    public static final String RESONANCE_DEFENSE_NAME =
+        "screen.guzhenrenext.forge.help.resonance.defense.name";
+    public static final String RESONANCE_DEFENSE_DESC =
+        "screen.guzhenrenext.forge.help.resonance.defense.desc";
+    public static final String RESONANCE_DEFENSE_COLOR_SEMANTIC =
+        "screen.guzhenrenext.forge.help.resonance.defense.color_semantic";
+    public static final String RESONANCE_SPIRIT_NAME =
+        "screen.guzhenrenext.forge.help.resonance.spirit.name";
+    public static final String RESONANCE_SPIRIT_DESC =
+        "screen.guzhenrenext.forge.help.resonance.spirit.desc";
+    public static final String RESONANCE_SPIRIT_COLOR_SEMANTIC =
+        "screen.guzhenrenext.forge.help.resonance.spirit.color_semantic";
 
     public static final String DAO_HUN_DAO = "guzhenrenext.dao.hundao";
     public static final String DAO_GU_DAO = "guzhenrenext.dao.gudao";

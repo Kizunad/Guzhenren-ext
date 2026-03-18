@@ -91,6 +91,64 @@ final class BenmingSwordBondSerializationTests {
         assertBondEquals(api, readTarget, "", 0.0);
     }
 
+    @Test
+    void missingStableSwordIdKeepsBondAcrossApis() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object source = api.newAttributes();
+        api.setStableSwordId(source, TEST_STABLE_SWORD_ID);
+        final Object sourceBond = api.getBond(source);
+        api.setOwnerUuid(sourceBond, TEST_OWNER_UUID);
+        api.setResonance(sourceBond, TEST_RESONANCE);
+
+        final Object legacyTag = api.toNbt(source);
+        api.remove(legacyTag, "stableSwordId");
+        assertFalse(api.contains(legacyTag, "stableSwordId"));
+        assertTrue(api.contains(legacyTag, "bond"));
+
+        final Object fromLegacy = api.fromNbt(legacyTag);
+        assertFalse(api.getStableSwordId(fromLegacy).isBlank());
+        assertBondEquals(api, fromLegacy, TEST_OWNER_UUID, TEST_RESONANCE);
+
+        final Object readTarget = api.newAttributes();
+        api.setStableSwordId(readTarget, "existing-stable-id");
+        final Object readTargetBond = api.getBond(readTarget);
+        api.setOwnerUuid(readTargetBond, "old-owner");
+        api.setResonance(readTargetBond, 99.0);
+        api.readFromNbt(readTarget, legacyTag);
+        assertEquals("existing-stable-id", api.getStableSwordId(readTarget));
+        assertBondEquals(api, readTarget, TEST_OWNER_UUID, TEST_RESONANCE);
+    }
+
+    @Test
+    void missingBondResetsToUnboundWhileStableSwordIdLoadsAcrossApis() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object source = api.newAttributes();
+        api.setStableSwordId(source, TEST_STABLE_SWORD_ID);
+        final Object sourceBond = api.getBond(source);
+        api.setOwnerUuid(sourceBond, TEST_OWNER_UUID);
+        api.setResonance(sourceBond, TEST_RESONANCE);
+
+        final Object legacyTag = api.toNbt(source);
+        api.remove(legacyTag, "bond");
+        assertTrue(api.contains(legacyTag, "stableSwordId"));
+        assertFalse(api.contains(legacyTag, "bond"));
+
+        final Object fromLegacy = api.fromNbt(legacyTag);
+        assertEquals(TEST_STABLE_SWORD_ID, api.getStableSwordId(fromLegacy));
+        assertBondEquals(api, fromLegacy, "", 0.0);
+
+        final Object readTarget = api.newAttributes();
+        api.setStableSwordId(readTarget, "temporary-id");
+        final Object readTargetBond = api.getBond(readTarget);
+        api.setOwnerUuid(readTargetBond, TEST_OWNER_UUID);
+        api.setResonance(readTargetBond, TEST_RESONANCE);
+        api.readFromNbt(readTarget, legacyTag);
+        assertEquals(TEST_STABLE_SWORD_ID, api.getStableSwordId(readTarget));
+        assertBondEquals(api, readTarget, "", 0.0);
+    }
+
     private static void assertBondEquals(
         RuntimeApi api,
         Object attributes,

@@ -1,5 +1,8 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai.SwordAIMode;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordSelectionAttachment;
@@ -8,10 +11,16 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStora
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.effects.FlyingSwordEffects;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordBondService;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordResourceTransaction;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.CultivationSnapshot;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.ZhuanCostHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +41,17 @@ import net.minecraft.world.phys.AABB;
  * </p>
  */
 public final class FlyingSwordController {
+
+    private static final double RITUAL_BIND_ZHENYUAN_BASE_COST = 10.0D;
+    private static final double RITUAL_BIND_NIANTOU_BASE_COST = 6.0D;
+    private static final double RITUAL_BIND_HUNPO_BASE_COST = 4.0D;
+    private static final double BURST_ATTEMPT_ZHENYUAN_BASE_COST = 12.0D;
+    private static final double BURST_ATTEMPT_NIANTOU_BASE_COST = 8.0D;
+    private static final double BURST_ATTEMPT_HUNPO_BASE_COST = 4.0D;
+    private static final double BURST_ATTEMPT_OVERLOAD_LIMIT = 100.0D;
+    private static final long MINIMAL_BURST_ATTEMPT_COOLDOWN_TICKS = 40L;
+    private static final long MINIMAL_BURST_ACTIVE_DURATION_TICKS = 20L;
+    private static final long MINIMAL_BURST_AFTERSHOCK_DURATION_TICKS = 20L;
 
     private FlyingSwordController() {}
 
@@ -226,25 +246,30 @@ public final class FlyingSwordController {
 
         FlyingSwordSelectionAttachment selection =
             KongqiaoAttachments.getFlyingSwordSelection(owner);
-        if (selection != null) {
-            Optional<UUID> selected = selection.getSelectedSword();
-            if (selected.isPresent()) {
-                Entity entity = level.getEntity(selected.get());
+        return resolveSelectedOrNearestCandidate(
+            selection == null ? Optional.empty() : selection.getSelectedSword(),
+            selectedUuid -> {
+                final Entity entity = level.getEntity(selectedUuid);
                 if (
-                    entity instanceof FlyingSwordEntity sword &&
-                    sword.isOwnedBy(owner)
+                    entity instanceof FlyingSwordEntity sword
+                        && sword.isOwnedBy(owner)
                 ) {
                     return sword;
                 }
-                selection.clear();
+                return null;
+            },
+            () -> {
+                if (selection != null) {
+                    selection.clear();
+                }
+            },
+            () -> getNearestSword(level, owner),
+            nearestSword -> {
+                if (selection != null) {
+                    selection.setSelectedSword(nearestSword.getUUID());
+                }
             }
-        }
-
-        FlyingSwordEntity nearest = getNearestSword(level, owner);
-        if (nearest != null && selection != null) {
-            selection.setSelectedSword(nearest.getUUID());
-        }
-        return nearest;
+        );
     }
 
     public static BenmingSwordBondService.Result queryBenmingSword(
@@ -278,7 +303,7 @@ public final class FlyingSwordController {
     ) {
         if (level == null || owner == null) {
             return BenmingSwordBondService.Result.failure(
-                BenmingSwordBondService.ResultBranch.BIND,
+                BenmingSwordBondService.ResultBranch.RITUAL_PRECHECK,
                 BenmingSwordBondService.FailureReason.INVALID_REQUEST,
                 ""
             );
@@ -287,7 +312,7 @@ public final class FlyingSwordController {
         final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
         if (sword == null) {
             return BenmingSwordBondService.Result.failure(
-                BenmingSwordBondService.ResultBranch.BIND,
+                BenmingSwordBondService.ResultBranch.RITUAL_PRECHECK,
                 BenmingSwordBondService.FailureReason.INVALID_REQUEST,
                 ""
             );
@@ -296,14 +321,84 @@ public final class FlyingSwordController {
         final List<BenmingSwordBondService.SwordBondPort> swords = toBondPorts(
             getPlayerSwords(level, owner)
         );
+        final long resolvedTick = level.getGameTime();
+        final FlyingSwordStateAttachment state =
+            KongqiaoAttachments.getFlyingSwordState(owner);
         final BenmingSwordBondService.PlayerBondCachePort cache =
-            toBondCachePort(KongqiaoAttachments.getFlyingSwordState(owner));
-        return BenmingSwordBondService.bind(
+            toBondCachePort(state);
+        return bindSwordAsBenmingWithRitual(
             owner.getUUID().toString(),
             new EntitySwordBondPort(sword),
             swords,
             cache,
-            level.getGameTime()
+            createDefaultRitualBindContext(owner, state, resolvedTick),
+            resolvedTick
+        );
+    }
+
+    static <T> T resolveSelectedOrNearestCandidate(
+        Optional<UUID> selectedId,
+        Function<UUID, T> selectedResolver,
+        Runnable clearSelection,
+        Supplier<T> nearestSupplier,
+        Consumer<T> rememberNearest
+    ) {
+        final Optional<UUID> normalizedSelectedId =
+            selectedId == null ? Optional.empty() : selectedId;
+        if (normalizedSelectedId.isPresent()) {
+            final T selected = selectedResolver == null
+                ? null
+                : selectedResolver.apply(normalizedSelectedId.get());
+            if (selected != null) {
+                return selected;
+            }
+            if (clearSelection != null) {
+                clearSelection.run();
+            }
+        }
+
+        final T nearest = nearestSupplier == null ? null : nearestSupplier.get();
+        if (nearest != null && rememberNearest != null) {
+            rememberNearest.accept(nearest);
+        }
+        return nearest;
+    }
+
+    static BenmingSwordBondService.Result bindSwordAsBenmingWithRitual(
+        String ownerUuid,
+        BenmingSwordBondService.SwordBondPort targetSword,
+        List<? extends BenmingSwordBondService.SwordBondPort> swords,
+        BenmingSwordBondService.PlayerBondCachePort cache,
+        BenmingSwordBondService.RitualBindTransactionContext context,
+        long resolvedTick
+    ) {
+        if (context == null || context.requestContext() == null) {
+            return BenmingSwordBondService.Result.failure(
+                BenmingSwordBondService.ResultBranch.RITUAL_BIND,
+                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                ""
+            );
+        }
+
+        final BenmingSwordBondService.Result precheckResult =
+            BenmingSwordBondService.precheckRitualBind(
+                ownerUuid,
+                targetSword,
+                swords,
+                cache,
+                context.requestContext(),
+                resolvedTick
+            );
+        if (!precheckResult.success()) {
+            return precheckResult;
+        }
+        return BenmingSwordBondService.ritualBindWithTransaction(
+            ownerUuid,
+            targetSword,
+            swords,
+            cache,
+            context,
+            resolvedTick
         );
     }
 
@@ -383,6 +478,410 @@ public final class FlyingSwordController {
             new EntitySwordBondPort(sword),
             cache,
             level.getGameTime()
+        );
+    }
+
+    public static BenmingControllerActionResult switchResonanceForSelectedOrNearestBenmingSword(
+        ServerLevel level,
+        ServerPlayer owner,
+        @Nullable FlyingSwordResonanceType targetType
+    ) {
+        if (level == null || owner == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                BenmingControllerFailureReason.INVALID_REQUEST,
+                "",
+                "",
+                0L
+            );
+        }
+
+        final FlyingSwordStateAttachment state =
+            KongqiaoAttachments.getFlyingSwordState(owner);
+        if (state == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                BenmingControllerFailureReason.STATE_ATTACHMENT_MISSING,
+                "",
+                "",
+                0L
+            );
+        }
+
+        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        if (sword == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                BenmingControllerFailureReason.NO_TARGET_SWORD,
+                "",
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
+        final String selectedSwordId = sword.getSwordAttributes().getStableSwordId();
+        final BenmingSwordBondService.Result queryResult =
+            queryBenmingSword(level, owner);
+        if (!queryResult.success()) {
+            return mapBenmingControllerFailure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                state,
+                selectedSwordId,
+                queryResult
+            );
+        }
+        return switchBenmingSwordResonance(
+            state,
+            selectedSwordId,
+            queryResult.stableSwordId(),
+            targetType
+        );
+    }
+
+    public static BenmingControllerActionResult attemptBurstForSelectedOrNearestBenmingSword(
+        ServerLevel level,
+        ServerPlayer owner
+    ) {
+        if (level == null || owner == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.INVALID_REQUEST,
+                "",
+                "",
+                0L
+            );
+        }
+
+        final FlyingSwordStateAttachment state =
+            KongqiaoAttachments.getFlyingSwordState(owner);
+        if (state == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.STATE_ATTACHMENT_MISSING,
+                "",
+                "",
+                0L
+            );
+        }
+
+        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        if (sword == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.NO_TARGET_SWORD,
+                "",
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
+        final String selectedSwordId = sword.getSwordAttributes().getStableSwordId();
+        final BenmingSwordBondService.Result queryResult =
+            queryBenmingSword(level, owner);
+        if (!queryResult.success()) {
+            return mapBenmingControllerFailure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                state,
+                selectedSwordId,
+                queryResult
+            );
+        }
+
+        final long resolvedTick = level.getGameTime();
+        final BenmingControllerActionResult availabilityResult =
+            validateBurstAttemptAvailability(
+                owner,
+                state,
+                selectedSwordId,
+                queryResult.stableSwordId(),
+                resolvedTick
+            );
+        if (!availabilityResult.success()) {
+            return availabilityResult;
+        }
+        return attemptBenmingSwordBurst(
+            state,
+            selectedSwordId,
+            queryResult.stableSwordId(),
+            resolvedTick
+        );
+    }
+
+    static BenmingControllerActionResult switchBenmingSwordResonance(
+        @Nullable final FlyingSwordStateAttachment state,
+        final String resolvedSwordId,
+        final String bondedSwordId,
+        @Nullable final FlyingSwordResonanceType targetType
+    ) {
+        if (state == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                BenmingControllerFailureReason.STATE_ATTACHMENT_MISSING,
+                "",
+                "",
+                0L
+            );
+        }
+        if (targetType == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                BenmingControllerFailureReason.RESONANCE_TYPE_INVALID,
+                resolvePrimaryStableSwordId(resolvedSwordId, bondedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+        if (normalizeSwordId(bondedSwordId).isBlank()) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                BenmingControllerFailureReason.NO_BONDED_SWORD,
+                resolvePrimaryStableSwordId(resolvedSwordId, bondedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+        if (!normalizeSwordId(bondedSwordId).equals(normalizeSwordId(resolvedSwordId))) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.RESONANCE_SWITCH,
+                BenmingControllerFailureReason.TARGET_NOT_CURRENT_BENMING,
+                resolvePrimaryStableSwordId(resolvedSwordId, bondedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
+        state.setResonanceType(targetType.getCode());
+        return BenmingControllerActionResult.success(
+            BenmingControllerAction.RESONANCE_SWITCH,
+            normalizeSwordId(resolvedSwordId),
+            state.getResonanceType(),
+            state.getBurstCooldownUntilTick()
+        );
+    }
+
+    static BenmingControllerActionResult attemptBenmingSwordBurst(
+        @Nullable final FlyingSwordStateAttachment state,
+        final String resolvedSwordId,
+        final String bondedSwordId,
+        final long resolvedTick
+    ) {
+        if (state == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.STATE_ATTACHMENT_MISSING,
+                "",
+                "",
+                0L
+            );
+        }
+        if (normalizeSwordId(bondedSwordId).isBlank()) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.NO_BONDED_SWORD,
+                resolvePrimaryStableSwordId(resolvedSwordId, bondedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+        if (!normalizeSwordId(bondedSwordId).equals(normalizeSwordId(resolvedSwordId))) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.TARGET_NOT_CURRENT_BENMING,
+                resolvePrimaryStableSwordId(resolvedSwordId, bondedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
+        final long normalizedTick = Math.max(0L, resolvedTick);
+        if (normalizedTick < state.getBurstCooldownUntilTick()) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.BURST_COOLDOWN_ACTIVE,
+                normalizeSwordId(resolvedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
+        final long nextBurstCooldown = resolveBurstAttemptCooldownUntilTick(
+            normalizedTick
+        );
+        final long burstActiveUntilTick = resolveBurstActiveUntilTick(normalizedTick);
+        final long burstAftershockUntilTick = resolveBurstAftershockUntilTick(
+            burstActiveUntilTick
+        );
+        state.setBurstCooldownUntilTick(nextBurstCooldown);
+        state.setBurstActiveUntilTick(burstActiveUntilTick);
+        state.setBurstAftershockUntilTick(burstAftershockUntilTick);
+        return BenmingControllerActionResult.success(
+            BenmingControllerAction.BURST_ATTEMPT,
+            normalizeSwordId(resolvedSwordId),
+            state.getResonanceType(),
+            nextBurstCooldown
+        );
+    }
+
+    static long resolveBurstActiveUntilTick(final long resolvedTick) {
+        return Math.max(0L, resolvedTick) + MINIMAL_BURST_ACTIVE_DURATION_TICKS;
+    }
+
+    static long resolveBurstAftershockUntilTick(final long burstActiveUntilTick) {
+        return Math.max(0L, burstActiveUntilTick)
+            + MINIMAL_BURST_AFTERSHOCK_DURATION_TICKS;
+    }
+
+    static long resolveBurstAttemptCooldownUntilTick(final long resolvedTick) {
+        return Math.max(0L, resolvedTick) + MINIMAL_BURST_ATTEMPT_COOLDOWN_TICKS;
+    }
+
+    static BenmingControllerActionResult validateBurstAttemptAvailability(
+        @Nullable final ServerPlayer owner,
+        @Nullable final FlyingSwordStateAttachment state,
+        final String resolvedSwordId,
+        final String bondedSwordId,
+        final long resolvedTick
+    ) {
+        if (state == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.STATE_ATTACHMENT_MISSING,
+                "",
+                "",
+                0L
+            );
+        }
+        if (normalizeSwordId(bondedSwordId).isBlank()) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.NO_BONDED_SWORD,
+                resolvePrimaryStableSwordId(resolvedSwordId, bondedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+        if (!normalizeSwordId(bondedSwordId).equals(normalizeSwordId(resolvedSwordId))) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.TARGET_NOT_CURRENT_BENMING,
+                resolvePrimaryStableSwordId(resolvedSwordId, bondedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
+        final long normalizedTick = Math.max(0L, resolvedTick);
+        if (normalizedTick < state.getBurstCooldownUntilTick()) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.BURST_COOLDOWN_ACTIVE,
+                normalizeSwordId(resolvedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+        if (owner == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.INVALID_REQUEST,
+                normalizeSwordId(resolvedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
+        final BenmingSwordResourceTransaction.Result burstConsumeResult =
+            tryConsumeBurstAttemptResources(owner, state, normalizedTick);
+        return mapBurstAttemptAvailabilityResult(
+            burstConsumeResult,
+            normalizeSwordId(resolvedSwordId),
+            state
+        );
+    }
+
+    static BenmingControllerActionResult mapBurstAttemptAvailabilityResult(
+        @Nullable final BenmingSwordResourceTransaction.Result burstConsumeResult,
+        final String resolvedSwordId,
+        @Nullable final FlyingSwordStateAttachment state
+    ) {
+        if (burstConsumeResult == null) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.INVALID_REQUEST,
+                normalizeSwordId(resolvedSwordId),
+                state == null ? "" : state.getResonanceType(),
+                state == null ? 0L : state.getBurstCooldownUntilTick()
+            );
+        }
+        if (burstConsumeResult.success()) {
+            return BenmingControllerActionResult.success(
+                BenmingControllerAction.BURST_ATTEMPT,
+                normalizeSwordId(resolvedSwordId),
+                state == null ? "" : state.getResonanceType(),
+                state == null ? 0L : state.getBurstCooldownUntilTick()
+            );
+        }
+        return BenmingControllerActionResult.failure(
+            BenmingControllerAction.BURST_ATTEMPT,
+            mapBurstAttemptFailureReason(burstConsumeResult.failureReason()),
+            normalizeSwordId(resolvedSwordId),
+            state == null ? "" : state.getResonanceType(),
+            state == null ? 0L : state.getBurstCooldownUntilTick()
+        );
+    }
+
+    private static BenmingControllerFailureReason mapBurstAttemptFailureReason(
+        @Nullable final BenmingSwordResourceTransaction.FailureReason failureReason
+    ) {
+        if (failureReason == null) {
+            return BenmingControllerFailureReason.INVALID_REQUEST;
+        }
+        return switch (failureReason) {
+            case INSUFFICIENT_ZHENYUAN,
+                INSUFFICIENT_NIANTOU,
+                INSUFFICIENT_HUNPO ->
+                BenmingControllerFailureReason.BURST_RESOURCES_INSUFFICIENT;
+            case BURST_COOLDOWN_ACTIVE ->
+                BenmingControllerFailureReason.BURST_COOLDOWN_ACTIVE;
+            case OVERLOAD_LIMIT_EXCEEDED ->
+                BenmingControllerFailureReason.BURST_OVERLOAD_BLOCKED;
+            case NONE,
+                INVALID_ENTITY,
+                INVALID_REQUEST,
+                ATOMIC_MUTATION_UNSUPPORTED,
+                RITUAL_LOCK_ACTIVE,
+                ILLEGAL_SWORD_STATE,
+                RESOURCE_WRITE_FAILED,
+                PHASE_STATE_WRITE_FAILED ->
+                BenmingControllerFailureReason.BOND_STATE_INVALID;
+        };
+    }
+
+    private static BenmingSwordResourceTransaction.Result tryConsumeBurstAttemptResources(
+        final ServerPlayer owner,
+        final FlyingSwordStateAttachment state,
+        final long normalizedTick
+    ) {
+        return BenmingSwordResourceTransaction.tryConsume(
+            owner,
+            new BenmingSwordResourceTransaction.Request(
+                BURST_ATTEMPT_ZHENYUAN_BASE_COST,
+                BURST_ATTEMPT_NIANTOU_BASE_COST,
+                BURST_ATTEMPT_HUNPO_BASE_COST,
+                BenmingSwordResourceTransaction.PhaseGuard.liveSword(
+                    true,
+                    true,
+                    false,
+                    state.getOverload(),
+                    true,
+                    BURST_ATTEMPT_OVERLOAD_LIMIT,
+                    normalizedTick,
+                    state.getBurstCooldownUntilTick(),
+                    state.getRitualLockUntilTick()
+                ),
+                BenmingSwordResourceTransaction.PhaseMutation.none()
+            ),
+            new BurstValidationMutationPort()
         );
     }
 
@@ -512,6 +1011,285 @@ public final class FlyingSwordController {
         return new AttachmentBondCachePort(state);
     }
 
+    private static BenmingSwordBondService.RitualBindTransactionContext createDefaultRitualBindContext(
+        ServerPlayer owner,
+        @Nullable FlyingSwordStateAttachment state,
+        long resolvedTick
+    ) {
+        final PlayerRitualBindTransactionPort mutationPort =
+            new PlayerRitualBindTransactionPort(owner, state);
+        return new BenmingSwordBondService.RitualBindTransactionContext(
+            CultivationSnapshot.capture(owner),
+            createDefaultRitualBindRequest(state, resolvedTick),
+            resolveRitualBindZhenyuanCost(owner),
+            baseCost -> normalizeNonNegativeCost(
+                ZhuanCostHelper.scaleCost(owner, normalizeNonNegativeCost(baseCost))
+            ),
+            mutationPort,
+            new BenmingSwordBondService.RitualRequestContext(
+                new SingleUseRitualRequestState(),
+                BenmingSwordBondService.defaultRitualDuplicateGuardTicks()
+            )
+        );
+    }
+
+    static BenmingSwordResourceTransaction.Request createDefaultRitualBindRequest(
+        @Nullable final FlyingSwordStateAttachment state,
+        final long resolvedTick
+    ) {
+        final double overloadBefore = state == null ? 0.0D : state.getOverload();
+        final long burstCooldownUntilTick = state == null
+            ? 0L
+            : state.getBurstCooldownUntilTick();
+        final long ritualLockUntilTick = state == null
+            ? 0L
+            : state.getRitualLockUntilTick();
+        return new BenmingSwordResourceTransaction.Request(
+            RITUAL_BIND_ZHENYUAN_BASE_COST,
+            RITUAL_BIND_NIANTOU_BASE_COST,
+            RITUAL_BIND_HUNPO_BASE_COST,
+            BenmingSwordResourceTransaction.PhaseGuard.liveSword(
+                true,
+                false,
+                true,
+                overloadBefore,
+                false,
+                0.0D,
+                resolvedTick,
+                burstCooldownUntilTick,
+                ritualLockUntilTick
+            ),
+            new BenmingSwordResourceTransaction.PhaseMutation(
+                0.0D,
+                false,
+                burstCooldownUntilTick,
+                true,
+                resolveRitualBindLockUntilTick(resolvedTick)
+            )
+        );
+    }
+
+    static long resolveRitualBindLockUntilTick(final long resolvedTick) {
+        return Math.max(0L, resolvedTick)
+            + BenmingSwordBondService.defaultRitualDuplicateGuardTicks();
+    }
+
+    private static BenmingControllerActionResult mapBenmingControllerFailure(
+        final BenmingControllerAction action,
+        final FlyingSwordStateAttachment state,
+        final String resolvedSwordId,
+        final BenmingSwordBondService.Result queryResult
+    ) {
+        return BenmingControllerActionResult.failure(
+            action,
+            mapBenmingControllerFailureReason(queryResult),
+            resolvePrimaryStableSwordId(resolvedSwordId, queryResult.stableSwordId()),
+            state == null ? "" : state.getResonanceType(),
+            state == null ? 0L : state.getBurstCooldownUntilTick()
+        );
+    }
+
+    private static BenmingControllerFailureReason mapBenmingControllerFailureReason(
+        final BenmingSwordBondService.Result queryResult
+    ) {
+        if (queryResult == null) {
+            return BenmingControllerFailureReason.INVALID_REQUEST;
+        }
+        return switch (queryResult.failureReason()) {
+            case NO_BONDED_SWORD -> BenmingControllerFailureReason.NO_BONDED_SWORD;
+            case NONE, INVALID_REQUEST -> BenmingControllerFailureReason.INVALID_REQUEST;
+            default -> BenmingControllerFailureReason.BOND_STATE_INVALID;
+        };
+    }
+
+    private static String resolvePrimaryStableSwordId(
+        final String resolvedSwordId,
+        final String bondedSwordId
+    ) {
+        final String normalizedResolved = normalizeSwordId(resolvedSwordId);
+        if (!normalizedResolved.isBlank()) {
+            return normalizedResolved;
+        }
+        return normalizeSwordId(bondedSwordId);
+    }
+
+    private static String normalizeSwordId(final String swordId) {
+        return swordId == null ? "" : swordId;
+    }
+
+    private static double resolveRitualBindZhenyuanCost(final ServerPlayer owner) {
+        return normalizeNonNegativeCost(
+            ZhenYuanHelper.calculateGuCost(owner, RITUAL_BIND_ZHENYUAN_BASE_COST)
+        );
+    }
+
+    private static double normalizeNonNegativeCost(final double cost) {
+        if (Double.isNaN(cost) || Double.isInfinite(cost) || cost <= 0.0D) {
+            return 0.0D;
+        }
+        return cost;
+    }
+
+    private static final class SingleUseRitualRequestState
+        implements BenmingSwordBondService.RitualRequestStatePort {
+
+        private String lockedSwordId = "";
+        private long lockedUntilTick;
+        private boolean executionPending;
+
+        @Override
+        public String getLockedSwordId() {
+            return lockedSwordId;
+        }
+
+        @Override
+        public long getLockedUntilTick() {
+            return lockedUntilTick;
+        }
+
+        @Override
+        public boolean isExecutionPending() {
+            return executionPending;
+        }
+
+        @Override
+        public void beginRitualRequest(final String stableSwordId, final long lockedUntilTick) {
+            this.lockedSwordId = stableSwordId == null ? "" : stableSwordId;
+            this.lockedUntilTick = Math.max(0L, lockedUntilTick);
+            this.executionPending = true;
+        }
+
+        @Override
+        public void markExecutionConsumed() {
+            this.executionPending = false;
+        }
+
+        @Override
+        public void clearRitualRequest() {
+            this.lockedSwordId = "";
+            this.lockedUntilTick = 0L;
+            this.executionPending = false;
+        }
+    }
+
+    private static final class PlayerRitualBindTransactionPort
+        implements BenmingSwordResourceTransaction.TransactionMutationPort {
+
+        private final ServerPlayer owner;
+        @Nullable
+        private final FlyingSwordStateAttachment state;
+
+        private PlayerRitualBindTransactionPort(
+            final ServerPlayer owner,
+            @Nullable final FlyingSwordStateAttachment state
+        ) {
+            this.owner = owner;
+            this.state = state;
+        }
+
+        @Override
+        public void spendZhenyuan(final double amount) {
+            ZhenYuanHelper.modify(owner, -amount);
+        }
+
+        @Override
+        public void spendNiantou(final double amount) {
+            NianTouHelper.modify(owner, -amount);
+        }
+
+        @Override
+        public void spendHunpo(final double amount) {
+            HunPoHelper.modify(owner, -amount);
+        }
+
+        @Override
+        public boolean supportsResourceRollback() {
+            return true;
+        }
+
+        @Override
+        public boolean supportsPhaseStateWrites() {
+            return state != null;
+        }
+
+        @Override
+        public void refundZhenyuan(final double amount) {
+            ZhenYuanHelper.modify(owner, amount);
+        }
+
+        @Override
+        public void refundNiantou(final double amount) {
+            NianTouHelper.modify(owner, amount);
+        }
+
+        @Override
+        public void refundHunpo(final double amount) {
+            HunPoHelper.modify(owner, amount);
+        }
+
+        @Override
+        public void setOverload(final double overload) {
+            if (state != null) {
+                state.setOverload(overload);
+            }
+        }
+
+        @Override
+        public void setBurstCooldownUntilTick(final long burstCooldownUntilTick) {
+            if (state != null) {
+                state.setBurstCooldownUntilTick(burstCooldownUntilTick);
+            }
+        }
+
+        @Override
+        public void setRitualLockUntilTick(final long ritualLockUntilTick) {
+            if (state != null) {
+                state.setRitualLockUntilTick(ritualLockUntilTick);
+            }
+        }
+    }
+
+    private static final class BurstValidationMutationPort
+        implements BenmingSwordResourceTransaction.TransactionMutationPort {
+
+        @Override
+        public void spendZhenyuan(final double amount) {}
+
+        @Override
+        public void spendNiantou(final double amount) {}
+
+        @Override
+        public void spendHunpo(final double amount) {}
+
+        @Override
+        public boolean supportsResourceRollback() {
+            return true;
+        }
+
+        @Override
+        public boolean supportsPhaseStateWrites() {
+            return false;
+        }
+
+        @Override
+        public void refundZhenyuan(final double amount) {}
+
+        @Override
+        public void refundNiantou(final double amount) {}
+
+        @Override
+        public void refundHunpo(final double amount) {}
+
+        @Override
+        public void setOverload(final double overload) {}
+
+        @Override
+        public void setBurstCooldownUntilTick(final long burstCooldownUntilTick) {}
+
+        @Override
+        public void setRitualLockUntilTick(final long ritualLockUntilTick) {}
+    }
+
     private static final class EntitySwordBondPort
         implements BenmingSwordBondService.SwordBondPort {
 
@@ -608,6 +1386,70 @@ public final class FlyingSwordController {
                 return;
             }
             state.clearBondCache();
+        }
+    }
+
+    public enum BenmingControllerAction {
+        RESONANCE_SWITCH,
+        BURST_ATTEMPT,
+    }
+
+    public enum BenmingControllerFailureReason {
+        NONE,
+        INVALID_REQUEST,
+        STATE_ATTACHMENT_MISSING,
+        NO_TARGET_SWORD,
+        NO_BONDED_SWORD,
+        TARGET_NOT_CURRENT_BENMING,
+        BOND_STATE_INVALID,
+        RESONANCE_TYPE_INVALID,
+        BURST_COOLDOWN_ACTIVE,
+        BURST_RESOURCES_INSUFFICIENT,
+        BURST_OVERLOAD_BLOCKED,
+    }
+
+    public record BenmingControllerActionResult(
+        boolean success,
+        BenmingControllerAction action,
+        BenmingControllerFailureReason failureReason,
+        String stableSwordId,
+        String resonanceType,
+        long burstCooldownUntilTick
+    ) {
+
+        public static BenmingControllerActionResult success(
+            final BenmingControllerAction action,
+            final String stableSwordId,
+            final String resonanceType,
+            final long burstCooldownUntilTick
+        ) {
+            return new BenmingControllerActionResult(
+                true,
+                action,
+                BenmingControllerFailureReason.NONE,
+                normalizeSwordId(stableSwordId),
+                normalizeSwordId(resonanceType),
+                Math.max(0L, burstCooldownUntilTick)
+            );
+        }
+
+        public static BenmingControllerActionResult failure(
+            final BenmingControllerAction action,
+            final BenmingControllerFailureReason failureReason,
+            final String stableSwordId,
+            final String resonanceType,
+            final long burstCooldownUntilTick
+        ) {
+            return new BenmingControllerActionResult(
+                false,
+                action,
+                failureReason == null
+                    ? BenmingControllerFailureReason.INVALID_REQUEST
+                    : failureReason,
+                normalizeSwordId(stableSwordId),
+                normalizeSwordId(resonanceType),
+                Math.max(0L, burstCooldownUntilTick)
+            );
         }
     }
 }

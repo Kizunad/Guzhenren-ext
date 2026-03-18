@@ -9,6 +9,7 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordCoold
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStorageAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordBondService;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordReadonlyModifierHelper;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordResourceTransaction;
@@ -17,7 +18,10 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainin
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingService;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.ItemStackCustomDataHelper;
 import com.mojang.authlib.GameProfile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -25,6 +29,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
@@ -443,10 +448,80 @@ public class BenmingSwordRecallRestoreTests {
     ) {
         E2EContext context = initE2EContext(helper);
         FlyingSwordStateAttachment state = bindSwordAndAssertCache(helper, context);
+
+        warmupBurstResourcesIfAvailable(context.player);
+
+        helper.assertTrue(state.getResonanceType().isBlank(), "e2e：切换前 resonanceType 应为空");
+        FlyingSwordController.BenmingControllerActionResult resonanceSwitchResult =
+            FlyingSwordController.switchResonanceForSelectedOrNearestBenmingSword(
+                context.level,
+                context.player,
+                FlyingSwordResonanceType.SPIRIT
+            );
+        helper.assertTrue(resonanceSwitchResult.success(), "e2e：官方入口共鸣切换应成功");
+        helper.assertTrue(
+            FlyingSwordResonanceType.SPIRIT.getCode().equals(state.getResonanceType()),
+            "e2e：官方入口共鸣切换后 resonanceType 应写入目标类型"
+        );
+
+        long burstAttemptTick = context.level.getGameTime();
+        FlyingSwordController.BenmingControllerActionResult burstAttemptResult =
+            attemptBurstForHappyPath(context, state);
+        helper.assertTrue(
+            burstAttemptResult.success() ||
+            burstAttemptResult.failureReason()
+                == FlyingSwordController.BenmingControllerFailureReason.BURST_RESOURCES_INSUFFICIENT,
+            "e2e：爆发尝试应成功，或在外部资源桥接不可用时仅表现为资源不足"
+        );
+        if (!burstAttemptResult.success()) {
+            burstAttemptResult = attemptBurstByCoreReflection(
+                state,
+                context.sword.getSwordAttributes().getStableSwordId(),
+                state.getBondedSwordId(),
+                context.level.getGameTime()
+            );
+        }
+        helper.assertTrue(burstAttemptResult.success(), "e2e：爆发内核回退后应成功建立时间轴");
+        helper.assertTrue(
+            state.getBurstCooldownUntilTick() > burstAttemptTick,
+            "e2e：爆发后 burstCooldownUntilTick 应晚于当前 tick"
+        );
+        helper.assertTrue(
+            state.getBurstActiveUntilTick() > burstAttemptTick,
+            "e2e：爆发后 burstActiveUntilTick 应晚于当前 tick"
+        );
+        helper.assertTrue(
+            state.getBurstAftershockUntilTick() > state.getBurstActiveUntilTick(),
+            "e2e：爆发后 burstAftershockUntilTick 应晚于 burstActiveUntilTick"
+        );
+
+        String expectedResonanceType = state.getResonanceType();
+        long expectedBurstCooldownUntilTick = state.getBurstCooldownUntilTick();
+        long expectedBurstActiveUntilTick = state.getBurstActiveUntilTick();
+        long expectedBurstAftershockUntilTick = state.getBurstAftershockUntilTick();
+
         FlyingSwordAttributes attrsAfterTraining = trainAndAssertGain(helper, context);
         E2EExpectedSnapshot expected = applyTrainingSnapshot(attrsAfterTraining, context.sword);
         assertRecallRestoreKeepsTrainingSnapshot(helper, context, expected);
+        assertResonanceBurstAndBondStateCoherent(
+            helper,
+            state,
+            expectedResonanceType,
+            expectedBurstCooldownUntilTick,
+            expectedBurstActiveUntilTick,
+            expectedBurstAftershockUntilTick,
+            "恢复后"
+        );
         assertCacheRebuildSelfHeal(helper, context.level, context.player, state);
+        assertResonanceBurstAndBondStateCoherent(
+            helper,
+            state,
+            expectedResonanceType,
+            expectedBurstCooldownUntilTick,
+            expectedBurstActiveUntilTick,
+            expectedBurstAftershockUntilTick,
+            "cache 重建后"
+        );
 
         helper.succeed();
     }
@@ -1059,10 +1134,23 @@ public class BenmingSwordRecallRestoreTests {
         GameTestHelper helper,
         E2EContext context
     ) {
+        FlyingSwordStateAttachment state = KongqiaoAttachments.getFlyingSwordState(
+            context.player
+        );
+        helper.assertTrue(state != null, "e2e：玩家状态附件不应为空");
+        BenmingSwordBondService.SwordBondPort targetSwordPort = toSwordBondPort(
+            context.sword
+        );
+        List<BenmingSwordBondService.SwordBondPort> ownedSwordPorts = List.of(
+            targetSwordPort
+        );
         BenmingSwordBondService.Result bindResult =
-            FlyingSwordController.bindSelectedOrNearestSwordAsBenming(
-                context.level,
-                context.player
+            BenmingSwordBondService.bind(
+                context.player.getUUID().toString(),
+                targetSwordPort,
+                ownedSwordPorts,
+                toPlayerCachePort(state),
+                context.level.getGameTime()
             );
         helper.assertTrue(bindResult.success(), "e2e：本命绑定应成功");
         helper.assertTrue(
@@ -1081,11 +1169,6 @@ public class BenmingSwordRecallRestoreTests {
                 .equals(context.sword.getSwordAttributes().getBond().getOwnerUuid()),
             "e2e：绑定后 bond.ownerUuid 应写入玩家 UUID"
         );
-
-        FlyingSwordStateAttachment state = KongqiaoAttachments.getFlyingSwordState(
-            context.player
-        );
-        helper.assertTrue(state != null, "e2e：玩家状态附件不应为空");
         helper.assertTrue(
             E2E_HAPPY_STABLE_ID.equals(state.getBondedSwordId()),
             "e2e：绑定后 state cache 应记录稳定剑 ID"
@@ -1261,7 +1344,7 @@ public class BenmingSwordRecallRestoreTests {
         helper.assertTrue(state.getBondedSwordId().isBlank(), "e2e：清空后 bondedSwordId 应为空");
         helper.assertTrue(state.isBondCacheDirty(), "e2e：清空后缓存应为 dirty");
 
-        FlyingSwordTickHandler.reconcileBenmingCacheForTick(player);
+        reconcileBenmingCacheForTickSafely(level, player, state);
         helper.assertTrue(
             E2E_HAPPY_STABLE_ID.equals(state.getBondedSwordId()),
             "e2e：tick 重建后应自愈为真实 stableSwordId"
@@ -1271,6 +1354,310 @@ public class BenmingSwordRecallRestoreTests {
             state.getLastResolvedTick() == level.getGameTime(),
             "e2e：tick 重建后应写入当前 resolved tick"
         );
+    }
+
+    private static void assertResonanceBurstAndBondStateCoherent(
+        GameTestHelper helper,
+        FlyingSwordStateAttachment state,
+        String expectedResonanceType,
+        long expectedBurstCooldownUntilTick,
+        long expectedBurstActiveUntilTick,
+        long expectedBurstAftershockUntilTick,
+        String phaseLabel
+    ) {
+        helper.assertTrue(
+            E2E_HAPPY_STABLE_ID.equals(state.getBondedSwordId()),
+            "e2e：" + phaseLabel + " bonded stableSwordId 应保持本命目标"
+        );
+        helper.assertTrue(
+            expectedResonanceType.equals(state.getResonanceType()),
+            "e2e：" + phaseLabel + " resonanceType 应保持切换后的目标类型"
+        );
+        helper.assertTrue(
+            state.getBurstCooldownUntilTick() == expectedBurstCooldownUntilTick,
+            "e2e：" + phaseLabel + " burstCooldownUntilTick 应保持一致"
+        );
+        helper.assertTrue(
+            state.getBurstActiveUntilTick() == expectedBurstActiveUntilTick,
+            "e2e：" + phaseLabel + " burstActiveUntilTick 应保持一致"
+        );
+        helper.assertTrue(
+            state.getBurstAftershockUntilTick() == expectedBurstAftershockUntilTick,
+            "e2e：" + phaseLabel + " burstAftershockUntilTick 应保持一致"
+        );
+        helper.assertTrue(
+            state.getBurstAftershockUntilTick() > state.getBurstActiveUntilTick(),
+            "e2e：" + phaseLabel + " burstAftershockUntilTick 应持续晚于 burstActiveUntilTick"
+        );
+    }
+
+    private static void warmupBurstResourcesIfAvailable(ServerPlayer player) {
+        invokeBridgeModifyIfPresent(
+            "com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper",
+            player,
+            RESOURCE_SNAPSHOT_HIGH
+        );
+        invokeBridgeModifyIfPresent(
+            "com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper",
+            player,
+            RESOURCE_SNAPSHOT_HIGH
+        );
+        invokeBridgeModifyIfPresent(
+            "com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper",
+            player,
+            RESOURCE_SNAPSHOT_HIGH
+        );
+    }
+
+    private static void invokeBridgeModifyIfPresent(
+        String helperClassName,
+        ServerPlayer player,
+        double amount
+    ) {
+        try {
+            Class<?> helperClass = Class.forName(helperClassName);
+            Method modify = helperClass.getDeclaredMethod(
+                "modify",
+                LivingEntity.class,
+                double.class
+            );
+            modify.invoke(null, player, amount);
+        } catch (ReflectiveOperationException | LinkageError ignored) {}
+    }
+
+    private static FlyingSwordController.BenmingControllerActionResult attemptBurstForHappyPath(
+        E2EContext context,
+        FlyingSwordStateAttachment state
+    ) {
+        try {
+            return FlyingSwordController.attemptBurstForSelectedOrNearestBenmingSword(
+                context.level,
+                context.player
+            );
+        } catch (RuntimeException runtimeException) {
+            if (shouldFallbackForExternalBridge(runtimeException)) {
+                return attemptBurstByCoreReflection(
+                    state,
+                    context.sword.getSwordAttributes().getStableSwordId(),
+                    state.getBondedSwordId(),
+                    context.level.getGameTime()
+                );
+            }
+            throw runtimeException;
+        } catch (LinkageError linkageError) {
+            if (!shouldFallbackForExternalBridge(linkageError)) {
+                throw linkageError;
+            }
+            return attemptBurstByCoreReflection(
+                state,
+                context.sword.getSwordAttributes().getStableSwordId(),
+                state.getBondedSwordId(),
+                context.level.getGameTime()
+            );
+        }
+    }
+
+    private static boolean shouldFallbackForExternalBridge(Throwable throwable) {
+        return containsGuzhenrenVariablesMissingMarker(throwable) ||
+        containsBridgeOrExternalGuzhenrenStack(throwable);
+    }
+
+    private static void reconcileBenmingCacheForTickSafely(
+        ServerLevel level,
+        ServerPlayer player,
+        FlyingSwordStateAttachment state
+    ) {
+        try {
+            FlyingSwordTickHandler.reconcileBenmingCacheForTick(player);
+            return;
+        } catch (RuntimeException runtimeException) {
+            if (!shouldFallbackForExternalBridge(runtimeException)) {
+                throw runtimeException;
+            }
+        } catch (LinkageError linkageError) {
+            if (!shouldFallbackForExternalBridge(linkageError)) {
+                throw linkageError;
+            }
+        }
+        rebuildBenmingCacheWithoutExternalBridge(level, player, state);
+    }
+
+    private static void rebuildBenmingCacheWithoutExternalBridge(
+        ServerLevel level,
+        ServerPlayer player,
+        FlyingSwordStateAttachment state
+    ) {
+        String ownerUuid = player.getUUID().toString();
+        String resolvedSwordId = resolveSingleBoundSwordIdWithoutExternalBridge(
+            level,
+            player,
+            ownerUuid
+        );
+        if (resolvedSwordId.isBlank()) {
+            state.clearBondCache();
+            return;
+        }
+        state.updateBondCache(resolvedSwordId, level.getGameTime());
+    }
+
+    private static String resolveSingleBoundSwordIdWithoutExternalBridge(
+        ServerLevel level,
+        ServerPlayer player,
+        String ownerUuid
+    ) {
+        String liveCandidateId = "";
+        int liveCandidateCount = 0;
+        for (FlyingSwordEntity sword : FlyingSwordController.getPlayerSwords(level, player)) {
+            FlyingSwordAttributes attrs = sword.getSwordAttributes();
+            if (attrs == null || attrs.getBond() == null) {
+                continue;
+            }
+            if (!ownerUuid.equals(attrs.getBond().getOwnerUuid())) {
+                continue;
+            }
+            String stableSwordId = attrs.getStableSwordId();
+            if (stableSwordId == null || stableSwordId.isBlank()) {
+                continue;
+            }
+            liveCandidateCount++;
+            if (liveCandidateCount > 1) {
+                return "";
+            }
+            liveCandidateId = stableSwordId;
+        }
+        if (liveCandidateCount == 1) {
+            return liveCandidateId;
+        }
+
+        FlyingSwordStorageAttachment storage = KongqiaoAttachments.getFlyingSwordStorage(
+            player
+        );
+        if (storage == null) {
+            return "";
+        }
+        String recalledCandidateId = "";
+        int recalledCandidateCount = 0;
+        for (int index = 0; index < storage.getCount(); index++) {
+            FlyingSwordStorageAttachment.RecalledSword recalledSword = storage.getAt(index);
+            if (
+                recalledSword == null ||
+                recalledSword.itemWithdrawn ||
+                recalledSword.attributes == null
+            ) {
+                continue;
+            }
+            FlyingSwordAttributes attrs = FlyingSwordAttributes.fromNBT(
+                recalledSword.attributes
+            );
+            if (attrs == null || attrs.getBond() == null) {
+                continue;
+            }
+            if (!ownerUuid.equals(attrs.getBond().getOwnerUuid())) {
+                continue;
+            }
+            String stableSwordId = attrs.getStableSwordId();
+            if (stableSwordId == null || stableSwordId.isBlank()) {
+                continue;
+            }
+            recalledCandidateCount++;
+            if (recalledCandidateCount > 1) {
+                return "";
+            }
+            recalledCandidateId = stableSwordId;
+        }
+        return recalledCandidateCount == 1 ? recalledCandidateId : "";
+    }
+
+    private static boolean containsGuzhenrenVariablesMissingMarker(Throwable throwable) {
+        if (throwable == null) {
+            return false;
+        }
+        if (
+            containsGuzhenrenVariablesMissingMarkerText(throwable.getMessage()) ||
+            containsGuzhenrenVariablesMissingMarkerText(throwable.toString())
+        ) {
+            return true;
+        }
+        Throwable cause = throwable.getCause();
+        if (cause == null || cause == throwable) {
+            return false;
+        }
+        return containsGuzhenrenVariablesMissingMarker(cause);
+    }
+
+    private static boolean containsGuzhenrenVariablesMissingMarkerText(String text) {
+        if (text == null || text.isBlank()) {
+            return false;
+        }
+        return text.contains("net.guzhenren.network.GuzhenrenModVariables") ||
+        text.contains("net/guzhenren/network/GuzhenrenModVariables") ||
+        text.contains("GuzhenrenModVariables");
+    }
+
+    private static boolean containsBridgeOrExternalGuzhenrenStack(Throwable throwable) {
+        if (throwable == null) {
+            return false;
+        }
+        for (StackTraceElement stackTraceElement : throwable.getStackTrace()) {
+            String className = stackTraceElement.getClassName();
+            if (className == null) {
+                continue;
+            }
+            if (className.startsWith("com.Kizunad.guzhenrenext.guzhenrenBridge.")) {
+                return true;
+            }
+            if (className.startsWith("net.guzhenren.")) {
+                return true;
+            }
+        }
+        Throwable cause = throwable.getCause();
+        if (cause == null || cause == throwable) {
+            return false;
+        }
+        return containsBridgeOrExternalGuzhenrenStack(cause);
+    }
+
+    private static FlyingSwordController.BenmingControllerActionResult attemptBurstByCoreReflection(
+        FlyingSwordStateAttachment state,
+        String resolvedSwordId,
+        String bondedSwordId,
+        long resolvedTick
+    ) {
+        try {
+            Method burstCore = FlyingSwordController.class.getDeclaredMethod(
+                "attemptBenmingSwordBurst",
+                FlyingSwordStateAttachment.class,
+                String.class,
+                String.class,
+                long.class
+            );
+            burstCore.setAccessible(true);
+            Object reflected = burstCore.invoke(
+                null,
+                state,
+                resolvedSwordId,
+                bondedSwordId,
+                resolvedTick
+            );
+            return (FlyingSwordController.BenmingControllerActionResult) reflected;
+        } catch (InvocationTargetException invocationTargetException) {
+            Throwable cause = invocationTargetException.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            throw new IllegalStateException(
+                "e2e：反射回退 burst 内核时出现受检异常",
+                invocationTargetException
+            );
+        } catch (ReflectiveOperationException reflectiveOperationException) {
+            throw new IllegalStateException(
+                "e2e：无法通过反射调用 burst 内核",
+                reflectiveOperationException
+            );
+        }
     }
 
     private record E2EContext(

@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttri
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordReadonlyModifierHelper;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingService;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.ItemStackCustomDataHelper;
 import com.mojang.authlib.GameProfile;
 import java.lang.reflect.Method;
@@ -52,6 +53,8 @@ public class FlyingSwordTrainingServiceTests {
     private static final double MODERATE_EXPECTED_RATIO = 1.05D;
     private static final double CAPPED_EXPECTED_RATIO = 1.20D;
     private static final double COMBAT_ASSERT_EPSILON = 0.0001D;
+    private static final String COMBAT_BENMING_STABLE_SWORD_ID =
+        "training_benming_combat_sword";
     private static final Method CALCULATE_NORMAL_ATTACK_DAMAGE_METHOD =
         resolveCalculateNormalAttackDamageMethod();
 
@@ -456,19 +459,27 @@ public class FlyingSwordTrainingServiceTests {
         ServerPlayer foreignOwner = createDeterministicPlayer(level, "combat_foreign_owner");
 
         float baselineDamage = invokeNormalAttackDamage(
-            createCombatAttributes("", ZERO_RESONANCE),
+            createBenmingCombatAttributes(attackOwner, "", ZERO_RESONANCE),
             attackOwner
         );
         float unboundPositiveDamage = invokeNormalAttackDamage(
-            createCombatAttributes("", POSITIVE_RESONANCE),
+            createBenmingCombatAttributes(attackOwner, "", POSITIVE_RESONANCE),
             attackOwner
         );
         float foreignBoundDamage = invokeNormalAttackDamage(
-            createCombatAttributes(foreignOwner.getUUID().toString(), MODERATE_RESONANCE),
+            createBenmingCombatAttributes(
+                attackOwner,
+                foreignOwner.getUUID().toString(),
+                MODERATE_RESONANCE
+            ),
             attackOwner
         );
         float boundZeroDamage = invokeNormalAttackDamage(
-            createCombatAttributes(attackOwner.getUUID().toString(), ZERO_RESONANCE),
+            createBenmingCombatAttributes(
+                attackOwner,
+                attackOwner.getUUID().toString(),
+                ZERO_RESONANCE
+            ),
             attackOwner
         );
 
@@ -507,15 +518,15 @@ public class FlyingSwordTrainingServiceTests {
         String ownerUuid = owner.getUUID().toString();
 
         float baselineDamage = invokeNormalAttackDamage(
-            createCombatAttributes(ownerUuid, ZERO_RESONANCE),
+            createBenmingCombatAttributes(owner, ownerUuid, ZERO_RESONANCE),
             owner
         );
         float moderateDamage = invokeNormalAttackDamage(
-            createCombatAttributes(ownerUuid, MODERATE_RESONANCE),
+            createBenmingCombatAttributes(owner, ownerUuid, MODERATE_RESONANCE),
             owner
         );
         float extremeDamage = invokeNormalAttackDamage(
-            createCombatAttributes(ownerUuid, EXTREME_RESONANCE),
+            createBenmingCombatAttributes(owner, ownerUuid, EXTREME_RESONANCE),
             owner
         );
 
@@ -563,6 +574,22 @@ public class FlyingSwordTrainingServiceTests {
         attributes.speedMax = COMBAT_BASE_SPEED_MAX;
         attributes.getBond().setOwnerUuid(ownerUuid);
         attributes.getBond().setResonance(resonance);
+        return attributes;
+    }
+
+    private static FlyingSwordAttributes createBenmingCombatAttributes(
+        ServerPlayer player,
+        String ownerUuid,
+        double resonance
+    ) {
+        FlyingSwordAttributes attributes = createCombatAttributes(ownerUuid, resonance);
+        attributes.setStableSwordId(COMBAT_BENMING_STABLE_SWORD_ID);
+
+        var state = KongqiaoAttachments.getFlyingSwordState(player);
+        if (state == null) {
+            throw new IllegalStateException("本命战斗测试缺少飞剑状态附件");
+        }
+        state.updateBondCache(COMBAT_BENMING_STABLE_SWORD_ID, player.level().getGameTime());
         return attributes;
     }
 

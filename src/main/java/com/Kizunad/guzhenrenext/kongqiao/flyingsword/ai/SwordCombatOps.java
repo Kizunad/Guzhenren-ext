@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordConstants;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordController;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordTickHandler;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordClusterAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.cluster.ClusterSynergyHelper;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -49,9 +51,18 @@ import net.minecraft.world.phys.Vec3;
 
      private static final int DEFAULT_MOB_EFFECT_AMPLIFIER = 0;
      private static final int TIER_DURATION_TICKS_PER_LEVEL = 10;
-     private static final double BENMING_ATTACK_MULTIPLIER_BASE = 1.0D;
-     private static final double BENMING_ATTACK_BONUS_PER_RESONANCE = 0.10D;
-     private static final double BENMING_ATTACK_BONUS_CAP = 0.20D;
+    private static final double BENMING_ATTACK_MULTIPLIER_BASE = 1.0D;
+    private static final double BENMING_RESONANCE_ATTACK_MULTIPLIER_CAP = 0.20D;
+    private static final double BENMING_RESONANCE_ATTACK_MULTIPLIER_PER_POINT = 0.10D;
+    private static final double BENMING_BURST_ACTIVE_ATTACK_MULTIPLIER = 1.25D;
+     private static final double BENMING_BURST_AFTERSHOCK_ATTACK_MULTIPLIER = 0.80D;
+     private static final double BENMING_BACKLASH_ATTACK_MULTIPLIER = 0.35D;
+     private static final double BENMING_RECOVERY_ATTACK_MULTIPLIER = 0.70D;
+     private static final double BENMING_BURST_ACTIVE_PURSUIT_MULTIPLIER = 1.20D;
+     private static final double BENMING_BURST_AFTERSHOCK_PURSUIT_MULTIPLIER = 0.85D;
+     private static final double BENMING_BURST_ACTIVE_COOLDOWN_MULTIPLIER = 0.80D;
+     private static final double BENMING_BURST_AFTERSHOCK_COOLDOWN_MULTIPLIER = 1.25D;
+     private static final double DAMAGE_SPEED_FLOOR = 0.05D;
  
      private SwordCombatOps() {}
 
@@ -90,9 +101,13 @@ import net.minecraft.world.phys.Vec3;
 
         // 计算追击速度（使用有效速度，包含品质加成）
         FlyingSwordAttributes attrs = sword.getSwordAttributes();
+        BenmingDamageContext benmingDamageContext = resolveBenmingDamageContext(
+            attrs,
+            owner
+        );
         double speed = Math.max(
             0.0,
-            attrs.getEffectiveSpeedMax() * Math.max(0.0, chaseSpeedScale)
+            resolveCombatPursuitSpeed(attrs, chaseSpeedScale, benmingDamageContext)
         );
 
         // 应用速度向目标移动
@@ -142,8 +157,13 @@ import net.minecraft.world.phys.Vec3;
         // 执行攻击
         boolean success = target.hurt(source, damage);
         if (success) {
+            FlyingSwordTickHandler.markCombatActivityForServerOwner(owner, sword);
+
             // 设置攻击冷却（使用属性系统的冷却值）
-            int cooldown = sword.getSwordAttributes().attackCooldown;
+            int cooldown = resolveCombatAttackCooldown(
+                sword.getSwordAttributes(),
+                resolveBenmingDamageContext(sword.getSwordAttributes(), owner)
+            );
             FlyingSwordCooldownOps.setAttackCooldown(sword, cooldown);
 
             // 计算实际造成的伤害
@@ -256,25 +276,58 @@ import net.minecraft.world.phys.Vec3;
         double currentSpeed,
         float synergyAttackMultiplier
     ) {
+        return calculateNormalAttackDamage(
+            attrs,
+            currentSpeed,
+            synergyAttackMultiplier,
+            resolveBenmingDamageContext(attrs, owner)
+        );
+    }
+
+    static float calculateNormalAttackDamage(
+        final FlyingSwordAttributes attrs,
+        final double currentSpeed,
+        final float synergyAttackMultiplier,
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (attrs == null) {
+            return 0.0F;
+        }
         applyImprintPassiveMultipliers(attrs);
 
-        // 获取有效伤害（包含品质、等级、临时修正）
-        double baseDamage = attrs.getEffectiveDamage();
+        final double baseDamage = sanitizeNonNegativeFinite(attrs.getEffectiveDamage());
 
-        // 速度加成（速度越快伤害越高）
-        double speedRatio =
-            currentSpeed / attrs.getEffectiveSpeedMax();
-        double speedBonus =
-            1.0 +
+        final double normalizedEffectiveSpeedMax = Math.max(
+            DAMAGE_SPEED_FLOOR,
+            sanitizeNonNegativeFinite(attrs.getEffectiveSpeedMax())
+        );
+        final double speedRatio =
+            sanitizeNonNegativeFinite(currentSpeed) / normalizedEffectiveSpeedMax;
+        final double speedBonus =
+            1.0D +
             Math.min(
                 SwordGrowthTuning.SPEED_DAMAGE_BONUS_CAP,
                 speedRatio * SwordGrowthTuning.SPEED_DAMAGE_BONUS_COEF
             );
 
-        double benmingAttackMultiplier = resolveBenmingResonanceAttackMultiplier(attrs, owner);
+        final double benmingAttackMultiplier = resolveBenmingResonanceAttackMultiplier(
+            attrs,
+            benmingDamageContext
+        );
+        final double benmingBurstAttackMultiplier =
+            resolveBenmingBurstAttackMultiplier(benmingDamageContext);
+        final double benmingPenaltyMultiplier =
+            resolveBenmingPenaltyAttackMultiplier(benmingDamageContext);
+        final double normalizedSynergyAttackMultiplier =
+            sanitizeMultiplier(synergyAttackMultiplier, 1.0D);
 
-        return (float) (
-            baseDamage * speedBonus * benmingAttackMultiplier * synergyAttackMultiplier
+        return sanitizeAttackDamage(
+            baseDamage
+                * speedBonus
+                * benmingAttackMultiplier
+                * benmingBurstAttackMultiplier
+                * benmingPenaltyMultiplier
+                * normalizedSynergyAttackMultiplier
         );
     }
 
@@ -282,37 +335,272 @@ import net.minecraft.world.phys.Vec3;
         FlyingSwordAttributes attrs,
         LivingEntity owner
     ) {
-        if (attrs == null || owner == null) {
+        return resolveBenmingResonanceAttackMultiplier(
+            attrs,
+            resolveBenmingDamageContext(attrs, owner)
+        );
+    }
+
+    static double resolveBenmingResonanceAttackMultiplier(
+        final FlyingSwordAttributes attrs,
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (attrs == null) {
             return BENMING_ATTACK_MULTIPLIER_BASE;
         }
 
-        FlyingSwordAttributes.BenmingSwordBond bond = attrs.getBond();
+        if (!isBenmingDamageContextApplicable(benmingDamageContext)) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        final double baselineDamage = sanitizeNonNegativeFinite(attrs.getEffectiveDamage());
+        if (baselineDamage <= 0.0D) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        final double resonanceMappedDamage = sanitizeNonNegativeFinite(
+            attrs.getEffectiveDamage(benmingDamageContext.resonanceType())
+        );
+        if (resonanceMappedDamage <= 0.0D) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        final double resonanceTypeMultiplier = sanitizeMultiplier(
+            resonanceMappedDamage / baselineDamage,
+            BENMING_ATTACK_MULTIPLIER_BASE
+        );
+
+        final FlyingSwordAttributes.BenmingSwordBond bond = attrs.getBond();
         if (bond == null) {
+            return resonanceTypeMultiplier;
+        }
+
+        final double resonance = sanitizeNonNegativeFinite(bond.getResonance());
+        if (resonance <= 0.0D) {
+            return resonanceTypeMultiplier;
+        }
+
+        final double resonanceBonus = Math.min(
+            BENMING_RESONANCE_ATTACK_MULTIPLIER_CAP,
+            resonance * BENMING_RESONANCE_ATTACK_MULTIPLIER_PER_POINT
+        );
+        final double bondResonanceMultiplier = sanitizeMultiplier(
+            BENMING_ATTACK_MULTIPLIER_BASE + resonanceBonus,
+            BENMING_ATTACK_MULTIPLIER_BASE
+        );
+
+        return sanitizeMultiplier(
+            resonanceTypeMultiplier * bondResonanceMultiplier,
+            resonanceTypeMultiplier
+        );
+    }
+
+    static double resolveBenmingPenaltyAttackMultiplier(
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (!isBenmingDamageContextApplicable(benmingDamageContext)) {
             return BENMING_ATTACK_MULTIPLIER_BASE;
         }
 
-        String ownerUuid = bond.getOwnerUuid();
-        if (ownerUuid == null || ownerUuid.isBlank()) {
+        final long currentTick = Math.max(0L, benmingDamageContext.currentTick());
+        if (currentTick < Math.max(0L, benmingDamageContext.overloadBacklashUntilTick())) {
+            return BENMING_BACKLASH_ATTACK_MULTIPLIER;
+        }
+        if (currentTick < Math.max(0L, benmingDamageContext.overloadRecoveryUntilTick())) {
+            return BENMING_RECOVERY_ATTACK_MULTIPLIER;
+        }
+        return BENMING_ATTACK_MULTIPLIER_BASE;
+    }
+
+    static double resolveBenmingBurstAttackMultiplier(
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (!isBenmingDamageContextApplicable(benmingDamageContext)) {
             return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+        return switch (resolveBenmingBurstPhase(benmingDamageContext)) {
+            case ACTIVE -> BENMING_BURST_ACTIVE_ATTACK_MULTIPLIER;
+            case AFTERSHOCK -> BENMING_BURST_AFTERSHOCK_ATTACK_MULTIPLIER;
+            case NONE -> BENMING_ATTACK_MULTIPLIER_BASE;
+        };
+    }
+
+    static double resolveCombatPursuitSpeed(
+        final FlyingSwordAttributes attrs,
+        final double chaseSpeedScale,
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (attrs == null) {
+            return 0.0D;
+        }
+        final double normalizedScale = sanitizeNonNegativeFinite(chaseSpeedScale);
+        final double effectiveSpeed = isBenmingDamageContextApplicable(benmingDamageContext)
+            ? attrs.getEffectivePursuitSpeed(benmingDamageContext.resonanceType())
+            : attrs.getEffectiveSpeedMax();
+        final double burstPursuitMultiplier = resolveBenmingBurstPursuitMultiplier(
+            benmingDamageContext
+        );
+        return sanitizeNonNegativeFinite(effectiveSpeed)
+            * normalizedScale
+            * burstPursuitMultiplier;
+    }
+
+    static int resolveCombatAttackCooldown(
+        final FlyingSwordAttributes attrs,
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (attrs == null) {
+            return 0;
+        }
+        final int baselineCooldown = isBenmingDamageContextApplicable(benmingDamageContext)
+            ? attrs.getEffectiveAttackCooldown(benmingDamageContext.resonanceType())
+            : attrs.attackCooldown;
+        final long mappedCooldown = Math.round(
+            Math.max(0, baselineCooldown)
+                * resolveBenmingBurstCooldownMultiplier(benmingDamageContext)
+        );
+        return Math.max(0, (int) mappedCooldown);
+    }
+
+    @Nullable
+    private static BenmingDamageContext resolveBenmingDamageContext(
+        final FlyingSwordAttributes attrs,
+        final LivingEntity owner
+    ) {
+        if (attrs == null || owner == null) {
+            return null;
+        }
+        if (!(owner instanceof ServerPlayer serverPlayer)) {
+            return null;
+        }
+
+        final FlyingSwordAttributes.BenmingSwordBond bond = attrs.getBond();
+        if (bond == null) {
+            return null;
+        }
+        final String ownerUuid = bond.getOwnerUuid();
+        if (ownerUuid == null || ownerUuid.isBlank()) {
+            return null;
         }
         if (!owner.getUUID().toString().equals(ownerUuid)) {
-            return BENMING_ATTACK_MULTIPLIER_BASE;
+            return null;
         }
 
-        double resonance = bond.getResonance();
-        if (
-            resonance <= 0.0D ||
-            Double.isNaN(resonance) ||
-            Double.isInfinite(resonance)
-        ) {
-            return BENMING_ATTACK_MULTIPLIER_BASE;
+        final var state = KongqiaoAttachments.getFlyingSwordState(serverPlayer);
+        if (state == null) {
+            return null;
         }
-
-        double resonanceBonus = Math.min(
-            BENMING_ATTACK_BONUS_CAP,
-            Math.max(0.0D, resonance) * BENMING_ATTACK_BONUS_PER_RESONANCE
+        return new BenmingDamageContext(
+            attrs.getStableSwordId(),
+            state.getBondedSwordId(),
+            state.isBondCacheDirty(),
+            state.getResonanceType(),
+            owner.level().getGameTime(),
+            state.getBurstActiveUntilTick(),
+            state.getBurstAftershockUntilTick(),
+            state.getOverloadBacklashUntilTick(),
+            state.getOverloadRecoveryUntilTick()
         );
-        return BENMING_ATTACK_MULTIPLIER_BASE + resonanceBonus;
+    }
+
+    private static boolean isBenmingDamageContextApplicable(
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (benmingDamageContext == null || benmingDamageContext.bondCacheDirty()) {
+            return false;
+        }
+        final String swordStableId = normalizeStableSwordId(
+            benmingDamageContext.swordStableId()
+        );
+        final String bondedSwordId = normalizeStableSwordId(
+            benmingDamageContext.bondedSwordId()
+        );
+        if (swordStableId.isBlank() || bondedSwordId.isBlank()) {
+            return false;
+        }
+        return swordStableId.equals(bondedSwordId);
+    }
+
+    private static double resolveBenmingBurstPursuitMultiplier(
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (!isBenmingDamageContextApplicable(benmingDamageContext)) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+        return switch (resolveBenmingBurstPhase(benmingDamageContext)) {
+            case ACTIVE -> BENMING_BURST_ACTIVE_PURSUIT_MULTIPLIER;
+            case AFTERSHOCK -> BENMING_BURST_AFTERSHOCK_PURSUIT_MULTIPLIER;
+            case NONE -> BENMING_ATTACK_MULTIPLIER_BASE;
+        };
+    }
+
+    private static double resolveBenmingBurstCooldownMultiplier(
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (!isBenmingDamageContextApplicable(benmingDamageContext)) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+        return switch (resolveBenmingBurstPhase(benmingDamageContext)) {
+            case ACTIVE -> BENMING_BURST_ACTIVE_COOLDOWN_MULTIPLIER;
+            case AFTERSHOCK -> BENMING_BURST_AFTERSHOCK_COOLDOWN_MULTIPLIER;
+            case NONE -> BENMING_ATTACK_MULTIPLIER_BASE;
+        };
+    }
+
+    private static BenmingBurstPhase resolveBenmingBurstPhase(
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (!isBenmingDamageContextApplicable(benmingDamageContext)) {
+            return BenmingBurstPhase.NONE;
+        }
+        final long currentTick = Math.max(0L, benmingDamageContext.currentTick());
+        final long burstActiveUntilTick = Math.max(
+            0L,
+            benmingDamageContext.burstActiveUntilTick()
+        );
+        final long burstAftershockUntilTick = Math.max(
+            0L,
+            benmingDamageContext.burstAftershockUntilTick()
+        );
+        if (currentTick < burstActiveUntilTick) {
+            return BenmingBurstPhase.ACTIVE;
+        }
+        if (currentTick >= burstActiveUntilTick && currentTick < burstAftershockUntilTick) {
+            return BenmingBurstPhase.AFTERSHOCK;
+        }
+        return BenmingBurstPhase.NONE;
+    }
+
+    private static String normalizeStableSwordId(@Nullable final String stableSwordId) {
+        return stableSwordId == null ? "" : stableSwordId;
+    }
+
+    private static double sanitizeNonNegativeFinite(final double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value) || value < 0.0D) {
+            return 0.0D;
+        }
+        return value;
+    }
+
+    private static double sanitizeMultiplier(
+        final double multiplier,
+        final double fallback
+    ) {
+        if (Double.isNaN(multiplier) || Double.isInfinite(multiplier) || multiplier <= 0.0D) {
+            return fallback;
+        }
+        return multiplier;
+    }
+
+    private static float sanitizeAttackDamage(final double damage) {
+        final double normalizedDamage = sanitizeNonNegativeFinite(damage);
+        if (normalizedDamage <= 0.0D) {
+            return 0.0F;
+        }
+        if (normalizedDamage >= Float.MAX_VALUE) {
+            return Float.MAX_VALUE;
+        }
+        return (float) normalizedDamage;
     }
 
     /**
@@ -356,6 +644,24 @@ import net.minecraft.world.phys.Vec3;
         }
 
         return ClusterSynergyHelper.evaluate(activeSwords).attackMultiplier();
+    }
+
+    record BenmingDamageContext(
+        String swordStableId,
+        String bondedSwordId,
+        boolean bondCacheDirty,
+        String resonanceType,
+        long currentTick,
+        long burstActiveUntilTick,
+        long burstAftershockUntilTick,
+        long overloadBacklashUntilTick,
+        long overloadRecoveryUntilTick
+    ) {}
+
+    private enum BenmingBurstPhase {
+        NONE,
+        ACTIVE,
+        AFTERSHOCK,
     }
 
     /**
