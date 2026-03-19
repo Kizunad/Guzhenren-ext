@@ -1,5 +1,18 @@
 package com.Kizunad.guzhenrenext.kongqiao;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.IllegalFormatException;
+import java.util.List;
+import java.util.Locale;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -368,5 +381,137 @@ public final class KongqiaoI18n {
      */
     public static Component text(String key, Object... args) {
         return Component.translatable(key, args);
+    }
+
+    /**
+     * 统一的“翻译组件 + 内置语言文件回退”读取入口。
+     * <p>
+     * 设计语义：
+     * <ul>
+     *     <li>先尝试 {@link #text(String, Object...)}，保持与游戏运行时语言系统一致。</li>
+     *     <li>仅当运行时翻译链路不可用（如纯 JVM 测试）时，回退读取 jar 内置 lang json。</li>
+     *     <li>回退顺序固定：{@code zh_cn -> 当前 Locale -> 当前语言 -> en_us}。</li>
+     *     <li>格式化保持 {@code Locale.ROOT}，且格式失败时返回原模板。</li>
+     * </ul>
+     * </p>
+     *
+     * @param key 语言键
+     * @param missingValue 所有回退失败时返回的兜底文本
+     * @param args 可选占位符
+     * @return 本地化文本
+     */
+    public static String localizedTextWithBundledFallback(
+        final String key,
+        final String missingValue,
+        final Object... args
+    ) {
+        final String namespace = resolveTranslationNamespace(key);
+        return localizedTextWithBundledFallback(key, namespace, missingValue, args);
+    }
+
+    /**
+     * 与 {@link #localizedTextWithBundledFallback(String, String, Object...)} 语义一致，
+     * 但允许调用方显式指定资源命名空间。
+     *
+     * @param key 语言键
+     * @param namespace 语言资源命名空间（例如 {@code guzhenrenext}/{@code minecraft}）
+     * @param missingValue 所有回退失败时返回的兜底文本
+     * @param args 可选占位符
+     * @return 本地化文本
+     */
+    public static String localizedTextWithBundledFallback(
+        final String key,
+        final String namespace,
+        final String missingValue,
+        final Object... args
+    ) {
+        try {
+            return text(key, args).getString();
+        } catch (RuntimeException | LinkageError exception) {
+            return localizedTextFromBundledLang(key, namespace, missingValue, args);
+        }
+    }
+
+    private static String localizedTextFromBundledLang(
+        final String key,
+        final String namespace,
+        final String missingValue,
+        final Object... args
+    ) {
+        for (final String localeKey : bundledLocaleFallbackOrder()) {
+            final String localized = readBundledLangValue(namespace, localeKey, key);
+            if (localized != null && !localized.isBlank()) {
+                if (args == null || args.length == 0) {
+                    return localized;
+                }
+                try {
+                    return String.format(Locale.ROOT, localized, args);
+                } catch (IllegalFormatException exception) {
+                    return localized;
+                }
+            }
+        }
+        return missingValue;
+    }
+
+    private static String resolveTranslationNamespace(final String key) {
+        if (key == null || key.isBlank()) {
+            return "minecraft";
+        }
+        if (key.contains("." + GuzhenrenExt.MODID + ".") || key.startsWith(GuzhenrenExt.MODID + ".")) {
+            return GuzhenrenExt.MODID;
+        }
+        return "minecraft";
+    }
+
+    private static List<String> bundledLocaleFallbackOrder() {
+        final List<String> localeKeys = new ArrayList<>();
+        addLocaleCandidate(localeKeys, "zh_cn");
+        addLocaleCandidate(localeKeys, Locale.getDefault().toString());
+        addLocaleCandidate(localeKeys, Locale.getDefault().getLanguage());
+        addLocaleCandidate(localeKeys, "en_us");
+        return localeKeys;
+    }
+
+    private static void addLocaleCandidate(
+        final List<String> localeKeys,
+        final String rawLocale
+    ) {
+        if (rawLocale == null || rawLocale.isBlank()) {
+            return;
+        }
+        String normalized = rawLocale.replace('-', '_').toLowerCase(Locale.ROOT);
+        if ("zh".equals(normalized)) {
+            normalized = "zh_cn";
+        } else if ("en".equals(normalized)) {
+            normalized = "en_us";
+        }
+        if (!localeKeys.contains(normalized)) {
+            localeKeys.add(normalized);
+        }
+    }
+
+    private static String readBundledLangValue(
+        final String namespace,
+        final String localeKey,
+        final String key
+    ) {
+        final String resourcePath = "assets/" + namespace + "/lang/" + localeKey + ".json";
+        try (
+            InputStream stream = KongqiaoI18n.class
+                .getClassLoader()
+                .getResourceAsStream(resourcePath)
+        ) {
+            if (stream == null) {
+                return null;
+            }
+            try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                final JsonObject translations = JsonParser.parseReader(reader).getAsJsonObject();
+                final JsonElement localized = translations.get(key);
+                return localized == null ? null : localized.getAsString();
+            }
+        } catch (IOException | RuntimeException exception) {
+            return null;
+        }
     }
 }

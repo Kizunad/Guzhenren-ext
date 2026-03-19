@@ -10,6 +10,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,27 @@ final class SwordCombatOpsNormalDamageTests {
 
     private static final Path MAIN_CLASSES = Path.of("build/classes/java/main");
     private static final Path MAIN_RESOURCES = Path.of("build/resources/main");
+    private static final int BENMING_CONTEXT_ARG_COUNT = 9;
+
+    private static final double TEST_MAGIC_10_0D = 10.0D;
+    private static final float TEST_MAGIC_11_5F = 11.5F;
+    private static final float TEST_MAGIC_14_03F = 14.03F;
+    private static final float TEST_MAGIC_10_58F = 10.58F;
+    private static final float TEST_MAGIC_4_9105F = 4.9105F;
+    private static final float TEST_MAGIC_9_821F = 9.821F;
+    private static final double TEST_MAGIC_2_4192D = 2.4192D;
+    private static final double TEST_MAGIC_1_692D = 1.692D;
+    private static final int TEST_MAGIC_20 = 20;
+    private static final int TEST_MAGIC_17 = 17;
+    private static final int TEST_MAGIC_22 = 22;
+    private static final float TEST_MAGIC_17_5375F = 17.5375F;
+    private static final double TEST_MAGIC_2_90304D = 2.90304D;
+    private static final int TEST_MAGIC_14 = 14;
+    private static final float TEST_MAGIC_11_224F = 11.224F;
+    private static final double TEST_MAGIC_2_05632D = 2.05632D;
+    private static final int TEST_MAGIC_21 = 21;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final Path ARTIFACT_MANIFEST =
         Path.of("build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties");
     private static final String NBT_TAG_CLASS_RESOURCE = "net/minecraft/nbt/Tag.class";
@@ -34,7 +56,7 @@ final class SwordCombatOpsNormalDamageTests {
     void normalDamageKeepsLegacyBaselineWhenNoBenmingContextApplies() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 10.0D);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_10_0D);
         api.setDoubleField(attrs, "speedMax", 2.0D);
 
         final float damage = api.calculateNormalAttackDamage(
@@ -44,14 +66,14 @@ final class SwordCombatOpsNormalDamageTests {
             null
         );
 
-        assertEquals(11.5F, damage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_11_5F, damage, DOUBLE_DELTA);
     }
 
     @Test
     void normalDamageUsesResonanceMappedDamageForBoundBenmingSword() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 10.0D);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_10_0D);
         api.setDoubleField(attrs, "speedMax", 2.0D);
 
         final Object offenseContext = api.newBenmingDamageContext(
@@ -90,8 +112,8 @@ final class SwordCombatOpsNormalDamageTests {
             defenseContext
         );
 
-        assertEquals(14.03F, offenseDamage, DOUBLE_DELTA);
-        assertEquals(10.58F, defenseDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_14_03F, offenseDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_10_58F, defenseDamage, DOUBLE_DELTA);
         assertTrue(offenseDamage > defenseDamage);
     }
 
@@ -99,7 +121,7 @@ final class SwordCombatOpsNormalDamageTests {
     void backlashAndRecoveryPenaltyReduceDamageButNeverBelowZero() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 10.0D);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_10_0D);
         api.setDoubleField(attrs, "speedMax", 2.0D);
 
         final Object backlashContext = api.newBenmingDamageContext(
@@ -155,9 +177,9 @@ final class SwordCombatOpsNormalDamageTests {
             invalidContext
         );
 
-        assertEquals(4.9105F, backlashDamage, DOUBLE_DELTA);
-        assertEquals(9.821F, recoveryDamage, DOUBLE_DELTA);
-        assertEquals(11.5F, invalidDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_4_9105F, backlashDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_9_821F, recoveryDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_11_5F, invalidDamage, DOUBLE_DELTA);
         assertTrue(backlashDamage >= 0.0F);
         assertTrue(recoveryDamage >= backlashDamage);
     }
@@ -223,8 +245,8 @@ final class SwordCombatOpsNormalDamageTests {
             invalidContext
         );
 
-        assertEquals(2.4192D, offenseSpeed, DOUBLE_DELTA);
-        assertEquals(1.692D, defenseSpeed, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_4192D, offenseSpeed, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_1_692D, defenseSpeed, DOUBLE_DELTA);
         assertEquals(2.0D, baselineSpeed, DOUBLE_DELTA);
         assertEquals(2.0D, invalidSpeed, DOUBLE_DELTA);
         assertTrue(offenseSpeed > baselineSpeed);
@@ -235,7 +257,7 @@ final class SwordCombatOpsNormalDamageTests {
     void attackCooldownUsesResonanceMappingAndFallsBackSafely() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setIntField(attrs, "attackCooldown", 20);
+        api.setIntField(attrs, "attackCooldown", TEST_MAGIC_20);
 
         final Object offenseContext = api.newBenmingDamageContext(
             "stable-benming",
@@ -271,10 +293,10 @@ final class SwordCombatOpsNormalDamageTests {
             0L
         );
 
-        assertEquals(17, api.resolveCombatAttackCooldown(attrs, offenseContext));
-        assertEquals(22, api.resolveCombatAttackCooldown(attrs, defenseContext));
-        assertEquals(20, api.resolveCombatAttackCooldown(attrs, null));
-        assertEquals(20, api.resolveCombatAttackCooldown(attrs, dirtyContext));
+        assertEquals(TEST_MAGIC_17, api.resolveCombatAttackCooldown(attrs, offenseContext));
+        assertEquals(TEST_MAGIC_22, api.resolveCombatAttackCooldown(attrs, defenseContext));
+        assertEquals(TEST_MAGIC_20, api.resolveCombatAttackCooldown(attrs, null));
+        assertEquals(TEST_MAGIC_20, api.resolveCombatAttackCooldown(attrs, dirtyContext));
         assertTrue(api.resolveCombatAttackCooldown(attrs, offenseContext) >= 0);
         assertTrue(api.resolveCombatAttackCooldown(attrs, defenseContext) >= 0);
     }
@@ -284,9 +306,9 @@ final class SwordCombatOpsNormalDamageTests {
         throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 10.0D);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_10_0D);
         api.setDoubleField(attrs, "speedMax", 2.0D);
-        api.setIntField(attrs, "attackCooldown", 20);
+        api.setIntField(attrs, "attackCooldown", TEST_MAGIC_20);
 
         final Object neutralContext = api.newBenmingDamageContext(
             "stable-benming",
@@ -342,12 +364,12 @@ final class SwordCombatOpsNormalDamageTests {
             activeContext
         );
 
-        assertEquals(14.03F, neutralDamage, DOUBLE_DELTA);
-        assertEquals(17.5375F, activeDamage, DOUBLE_DELTA);
-        assertEquals(2.4192D, neutralPursuitSpeed, DOUBLE_DELTA);
-        assertEquals(2.90304D, activePursuitSpeed, DOUBLE_DELTA);
-        assertEquals(17, neutralCooldown);
-        assertEquals(14, activeCooldown);
+        assertEquals(TEST_MAGIC_14_03F, neutralDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_17_5375F, activeDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_4192D, neutralPursuitSpeed, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_90304D, activePursuitSpeed, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_17, neutralCooldown);
+        assertEquals(TEST_MAGIC_14, activeCooldown);
         assertTrue(activeDamage > neutralDamage);
         assertTrue(activePursuitSpeed > neutralPursuitSpeed);
         assertTrue(activeCooldown < neutralCooldown);
@@ -358,9 +380,9 @@ final class SwordCombatOpsNormalDamageTests {
         throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 10.0D);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_10_0D);
         api.setDoubleField(attrs, "speedMax", 2.0D);
-        api.setIntField(attrs, "attackCooldown", 20);
+        api.setIntField(attrs, "attackCooldown", TEST_MAGIC_20);
 
         final Object neutralContext = api.newBenmingDamageContext(
             "stable-benming",
@@ -416,12 +438,12 @@ final class SwordCombatOpsNormalDamageTests {
             aftershockContext
         );
 
-        assertEquals(14.03F, neutralDamage, DOUBLE_DELTA);
-        assertEquals(11.224F, aftershockDamage, DOUBLE_DELTA);
-        assertEquals(2.4192D, neutralPursuitSpeed, DOUBLE_DELTA);
-        assertEquals(2.05632D, aftershockPursuitSpeed, DOUBLE_DELTA);
-        assertEquals(17, neutralCooldown);
-        assertEquals(21, aftershockCooldown);
+        assertEquals(TEST_MAGIC_14_03F, neutralDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_11_224F, aftershockDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_4192D, neutralPursuitSpeed, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_05632D, aftershockPursuitSpeed, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_17, neutralCooldown);
+        assertEquals(TEST_MAGIC_21, aftershockCooldown);
         assertTrue(aftershockDamage < neutralDamage);
         assertTrue(aftershockPursuitSpeed < neutralPursuitSpeed);
         assertTrue(aftershockCooldown > neutralCooldown);
@@ -432,9 +454,9 @@ final class SwordCombatOpsNormalDamageTests {
         throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 10.0D);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_10_0D);
         api.setDoubleField(attrs, "speedMax", 2.0D);
-        api.setIntField(attrs, "attackCooldown", 20);
+        api.setIntField(attrs, "attackCooldown", TEST_MAGIC_20);
 
         final Object invalidBurstContext = api.newBenmingDamageContext(
             "stable-benming",
@@ -476,12 +498,12 @@ final class SwordCombatOpsNormalDamageTests {
             invalidBurstContext
         );
 
-        assertEquals(11.5F, neutralDamage, DOUBLE_DELTA);
-        assertEquals(11.5F, invalidDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_11_5F, neutralDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_11_5F, invalidDamage, DOUBLE_DELTA);
         assertEquals(2.0D, neutralPursuitSpeed, DOUBLE_DELTA);
         assertEquals(2.0D, invalidPursuitSpeed, DOUBLE_DELTA);
-        assertEquals(20, neutralCooldown);
-        assertEquals(20, invalidCooldown);
+        assertEquals(TEST_MAGIC_20, neutralCooldown);
+        assertEquals(TEST_MAGIC_20, invalidCooldown);
     }
 
     private static final class RuntimeApi {
@@ -557,17 +579,20 @@ final class SwordCombatOpsNormalDamageTests {
             field.setInt(attrs, value);
         }
 
-        Object newBenmingDamageContext(
-            final String swordStableId,
-            final String bondedSwordId,
-            final boolean bondCacheDirty,
-            final String resonanceType,
-            final long currentTick,
-            final long burstActiveUntilTick,
-            final long overloadBacklashUntilTick,
-            final long overloadRecoveryUntilTick,
-            final long burstAftershockUntilTick
-        ) throws Exception {
+        Object newBenmingDamageContext(final Object... args) throws Exception {
+            if (args.length != BENMING_CONTEXT_ARG_COUNT) {
+                throw new IllegalArgumentException("本命伤害上下文参数数量非法: " + args.length);
+            }
+            final Iterator<Object> iterator = List.of(args).iterator();
+            final Object swordStableId = iterator.next();
+            final Object bondedSwordId = iterator.next();
+            final Object bondCacheDirty = iterator.next();
+            final Object resonanceType = iterator.next();
+            final Object currentTick = iterator.next();
+            final Object burstActiveUntilTick = iterator.next();
+            final Object overloadBacklashUntilTick = iterator.next();
+            final Object overloadRecoveryUntilTick = iterator.next();
+            final Object burstAftershockUntilTick = iterator.next();
             final Constructor<?> constructor = benmingDamageContextClass.getDeclaredConstructor(
                 String.class,
                 String.class,
@@ -696,7 +721,7 @@ final class SwordCombatOpsNormalDamageTests {
             if (root == null || !root.toFile().exists()) {
                 return null;
             }
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();

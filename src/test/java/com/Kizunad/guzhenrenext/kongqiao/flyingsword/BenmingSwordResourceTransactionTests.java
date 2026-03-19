@@ -23,6 +23,16 @@ final class BenmingSwordResourceTransactionTests {
     private static final double SCALED_HUNPO_COST = BASE_HUNPO_COST * COST_SCALE_FACTOR;
     private static final double PHASE_OVERLOAD_BEFORE = 12.0;
     private static final double PHASE_OVERLOAD_DELTA = 6.0;
+
+    private static final int TEST_MAGIC_3 = 3;
+    private static final double TEST_MAGIC_92_0 = 92.0;
+    private static final double TEST_MAGIC_85_0 = 85.0;
+    private static final double TEST_MAGIC_90_0 = 90.0;
+    private static final double TEST_MAGIC_100_0 = 100.0;
+    private static final double TEST_MAGIC_1_2D = 1.2D;
+    private static final double TEST_MAGIC_1_2 = 1.2;
+    private static final double TEST_MAGIC_15_0 = 15.0;
+
     private static final double PHASE_OVERLOAD_AFTER =
         PHASE_OVERLOAD_BEFORE + PHASE_OVERLOAD_DELTA;
     private static final double PHASE_OVERLOAD_LIMIT = 40.0;
@@ -62,7 +72,7 @@ final class BenmingSwordResourceTransactionTests {
         assertEquals(ACTUAL_ZHENYUAN_COST, result.zhenyuanCost(), DOUBLE_DELTA);
         assertEquals(BASE_NIANTOU_COST * COST_SCALE_FACTOR, result.niantouCost(), DOUBLE_DELTA);
         assertEquals(BASE_HUNPO_COST * COST_SCALE_FACTOR, result.hunpoCost(), DOUBLE_DELTA);
-        assertEquals(3, port.operations().size());
+        assertEquals(TEST_MAGIC_3, port.operations().size());
         assertEquals("zhenyuan", port.operations().get(0).resource());
         assertEquals(ACTUAL_ZHENYUAN_COST, port.operations().get(0).amount(), DOUBLE_DELTA);
         assertEquals("niantou", port.operations().get(1).resource());
@@ -97,9 +107,9 @@ final class BenmingSwordResourceTransactionTests {
         assertTrue(result.success());
         assertEquals(BenmingSwordResourceTransaction.FailureReason.NONE, result.failureReason());
         assertEquals(BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD, result.swordStateSource());
-        assertResourceState(port, 92.0, 85.0, 90.0);
+        assertResourceState(port, TEST_MAGIC_92_0, TEST_MAGIC_85_0, TEST_MAGIC_90_0);
         assertPhaseState(port, PHASE_OVERLOAD_AFTER, NEXT_BURST_COOLDOWN, NEXT_RITUAL_LOCK);
-        assertPhaseOutcome(
+        assertPhaseOutcome(new ExpectedPhaseOutcome(
             result.phaseOutcome(),
             BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD,
             PHASE_OVERLOAD_BEFORE,
@@ -111,7 +121,7 @@ final class BenmingSwordResourceTransactionTests {
             true,
             true,
             true
-        );
+        ));
         assertEquals(
             List.of(
                 "spendZhenyuan:8.0",
@@ -265,9 +275,9 @@ final class BenmingSwordResourceTransactionTests {
             result.failureReason()
         );
         assertEquals(BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD, result.swordStateSource());
-        assertResourceState(port, 100.0, 100.0, 100.0);
+        assertResourceState(port, TEST_MAGIC_100_0, TEST_MAGIC_100_0, TEST_MAGIC_100_0);
         assertPhaseState(port, PHASE_OVERLOAD_BEFORE, READY_BURST_COOLDOWN, READY_RITUAL_LOCK);
-        assertPhaseOutcome(
+        assertPhaseOutcome(new ExpectedPhaseOutcome(
             result.phaseOutcome(),
             BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD,
             PHASE_OVERLOAD_BEFORE,
@@ -279,7 +289,7 @@ final class BenmingSwordResourceTransactionTests {
             false,
             false,
             false
-        );
+        ));
         assertTrue(port.events().isEmpty());
     }
 
@@ -312,7 +322,7 @@ final class BenmingSwordResourceTransactionTests {
             result.failureReason()
         );
         assertEquals(BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD, result.swordStateSource());
-        assertResourceState(port, 100.0, 100.0, 100.0);
+        assertResourceState(port, TEST_MAGIC_100_0, TEST_MAGIC_100_0, TEST_MAGIC_100_0);
         assertPhaseState(port, PHASE_OVERLOAD_BEFORE, READY_BURST_COOLDOWN, NEXT_RITUAL_LOCK);
         assertTrue(port.events().isEmpty());
     }
@@ -349,7 +359,7 @@ final class BenmingSwordResourceTransactionTests {
             BenmingSwordResourceTransaction.SwordStateSource.WITHDRAWN_ILLEGAL_DETACH,
             result.swordStateSource()
         );
-        assertResourceState(port, 100.0, 100.0, 100.0);
+        assertResourceState(port, TEST_MAGIC_100_0, TEST_MAGIC_100_0, TEST_MAGIC_100_0);
         assertPhaseState(port, PHASE_OVERLOAD_BEFORE, ACTIVE_BURST_COOLDOWN, READY_RITUAL_LOCK);
         assertTrue(port.events().isEmpty());
     }
@@ -386,9 +396,9 @@ final class BenmingSwordResourceTransactionTests {
             BenmingSwordResourceTransaction.SwordStateSource.RECALLED_SWORD,
             result.swordStateSource()
         );
-        assertResourceState(port, 100.0, 100.0, 100.0);
+        assertResourceState(port, TEST_MAGIC_100_0, TEST_MAGIC_100_0, TEST_MAGIC_100_0);
         assertPhaseState(port, PHASE_OVERLOAD_BEFORE, READY_BURST_COOLDOWN, READY_RITUAL_LOCK);
-        assertPhaseOutcome(
+        assertPhaseOutcome(new ExpectedPhaseOutcome(
             result.phaseOutcome(),
             BenmingSwordResourceTransaction.SwordStateSource.RECALLED_SWORD,
             PHASE_OVERLOAD_BEFORE,
@@ -400,7 +410,7 @@ final class BenmingSwordResourceTransactionTests {
             false,
             false,
             false
-        );
+        ));
         assertTrue(port.events().isEmpty());
     }
 
@@ -434,9 +444,9 @@ final class BenmingSwordResourceTransactionTests {
             result.failureReason()
         );
         assertEquals(BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD, result.swordStateSource());
-        assertResourceState(port, 100.0, 100.0, 100.0);
+        assertResourceState(port, TEST_MAGIC_100_0, TEST_MAGIC_100_0, TEST_MAGIC_100_0);
         assertPhaseState(port, PHASE_OVERLOAD_BEFORE, READY_BURST_COOLDOWN, READY_RITUAL_LOCK);
-        assertPhaseOutcome(
+        assertPhaseOutcome(new ExpectedPhaseOutcome(
             result.phaseOutcome(),
             BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD,
             PHASE_OVERLOAD_BEFORE,
@@ -448,7 +458,7 @@ final class BenmingSwordResourceTransactionTests {
             false,
             false,
             false
-        );
+        ));
         assertEquals(
             List.of(
                 "spendZhenyuan:8.0",
@@ -501,7 +511,7 @@ final class BenmingSwordResourceTransactionTests {
             result.failureReason()
         );
         assertEquals(BenmingSwordResourceTransaction.SwordStateSource.LIVE_SWORD, result.swordStateSource());
-        assertResourceState(resourcePort, 100.0, 100.0, 100.0);
+        assertResourceState(resourcePort, TEST_MAGIC_100_0, TEST_MAGIC_100_0, TEST_MAGIC_100_0);
         assertPhaseState(phaseStatePort, PHASE_OVERLOAD_BEFORE, READY_BURST_COOLDOWN, READY_RITUAL_LOCK);
         assertTrue(resourcePort.events().isEmpty());
         assertTrue(phaseStatePort.events().isEmpty());
@@ -528,8 +538,8 @@ final class BenmingSwordResourceTransactionTests {
 
         assertEquals(baseReward, lowReward, DOUBLE_DELTA);
         assertTrue(highReward > lowReward);
-        assertTrue(highReward <= baseReward * 1.2D);
-        assertTrue(highModifier.finalMultiplier() <= 1.2D);
+        assertTrue(highReward <= baseReward * TEST_MAGIC_1_2D);
+        assertTrue(highModifier.finalMultiplier() <= TEST_MAGIC_1_2D);
     }
 
     @Test
@@ -570,7 +580,7 @@ final class BenmingSwordResourceTransactionTests {
             );
 
         assertEquals(1.0, modifier.physiqueMultiplier(), DOUBLE_DELTA);
-        assertEquals(1.2, modifier.finalMultiplier(), DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_1_2, modifier.finalMultiplier(), DOUBLE_DELTA);
         assertFalse(extremeResult.success());
         assertFalse(baselineResult.success());
         assertEquals(
@@ -581,8 +591,8 @@ final class BenmingSwordResourceTransactionTests {
             BenmingSwordResourceTransaction.FailureReason.INSUFFICIENT_NIANTOU,
             baselineResult.failureReason()
         );
-        assertEquals(15.0, extremeResult.niantouCost(), DOUBLE_DELTA);
-        assertEquals(15.0, baselineResult.niantouCost(), DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_15_0, extremeResult.niantouCost(), DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_15_0, baselineResult.niantouCost(), DOUBLE_DELTA);
         assertEquals(extremeResult.niantouCost(), baselineResult.niantouCost(), DOUBLE_DELTA);
         assertEquals(extremeResult.hunpoCost(), baselineResult.hunpoCost(), DOUBLE_DELTA);
         assertEquals(0, extremePort.operations().size());
@@ -665,30 +675,33 @@ final class BenmingSwordResourceTransactionTests {
         assertEquals(ritualLockUntilTick, port.ritualLockUntilTick());
     }
 
-    private static void assertPhaseOutcome(
-        final BenmingSwordResourceTransaction.PhaseOutcome phaseOutcome,
-        final BenmingSwordResourceTransaction.SwordStateSource swordStateSource,
-        final double overloadBefore,
-        final double overloadAfter,
-        final long burstCooldownBefore,
-        final long burstCooldownAfter,
-        final long ritualLockBefore,
-        final long ritualLockAfter,
-        final boolean overloadWritten,
-        final boolean burstCooldownWritten,
-        final boolean ritualLockWritten
-    ) {
-        assertEquals(swordStateSource, phaseOutcome.swordStateSource());
-        assertEquals(overloadBefore, phaseOutcome.overloadBefore(), DOUBLE_DELTA);
-        assertEquals(overloadAfter, phaseOutcome.overloadAfter(), DOUBLE_DELTA);
-        assertEquals(burstCooldownBefore, phaseOutcome.burstCooldownUntilTickBefore());
-        assertEquals(burstCooldownAfter, phaseOutcome.burstCooldownUntilTickAfter());
-        assertEquals(ritualLockBefore, phaseOutcome.ritualLockUntilTickBefore());
-        assertEquals(ritualLockAfter, phaseOutcome.ritualLockUntilTickAfter());
-        assertEquals(overloadWritten, phaseOutcome.overloadWritten());
-        assertEquals(burstCooldownWritten, phaseOutcome.burstCooldownWritten());
-        assertEquals(ritualLockWritten, phaseOutcome.ritualLockWritten());
+    private static void assertPhaseOutcome(final ExpectedPhaseOutcome expected) {
+        final BenmingSwordResourceTransaction.PhaseOutcome phaseOutcome = expected.phaseOutcome();
+        assertEquals(expected.swordStateSource(), phaseOutcome.swordStateSource());
+        assertEquals(expected.overloadBefore(), phaseOutcome.overloadBefore(), DOUBLE_DELTA);
+        assertEquals(expected.overloadAfter(), phaseOutcome.overloadAfter(), DOUBLE_DELTA);
+        assertEquals(expected.burstCooldownBefore(), phaseOutcome.burstCooldownUntilTickBefore());
+        assertEquals(expected.burstCooldownAfter(), phaseOutcome.burstCooldownUntilTickAfter());
+        assertEquals(expected.ritualLockBefore(), phaseOutcome.ritualLockUntilTickBefore());
+        assertEquals(expected.ritualLockAfter(), phaseOutcome.ritualLockUntilTickAfter());
+        assertEquals(expected.overloadWritten(), phaseOutcome.overloadWritten());
+        assertEquals(expected.burstCooldownWritten(), phaseOutcome.burstCooldownWritten());
+        assertEquals(expected.ritualLockWritten(), phaseOutcome.ritualLockWritten());
     }
+
+    private record ExpectedPhaseOutcome(
+        BenmingSwordResourceTransaction.PhaseOutcome phaseOutcome,
+        BenmingSwordResourceTransaction.SwordStateSource swordStateSource,
+        double overloadBefore,
+        double overloadAfter,
+        long burstCooldownBefore,
+        long burstCooldownAfter,
+        long ritualLockBefore,
+        long ritualLockAfter,
+        boolean overloadWritten,
+        boolean burstCooldownWritten,
+        boolean ritualLockWritten
+    ) {}
 
     private record Operation(String resource, double amount) {}
 

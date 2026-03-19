@@ -26,6 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordControllerBindRitualTests {
 
+
+    private static final int TEST_MAGIC_4 = 4;
+    private static final double TEST_MAGIC_12_5D = 12.5D;
+    private static final long TEST_MAGIC_20L = 20L;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String CONTROLLER_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordController";
     private static final String BOND_SERVICE_CLASS_NAME =
@@ -95,7 +101,7 @@ final class FlyingSwordControllerBindRitualTests {
         assertEquals("stable-selected", cacheState.bondedSwordId);
         assertFalse(cacheState.dirty);
         assertFalse(requestState.executionPending);
-        assertEquals(4, mutationState.operations.size());
+        assertEquals(TEST_MAGIC_4, mutationState.operations.size());
         assertEquals(
             RESOLVED_TICK + api.defaultRitualDuplicateGuardTicks(),
             mutationState.ritualLockUntilTick
@@ -137,9 +143,9 @@ final class FlyingSwordControllerBindRitualTests {
         final RuntimeApi api = RuntimeApi.create();
         final MutationState mutationState = MutationState.phaseWritable();
         final Object state = api.newRuntimeStateAttachment();
-        api.setRuntimeStateOverload(state, 12.5D);
+        api.setRuntimeStateOverload(state, TEST_MAGIC_12_5D);
         api.setRuntimeStateBurstCooldownUntilTick(state, 0L);
-        api.setRuntimeStateRitualLockUntilTick(state, RESOLVED_TICK + 20L);
+        api.setRuntimeStateRitualLockUntilTick(state, RESOLVED_TICK + TEST_MAGIC_20L);
 
         final Object request = api.createDefaultRitualBindRequest(state, RESOLVED_TICK);
         final Object result = api.tryConsumePhaseAwareRequest(request, mutationState);
@@ -172,31 +178,18 @@ final class FlyingSwordControllerBindRitualTests {
         private final Method snapshotOfMethod;
         private final Method tryConsumeMethod;
 
-        private RuntimeApi(
-            final Class<?> controllerClass,
-            final Class<?> swordBondPortClass,
-            final Class<?> playerBondCachePortClass,
-            final Class<?> ritualRequestStatePortClass,
-            final Class<?> ritualRequestContextClass,
-            final Class<?> ritualBindTransactionContextClass,
-            final Class<?> transactionMutationPortClass,
-            final Class<?> costScalerClass,
-            final Class<?> requestClass,
-            final Class<?> snapshotClass,
-            final Class<?> stateAttachmentClass,
-            final Class<?> bondServiceClass
-        ) throws ReflectiveOperationException {
-            this.controllerClass = controllerClass;
-            this.swordBondPortClass = swordBondPortClass;
-            this.playerBondCachePortClass = playerBondCachePortClass;
-            this.ritualRequestStatePortClass = ritualRequestStatePortClass;
-            this.ritualRequestContextClass = ritualRequestContextClass;
-            this.ritualBindTransactionContextClass = ritualBindTransactionContextClass;
-            this.transactionMutationPortClass = transactionMutationPortClass;
-            this.costScalerClass = costScalerClass;
-            this.requestClass = requestClass;
-            this.snapshotClass = snapshotClass;
-            this.stateAttachmentClass = stateAttachmentClass;
+        private RuntimeApi(final RuntimeApiDeps deps) throws ReflectiveOperationException {
+            this.controllerClass = deps.controllerClass();
+            this.swordBondPortClass = deps.swordBondPortClass();
+            this.playerBondCachePortClass = deps.playerBondCachePortClass();
+            this.ritualRequestStatePortClass = deps.ritualRequestStatePortClass();
+            this.ritualRequestContextClass = deps.ritualRequestContextClass();
+            this.ritualBindTransactionContextClass = deps.ritualBindTransactionContextClass();
+            this.transactionMutationPortClass = deps.transactionMutationPortClass();
+            this.costScalerClass = deps.costScalerClass();
+            this.requestClass = deps.requestClass();
+            this.snapshotClass = deps.snapshotClass();
+            this.stateAttachmentClass = deps.stateAttachmentClass();
             this.resolveSelectedOrNearestCandidateMethod = controllerClass.getDeclaredMethod(
                 "resolveSelectedOrNearestCandidate",
                 Optional.class,
@@ -219,7 +212,7 @@ final class FlyingSwordControllerBindRitualTests {
                 stateAttachmentClass,
                 long.class
             );
-            this.defaultRitualDuplicateGuardTicksMethod = bondServiceClass.getMethod(
+            this.defaultRitualDuplicateGuardTicksMethod = deps.bondServiceClass().getMethod(
                 "defaultRitualDuplicateGuardTicks"
             );
             this.snapshotOfMethod = snapshotClass.getMethod(
@@ -303,20 +296,37 @@ final class FlyingSwordControllerBindRitualTests {
                 loader
             );
             return new RuntimeApi(
-                controllerClass,
-                swordBondPortClass,
-                playerBondCachePortClass,
-                ritualRequestStatePortClass,
-                ritualRequestContextClass,
-                ritualBindTransactionContextClass,
-                transactionMutationPortClass,
-                costScalerClass,
-                requestClass,
-                snapshotClass,
-                stateAttachmentClass,
-                bondServiceClass
+                new RuntimeApiDeps(
+                    controllerClass,
+                    swordBondPortClass,
+                    playerBondCachePortClass,
+                    ritualRequestStatePortClass,
+                    ritualRequestContextClass,
+                    ritualBindTransactionContextClass,
+                    transactionMutationPortClass,
+                    costScalerClass,
+                    requestClass,
+                    snapshotClass,
+                    stateAttachmentClass,
+                    bondServiceClass
+                )
             );
         }
+
+        private record RuntimeApiDeps(
+            Class<?> controllerClass,
+            Class<?> swordBondPortClass,
+            Class<?> playerBondCachePortClass,
+            Class<?> ritualRequestStatePortClass,
+            Class<?> ritualRequestContextClass,
+            Class<?> ritualBindTransactionContextClass,
+            Class<?> transactionMutationPortClass,
+            Class<?> costScalerClass,
+            Class<?> requestClass,
+            Class<?> snapshotClass,
+            Class<?> stateAttachmentClass,
+            Class<?> bondServiceClass
+        ) {}
 
         Object resolveSelectedOrNearestCandidate(
             final Optional<UUID> selectedId,
@@ -616,7 +626,7 @@ final class FlyingSwordControllerBindRitualTests {
                 return null;
             }
 
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();

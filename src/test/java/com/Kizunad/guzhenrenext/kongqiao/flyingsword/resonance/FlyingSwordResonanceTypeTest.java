@@ -11,6 +11,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 final class FlyingSwordResonanceTypeTest {
 
+
+    private static final int TEST_MAGIC_HEX_FFE36A2E = 0xFFE36A2E;
+
     @Test
     void resolvesByEnglishAndChineseAlias() {
         assertEquals(
@@ -41,7 +44,7 @@ final class FlyingSwordResonanceTypeTest {
             "screen.guzhenrenext.forge.help.resonance.offense.color_semantic",
             type.getColorSemanticKey()
         );
-        assertEquals(0xFFE36A2E, type.getPrimaryColor());
+        assertEquals(TEST_MAGIC_HEX_FFE36A2E, type.getPrimaryColor());
     }
 
     @Test

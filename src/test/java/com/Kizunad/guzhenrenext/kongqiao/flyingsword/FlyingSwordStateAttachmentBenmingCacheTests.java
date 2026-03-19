@@ -18,6 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordStateAttachmentBenmingCacheTests {
 
+
+    private static final long TEST_MAGIC_NEG_2L = -2L;
+    private static final int TEST_MAGIC_NEG_3 = -3;
+    private static final long TEST_MAGIC_NEG_4L = -4L;
+    private static final long TEST_MAGIC_NEG_5L = -5L;
+    private static final long TEST_MAGIC_NEG_6L = -6L;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String ATTACHMENT_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment";
     private static final String COMPOUND_TAG_CLASS_NAME = "net.minecraft.nbt.CompoundTag";
@@ -204,11 +212,11 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
 
         final Object serialized = api.newCompoundTag();
         api.putDouble(serialized, OVERLOAD_KEY, -1.0D);
-        api.putLong(serialized, LAST_OVERLOAD_TICK_KEY, -2L);
-        api.putInt(serialized, RESONANCE_LEVEL_KEY, -3);
-        api.putLong(serialized, OVERLOAD_BACKLASH_UNTIL_TICK_KEY, -4L);
-        api.putLong(serialized, OVERLOAD_RECOVERY_UNTIL_TICK_KEY, -5L);
-        api.putLong(serialized, LAST_COMBAT_TICK_KEY, -6L);
+        api.putLong(serialized, LAST_OVERLOAD_TICK_KEY, TEST_MAGIC_NEG_2L);
+        api.putInt(serialized, RESONANCE_LEVEL_KEY, TEST_MAGIC_NEG_3);
+        api.putLong(serialized, OVERLOAD_BACKLASH_UNTIL_TICK_KEY, TEST_MAGIC_NEG_4L);
+        api.putLong(serialized, OVERLOAD_RECOVERY_UNTIL_TICK_KEY, TEST_MAGIC_NEG_5L);
+        api.putLong(serialized, LAST_COMBAT_TICK_KEY, TEST_MAGIC_NEG_6L);
 
         final Object state = api.newAttachment();
         api.deserialize(state, serialized);
@@ -535,7 +543,7 @@ final class FlyingSwordStateAttachmentBenmingCacheTests {
                 return null;
             }
 
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();

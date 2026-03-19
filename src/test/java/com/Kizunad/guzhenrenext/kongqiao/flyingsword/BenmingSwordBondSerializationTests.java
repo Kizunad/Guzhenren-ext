@@ -18,6 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class BenmingSwordBondSerializationTests {
 
+
+    private static final double TEST_MAGIC_99_0 = 99.0;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String ATTRS_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes";
     private static final String COMPOUND_TAG_CLASS_NAME = "net.minecraft.nbt.CompoundTag";
@@ -53,7 +57,7 @@ final class BenmingSwordBondSerializationTests {
         api.setStableSwordId(readTarget, "temporary-id");
         final Object readTargetBond = api.getBond(readTarget);
         api.setOwnerUuid(readTargetBond, "temporary-owner");
-        api.setResonance(readTargetBond, 99.0);
+        api.setResonance(readTargetBond, TEST_MAGIC_99_0);
         api.readFromNbt(readTarget, serialized);
         assertEquals(TEST_STABLE_SWORD_ID, api.getStableSwordId(readTarget));
         assertBondEquals(api, readTarget, TEST_OWNER_UUID, TEST_RESONANCE);
@@ -114,7 +118,7 @@ final class BenmingSwordBondSerializationTests {
         api.setStableSwordId(readTarget, "existing-stable-id");
         final Object readTargetBond = api.getBond(readTarget);
         api.setOwnerUuid(readTargetBond, "old-owner");
-        api.setResonance(readTargetBond, 99.0);
+        api.setResonance(readTargetBond, TEST_MAGIC_99_0);
         api.readFromNbt(readTarget, legacyTag);
         assertEquals("existing-stable-id", api.getStableSwordId(readTarget));
         assertBondEquals(api, readTarget, TEST_OWNER_UUID, TEST_RESONANCE);
@@ -330,7 +334,7 @@ final class BenmingSwordBondSerializationTests {
                 return null;
             }
 
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();

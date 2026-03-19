@@ -22,6 +22,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordHudStateContractTests {
 
+
+    private static final double TEST_MAGIC_135_5D = 135.5D;
+    private static final long TEST_MAGIC_240L = 240L;
+    private static final long TEST_MAGIC_180L = 180L;
+    private static final long TEST_MAGIC_260L = 260L;
+    private static final long TEST_MAGIC_200L = 200L;
+    private static final float TEST_MAGIC_135_5F = 135.5F;
+    private static final float TEST_MAGIC_0_0001F = 0.0001F;
+    private static final long TEST_MAGIC_100L = 100L;
+    private static final double TEST_MAGIC_10_0D = 10.0D;
+    private static final long TEST_MAGIC_220L = 220L;
+    private static final double TEST_MAGIC_99_9D = 99.9D;
+    private static final double TEST_MAGIC_100_0D = 100.0D;
+    private static final float TEST_MAGIC_100_0F = 100.0F;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String HUD_STATE_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHudState";
     private static final String DISPLAY_DATA_CLASS_NAME =
@@ -46,22 +62,22 @@ final class FlyingSwordHudStateContractTests {
         final Object data = api.newDisplayData();
         api.setBooleanField(data, "isSelected", true);
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             BONDED_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "offense",
-            135.5D,
-            240L,
-            180L,
-            260L,
-            200L
-        );
+            TEST_MAGIC_135_5D,
+            TEST_MAGIC_240L,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_260L,
+            TEST_MAGIC_200L
+        ));
 
         assertTrue(api.getBooleanField(data, "isSelected"));
         assertTrue(api.getBooleanField(data, "isBenmingSword"));
         assertEquals("OFFENSE", api.getEnumFieldName(data, "benmingResonanceType"));
-        assertEquals(135.5F, api.getFloatField(data, "overloadPercent"), 0.0001F);
+        assertEquals(TEST_MAGIC_135_5F, api.getFloatField(data, "overloadPercent"), TEST_MAGIC_0_0001F);
         assertFalse(api.getBooleanField(data, "isBurstReady"));
         assertTrue(api.getBooleanField(data, "isAftershockPeriod"));
         assertTrue(api.getBooleanField(data, "shouldHighlightWarning"));
@@ -72,26 +88,26 @@ final class FlyingSwordHudStateContractTests {
         final RuntimeApi api = RuntimeApi.create();
         final Object data = api.newDisplayData();
 
-        api.project(data, null, null, null, 0.0D, 0L, 0L, 0L, 200L);
+        api.project(new RuntimeApi.ProjectionArgs(data, null, null, null, 0.0D, 0L, 0L, 0L, TEST_MAGIC_200L));
 
         assertFalse(api.getBooleanField(data, "isBenmingSword"));
         assertNull(api.getField(data, "benmingResonanceType"));
-        assertEquals(0.0F, api.getFloatField(data, "overloadPercent"), 0.0001F);
+        assertEquals(0.0F, api.getFloatField(data, "overloadPercent"), TEST_MAGIC_0_0001F);
         assertTrue(api.getBooleanField(data, "isBurstReady"));
         assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
         assertFalse(api.getBooleanField(data, "shouldHighlightWarning"));
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             OTHER_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "unknown-resonance",
             0.0D,
-            100L,
-            180L,
-            260L,
-            200L
-        );
+            TEST_MAGIC_100L,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_260L,
+            TEST_MAGIC_200L
+        ));
 
         assertFalse(api.getBooleanField(data, "isBenmingSword"));
         assertNull(api.getField(data, "benmingResonanceType"));
@@ -104,69 +120,69 @@ final class FlyingSwordHudStateContractTests {
         final RuntimeApi api = RuntimeApi.create();
         final Object data = api.newDisplayData();
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             BONDED_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "spirit",
-            10.0D,
-            180L,
-            240L,
-            260L,
-            200L
-        );
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_240L,
+            TEST_MAGIC_260L,
+            TEST_MAGIC_200L
+        ));
         assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             BONDED_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "spirit",
-            10.0D,
-            180L,
-            200L,
-            260L,
-            220L
-        );
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_200L,
+            TEST_MAGIC_260L,
+            TEST_MAGIC_220L
+        ));
         assertTrue(api.getBooleanField(data, "isAftershockPeriod"));
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             BONDED_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "spirit",
-            10.0D,
-            180L,
-            200L,
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_200L,
             0L,
-            200L
-        );
+            TEST_MAGIC_200L
+        ));
         assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             BONDED_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "spirit",
-            10.0D,
-            180L,
-            200L,
-            200L,
-            200L
-        );
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_200L,
+            TEST_MAGIC_200L,
+            TEST_MAGIC_200L
+        ));
         assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             OTHER_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "spirit",
-            10.0D,
-            180L,
-            200L,
-            260L,
-            220L
-        );
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_200L,
+            TEST_MAGIC_260L,
+            TEST_MAGIC_220L
+        ));
         assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
     }
 
@@ -175,32 +191,32 @@ final class FlyingSwordHudStateContractTests {
         final RuntimeApi api = RuntimeApi.create();
         final Object data = api.newDisplayData();
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             BONDED_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "defense",
-            99.9D,
-            180L,
+            TEST_MAGIC_99_9D,
+            TEST_MAGIC_180L,
             0L,
             0L,
-            200L
-        );
+            TEST_MAGIC_200L
+        ));
         assertFalse(api.getBooleanField(data, "shouldHighlightWarning"));
 
-        api.project(
+        api.project(new RuntimeApi.ProjectionArgs(
             data,
             BONDED_STABLE_SWORD_ID,
             BONDED_STABLE_SWORD_ID,
             "defense",
-            100.0D,
-            180L,
+            TEST_MAGIC_100_0D,
+            TEST_MAGIC_180L,
             0L,
             0L,
-            200L
-        );
+            TEST_MAGIC_200L
+        ));
         assertTrue(api.getBooleanField(data, "isBenmingSword"));
-        assertEquals(100.0F, api.getFloatField(data, "overloadPercent"), 0.0001F);
+        assertEquals(TEST_MAGIC_100_0F, api.getFloatField(data, "overloadPercent"), TEST_MAGIC_0_0001F);
         assertTrue(api.getBooleanField(data, "shouldHighlightWarning"));
     }
 
@@ -264,33 +280,35 @@ final class FlyingSwordHudStateContractTests {
             return displayDataClass.getConstructor().newInstance();
         }
 
-        void project(
-            final Object data,
-            final String stableSwordId,
-            final String bondedSwordId,
-            final String resonanceRaw,
-            final double overload,
-            final long burstCooldownUntilTick,
-            final long burstActiveUntilTick,
-            final long burstAftershockUntilTick,
-            final long gameTick
-        ) throws Exception {
+        void project(final ProjectionArgs args) throws Exception {
             final Object projectionInput = projectionInputConstructor.newInstance(
-                stableSwordId,
-                bondedSwordId,
-                resonanceRaw,
-                overload,
-                burstCooldownUntilTick,
-                burstActiveUntilTick,
-                burstAftershockUntilTick,
-                gameTick
+                args.stableSwordId(),
+                args.bondedSwordId(),
+                args.resonanceRaw(),
+                args.overload(),
+                args.burstCooldownUntilTick(),
+                args.burstActiveUntilTick(),
+                args.burstAftershockUntilTick(),
+                args.gameTick()
             );
             projectionMethod.invoke(
                 null,
-                data,
+                args.data(),
                 projectionInput
             );
         }
+
+        private record ProjectionArgs(
+            Object data,
+            String stableSwordId,
+            String bondedSwordId,
+            String resonanceRaw,
+            double overload,
+            long burstCooldownUntilTick,
+            long burstActiveUntilTick,
+            long burstAftershockUntilTick,
+            long gameTick
+        ) {}
 
         Object getField(final Object target, final String fieldName) throws Exception {
             final Field field = displayDataClass.getField(fieldName);
@@ -391,7 +409,7 @@ final class FlyingSwordHudStateContractTests {
             return null;
         }
 
-        try (var stream = Files.walk(root, 6)) {
+        try (var stream = Files.walk(root, TEST_MAGIC_6)) {
             final List<Path> candidates = stream
                 .filter(path -> path.toString().endsWith(".jar"))
                 .toList();

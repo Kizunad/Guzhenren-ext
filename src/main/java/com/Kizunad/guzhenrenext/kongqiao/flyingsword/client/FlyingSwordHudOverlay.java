@@ -1,20 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.client;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoI18n;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.IllegalFormatException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -385,83 +375,7 @@ public final class FlyingSwordHudOverlay {
     }
 
     private static String localizedHudText(final String key, final Object... args) {
-        try {
-            return KongqiaoI18n.text(key, args).getString();
-        } catch (RuntimeException | LinkageError exception) {
-            return localizedHudTextFromBundledLang(key, args);
-        }
-    }
-
-    private static String localizedHudTextFromBundledLang(
-        final String key,
-        final Object... args
-    ) {
-        for (final String localeKey : bundledLocaleFallbackOrder()) {
-            final String localized = readBundledLangValue(localeKey, key);
-            if (localized != null && !localized.isBlank()) {
-                if (args == null || args.length == 0) {
-                    return localized;
-                }
-                try {
-                    return String.format(Locale.ROOT, localized, args);
-                } catch (IllegalFormatException exception) {
-                    return localized;
-                }
-            }
-        }
-        return "";
-    }
-
-    private static List<String> bundledLocaleFallbackOrder() {
-        final List<String> localeKeys = new ArrayList<>();
-        addLocaleCandidate(localeKeys, "zh_cn");
-        addLocaleCandidate(localeKeys, Locale.getDefault().toString());
-        addLocaleCandidate(localeKeys, Locale.getDefault().getLanguage());
-        addLocaleCandidate(localeKeys, "en_us");
-        return localeKeys;
-    }
-
-    private static void addLocaleCandidate(
-        final List<String> localeKeys,
-        final String rawLocale
-    ) {
-        if (rawLocale == null || rawLocale.isBlank()) {
-            return;
-        }
-        String normalized = rawLocale.replace('-', '_').toLowerCase(Locale.ROOT);
-        if ("zh".equals(normalized)) {
-            normalized = "zh_cn";
-        } else if ("en".equals(normalized)) {
-            normalized = "en_us";
-        }
-        if (!localeKeys.contains(normalized)) {
-            localeKeys.add(normalized);
-        }
-    }
-
-    private static String readBundledLangValue(
-        final String localeKey,
-        final String key
-    ) {
-        final String resourcePath =
-            "assets/" + GuzhenrenExt.MODID + "/lang/" + localeKey + ".json";
-        try (
-            InputStream stream = FlyingSwordHudOverlay.class
-                .getClassLoader()
-                .getResourceAsStream(resourcePath)
-        ) {
-            if (stream == null) {
-                return null;
-            }
-            try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-                final JsonObject translations =
-                    JsonParser.parseReader(reader).getAsJsonObject();
-                final JsonElement localized = translations.get(key);
-                return localized == null ? null : localized.getAsString();
-            }
-        } catch (IOException | RuntimeException exception) {
-            return null;
-        }
+        return KongqiaoI18n.localizedTextWithBundledFallback(key, "", args);
     }
 
     private static int resolveResonanceColor(FlyingSwordResonanceType resonanceType) {

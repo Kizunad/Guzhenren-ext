@@ -20,6 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ServerboundBenmingSwordActionPayloadTests {
 
+
+    private static final int TEST_MAGIC_4 = 4;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String PAYLOAD_CLASS_NAME =
         "com.Kizunad.guzhenrenext.network.ServerboundBenmingSwordActionPayload";
     private static final String CONTROLLER_CLASS_NAME =
@@ -153,7 +157,7 @@ final class ServerboundBenmingSwordActionPayloadTests {
         assertEquals("[本命飞剑] 当前过载过高，无法触发本命爆发。", overloadMessage);
         assertEquals("[本命飞剑] 本命缔结状态异常，无法执行当前操作。", illegalStateMessage);
         assertEquals(
-            4,
+            TEST_MAGIC_4,
             new HashSet<>(
                 List.of(
                     cooldownMessage,
@@ -262,34 +266,20 @@ final class ServerboundBenmingSwordActionPayloadTests {
         private final Method controllerSuccessMethod;
         private final Method controllerFailureMethod;
 
-        private RuntimeApi(
-            final Class<?> payloadClass,
-            final Class<?> actionEnumClass,
-            final Class<?> actionFeedbackClass,
-            final Class<?> routingHelperClass,
-            final Class<?> executorInterfaceClass,
-            final Class<?> bondResultClass,
-            final Class<?> bondBranchEnumClass,
-            final Class<?> bondFailureReasonEnumClass,
-            final Class<?> controllerResultClass,
-            final Class<?> controllerActionEnumClass,
-            final Class<?> controllerFailureReasonEnumClass,
-            final Class<?> resonanceStateViewClass,
-            final Class<?> resonanceTypeClass
-        ) throws ReflectiveOperationException {
-            this.payloadClass = payloadClass;
-            this.actionEnumClass = actionEnumClass;
-            this.actionFeedbackClass = actionFeedbackClass;
-            this.routingHelperClass = routingHelperClass;
-            this.executorInterfaceClass = executorInterfaceClass;
-            this.bondResultClass = bondResultClass;
-            this.bondBranchEnumClass = bondBranchEnumClass;
-            this.bondFailureReasonEnumClass = bondFailureReasonEnumClass;
-            this.controllerResultClass = controllerResultClass;
-            this.controllerActionEnumClass = controllerActionEnumClass;
-            this.controllerFailureReasonEnumClass = controllerFailureReasonEnumClass;
-            this.resonanceStateViewClass = resonanceStateViewClass;
-            this.resonanceTypeClass = resonanceTypeClass;
+        private RuntimeApi(final RuntimeApiDeps deps) throws ReflectiveOperationException {
+            this.payloadClass = deps.payloadClass();
+            this.actionEnumClass = deps.actionEnumClass();
+            this.actionFeedbackClass = deps.actionFeedbackClass();
+            this.routingHelperClass = deps.routingHelperClass();
+            this.executorInterfaceClass = deps.executorInterfaceClass();
+            this.bondResultClass = deps.bondResultClass();
+            this.bondBranchEnumClass = deps.bondBranchEnumClass();
+            this.bondFailureReasonEnumClass = deps.bondFailureReasonEnumClass();
+            this.controllerResultClass = deps.controllerResultClass();
+            this.controllerActionEnumClass = deps.controllerActionEnumClass();
+            this.controllerFailureReasonEnumClass = deps.controllerFailureReasonEnumClass();
+            this.resonanceStateViewClass = deps.resonanceStateViewClass();
+            this.resonanceTypeClass = deps.resonanceTypeClass();
             this.executeMethod = routingHelperClass.getDeclaredMethod(
                 "execute",
                 actionEnumClass,
@@ -328,42 +318,60 @@ final class ServerboundBenmingSwordActionPayloadTests {
         static RuntimeApi create() throws Exception {
             final URLClassLoader loader = buildRuntimeClassLoader();
             final Class<?> payloadClass = Class.forName(PAYLOAD_CLASS_NAME, true, loader);
+            final String resonanceStateViewClassName = PAYLOAD_CLASS_NAME.replace(
+                "ServerboundBenmingSwordActionPayload",
+                "BenmingActionRoutingHelper$ResonanceStateView"
+            );
             return new RuntimeApi(
-                payloadClass,
-                Class.forName("com.Kizunad.guzhenrenext.network.BenmingAction", true, loader),
-                Class.forName("com.Kizunad.guzhenrenext.network.BenmingActionFeedback", true, loader),
-                Class.forName("com.Kizunad.guzhenrenext.network.BenmingActionRoutingHelper", true, loader),
-                Class.forName("com.Kizunad.guzhenrenext.network.BenmingActionExecutor", true, loader),
-                Class.forName(BOND_SERVICE_CLASS_NAME + "$Result", true, loader),
-                Class.forName(BOND_SERVICE_CLASS_NAME + "$ResultBranch", true, loader),
-                Class.forName(BOND_SERVICE_CLASS_NAME + "$FailureReason", true, loader),
-                Class.forName(
-                    CONTROLLER_CLASS_NAME + "$BenmingControllerActionResult",
-                    true,
-                    loader
-                ),
-                Class.forName(
-                    CONTROLLER_CLASS_NAME + "$BenmingControllerAction",
-                    true,
-                    loader
-                ),
-                Class.forName(
-                    CONTROLLER_CLASS_NAME + "$BenmingControllerFailureReason",
-                    true,
-                    loader
-                ),
-                Class.forName(
-                    PAYLOAD_CLASS_NAME.replace("ServerboundBenmingSwordActionPayload", "BenmingActionRoutingHelper$ResonanceStateView"),
-                    true,
-                    loader
-                ),
-                Class.forName(
-                    "com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType",
-                    true,
-                    loader
+                new RuntimeApiDeps(
+                    payloadClass,
+                    Class.forName("com.Kizunad.guzhenrenext.network.BenmingAction", true, loader),
+                    Class.forName("com.Kizunad.guzhenrenext.network.BenmingActionFeedback", true, loader),
+                    Class.forName("com.Kizunad.guzhenrenext.network.BenmingActionRoutingHelper", true, loader),
+                    Class.forName("com.Kizunad.guzhenrenext.network.BenmingActionExecutor", true, loader),
+                    Class.forName(BOND_SERVICE_CLASS_NAME + "$Result", true, loader),
+                    Class.forName(BOND_SERVICE_CLASS_NAME + "$ResultBranch", true, loader),
+                    Class.forName(BOND_SERVICE_CLASS_NAME + "$FailureReason", true, loader),
+                    Class.forName(
+                        CONTROLLER_CLASS_NAME + "$BenmingControllerActionResult",
+                        true,
+                        loader
+                    ),
+                    Class.forName(
+                        CONTROLLER_CLASS_NAME + "$BenmingControllerAction",
+                        true,
+                        loader
+                    ),
+                    Class.forName(
+                        CONTROLLER_CLASS_NAME + "$BenmingControllerFailureReason",
+                        true,
+                        loader
+                    ),
+                    Class.forName(resonanceStateViewClassName, true, loader),
+                    Class.forName(
+                        "com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType",
+                        true,
+                        loader
+                    )
                 )
             );
         }
+
+        private record RuntimeApiDeps(
+            Class<?> payloadClass,
+            Class<?> actionEnumClass,
+            Class<?> actionFeedbackClass,
+            Class<?> routingHelperClass,
+            Class<?> executorInterfaceClass,
+            Class<?> bondResultClass,
+            Class<?> bondBranchEnumClass,
+            Class<?> bondFailureReasonEnumClass,
+            Class<?> controllerResultClass,
+            Class<?> controllerActionEnumClass,
+            Class<?> controllerFailureReasonEnumClass,
+            Class<?> resonanceStateViewClass,
+            Class<?> resonanceTypeClass
+        ) {}
 
         Object execute(final String actionName, final Object executor) throws Exception {
             final Object action = actionName == null
@@ -636,7 +644,7 @@ final class ServerboundBenmingSwordActionPayloadTests {
             if (root == null || !root.toFile().exists()) {
                 return null;
             }
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();

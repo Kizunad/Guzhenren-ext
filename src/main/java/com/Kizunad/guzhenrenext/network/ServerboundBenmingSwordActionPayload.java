@@ -1,8 +1,5 @@
 package com.Kizunad.guzhenrenext.network;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoI18n;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
@@ -11,15 +8,6 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordController.Benmi
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordPreferencesAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordBondService;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.IllegalFormatException;
-import java.util.List;
-import java.util.Locale;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -169,103 +157,10 @@ final class BenmingActionRoutingHelper {
     private BenmingActionRoutingHelper() {}
 
     static String localizedText(final String key, final Object... args) {
-        try {
-            return KongqiaoI18n.text(key, args).getString();
-        } catch (RuntimeException | LinkageError exception) {
-            return localizedTextFromBundledLang(key, args);
-        }
-    }
-
-    private static String localizedTextFromBundledLang(
-        final String key,
-        final Object... args
-    ) {
-        final String template = resolveBundledTemplate(key);
-        if (args == null || args.length == 0) {
-            return template;
-        }
-        try {
-            return String.format(Locale.ROOT, template, args);
-        } catch (IllegalFormatException exception) {
-            return template;
-        }
-    }
-
-    private static String resolveBundledTemplate(final String key) {
-        final String namespace = resolveTranslationNamespace(key);
-        for (final String localeKey : bundledLocaleFallbackOrder()) {
-            final String localized = readBundledLangValue(namespace, localeKey, key);
-            if (localized != null && !localized.isBlank()) {
-                return localized;
-            }
-        }
-        if (UNKNOWN_LABEL_TRANSLATION_KEY.equals(key)) {
-            return "Unknown";
-        }
-        return "Unavailable";
-    }
-
-    private static String resolveTranslationNamespace(final String key) {
-        if (key == null || key.isBlank()) {
-            return "minecraft";
-        }
-        if (key.contains("." + GuzhenrenExt.MODID + ".") || key.startsWith(GuzhenrenExt.MODID + ".")) {
-            return GuzhenrenExt.MODID;
-        }
-        return "minecraft";
-    }
-
-    private static List<String> bundledLocaleFallbackOrder() {
-        final List<String> localeKeys = new ArrayList<>();
-        addLocaleCandidate(localeKeys, "zh_cn");
-        addLocaleCandidate(localeKeys, Locale.getDefault().toString());
-        addLocaleCandidate(localeKeys, Locale.getDefault().getLanguage());
-        addLocaleCandidate(localeKeys, "en_us");
-        return localeKeys;
-    }
-
-    private static void addLocaleCandidate(
-        final List<String> localeKeys,
-        final String rawLocale
-    ) {
-        if (rawLocale == null || rawLocale.isBlank()) {
-            return;
-        }
-        String normalized = rawLocale.replace('-', '_').toLowerCase(Locale.ROOT);
-        if ("zh".equals(normalized)) {
-            normalized = "zh_cn";
-        } else if ("en".equals(normalized)) {
-            normalized = "en_us";
-        }
-        if (!localeKeys.contains(normalized)) {
-            localeKeys.add(normalized);
-        }
-    }
-
-    private static String readBundledLangValue(
-        final String namespace,
-        final String localeKey,
-        final String key
-    ) {
-        final String resourcePath =
-            "assets/" + namespace + "/lang/" + localeKey + ".json";
-        try (
-            InputStream stream = BenmingActionRoutingHelper.class
-                .getClassLoader()
-                .getResourceAsStream(resourcePath)
-        ) {
-            if (stream == null) {
-                return null;
-            }
-            try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-                final JsonObject translations =
-                    JsonParser.parseReader(reader).getAsJsonObject();
-                final JsonElement localized = translations.get(key);
-                return localized == null ? null : localized.getAsString();
-            }
-        } catch (IOException | RuntimeException exception) {
-            return null;
-        }
+        final String missingValue = UNKNOWN_LABEL_TRANSLATION_KEY.equals(key)
+            ? "Unknown"
+            : "Unavailable";
+        return KongqiaoI18n.localizedTextWithBundledFallback(key, missingValue, args);
     }
 
     static BenmingActionFeedback execute(

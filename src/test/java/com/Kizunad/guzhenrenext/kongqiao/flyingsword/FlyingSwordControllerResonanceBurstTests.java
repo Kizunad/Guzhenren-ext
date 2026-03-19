@@ -1,7 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -17,6 +16,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordControllerResonanceBurstTests {
+
+
+    private static final long TEST_MAGIC_30L = 30L;
+    private static final long TEST_MAGIC_1500L = 1500L;
+    private static final long TEST_MAGIC_1600L = 1600L;
+    private static final long TEST_MAGIC_1800L = 1800L;
+    private static final long TEST_MAGIC_1810L = 1810L;
+    private static final long TEST_MAGIC_1820L = 1820L;
+    private static final long TEST_MAGIC_1900L = 1900L;
+    private static final long TEST_MAGIC_1950L = 1950L;
+    private static final int TEST_MAGIC_6 = 6;
 
     private static final String CONTROLLER_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordController";
@@ -78,9 +88,9 @@ final class FlyingSwordControllerResonanceBurstTests {
         final RuntimeApi api = RuntimeApi.create();
         final Object state = api.newStateAttachment();
         api.setStateResonanceType(state, "offense");
-        api.setStateBurstCooldownUntilTick(state, RESOLVED_TICK + 30L);
-        api.setStateBurstActiveUntilTick(state, 1500L);
-        api.setStateBurstAftershockUntilTick(state, 1600L);
+        api.setStateBurstCooldownUntilTick(state, RESOLVED_TICK + TEST_MAGIC_30L);
+        api.setStateBurstActiveUntilTick(state, TEST_MAGIC_1500L);
+        api.setStateBurstAftershockUntilTick(state, TEST_MAGIC_1600L);
 
         final Object result = api.attemptBenmingSwordBurst(
             state,
@@ -91,10 +101,10 @@ final class FlyingSwordControllerResonanceBurstTests {
 
         assertFalse(api.resultSuccess(result));
         assertEquals("BURST_COOLDOWN_ACTIVE", api.resultFailureReason(result));
-        assertEquals(RESOLVED_TICK + 30L, api.resultBurstCooldownUntilTick(result));
-        assertEquals(RESOLVED_TICK + 30L, api.getStateBurstCooldownUntilTick(state));
-        assertEquals(1500L, api.getStateBurstActiveUntilTick(state));
-        assertEquals(1600L, api.getStateBurstAftershockUntilTick(state));
+        assertEquals(RESOLVED_TICK + TEST_MAGIC_30L, api.resultBurstCooldownUntilTick(result));
+        assertEquals(RESOLVED_TICK + TEST_MAGIC_30L, api.getStateBurstCooldownUntilTick(state));
+        assertEquals(TEST_MAGIC_1500L, api.getStateBurstActiveUntilTick(state));
+        assertEquals(TEST_MAGIC_1600L, api.getStateBurstAftershockUntilTick(state));
     }
 
     @Test
@@ -138,9 +148,9 @@ final class FlyingSwordControllerResonanceBurstTests {
         final RuntimeApi api = RuntimeApi.create();
         final Object state = api.newStateAttachment();
         api.setStateResonanceType(state, "offense");
-        api.setStateBurstCooldownUntilTick(state, 1800L);
-        api.setStateBurstActiveUntilTick(state, 1810L);
-        api.setStateBurstAftershockUntilTick(state, 1820L);
+        api.setStateBurstCooldownUntilTick(state, TEST_MAGIC_1800L);
+        api.setStateBurstActiveUntilTick(state, TEST_MAGIC_1810L);
+        api.setStateBurstAftershockUntilTick(state, TEST_MAGIC_1820L);
 
         final Object transactionFailure = api.newTransactionFailureResult(
             "OVERLOAD_LIMIT_EXCEEDED"
@@ -153,9 +163,9 @@ final class FlyingSwordControllerResonanceBurstTests {
 
         assertFalse(api.resultSuccess(result));
         assertEquals("BURST_OVERLOAD_BLOCKED", api.resultFailureReason(result));
-        assertEquals(1800L, api.getStateBurstCooldownUntilTick(state));
-        assertEquals(1810L, api.getStateBurstActiveUntilTick(state));
-        assertEquals(1820L, api.getStateBurstAftershockUntilTick(state));
+        assertEquals(TEST_MAGIC_1800L, api.getStateBurstCooldownUntilTick(state));
+        assertEquals(TEST_MAGIC_1810L, api.getStateBurstActiveUntilTick(state));
+        assertEquals(TEST_MAGIC_1820L, api.getStateBurstAftershockUntilTick(state));
     }
 
     @Test
@@ -164,8 +174,8 @@ final class FlyingSwordControllerResonanceBurstTests {
         final Object state = api.newStateAttachment();
         api.setStateResonanceType(state, "spirit");
         api.setStateBurstCooldownUntilTick(state, 0L);
-        api.setStateBurstActiveUntilTick(state, 1900L);
-        api.setStateBurstAftershockUntilTick(state, 1950L);
+        api.setStateBurstActiveUntilTick(state, TEST_MAGIC_1900L);
+        api.setStateBurstAftershockUntilTick(state, TEST_MAGIC_1950L);
 
         final Object transactionFailure = api.newTransactionFailureResult(
             "INSUFFICIENT_ZHENYUAN"
@@ -179,8 +189,8 @@ final class FlyingSwordControllerResonanceBurstTests {
         assertFalse(api.resultSuccess(result));
         assertEquals("BURST_RESOURCES_INSUFFICIENT", api.resultFailureReason(result));
         assertEquals(0L, api.getStateBurstCooldownUntilTick(state));
-        assertEquals(1900L, api.getStateBurstActiveUntilTick(state));
-        assertEquals(1950L, api.getStateBurstAftershockUntilTick(state));
+        assertEquals(TEST_MAGIC_1900L, api.getStateBurstActiveUntilTick(state));
+        assertEquals(TEST_MAGIC_1950L, api.getStateBurstAftershockUntilTick(state));
     }
 
     private static final class RuntimeApi {
@@ -488,7 +498,7 @@ final class FlyingSwordControllerResonanceBurstTests {
             if (root == null || !root.toFile().exists()) {
                 return null;
             }
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();

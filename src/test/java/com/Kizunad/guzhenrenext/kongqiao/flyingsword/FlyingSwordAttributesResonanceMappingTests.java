@@ -18,6 +18,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordAttributesResonanceMappingTests {
 
+
+    private static final double TEST_MAGIC_10_0D = 10.0D;
+    private static final double TEST_MAGIC_30_0D = 30.0D;
+    private static final int TEST_MAGIC_20 = 20;
+    private static final double TEST_MAGIC_12_2D = 12.2D;
+    private static final double TEST_MAGIC_9_2D = 9.2D;
+    private static final double TEST_MAGIC_10_5D = 10.5D;
+    private static final double TEST_MAGIC_2_4192D = 2.4192D;
+    private static final double TEST_MAGIC_1_692D = 1.692D;
+    private static final double TEST_MAGIC_2_2896D = 2.2896D;
+    private static final int TEST_MAGIC_17 = 17;
+    private static final int TEST_MAGIC_22 = 22;
+    private static final int TEST_MAGIC_19 = 19;
+    private static final double TEST_MAGIC_1_18D = 1.18D;
+    private static final double TEST_MAGIC_0_82D = 0.82D;
+    private static final double TEST_MAGIC_13_2D = 13.2D;
+    private static final double TEST_MAGIC_18_0D = 18.0D;
+    private static final double TEST_MAGIC_16_5D = 16.5D;
+    private static final double TEST_MAGIC_9_5D = 9.5D;
+    private static final double TEST_MAGIC_2_4D = 2.4D;
+    private static final double TEST_MAGIC_1_2D = 1.2D;
+    private static final double TEST_MAGIC_25_0D = 25.0D;
+    private static final int TEST_MAGIC_13 = 13;
+    private static final double TEST_MAGIC_6_0D = 6.0D;
+    private static final double TEST_MAGIC_NEG_3_0D = -3.0D;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String ATTRS_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes";
     private static final Path MAIN_CLASSES = Path.of("build/classes/java/main");
@@ -31,43 +58,43 @@ final class FlyingSwordAttributesResonanceMappingTests {
     void resonanceArchetypesProduceDeterministicCombatFeelDifferences() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 10.0D);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_10_0D);
         api.setDoubleField(attrs, "speedMax", 2.0D);
         api.setDoubleField(attrs, "speedBase", 1.0D);
-        api.setDoubleField(attrs, "turnRate", 30.0D);
-        api.setIntField(attrs, "attackCooldown", 20);
+        api.setDoubleField(attrs, "turnRate", TEST_MAGIC_30_0D);
+        api.setIntField(attrs, "attackCooldown", TEST_MAGIC_20);
 
         final double offenseDamage = api.getEffectiveDamage(attrs, "offense");
         final double defenseDamage = api.getEffectiveDamage(attrs, "defense");
         final double spiritDamage = api.getEffectiveDamage(attrs, "spirit");
-        assertEquals(12.2D, offenseDamage, DOUBLE_DELTA);
-        assertEquals(9.2D, defenseDamage, DOUBLE_DELTA);
-        assertEquals(10.5D, spiritDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_12_2D, offenseDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_9_2D, defenseDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_10_5D, spiritDamage, DOUBLE_DELTA);
 
         final double offensePursuit = api.getEffectivePursuitSpeed(attrs, "offense");
         final double defensePursuit = api.getEffectivePursuitSpeed(attrs, "defense");
         final double spiritPursuit = api.getEffectivePursuitSpeed(attrs, "spirit");
-        assertEquals(2.4192D, offensePursuit, DOUBLE_DELTA);
-        assertEquals(1.692D, defensePursuit, DOUBLE_DELTA);
-        assertEquals(2.2896D, spiritPursuit, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_4192D, offensePursuit, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_1_692D, defensePursuit, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_2896D, spiritPursuit, DOUBLE_DELTA);
 
-        assertEquals(17, api.getEffectiveAttackCooldown(attrs, "offense"));
-        assertEquals(22, api.getEffectiveAttackCooldown(attrs, "defense"));
-        assertEquals(19, api.getEffectiveAttackCooldown(attrs, "spirit"));
+        assertEquals(TEST_MAGIC_17, api.getEffectiveAttackCooldown(attrs, "offense"));
+        assertEquals(TEST_MAGIC_22, api.getEffectiveAttackCooldown(attrs, "defense"));
+        assertEquals(TEST_MAGIC_19, api.getEffectiveAttackCooldown(attrs, "spirit"));
 
         final double offenseGuardCostMultiplier =
             api.getGuardDurabilityCostMultiplier(attrs, "offense");
         final double defenseGuardCostMultiplier =
             api.getGuardDurabilityCostMultiplier(attrs, "defense");
-        assertEquals(1.18D, offenseGuardCostMultiplier, DOUBLE_DELTA);
-        assertEquals(0.82D, defenseGuardCostMultiplier, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_1_18D, offenseGuardCostMultiplier, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_0_82D, defenseGuardCostMultiplier, DOUBLE_DELTA);
 
         final double offenseRecallStability = api.getRecallStabilityScore(attrs, "offense");
         final double defenseRecallStability = api.getRecallStabilityScore(attrs, "defense");
         final double spiritRecallStability = api.getRecallStabilityScore(attrs, "spirit");
-        assertEquals(13.2D, offenseRecallStability, DOUBLE_DELTA);
-        assertEquals(18.0D, defenseRecallStability, DOUBLE_DELTA);
-        assertEquals(16.5D, spiritRecallStability, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_13_2D, offenseRecallStability, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_18_0D, defenseRecallStability, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_16_5D, spiritRecallStability, DOUBLE_DELTA);
 
         assertTrue(offenseDamage > spiritDamage);
         assertTrue(spiritDamage > defenseDamage);
@@ -81,11 +108,11 @@ final class FlyingSwordAttributesResonanceMappingTests {
     void missingOrUnknownResonanceFallsBackToSafeBaseline() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object attrs = api.newAttributes();
-        api.setDoubleField(attrs, "damage", 9.5D);
-        api.setDoubleField(attrs, "speedMax", 2.4D);
-        api.setDoubleField(attrs, "speedBase", 1.2D);
-        api.setDoubleField(attrs, "turnRate", 25.0D);
-        api.setIntField(attrs, "attackCooldown", 13);
+        api.setDoubleField(attrs, "damage", TEST_MAGIC_9_5D);
+        api.setDoubleField(attrs, "speedMax", TEST_MAGIC_2_4D);
+        api.setDoubleField(attrs, "speedBase", TEST_MAGIC_1_2D);
+        api.setDoubleField(attrs, "turnRate", TEST_MAGIC_25_0D);
+        api.setIntField(attrs, "attackCooldown", TEST_MAGIC_13);
 
         final double baselineDamage = api.getEffectiveDamage(attrs);
         final double baselineSpeedMax = api.getEffectiveSpeedMax(attrs);
@@ -124,8 +151,8 @@ final class FlyingSwordAttributesResonanceMappingTests {
             api.getGuardDurabilityCostMultiplier(attrs, "unknown-resonance"),
             DOUBLE_DELTA
         );
-        assertEquals(6.0D, api.mapGuardDurabilityCost(attrs, 6.0D, null), DOUBLE_DELTA);
-        assertEquals(0.0D, api.mapGuardDurabilityCost(attrs, -3.0D, "offense"), DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_6_0D, api.mapGuardDurabilityCost(attrs, TEST_MAGIC_6_0D, null), DOUBLE_DELTA);
+        assertEquals(0.0D, api.mapGuardDurabilityCost(attrs, TEST_MAGIC_NEG_3_0D, "offense"), DOUBLE_DELTA);
     }
 
     private static final class RuntimeApi {
@@ -347,7 +374,7 @@ final class FlyingSwordAttributesResonanceMappingTests {
                 return null;
             }
 
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();

@@ -19,6 +19,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordHudOverlayLayoutTest {
 
+
+    private static final float TEST_MAGIC_135_5F = 135.5F;
+    private static final float TEST_MAGIC_0_0001F = 0.0001F;
+    private static final float TEST_MAGIC_88_0F = 88.0F;
+    private static final float TEST_MAGIC_75_0F = 75.0F;
+    private static final float TEST_MAGIC_65_0F = 65.0F;
+    private static final int TEST_MAGIC_3 = 3;
+    private static final float TEST_MAGIC_100_0F = 100.0F;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String HUD_OVERLAY_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHudOverlay";
     private static final String DISPLAY_DATA_CLASS_NAME =
@@ -39,7 +49,7 @@ final class FlyingSwordHudOverlayLayoutTest {
         final Object benmingSword = api.newDisplayData();
         api.setBooleanField(benmingSword, "isBenmingSword", true);
         api.setEnumField(benmingSword, "benmingResonanceType", "OFFENSE");
-        api.setFloatField(benmingSword, "overloadPercent", 135.5F);
+        api.setFloatField(benmingSword, "overloadPercent", TEST_MAGIC_135_5F);
         api.setBooleanField(benmingSword, "shouldHighlightWarning", true);
         api.setBooleanField(benmingSword, "isBurstReady", true);
         api.setBooleanField(benmingSword, "isAftershockPeriod", true);
@@ -51,7 +61,7 @@ final class FlyingSwordHudOverlayLayoutTest {
         assertTrue(api.getPlanBoolean(benmingPlan, "showStatusRow"));
         assertTrue(api.getPlanBoolean(benmingPlan, "showOverloadRow"));
         assertEquals("载136%", api.getPlanString(benmingPlan, "overloadText"));
-        assertEquals(1.0F, api.getPlanFloat(benmingPlan, "overloadFillRatio"), 0.0001F);
+        assertEquals(1.0F, api.getPlanFloat(benmingPlan, "overloadFillRatio"), TEST_MAGIC_0_0001F);
         assertTrue(api.getPlanBoolean(benmingPlan, "overloadDanger"));
         assertEquals(
             api.getIntConstant("BENMING_STATUS_ENTRY_HEIGHT"),
@@ -64,7 +74,7 @@ final class FlyingSwordHudOverlayLayoutTest {
 
         final Object normalSword = api.newDisplayData();
         api.setEnumField(normalSword, "benmingResonanceType", "SPIRIT");
-        api.setFloatField(normalSword, "overloadPercent", 88.0F);
+        api.setFloatField(normalSword, "overloadPercent", TEST_MAGIC_88_0F);
         api.setBooleanField(normalSword, "shouldHighlightWarning", true);
         api.setBooleanField(normalSword, "isBurstReady", true);
         api.setBooleanField(normalSword, "isAftershockPeriod", true);
@@ -76,7 +86,7 @@ final class FlyingSwordHudOverlayLayoutTest {
         assertFalse(api.getPlanBoolean(normalPlan, "showStatusRow"));
         assertFalse(api.getPlanBoolean(normalPlan, "showOverloadRow"));
         assertEquals("", api.getPlanString(normalPlan, "overloadText"));
-        assertEquals(0.0F, api.getPlanFloat(normalPlan, "overloadFillRatio"), 0.0001F);
+        assertEquals(0.0F, api.getPlanFloat(normalPlan, "overloadFillRatio"), TEST_MAGIC_0_0001F);
         assertEquals(api.getIntConstant("NORMAL_ENTRY_HEIGHT"), api.getPlanInt(normalPlan, "entryHeight"));
         assertTrue(api.getStatusBadgeTexts(normalPlan).isEmpty());
     }
@@ -88,15 +98,15 @@ final class FlyingSwordHudOverlayLayoutTest {
         final Object benmingSword = api.newDisplayData();
         api.setBooleanField(benmingSword, "isBenmingSword", true);
         api.setEnumField(benmingSword, "benmingResonanceType", "DEFENSE");
-        api.setFloatField(benmingSword, "overloadPercent", 75.0F);
+        api.setFloatField(benmingSword, "overloadPercent", TEST_MAGIC_75_0F);
         api.setBooleanField(benmingSword, "shouldHighlightWarning", true);
         final Object normalBack = api.newDisplayData();
         api.setEnumField(normalBack, "benmingResonanceType", "SPIRIT");
-        api.setFloatField(normalBack, "overloadPercent", 65.0F);
+        api.setFloatField(normalBack, "overloadPercent", TEST_MAGIC_65_0F);
         api.setBooleanField(normalBack, "isBurstReady", true);
 
         final List<?> placements = api.buildPlacements(List.of(normalFront, benmingSword, normalBack));
-        assertEquals(3, placements.size());
+        assertEquals(TEST_MAGIC_3, placements.size());
 
         final int marginTop = api.getIntConstant("MARGIN_TOP");
         final int spacing = api.getIntConstant("ENTRY_SPACING");
@@ -124,7 +134,7 @@ final class FlyingSwordHudOverlayLayoutTest {
         final Object benmingSword = api.newDisplayData();
         api.setBooleanField(benmingSword, "isBenmingSword", true);
         api.setEnumField(benmingSword, "benmingResonanceType", "DEFENSE");
-        api.setFloatField(benmingSword, "overloadPercent", 100.0F);
+        api.setFloatField(benmingSword, "overloadPercent", TEST_MAGIC_100_0F);
         api.setBooleanField(benmingSword, "shouldHighlightWarning", true);
 
         final Object plan = api.buildRenderPlan(benmingSword);
@@ -328,7 +338,7 @@ final class FlyingSwordHudOverlayLayoutTest {
             return null;
         }
 
-        try (var stream = Files.walk(root, 6)) {
+        try (var stream = Files.walk(root, TEST_MAGIC_6)) {
             final List<Path> candidates = stream
                 .filter(path -> path.toString().endsWith(".jar"))
                 .toList();

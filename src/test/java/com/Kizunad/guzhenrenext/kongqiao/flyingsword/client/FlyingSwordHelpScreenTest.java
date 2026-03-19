@@ -23,6 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordHelpScreenTest {
 
+
+    private static final int TEST_MAGIC_5 = 5;
+    private static final int TEST_MAGIC_6 = 6;
+
     private static final String HELP_SCREEN_CLASS_NAME =
         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHelpScreen";
     private static final String GUIDE_STATE_CLASS_NAME =
@@ -67,7 +71,7 @@ final class FlyingSwordHelpScreenTest {
     void helpScreenExposesBenmingTabAndDedicatedBuilder() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
 
-        assertEquals(5, api.helpTabKeys().size());
+        assertEquals(TEST_MAGIC_5, api.helpTabKeys().size());
         assertEquals(TAB_BENMING_KEY, api.helpTabKeys().get(api.benmingTabIndex()));
         assertTrue(api.hasMethod("buildBenmingContent", int.class));
     }
@@ -445,7 +449,7 @@ final class FlyingSwordHelpScreenTest {
             if (root == null || !root.toFile().exists()) {
                 return null;
             }
-            try (var stream = Files.walk(root, 6)) {
+            try (var stream = Files.walk(root, TEST_MAGIC_6)) {
                 final List<Path> candidates = stream
                     .filter(path -> path.toString().endsWith(".jar"))
                     .toList();
