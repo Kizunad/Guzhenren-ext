@@ -1,9 +1,12 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.client;
 
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordConstants;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ai.SwordAIMode;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.quality.SwordQuality;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -42,6 +45,9 @@ public final class FlyingSwordHudState {
 
     /** 刷新间隔（ticks）。 */
     private static final int REFRESH_INTERVAL = 5;
+
+    /** 触发 HUD 警告高亮的过载阈值（百分比）。 */
+    private static final float OVERLOAD_WARNING_THRESHOLD_PERCENT = 100.0F;
 
     /** 缓存的飞剑数据列表。 */
     private static final List<SwordDisplayData> CACHED_SWORDS =
@@ -135,6 +141,31 @@ public final class FlyingSwordHudState {
         data.health = sword.getHealth();
         data.maxHealth = sword.getMaxHealth();
         data.isSelected = sword.getUUID().equals(selectedSwordId);
+        final String stableSwordId = sword.getSwordAttributes() == null
+            ? ""
+            : normalizeSwordId(sword.getSwordAttributes().getStableSwordId());
+        final FlyingSwordStateAttachment state = KongqiaoAttachments.getFlyingSwordState(player);
+        final String bondedSwordId = state == null ? "" : state.getBondedSwordId();
+        final String resonanceRaw = state == null ? "" : state.getResonanceType();
+        final double overload = state == null ? 0.0D : state.getOverload();
+        final long burstCooldownUntilTick = state == null ? 0L : state.getBurstCooldownUntilTick();
+        final long burstActiveUntilTick = state == null ? 0L : state.getBurstActiveUntilTick();
+        final long burstAftershockUntilTick = state == null
+            ? 0L
+            : state.getBurstAftershockUntilTick();
+        projectBenmingPhase2Fields(
+            data,
+            new BenmingPhase2ProjectionInput(
+                stableSwordId,
+                bondedSwordId,
+                resonanceRaw,
+                overload,
+                burstCooldownUntilTick,
+                burstActiveUntilTick,
+                burstAftershockUntilTick,
+                player.level().getGameTime()
+            )
+        );
 
         // 计算经验进度
         var attrs = sword.getSwordAttributes();
@@ -148,6 +179,63 @@ public final class FlyingSwordHudState {
         }
 
         return data;
+    }
+
+    /**
+     * 投影本命二期 HUD 字段。
+     * <p>
+     * 该方法仅做客户端缓存字段转换，不承担业务判定权威。
+     * 当同步面未提供明确权威状态时，使用保守默认值（例如余震期默认 false）。
+     * </p>
+     */
+    static void projectBenmingPhase2Fields(
+        SwordDisplayData data,
+        BenmingPhase2ProjectionInput projectionInput
+    ) {
+        final String normalizedStableSwordId = normalizeSwordId(
+            projectionInput.stableSwordId()
+        );
+        final String normalizedBondedSwordId = normalizeSwordId(
+            projectionInput.bondedSwordId()
+        );
+        data.isBenmingSword =
+            !normalizedBondedSwordId.isBlank() && normalizedBondedSwordId.equals(normalizedStableSwordId);
+
+        data.benmingResonanceType = FlyingSwordResonanceType.resolve(
+            projectionInput.resonanceRaw()
+        ).orElse(null);
+        data.overloadPercent = (float) Math.max(0.0D, projectionInput.overload());
+        data.isBurstReady =
+            projectionInput.burstCooldownUntilTick() <= projectionInput.gameTick();
+        final long normalizedActiveUntilTick = Math.max(
+            0L,
+            projectionInput.burstActiveUntilTick()
+        );
+        final long normalizedAftershockUntilTick = Math.max(
+            0L,
+            projectionInput.burstAftershockUntilTick()
+        );
+        data.isAftershockPeriod =
+            data.isBenmingSword
+                && projectionInput.gameTick() >= normalizedActiveUntilTick
+                && projectionInput.gameTick() < normalizedAftershockUntilTick;
+
+        data.shouldHighlightWarning = data.overloadPercent >= OVERLOAD_WARNING_THRESHOLD_PERCENT;
+    }
+
+    private record BenmingPhase2ProjectionInput(
+        @Nullable String stableSwordId,
+        @Nullable String bondedSwordId,
+        @Nullable String resonanceRaw,
+        double overload,
+        long burstCooldownUntilTick,
+        long burstActiveUntilTick,
+        long burstAftershockUntilTick,
+        long gameTick
+    ) {}
+
+    private static String normalizeSwordId(@Nullable String swordId) {
+        return swordId == null ? "" : swordId;
     }
 
     /**
@@ -268,6 +356,25 @@ public final class FlyingSwordHudState {
 
         /** 是否被选中。 */
         public boolean isSelected = false;
+
+        /** 是否为本命飞剑（可与 isSelected 同时为 true）。 */
+        public boolean isBenmingSword = false;
+
+        /** 本命二期分型（缺省态为 null）。 */
+        @Nullable
+        public FlyingSwordResonanceType benmingResonanceType = null;
+
+        /** 本命过载百分比（非负，缺省为 0）。 */
+        public float overloadPercent = 0.0F;
+
+        /** 本命爆发是否可用（基于客户端已同步冷却 tick 的显示投影）。 */
+        public boolean isBurstReady = true;
+
+        /** 是否处于余震期（当前同步面未提供独立权威字段时默认 false）。 */
+        public boolean isAftershockPeriod = false;
+
+        /** 是否需要警告高亮（当前按过载阈值投影）。 */
+        public boolean shouldHighlightWarning = false;
 
         /**
          * 获取生命值百分比。

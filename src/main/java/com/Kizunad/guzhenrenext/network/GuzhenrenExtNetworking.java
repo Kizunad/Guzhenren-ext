@@ -60,6 +60,11 @@ public final class GuzhenrenExtNetworking {
             ServerboundFlyingSwordActionPayload::handle
         );
         registrar.playToServer(
+            ServerboundBenmingSwordActionPayload.TYPE,
+            ServerboundBenmingSwordActionPayload.STREAM_CODEC,
+            ServerboundBenmingSwordActionPayload::handle
+        );
+        registrar.playToServer(
             ServerboundOpenTrainingGuiPayload.TYPE,
             ServerboundOpenTrainingGuiPayload.STREAM_CODEC,
             ServerboundOpenTrainingGuiPayload::handle

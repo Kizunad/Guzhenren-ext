@@ -18,10 +18,12 @@ import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -104,6 +106,7 @@ public final class FlyingSwordTickHandler {
         }
 
         reconcileBenmingCacheForTick(player);
+        reconcileOverloadLoopForTick(state, player.serverLevel().getGameTime());
         if (!state.isInitialized()) {
             state.setInitialized(true);
         }
@@ -111,6 +114,139 @@ public final class FlyingSwordTickHandler {
         FlyingSwordTrainingService.tick(player);
         // Phase 2：后续在此调用 AI/同步/战斗模块。
     }
+
+    public static void markCombatActivityForTick(final ServerPlayer player) {
+        if (player == null) {
+            return;
+        }
+        final FlyingSwordStateAttachment state =
+            KongqiaoAttachments.getFlyingSwordState(player);
+        if (state == null) {
+            return;
+        }
+        state.setLastCombatTick(player.serverLevel().getGameTime());
+    }
+
+    private static void reconcileOverloadLoopForTick(
+        final FlyingSwordStateAttachment state,
+        final long gameTick
+    ) {
+        if (state == null) {
+            return;
+        }
+
+        final boolean combatActivityThisTick = state.getLastCombatTick() == gameTick;
+        final OverloadResolution resolution = resolveOverloadForTick(
+            new OverloadTickInput(
+                state.getOverload(),
+                state.getBurstCooldownUntilTick(),
+                state.getOverloadBacklashUntilTick(),
+                state.getOverloadRecoveryUntilTick(),
+                state.getLastOverloadTick(),
+                gameTick,
+                combatActivityThisTick,
+                OverloadBacklashEngine.defaultCombatOverloadGrowthPerTick()
+            )
+        );
+        state.setOverload(resolution.overloadAfter());
+        state.setBurstCooldownUntilTick(resolution.burstCooldownUntilTickAfter());
+        state.setOverloadBacklashUntilTick(
+            resolution.overloadBacklashUntilTickAfter()
+        );
+        state.setOverloadRecoveryUntilTick(
+            resolution.overloadRecoveryUntilTickAfter()
+        );
+        state.setLastOverloadTick(resolution.lastOverloadTickAfter());
+    }
+
+    static OverloadResolution resolveOverloadForTick(
+        final OverloadTickInput input
+    ) {
+        if (input == null) {
+            return new OverloadResolution(0.0D, 0L, 0L, 0L, 0L, false);
+        }
+        final OverloadBacklashEngine.OverloadResolution resolution =
+            OverloadBacklashEngine.resolveOverloadForTick(
+                new OverloadBacklashEngine.OverloadTickInput(
+                    input.overloadBefore(),
+                    input.burstCooldownUntilTickBefore(),
+                    input.overloadBacklashUntilTickBefore(),
+                    input.overloadRecoveryUntilTickBefore(),
+                    input.lastOverloadTickBefore(),
+                    input.currentTick(),
+                    input.combatActivityThisTick(),
+                    input.combatOverloadGrowthPerTick()
+                )
+            );
+        return new OverloadResolution(
+            resolution.overloadAfter(),
+            resolution.burstCooldownUntilTickAfter(),
+            resolution.overloadBacklashUntilTickAfter(),
+            resolution.overloadRecoveryUntilTickAfter(),
+            resolution.lastOverloadTickAfter(),
+            resolution.backlashTriggered()
+        );
+    }
+
+    static boolean shouldTriggerOverloadBacklash(final double overload) {
+        return OverloadBacklashEngine.shouldTriggerOverloadBacklash(overload);
+    }
+
+    public static void markCombatActivityForServerOwner(
+        @Nullable final LivingEntity owner,
+        @Nullable final FlyingSwordEntity attackingSword
+    ) {
+        if (!(owner instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        if (attackingSword == null) {
+            return;
+        }
+        final FlyingSwordStateAttachment state =
+            KongqiaoAttachments.getFlyingSwordState(serverPlayer);
+        if (state == null) {
+            return;
+        }
+        if (!shouldMarkCombatActivityForSword(state, attackingSword)) {
+            return;
+        }
+        markCombatActivityForTick(serverPlayer);
+    }
+
+    static boolean shouldMarkCombatActivityForSword(
+        @Nullable final FlyingSwordStateAttachment state,
+        @Nullable final FlyingSwordEntity attackingSword
+    ) {
+        if (state == null || attackingSword == null) {
+            return false;
+        }
+        return OverloadBacklashEngine.shouldMarkCombatActivityForSword(
+            state.getBondedSwordId(),
+            attackingSword.getSwordAttributes().getStableSwordId(),
+            state.isBondCacheDirty()
+        );
+    }
+
+    record OverloadResolution(
+        double overloadAfter,
+        long burstCooldownUntilTickAfter,
+        long overloadBacklashUntilTickAfter,
+        long overloadRecoveryUntilTickAfter,
+        long lastOverloadTickAfter,
+        boolean backlashTriggered
+    ) {}
+
+    // given tick 协调层聚合玩家状态 when 进入过载结算 then 统一封装为单对象传递。
+    record OverloadTickInput(
+        double overloadBefore,
+        long burstCooldownUntilTickBefore,
+        long overloadBacklashUntilTickBefore,
+        long overloadRecoveryUntilTickBefore,
+        long lastOverloadTickBefore,
+        long currentTick,
+        boolean combatActivityThisTick,
+        double combatOverloadGrowthPerTick
+    ) {}
 
     public static void reconcileBenmingCacheForTick(final ServerPlayer player) {
         if (player == null) {

@@ -143,6 +143,14 @@ public final class GuKeyBindings {
         KEY_CATEGORY
     );
 
+    public static final KeyMapping FLYING_SWORD_BENMING_ACTION = new KeyMapping(
+        "key.guzhenrenext.flyingsword.benming_action",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_G,
+        KEY_CATEGORY
+    );
+
     private GuKeyBindings() {}
 
     @SubscribeEvent
@@ -158,5 +166,6 @@ public final class GuKeyBindings {
         event.register(FLYING_SWORD_RECALL_ALL);
         event.register(FLYING_SWORD_RESTORE_ALL);
         event.register(FLYING_SWORD_TOGGLE_HUD);
+        event.register(FLYING_SWORD_BENMING_ACTION);
     }
 }
