@@ -48,6 +48,9 @@ final class FlyingSwordControllerBindRitualTests {
     private static final double RITUAL_HUNPO_COST = 4.0D;
     private static final Path MAIN_CLASSES = Path.of("build/classes/java/main");
     private static final Path MAIN_RESOURCES = Path.of("build/resources/main");
+    private static final Path CONTROLLER_SOURCE = Path.of(
+        "src/main/java/com/Kizunad/guzhenrenext/kongqiao/flyingsword/FlyingSwordController.java"
+    );
     private static final Path ARTIFACT_MANIFEST =
         Path.of("build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties");
 
@@ -71,6 +74,61 @@ final class FlyingSwordControllerBindRitualTests {
         assertEquals(selectedValue, result);
         assertFalse(cleared.get());
         assertNull(remembered.get());
+    }
+
+    @Test
+    void resolveSelectedOrNearestCandidateFallsBackToNearestWhenSelectedTargetInvalid()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final UUID selectedUuid = UUID.randomUUID();
+        final String nearestValue = "nearest-sword";
+        final AtomicBoolean cleared = new AtomicBoolean(false);
+        final AtomicReference<Object> remembered = new AtomicReference<>();
+
+        final Object result = api.resolveSelectedOrNearestCandidate(
+            Optional.of(selectedUuid),
+            swordUuid -> null,
+            () -> cleared.set(true),
+            () -> nearestValue,
+            remembered::set
+        );
+
+        assertEquals(nearestValue, result);
+        assertTrue(cleared.get());
+        assertEquals(nearestValue, remembered.get());
+    }
+
+    @Test
+    void resolveStrictSelectedCandidatePrefersSelectedSword() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final UUID selectedUuid = UUID.randomUUID();
+        final String selectedValue = "selected-sword";
+        final AtomicBoolean cleared = new AtomicBoolean(false);
+
+        final Object result = api.resolveStrictSelectedCandidate(
+            Optional.of(selectedUuid),
+            swordUuid -> swordUuid.equals(selectedUuid) ? selectedValue : null,
+            () -> cleared.set(true)
+        );
+
+        assertEquals(selectedValue, result);
+        assertFalse(cleared.get());
+    }
+
+    @Test
+    void resolveStrictSelectedCandidateReturnsNullWhenSelectedTargetInvalid() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final UUID selectedUuid = UUID.randomUUID();
+        final AtomicBoolean cleared = new AtomicBoolean(false);
+
+        final Object result = api.resolveStrictSelectedCandidate(
+            Optional.of(selectedUuid),
+            swordUuid -> null,
+            () -> cleared.set(true)
+        );
+
+        assertNull(result);
+        assertTrue(cleared.get());
     }
 
     @Test
@@ -156,6 +214,19 @@ final class FlyingSwordControllerBindRitualTests {
         assertEquals(0L, mutationState.ritualLockUntilTick);
     }
 
+    @Test
+    void bindSelectedOrNearestSwordAsBenmingKeepsStrictSelectionAndDedicatedMissingSelectionFailure()
+        throws Exception {
+        final String methodBody = extractMethodBody(
+            Files.readString(CONTROLLER_SOURCE),
+            "public static BenmingSwordBondService.Result bindSelectedOrNearestSwordAsBenming(",
+            "public static BenmingSwordBondService.Result activeUnbindSelectedOrNearestBenmingSword("
+        );
+
+        assertTrue(methodBody.contains("getStrictSelectedSword(level, owner)"));
+        assertTrue(methodBody.contains("FailureReason.NO_SELECTED_SWORD"));
+    }
+
     private static final class RuntimeApi {
 
         private static Path cachedMinecraftJarPath;
@@ -172,6 +243,7 @@ final class FlyingSwordControllerBindRitualTests {
         private final Class<?> snapshotClass;
         private final Class<?> stateAttachmentClass;
         private final Method resolveSelectedOrNearestCandidateMethod;
+        private final Method resolveStrictSelectedCandidateMethod;
         private final Method bindSwordAsBenmingWithRitualMethod;
         private final Method createDefaultRitualBindRequestMethod;
         private final Method defaultRitualDuplicateGuardTicksMethod;
@@ -197,6 +269,12 @@ final class FlyingSwordControllerBindRitualTests {
                 Runnable.class,
                 java.util.function.Supplier.class,
                 java.util.function.Consumer.class
+            );
+            this.resolveStrictSelectedCandidateMethod = controllerClass.getDeclaredMethod(
+                "resolveStrictSelectedCandidate",
+                Optional.class,
+                java.util.function.Function.class,
+                Runnable.class
             );
             this.bindSwordAsBenmingWithRitualMethod = controllerClass.getDeclaredMethod(
                 "bindSwordAsBenmingWithRitual",
@@ -236,6 +314,7 @@ final class FlyingSwordControllerBindRitualTests {
                 transactionMutationPortClass
             );
             this.resolveSelectedOrNearestCandidateMethod.setAccessible(true);
+            this.resolveStrictSelectedCandidateMethod.setAccessible(true);
             this.bindSwordAsBenmingWithRitualMethod.setAccessible(true);
             this.createDefaultRitualBindRequestMethod.setAccessible(true);
         }
@@ -342,6 +421,19 @@ final class FlyingSwordControllerBindRitualTests {
                 clearSelection,
                 nearestSupplier,
                 rememberNearest
+            );
+        }
+
+        Object resolveStrictSelectedCandidate(
+            final Optional<UUID> selectedId,
+            final java.util.function.Function<UUID, Object> selectedResolver,
+            final Runnable clearSelection
+        ) throws Exception {
+            return resolveStrictSelectedCandidateMethod.invoke(
+                null,
+                selectedId,
+                selectedResolver,
+                clearSelection
             );
         }
 
@@ -856,5 +948,18 @@ final class FlyingSwordControllerBindRitualTests {
             case "equals" -> proxy == (args == null ? null : args[0]);
             default -> throw new UnsupportedOperationException(method.getName());
         };
+    }
+
+    private static String extractMethodBody(
+        final String source,
+        final String startMarker,
+        final String endMarker
+    ) {
+        final int start = source.indexOf(startMarker);
+        final int end = source.indexOf(endMarker, start);
+        if (start < 0 || end < 0 || end <= start) {
+            throw new IllegalStateException("无法从源码中提取目标方法片段");
+        }
+        return source.substring(start, end);
     }
 }

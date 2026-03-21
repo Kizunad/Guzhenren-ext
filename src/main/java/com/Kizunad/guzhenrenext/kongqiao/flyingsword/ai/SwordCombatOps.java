@@ -61,8 +61,12 @@ import net.minecraft.world.phys.Vec3;
      private static final double BENMING_BURST_ACTIVE_PURSUIT_MULTIPLIER = 1.20D;
      private static final double BENMING_BURST_AFTERSHOCK_PURSUIT_MULTIPLIER = 0.85D;
      private static final double BENMING_BURST_ACTIVE_COOLDOWN_MULTIPLIER = 0.80D;
-     private static final double BENMING_BURST_AFTERSHOCK_COOLDOWN_MULTIPLIER = 1.25D;
-     private static final double DAMAGE_SPEED_FLOOR = 0.05D;
+      private static final double BENMING_BURST_AFTERSHOCK_COOLDOWN_MULTIPLIER = 1.25D;
+      private static final double BENMING_PRE_BACKLASH_WARNING_OVERLOAD_MIN = 80.0D;
+      private static final double BENMING_PRE_BACKLASH_WARNING_OVERLOAD_MAX = 100.0D;
+      private static final double BENMING_PRE_BACKLASH_ENTRY_COOLDOWN_MULTIPLIER = 1.03D;
+      private static final double BENMING_PRE_BACKLASH_CAP_COOLDOWN_MULTIPLIER = 1.15D;
+      private static final double DAMAGE_SPEED_FLOOR = 0.05D;
  
      private SwordCombatOps() {}
 
@@ -455,9 +459,14 @@ import net.minecraft.world.phys.Vec3;
         final int baselineCooldown = isBenmingDamageContextApplicable(benmingDamageContext)
             ? attrs.getEffectiveAttackCooldown(benmingDamageContext.resonanceType())
             : attrs.attackCooldown;
+        final double preBacklashCooldownMultiplier =
+            resolveBenmingPreBacklashCooldownMultiplier(benmingDamageContext);
+        final double burstCooldownMultiplier =
+            resolveBenmingBurstCooldownMultiplier(benmingDamageContext);
         final long mappedCooldown = Math.round(
             Math.max(0, baselineCooldown)
-                * resolveBenmingBurstCooldownMultiplier(benmingDamageContext)
+                * preBacklashCooldownMultiplier
+                * burstCooldownMultiplier
         );
         return Math.max(0, (int) mappedCooldown);
     }
@@ -499,7 +508,8 @@ import net.minecraft.world.phys.Vec3;
             state.getBurstActiveUntilTick(),
             state.getBurstAftershockUntilTick(),
             state.getOverloadBacklashUntilTick(),
-            state.getOverloadRecoveryUntilTick()
+            state.getOverloadRecoveryUntilTick(),
+            state.getOverload()
         );
     }
 
@@ -545,6 +555,45 @@ import net.minecraft.world.phys.Vec3;
             case AFTERSHOCK -> BENMING_BURST_AFTERSHOCK_COOLDOWN_MULTIPLIER;
             case NONE -> BENMING_ATTACK_MULTIPLIER_BASE;
         };
+    }
+
+    private static double resolveBenmingPreBacklashCooldownMultiplier(
+        @Nullable final BenmingDamageContext benmingDamageContext
+    ) {
+        if (!isBenmingDamageContextApplicable(benmingDamageContext)) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        final long currentTick = Math.max(0L, benmingDamageContext.currentTick());
+        if (currentTick < Math.max(0L, benmingDamageContext.overloadBacklashUntilTick())) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+        if (currentTick < Math.max(0L, benmingDamageContext.overloadRecoveryUntilTick())) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        final double overload = sanitizeNonNegativeFinite(benmingDamageContext.overload());
+        if (overload < BENMING_PRE_BACKLASH_WARNING_OVERLOAD_MIN
+            || overload >= BENMING_PRE_BACKLASH_WARNING_OVERLOAD_MAX) {
+            return BENMING_ATTACK_MULTIPLIER_BASE;
+        }
+
+        final double warningProgress = Math.min(
+            BENMING_ATTACK_MULTIPLIER_BASE,
+            (overload - BENMING_PRE_BACKLASH_WARNING_OVERLOAD_MIN)
+                / (
+                    BENMING_PRE_BACKLASH_WARNING_OVERLOAD_MAX
+                        - BENMING_PRE_BACKLASH_WARNING_OVERLOAD_MIN
+                )
+        );
+        final double cooldownMultiplierRange =
+            BENMING_PRE_BACKLASH_CAP_COOLDOWN_MULTIPLIER
+                - BENMING_PRE_BACKLASH_ENTRY_COOLDOWN_MULTIPLIER;
+        return sanitizeMultiplier(
+            BENMING_PRE_BACKLASH_ENTRY_COOLDOWN_MULTIPLIER
+                + warningProgress * cooldownMultiplierRange,
+            BENMING_ATTACK_MULTIPLIER_BASE
+        );
     }
 
     private static BenmingBurstPhase resolveBenmingBurstPhase(
@@ -655,7 +704,8 @@ import net.minecraft.world.phys.Vec3;
         long burstActiveUntilTick,
         long burstAftershockUntilTick,
         long overloadBacklashUntilTick,
-        long overloadRecoveryUntilTick
+        long overloadRecoveryUntilTick,
+        double overload
     ) {}
 
     private enum BenmingBurstPhase {

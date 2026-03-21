@@ -33,9 +33,15 @@ final class FlyingSwordHudStateContractTests {
     private static final long TEST_MAGIC_100L = 100L;
     private static final double TEST_MAGIC_10_0D = 10.0D;
     private static final long TEST_MAGIC_220L = 220L;
+    private static final double TEST_MAGIC_79_9D = 79.9D;
+    private static final double TEST_MAGIC_80_0D = 80.0D;
     private static final double TEST_MAGIC_99_9D = 99.9D;
     private static final double TEST_MAGIC_100_0D = 100.0D;
+    private static final float TEST_MAGIC_80_0F = 80.0F;
     private static final float TEST_MAGIC_100_0F = 100.0F;
+    private static final int TEST_MAGIC_7 = 7;
+    private static final int TEST_MAGIC_8 = 8;
+    private static final int TEST_MAGIC_9 = 9;
     private static final int TEST_MAGIC_6 = 6;
 
     private static final String HUD_STATE_CLASS_NAME =
@@ -80,7 +86,10 @@ final class FlyingSwordHudStateContractTests {
         assertEquals(TEST_MAGIC_135_5F, api.getFloatField(data, "overloadPercent"), TEST_MAGIC_0_0001F);
         assertFalse(api.getBooleanField(data, "isBurstReady"));
         assertTrue(api.getBooleanField(data, "isAftershockPeriod"));
+        assertFalse(api.getBooleanField(data, "isOverloadBacklashActive"));
+        assertFalse(api.getBooleanField(data, "isOverloadRecoveryActive"));
         assertTrue(api.getBooleanField(data, "shouldHighlightWarning"));
+        assertTrue(api.getBooleanField(data, "isOverloadDanger"));
     }
 
     @Test
@@ -93,9 +102,12 @@ final class FlyingSwordHudStateContractTests {
         assertFalse(api.getBooleanField(data, "isBenmingSword"));
         assertNull(api.getField(data, "benmingResonanceType"));
         assertEquals(0.0F, api.getFloatField(data, "overloadPercent"), TEST_MAGIC_0_0001F);
-        assertTrue(api.getBooleanField(data, "isBurstReady"));
+        assertFalse(api.getBooleanField(data, "isBurstReady"));
         assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
+        assertFalse(api.getBooleanField(data, "isOverloadBacklashActive"));
+        assertFalse(api.getBooleanField(data, "isOverloadRecoveryActive"));
         assertFalse(api.getBooleanField(data, "shouldHighlightWarning"));
+        assertFalse(api.getBooleanField(data, "isOverloadDanger"));
 
         api.project(new RuntimeApi.ProjectionArgs(
             data,
@@ -111,8 +123,10 @@ final class FlyingSwordHudStateContractTests {
 
         assertFalse(api.getBooleanField(data, "isBenmingSword"));
         assertNull(api.getField(data, "benmingResonanceType"));
-        assertTrue(api.getBooleanField(data, "isBurstReady"));
+        assertFalse(api.getBooleanField(data, "isBurstReady"));
         assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
+        assertFalse(api.getBooleanField(data, "isOverloadBacklashActive"));
+        assertFalse(api.getBooleanField(data, "isOverloadRecoveryActive"));
     }
 
     @Test
@@ -187,9 +201,184 @@ final class FlyingSwordHudStateContractTests {
     }
 
     @Test
-    void projectionRaisesNearOverloadWarningAtThresholdBoundary() throws Exception {
+    void projectionSeparatesOverloadLoopStateFromBurstAftershock() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object data = api.newDisplayData();
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "devour",
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_220L,
+            TEST_MAGIC_260L,
+            0L,
+            0L,
+            TEST_MAGIC_200L
+        ));
+        assertTrue(api.getBooleanField(data, "isOverloadBacklashActive"));
+        assertFalse(api.getBooleanField(data, "isOverloadRecoveryActive"));
+        assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
+        assertFalse(api.getBooleanField(data, "isBurstReady"));
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "devour",
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_260L,
+            0L,
+            0L,
+            TEST_MAGIC_220L
+        ));
+        assertFalse(api.getBooleanField(data, "isOverloadBacklashActive"));
+        assertTrue(api.getBooleanField(data, "isOverloadRecoveryActive"));
+        assertFalse(api.getBooleanField(data, "isAftershockPeriod"));
+        assertTrue(api.getBooleanField(data, "isBurstReady"));
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "spirit",
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            0L,
+            0L,
+            TEST_MAGIC_200L,
+            TEST_MAGIC_260L,
+            TEST_MAGIC_220L
+        ));
+        assertFalse(api.getBooleanField(data, "isOverloadBacklashActive"));
+        assertFalse(api.getBooleanField(data, "isOverloadRecoveryActive"));
+        assertTrue(api.getBooleanField(data, "isAftershockPeriod"));
+    }
+
+
+    @Test
+    void projectionRequiresOverloadSafeWindowForBurstReady() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object data = api.newDisplayData();
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "defense",
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            0L,
+            0L,
+            TEST_MAGIC_200L
+        ));
+        assertTrue(api.getBooleanField(data, "isBurstReady"));
+        assertFalse(api.getBooleanField(data, "isOverloadDanger"));
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "defense",
+            TEST_MAGIC_100_0D,
+            TEST_MAGIC_180L,
+            0L,
+            0L,
+            TEST_MAGIC_200L
+        ));
+        assertFalse(api.getBooleanField(data, "isBurstReady"));
+        assertTrue(api.getBooleanField(data, "isOverloadDanger"));
+    }
+
+    @Test
+    void projectionUsesDevourRecoveryWindowForBurstReady() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object data = api.newDisplayData();
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "devour",
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_220L,
+            TEST_MAGIC_260L,
+            0L,
+            0L,
+            TEST_MAGIC_200L
+        ));
+        assertEquals("DEVOUR", api.getEnumFieldName(data, "benmingResonanceType"));
+        assertFalse(api.getBooleanField(data, "isBurstReady"));
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "devour",
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_260L,
+            0L,
+            0L,
+            TEST_MAGIC_220L
+        ));
+        assertTrue(api.getBooleanField(data, "isBurstReady"));
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "devour",
+            TEST_MAGIC_10_0D,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_180L,
+            TEST_MAGIC_220L,
+            0L,
+            0L,
+            TEST_MAGIC_220L
+        ));
+        assertFalse(api.getBooleanField(data, "isBurstReady"));
+    }
+
+    @Test
+    void projectionSeparatesPreWarningAndDangerThresholds() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object data = api.newDisplayData();
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "defense",
+            TEST_MAGIC_79_9D,
+            TEST_MAGIC_180L,
+            0L,
+            0L,
+            TEST_MAGIC_200L
+        ));
+        assertFalse(api.getBooleanField(data, "shouldHighlightWarning"));
+        assertFalse(api.getBooleanField(data, "isOverloadDanger"));
+
+        api.project(new RuntimeApi.ProjectionArgs(
+            data,
+            BONDED_STABLE_SWORD_ID,
+            BONDED_STABLE_SWORD_ID,
+            "defense",
+            TEST_MAGIC_80_0D,
+            TEST_MAGIC_180L,
+            0L,
+            0L,
+            TEST_MAGIC_200L
+        ));
+        assertEquals(TEST_MAGIC_80_0F, api.getFloatField(data, "overloadPercent"), TEST_MAGIC_0_0001F);
+        assertTrue(api.getBooleanField(data, "shouldHighlightWarning"));
+        assertFalse(api.getBooleanField(data, "isOverloadDanger"));
 
         api.project(new RuntimeApi.ProjectionArgs(
             data,
@@ -202,7 +391,8 @@ final class FlyingSwordHudStateContractTests {
             0L,
             TEST_MAGIC_200L
         ));
-        assertFalse(api.getBooleanField(data, "shouldHighlightWarning"));
+        assertTrue(api.getBooleanField(data, "shouldHighlightWarning"));
+        assertFalse(api.getBooleanField(data, "isOverloadDanger"));
 
         api.project(new RuntimeApi.ProjectionArgs(
             data,
@@ -218,6 +408,63 @@ final class FlyingSwordHudStateContractTests {
         assertTrue(api.getBooleanField(data, "isBenmingSword"));
         assertEquals(TEST_MAGIC_100_0F, api.getFloatField(data, "overloadPercent"), TEST_MAGIC_0_0001F);
         assertTrue(api.getBooleanField(data, "shouldHighlightWarning"));
+        assertTrue(api.getBooleanField(data, "isOverloadDanger"));
+    }
+
+    @Test
+    void visibleDisplayWindowPrioritizesBenmingRowAheadOfOrdinaryRows() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object ordinaryNearRow = api.newDisplayData();
+        final Object ordinaryMidRow = api.newDisplayData();
+        final Object benmingRow = api.newDisplayData();
+        final Object ordinaryFarRow = api.newDisplayData();
+        api.setBooleanField(benmingRow, "isBenmingSword", true);
+
+        final List<Object> orderedRows = api.buildVisibleDisplayWindow(List.of(
+            ordinaryNearRow,
+            ordinaryMidRow,
+            benmingRow,
+            ordinaryFarRow
+        ));
+
+        assertEquals(
+            List.of(benmingRow, ordinaryNearRow, ordinaryMidRow, ordinaryFarRow),
+            orderedRows
+        );
+    }
+
+    @Test
+    void visibleDisplayWindowKeepsBenmingRowInsideHudLimit() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final List<Object> distanceOrderedRows = createDisplayRows(api, TEST_MAGIC_9);
+        final Object benmingRow = distanceOrderedRows.get(TEST_MAGIC_8);
+        api.setBooleanField(benmingRow, "isBenmingSword", true);
+
+        final List<Object> orderedRows = api.buildVisibleDisplayWindow(distanceOrderedRows);
+        final List<Object> expectedRows = new ArrayList<>();
+        expectedRows.add(benmingRow);
+        expectedRows.addAll(distanceOrderedRows.subList(0, TEST_MAGIC_7));
+
+        assertEquals(TEST_MAGIC_8, orderedRows.size());
+        assertEquals(expectedRows, orderedRows);
+    }
+
+    @Test
+    void visibleDisplayWindowKeepsDistanceOrderWhenNoBenmingSwordExists() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final List<Object> distanceOrderedRows = createDisplayRows(api, TEST_MAGIC_9);
+
+        final List<Object> orderedRows = api.buildVisibleDisplayWindow(distanceOrderedRows);
+
+        assertEquals(distanceOrderedRows.subList(0, TEST_MAGIC_8), orderedRows);
+    }
+
+    private static List<Object> createDisplayRows(RuntimeApi api, int count) throws Exception {
+        final List<Object> rows = new ArrayList<>();
+        for (int index = 0; index < count; index++) {
+            rows.add(api.newDisplayData());
+        }
+        return rows;
     }
 
     private static final class RuntimeApi {
@@ -227,6 +474,7 @@ final class FlyingSwordHudStateContractTests {
         private final Class<?> projectionInputClass;
         private final Class<?> resonanceEnumClass;
         private final Method projectionMethod;
+        private final Method buildVisibleDisplayWindowMethod;
         private final Constructor<?> projectionInputConstructor;
 
         private RuntimeApi(
@@ -245,11 +493,18 @@ final class FlyingSwordHudStateContractTests {
                 projectionInputClass
             );
             this.projectionMethod.setAccessible(true);
+            this.buildVisibleDisplayWindowMethod = hudStateClass.getDeclaredMethod(
+                "buildVisibleDisplayWindow",
+                List.class
+            );
+            this.buildVisibleDisplayWindowMethod.setAccessible(true);
             this.projectionInputConstructor = projectionInputClass.getDeclaredConstructor(
                 String.class,
                 String.class,
                 String.class,
                 double.class,
+                long.class,
+                long.class,
                 long.class,
                 long.class,
                 long.class,
@@ -287,6 +542,8 @@ final class FlyingSwordHudStateContractTests {
                 args.resonanceRaw(),
                 args.overload(),
                 args.burstCooldownUntilTick(),
+                args.overloadBacklashUntilTick(),
+                args.overloadRecoveryUntilTick(),
                 args.burstActiveUntilTick(),
                 args.burstAftershockUntilTick(),
                 args.gameTick()
@@ -298,6 +555,19 @@ final class FlyingSwordHudStateContractTests {
             );
         }
 
+        List<Object> buildVisibleDisplayWindow(final List<Object> distanceOrderedRows)
+            throws Exception {
+            final Object orderedRows = buildVisibleDisplayWindowMethod.invoke(
+                null,
+                distanceOrderedRows
+            );
+            assertTrue(orderedRows instanceof List<?>);
+            final List<?> rawOrderedRows = (List<?>) orderedRows;
+            final List<Object> typedOrderedRows = new ArrayList<>();
+            typedOrderedRows.addAll(rawOrderedRows);
+            return typedOrderedRows;
+        }
+
         private record ProjectionArgs(
             Object data,
             String stableSwordId,
@@ -305,10 +575,38 @@ final class FlyingSwordHudStateContractTests {
             String resonanceRaw,
             double overload,
             long burstCooldownUntilTick,
+            long overloadBacklashUntilTick,
+            long overloadRecoveryUntilTick,
             long burstActiveUntilTick,
             long burstAftershockUntilTick,
             long gameTick
-        ) {}
+        ) {
+            private ProjectionArgs(
+                Object data,
+                String stableSwordId,
+                String bondedSwordId,
+                String resonanceRaw,
+                double overload,
+                long burstCooldownUntilTick,
+                long burstActiveUntilTick,
+                long burstAftershockUntilTick,
+                long gameTick
+            ) {
+                this(
+                    data,
+                    stableSwordId,
+                    bondedSwordId,
+                    resonanceRaw,
+                    overload,
+                    burstCooldownUntilTick,
+                    0L,
+                    0L,
+                    burstActiveUntilTick,
+                    burstAftershockUntilTick,
+                    gameTick
+                );
+            }
+        }
 
         Object getField(final Object target, final String fieldName) throws Exception {
             final Field field = displayDataClass.getField(fieldName);

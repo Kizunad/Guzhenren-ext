@@ -10,6 +10,8 @@ import com.Kizunad.guzhenrenext.network.ServerboundBenmingSwordActionPayload;
 import com.Kizunad.guzhenrenext.network.ServerboundFlyingSwordActionPayload;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
@@ -30,7 +32,11 @@ public final class GuClientEvents {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         final Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null) {
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            minecraft.player,
+            minecraft.level
+        );
+        if (minecraft.player == null || minecraft.level == null) {
             return;
         }
 
@@ -111,7 +117,17 @@ public final class GuClientEvents {
         }
 
         while (GuKeyBindings.FLYING_SWORD_BENMING_ACTION.consumeClick()) {
-            PacketDistributor.sendToServer(resolveBenmingActionPayload());
+            final BenmingClientActionResolver.BenmingActionRoute actionRoute =
+                BenmingClientActionResolver.resolveActionRoute(
+                    Screen.hasShiftDown(),
+                    Screen.hasControlDown()
+                );
+            final long currentTick = minecraft.player.level().getGameTime();
+            if (BenmingClientActionResolver.shouldSendAction(actionRoute, currentTick)) {
+                PacketDistributor.sendToServer(
+                    BenmingClientActionResolver.createPayload(actionRoute)
+                );
+            }
         }
 
         // 切换飞剑 HUD 显示
@@ -122,34 +138,78 @@ public final class GuClientEvents {
 
     static ServerboundBenmingSwordActionPayload resolveBenmingActionPayload() {
         return BenmingClientActionResolver.createPayload(
-            Screen.hasShiftDown(),
-            Screen.hasControlDown()
+            BenmingClientActionResolver.resolveActionRoute(
+                Screen.hasShiftDown(),
+                Screen.hasControlDown()
+            )
         );
     }
 }
 
 final class BenmingClientActionResolver {
 
+    enum BenmingActionRoute {
+        RITUAL_BIND,
+        SWITCH_RESONANCE,
+        BURST_ATTEMPT;
+    }
+
+    static final long BENMING_ACTION_THROTTLE_WINDOW_TICKS = 4L;
+
+    private static final Map<BenmingActionRoute, Long> LAST_SENT_TICK_BY_ACTION =
+        new HashMap<>();
+    private static Object lastClientPlayerIdentity;
+    private static Object lastClientLevelIdentity;
+
     private BenmingClientActionResolver() {}
 
-    static String resolveActionName(final boolean shiftDown, final boolean controlDown) {
+    static BenmingActionRoute resolveActionRoute(
+        final boolean shiftDown,
+        final boolean controlDown
+    ) {
         if (controlDown) {
-            return "BURST_ATTEMPT";
+            return BenmingActionRoute.BURST_ATTEMPT;
         }
         if (shiftDown) {
-            return "SWITCH_RESONANCE";
+            return BenmingActionRoute.SWITCH_RESONANCE;
         }
-        return "RITUAL_BIND";
+        return BenmingActionRoute.RITUAL_BIND;
+    }
+
+    static String resolveActionName(final boolean shiftDown, final boolean controlDown) {
+        return resolveActionRoute(shiftDown, controlDown).name();
     }
 
     static ServerboundBenmingSwordActionPayload createPayload(
         final boolean shiftDown,
         final boolean controlDown
     ) {
-        return createPayload(resolveActionName(shiftDown, controlDown));
+        return createPayload(resolveActionRoute(shiftDown, controlDown));
     }
 
-    private static ServerboundBenmingSwordActionPayload createPayload(
+    static ServerboundBenmingSwordActionPayload createPayload(
+        final BenmingActionRoute actionRoute
+    ) {
+        return switch (actionRoute) {
+            case RITUAL_BIND -> createRitualBindPayload();
+            case SWITCH_RESONANCE -> createSwitchResonancePayload();
+            case BURST_ATTEMPT -> createBurstAttemptPayload();
+        };
+    }
+
+    private static ServerboundBenmingSwordActionPayload createRitualBindPayload() {
+        return createPayloadForActionName(BenmingActionRoute.RITUAL_BIND.name());
+    }
+
+    private static ServerboundBenmingSwordActionPayload createSwitchResonancePayload() {
+        return createPayloadForActionName(BenmingActionRoute.SWITCH_RESONANCE.name());
+    }
+
+    private static ServerboundBenmingSwordActionPayload createBurstAttemptPayload() {
+        return createPayloadForActionName(BenmingActionRoute.BURST_ATTEMPT.name());
+    }
+
+    private static ServerboundBenmingSwordActionPayload createPayloadForActionName(
         final String actionName
     ) {
         try {
@@ -162,6 +222,61 @@ final class BenmingClientActionResolver {
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException("无法构造本命动作数据包: " + actionName, exception);
         }
+    }
+
+    static boolean shouldSendAction(
+        final BenmingActionRoute actionRoute,
+        final long currentTick
+    ) {
+        return shouldSendAction(actionRoute, currentTick, BENMING_ACTION_THROTTLE_WINDOW_TICKS);
+    }
+
+    static boolean shouldSendAction(
+        final BenmingActionRoute actionRoute,
+        final long currentTick,
+        final long throttleWindowTicks
+    ) {
+        final Long lastSentTick = LAST_SENT_TICK_BY_ACTION.get(actionRoute);
+        if (lastSentTick != null && currentTick < lastSentTick) {
+            LAST_SENT_TICK_BY_ACTION.put(actionRoute, currentTick);
+            return true;
+        }
+
+        if (lastSentTick != null && currentTick - lastSentTick < throttleWindowTicks) {
+            return false;
+        }
+
+        LAST_SENT_TICK_BY_ACTION.put(actionRoute, currentTick);
+        return true;
+    }
+
+    static void syncThrottleStateForSession(
+        final Object playerIdentity,
+        final Object levelIdentity
+    ) {
+        if (playerIdentity == null || levelIdentity == null) {
+            clearThrottleState();
+            return;
+        }
+
+        if (lastClientPlayerIdentity == playerIdentity
+            && lastClientLevelIdentity == levelIdentity) {
+            return;
+        }
+
+        clearThrottleState();
+        lastClientPlayerIdentity = playerIdentity;
+        lastClientLevelIdentity = levelIdentity;
+    }
+
+    static void resetThrottleStateForTests() {
+        clearThrottleState();
+    }
+
+    private static void clearThrottleState() {
+        LAST_SENT_TICK_BY_ACTION.clear();
+        lastClientPlayerIdentity = null;
+        lastClientLevelIdentity = null;
     }
 
     private static Constructor<ServerboundBenmingSwordActionPayload> resolvePayloadConstructor(

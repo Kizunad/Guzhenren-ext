@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.client;
 
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordController;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordConstants;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntity;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment;
@@ -46,8 +47,9 @@ public final class FlyingSwordHudState {
     /** 刷新间隔（ticks）。 */
     private static final int REFRESH_INTERVAL = 5;
 
-    /** 触发 HUD 警告高亮的过载阈值（百分比）。 */
-    private static final float OVERLOAD_WARNING_THRESHOLD_PERCENT = 100.0F;
+    private static final float OVERLOAD_WARNING_THRESHOLD_PERCENT = 80.0F;
+
+    private static final float OVERLOAD_DANGER_THRESHOLD_PERCENT = 100.0F;
 
     /** 缓存的飞剑数据列表。 */
     private static final List<SwordDisplayData> CACHED_SWORDS =
@@ -115,12 +117,13 @@ public final class FlyingSwordHudState {
             Comparator.comparingDouble(sword -> sword.distanceToSqr(player))
         );
 
-        // 转换为显示数据
-        int count = Math.min(nearbySwords.size(), MAX_DISPLAY_COUNT);
-        for (int i = 0; i < count; i++) {
-            FlyingSwordEntity sword = nearbySwords.get(i);
-            CACHED_SWORDS.add(createDisplayData(sword, player));
+        final List<SwordDisplayData> preparedDisplayData = new ArrayList<>(
+            nearbySwords.size()
+        );
+        for (FlyingSwordEntity sword : nearbySwords) {
+            preparedDisplayData.add(createDisplayData(sword, player));
         }
+        CACHED_SWORDS.addAll(buildVisibleDisplayWindow(preparedDisplayData));
     }
 
     /**
@@ -149,6 +152,12 @@ public final class FlyingSwordHudState {
         final String resonanceRaw = state == null ? "" : state.getResonanceType();
         final double overload = state == null ? 0.0D : state.getOverload();
         final long burstCooldownUntilTick = state == null ? 0L : state.getBurstCooldownUntilTick();
+        final long overloadBacklashUntilTick = state == null
+            ? 0L
+            : state.getOverloadBacklashUntilTick();
+        final long overloadRecoveryUntilTick = state == null
+            ? 0L
+            : state.getOverloadRecoveryUntilTick();
         final long burstActiveUntilTick = state == null ? 0L : state.getBurstActiveUntilTick();
         final long burstAftershockUntilTick = state == null
             ? 0L
@@ -161,6 +170,8 @@ public final class FlyingSwordHudState {
                 resonanceRaw,
                 overload,
                 burstCooldownUntilTick,
+                overloadBacklashUntilTick,
+                overloadRecoveryUntilTick,
                 burstActiveUntilTick,
                 burstAftershockUntilTick,
                 player.level().getGameTime()
@@ -192,6 +203,7 @@ public final class FlyingSwordHudState {
         SwordDisplayData data,
         BenmingPhase2ProjectionInput projectionInput
     ) {
+        final long normalizedGameTick = Math.max(0L, projectionInput.gameTick());
         final String normalizedStableSwordId = normalizeSwordId(
             projectionInput.stableSwordId()
         );
@@ -205,8 +217,32 @@ public final class FlyingSwordHudState {
             projectionInput.resonanceRaw()
         ).orElse(null);
         data.overloadPercent = (float) Math.max(0.0D, projectionInput.overload());
-        data.isBurstReady =
-            projectionInput.burstCooldownUntilTick() <= projectionInput.gameTick();
+        data.isOverloadDanger = data.overloadPercent >= OVERLOAD_DANGER_THRESHOLD_PERCENT;
+        final long normalizedBacklashUntilTick = Math.max(
+            0L,
+            projectionInput.overloadBacklashUntilTick()
+        );
+        final long normalizedRecoveryUntilTick = Math.max(
+            0L,
+            projectionInput.overloadRecoveryUntilTick()
+        );
+        data.isOverloadBacklashActive =
+            data.isBenmingSword && normalizedBacklashUntilTick > normalizedGameTick;
+        data.isOverloadRecoveryActive =
+            data.isBenmingSword
+                && normalizedRecoveryUntilTick > normalizedBacklashUntilTick
+                && normalizedGameTick >= normalizedBacklashUntilTick
+                && normalizedGameTick < normalizedRecoveryUntilTick;
+        data.isBurstReady = FlyingSwordController.isBurstWindowReady(
+            normalizedStableSwordId,
+            normalizedBondedSwordId,
+            projectionInput.resonanceRaw(),
+            projectionInput.overload(),
+            projectionInput.burstCooldownUntilTick(),
+            projectionInput.overloadBacklashUntilTick(),
+            projectionInput.overloadRecoveryUntilTick(),
+            projectionInput.gameTick()
+        );
         final long normalizedActiveUntilTick = Math.max(
             0L,
             projectionInput.burstActiveUntilTick()
@@ -217,10 +253,56 @@ public final class FlyingSwordHudState {
         );
         data.isAftershockPeriod =
             data.isBenmingSword
-                && projectionInput.gameTick() >= normalizedActiveUntilTick
-                && projectionInput.gameTick() < normalizedAftershockUntilTick;
+                && normalizedGameTick >= normalizedActiveUntilTick
+                && normalizedGameTick < normalizedAftershockUntilTick;
 
         data.shouldHighlightWarning = data.overloadPercent >= OVERLOAD_WARNING_THRESHOLD_PERCENT;
+    }
+
+    static List<SwordDisplayData> buildVisibleDisplayWindow(
+        List<SwordDisplayData> distanceOrderedDisplayData
+    ) {
+        final int effectiveDisplayCount = Math.min(
+            distanceOrderedDisplayData.size(),
+            MAX_DISPLAY_COUNT
+        );
+        final List<SwordDisplayData> visibleDisplayData = new ArrayList<>(
+            effectiveDisplayCount
+        );
+        if (effectiveDisplayCount <= 0) {
+            return visibleDisplayData;
+        }
+
+        appendMatchingDisplayRows(
+            visibleDisplayData,
+            distanceOrderedDisplayData,
+            true,
+            effectiveDisplayCount
+        );
+        appendMatchingDisplayRows(
+            visibleDisplayData,
+            distanceOrderedDisplayData,
+            false,
+            effectiveDisplayCount
+        );
+        return visibleDisplayData;
+    }
+
+    private static void appendMatchingDisplayRows(
+        List<SwordDisplayData> visibleDisplayData,
+        List<SwordDisplayData> distanceOrderedDisplayData,
+        boolean expectBenmingSword,
+        int effectiveDisplayCount
+    ) {
+        for (SwordDisplayData displayData : distanceOrderedDisplayData) {
+            if (visibleDisplayData.size() >= effectiveDisplayCount) {
+                return;
+            }
+            if (displayData.isBenmingSword != expectBenmingSword) {
+                continue;
+            }
+            visibleDisplayData.add(displayData);
+        }
     }
 
     private record BenmingPhase2ProjectionInput(
@@ -229,6 +311,8 @@ public final class FlyingSwordHudState {
         @Nullable String resonanceRaw,
         double overload,
         long burstCooldownUntilTick,
+        long overloadBacklashUntilTick,
+        long overloadRecoveryUntilTick,
         long burstActiveUntilTick,
         long burstAftershockUntilTick,
         long gameTick
@@ -367,14 +451,19 @@ public final class FlyingSwordHudState {
         /** 本命过载百分比（非负，缺省为 0）。 */
         public float overloadPercent = 0.0F;
 
-        /** 本命爆发是否可用（基于客户端已同步冷却 tick 的显示投影）。 */
+        /** 本命爆发是否可用（基于共享爆发窗口语义的客户端显示投影）。 */
         public boolean isBurstReady = true;
 
         /** 是否处于余震期（当前同步面未提供独立权威字段时默认 false）。 */
         public boolean isAftershockPeriod = false;
 
-        /** 是否需要警告高亮（当前按过载阈值投影）。 */
+        public boolean isOverloadBacklashActive = false;
+
+        public boolean isOverloadRecoveryActive = false;
+
         public boolean shouldHighlightWarning = false;
+
+        public boolean isOverloadDanger = false;
 
         /**
          * 获取生命值百分比。

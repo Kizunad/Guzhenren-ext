@@ -10,12 +10,16 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ServerboundBenmingSwordActionPayloadTests {
@@ -23,6 +27,19 @@ final class ServerboundBenmingSwordActionPayloadTests {
 
     private static final int TEST_MAGIC_4 = 4;
     private static final int TEST_MAGIC_6 = 6;
+    private static final long TEST_BASE_TICK = 100L;
+    private static final String BURST_COOLDOWN_DEDUPE_KEY =
+        "controller.BURST_ATTEMPT.BURST_COOLDOWN_ACTIVE";
+    private static final String BURST_RESOURCE_DEDUPE_KEY =
+        "controller.BURST_ATTEMPT.BURST_RESOURCES_INSUFFICIENT";
+    private static final String GUIDE_AFTER_BOND_KEY =
+        "message.guzhenrenext.flyingsword.benming.guide.after_bond";
+    private static final String GUIDE_BOND_FAIL_NEXT_STEP_KEY =
+        "message.guzhenrenext.flyingsword.benming.guide.bond_fail_next_step";
+    private static final String GUIDE_RESONANCE_FIRST_CHOICE_KEY =
+        "message.guzhenrenext.flyingsword.benming.guide.resonance_first_choice";
+    private static final String GUIDE_OVERLOAD_FIRST_WARNING_KEY =
+        "message.guzhenrenext.flyingsword.benming.guide.overload_first_warning";
 
     private static final String PAYLOAD_CLASS_NAME =
         "com.Kizunad.guzhenrenext.network.ServerboundBenmingSwordActionPayload";
@@ -170,6 +187,24 @@ final class ServerboundBenmingSwordActionPayloadTests {
     }
 
     @Test
+    void feedbackMapsMissingSelectedSwordBondFailureToDedicatedGuidance() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final String ritualBindMessage = api.feedbackForBondResult(
+            api.newBondFailureResult(
+                "RITUAL_BIND",
+                "NO_SELECTED_SWORD",
+                "stable-bind"
+            )
+        );
+
+        assertEquals(
+            "[本命飞剑] 请先明确选中一把飞剑，再执行本命缔结。",
+            ritualBindMessage
+        );
+    }
+
+    @Test
     void executeRoutesResonanceAndBurstThroughControllerChannel() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object executor = api.newExecutorProxy(
@@ -202,6 +237,272 @@ final class ServerboundBenmingSwordActionPayloadTests {
             api.feedbackMessage(burstFeedback)
         );
     }
+
+    @Test
+    void burstFailureFeedbackDeliveryThrottleSuppressesImmediateRepeats() {
+        final Map<String, Long> cooldowns = new HashMap<>();
+
+        assertTrue(
+            BenmingFeedbackDeliveryThrottleLogic.shouldSendWithCooldowns(
+                BURST_COOLDOWN_DEDUPE_KEY,
+                TEST_BASE_TICK,
+                cooldowns
+            )
+        );
+        assertFalse(
+            BenmingFeedbackDeliveryThrottleLogic.shouldSendWithCooldowns(
+                BURST_COOLDOWN_DEDUPE_KEY,
+                TEST_BASE_TICK,
+                cooldowns
+            )
+        );
+        assertTrue(
+            BenmingFeedbackDeliveryThrottleLogic.shouldSendWithCooldowns(
+                BURST_RESOURCE_DEDUPE_KEY,
+                TEST_BASE_TICK,
+                cooldowns
+            )
+        );
+        assertTrue(
+            BenmingFeedbackDeliveryThrottleLogic.shouldSendWithCooldowns(
+                BURST_COOLDOWN_DEDUPE_KEY,
+                TEST_BASE_TICK + BenmingFeedbackDeliveryThrottleLogic.cooldownWindowTicks(),
+                cooldowns
+            )
+        );
+    }
+
+    @Test
+    void ritualFeedbackBypassesBurstThrottleAndKeepsConfirmationReadable()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Method ritualBondFactory = api.actionFeedbackClass.getDeclaredMethod(
+            "bond",
+            api.bondResultClass
+        );
+        ritualBondFactory.setAccessible(true);
+        final Object ritualSuccessFeedback = ritualBondFactory.invoke(
+            null,
+            api.newBondSuccessResult("RITUAL_BIND", "stable-bind")
+        );
+        final Object ritualFailureFeedback = ritualBondFactory.invoke(
+            null,
+            api.newBondFailureResult(
+                "RITUAL_BIND",
+                "RITUAL_RESOURCES_INSUFFICIENT",
+                "stable-bind"
+            )
+        );
+        final String ritualSuccessMessage = api.feedbackMessage(ritualSuccessFeedback);
+        final String ritualFailureMessage = api.feedbackMessage(ritualFailureFeedback);
+
+        assertEquals(
+            "[本命飞剑] 仪式缔结成功：stable-bind",
+            ritualSuccessMessage
+        );
+        assertEquals(
+            "[本命飞剑] 仪式资源不足，无法完成本命缔结。",
+            ritualFailureMessage
+        );
+    }
+
+    @Test
+    void firstGuideDeliveryHooksIntoSuccessfulBindAndResonanceBehavior()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object bindFeedback = api.execute(
+            "RITUAL_BIND",
+            api.newExecutorProxy(
+                api.newBondSuccessResult("QUERY", "stable-query"),
+                api.newBondSuccessResult("RITUAL_BIND", "stable-bind"),
+                api.newBondSuccessResult("ACTIVE_UNBIND", "stable-unbind"),
+                api.newBondSuccessResult("FORCED_UNBIND", "stable-forced"),
+                api.newControllerSuccessResult(
+                    "RESONANCE_SWITCH",
+                    "stable-resonance",
+                    "defense",
+                    0L
+                ),
+                api.newControllerSuccessResult(
+                    "BURST_ATTEMPT",
+                    "stable-burst",
+                    "spirit",
+                    1240L
+                )
+            )
+        );
+        final Object resonanceFeedback = api.execute(
+            "SWITCH_RESONANCE",
+            api.newExecutorProxy(
+                api.newBondSuccessResult("QUERY", "stable-query"),
+                api.newBondSuccessResult("RITUAL_BIND", "stable-bind"),
+                api.newBondSuccessResult("ACTIVE_UNBIND", "stable-unbind"),
+                api.newBondSuccessResult("FORCED_UNBIND", "stable-forced"),
+                api.newControllerSuccessResult(
+                    "RESONANCE_SWITCH",
+                    "stable-resonance",
+                    "defense",
+                    0L
+                ),
+                api.newControllerSuccessResult(
+                    "BURST_ATTEMPT",
+                    "stable-burst",
+                    "spirit",
+                    1240L
+                )
+            )
+        );
+
+        assertEquals(
+            GUIDE_AFTER_BOND_KEY,
+            api.consumeFirstGuideTopic(bindFeedback, new HashSet<>())
+        );
+        assertEquals(
+            GUIDE_RESONANCE_FIRST_CHOICE_KEY,
+            api.consumeFirstGuideTopic(resonanceFeedback, new HashSet<>())
+        );
+    }
+
+    @Test
+    void firstGuideDeliveryRoutesBondFailureAndOverloadWarningToHelp()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Set<String> seenTopics = new HashSet<>();
+        final Object bondFailureFeedback = api.execute(
+            "RITUAL_BIND",
+            api.newExecutorProxy(
+                api.newBondSuccessResult("QUERY", "stable-query"),
+                api.newBondFailureResult(
+                    "RITUAL_BIND",
+                    "TARGET_NOT_BOUND_TO_PLAYER",
+                    "unstable-bind"
+                ),
+                api.newBondSuccessResult("ACTIVE_UNBIND", "stable-unbind"),
+                api.newBondSuccessResult("FORCED_UNBIND", "stable-forced"),
+                api.newControllerSuccessResult(
+                    "RESONANCE_SWITCH",
+                    "stable-resonance",
+                    "defense",
+                    0L
+                ),
+                api.newControllerSuccessResult(
+                    "BURST_ATTEMPT",
+                    "stable-burst",
+                    "spirit",
+                    1240L
+                )
+            )
+        );
+        final Object overloadWarningFeedback = api.execute(
+            "BURST_ATTEMPT",
+            api.newExecutorProxy(
+                api.newBondSuccessResult("QUERY", "stable-query"),
+                api.newBondSuccessResult("RITUAL_BIND", "stable-bind"),
+                api.newBondSuccessResult("ACTIVE_UNBIND", "stable-unbind"),
+                api.newBondSuccessResult("FORCED_UNBIND", "stable-forced"),
+                api.newControllerSuccessResult(
+                    "RESONANCE_SWITCH",
+                    "stable-resonance",
+                    "defense",
+                    0L
+                ),
+                api.newControllerFailureResult(
+                    "BURST_ATTEMPT",
+                    "BURST_OVERLOAD_BLOCKED",
+                    "stable-burst",
+                    "spirit",
+                    1240L
+                )
+            )
+        );
+
+        final String bondFailureTopic = api.consumeFirstGuideTopic(
+            bondFailureFeedback,
+            seenTopics
+        );
+        final String bondFailureRepeat = api.consumeFirstGuideTopic(
+            bondFailureFeedback,
+            seenTopics
+        );
+        final String overloadWarningTopic = api.consumeFirstGuideTopic(
+            overloadWarningFeedback,
+            seenTopics
+        );
+        final String overloadWarningRepeat = api.consumeFirstGuideTopic(
+            overloadWarningFeedback,
+            seenTopics
+        );
+
+        assertEquals(GUIDE_BOND_FAIL_NEXT_STEP_KEY, bondFailureTopic, "bond=" + bondFailureTopic);
+        assertEquals(null, bondFailureRepeat, "bondRepeat=" + bondFailureRepeat);
+        assertEquals(
+            GUIDE_OVERLOAD_FIRST_WARNING_KEY,
+            overloadWarningTopic,
+            "overload=" + overloadWarningTopic
+        );
+        assertEquals(null, overloadWarningRepeat, "overloadRepeat=" + overloadWarningRepeat);
+    }
+
+    @Test
+    void firstGuideDeliveryOnlyEmitsEachTopicOncePerSeenState() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Set<String> seenTopics = new HashSet<>();
+        final Object bindFeedback = api.execute(
+            "RITUAL_BIND",
+            api.newExecutorProxy(
+                api.newBondSuccessResult("QUERY", "stable-query"),
+                api.newBondSuccessResult("RITUAL_BIND", "stable-bind"),
+                api.newBondSuccessResult("ACTIVE_UNBIND", "stable-unbind"),
+                api.newBondSuccessResult("FORCED_UNBIND", "stable-forced"),
+                api.newControllerSuccessResult(
+                    "RESONANCE_SWITCH",
+                    "stable-resonance",
+                    "defense",
+                    0L
+                ),
+                api.newControllerSuccessResult(
+                    "BURST_ATTEMPT",
+                    "stable-burst",
+                    "spirit",
+                    1240L
+                )
+            )
+        );
+        final Object burstFailureFeedback = api.execute(
+            "BURST_ATTEMPT",
+            api.newExecutorProxy(
+                api.newBondSuccessResult("QUERY", "stable-query"),
+                api.newBondSuccessResult("RITUAL_BIND", "stable-bind"),
+                api.newBondSuccessResult("ACTIVE_UNBIND", "stable-unbind"),
+                api.newBondSuccessResult("FORCED_UNBIND", "stable-forced"),
+                api.newControllerSuccessResult(
+                    "RESONANCE_SWITCH",
+                    "stable-resonance",
+                    "defense",
+                    0L
+                ),
+                api.newControllerFailureResult(
+                    "BURST_ATTEMPT",
+                    "BURST_OVERLOAD_BLOCKED",
+                    "stable-burst",
+                    "spirit",
+                    1240L
+                )
+            )
+        );
+
+        assertEquals(
+            GUIDE_AFTER_BOND_KEY,
+            api.consumeFirstGuideTopic(bindFeedback, seenTopics)
+        );
+        assertEquals(null, api.consumeFirstGuideTopic(bindFeedback, seenTopics));
+        assertEquals(
+            GUIDE_OVERLOAD_FIRST_WARNING_KEY,
+            api.consumeFirstGuideTopic(burstFailureFeedback, seenTopics)
+        );
+        assertEquals(null, api.consumeFirstGuideTopic(burstFailureFeedback, seenTopics));
+    }
+
 
     @Test
     void feedbackTreatsInvalidRouteAsExplicitPlayerFacingFailure() throws Exception {
@@ -258,9 +559,11 @@ final class ServerboundBenmingSwordActionPayloadTests {
         private final Class<?> controllerResultClass;
         private final Class<?> controllerActionEnumClass;
         private final Class<?> controllerFailureReasonEnumClass;
+        private final Class<?> firstGuideDeliveryClass;
         private final Class<?> resonanceStateViewClass;
         private final Class<?> resonanceTypeClass;
         private final Method executeMethod;
+        private final Method consumeFirstGuideTopicMethod;
         private final Method feedbackMethod;
         private final Method resolveNextResonanceTypeMethod;
         private final Method controllerSuccessMethod;
@@ -278,12 +581,18 @@ final class ServerboundBenmingSwordActionPayloadTests {
             this.controllerResultClass = deps.controllerResultClass();
             this.controllerActionEnumClass = deps.controllerActionEnumClass();
             this.controllerFailureReasonEnumClass = deps.controllerFailureReasonEnumClass();
+            this.firstGuideDeliveryClass = deps.firstGuideDeliveryClass();
             this.resonanceStateViewClass = deps.resonanceStateViewClass();
             this.resonanceTypeClass = deps.resonanceTypeClass();
             this.executeMethod = routingHelperClass.getDeclaredMethod(
                 "execute",
                 actionEnumClass,
                 executorInterfaceClass
+            );
+            this.consumeFirstGuideTopicMethod = firstGuideDeliveryClass.getDeclaredMethod(
+                "consumeTopic",
+                actionFeedbackClass,
+                Set.class
             );
             this.feedbackMethod = routingHelperClass.getDeclaredMethod(
                 "feedback",
@@ -311,6 +620,7 @@ final class ServerboundBenmingSwordActionPayloadTests {
             this.controllerSuccessMethod.setAccessible(true);
             this.controllerFailureMethod.setAccessible(true);
             this.executeMethod.setAccessible(true);
+            this.consumeFirstGuideTopicMethod.setAccessible(true);
             this.feedbackMethod.setAccessible(true);
             this.resolveNextResonanceTypeMethod.setAccessible(true);
         }
@@ -347,6 +657,11 @@ final class ServerboundBenmingSwordActionPayloadTests {
                         true,
                         loader
                     ),
+                    Class.forName(
+                        "com.Kizunad.guzhenrenext.network.BenmingFirstGuideDelivery",
+                        true,
+                        loader
+                    ),
                     Class.forName(resonanceStateViewClassName, true, loader),
                     Class.forName(
                         "com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType",
@@ -369,6 +684,7 @@ final class ServerboundBenmingSwordActionPayloadTests {
             Class<?> controllerResultClass,
             Class<?> controllerActionEnumClass,
             Class<?> controllerFailureReasonEnumClass,
+            Class<?> firstGuideDeliveryClass,
             Class<?> resonanceStateViewClass,
             Class<?> resonanceTypeClass
         ) {}
@@ -378,6 +694,17 @@ final class ServerboundBenmingSwordActionPayloadTests {
                 ? null
                 : enumConstant(actionEnumClass, actionName);
             return executeMethod.invoke(null, action, executor);
+        }
+
+        String consumeFirstGuideTopic(
+            final Object actionFeedback,
+            final Set<String> seenTopics
+        ) throws Exception {
+            return (String) consumeFirstGuideTopicMethod.invoke(
+                null,
+                actionFeedback,
+                seenTopics
+            );
         }
 
         Object newBondSuccessResult(final String branchName, final String stableSwordId)

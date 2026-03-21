@@ -32,6 +32,7 @@ public final class BenmingSwordBondService {
     public enum FailureReason {
         NONE,
         INVALID_REQUEST,
+        NO_SELECTED_SWORD,
         NO_BONDED_SWORD,
         PLAYER_ALREADY_HAS_BONDED_SWORD,
         TARGET_BOUND_TO_OTHER_PLAYER,

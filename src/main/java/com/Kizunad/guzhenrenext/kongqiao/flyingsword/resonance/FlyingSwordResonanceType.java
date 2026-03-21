@@ -32,6 +32,15 @@ public enum FlyingSwordResonanceType {
         KongqiaoI18n.RESONANCE_SPIRIT_DESC,
         KongqiaoI18n.RESONANCE_SPIRIT_COLOR_SEMANTIC,
         0xFF3A8DFF
+    ),
+
+    DEVOUR(
+        "devour",
+        "噬",
+        KongqiaoI18n.RESONANCE_DEVOUR_NAME,
+        KongqiaoI18n.RESONANCE_DEVOUR_DESC,
+        KongqiaoI18n.RESONANCE_DEVOUR_COLOR_SEMANTIC,
+        0xFF8A4FD6
     );
 
     private final String code;

@@ -137,33 +137,34 @@ public class FlyingSwordAttributes {
     private static final ResonanceMappedProfile BASELINE_RESONANCE_PROFILE =
         new ResonanceMappedProfile(1.0D, 1.0D, 1.0D, 1.0D, 1.0D, 1.0D);
 
-    private static final double OFFENSE_DAMAGE_MULTIPLIER = 1.22D;
-    private static final double OFFENSE_SPEED_MULTIPLIER = 1.08D;
-    private static final double OFFENSE_PURSUIT_SPEED_MULTIPLIER = 1.12D;
-    private static final double OFFENSE_ATTACK_COOLDOWN_MULTIPLIER = 0.86D;
-    private static final double OFFENSE_GUARD_DURABILITY_COST_MULTIPLIER = 1.18D;
-    private static final double OFFENSE_RECALL_STABILITY_MULTIPLIER = 0.88D;
+    private static final double OFFENSE_DAMAGE_MULTIPLIER = 1.26D;
+    private static final double OFFENSE_SPEED_MULTIPLIER = 1.09D;
+    private static final double OFFENSE_PURSUIT_SPEED_MULTIPLIER = 1.14D;
+    private static final double OFFENSE_ATTACK_COOLDOWN_MULTIPLIER = 0.84D;
+    private static final double OFFENSE_GUARD_DURABILITY_COST_MULTIPLIER = 1.22D;
+    private static final double OFFENSE_RECALL_STABILITY_MULTIPLIER = 0.84D;
 
-    private static final double DEFENSE_DAMAGE_MULTIPLIER = 0.92D;
-    private static final double DEFENSE_SPEED_MULTIPLIER = 0.94D;
-    private static final double DEFENSE_PURSUIT_SPEED_MULTIPLIER = 0.90D;
-    private static final double DEFENSE_ATTACK_COOLDOWN_MULTIPLIER = 1.12D;
-    private static final double DEFENSE_GUARD_DURABILITY_COST_MULTIPLIER = 0.82D;
-    private static final double DEFENSE_RECALL_STABILITY_MULTIPLIER = 1.20D;
+    private static final double DEFENSE_DAMAGE_MULTIPLIER = 0.90D;
+    private static final double DEFENSE_SPEED_MULTIPLIER = 0.92D;
+    private static final double DEFENSE_PURSUIT_SPEED_MULTIPLIER = 0.88D;
+    private static final double DEFENSE_ATTACK_COOLDOWN_MULTIPLIER = 1.14D;
+    private static final double DEFENSE_GUARD_DURABILITY_COST_MULTIPLIER = 0.78D;
+    private static final double DEFENSE_RECALL_STABILITY_MULTIPLIER = 1.24D;
 
-    private static final double SPIRIT_DAMAGE_MULTIPLIER = 1.05D;
+    private static final double SPIRIT_DAMAGE_MULTIPLIER = 1.04D;
     private static final double SPIRIT_SPEED_MULTIPLIER = 1.06D;
-    private static final double SPIRIT_PURSUIT_SPEED_MULTIPLIER = 1.08D;
-    private static final double SPIRIT_ATTACK_COOLDOWN_MULTIPLIER = 0.95D;
-    private static final double SPIRIT_GUARD_DURABILITY_COST_MULTIPLIER = 0.95D;
-    private static final double SPIRIT_RECALL_STABILITY_MULTIPLIER = 1.10D;
+    private static final double SPIRIT_PURSUIT_SPEED_MULTIPLIER = 1.09D;
+    private static final double SPIRIT_ATTACK_COOLDOWN_MULTIPLIER = 0.94D;
+    private static final double SPIRIT_GUARD_DURABILITY_COST_MULTIPLIER = 0.93D;
+    private static final double SPIRIT_RECALL_STABILITY_MULTIPLIER = 1.12D;
 
-    /**
-     * 三相共鸣统一映射表。
-     * <p>
-     * 这里集中定义“手感差异”倍率，避免 Combat/HUD/调用方各自硬编码分型逻辑。
-     * </p>
-     */
+    private static final double DEVOUR_DAMAGE_MULTIPLIER = 1.12D;
+    private static final double DEVOUR_SPEED_MULTIPLIER = 0.98D;
+    private static final double DEVOUR_PURSUIT_SPEED_MULTIPLIER = 1.05D;
+    private static final double DEVOUR_ATTACK_COOLDOWN_MULTIPLIER = 0.92D;
+    private static final double DEVOUR_GUARD_DURABILITY_COST_MULTIPLIER = 1.28D;
+    private static final double DEVOUR_RECALL_STABILITY_MULTIPLIER = 0.70D;
+
     private static final Map<FlyingSwordResonanceType, ResonanceMappedProfile>
         RESONANCE_PROFILE_MAP = createResonanceProfileMap();
 
@@ -532,6 +533,18 @@ public class FlyingSwordAttributes {
                 SPIRIT_ATTACK_COOLDOWN_MULTIPLIER,
                 SPIRIT_GUARD_DURABILITY_COST_MULTIPLIER,
                 SPIRIT_RECALL_STABILITY_MULTIPLIER
+            )
+        );
+
+        map.put(
+            FlyingSwordResonanceType.DEVOUR,
+            new ResonanceMappedProfile(
+                DEVOUR_DAMAGE_MULTIPLIER,
+                DEVOUR_SPEED_MULTIPLIER,
+                DEVOUR_PURSUIT_SPEED_MULTIPLIER,
+                DEVOUR_ATTACK_COOLDOWN_MULTIPLIER,
+                DEVOUR_GUARD_DURABILITY_COST_MULTIPLIER,
+                DEVOUR_RECALL_STABILITY_MULTIPLIER
             )
         );
 
