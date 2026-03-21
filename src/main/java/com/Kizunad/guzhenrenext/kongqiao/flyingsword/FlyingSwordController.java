@@ -757,6 +757,16 @@ public final class FlyingSwordController {
             );
         }
 
+        if (FlyingSwordResonanceType.resolve(state.getResonanceType()).isEmpty()) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.RESONANCE_TYPE_INVALID,
+                normalizeSwordId(resolvedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+
         final long normalizedTick = Math.max(0L, resolvedTick);
         if (normalizedTick < state.getBurstCooldownUntilTick()) {
             return BenmingControllerActionResult.failure(
@@ -944,8 +954,6 @@ public final class FlyingSwordController {
                 case OFFENSE ->
                     normalizedOverload >=
                     BURST_ATTEMPT_OFFENSE_PRESSURE_OVERLOAD_FLOOR;
-                case DEFENSE ->
-                    normalizedOverload < BURST_ATTEMPT_DEFENSE_STABLE_OVERLOAD_LIMIT;
                 case SPIRIT ->
                     normalizedOverload >=
                         BURST_ATTEMPT_DEFENSE_STABLE_OVERLOAD_LIMIT
@@ -954,8 +962,12 @@ public final class FlyingSwordController {
                 case DEVOUR ->
                     normalizedTick >= normalizedBacklashUntilTick
                         && normalizedTick < normalizedRecoveryUntilTick;
+                case DEFENSE ->
+                    normalizedOverload < BURST_ATTEMPT_DEFENSE_STABLE_OVERLOAD_LIMIT
+                        && (normalizedTick < normalizedBacklashUntilTick
+                            || normalizedTick >= normalizedRecoveryUntilTick);
             })
-            .orElse(true);
+            .orElse(false);
     }
 
     private static long resolveRouteWindowTick(final long[] routeWindowTicks, final int index) {

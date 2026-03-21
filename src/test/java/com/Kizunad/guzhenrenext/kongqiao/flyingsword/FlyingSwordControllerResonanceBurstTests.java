@@ -217,6 +217,50 @@ final class FlyingSwordControllerResonanceBurstTests {
     }
 
     @Test
+    void burstAttemptRejectsBlankResonanceWithInvalidReason() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object state = newBurstAttemptState(
+            api,
+            "",
+            OVERLOAD_MID_PRESSURE_BAND
+        );
+
+        final Object result = api.attemptBenmingSwordBurst(
+            state,
+            "stable-benming",
+            "stable-benming",
+            RESOLVED_TICK
+        );
+
+        assertFalse(api.resultSuccess(result));
+        assertEquals("RESONANCE_TYPE_INVALID", api.resultFailureReason(result));
+        assertEquals("", api.getStateResonanceType(state));
+        assertEquals(0L, api.getStateBurstCooldownUntilTick(state));
+    }
+
+    @Test
+    void burstAttemptRejectsInvalidResonanceWithInvalidReason() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object state = newBurstAttemptState(
+            api,
+            "not-a-real-route",
+            OVERLOAD_MID_PRESSURE_BAND
+        );
+
+        final Object result = api.attemptBenmingSwordBurst(
+            state,
+            "stable-benming",
+            "stable-benming",
+            RESOLVED_TICK
+        );
+
+        assertFalse(api.resultSuccess(result));
+        assertEquals("RESONANCE_TYPE_INVALID", api.resultFailureReason(result));
+        assertEquals("not-a-real-route", api.getStateResonanceType(state));
+        assertEquals(0L, api.getStateBurstCooldownUntilTick(state));
+    }
+
+    @Test
     void defenseBurstRouteOnlyAcceptsStableLowPressureBand() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
 
@@ -235,6 +279,23 @@ final class FlyingSwordControllerResonanceBurstTests {
         assertTrue(api.resultSuccess(readyResult));
         assertEquals("NONE", api.resultFailureReason(readyResult));
 
+        final Object recoveryBlockedState = newBurstAttemptState(
+            api,
+            "defense",
+            OVERLOAD_BELOW_STABLE_BAND
+        );
+        api.setStateOverloadBacklashUntilTick(recoveryBlockedState, TEST_MAGIC_1900L);
+        api.setStateOverloadRecoveryUntilTick(recoveryBlockedState, TEST_MAGIC_2140L);
+        final Object recoveryBlockedResult = api.attemptBenmingSwordBurst(
+            recoveryBlockedState,
+            "stable-benming",
+            "stable-benming",
+            TEST_MAGIC_2100L
+        );
+
+        assertFalse(api.resultSuccess(recoveryBlockedResult));
+        assertEquals("BURST_OVERLOAD_BLOCKED", api.resultFailureReason(recoveryBlockedResult));
+
         final Object blockedState = newBurstAttemptState(
             api,
             "defense",
@@ -250,6 +311,30 @@ final class FlyingSwordControllerResonanceBurstTests {
         assertFalse(api.resultSuccess(blockedResult));
         assertEquals("BURST_OVERLOAD_BLOCKED", api.resultFailureReason(blockedResult));
         assertEquals(0L, api.getStateBurstCooldownUntilTick(blockedState));
+    }
+
+    @Test
+    void legalBurstRouteRemainsReadyForValidResonance() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object state = newBurstAttemptState(
+            api,
+            "offense",
+            OVERLOAD_OFFENSE_ENTRY_BOUNDARY
+        );
+
+        final Object result = api.attemptBenmingSwordBurst(
+            state,
+            "stable-benming",
+            "stable-benming",
+            RESOLVED_TICK
+        );
+
+        assertTrue(api.resultSuccess(result));
+        assertEquals("NONE", api.resultFailureReason(result));
+        assertEquals(
+            api.resolveBurstAttemptCooldownUntilTick(RESOLVED_TICK),
+            api.getStateBurstCooldownUntilTick(state)
+        );
     }
 
     @Test
