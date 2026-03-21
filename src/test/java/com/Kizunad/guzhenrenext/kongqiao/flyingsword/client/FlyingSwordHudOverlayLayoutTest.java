@@ -23,9 +23,11 @@ final class FlyingSwordHudOverlayLayoutTest {
     private static final float TEST_MAGIC_135_5F = 135.5F;
     private static final float TEST_MAGIC_0_0001F = 0.0001F;
     private static final float TEST_MAGIC_88_0F = 88.0F;
+    private static final float TEST_MAGIC_85_0F = 85.0F;
     private static final float TEST_MAGIC_75_0F = 75.0F;
     private static final float TEST_MAGIC_65_0F = 65.0F;
     private static final int TEST_MAGIC_3 = 3;
+    private static final int TEST_MAGIC_4 = 4;
     private static final float TEST_MAGIC_100_0F = 100.0F;
     private static final int TEST_MAGIC_6 = 6;
 
@@ -51,6 +53,7 @@ final class FlyingSwordHudOverlayLayoutTest {
         api.setEnumField(benmingSword, "benmingResonanceType", "OFFENSE");
         api.setFloatField(benmingSword, "overloadPercent", TEST_MAGIC_135_5F);
         api.setBooleanField(benmingSword, "shouldHighlightWarning", true);
+        api.setBooleanField(benmingSword, "isOverloadDanger", true);
         api.setBooleanField(benmingSword, "isBurstReady", true);
         api.setBooleanField(benmingSword, "isAftershockPeriod", true);
 
@@ -68,7 +71,7 @@ final class FlyingSwordHudOverlayLayoutTest {
             api.getPlanInt(benmingPlan, "entryHeight")
         );
         assertEquals(
-            List.of("过载危", "可爆", "余震"),
+            List.of("越线将崩", "压线可斩", "锋芒未收"),
             api.getStatusBadgeTexts(benmingPlan)
         );
 
@@ -98,7 +101,7 @@ final class FlyingSwordHudOverlayLayoutTest {
         final Object benmingSword = api.newDisplayData();
         api.setBooleanField(benmingSword, "isBenmingSword", true);
         api.setEnumField(benmingSword, "benmingResonanceType", "DEFENSE");
-        api.setFloatField(benmingSword, "overloadPercent", TEST_MAGIC_75_0F);
+        api.setFloatField(benmingSword, "overloadPercent", TEST_MAGIC_85_0F);
         api.setBooleanField(benmingSword, "shouldHighlightWarning", true);
         final Object normalBack = api.newDisplayData();
         api.setEnumField(normalBack, "benmingResonanceType", "SPIRIT");
@@ -129,25 +132,214 @@ final class FlyingSwordHudOverlayLayoutTest {
     }
 
     @Test
-    void nearOverloadWarningStaysVisibleInBenmingHudPlan() throws Exception {
+    void preWarningAndDangerUseDifferentBenmingHudBadges() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
-        final Object benmingSword = api.newDisplayData();
-        api.setBooleanField(benmingSword, "isBenmingSword", true);
-        api.setEnumField(benmingSword, "benmingResonanceType", "DEFENSE");
-        api.setFloatField(benmingSword, "overloadPercent", TEST_MAGIC_100_0F);
-        api.setBooleanField(benmingSword, "shouldHighlightWarning", true);
+        final Object preWarningSword = api.newDisplayData();
+        api.setBooleanField(preWarningSword, "isBenmingSword", true);
+        api.setEnumField(preWarningSword, "benmingResonanceType", "DEFENSE");
+        api.setFloatField(preWarningSword, "overloadPercent", TEST_MAGIC_85_0F);
+        api.setBooleanField(preWarningSword, "shouldHighlightWarning", true);
 
-        final Object plan = api.buildRenderPlan(benmingSword);
-        assertTrue(api.getPlanBoolean(plan, "benmingEnhanced"));
-        assertTrue(api.getPlanBoolean(plan, "showStatusRow"));
-        assertTrue(api.getPlanBoolean(plan, "showOverloadRow"));
-        assertTrue(api.getPlanBoolean(plan, "overloadDanger"));
-        assertEquals("载100%", api.getPlanString(plan, "overloadText"));
-        assertTrue(api.getStatusBadgeTexts(plan).contains("过载危"));
+        final Object preWarningPlan = api.buildRenderPlan(preWarningSword);
+        assertTrue(api.getPlanBoolean(preWarningPlan, "benmingEnhanced"));
+        assertTrue(api.getPlanBoolean(preWarningPlan, "showStatusRow"));
+        assertTrue(api.getPlanBoolean(preWarningPlan, "showOverloadRow"));
+        assertFalse(api.getPlanBoolean(preWarningPlan, "overloadDanger"));
+        assertEquals("载85%", api.getPlanString(preWarningPlan, "overloadText"));
+        assertTrue(api.getStatusBadgeTexts(preWarningPlan).contains("过载警"));
         assertEquals(
             api.getIntConstant("BENMING_STATUS_ENTRY_HEIGHT"),
-            api.getPlanInt(plan, "entryHeight")
+            api.getPlanInt(preWarningPlan, "entryHeight")
         );
+
+        final Object dangerSword = api.newDisplayData();
+        api.setBooleanField(dangerSword, "isBenmingSword", true);
+        api.setEnumField(dangerSword, "benmingResonanceType", "DEFENSE");
+        api.setFloatField(dangerSword, "overloadPercent", TEST_MAGIC_100_0F);
+        api.setBooleanField(dangerSword, "shouldHighlightWarning", true);
+        api.setBooleanField(dangerSword, "isOverloadDanger", true);
+
+        final Object dangerPlan = api.buildRenderPlan(dangerSword);
+        assertTrue(api.getPlanBoolean(dangerPlan, "overloadDanger"));
+        assertEquals("载100%", api.getPlanString(dangerPlan, "overloadText"));
+        assertTrue(api.getStatusBadgeTexts(dangerPlan).contains("稳流将断"));
+    }
+
+    @Test
+    void routeSpecificBurstAndAftershockBadgesStayDistinctAcrossMvpRoutes()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object defenseSword = api.newDisplayData();
+        api.setBooleanField(defenseSword, "isBenmingSword", true);
+        api.setEnumField(defenseSword, "benmingResonanceType", "DEFENSE");
+        api.setBooleanField(defenseSword, "isBurstReady", true);
+        api.setBooleanField(defenseSword, "isAftershockPeriod", true);
+
+        final Object defensePlan = api.buildRenderPlan(defenseSword);
+        assertEquals("稳(御)", api.getPlanString(defensePlan, "resonanceText"));
+        assertEquals(
+            List.of("镇域成形", "余稳回流"),
+            api.getStatusBadgeTexts(defensePlan)
+        );
+
+        final Object spiritSword = api.newDisplayData();
+        api.setBooleanField(spiritSword, "isBenmingSword", true);
+        api.setEnumField(spiritSword, "benmingResonanceType", "SPIRIT");
+        api.setBooleanField(spiritSword, "isBurstReady", true);
+        api.setBooleanField(spiritSword, "isAftershockPeriod", true);
+
+        final Object spiritPlan = api.buildRenderPlan(spiritSword);
+        assertEquals("巧(灵)", api.getPlanString(spiritPlan, "resonanceText"));
+        assertEquals(
+            List.of("抢拍得势", "回身整拍"),
+            api.getStatusBadgeTexts(spiritPlan)
+        );
+    }
+
+    @Test
+    void overloadLoopBadgesStayDistinctFromAftershockBadge() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object backlashSword = api.newDisplayData();
+        api.setBooleanField(backlashSword, "isBenmingSword", true);
+        api.setEnumField(backlashSword, "benmingResonanceType", "DEVOUR");
+        api.setBooleanField(backlashSword, "isBurstReady", false);
+        api.setBooleanField(backlashSword, "isOverloadBacklashActive", true);
+
+        final Object backlashPlan = api.buildRenderPlan(backlashSword);
+        assertEquals(List.of("反噬"), api.getStatusBadgeTexts(backlashPlan));
+
+        final Object recoverySword = api.newDisplayData();
+        api.setBooleanField(recoverySword, "isBenmingSword", true);
+        api.setEnumField(recoverySword, "benmingResonanceType", "DEVOUR");
+        api.setBooleanField(recoverySword, "isOverloadRecoveryActive", true);
+        api.setBooleanField(recoverySword, "isBurstReady", true);
+
+        final List<String> recoveryBadges = api.getStatusBadgeTexts(
+            api.buildRenderPlan(recoverySword)
+        );
+        assertEquals(List.of("恢复", "回炉得势"), recoveryBadges);
+        assertFalse(recoveryBadges.contains("余烬回炼"));
+
+        final Object aftershockSword = api.newDisplayData();
+        api.setBooleanField(aftershockSword, "isBenmingSword", true);
+        api.setEnumField(aftershockSword, "benmingResonanceType", "DEVOUR");
+        api.setBooleanField(aftershockSword, "isBurstReady", false);
+        api.setBooleanField(aftershockSword, "isAftershockPeriod", true);
+
+        final List<String> aftershockBadges = api.getStatusBadgeTexts(
+            api.buildRenderPlan(aftershockSword)
+        );
+        assertEquals(List.of("余烬回炼"), aftershockBadges);
+        assertFalse(aftershockBadges.contains("反噬"));
+        assertFalse(aftershockBadges.contains("恢复"));
+    }
+
+    @Test
+    void devourRouteUsesDedicatedBurstDangerAndAftershockBadges() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object devourSword = api.newDisplayData();
+        api.setBooleanField(devourSword, "isBenmingSword", true);
+        api.setEnumField(devourSword, "benmingResonanceType", "DEVOUR");
+        api.setBooleanField(devourSword, "shouldHighlightWarning", true);
+        api.setBooleanField(devourSword, "isOverloadDanger", true);
+        api.setBooleanField(devourSword, "isBurstReady", true);
+        api.setBooleanField(devourSword, "isAftershockPeriod", true);
+
+        final Object devourPlan = api.buildRenderPlan(devourSword);
+        assertEquals(
+            List.of("炉裂将噬", "回炉得势", "余烬回炼"),
+            api.getStatusBadgeTexts(devourPlan)
+        );
+        assertFalse(api.getStatusBadgeTexts(devourPlan).contains("过载危"));
+        assertFalse(api.getStatusBadgeTexts(devourPlan).contains("可爆"));
+        assertFalse(api.getStatusBadgeTexts(devourPlan).contains("余震"));
+    }
+
+    @Test
+    void overloadLoopBadgesStayInsideExistingBenmingEntryHeightPolicy() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object normalFront = api.newDisplayData();
+        final Object backlashSword = api.newDisplayData();
+        api.setBooleanField(backlashSword, "isBenmingSword", true);
+        api.setEnumField(backlashSword, "benmingResonanceType", "DEVOUR");
+        api.setBooleanField(backlashSword, "isBurstReady", false);
+        api.setBooleanField(backlashSword, "isOverloadBacklashActive", true);
+
+        final Object recoverySword = api.newDisplayData();
+        api.setBooleanField(recoverySword, "isBenmingSword", true);
+        api.setEnumField(recoverySword, "benmingResonanceType", "DEVOUR");
+        api.setBooleanField(recoverySword, "isOverloadRecoveryActive", true);
+        api.setBooleanField(recoverySword, "isBurstReady", true);
+
+        final Object normalBack = api.newDisplayData();
+        api.setEnumField(normalBack, "benmingResonanceType", "OFFENSE");
+        api.setBooleanField(normalBack, "isAftershockPeriod", true);
+
+        final Object backlashPlan = api.buildRenderPlan(backlashSword);
+        assertTrue(api.getPlanBoolean(backlashPlan, "showStatusRow"));
+        assertTrue(api.getPlanBoolean(backlashPlan, "showOverloadRow"));
+        assertEquals(
+            api.getIntConstant("BENMING_STATUS_ENTRY_HEIGHT"),
+            api.getPlanInt(backlashPlan, "entryHeight")
+        );
+        assertEquals(List.of("反噬"), api.getStatusBadgeTexts(backlashPlan));
+
+        final Object recoveryPlan = api.buildRenderPlan(recoverySword);
+        assertTrue(api.getPlanBoolean(recoveryPlan, "showStatusRow"));
+        assertTrue(api.getPlanBoolean(recoveryPlan, "showOverloadRow"));
+        assertEquals(
+            api.getIntConstant("BENMING_STATUS_ENTRY_HEIGHT"),
+            api.getPlanInt(recoveryPlan, "entryHeight")
+        );
+        assertEquals(List.of("恢复", "回炉得势"), api.getStatusBadgeTexts(recoveryPlan));
+
+        final List<?> placements = api.buildPlacements(
+            List.of(normalFront, backlashSword, recoverySword, normalBack)
+        );
+        assertEquals(TEST_MAGIC_4, placements.size());
+
+        final int marginTop = api.getIntConstant("MARGIN_TOP");
+        final int spacing = api.getIntConstant("ENTRY_SPACING");
+        final int normalHeight = api.getIntConstant("NORMAL_ENTRY_HEIGHT");
+        final int benmingHeight = api.getIntConstant("BENMING_STATUS_ENTRY_HEIGHT");
+
+        assertEquals(marginTop, api.getPlacementY(placements.get(0)));
+        assertEquals(marginTop + normalHeight + spacing, api.getPlacementY(placements.get(1)));
+        assertEquals(
+            marginTop + normalHeight + spacing + benmingHeight + spacing,
+            api.getPlacementY(placements.get(2))
+        );
+        assertEquals(
+            marginTop + normalHeight + spacing + benmingHeight + spacing + benmingHeight + spacing,
+            api.getPlacementY(placements.get(3))
+        );
+
+        assertFalse(api.getPlacementPlanBoolean(placements.get(0), "benmingEnhanced"));
+        assertTrue(api.getPlacementPlanBoolean(placements.get(1), "benmingEnhanced"));
+        assertTrue(api.getPlacementPlanBoolean(placements.get(1), "showStatusRow"));
+        assertTrue(api.getPlacementPlanBoolean(placements.get(2), "benmingEnhanced"));
+        assertTrue(api.getPlacementPlanBoolean(placements.get(2), "showStatusRow"));
+        assertFalse(api.getPlacementPlanBoolean(placements.get(3), "benmingEnhanced"));
+        assertFalse(api.getPlacementPlanBoolean(placements.get(3), "showStatusRow"));
+        assertFalse(api.getPlacementPlanBoolean(placements.get(3), "showOverloadRow"));
+    }
+
+    @Test
+    void devourBenmingPlanShowsDedicatedShortLabel() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object devourSword = api.newDisplayData();
+        api.setBooleanField(devourSword, "isBenmingSword", true);
+        api.setEnumField(devourSword, "benmingResonanceType", "DEVOUR");
+        api.setFloatField(devourSword, "overloadPercent", TEST_MAGIC_65_0F);
+
+        final Object devourPlan = api.buildRenderPlan(devourSword);
+        assertTrue(api.getPlanBoolean(devourPlan, "benmingEnhanced"));
+        assertEquals("噬元", api.getPlanString(devourPlan, "resonanceText"));
+        assertEquals("载65%", api.getPlanString(devourPlan, "overloadText"));
     }
 
     private static final class RuntimeApi {

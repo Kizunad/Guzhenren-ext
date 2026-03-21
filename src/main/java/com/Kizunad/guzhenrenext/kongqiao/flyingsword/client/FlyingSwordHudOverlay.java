@@ -108,6 +108,10 @@ public final class FlyingSwordHudOverlay {
 
     private static final int COLOR_BENMING_BADGE_TEXT = 0xFFFFF2CD;
 
+    private static final int COLOR_PRE_WARNING_BADGE_BG = 0xCC87640F;
+
+    private static final int COLOR_PRE_WARNING_BADGE_TEXT = 0xFFFFF0B5;
+
     private static final int COLOR_WARNING_BADGE_BG = 0xCC8C2D22;
 
     private static final int COLOR_WARNING_BADGE_TEXT = 0xFFFFDCD5;
@@ -119,6 +123,14 @@ public final class FlyingSwordHudOverlay {
     private static final int COLOR_AFTERSHOCK_BADGE_BG = 0xCC204E79;
 
     private static final int COLOR_AFTERSHOCK_BADGE_TEXT = 0xFFD9F1FF;
+
+    private static final int COLOR_BACKLASH_BADGE_BG = 0xCC8C2D22;
+
+    private static final int COLOR_BACKLASH_BADGE_TEXT = 0xFFFFDCD5;
+
+    private static final int COLOR_RECOVERY_BADGE_BG = 0xCC7A5B11;
+
+    private static final int COLOR_RECOVERY_BADGE_TEXT = 0xFFFFE7B8;
 
     private static final int COLOR_OVERLOAD_BAR_BG = 0xFF3A2A20;
 
@@ -300,19 +312,44 @@ public final class FlyingSwordHudOverlay {
     ) {
         List<StatusBadge> statusBadges = new ArrayList<>();
         if (sword.isBenmingSword) {
-            if (sword.shouldHighlightWarning) {
+            if (sword.isOverloadDanger) {
                 statusBadges.add(
                     new StatusBadge(
-                        localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_OVERLOAD_WARNING),
+                        resolveDangerBadgeText(sword.benmingResonanceType),
                         COLOR_WARNING_BADGE_TEXT,
                         COLOR_WARNING_BADGE_BG
+                    )
+                );
+            } else if (sword.shouldHighlightWarning) {
+                statusBadges.add(
+                    new StatusBadge(
+                        localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_OVERLOAD_PRE_WARNING),
+                        COLOR_PRE_WARNING_BADGE_TEXT,
+                        COLOR_PRE_WARNING_BADGE_BG
+                    )
+                );
+            }
+            if (sword.isOverloadBacklashActive) {
+                statusBadges.add(
+                    new StatusBadge(
+                        resolveBacklashBadgeText(),
+                        COLOR_BACKLASH_BADGE_TEXT,
+                        COLOR_BACKLASH_BADGE_BG
+                    )
+                );
+            } else if (sword.isOverloadRecoveryActive) {
+                statusBadges.add(
+                    new StatusBadge(
+                        resolveRecoveryBadgeText(),
+                        COLOR_RECOVERY_BADGE_TEXT,
+                        COLOR_RECOVERY_BADGE_BG
                     )
                 );
             }
             if (sword.isBurstReady) {
                 statusBadges.add(
                     new StatusBadge(
-                        localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_BURST_READY),
+                        resolveBurstBadgeText(sword.benmingResonanceType),
                         COLOR_BURST_BADGE_TEXT,
                         COLOR_BURST_BADGE_BG
                     )
@@ -321,7 +358,7 @@ public final class FlyingSwordHudOverlay {
             if (sword.isAftershockPeriod) {
                 statusBadges.add(
                     new StatusBadge(
-                        localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_AFTERSHOCK),
+                        resolveAftershockBadgeText(sword.benmingResonanceType),
                         COLOR_AFTERSHOCK_BADGE_TEXT,
                         COLOR_AFTERSHOCK_BADGE_BG
                     )
@@ -359,7 +396,7 @@ public final class FlyingSwordHudOverlay {
             showOverloadRow,
             overloadText,
             overloadFillRatio,
-            sword.shouldHighlightWarning
+            sword.isOverloadDanger
         );
     }
 
@@ -371,7 +408,57 @@ public final class FlyingSwordHudOverlay {
             case OFFENSE -> localizedHudText(KongqiaoI18n.BENMING_HUD_RESONANCE_OFFENSE_SHORT);
             case DEFENSE -> localizedHudText(KongqiaoI18n.BENMING_HUD_RESONANCE_DEFENSE_SHORT);
             case SPIRIT -> localizedHudText(KongqiaoI18n.BENMING_HUD_RESONANCE_SPIRIT_SHORT);
+            case DEVOUR -> localizedHudText(KongqiaoI18n.BENMING_HUD_RESONANCE_DEVOUR_SHORT);
         };
+    }
+
+    private static String resolveBurstBadgeText(FlyingSwordResonanceType resonanceType) {
+        if (resonanceType == null) {
+            return localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_BURST_READY);
+        }
+        final String badgeKey = switch (resonanceType) {
+            case OFFENSE -> KongqiaoI18n.BENMING_HUD_BADGE_OFFENSE_BURST_READY;
+            case DEFENSE -> KongqiaoI18n.BENMING_HUD_BADGE_DEFENSE_BURST_READY;
+            case SPIRIT -> KongqiaoI18n.BENMING_HUD_BADGE_SPIRIT_BURST_READY;
+            case DEVOUR -> KongqiaoI18n.BENMING_HUD_BADGE_DEVOUR_BURST_READY;
+        };
+        return localizedHudText(badgeKey);
+    }
+
+    private static String resolveDangerBadgeText(FlyingSwordResonanceType resonanceType) {
+        if (resonanceType == null) {
+            return localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_OVERLOAD_WARNING);
+        }
+        final String badgeKey = switch (resonanceType) {
+            case OFFENSE -> KongqiaoI18n.BENMING_HUD_BADGE_OFFENSE_DANGER;
+            case DEFENSE -> KongqiaoI18n.BENMING_HUD_BADGE_DEFENSE_DANGER;
+            case SPIRIT -> KongqiaoI18n.BENMING_HUD_BADGE_SPIRIT_DANGER;
+            case DEVOUR -> KongqiaoI18n.BENMING_HUD_BADGE_DEVOUR_DANGER;
+        };
+        return localizedHudText(badgeKey);
+    }
+
+    private static String resolveBacklashBadgeText() {
+        return localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_BACKLASH);
+    }
+
+    private static String resolveRecoveryBadgeText() {
+        return localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_RECOVERY);
+    }
+
+    private static String resolveAftershockBadgeText(
+        FlyingSwordResonanceType resonanceType
+    ) {
+        if (resonanceType == null) {
+            return localizedHudText(KongqiaoI18n.BENMING_HUD_BADGE_AFTERSHOCK);
+        }
+        final String badgeKey = switch (resonanceType) {
+            case OFFENSE -> KongqiaoI18n.BENMING_HUD_BADGE_OFFENSE_AFTERSHOCK;
+            case DEFENSE -> KongqiaoI18n.BENMING_HUD_BADGE_DEFENSE_AFTERSHOCK;
+            case SPIRIT -> KongqiaoI18n.BENMING_HUD_BADGE_SPIRIT_AFTERSHOCK;
+            case DEVOUR -> KongqiaoI18n.BENMING_HUD_BADGE_DEVOUR_AFTERSHOCK;
+        };
+        return localizedHudText(badgeKey);
     }
 
     private static String localizedHudText(final String key, final Object... args) {
