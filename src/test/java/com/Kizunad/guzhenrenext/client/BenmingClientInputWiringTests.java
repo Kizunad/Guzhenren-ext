@@ -155,4 +155,26 @@ final class BenmingClientInputWiringTests {
         );
     }
 
+    @Test
+    void benmingClientThrottleAllowsActionWhenTickRewindsToNewWorld() {
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                500L
+            )
+        );
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                20L
+            )
+        );
+        assertTrue(
+            !BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                21L
+            )
+        );
+    }
+
 }

@@ -565,7 +565,7 @@ public final class FlyingSwordController {
             );
         }
 
-        final FlyingSwordEntity sword = getStrictSelectedSword(level, owner);
+        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
         if (sword == null) {
             return createMissingStrongSelectedTargetFailure(
                 BenmingControllerAction.RESONANCE_SWITCH,
@@ -618,7 +618,7 @@ public final class FlyingSwordController {
             );
         }
 
-        final FlyingSwordEntity sword = getStrictSelectedSword(level, owner);
+        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
         if (sword == null) {
             return createMissingStrongSelectedTargetFailure(
                 BenmingControllerAction.BURST_ATTEMPT,

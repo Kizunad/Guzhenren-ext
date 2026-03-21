@@ -231,6 +231,11 @@ final class BenmingClientActionResolver {
         final long throttleWindowTicks
     ) {
         final Long lastSentTick = LAST_SENT_TICK_BY_ACTION.get(actionRoute);
+        if (lastSentTick != null && currentTick < lastSentTick) {
+            LAST_SENT_TICK_BY_ACTION.put(actionRoute, currentTick);
+            return true;
+        }
+
         if (lastSentTick != null && currentTick - lastSentTick < throttleWindowTicks) {
             return false;
         }

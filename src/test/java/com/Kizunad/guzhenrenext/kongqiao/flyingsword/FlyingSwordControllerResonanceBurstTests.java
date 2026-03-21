@@ -486,28 +486,26 @@ final class FlyingSwordControllerResonanceBurstTests {
     }
 
     @Test
-    void switchStrongActionUsesStrictSelectedResolutionPath() throws Exception {
-        final String methodBody = extractMethodBody(
+    void switchStrongActionUsesSelectedOrNearestResolutionPath() throws Exception {
+        final String methodBody = extractMethodBlock(
             Files.readString(CONTROLLER_SOURCE),
-            "public static BenmingControllerActionResult switchResonanceForSelectedOrNearestBenmingSword(",
-            "public static BenmingControllerActionResult attemptBurstForSelectedOrNearestBenmingSword("
+            "public static BenmingControllerActionResult switchResonanceForSelectedOrNearestBenmingSword("
         );
 
-        assertTrue(methodBody.contains("getStrictSelectedSword(level, owner)"));
-        assertFalse(methodBody.contains("getSelectedOrNearestSword(level, owner)"));
+        assertTrue(methodBody.contains("getSelectedOrNearestSword(level, owner)"));
+        assertFalse(methodBody.contains("getStrictSelectedSword(level, owner)"));
         assertTrue(methodBody.contains("createMissingStrongSelectedTargetFailure"));
     }
 
     @Test
-    void burstStrongActionUsesStrictSelectedResolutionPath() throws Exception {
-        final String methodBody = extractMethodBody(
+    void burstStrongActionUsesSelectedOrNearestResolutionPath() throws Exception {
+        final String methodBody = extractMethodBlock(
             Files.readString(CONTROLLER_SOURCE),
-            "public static BenmingControllerActionResult attemptBurstForSelectedOrNearestBenmingSword(",
-            "static BenmingControllerActionResult createMissingStrongSelectedTargetFailure("
+            "public static BenmingControllerActionResult attemptBurstForSelectedOrNearestBenmingSword("
         );
 
-        assertTrue(methodBody.contains("getStrictSelectedSword(level, owner)"));
-        assertFalse(methodBody.contains("getSelectedOrNearestSword(level, owner)"));
+        assertTrue(methodBody.contains("getSelectedOrNearestSword(level, owner)"));
+        assertFalse(methodBody.contains("getStrictSelectedSword(level, owner)"));
         assertTrue(methodBody.contains("createMissingStrongSelectedTargetFailure"));
     }
 
@@ -920,16 +918,30 @@ final class FlyingSwordControllerResonanceBurstTests {
         }
     }
 
-    private static String extractMethodBody(
-        final String source,
-        final String startMarker,
-        final String endMarker
-    ) {
+    private static String extractMethodBlock(final String source, final String startMarker) {
         final int start = source.indexOf(startMarker);
-        final int end = source.indexOf(endMarker, start);
-        if (start < 0 || end < 0 || end <= start) {
-            throw new IllegalStateException("无法从源码中提取目标方法片段");
+        if (start < 0) {
+            throw new IllegalStateException("无法从源码中定位目标方法");
         }
-        return source.substring(start, end);
+
+        int braceStart = source.indexOf('{', start);
+        if (braceStart < 0) {
+            throw new IllegalStateException("无法从源码中找到方法体起始大括号");
+        }
+
+        int depth = 0;
+        for (int i = braceStart; i < source.length(); i++) {
+            final char ch = source.charAt(i);
+            if (ch == '{') {
+                depth++;
+            } else if (ch == '}') {
+                depth--;
+                if (depth == 0) {
+                    return source.substring(start, i + 1);
+                }
+            }
+        }
+
+        throw new IllegalStateException("无法从源码中完整提取目标方法体");
     }
 }

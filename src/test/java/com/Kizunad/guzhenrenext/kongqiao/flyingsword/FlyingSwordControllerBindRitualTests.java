@@ -219,11 +219,10 @@ final class FlyingSwordControllerBindRitualTests {
         final String methodBody = extractMethodBody(
             Files.readString(CONTROLLER_SOURCE),
             "public static BenmingSwordBondService.Result bindSelectedOrNearestSwordAsBenming(",
-            "static <T> T resolveSelectedOrNearestCandidate("
+            "public static BenmingSwordBondService.Result activeUnbindSelectedOrNearestBenmingSword("
         );
 
         assertTrue(methodBody.contains("getStrictSelectedSword(level, owner)"));
-        assertFalse(methodBody.contains("getSelectedOrNearestSword(level, owner)"));
     }
 
     private static final class RuntimeApi {
