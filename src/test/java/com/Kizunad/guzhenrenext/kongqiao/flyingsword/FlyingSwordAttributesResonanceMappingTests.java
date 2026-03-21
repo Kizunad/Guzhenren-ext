@@ -22,20 +22,26 @@ final class FlyingSwordAttributesResonanceMappingTests {
     private static final double TEST_MAGIC_10_0D = 10.0D;
     private static final double TEST_MAGIC_30_0D = 30.0D;
     private static final int TEST_MAGIC_20 = 20;
-    private static final double TEST_MAGIC_12_2D = 12.2D;
-    private static final double TEST_MAGIC_9_2D = 9.2D;
-    private static final double TEST_MAGIC_10_5D = 10.5D;
-    private static final double TEST_MAGIC_2_4192D = 2.4192D;
-    private static final double TEST_MAGIC_1_692D = 1.692D;
-    private static final double TEST_MAGIC_2_2896D = 2.2896D;
+    private static final double TEST_MAGIC_12_6D = 12.6D;
+    private static final double TEST_MAGIC_9_0D = 9.0D;
+    private static final double TEST_MAGIC_10_4D = 10.4D;
+    private static final double TEST_MAGIC_11_2D = 11.2D;
+    private static final double TEST_MAGIC_2_4852D = 2.4852D;
+    private static final double TEST_MAGIC_1_6192D = 1.6192D;
+    private static final double TEST_MAGIC_2_3108D = 2.3108D;
+    private static final double TEST_MAGIC_2_058D = 2.058D;
     private static final int TEST_MAGIC_17 = 17;
-    private static final int TEST_MAGIC_22 = 22;
+    private static final int TEST_MAGIC_18 = 18;
+    private static final int TEST_MAGIC_23 = 23;
     private static final int TEST_MAGIC_19 = 19;
-    private static final double TEST_MAGIC_1_18D = 1.18D;
-    private static final double TEST_MAGIC_0_82D = 0.82D;
-    private static final double TEST_MAGIC_13_2D = 13.2D;
-    private static final double TEST_MAGIC_18_0D = 18.0D;
-    private static final double TEST_MAGIC_16_5D = 16.5D;
+    private static final double TEST_MAGIC_1_22D = 1.22D;
+    private static final double TEST_MAGIC_1_28D = 1.28D;
+    private static final double TEST_MAGIC_0_78D = 0.78D;
+    private static final double TEST_MAGIC_0_93D = 0.93D;
+    private static final double TEST_MAGIC_12_6_RECALL_D = 12.6D;
+    private static final double TEST_MAGIC_18_6_RECALL_D = 18.6D;
+    private static final double TEST_MAGIC_16_8_RECALL_D = 16.8D;
+    private static final double TEST_MAGIC_10_5_RECALL_D = 10.5D;
     private static final double TEST_MAGIC_9_5D = 9.5D;
     private static final double TEST_MAGIC_2_4D = 2.4D;
     private static final double TEST_MAGIC_1_2D = 1.2D;
@@ -67,41 +73,60 @@ final class FlyingSwordAttributesResonanceMappingTests {
         final double offenseDamage = api.getEffectiveDamage(attrs, "offense");
         final double defenseDamage = api.getEffectiveDamage(attrs, "defense");
         final double spiritDamage = api.getEffectiveDamage(attrs, "spirit");
-        assertEquals(TEST_MAGIC_12_2D, offenseDamage, DOUBLE_DELTA);
-        assertEquals(TEST_MAGIC_9_2D, defenseDamage, DOUBLE_DELTA);
-        assertEquals(TEST_MAGIC_10_5D, spiritDamage, DOUBLE_DELTA);
+        final double devourDamage = api.getEffectiveDamage(attrs, "devour");
+        assertEquals(TEST_MAGIC_12_6D, offenseDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_9_0D, defenseDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_10_4D, spiritDamage, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_11_2D, devourDamage, DOUBLE_DELTA);
 
         final double offensePursuit = api.getEffectivePursuitSpeed(attrs, "offense");
         final double defensePursuit = api.getEffectivePursuitSpeed(attrs, "defense");
         final double spiritPursuit = api.getEffectivePursuitSpeed(attrs, "spirit");
-        assertEquals(TEST_MAGIC_2_4192D, offensePursuit, DOUBLE_DELTA);
-        assertEquals(TEST_MAGIC_1_692D, defensePursuit, DOUBLE_DELTA);
-        assertEquals(TEST_MAGIC_2_2896D, spiritPursuit, DOUBLE_DELTA);
+        final double devourPursuit = api.getEffectivePursuitSpeed(attrs, "devour");
+        assertEquals(TEST_MAGIC_2_4852D, offensePursuit, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_1_6192D, defensePursuit, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_3108D, spiritPursuit, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_2_058D, devourPursuit, DOUBLE_DELTA);
 
         assertEquals(TEST_MAGIC_17, api.getEffectiveAttackCooldown(attrs, "offense"));
-        assertEquals(TEST_MAGIC_22, api.getEffectiveAttackCooldown(attrs, "defense"));
+        assertEquals(TEST_MAGIC_23, api.getEffectiveAttackCooldown(attrs, "defense"));
         assertEquals(TEST_MAGIC_19, api.getEffectiveAttackCooldown(attrs, "spirit"));
+        assertEquals(TEST_MAGIC_18, api.getEffectiveAttackCooldown(attrs, "devour"));
 
         final double offenseGuardCostMultiplier =
             api.getGuardDurabilityCostMultiplier(attrs, "offense");
         final double defenseGuardCostMultiplier =
             api.getGuardDurabilityCostMultiplier(attrs, "defense");
-        assertEquals(TEST_MAGIC_1_18D, offenseGuardCostMultiplier, DOUBLE_DELTA);
-        assertEquals(TEST_MAGIC_0_82D, defenseGuardCostMultiplier, DOUBLE_DELTA);
+        final double spiritGuardCostMultiplier =
+            api.getGuardDurabilityCostMultiplier(attrs, "spirit");
+        final double devourGuardCostMultiplier =
+            api.getGuardDurabilityCostMultiplier(attrs, "devour");
+        assertEquals(TEST_MAGIC_1_22D, offenseGuardCostMultiplier, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_0_78D, defenseGuardCostMultiplier, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_0_93D, spiritGuardCostMultiplier, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_1_28D, devourGuardCostMultiplier, DOUBLE_DELTA);
 
         final double offenseRecallStability = api.getRecallStabilityScore(attrs, "offense");
         final double defenseRecallStability = api.getRecallStabilityScore(attrs, "defense");
         final double spiritRecallStability = api.getRecallStabilityScore(attrs, "spirit");
-        assertEquals(TEST_MAGIC_13_2D, offenseRecallStability, DOUBLE_DELTA);
-        assertEquals(TEST_MAGIC_18_0D, defenseRecallStability, DOUBLE_DELTA);
-        assertEquals(TEST_MAGIC_16_5D, spiritRecallStability, DOUBLE_DELTA);
+        final double devourRecallStability = api.getRecallStabilityScore(attrs, "devour");
+        assertEquals(TEST_MAGIC_12_6_RECALL_D, offenseRecallStability, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_18_6_RECALL_D, defenseRecallStability, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_16_8_RECALL_D, spiritRecallStability, DOUBLE_DELTA);
+        assertEquals(TEST_MAGIC_10_5_RECALL_D, devourRecallStability, DOUBLE_DELTA);
 
         assertTrue(offenseDamage > spiritDamage);
+        assertTrue(devourDamage > spiritDamage);
         assertTrue(spiritDamage > defenseDamage);
         assertTrue(offensePursuit > spiritPursuit);
+        assertTrue(devourPursuit > defensePursuit);
         assertTrue(spiritPursuit > defensePursuit);
+        assertTrue(devourGuardCostMultiplier > offenseGuardCostMultiplier);
+        assertTrue(offenseGuardCostMultiplier > spiritGuardCostMultiplier);
+        assertTrue(spiritGuardCostMultiplier > defenseGuardCostMultiplier);
         assertTrue(defenseRecallStability > spiritRecallStability);
         assertTrue(spiritRecallStability > offenseRecallStability);
+        assertTrue(offenseRecallStability > devourRecallStability);
     }
 
     @Test

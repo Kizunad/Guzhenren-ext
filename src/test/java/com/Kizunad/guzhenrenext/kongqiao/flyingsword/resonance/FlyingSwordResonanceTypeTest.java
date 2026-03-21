@@ -13,6 +13,7 @@ final class FlyingSwordResonanceTypeTest {
 
 
     private static final int TEST_MAGIC_HEX_FFE36A2E = 0xFFE36A2E;
+    private static final int TEST_MAGIC_HEX_FF8A4FD6 = 0xFF8A4FD6;
 
     @Test
     void resolvesByEnglishAndChineseAlias() {
@@ -27,6 +28,14 @@ final class FlyingSwordResonanceTypeTest {
         assertEquals(
             FlyingSwordResonanceType.SPIRIT,
             FlyingSwordResonanceType.resolve("巧").orElseThrow()
+        );
+        assertEquals(
+            FlyingSwordResonanceType.DEVOUR,
+            FlyingSwordResonanceType.resolve("devour").orElseThrow()
+        );
+        assertEquals(
+            FlyingSwordResonanceType.DEVOUR,
+            FlyingSwordResonanceType.resolve("噬").orElseThrow()
         );
     }
 
@@ -45,6 +54,18 @@ final class FlyingSwordResonanceTypeTest {
             type.getColorSemanticKey()
         );
         assertEquals(TEST_MAGIC_HEX_FFE36A2E, type.getPrimaryColor());
+    }
+
+    @Test
+    void exposesDevourKeysAndColor() {
+        final FlyingSwordResonanceType type = FlyingSwordResonanceType.DEVOUR;
+        assertEquals("screen.guzhenrenext.forge.help.resonance.devour.name", type.getDisplayNameKey());
+        assertEquals("screen.guzhenrenext.forge.help.resonance.devour.desc", type.getDescriptionKey());
+        assertEquals(
+            "screen.guzhenrenext.forge.help.resonance.devour.color_semantic",
+            type.getColorSemanticKey()
+        );
+        assertEquals(TEST_MAGIC_HEX_FF8A4FD6, type.getPrimaryColor());
     }
 
     @Test
