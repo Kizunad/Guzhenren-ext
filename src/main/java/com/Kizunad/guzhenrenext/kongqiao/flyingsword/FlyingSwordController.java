@@ -49,6 +49,8 @@ public final class FlyingSwordController {
     private static final double BURST_ATTEMPT_NIANTOU_BASE_COST = 8.0D;
     private static final double BURST_ATTEMPT_HUNPO_BASE_COST = 4.0D;
     private static final double BURST_ATTEMPT_OVERLOAD_LIMIT = 100.0D;
+    private static final double BURST_ATTEMPT_DEFENSE_STABLE_OVERLOAD_LIMIT = 40.0D;
+    private static final double BURST_ATTEMPT_OFFENSE_PRESSURE_OVERLOAD_FLOOR = 80.0D;
     private static final long MINIMAL_BURST_ATTEMPT_COOLDOWN_TICKS = 40L;
     private static final long MINIMAL_BURST_ACTIVE_DURATION_TICKS = 20L;
     private static final long MINIMAL_BURST_AFTERSHOCK_DURATION_TICKS = 20L;
@@ -272,6 +274,37 @@ public final class FlyingSwordController {
         );
     }
 
+    @Nullable
+    static FlyingSwordEntity getStrictSelectedSword(
+        final ServerLevel level,
+        final ServerPlayer owner
+    ) {
+        if (level == null || owner == null) {
+            return null;
+        }
+
+        final FlyingSwordSelectionAttachment selection =
+            KongqiaoAttachments.getFlyingSwordSelection(owner);
+        return resolveStrictSelectedCandidate(
+            selection == null ? Optional.empty() : selection.getSelectedSword(),
+            selectedUuid -> {
+                final Entity entity = level.getEntity(selectedUuid);
+                if (
+                    entity instanceof FlyingSwordEntity sword
+                        && sword.isOwnedBy(owner)
+                ) {
+                    return sword;
+                }
+                return null;
+            },
+            () -> {
+                if (selection != null) {
+                    selection.clear();
+                }
+            }
+        );
+    }
+
     public static BenmingSwordBondService.Result queryBenmingSword(
         ServerLevel level,
         ServerPlayer owner
@@ -309,7 +342,7 @@ public final class FlyingSwordController {
             );
         }
 
-        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        final FlyingSwordEntity sword = getStrictSelectedSword(level, owner);
         if (sword == null) {
             return BenmingSwordBondService.Result.failure(
                 BenmingSwordBondService.ResultBranch.RITUAL_PRECHECK,
@@ -362,6 +395,30 @@ public final class FlyingSwordController {
             rememberNearest.accept(nearest);
         }
         return nearest;
+    }
+
+    @Nullable
+    static <T> T resolveStrictSelectedCandidate(
+        final Optional<UUID> selectedId,
+        final Function<UUID, T> selectedResolver,
+        final Runnable clearSelection
+    ) {
+        final Optional<UUID> normalizedSelectedId =
+            selectedId == null ? Optional.empty() : selectedId;
+        if (normalizedSelectedId.isEmpty()) {
+            return null;
+        }
+
+        final T selected = selectedResolver == null
+            ? null
+            : selectedResolver.apply(normalizedSelectedId.get());
+        if (selected != null) {
+            return selected;
+        }
+        if (clearSelection != null) {
+            clearSelection.run();
+        }
+        return null;
     }
 
     static BenmingSwordBondService.Result bindSwordAsBenmingWithRitual(
@@ -508,14 +565,11 @@ public final class FlyingSwordController {
             );
         }
 
-        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        final FlyingSwordEntity sword = getStrictSelectedSword(level, owner);
         if (sword == null) {
-            return BenmingControllerActionResult.failure(
+            return createMissingStrongSelectedTargetFailure(
                 BenmingControllerAction.RESONANCE_SWITCH,
-                BenmingControllerFailureReason.NO_TARGET_SWORD,
-                "",
-                state.getResonanceType(),
-                state.getBurstCooldownUntilTick()
+                state
             );
         }
 
@@ -564,14 +618,11 @@ public final class FlyingSwordController {
             );
         }
 
-        final FlyingSwordEntity sword = getSelectedOrNearestSword(level, owner);
+        final FlyingSwordEntity sword = getStrictSelectedSword(level, owner);
         if (sword == null) {
-            return BenmingControllerActionResult.failure(
+            return createMissingStrongSelectedTargetFailure(
                 BenmingControllerAction.BURST_ATTEMPT,
-                BenmingControllerFailureReason.NO_TARGET_SWORD,
-                "",
-                state.getResonanceType(),
-                state.getBurstCooldownUntilTick()
+                state
             );
         }
 
@@ -604,6 +655,19 @@ public final class FlyingSwordController {
             selectedSwordId,
             queryResult.stableSwordId(),
             resolvedTick
+        );
+    }
+
+    static BenmingControllerActionResult createMissingStrongSelectedTargetFailure(
+        final BenmingControllerAction action,
+        @Nullable final FlyingSwordStateAttachment state
+    ) {
+        return BenmingControllerActionResult.failure(
+            action,
+            BenmingControllerFailureReason.NO_TARGET_SWORD,
+            "",
+            state == null ? "" : state.getResonanceType(),
+            state == null ? 0L : state.getBurstCooldownUntilTick()
         );
     }
 
@@ -703,6 +767,15 @@ public final class FlyingSwordController {
                 state.getBurstCooldownUntilTick()
             );
         }
+        if (!isBurstWindowReady(state, resolvedSwordId, bondedSwordId, normalizedTick)) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.BURST_OVERLOAD_BLOCKED,
+                normalizeSwordId(resolvedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
 
         final long nextBurstCooldown = resolveBurstAttemptCooldownUntilTick(
             normalizedTick
@@ -733,6 +806,167 @@ public final class FlyingSwordController {
 
     static long resolveBurstAttemptCooldownUntilTick(final long resolvedTick) {
         return Math.max(0L, resolvedTick) + MINIMAL_BURST_ATTEMPT_COOLDOWN_TICKS;
+    }
+
+    public static boolean isBurstWindowReady(
+        @Nullable final String resolvedSwordId,
+        @Nullable final String bondedSwordId,
+        final double overload,
+        final long burstCooldownUntilTick,
+        final long resolvedTick
+    ) {
+        final String normalizedResolvedSwordId = normalizeSwordId(resolvedSwordId);
+        final String normalizedBondedSwordId = normalizeSwordId(bondedSwordId);
+        final long normalizedTick = Math.max(0L, resolvedTick);
+        return !normalizedResolvedSwordId.isBlank()
+            && !normalizedBondedSwordId.isBlank()
+            && normalizedResolvedSwordId.equals(normalizedBondedSwordId)
+            && normalizedTick >= Math.max(0L, burstCooldownUntilTick)
+            && !isBurstOverloadBlocked(overload);
+    }
+
+    static boolean isBurstWindowReady(
+        @Nullable final FlyingSwordStateAttachment state,
+        final String resolvedSwordId,
+        final String bondedSwordId,
+        final long resolvedTick
+    ) {
+        if (state == null) {
+            return false;
+        }
+        return isBurstWindowReady(
+            resolvedSwordId,
+            bondedSwordId,
+            BurstWindowContext.fromState(
+                state.getResonanceType(),
+                state.getOverload(),
+                state.getBurstCooldownUntilTick(),
+                state.getOverloadBacklashUntilTick(),
+                state.getOverloadRecoveryUntilTick(),
+                resolvedTick
+            )
+        );
+    }
+
+    public static boolean isBurstWindowReady(
+        @Nullable final String resolvedSwordId,
+        @Nullable final String bondedSwordId,
+        final BurstWindowContext burstWindowContext
+    ) {
+        return isBurstWindowReady(
+            resolvedSwordId,
+            bondedSwordId,
+            burstWindowContext.overload(),
+            burstWindowContext.burstCooldownUntilTick(),
+            burstWindowContext.resolvedTick()
+        ) && isBurstRouteWindowReady(
+            burstWindowContext
+        );
+    }
+
+    public record BurstWindowContext(
+        @Nullable String resonanceRaw,
+        double overload,
+        long burstCooldownUntilTick,
+        long overloadBacklashUntilTick,
+        long overloadRecoveryUntilTick,
+        long resolvedTick
+    ) {
+
+        public static BurstWindowContext fromState(
+            @Nullable final String resonanceRaw,
+            final double overload,
+            final long burstCooldownUntilTick,
+            final long overloadBacklashUntilTick,
+            final long overloadRecoveryUntilTick,
+            final long resolvedTick
+        ) {
+            return new BurstWindowContext(
+                resonanceRaw,
+                overload,
+                burstCooldownUntilTick,
+                overloadBacklashUntilTick,
+                overloadRecoveryUntilTick,
+                resolvedTick
+            );
+        }
+
+        public static BurstWindowContext fromRouteWindowTicks(
+            @Nullable final String resonanceRaw,
+            final double overload,
+            final long burstCooldownUntilTick,
+            final long... routeWindowTicks
+        ) {
+            return new BurstWindowContext(
+                resonanceRaw,
+                overload,
+                burstCooldownUntilTick,
+                resolveRouteWindowTick(routeWindowTicks, 0),
+                resolveRouteWindowTick(routeWindowTicks, 1),
+                resolveRouteWindowTick(routeWindowTicks, 2)
+            );
+        }
+    }
+
+    public static boolean isBurstWindowReady(
+        @Nullable final String resolvedSwordId,
+        @Nullable final String bondedSwordId,
+        @Nullable final String resonanceRaw,
+        final double overload,
+        final long burstCooldownUntilTick,
+        final long... routeWindowTicks
+    ) {
+        return isBurstWindowReady(
+            resolvedSwordId,
+            bondedSwordId,
+            BurstWindowContext.fromRouteWindowTicks(
+                resonanceRaw,
+                overload,
+                burstCooldownUntilTick,
+                routeWindowTicks
+            )
+        );
+    }
+
+    private static boolean isBurstRouteWindowReady(final BurstWindowContext burstWindowContext) {
+        final double normalizedOverload = Math.max(0.0D, burstWindowContext.overload());
+        final long normalizedTick = Math.max(0L, burstWindowContext.resolvedTick());
+        final long normalizedBacklashUntilTick = Math.max(
+            0L,
+            burstWindowContext.overloadBacklashUntilTick()
+        );
+        final long normalizedRecoveryUntilTick = Math.max(
+            0L,
+            burstWindowContext.overloadRecoveryUntilTick()
+        );
+        return FlyingSwordResonanceType.resolve(burstWindowContext.resonanceRaw())
+            .map(type -> switch (type) {
+                case OFFENSE ->
+                    normalizedOverload >=
+                    BURST_ATTEMPT_OFFENSE_PRESSURE_OVERLOAD_FLOOR;
+                case DEFENSE ->
+                    normalizedOverload < BURST_ATTEMPT_DEFENSE_STABLE_OVERLOAD_LIMIT;
+                case SPIRIT ->
+                    normalizedOverload >=
+                        BURST_ATTEMPT_DEFENSE_STABLE_OVERLOAD_LIMIT
+                        && normalizedOverload <
+                        BURST_ATTEMPT_OFFENSE_PRESSURE_OVERLOAD_FLOOR;
+                case DEVOUR ->
+                    normalizedTick >= normalizedBacklashUntilTick
+                        && normalizedTick < normalizedRecoveryUntilTick;
+            })
+            .orElse(true);
+    }
+
+    private static long resolveRouteWindowTick(final long[] routeWindowTicks, final int index) {
+        if (routeWindowTicks == null || index < 0 || index >= routeWindowTicks.length) {
+            return 0L;
+        }
+        return routeWindowTicks[index];
+    }
+
+    private static boolean isBurstOverloadBlocked(final double overload) {
+        return Math.max(0.0D, overload) >= BURST_ATTEMPT_OVERLOAD_LIMIT;
     }
 
     static BenmingControllerActionResult validateBurstAttemptAvailability(
@@ -784,6 +1018,15 @@ public final class FlyingSwordController {
             return BenmingControllerActionResult.failure(
                 BenmingControllerAction.BURST_ATTEMPT,
                 BenmingControllerFailureReason.INVALID_REQUEST,
+                normalizeSwordId(resolvedSwordId),
+                state.getResonanceType(),
+                state.getBurstCooldownUntilTick()
+            );
+        }
+        if (!isBurstWindowReady(state, resolvedSwordId, bondedSwordId, normalizedTick)) {
+            return BenmingControllerActionResult.failure(
+                BenmingControllerAction.BURST_ATTEMPT,
+                BenmingControllerFailureReason.BURST_OVERLOAD_BLOCKED,
                 normalizeSwordId(resolvedSwordId),
                 state.getResonanceType(),
                 state.getBurstCooldownUntilTick()
