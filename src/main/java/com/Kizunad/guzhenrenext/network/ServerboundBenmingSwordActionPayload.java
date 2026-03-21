@@ -8,6 +8,9 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordController.Benmi
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordPreferencesAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordBondService;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
+import java.util.Map;
+import java.util.Set;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -67,8 +70,28 @@ public record ServerboundBenmingSwordActionPayload(BenmingAction action)
                 action,
                 new LiveBenmingActionExecutor(level, serverPlayer)
             );
+            if (BenmingFeedbackDeliveryThrottle.dedupeKey(feedback) != null
+                && !BenmingFeedbackDeliveryThrottle.shouldSend(
+                    serverPlayer,
+                    level.getGameTime(),
+                    feedback
+                )) {
+                return;
+            }
             serverPlayer.sendSystemMessage(
                 Component.literal(feedback.message())
+            );
+            final String firstGuideTopic = BenmingFirstGuideDelivery.consumeTopic(
+                serverPlayer,
+                feedback
+            );
+            if (firstGuideTopic == null) {
+                return;
+            }
+            serverPlayer.sendSystemMessage(
+                Component.literal(
+                    BenmingActionRoutingHelper.localizedText(firstGuideTopic)
+                )
             );
         });
     }
@@ -120,6 +143,247 @@ public record ServerboundBenmingSwordActionPayload(BenmingAction action)
                 player
             );
         }
+    }
+}
+
+final class BenmingFirstGuideDelivery {
+
+    private static final String PLAYER_DATA_KEY =
+        GuzhenrenExt.MODID + ".benming_first_guide_seen_topics";
+
+    private BenmingFirstGuideDelivery() {}
+
+    static String consumeTopic(
+        final ServerPlayer player,
+        final BenmingActionFeedback feedback
+    ) {
+        if (player == null) {
+            return null;
+        }
+        final CompoundTag playerData = player.getPersistentData();
+        final CompoundTag seenTopics = playerData.getCompound(PLAYER_DATA_KEY);
+        final String topicKey = consumeTopic(feedback, seenTopics);
+        if (topicKey == null) {
+            return null;
+        }
+        playerData.put(PLAYER_DATA_KEY, seenTopics);
+        return topicKey;
+    }
+
+    static String consumeTopic(
+        final BenmingActionFeedback feedback,
+        final Set<String> seenTopics
+    ) {
+        final String topicKey = resolveTopic(feedback);
+        if (!markFirstSeen(seenTopics, topicKey)) {
+            return null;
+        }
+        return topicKey;
+    }
+
+    private static String consumeTopic(
+        final BenmingActionFeedback feedback,
+        final CompoundTag seenTopics
+    ) {
+        final String topicKey = resolveTopic(feedback);
+        if (!markFirstSeen(seenTopics, topicKey)) {
+            return null;
+        }
+        return topicKey;
+    }
+
+    static String resolveTopic(final BenmingActionFeedback feedback) {
+        if (feedback == null) {
+            return null;
+        }
+        if (feedback.bondResult() != null) {
+            return resolveBondTopic(feedback.action(), feedback.bondResult());
+        }
+        return resolveControllerTopic(feedback.action(), feedback.controllerResult());
+    }
+
+    private static String resolveBondTopic(
+        final BenmingAction action,
+        final BenmingSwordBondService.Result result
+    ) {
+        if (action != BenmingAction.RITUAL_BIND || result == null) {
+            return null;
+        }
+        if (result.success()) {
+            return KongqiaoI18n.BENMING_GUIDE_AFTER_BOND;
+        }
+        return KongqiaoI18n.BENMING_GUIDE_BOND_FAIL_NEXT_STEP;
+    }
+
+    private static String resolveControllerTopic(
+        final BenmingAction action,
+        final BenmingControllerActionResult result
+    ) {
+        if (result == null) {
+            return null;
+        }
+        if (!result.success()) {
+            return switch (action) {
+                case BURST_ATTEMPT ->
+                    result.failureReason() ==
+                        FlyingSwordController.BenmingControllerFailureReason.BURST_OVERLOAD_BLOCKED
+                        ? KongqiaoI18n.BENMING_GUIDE_OVERLOAD_FIRST_WARNING
+                        : null;
+                case QUERY,
+                    RITUAL_BIND,
+                    ACTIVE_UNBIND,
+                    FORCED_UNBIND,
+                    SWITCH_RESONANCE -> null;
+            };
+        }
+        return switch (action) {
+            case SWITCH_RESONANCE ->
+                KongqiaoI18n.BENMING_GUIDE_RESONANCE_FIRST_CHOICE;
+            case QUERY,
+                RITUAL_BIND,
+                ACTIVE_UNBIND,
+                FORCED_UNBIND,
+                BURST_ATTEMPT -> null;
+        };
+    }
+
+    private static boolean markFirstSeen(
+        final CompoundTag seenTopics,
+        final String topicKey
+    ) {
+        final String normalizedTopic = normalizeTopicKey(topicKey);
+        if (seenTopics == null || normalizedTopic.isBlank()) {
+            return false;
+        }
+        if (seenTopics.getBoolean(normalizedTopic)) {
+            return false;
+        }
+        seenTopics.putBoolean(normalizedTopic, true);
+        return true;
+    }
+
+    private static boolean markFirstSeen(
+        final Set<String> seenTopics,
+        final String topicKey
+    ) {
+        final String normalizedTopic = normalizeTopicKey(topicKey);
+        if (seenTopics == null || normalizedTopic.isBlank()) {
+            return false;
+        }
+        return seenTopics.add(normalizedTopic);
+    }
+
+    private static String normalizeTopicKey(final String topicKey) {
+        if (topicKey == null) {
+            return "";
+        }
+        return topicKey.trim();
+    }
+}
+
+final class BenmingFeedbackDeliveryThrottle {
+
+    private static final String PLAYER_DATA_KEY =
+        GuzhenrenExt.MODID + ".benming_feedback_delivery_cooldowns";
+
+    private BenmingFeedbackDeliveryThrottle() {}
+
+    static boolean shouldSend(
+        final ServerPlayer player,
+        final long currentTick,
+        final BenmingActionFeedback feedback
+    ) {
+        final String dedupeKey = dedupeKey(feedback);
+        if (dedupeKey == null) {
+            return true;
+        }
+        final CompoundTag playerData = player.getPersistentData();
+        final CompoundTag cooldowns = playerData.getCompound(PLAYER_DATA_KEY);
+        if (!BenmingFeedbackDeliveryThrottleLogic.shouldSend(
+            dedupeKey,
+            currentTick,
+            cooldowns.getLong(dedupeKey)
+        )) {
+            return false;
+        }
+        cooldowns.putLong(
+            dedupeKey,
+            currentTick + BenmingFeedbackDeliveryThrottleLogic.cooldownWindowTicks()
+        );
+        playerData.put(PLAYER_DATA_KEY, cooldowns);
+        return true;
+    }
+
+    static boolean shouldSendWithCooldowns(
+        final BenmingActionFeedback feedback,
+        final long currentTick,
+        final Map<String, Long> cooldowns
+    ) {
+        return BenmingFeedbackDeliveryThrottleLogic.shouldSendWithCooldowns(
+            dedupeKey(feedback),
+            currentTick,
+            cooldowns
+        );
+    }
+
+    static String dedupeKey(final BenmingActionFeedback feedback) {
+        if (feedback == null || feedback.action() != BenmingAction.BURST_ATTEMPT) {
+            return null;
+        }
+        final BenmingControllerActionResult controllerResult = feedback.controllerResult();
+        if (controllerResult == null || controllerResult.success()) {
+            return null;
+        }
+        if (controllerResult.failureReason() == null
+            || controllerResult.failureReason()
+                == FlyingSwordController.BenmingControllerFailureReason.NONE) {
+            return null;
+        }
+        return "controller."
+            + feedback.action().name()
+            + "."
+            + controllerResult.failureReason().name();
+    }
+
+    static long cooldownWindowTicks() {
+        return BenmingFeedbackDeliveryThrottleLogic.cooldownWindowTicks();
+    }
+}
+
+final class BenmingFeedbackDeliveryThrottleLogic {
+
+    private static final long DELIVERY_COOLDOWN_TICKS = 20L;
+
+    private BenmingFeedbackDeliveryThrottleLogic() {}
+
+    static boolean shouldSendWithCooldowns(
+        final String dedupeKey,
+        final long currentTick,
+        final Map<String, Long> cooldowns
+    ) {
+        if (dedupeKey == null || cooldowns == null) {
+            return true;
+        }
+        if (!shouldSend(dedupeKey, currentTick, cooldowns.getOrDefault(dedupeKey, 0L))) {
+            return false;
+        }
+        cooldowns.put(dedupeKey, currentTick + DELIVERY_COOLDOWN_TICKS);
+        return true;
+    }
+
+    static long cooldownWindowTicks() {
+        return DELIVERY_COOLDOWN_TICKS;
+    }
+
+    static boolean shouldSend(
+        final String dedupeKey,
+        final long currentTick,
+        final long nextAllowedTick
+    ) {
+        if (dedupeKey == null) {
+            return true;
+        }
+        return currentTick >= nextAllowedTick;
     }
 }
 
