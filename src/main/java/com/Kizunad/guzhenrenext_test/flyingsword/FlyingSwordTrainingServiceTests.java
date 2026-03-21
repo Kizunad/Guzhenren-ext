@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext_test.flyingsword;
 
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordReadonlyModifierHelper;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.training.FlyingSwordTrainingService;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
@@ -32,8 +33,17 @@ public class FlyingSwordTrainingServiceTests {
     private static final int EXPECTED_FUEL_AFTER_TICK = 4;
     private static final int EXPECTED_EXP_AFTER_TICK = 1;
     private static final int EXPECTED_EXP_AFTER_BONUS_TICK = 2;
+    private static final int EXPECTED_EXP_AFTER_OFFENSE_ROUTE_TICK = 3;
+    private static final int EXPECTED_EXP_AFTER_DEFENSE_ROUTE_TICK = 1;
+    private static final int EXPECTED_EXP_AFTER_SPIRIT_ROUTE_TICK = 2;
+    private static final int EXPECTED_EXP_AFTER_DEVOUR_ROUTE_TICK = 1;
     private static final int FUEL_STACK_FOR_CONSERVATION_TEST = 2;
     private static final double EXPECTED_RESONANCE_BONUS = 0.01D;
+    private static final double EXPECTED_OFFENSE_ROUTE_RESONANCE_BONUS = 0.008D;
+    private static final double EXPECTED_DEFENSE_ROUTE_RESONANCE_BONUS = 0.0125D;
+    private static final double EXPECTED_SPIRIT_ROUTE_RESONANCE_BONUS = 0.01D;
+    private static final double EXPECTED_DEVOUR_ROUTE_RESONANCE_BONUS = 0.0135D;
+    private static final int MIN_EXPECTED_DEVOUR_ROUTE_AFFINITY = 4;
     private static final double EXPECTED_RESONANCE_BONUS_MILD = 0.0115D;
     private static final double EXPECTED_RESONANCE_BONUS_CLAMPED = 0.012D;
     private static final double REWARD_MULTIPLIER_MILD = 1.15D;
@@ -449,6 +459,39 @@ public class FlyingSwordTrainingServiceTests {
     @GameTest(
         template = "empty",
         timeoutTicks = TEST_TIMEOUT_TICKS,
+        batch = "benming_training_route_tradeoff"
+    )
+    public void testBenmingTrainingShouldDifferentiateRouteGrowthTradeoffs(
+        GameTestHelper helper
+    ) {
+        final BenmingRouteTradeoffFixture fixture = createBenmingRouteTradeoffFixture(
+            helper.getLevel()
+        );
+
+        FlyingSwordTrainingService.installBonusResourceGateForTest(p -> true);
+        FlyingSwordTrainingService.installReadonlyRewardModifierProviderForTest(
+            p -> BenmingSwordReadonlyModifierHelper.ReadonlyModifier.identity()
+        );
+
+        try {
+            tickBenmingRouteTradeoffFixture(fixture);
+            final BenmingRouteTradeoffOutcome outcome = readBenmingRouteTradeoffOutcome(
+                fixture
+            );
+            assertBenmingRouteTradeoffFuelAndExp(helper, outcome);
+            assertBenmingRouteTradeoffResonanceAndAffinity(helper, outcome);
+            assertBenmingRouteTradeoffComparisons(helper, outcome);
+        } finally {
+            FlyingSwordTrainingService.resetBonusResourceGateForTest();
+            FlyingSwordTrainingService.resetReadonlyRewardModifierProviderForTest();
+        }
+
+        helper.succeed();
+    }
+
+    @GameTest(
+        template = "empty",
+        timeoutTicks = TEST_TIMEOUT_TICKS,
         batch = BENMING_COMBAT_BATCH
     )
     public void testBenmingCombatMultiplierShouldRequireActualBoundOwner(
@@ -563,6 +606,254 @@ public class FlyingSwordTrainingServiceTests {
             return 0;
         }
         return (fuelTime * PERCENT_100) / maxFuelTime;
+    }
+
+    private static ItemStack createBoundTrainingSword(final ServerPlayer owner) {
+        final ItemStack swordStack = new ItemStack(Items.IRON_SWORD);
+        final FlyingSwordAttributes attributes = new FlyingSwordAttributes();
+        attributes.getBond().setOwnerUuid(owner.getUUID().toString());
+        writeAttributesToSword(swordStack, attributes);
+        return swordStack;
+    }
+
+    private static void initializeTraining(
+        final FlyingSwordTrainingAttachment training,
+        final ItemStack swordStack
+    ) {
+        training.getInputSlots().setStackInSlot(SLOT_SWORD, swordStack);
+        training.getInputSlots().setStackInSlot(SLOT_FUEL, new ItemStack(Items.COAL));
+        training.setFuelTime(INITIAL_FUEL);
+        training.setMaxFuelTime(INITIAL_FUEL);
+    }
+
+    private static void setPlayerResonanceType(
+        final ServerPlayer player,
+        final FlyingSwordResonanceType resonanceType
+    ) {
+        final var state = KongqiaoAttachments.getFlyingSwordState(player);
+        if (state == null) {
+            throw new IllegalStateException("本命训练测试缺少飞剑状态附件");
+        }
+        state.setResonanceType(resonanceType == null ? "" : resonanceType.getCode());
+    }
+
+    private record BenmingRouteTradeoffFixture(
+        ServerPlayer offensePlayer,
+        ServerPlayer defensePlayer,
+        ServerPlayer spiritPlayer,
+        ServerPlayer devourPlayer,
+        FlyingSwordTrainingAttachment offenseTraining,
+        FlyingSwordTrainingAttachment defenseTraining,
+        FlyingSwordTrainingAttachment spiritTraining,
+        FlyingSwordTrainingAttachment devourTraining
+    ) {}
+
+    private record BenmingRouteTradeoffOutcome(
+        FlyingSwordTrainingAttachment offenseTraining,
+        FlyingSwordTrainingAttachment defenseTraining,
+        FlyingSwordTrainingAttachment spiritTraining,
+        FlyingSwordTrainingAttachment devourTraining,
+        FlyingSwordAttributes offenseAttributes,
+        FlyingSwordAttributes defenseAttributes,
+        FlyingSwordAttributes spiritAttributes,
+        FlyingSwordAttributes devourAttributes
+    ) {}
+
+    private static BenmingRouteTradeoffFixture createBenmingRouteTradeoffFixture(
+        final ServerLevel level
+    ) {
+        final ServerPlayer offensePlayer = createDeterministicPlayer(level, "route_offense");
+        final ServerPlayer defensePlayer = createDeterministicPlayer(level, "route_defense");
+        final ServerPlayer spiritPlayer = createDeterministicPlayer(level, "route_spirit");
+        final ServerPlayer devourPlayer = createDeterministicPlayer(level, "route_devour");
+
+        final FlyingSwordTrainingAttachment offenseTraining = new FlyingSwordTrainingAttachment();
+        final FlyingSwordTrainingAttachment defenseTraining = new FlyingSwordTrainingAttachment();
+        final FlyingSwordTrainingAttachment spiritTraining = new FlyingSwordTrainingAttachment();
+        final FlyingSwordTrainingAttachment devourTraining = new FlyingSwordTrainingAttachment();
+
+        initializeTraining(offenseTraining, createBoundTrainingSword(offensePlayer));
+        initializeTraining(defenseTraining, createBoundTrainingSword(defensePlayer));
+        initializeTraining(spiritTraining, createBoundTrainingSword(spiritPlayer));
+        initializeTraining(devourTraining, createBoundTrainingSword(devourPlayer));
+
+        setPlayerResonanceType(offensePlayer, FlyingSwordResonanceType.OFFENSE);
+        setPlayerResonanceType(defensePlayer, FlyingSwordResonanceType.DEFENSE);
+        setPlayerResonanceType(spiritPlayer, FlyingSwordResonanceType.SPIRIT);
+        setPlayerResonanceType(devourPlayer, FlyingSwordResonanceType.DEVOUR);
+
+        return new BenmingRouteTradeoffFixture(
+            offensePlayer,
+            defensePlayer,
+            spiritPlayer,
+            devourPlayer,
+            offenseTraining,
+            defenseTraining,
+            spiritTraining,
+            devourTraining
+        );
+    }
+
+    private static void tickBenmingRouteTradeoffFixture(
+        final BenmingRouteTradeoffFixture fixture
+    ) {
+        FlyingSwordTrainingService.tickInternal(
+            fixture.offenseTraining(),
+            fixture.offensePlayer()
+        );
+        FlyingSwordTrainingService.tickInternal(
+            fixture.defenseTraining(),
+            fixture.defensePlayer()
+        );
+        FlyingSwordTrainingService.tickInternal(
+            fixture.spiritTraining(),
+            fixture.spiritPlayer()
+        );
+        FlyingSwordTrainingService.tickInternal(
+            fixture.devourTraining(),
+            fixture.devourPlayer()
+        );
+    }
+
+    private static BenmingRouteTradeoffOutcome readBenmingRouteTradeoffOutcome(
+        final BenmingRouteTradeoffFixture fixture
+    ) {
+        return new BenmingRouteTradeoffOutcome(
+            fixture.offenseTraining(),
+            fixture.defenseTraining(),
+            fixture.spiritTraining(),
+            fixture.devourTraining(),
+            readAttributesFromSword(fixture.offenseTraining().getInputSlots().getStackInSlot(SLOT_SWORD)),
+            readAttributesFromSword(fixture.defenseTraining().getInputSlots().getStackInSlot(SLOT_SWORD)),
+            readAttributesFromSword(fixture.spiritTraining().getInputSlots().getStackInSlot(SLOT_SWORD)),
+            readAttributesFromSword(fixture.devourTraining().getInputSlots().getStackInSlot(SLOT_SWORD))
+        );
+    }
+
+    private static void assertBenmingRouteTradeoffFuelAndExp(
+        final GameTestHelper helper,
+        final BenmingRouteTradeoffOutcome outcome
+    ) {
+        helper.assertTrue(
+            outcome.offenseTraining().getFuelTime() == EXPECTED_FUEL_AFTER_TICK,
+            "攻路线训练不应改动基础燃料消耗节奏"
+        );
+        helper.assertTrue(
+            outcome.defenseTraining().getFuelTime() == EXPECTED_FUEL_AFTER_TICK,
+            "御路线训练不应改动基础燃料消耗节奏"
+        );
+        helper.assertTrue(
+            outcome.spiritTraining().getFuelTime() == EXPECTED_FUEL_AFTER_TICK,
+            "灵路线训练不应改动基础燃料消耗节奏"
+        );
+        helper.assertTrue(
+            outcome.devourTraining().getFuelTime() == EXPECTED_FUEL_AFTER_TICK,
+            "噬元炼魄训练不应改动基础燃料消耗节奏"
+        );
+        helper.assertTrue(
+            outcome.offenseTraining().getAccumulatedExp() == EXPECTED_EXP_AFTER_OFFENSE_ROUTE_TICK,
+            "攻路线应把训练奖励偏向经验推进"
+        );
+        helper.assertTrue(
+            outcome.defenseTraining().getAccumulatedExp() == EXPECTED_EXP_AFTER_DEFENSE_ROUTE_TICK,
+            "御路线应接受更慢的经验推进代价"
+        );
+        helper.assertTrue(
+            outcome.spiritTraining().getAccumulatedExp() == EXPECTED_EXP_AFTER_SPIRIT_ROUTE_TICK,
+            "灵路线经验推进应保持中档"
+        );
+        helper.assertTrue(
+            outcome.devourTraining().getAccumulatedExp() == EXPECTED_EXP_AFTER_DEVOUR_ROUTE_TICK,
+            "噬元炼魄应接受较慢经验推进，以换取更强的炼化收益"
+        );
+        helper.assertTrue(
+            outcome.offenseAttributes().getExperience() == EXPECTED_EXP_AFTER_OFFENSE_ROUTE_TICK,
+            "攻路线飞剑经验应高于其余路线"
+        );
+        helper.assertTrue(
+            outcome.defenseAttributes().getExperience() == EXPECTED_EXP_AFTER_DEFENSE_ROUTE_TICK,
+            "御路线飞剑经验应保持最低以换取更稳成长"
+        );
+        helper.assertTrue(
+            outcome.spiritAttributes().getExperience() == EXPECTED_EXP_AFTER_SPIRIT_ROUTE_TICK,
+            "灵路线飞剑经验应维持攻御之间的中档节奏"
+        );
+        helper.assertTrue(
+            outcome.devourAttributes().getExperience() == EXPECTED_EXP_AFTER_DEVOUR_ROUTE_TICK,
+            "噬元炼魄飞剑经验应维持低档，体现难学代价"
+        );
+    }
+
+    private static void assertBenmingRouteTradeoffResonanceAndAffinity(
+        final GameTestHelper helper,
+        final BenmingRouteTradeoffOutcome outcome
+    ) {
+        helper.assertTrue(
+            Math.abs(
+                outcome.offenseAttributes().getBond().getResonance()
+                    - EXPECTED_OFFENSE_ROUTE_RESONANCE_BONUS
+            ) < EPSILON,
+            "攻路线共鸣增长应低于其余路线，体现快练慢稳的代价"
+        );
+        helper.assertTrue(
+            Math.abs(
+                outcome.defenseAttributes().getBond().getResonance()
+                    - EXPECTED_DEFENSE_ROUTE_RESONANCE_BONUS
+            ) < EPSILON,
+            "御路线共鸣增长应最高，体现稳态成长优势"
+        );
+        helper.assertTrue(
+            Math.abs(
+                outcome.spiritAttributes().getBond().getResonance()
+                    - EXPECTED_SPIRIT_ROUTE_RESONANCE_BONUS
+            ) < EPSILON,
+            "灵路线共鸣增长应保持中档，体现节奏向均衡收益"
+        );
+        helper.assertTrue(
+            Math.abs(
+                outcome.devourAttributes().getBond().getResonance()
+                    - EXPECTED_DEVOUR_ROUTE_RESONANCE_BONUS
+            ) < EPSILON,
+            "噬元炼魄应把额外成本更集中地炼成共鸣收益"
+        );
+        helper.assertTrue(
+            outcome.devourAttributes().getSpiritData().getAffinity()
+                >= MIN_EXPECTED_DEVOUR_ROUTE_AFFINITY,
+            "噬元炼魄应至少拿到额外亲和收益"
+        );
+    }
+
+    private static void assertBenmingRouteTradeoffComparisons(
+        final GameTestHelper helper,
+        final BenmingRouteTradeoffOutcome outcome
+    ) {
+        helper.assertTrue(
+            outcome.offenseAttributes().getExperience() > outcome.spiritAttributes().getExperience(),
+            "攻路线应在经验推进上优于灵路线"
+        );
+        helper.assertTrue(
+            outcome.spiritAttributes().getExperience() > outcome.defenseAttributes().getExperience(),
+            "灵路线应在经验推进上优于御路线"
+        );
+        helper.assertTrue(
+            outcome.devourAttributes().getExperience() == outcome.defenseAttributes().getExperience(),
+            "噬元炼魄应与御路线同属低经验档"
+        );
+        helper.assertTrue(
+            outcome.devourAttributes().getBond().getResonance()
+                > outcome.defenseAttributes().getBond().getResonance(),
+            "噬元炼魄应在共鸣炼化上优于御路线"
+        );
+        helper.assertTrue(
+            outcome.defenseAttributes().getBond().getResonance()
+                > outcome.spiritAttributes().getBond().getResonance(),
+            "御路线应在共鸣稳态上优于灵路线"
+        );
+        helper.assertTrue(
+            outcome.spiritAttributes().getBond().getResonance()
+                > outcome.offenseAttributes().getBond().getResonance(),
+            "灵路线应在共鸣稳态上优于攻路线"
+        );
     }
 
     private static FlyingSwordAttributes createCombatAttributes(

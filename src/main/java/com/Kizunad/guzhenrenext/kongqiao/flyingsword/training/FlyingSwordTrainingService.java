@@ -1,11 +1,15 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.training;
 
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordStateAttachment;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.calculator.FlyingSwordAttributes;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordReadonlyModifierHelper;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordResourceTransaction;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.CultivationSnapshot;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.resonance.FlyingSwordResonanceType;
 import com.Kizunad.guzhenrenext.kongqiao.logic.util.ItemStackCustomDataHelper;
+import java.util.EnumMap;
+import java.util.Map;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -21,10 +25,21 @@ public final class FlyingSwordTrainingService {
     private static final int AFFINITY_PROC_DENOMINATOR = 20;
     private static final int AFFINITY_GAIN = 1;
     private static final int BENMING_BONUS_EXP = 1;
-    private static final int BENMING_BONUS_ACCUMULATED_EXP = 1;
     private static final int BENMING_BONUS_AFFINITY = 1;
     private static final double BENMING_BONUS_RESONANCE = 0.01D;
     private static final double BENMING_MAX_RESONANCE = 1.0D;
+    private static final int OFFENSE_ROUTE_BONUS_EXP = 2;
+    private static final int DEFENSE_ROUTE_BONUS_EXP = 0;
+    private static final int SPIRIT_ROUTE_BONUS_EXP = 1;
+    private static final int DEVOUR_ROUTE_BONUS_EXP = 0;
+    private static final int OFFENSE_ROUTE_BONUS_AFFINITY = 0;
+    private static final int DEFENSE_ROUTE_BONUS_AFFINITY = 0;
+    private static final int SPIRIT_ROUTE_BONUS_AFFINITY = 3;
+    private static final int DEVOUR_ROUTE_BONUS_AFFINITY = 4;
+    private static final double OFFENSE_ROUTE_RESONANCE_MULTIPLIER = 0.8D;
+    private static final double DEFENSE_ROUTE_RESONANCE_MULTIPLIER = 1.25D;
+    private static final double SPIRIT_ROUTE_RESONANCE_MULTIPLIER = 1.0D;
+    private static final double DEVOUR_ROUTE_RESONANCE_MULTIPLIER = 1.35D;
     private static final double BENMING_BONUS_ZHENYUAN_COST = 4.0D;
     private static final double BENMING_BONUS_NIANTOU_COST = 2.0D;
     private static final double BENMING_BONUS_HUNPO_COST = 1.0D;
@@ -34,6 +49,14 @@ public final class FlyingSwordTrainingService {
             BENMING_BONUS_NIANTOU_COST,
             BENMING_BONUS_HUNPO_COST
         );
+    private static final BenmingTrainingRewardProfile LEGACY_BENMING_REWARD_PROFILE =
+        new BenmingTrainingRewardProfile(
+            BENMING_BONUS_EXP,
+            BENMING_BONUS_AFFINITY,
+            SPIRIT_ROUTE_RESONANCE_MULTIPLIER
+        );
+    private static final Map<FlyingSwordResonanceType, BenmingTrainingRewardProfile>
+        BENMING_ROUTE_REWARD_PROFILE_MAP = createBenmingRouteRewardProfileMap();
     private static ReadonlyRewardModifierProvider readonlyRewardModifierProvider =
         player -> {
             final CultivationSnapshot snapshot = CultivationSnapshot.capture(player);
@@ -53,6 +76,12 @@ public final class FlyingSwordTrainingService {
 
         BenmingSwordReadonlyModifierHelper.ReadonlyModifier resolve(ServerPlayer player);
     }
+
+    private record BenmingTrainingRewardProfile(
+        int bonusExp,
+        int bonusAffinity,
+        double resonanceMultiplier
+    ) {}
 
     public static void tick(ServerPlayer player) {
         if (player == null) {
@@ -106,24 +135,103 @@ public final class FlyingSwordTrainingService {
 
         if (isBenmingSwordOwnedByPlayer(attributes, player)) {
             if (bonusResourceGate.tryConsume(player)) {
-                attributes.addExperience(BENMING_BONUS_EXP);
-                training.addAccumulatedExp(BENMING_BONUS_ACCUMULATED_EXP);
-                attributes.getSpiritData().addAffinity(BENMING_BONUS_AFFINITY);
-                final double readonlyRewardResonanceGain = applyReadonlyRewardMultiplier(
-                    BENMING_BONUS_RESONANCE,
-                    player
-                );
-                double nextResonance = Math.min(
-                    BENMING_MAX_RESONANCE,
-                    attributes.getBond().getResonance() + readonlyRewardResonanceGain
-                );
-                attributes.getBond().setResonance(nextResonance);
+                applyBenmingRewardProfile(training, attributes, player);
             }
         }
 
         root.put("Attributes", attributes.toNBT());
         ItemStackCustomDataHelper.setCustomDataTag(swordStack, root);
         training.getInputSlots().setStackInSlot(SLOT_SWORD, swordStack);
+    }
+
+    private static void applyBenmingRewardProfile(
+        final FlyingSwordTrainingAttachment training,
+        final FlyingSwordAttributes attributes,
+        final ServerPlayer player
+    ) {
+        final BenmingTrainingRewardProfile rewardProfile =
+            resolveBenmingRewardProfile(player);
+        if (rewardProfile.bonusExp() > 0) {
+            attributes.addExperience(rewardProfile.bonusExp());
+            training.addAccumulatedExp(rewardProfile.bonusExp());
+        }
+        if (rewardProfile.bonusAffinity() > 0) {
+            attributes.getSpiritData().addAffinity(rewardProfile.bonusAffinity());
+        }
+
+        final double readonlyRewardResonanceGain = applyReadonlyRewardMultiplier(
+            BENMING_BONUS_RESONANCE * rewardProfile.resonanceMultiplier(),
+            player
+        );
+        final double nextResonance = Math.min(
+            BENMING_MAX_RESONANCE,
+            attributes.getBond().getResonance() + readonlyRewardResonanceGain
+        );
+        attributes.getBond().setResonance(nextResonance);
+    }
+
+    private static BenmingTrainingRewardProfile resolveBenmingRewardProfile(
+        final ServerPlayer player
+    ) {
+        if (player == null) {
+            return LEGACY_BENMING_REWARD_PROFILE;
+        }
+        final FlyingSwordStateAttachment state =
+            KongqiaoAttachments.getFlyingSwordState(player);
+        if (state == null) {
+            return LEGACY_BENMING_REWARD_PROFILE;
+        }
+        return FlyingSwordResonanceType.resolve(state.getResonanceType())
+            .map(type ->
+                BENMING_ROUTE_REWARD_PROFILE_MAP.getOrDefault(
+                    type,
+                    LEGACY_BENMING_REWARD_PROFILE
+                ))
+            .orElse(LEGACY_BENMING_REWARD_PROFILE);
+    }
+
+    private static Map<FlyingSwordResonanceType, BenmingTrainingRewardProfile>
+        createBenmingRouteRewardProfileMap() {
+        final EnumMap<FlyingSwordResonanceType, BenmingTrainingRewardProfile> map =
+            new EnumMap<>(FlyingSwordResonanceType.class);
+
+        map.put(
+            FlyingSwordResonanceType.OFFENSE,
+            new BenmingTrainingRewardProfile(
+                OFFENSE_ROUTE_BONUS_EXP,
+                OFFENSE_ROUTE_BONUS_AFFINITY,
+                OFFENSE_ROUTE_RESONANCE_MULTIPLIER
+            )
+        );
+
+        map.put(
+            FlyingSwordResonanceType.DEFENSE,
+            new BenmingTrainingRewardProfile(
+                DEFENSE_ROUTE_BONUS_EXP,
+                DEFENSE_ROUTE_BONUS_AFFINITY,
+                DEFENSE_ROUTE_RESONANCE_MULTIPLIER
+            )
+        );
+
+        map.put(
+            FlyingSwordResonanceType.SPIRIT,
+            new BenmingTrainingRewardProfile(
+                SPIRIT_ROUTE_BONUS_EXP,
+                SPIRIT_ROUTE_BONUS_AFFINITY,
+                SPIRIT_ROUTE_RESONANCE_MULTIPLIER
+            )
+        );
+
+        map.put(
+            FlyingSwordResonanceType.DEVOUR,
+            new BenmingTrainingRewardProfile(
+                DEVOUR_ROUTE_BONUS_EXP,
+                DEVOUR_ROUTE_BONUS_AFFINITY,
+                DEVOUR_ROUTE_RESONANCE_MULTIPLIER
+            )
+        );
+
+        return Map.copyOf(map);
     }
 
     private static boolean tryRefillFuel(FlyingSwordTrainingAttachment training) {
