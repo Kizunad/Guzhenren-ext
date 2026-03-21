@@ -43,6 +43,26 @@ final class FlyingSwordHelpScreenTest {
         "screen.guzhenrenext.forge.help.benming.guide.desc";
     private static final String HELP_BENMING_OVERLOAD_KEY =
         "screen.guzhenrenext.forge.help.benming.overload.warning";
+    private static final String HELP_BENMING_BACKLASH_KEY =
+        "screen.guzhenrenext.forge.help.benming.backlash.rule";
+    private static final String HELP_BENMING_RECOVERY_KEY =
+        "screen.guzhenrenext.forge.help.benming.recovery.rule";
+    private static final String HELP_BENMING_AFTERSHOCK_KEY =
+        "screen.guzhenrenext.forge.help.benming.aftershock.rule";
+    private static final String HELP_RESONANCE_OFFENSE_HUD_CUES_KEY =
+        "screen.guzhenrenext.forge.help.resonance.offense.hud_cues";
+    private static final String HELP_RESONANCE_DEFENSE_HUD_CUES_KEY =
+        "screen.guzhenrenext.forge.help.resonance.defense.hud_cues";
+    private static final String HELP_RESONANCE_SPIRIT_HUD_CUES_KEY =
+        "screen.guzhenrenext.forge.help.resonance.spirit.hud_cues";
+    private static final String HELP_RESONANCE_DEVOUR_HUD_CUES_KEY =
+        "screen.guzhenrenext.forge.help.resonance.devour.hud_cues";
+    private static final String HUD_DEVOUR_BURST_READY_KEY =
+        "hud.guzhenrenext.flyingsword.benming.badge.devour.burst_ready";
+    private static final String HUD_DEVOUR_DANGER_KEY =
+        "hud.guzhenrenext.flyingsword.benming.badge.devour.danger";
+    private static final String HUD_DEVOUR_AFTERSHOCK_KEY =
+        "hud.guzhenrenext.flyingsword.benming.badge.devour.aftershock";
     private static final String HELP_BENMING_BOND_ENTRY_KEY =
         "screen.guzhenrenext.forge.help.benming.bond.entry";
     private static final String HELP_BENMING_BOND_AFTER_SUCCESS_KEY =
@@ -53,8 +73,12 @@ final class FlyingSwordHelpScreenTest {
         "message.guzhenrenext.flyingsword.benming.guide.after_bond";
     private static final String GUIDE_OVERLOAD_WARNING_KEY =
         "message.guzhenrenext.flyingsword.benming.guide.overload_first_warning";
+    private static final String GUIDE_BACKLASH_FIRST_TIME_KEY =
+        "message.guzhenrenext.flyingsword.benming.guide.backlash_first_time";
     private static final String GUIDE_BURST_READY_KEY =
         "message.guzhenrenext.flyingsword.benming.guide.burst_ready_first_time";
+    private static final String GUIDE_AFTERSHOCK_FIRST_TIME_KEY =
+        "message.guzhenrenext.flyingsword.benming.guide.aftershock_first_time";
     private static final String ZH_LANG_PATH =
         "src/main/resources/assets/guzhenrenext/lang/zh_cn.json";
     private static final String EN_LANG_PATH =
@@ -83,6 +107,17 @@ final class FlyingSwordHelpScreenTest {
         final Object overloadRoute = api.routeForGuide(GUIDE_OVERLOAD_WARNING_KEY);
         assertEquals(api.benmingTabIndex(), api.routeTabIndex(overloadRoute));
         assertEquals(HELP_BENMING_OVERLOAD_KEY, api.routeHelpEntry(overloadRoute));
+
+        final Object backlashRoute = api.routeForGuide(GUIDE_BACKLASH_FIRST_TIME_KEY);
+        assertEquals(api.benmingTabIndex(), api.routeTabIndex(backlashRoute));
+        assertEquals(HELP_BENMING_BACKLASH_KEY, api.routeHelpEntry(backlashRoute));
+
+        final Object aftershockRoute = api.routeForGuide(GUIDE_AFTERSHOCK_FIRST_TIME_KEY);
+        assertEquals(api.benmingTabIndex(), api.routeTabIndex(aftershockRoute));
+        assertEquals(HELP_BENMING_AFTERSHOCK_KEY, api.routeHelpEntry(aftershockRoute));
+        assertFalse(
+            api.routeHelpEntry(backlashRoute).equals(api.routeHelpEntry(aftershockRoute))
+        );
 
         final Object fallbackRoute = api.routeForGuide("unknown.topic");
         assertEquals(api.benmingTabIndex(), api.routeTabIndex(fallbackRoute));
@@ -152,8 +187,22 @@ final class FlyingSwordHelpScreenTest {
 
         assertTrue(extractValue(zhContent, TAB_BENMING_KEY).isPresent());
         assertTrue(extractValue(zhContent, HELP_BENMING_OVERVIEW_KEY).isPresent());
+        assertTrue(extractValue(zhContent, HELP_BENMING_BACKLASH_KEY).isPresent());
+        assertTrue(extractValue(zhContent, HELP_BENMING_RECOVERY_KEY).isPresent());
+        assertTrue(extractValue(zhContent, HELP_BENMING_AFTERSHOCK_KEY).isPresent());
+        assertTrue(extractValue(zhContent, HELP_RESONANCE_OFFENSE_HUD_CUES_KEY).isPresent());
+        assertTrue(extractValue(zhContent, HELP_RESONANCE_DEFENSE_HUD_CUES_KEY).isPresent());
+        assertTrue(extractValue(zhContent, HELP_RESONANCE_SPIRIT_HUD_CUES_KEY).isPresent());
+        assertTrue(extractValue(zhContent, HELP_RESONANCE_DEVOUR_HUD_CUES_KEY).isPresent());
         assertTrue(extractValue(enContent, TAB_BENMING_KEY).isPresent());
         assertTrue(extractValue(enContent, HELP_BENMING_OVERVIEW_KEY).isPresent());
+        assertTrue(extractValue(enContent, HELP_BENMING_BACKLASH_KEY).isPresent());
+        assertTrue(extractValue(enContent, HELP_BENMING_RECOVERY_KEY).isPresent());
+        assertTrue(extractValue(enContent, HELP_BENMING_AFTERSHOCK_KEY).isPresent());
+        assertTrue(extractValue(enContent, HELP_RESONANCE_OFFENSE_HUD_CUES_KEY).isPresent());
+        assertTrue(extractValue(enContent, HELP_RESONANCE_DEFENSE_HUD_CUES_KEY).isPresent());
+        assertTrue(extractValue(enContent, HELP_RESONANCE_SPIRIT_HUD_CUES_KEY).isPresent());
+        assertTrue(extractValue(enContent, HELP_RESONANCE_DEVOUR_HUD_CUES_KEY).isPresent());
 
         assertTrue(
             extractValue(zhContent, GUIDE_BOND_START_KEY).orElseThrow().length() <=
@@ -198,11 +247,55 @@ final class FlyingSwordHelpScreenTest {
             .orElseThrow();
         final String zhBondEntry = extractValue(zhContent, HELP_BENMING_BOND_ENTRY_KEY)
             .orElseThrow();
+        final String zhBacklash = extractValue(zhContent, HELP_BENMING_BACKLASH_KEY)
+            .orElseThrow();
+        final String zhRecovery = extractValue(zhContent, HELP_BENMING_RECOVERY_KEY)
+            .orElseThrow();
+        final String zhAftershock = extractValue(zhContent, HELP_BENMING_AFTERSHOCK_KEY)
+            .orElseThrow();
+        final String zhOffenseHudCues = extractValue(
+            zhContent,
+            HELP_RESONANCE_OFFENSE_HUD_CUES_KEY
+        ).orElseThrow();
+        final String zhDefenseHudCues = extractValue(
+            zhContent,
+            HELP_RESONANCE_DEFENSE_HUD_CUES_KEY
+        ).orElseThrow();
+        final String zhSpiritHudCues = extractValue(
+            zhContent,
+            HELP_RESONANCE_SPIRIT_HUD_CUES_KEY
+        ).orElseThrow();
+        final String zhDevourHudCues = extractValue(
+            zhContent,
+            HELP_RESONANCE_DEVOUR_HUD_CUES_KEY
+        ).orElseThrow();
+        final String zhDevourBurst = extractValue(zhContent, HUD_DEVOUR_BURST_READY_KEY)
+            .orElseThrow();
+        final String zhDevourDanger = extractValue(zhContent, HUD_DEVOUR_DANGER_KEY)
+            .orElseThrow();
+        final String zhDevourAftershock = extractValue(zhContent, HUD_DEVOUR_AFTERSHOCK_KEY)
+            .orElseThrow();
         final String enOverview = extractValue(enContent, HELP_BENMING_OVERVIEW_KEY)
             .orElseThrow();
         final String enGuideDesc = extractValue(enContent, HELP_BENMING_GUIDE_DESC_KEY)
             .orElseThrow();
         final String enBondEntry = extractValue(enContent, HELP_BENMING_BOND_ENTRY_KEY)
+            .orElseThrow();
+        final String enBacklash = extractValue(enContent, HELP_BENMING_BACKLASH_KEY)
+            .orElseThrow();
+        final String enRecovery = extractValue(enContent, HELP_BENMING_RECOVERY_KEY)
+            .orElseThrow();
+        final String enAftershock = extractValue(enContent, HELP_BENMING_AFTERSHOCK_KEY)
+            .orElseThrow();
+        final String enDevourHudCues = extractValue(
+            enContent,
+            HELP_RESONANCE_DEVOUR_HUD_CUES_KEY
+        ).orElseThrow();
+        final String enDevourBurst = extractValue(enContent, HUD_DEVOUR_BURST_READY_KEY)
+            .orElseThrow();
+        final String enDevourDanger = extractValue(enContent, HUD_DEVOUR_DANGER_KEY)
+            .orElseThrow();
+        final String enDevourAftershock = extractValue(enContent, HUD_DEVOUR_AFTERSHOCK_KEY)
             .orElseThrow();
 
         assertTrue(zhOverview.contains("短提示"));
@@ -210,11 +303,42 @@ final class FlyingSwordHelpScreenTest {
         assertTrue(zhGuideDesc.contains("下一步该做什么"));
         assertTrue(zhGuideDesc.contains("本页"));
         assertTrue(zhBondEntry.contains("先确认已经选中目标飞剑"));
+        assertTrue(zhBacklash.contains("过载循环"));
+        assertTrue(zhBacklash.contains("反噬"));
+        assertTrue(zhBacklash.contains("不是爆发后的余震"));
+        assertTrue(zhRecovery.contains("恢复"));
+        assertTrue(zhRecovery.contains("过载循环"));
+        assertTrue(zhRecovery.contains("不是同一阶段"));
+        assertTrue(zhAftershock.contains("爆发尾段"));
+        assertTrue(zhAftershock.contains("不是过载反噬/恢复"));
+        assertTrue(zhOffenseHudCues.contains("压线可斩"));
+        assertTrue(zhOffenseHudCues.contains("越线将崩"));
+        assertTrue(zhOffenseHudCues.contains("锋芒未收"));
+        assertTrue(zhDefenseHudCues.contains("镇域成形"));
+        assertTrue(zhDefenseHudCues.contains("稳流将断"));
+        assertTrue(zhDefenseHudCues.contains("余稳回流"));
+        assertTrue(zhSpiritHudCues.contains("抢拍得势"));
+        assertTrue(zhSpiritHudCues.contains("错拍失窗"));
+        assertTrue(zhSpiritHudCues.contains("回身整拍"));
+        assertTrue(zhDevourHudCues.contains(zhDevourBurst));
+        assertTrue(zhDevourHudCues.contains(zhDevourDanger));
+        assertTrue(zhDevourHudCues.contains(zhDevourAftershock));
+        assertTrue(zhDevourHudCues.contains("反噬 / 恢复"));
 
         assertTrue(enOverview.contains("First guides stay short"));
         assertTrue(enGuideDesc.contains("next step"));
         assertTrue(enGuideDesc.contains("help page"));
         assertTrue(enBondEntry.contains("selected first"));
+        assertTrue(enBacklash.contains("overload loop"));
+        assertTrue(enBacklash.contains("not the aftershock tail"));
+        assertTrue(enRecovery.contains("rebuild segment"));
+        assertTrue(enRecovery.contains("not the same phase as burst aftershock"));
+        assertTrue(enAftershock.contains("burst tail"));
+        assertTrue(enAftershock.contains("not overload backlash or recovery"));
+        assertTrue(enDevourHudCues.contains(enDevourBurst));
+        assertTrue(enDevourHudCues.contains(enDevourDanger));
+        assertTrue(enDevourHudCues.contains(enDevourAftershock));
+        assertTrue(enDevourHudCues.contains("Backlash / Recovery"));
     }
 
     private static Optional<String> extractValue(

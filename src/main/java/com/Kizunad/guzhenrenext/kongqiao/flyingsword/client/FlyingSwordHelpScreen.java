@@ -82,7 +82,7 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
         KongqiaoI18n.BENMING_GUIDE_OVERLOAD_FIRST_WARNING,
         KongqiaoI18n.HELP_BENMING_OVERLOAD_WARNING,
         KongqiaoI18n.BENMING_GUIDE_BACKLASH_FIRST_TIME,
-        KongqiaoI18n.HELP_BENMING_BACKLASH_RECOVERY,
+        KongqiaoI18n.HELP_BENMING_BACKLASH_RULE,
         KongqiaoI18n.BENMING_GUIDE_BURST_READY_FIRST_TIME,
         KongqiaoI18n.HELP_BENMING_BURST_WINDOW,
         KongqiaoI18n.BENMING_GUIDE_AFTERSHOCK_FIRST_TIME,
@@ -454,21 +454,31 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
         y = addSectionTitle(width, y, KongqiaoI18n.RESONANCE_OFFENSE_NAME);
         y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_RESONANCE_OFFENSE);
         y = addLabel(width, y, KongqiaoI18n.RESONANCE_OFFENSE_COLOR_SEMANTIC);
+        y = addLabel(width, y, KongqiaoI18n.RESONANCE_OFFENSE_HUD_CUES);
 
         y += SECTION_GAP;
         y = addSectionTitle(width, y, KongqiaoI18n.RESONANCE_DEFENSE_NAME);
         y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_RESONANCE_DEFENSE);
         y = addLabel(width, y, KongqiaoI18n.RESONANCE_DEFENSE_COLOR_SEMANTIC);
+        y = addLabel(width, y, KongqiaoI18n.RESONANCE_DEFENSE_HUD_CUES);
 
         y += SECTION_GAP;
         y = addSectionTitle(width, y, KongqiaoI18n.RESONANCE_SPIRIT_NAME);
         y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_RESONANCE_SPIRIT);
         y = addLabel(width, y, KongqiaoI18n.RESONANCE_SPIRIT_COLOR_SEMANTIC);
+        y = addLabel(width, y, KongqiaoI18n.RESONANCE_SPIRIT_HUD_CUES);
+
+        y += SECTION_GAP;
+        y = addSectionTitle(width, y, KongqiaoI18n.RESONANCE_DEVOUR_NAME);
+        y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_RESONANCE_DEVOUR);
+        y = addLabel(width, y, KongqiaoI18n.RESONANCE_DEVOUR_COLOR_SEMANTIC);
+        y = addLabel(width, y, KongqiaoI18n.RESONANCE_DEVOUR_HUD_CUES);
 
         y += SECTION_GAP;
         y = addSectionTitle(width, y, KongqiaoI18n.HELP_BENMING_RISK_TITLE);
         y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_OVERLOAD_WARNING);
-        y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_BACKLASH_RECOVERY);
+        y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_BACKLASH_RULE);
+        y = addLabel(width, y, KongqiaoI18n.HELP_BENMING_RECOVERY_RULE);
 
         y += SECTION_GAP;
         y = addSectionTitle(width, y, KongqiaoI18n.HELP_BENMING_BURST_TITLE);
