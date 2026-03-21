@@ -145,6 +145,7 @@
     "message.guzhenrenext.flyingsword.benming.feedback.fail.ritual_target_mismatch": "[Benming Sword] Ritual target changed. Reconfirm your Benming sword.",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.state_attachment_missing": "[Benming Sword] Benming state record is missing. This action cannot proceed.",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.no_target_sword": "[Benming Sword] No nearby sword is available for this Benming action.",
+    "message.guzhenrenext.flyingsword.benming.feedback.fail.no_selected_sword": "[Benming Sword] Select a sword first before attempting the Benming bond.",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.target_not_current_benming": "[Benming Sword] Current target is not your Benming sword.",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.bond_state_invalid": "[Benming Sword] Benming bond state is invalid for this action.",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.resonance_type_invalid": "[Benming Sword] No valid resonance type is available to switch.",

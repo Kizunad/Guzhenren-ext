@@ -177,4 +177,122 @@ final class BenmingClientInputWiringTests {
         );
     }
 
+    @Test
+    void benmingClientThrottleKeepsSameSessionNextTickThrottledAfterSync() {
+        final Object playerIdentity = new Object();
+        final Object levelIdentity = new Object();
+
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            playerIdentity,
+            levelIdentity
+        );
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                900L
+            )
+        );
+        assertTrue(
+            !BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                901L
+            )
+        );
+    }
+
+    @Test
+    void benmingClientThrottleResetsWhenPlayerIdentityChanges() {
+        final Object levelIdentity = new Object();
+        final Object firstPlayerIdentity = new Object();
+        final Object secondPlayerIdentity = new Object();
+
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            firstPlayerIdentity,
+            levelIdentity
+        );
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                600L
+            )
+        );
+        assertTrue(
+            !BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                601L
+            )
+        );
+
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            secondPlayerIdentity,
+            levelIdentity
+        );
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.RITUAL_BIND,
+                602L
+            )
+        );
+    }
+
+    @Test
+    void benmingClientThrottleResetsWhenLevelIdentityChanges() {
+        final Object playerIdentity = new Object();
+        final Object firstLevelIdentity = new Object();
+        final Object secondLevelIdentity = new Object();
+
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            playerIdentity,
+            firstLevelIdentity
+        );
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.SWITCH_RESONANCE,
+                700L
+            )
+        );
+        assertTrue(
+            !BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.SWITCH_RESONANCE,
+                701L
+            )
+        );
+
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            playerIdentity,
+            secondLevelIdentity
+        );
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.SWITCH_RESONANCE,
+                702L
+            )
+        );
+    }
+
+    @Test
+    void benmingClientThrottleClearsOnNullSessionIdentity() {
+        final Object playerIdentity = new Object();
+        final Object levelIdentity = new Object();
+
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            playerIdentity,
+            levelIdentity
+        );
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.BURST_ATTEMPT,
+                800L
+            )
+        );
+
+        BenmingClientActionResolver.syncThrottleStateForSession(null, null);
+        assertTrue(
+            BenmingClientActionResolver.shouldSendAction(
+                BenmingClientActionResolver.BenmingActionRoute.BURST_ATTEMPT,
+                801L
+            )
+        );
+    }
+
 }

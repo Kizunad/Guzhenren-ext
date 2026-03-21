@@ -580,6 +580,8 @@ final class BenmingActionRoutingHelper {
         final String swordId = displaySwordId(result.stableSwordId());
         return switch (result.failureReason()) {
             case NONE, INVALID_REQUEST -> invalidRequestMessage(action);
+            case NO_SELECTED_SWORD ->
+                localizedText(KongqiaoI18n.BENMING_FEEDBACK_FAIL_NO_SELECTED_SWORD);
             case NO_BONDED_SWORD ->
                 localizedText(KongqiaoI18n.BENMING_FEEDBACK_FAIL_NOT_BONDED);
             case PLAYER_ALREADY_HAS_BONDED_SWORD ->

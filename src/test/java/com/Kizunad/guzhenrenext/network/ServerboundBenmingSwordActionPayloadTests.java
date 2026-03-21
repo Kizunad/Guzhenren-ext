@@ -187,6 +187,24 @@ final class ServerboundBenmingSwordActionPayloadTests {
     }
 
     @Test
+    void feedbackMapsMissingSelectedSwordBondFailureToDedicatedGuidance() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final String ritualBindMessage = api.feedbackForBondResult(
+            api.newBondFailureResult(
+                "RITUAL_BIND",
+                "NO_SELECTED_SWORD",
+                "stable-bind"
+            )
+        );
+
+        assertEquals(
+            "[本命飞剑] 请先明确选中一把飞剑，再执行本命缔结。",
+            ritualBindMessage
+        );
+    }
+
+    @Test
     void executeRoutesResonanceAndBurstThroughControllerChannel() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object executor = api.newExecutorProxy(

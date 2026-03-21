@@ -32,7 +32,11 @@ public final class GuClientEvents {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         final Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null) {
+        BenmingClientActionResolver.syncThrottleStateForSession(
+            minecraft.player,
+            minecraft.level
+        );
+        if (minecraft.player == null || minecraft.level == null) {
             return;
         }
 
@@ -154,6 +158,8 @@ final class BenmingClientActionResolver {
 
     private static final Map<BenmingActionRoute, Long> LAST_SENT_TICK_BY_ACTION =
         new HashMap<>();
+    private static Object lastClientPlayerIdentity;
+    private static Object lastClientLevelIdentity;
 
     private BenmingClientActionResolver() {}
 
@@ -244,8 +250,33 @@ final class BenmingClientActionResolver {
         return true;
     }
 
+    static void syncThrottleStateForSession(
+        final Object playerIdentity,
+        final Object levelIdentity
+    ) {
+        if (playerIdentity == null || levelIdentity == null) {
+            clearThrottleState();
+            return;
+        }
+
+        if (lastClientPlayerIdentity == playerIdentity
+            && lastClientLevelIdentity == levelIdentity) {
+            return;
+        }
+
+        clearThrottleState();
+        lastClientPlayerIdentity = playerIdentity;
+        lastClientLevelIdentity = levelIdentity;
+    }
+
     static void resetThrottleStateForTests() {
+        clearThrottleState();
+    }
+
+    private static void clearThrottleState() {
         LAST_SENT_TICK_BY_ACTION.clear();
+        lastClientPlayerIdentity = null;
+        lastClientLevelIdentity = null;
     }
 
     private static Constructor<ServerboundBenmingSwordActionPayload> resolvePayloadConstructor(

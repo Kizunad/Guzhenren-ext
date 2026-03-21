@@ -149,6 +149,7 @@
     "message.guzhenrenext.flyingsword.benming.feedback.fail.ritual_target_mismatch": "[本命飞剑] 仪式目标已变化，请重新确认本命飞剑。",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.state_attachment_missing": "[本命飞剑] 未找到本命状态记录，无法执行当前操作。",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.no_target_sword": "[本命飞剑] 附近没有可用于本命操作的飞剑。",
+    "message.guzhenrenext.flyingsword.benming.feedback.fail.no_selected_sword": "[本命飞剑] 请先明确选中一把飞剑，再执行本命缔结。",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.target_not_current_benming": "[本命飞剑] 当前目标不是你的本命飞剑。",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.bond_state_invalid": "[本命飞剑] 本命缔结状态异常，无法执行当前操作。",
     "message.guzhenrenext.flyingsword.benming.feedback.fail.resonance_type_invalid": "[本命飞剑] 未找到可切换的本命共鸣分型。",

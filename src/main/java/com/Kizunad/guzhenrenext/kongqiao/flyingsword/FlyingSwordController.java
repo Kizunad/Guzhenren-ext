@@ -346,7 +346,7 @@ public final class FlyingSwordController {
         if (sword == null) {
             return BenmingSwordBondService.Result.failure(
                 BenmingSwordBondService.ResultBranch.RITUAL_PRECHECK,
-                BenmingSwordBondService.FailureReason.INVALID_REQUEST,
+                BenmingSwordBondService.FailureReason.NO_SELECTED_SWORD,
                 ""
             );
         }

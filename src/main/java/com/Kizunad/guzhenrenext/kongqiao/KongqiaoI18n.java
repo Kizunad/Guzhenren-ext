@@ -281,6 +281,8 @@ public final class KongqiaoI18n {
         "message.guzhenrenext.flyingsword.benming.feedback.fail.state_attachment_missing";
     public static final String BENMING_FEEDBACK_FAIL_NO_TARGET_SWORD =
         "message.guzhenrenext.flyingsword.benming.feedback.fail.no_target_sword";
+    public static final String BENMING_FEEDBACK_FAIL_NO_SELECTED_SWORD =
+        "message.guzhenrenext.flyingsword.benming.feedback.fail.no_selected_sword";
     public static final String BENMING_FEEDBACK_FAIL_TARGET_NOT_CURRENT_BENMING =
         "message.guzhenrenext.flyingsword.benming.feedback.fail.target_not_current_benming";
     public static final String BENMING_FEEDBACK_FAIL_BOND_STATE_INVALID =

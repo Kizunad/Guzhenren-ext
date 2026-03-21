@@ -215,7 +215,8 @@ final class FlyingSwordControllerBindRitualTests {
     }
 
     @Test
-    void bindSelectedOrNearestSwordAsBenmingUsesStrictSelectedResolutionPath() throws Exception {
+    void bindSelectedOrNearestSwordAsBenmingKeepsStrictSelectionAndDedicatedMissingSelectionFailure()
+        throws Exception {
         final String methodBody = extractMethodBody(
             Files.readString(CONTROLLER_SOURCE),
             "public static BenmingSwordBondService.Result bindSelectedOrNearestSwordAsBenming(",
@@ -223,6 +224,7 @@ final class FlyingSwordControllerBindRitualTests {
         );
 
         assertTrue(methodBody.contains("getStrictSelectedSword(level, owner)"));
+        assertTrue(methodBody.contains("FailureReason.NO_SELECTED_SWORD"));
     }
 
     private static final class RuntimeApi {
