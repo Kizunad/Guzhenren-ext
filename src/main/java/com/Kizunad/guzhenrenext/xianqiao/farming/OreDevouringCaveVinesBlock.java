@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.farming;
 
+import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -19,6 +20,7 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
     private static final int BLOCK_UPDATE_FLAGS = 3;
     private static final int MAX_VERTICAL_SCAN_DISTANCE = 1;
     private static final int DROP_SINGLE_COUNT = 1;
+    private static final int REFINED_DROP_SINGLE_COUNT = 1;
     private static final int FEEDBACK_PARTICLE_COUNT = 8;
     private static final double BLOCK_CENTER_OFFSET = 0.5D;
     private static final double FEEDBACK_PARTICLE_OFFSET = 0.2D;
@@ -26,6 +28,7 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
     private static final float FEEDBACK_SOUND_VOLUME = 0.8F;
     private static final float FEEDBACK_SOUND_PITCH = 0.7F;
     private static final String SUCCESS_NAME_TAG = "噬金藤·吞矿成精";
+    private static final String REFINED_SUCCESS_NAME_TAG = "噬金藤·万象副产";
 
     public OreDevouringCaveVinesBlock(Properties properties) {
         super(properties);
@@ -54,6 +57,8 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
         if (orePos == null) {
             return;
         }
+        BlockState primaryOreState = level.getBlockState(orePos);
+        BlockPos secondaryOrePos = resolveSecondaryOreTarget(vinePos, level, orePos);
         level.setBlock(orePos, Blocks.STONE.defaultBlockState(), BLOCK_UPDATE_FLAGS);
         if (vineState.hasProperty(CaveVines.BERRIES)) {
             level.setBlock(vinePos, vineState.setValue(CaveVines.BERRIES, true), BLOCK_UPDATE_FLAGS);
@@ -68,6 +73,7 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
         essenceDrop.setCustomName(Component.literal(SUCCESS_NAME_TAG));
         essenceDrop.setCustomNameVisible(true);
         level.addFreshEntity(essenceDrop);
+        tryDropRefinedByproduct(level, vinePos, primaryOreState, secondaryOrePos);
         level.sendParticles(
             ParticleTypes.SMOKE,
             vinePos.getX() + BLOCK_CENTER_OFFSET,
@@ -89,6 +95,32 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
         );
     }
 
+    private static void tryDropRefinedByproduct(
+        ServerLevel level,
+        BlockPos vinePos,
+        BlockState primaryOreState,
+        BlockPos secondaryOrePos
+    ) {
+        if (!isGoldBearingOre(primaryOreState) || secondaryOrePos == null) {
+            return;
+        }
+        BlockState secondaryOreState = level.getBlockState(secondaryOrePos);
+        level.setBlock(secondaryOrePos, Blocks.COBBLESTONE.defaultBlockState(), BLOCK_UPDATE_FLAGS);
+        if (!isRefineCatalystOre(secondaryOreState)) {
+            return;
+        }
+        ItemEntity refinedDrop = new ItemEntity(
+            level,
+            vinePos.getX() + BLOCK_CENTER_OFFSET,
+            vinePos.getY() + BLOCK_CENTER_OFFSET,
+            vinePos.getZ() + BLOCK_CENTER_OFFSET,
+            XianqiaoItems.WAN_XIANG_JIN_SHA.toStack(REFINED_DROP_SINGLE_COUNT)
+        );
+        refinedDrop.setCustomName(Component.literal(REFINED_SUCCESS_NAME_TAG));
+        refinedDrop.setCustomNameVisible(true);
+        level.addFreshEntity(refinedDrop);
+    }
+
     private static BlockPos resolveOreTarget(BlockPos vinePos, BlockGetter level) {
         BlockPos upPos = vinePos.above(MAX_VERTICAL_SCAN_DISTANCE);
         BlockPos downPos = vinePos.below(MAX_VERTICAL_SCAN_DISTANCE);
@@ -96,6 +128,18 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
             return upPos;
         }
         if (isOreBlock(level.getBlockState(downPos))) {
+            return downPos;
+        }
+        return null;
+    }
+
+    private static BlockPos resolveSecondaryOreTarget(BlockPos vinePos, BlockGetter level, BlockPos primaryOrePos) {
+        BlockPos upPos = vinePos.above(MAX_VERTICAL_SCAN_DISTANCE);
+        BlockPos downPos = vinePos.below(MAX_VERTICAL_SCAN_DISTANCE);
+        if (!upPos.equals(primaryOrePos) && isOreBlock(level.getBlockState(upPos))) {
+            return upPos;
+        }
+        if (!downPos.equals(primaryOrePos) && isOreBlock(level.getBlockState(downPos))) {
             return downPos;
         }
         return null;
@@ -121,5 +165,20 @@ public class OreDevouringCaveVinesBlock extends CaveVinesBlock {
             || state.is(Blocks.NETHER_GOLD_ORE)
             || state.is(Blocks.NETHER_QUARTZ_ORE)
             || state.is(Blocks.ANCIENT_DEBRIS);
+    }
+
+    private static boolean isGoldBearingOre(BlockState state) {
+        return state.is(Blocks.GOLD_ORE)
+            || state.is(Blocks.DEEPSLATE_GOLD_ORE)
+            || state.is(Blocks.NETHER_GOLD_ORE);
+    }
+
+    private static boolean isRefineCatalystOre(BlockState state) {
+        return state.is(Blocks.IRON_ORE)
+            || state.is(Blocks.DEEPSLATE_IRON_ORE)
+            || state.is(Blocks.COPPER_ORE)
+            || state.is(Blocks.DEEPSLATE_COPPER_ORE)
+            || state.is(Blocks.COAL_ORE)
+            || state.is(Blocks.DEEPSLATE_COAL_ORE);
     }
 }
