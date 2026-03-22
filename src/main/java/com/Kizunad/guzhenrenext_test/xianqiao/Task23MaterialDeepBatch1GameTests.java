@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext_test.xianqiao;
 
 import com.Kizunad.guzhenrenext.xianqiao.alchemy.blockentity.AlchemyFurnaceBlockEntity;
+import com.Kizunad.guzhenrenext.xianqiao.alchemy.menu.AlchemyFurnaceMenu;
 import com.Kizunad.guzhenrenext.xianqiao.alchemy.service.AlchemyService;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -49,6 +51,7 @@ public class Task23MaterialDeepBatch1GameTests {
     private static final long DAYLIGHT_TIME_TICK = 1000L;
     private static final int MD03_REQUIRED_TICK_CALLS = 81;
     private static final int MD05_INPUT_STACK_COUNT = 48;
+    private static final int MD05_BATCH_REQUEST_SIZE = 3;
     private static final int MD04_BOUNDARY_RADIUS_BLOCKS = 64;
     private static final int MD04_OUTSIDE_OFFSET_BLOCKS = 4;
     private static final int CHUNK_SIZE_BLOCKS = 16;
@@ -82,6 +85,8 @@ public class Task23MaterialDeepBatch1GameTests {
     private static final UUID MD04_HAPPY_OWNER_UUID = UUID.fromString("271fef0a-4e2d-4e04-abb4-3ecf0d96cb64");
     private static final UUID MD04_BYPASS_OWNER_UUID = UUID.fromString("0d5338f1-c95f-44e4-b7b2-f4f37cebf748");
     private static final UUID MD05_HAPPY_REFINER_UUID = UUID.fromString("4fdb8ab8-b85b-4d3d-bcc8-ec9533dca0b7");
+    private static final UUID MD05_BATCH_REFINER_UUID = UUID.fromString("ad3012b5-885c-43e4-9419-a61d6d3bc07b");
+    private static final UUID MD05_MENU_REFINER_UUID = UUID.fromString("1a1b7f69-8866-4587-92e4-ff5d8feea855");
 
     @GameTest(
         template = "examplegametests.empty",
@@ -460,8 +465,11 @@ public class Task23MaterialDeepBatch1GameTests {
         double hunpoBefore = AlchemyService.readHunPoAmountForTest(refiner);
         AlchemyService.forceNextRefineFailureForTest(refiner);
 
-        boolean attempted = AlchemyService.tryRefine(furnace, refiner);
-        helper.assertTrue(attempted, "happy path: 主材与辅材完整时应发起合法炼制尝试");
+        AlchemyService.RefineAttemptOutcome outcome = AlchemyService.tryRefineWithOutcome(furnace, refiner);
+        helper.assertTrue(
+            outcome == AlchemyService.RefineAttemptOutcome.LEGAL_FAILURE_WITH_CONSOLATION_OUTPUT,
+            "happy path: 单次合法失败应被显式分类为“失败补偿产出九转髓晶”"
+        );
 
         ItemStack output = furnace.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
         helper.assertTrue(
@@ -486,12 +494,92 @@ public class Task23MaterialDeepBatch1GameTests {
         timeoutTicks = TEST_TIMEOUT_TICKS,
         batch = PLAN2_MATERIAL_DEEP_BATCH1_MAIN
     )
+    public void testPlan2MaterialDeepBatch1Md05BatchShouldContinueAfterLegalFailureReward(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        AlchemyFurnaceBlockEntity furnace = placeAlchemyFurnace(helper, MD05_HAPPY_FURNACE_POS);
+        injectMd05RefineInputs(furnace);
+        ServerPlayer refiner = createTestPlayer(level, MD05_BATCH_REFINER_UUID, "task23_md05_batch_refiner");
+        AlchemyService.seedHunPoAmountForTest(refiner, MD05_HUNPO_SEED);
+        AlchemyService.forceNextRefineFailureForTest(refiner);
+
+        int mainCountBefore = furnace.getItem(AlchemyFurnaceBlockEntity.SLOT_MAIN).getCount();
+        AlchemyService.BatchRefineSummary summary = AlchemyService.tryRefineBatchWithSummary(
+            furnace,
+            MD05_BATCH_REQUEST_SIZE,
+            refiner
+        );
+
+        helper.assertTrue(
+            summary.attemptedCount() == MD05_BATCH_REQUEST_SIZE,
+            "batch path: 首次合法失败产出九转髓晶后，批量炼制仍应继续处理剩余请求次数"
+        );
+        helper.assertTrue(
+            summary.successfulPillOutputCount() == 0,
+            "batch path: 失败补偿产物与后续被九转髓晶占槽的尝试都不能计为成功产丹"
+        );
+
+        int mainCountAfter = furnace.getItem(AlchemyFurnaceBlockEntity.SLOT_MAIN).getCount();
+        helper.assertTrue(
+            mainCountBefore - mainCountAfter == MD05_BATCH_REQUEST_SIZE,
+            "batch path: 批量续炼成功后，应按请求次数连续消耗输入主材"
+        );
+
+        ItemStack output = furnace.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
+        helper.assertTrue(
+            output.is(XianqiaoItems.JIU_ZHUAN_SUI_JING.get()),
+            "batch path: 首次合法失败后的产出槽仍应保留九转髓晶作为失败补偿物"
+        );
+        helper.succeed();
+    }
+
+    @GameTest(
+        template = "examplegametests.empty",
+        timeoutTicks = TEST_TIMEOUT_TICKS,
+        batch = PLAN2_MATERIAL_DEEP_BATCH1_MAIN
+    )
+    public void testPlan2MaterialDeepBatch1Md05MenuXpProxyShouldIgnoreConsolationOutput(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        AlchemyFurnaceBlockEntity furnace = placeAlchemyFurnace(helper, MD05_BYPASS_GUARD_FURNACE_POS);
+        injectMd05RefineInputs(furnace);
+        ServerPlayer refiner = createTestPlayer(level, MD05_MENU_REFINER_UUID, "task23_md05_menu_refiner");
+        AlchemyService.seedHunPoAmountForTest(refiner, MD05_HUNPO_SEED);
+        AlchemyService.forceNextRefineFailureForTest(refiner);
+
+        AlchemyFurnaceMenu menu = new AlchemyFurnaceMenu(
+            0,
+            refiner.getInventory(),
+            furnace,
+            new SimpleContainerData(0)
+        );
+        boolean clicked = menu.clickMenuButton(refiner, AlchemyFurnaceMenu.BUTTON_REFINE);
+        helper.assertTrue(clicked, "menu path: 服务端点击炼制按钮应成功进入炼制处理分支");
+
+        ItemStack output = furnace.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
+        helper.assertTrue(
+            output.is(XianqiaoItems.JIU_ZHUAN_SUI_JING.get()),
+            "menu path: 失败补偿路径仍应保留九转髓晶产出行为本身"
+        );
+        helper.assertTrue(
+            menu.getLastRefineExperience() == 0,
+            "menu path: 九转髓晶属于失败补偿产物，不能被界面经验代理误记为成功产丹"
+        );
+        helper.succeed();
+    }
+
+    @GameTest(
+        template = "examplegametests.empty",
+        timeoutTicks = TEST_TIMEOUT_TICKS,
+        batch = PLAN2_MATERIAL_DEEP_BATCH1_MAIN
+    )
     public void testPlan2MaterialDeepBatch1Md05BypassGuardShouldBlockNoKeyInputPath(GameTestHelper helper) {
         AlchemyFurnaceBlockEntity furnace = placeAlchemyFurnace(helper, MD05_BYPASS_GUARD_FURNACE_POS);
         furnace.setItem(AlchemyFurnaceBlockEntity.SLOT_AUX_1, new ItemStack(Items.COBBLESTONE, MD05_INPUT_STACK_COUNT));
 
-        boolean attempted = AlchemyService.tryRefine(furnace);
-        helper.assertTrue(!attempted, "bypass guard: 缺失主材时不应发起合法炼制尝试");
+        AlchemyService.RefineAttemptOutcome outcome = AlchemyService.tryRefineWithOutcome(furnace, null);
+        helper.assertTrue(
+            outcome == AlchemyService.RefineAttemptOutcome.NO_LEGAL_ATTEMPT,
+            "bypass guard: 缺失主材时应显式分类为“无合法尝试”"
+        );
 
         ItemStack output = furnace.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
         helper.assertTrue(

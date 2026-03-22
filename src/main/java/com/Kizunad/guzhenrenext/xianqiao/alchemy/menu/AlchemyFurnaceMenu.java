@@ -216,15 +216,20 @@ public class AlchemyFurnaceMenu extends AbstractContainerMenu {
             int successfulCount = 0;
             boolean refined = false;
             if (container instanceof AlchemyFurnaceBlockEntity blockEntity && blockEntity.isBulkMode()) {
-                int mainCountBefore = container.getItem(AlchemyFurnaceBlockEntity.SLOT_MAIN).getCount();
-                successfulCount = AlchemyService.tryRefineBatch(container, blockEntity.getBatchSize(), serverPlayer);
-                int mainCountAfter = container.getItem(AlchemyFurnaceBlockEntity.SLOT_MAIN).getCount();
-                refined = successfulCount > 0 || mainCountAfter < mainCountBefore;
+                AlchemyService.BatchRefineSummary summary = AlchemyService.tryRefineBatchWithSummary(
+                    container,
+                    blockEntity.getBatchSize(),
+                    serverPlayer
+                );
+                successfulCount = summary.successfulPillOutputCount();
+                refined = summary.attemptedAny();
             } else {
-                int outputCountBefore = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT).getCount();
-                refined = AlchemyService.tryRefine(container, serverPlayer);
-                int outputCountAfter = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT).getCount();
-                if (outputCountAfter > outputCountBefore) {
+                AlchemyService.RefineAttemptOutcome outcome = AlchemyService.tryRefineWithOutcome(
+                    container,
+                    serverPlayer
+                );
+                refined = outcome.attempted();
+                if (outcome.producedSuccessfulPillOutput()) {
                     successfulCount = 1;
                 }
             }

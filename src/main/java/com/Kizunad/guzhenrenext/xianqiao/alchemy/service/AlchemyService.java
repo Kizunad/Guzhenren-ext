@@ -132,16 +132,33 @@ public final class AlchemyService {
      * @return 完成一次合法炼制尝试返回 true（无论成功/失败），否则返回 false
      */
     public static boolean tryRefine(Container container) {
-        return tryRefine(container, null);
+        return tryRefineWithOutcome(container, null).attempted();
     }
 
     public static boolean tryRefine(Container container, @Nullable ServerPlayer refiner) {
+        return tryRefineWithOutcome(container, refiner).attempted();
+    }
+
+    public static RefineAttemptOutcome tryRefineWithOutcome(Container container, @Nullable ServerPlayer refiner) {
+        return tryRefineWithOutcome(container, refiner, false);
+    }
+
+    private static RefineAttemptOutcome tryRefineWithOutcome(
+        Container container,
+        @Nullable ServerPlayer refiner,
+        boolean allowBatchContinuationThroughFailureReward
+    ) {
         Optional<TierRefinePlan> tierRefinePlanOptional = findTierRefinePlan(container);
         if (tierRefinePlanOptional.isPresent()) {
-            return tryRefineByTierPlan(container, tierRefinePlanOptional.get(), refiner);
+            return tryRefineByTierPlan(
+                container,
+                tierRefinePlanOptional.get(),
+                refiner,
+                allowBatchContinuationThroughFailureReward
+            );
         }
 
-        return tryRefineByLegacyRecipe(container, refiner);
+        return tryRefineByLegacyRecipe(container, refiner, allowBatchContinuationThroughFailureReward);
     }
 
     /**
@@ -157,23 +174,33 @@ public final class AlchemyService {
      * @param tierRefinePlan 已命中的三级丹方计划
      * @return 完成一次合法炼制尝试返回 true；无法尝试返回 false
      */
-    private static boolean tryRefineByTierPlan(
+    private static RefineAttemptOutcome tryRefineByTierPlan(
         Container container,
         TierRefinePlan tierRefinePlan,
-        @Nullable ServerPlayer refiner
+        @Nullable ServerPlayer refiner,
+        boolean allowBatchContinuationThroughFailureReward
     ) {
         ItemStack currentOutput = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
         ItemStack recipeOutput = tierRefinePlan.createOutputStack();
-        if (!canAttemptRefineWithOutputSlot(currentOutput, recipeOutput)) {
-            return false;
+        if (
+            !canAttemptRefineWithOutputSlot(
+                currentOutput,
+                recipeOutput,
+                allowBatchContinuationThroughFailureReward
+            )
+        ) {
+            return RefineAttemptOutcome.NO_LEGAL_ATTEMPT;
         }
 
         boolean refineSucceeded = rollRefineSuccess(tierRefinePlan.auxiliaryCountForSuccessRate(), refiner);
         if (!refineSucceeded) {
             consumeInputMaterialsBySlots(container, tierRefinePlan.matchedInputSlots());
-            placeNineRefinementMarrowCrystalOnRefineFailure(container, refiner);
+            boolean failureRewardPlaced = placeNineRefinementMarrowCrystalOnRefineFailure(container, refiner);
             container.setChanged();
-            return true;
+            if (failureRewardPlaced) {
+                return RefineAttemptOutcome.LEGAL_FAILURE_WITH_CONSOLATION_OUTPUT;
+            }
+            return RefineAttemptOutcome.LEGAL_ATTEMPT_WITHOUT_OUTPUT;
         }
 
         PillQuality rolledQuality = rollPillQuality(tierRefinePlan.auxiliaryCountForSuccessRate());
@@ -186,13 +213,13 @@ public final class AlchemyService {
         if (!canPlaceToOutputSlot(currentOutput, recipeOutput)) {
             consumeInputMaterialsBySlots(container, tierRefinePlan.matchedInputSlots());
             container.setChanged();
-            return true;
+            return RefineAttemptOutcome.LEGAL_ATTEMPT_WITHOUT_OUTPUT;
         }
 
         consumeInputMaterialsBySlots(container, tierRefinePlan.matchedInputSlots());
         placeOutput(container, recipeOutput);
         container.setChanged();
-        return true;
+        return RefineAttemptOutcome.SUCCESSFUL_PILL_OUTPUT;
     }
 
     /**
@@ -201,43 +228,51 @@ public final class AlchemyService {
      * @param container 炼丹炉容器
      * @return 完成一次合法炼制尝试返回 true；无法尝试返回 false
      */
-    private static boolean tryRefineByLegacyRecipe(Container container, @Nullable ServerPlayer refiner) {
+    private static RefineAttemptOutcome tryRefineByLegacyRecipe(
+        Container container,
+        @Nullable ServerPlayer refiner,
+        boolean allowBatchContinuationThroughFailureReward
+    ) {
         Optional<AlchemyRecipe> recipeOptional = findRecipe(container);
         if (recipeOptional.isEmpty()) {
-            return false;
+            return RefineAttemptOutcome.NO_LEGAL_ATTEMPT;
         }
         AlchemyRecipe recipe = recipeOptional.get();
         ItemStack currentOutput = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
         ItemStack recipeOutput = recipe.createOutputStack();
-        if (!canAttemptRefineWithOutputSlot(currentOutput, recipeOutput)) {
-            return false;
+        if (
+            !canAttemptRefineWithOutputSlot(
+                currentOutput,
+                recipeOutput,
+                allowBatchContinuationThroughFailureReward
+            )
+        ) {
+            return RefineAttemptOutcome.NO_LEGAL_ATTEMPT;
         }
 
         boolean refineSucceeded = rollRefineSuccess(recipe.auxiliaryCount(), refiner);
         if (!refineSucceeded) {
             consumeLegacyInputMaterials(container);
-            placeNineRefinementMarrowCrystalOnRefineFailure(container, refiner);
+            boolean failureRewardPlaced = placeNineRefinementMarrowCrystalOnRefineFailure(container, refiner);
             container.setChanged();
-            return true;
+            if (failureRewardPlaced) {
+                return RefineAttemptOutcome.LEGAL_FAILURE_WITH_CONSOLATION_OUTPUT;
+            }
+            return RefineAttemptOutcome.LEGAL_ATTEMPT_WITHOUT_OUTPUT;
         }
 
         PillQuality rolledQuality = rollPillQuality(recipe.auxiliaryCount());
         PillItem.writeQuality(recipeOutput, rolledQuality);
         if (!canPlaceToOutputSlot(currentOutput, recipeOutput)) {
-            // 当品质组件与现有产出堆叠不兼容时，本次已进入成功分支但无法落入产出槽。
-            // 为保持“合法尝试必消耗输入材料”的单次语义一致性：
-            // 1) 仍消耗输入；
-            // 2) 不产出丹药；
-            // 3) 返回 true，表示本次尝试已完成（但产出失败）。
             consumeLegacyInputMaterials(container);
             container.setChanged();
-            return true;
+            return RefineAttemptOutcome.LEGAL_ATTEMPT_WITHOUT_OUTPUT;
         }
 
         consumeLegacyInputMaterials(container);
         placeOutput(container, recipeOutput);
         container.setChanged();
-        return true;
+        return RefineAttemptOutcome.SUCCESSFUL_PILL_OUTPUT;
     }
 
     /**
@@ -354,20 +389,36 @@ public final class AlchemyService {
     }
 
     public static int tryRefineBatch(Container container, int requestedBatchSize, @Nullable ServerPlayer refiner) {
+        return tryRefineBatchWithSummary(container, requestedBatchSize, refiner).successfulPillOutputCount();
+    }
+
+    public static BatchRefineSummary tryRefineBatchWithSummary(
+        Container container,
+        int requestedBatchSize,
+        @Nullable ServerPlayer refiner
+    ) {
         int normalizedBatchSize = Math.max(1, requestedBatchSize);
+        int attemptedCount = 0;
         int successfulCount = 0;
+        boolean allowBatchContinuationThroughFailureReward = false;
         for (int i = 0; i < normalizedBatchSize; i++) {
-            int outputCountBefore = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT).getCount();
-            boolean attempted = tryRefine(container, refiner);
-            if (!attempted) {
+            RefineAttemptOutcome outcome = tryRefineWithOutcome(
+                container,
+                refiner,
+                allowBatchContinuationThroughFailureReward
+            );
+            if (!outcome.attempted()) {
                 break;
             }
-            int outputCountAfter = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT).getCount();
-            if (outputCountAfter > outputCountBefore) {
+            attemptedCount++;
+            if (outcome.producedSuccessfulPillOutput()) {
                 successfulCount++;
             }
+            if (outcome == RefineAttemptOutcome.LEGAL_FAILURE_WITH_CONSOLATION_OUTPUT) {
+                allowBatchContinuationThroughFailureReward = true;
+            }
         }
-        return successfulCount;
+        return new BatchRefineSummary(attemptedCount, successfulCount);
     }
 
     /**
@@ -443,6 +494,24 @@ public final class AlchemyService {
             return false;
         }
         return currentOutput.getCount() < currentOutput.getMaxStackSize();
+    }
+
+    private static boolean canAttemptRefineWithOutputSlot(
+        ItemStack currentOutput,
+        ItemStack recipeOutput,
+        boolean allowBatchContinuationThroughFailureReward
+    ) {
+        if (canAttemptRefineWithOutputSlot(currentOutput, recipeOutput)) {
+            return true;
+        }
+        if (!allowBatchContinuationThroughFailureReward) {
+            return false;
+        }
+        return isNineRefinementMarrowCrystal(currentOutput);
+    }
+
+    private static boolean isNineRefinementMarrowCrystal(ItemStack stack) {
+        return !stack.isEmpty() && stack.is(XianqiaoItems.JIU_ZHUAN_SUI_JING.get());
     }
 
     /**
@@ -689,22 +758,23 @@ public final class AlchemyService {
      *
      * @param container 炼丹炉容器
      */
-    private static void placeNineRefinementMarrowCrystalOnRefineFailure(
+    private static boolean placeNineRefinementMarrowCrystalOnRefineFailure(
         Container container,
         @Nullable ServerPlayer refiner
     ) {
         if (refiner == null) {
-            return;
+            return false;
         }
         ItemStack failureOutput = new ItemStack(XianqiaoItems.JIU_ZHUAN_SUI_JING.get(), OUTPUT_COUNT_PER_SUCCESS);
         ItemStack currentOutput = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
         if (!canPlaceToOutputSlot(currentOutput, failureOutput)) {
-            return;
+            return false;
         }
         if (!consumeRefinerHunPo(refiner, NINE_REFINEMENT_MARROW_HUNPO_COST)) {
-            return;
+            return false;
         }
         placeOutput(container, failureOutput);
+        return true;
     }
 
     private static boolean consumeRefinerHunPo(ServerPlayer refiner, double amount) {
@@ -772,6 +842,28 @@ public final class AlchemyService {
 
         private ItemStack createOutputStack() {
             return new ItemStack(definition.outputPill(), OUTPUT_COUNT_PER_SUCCESS);
+        }
+    }
+
+    public enum RefineAttemptOutcome {
+        NO_LEGAL_ATTEMPT,
+        SUCCESSFUL_PILL_OUTPUT,
+        LEGAL_FAILURE_WITH_CONSOLATION_OUTPUT,
+        LEGAL_ATTEMPT_WITHOUT_OUTPUT;
+
+        public boolean attempted() {
+            return this != NO_LEGAL_ATTEMPT;
+        }
+
+        public boolean producedSuccessfulPillOutput() {
+            return this == SUCCESSFUL_PILL_OUTPUT;
+        }
+    }
+
+    public record BatchRefineSummary(int attemptedCount, int successfulPillOutputCount) {
+
+        public boolean attemptedAny() {
+            return attemptedCount > 0;
         }
     }
 
