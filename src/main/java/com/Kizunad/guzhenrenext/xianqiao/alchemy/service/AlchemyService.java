@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.alchemy.service;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
 import com.Kizunad.guzhenrenext.xianqiao.alchemy.blockentity.AlchemyFurnaceBlockEntity;
 import com.Kizunad.guzhenrenext.xianqiao.alchemy.item.PillItem;
 import com.Kizunad.guzhenrenext.xianqiao.alchemy.item.PillQuality;
@@ -11,11 +12,16 @@ import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -39,6 +45,9 @@ public final class AlchemyService {
     private static final int MIN_SUCCESS_RATE_PERCENT = 0;
     private static final int MAX_SUCCESS_RATE_PERCENT = 100;
     private static final int OUTPUT_COUNT_PER_SUCCESS = 1;
+    private static final double NINE_REFINEMENT_MARROW_HUNPO_COST = 2.0D;
+    private static final Map<UUID, Double> TEST_REFINER_HUNPO_OVERRIDE = new HashMap<>();
+    private static final Set<UUID> TEST_FORCE_NEXT_REFINE_FAILURE = new HashSet<>();
 
     private static final List<Integer> AUXILIARY_INPUT_SLOTS = List.of(
         AlchemyFurnaceBlockEntity.SLOT_AUX_1,
@@ -123,12 +132,16 @@ public final class AlchemyService {
      * @return 完成一次合法炼制尝试返回 true（无论成功/失败），否则返回 false
      */
     public static boolean tryRefine(Container container) {
+        return tryRefine(container, null);
+    }
+
+    public static boolean tryRefine(Container container, @Nullable ServerPlayer refiner) {
         Optional<TierRefinePlan> tierRefinePlanOptional = findTierRefinePlan(container);
         if (tierRefinePlanOptional.isPresent()) {
-            return tryRefineByTierPlan(container, tierRefinePlanOptional.get());
+            return tryRefineByTierPlan(container, tierRefinePlanOptional.get(), refiner);
         }
 
-        return tryRefineByLegacyRecipe(container);
+        return tryRefineByLegacyRecipe(container, refiner);
     }
 
     /**
@@ -144,16 +157,21 @@ public final class AlchemyService {
      * @param tierRefinePlan 已命中的三级丹方计划
      * @return 完成一次合法炼制尝试返回 true；无法尝试返回 false
      */
-    private static boolean tryRefineByTierPlan(Container container, TierRefinePlan tierRefinePlan) {
+    private static boolean tryRefineByTierPlan(
+        Container container,
+        TierRefinePlan tierRefinePlan,
+        @Nullable ServerPlayer refiner
+    ) {
         ItemStack currentOutput = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
         ItemStack recipeOutput = tierRefinePlan.createOutputStack();
         if (!canAttemptRefineWithOutputSlot(currentOutput, recipeOutput)) {
             return false;
         }
 
-        boolean refineSucceeded = rollRefineSuccess(tierRefinePlan.auxiliaryCountForSuccessRate());
+        boolean refineSucceeded = rollRefineSuccess(tierRefinePlan.auxiliaryCountForSuccessRate(), refiner);
         if (!refineSucceeded) {
             consumeInputMaterialsBySlots(container, tierRefinePlan.matchedInputSlots());
+            placeNineRefinementMarrowCrystalOnRefineFailure(container, refiner);
             container.setChanged();
             return true;
         }
@@ -183,7 +201,7 @@ public final class AlchemyService {
      * @param container 炼丹炉容器
      * @return 完成一次合法炼制尝试返回 true；无法尝试返回 false
      */
-    private static boolean tryRefineByLegacyRecipe(Container container) {
+    private static boolean tryRefineByLegacyRecipe(Container container, @Nullable ServerPlayer refiner) {
         Optional<AlchemyRecipe> recipeOptional = findRecipe(container);
         if (recipeOptional.isEmpty()) {
             return false;
@@ -195,9 +213,10 @@ public final class AlchemyService {
             return false;
         }
 
-        boolean refineSucceeded = rollRefineSuccess(recipe.auxiliaryCount());
+        boolean refineSucceeded = rollRefineSuccess(recipe.auxiliaryCount(), refiner);
         if (!refineSucceeded) {
             consumeLegacyInputMaterials(container);
+            placeNineRefinementMarrowCrystalOnRefineFailure(container, refiner);
             container.setChanged();
             return true;
         }
@@ -331,11 +350,15 @@ public final class AlchemyService {
      * @return 实际成功产出次数（>= 0）
      */
     public static int tryRefineBatch(Container container, int requestedBatchSize) {
+        return tryRefineBatch(container, requestedBatchSize, null);
+    }
+
+    public static int tryRefineBatch(Container container, int requestedBatchSize, @Nullable ServerPlayer refiner) {
         int normalizedBatchSize = Math.max(1, requestedBatchSize);
         int successfulCount = 0;
         for (int i = 0; i < normalizedBatchSize; i++) {
             int outputCountBefore = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT).getCount();
-            boolean attempted = tryRefine(container);
+            boolean attempted = tryRefine(container, refiner);
             if (!attempted) {
                 break;
             }
@@ -535,10 +558,36 @@ public final class AlchemyService {
         };
     }
 
-    private static boolean rollRefineSuccess(int auxiliaryCount) {
+    private static boolean rollRefineSuccess(int auxiliaryCount, @Nullable ServerPlayer refiner) {
+        if (consumeForcedRefineFailureForTest(refiner)) {
+            return false;
+        }
         int successRate = calculateSuccessRatePercentByAuxiliaryCount(auxiliaryCount);
         int randomPercent = ThreadLocalRandom.current().nextInt(MAX_SUCCESS_RATE_PERCENT);
         return randomPercent < successRate;
+    }
+
+    /**
+     * 测试专用：强制下一次炼制命中“失败分支”。
+     * <p>
+     * 仅用于 GameTest 构造确定性夹具，避免通过随机重试等待失败分支；
+     * 正常玩法路径不会主动写入该标记，因此线上语义保持不变。
+     * </p>
+     *
+     * @param refiner 发起炼制的玩家
+     */
+    public static void forceNextRefineFailureForTest(ServerPlayer refiner) {
+        if (refiner == null) {
+            return;
+        }
+        TEST_FORCE_NEXT_REFINE_FAILURE.add(refiner.getUUID());
+    }
+
+    private static boolean consumeForcedRefineFailureForTest(@Nullable ServerPlayer refiner) {
+        if (refiner == null) {
+            return false;
+        }
+        return TEST_FORCE_NEXT_REFINE_FAILURE.remove(refiner.getUUID());
     }
 
     /**
@@ -627,6 +676,75 @@ public final class AlchemyService {
         for (int slot : uniqueSlots) {
             container.removeItem(slot, 1);
         }
+    }
+
+    /**
+     * 在“炼制判定失败”的合法尝试分支尝试产出九转髓晶。
+     * <p>
+     * 该逻辑是 Task23/M-D05 的最小落地合同，遵循 fail-closed 原则：
+     * 1) 仅在既有炼丹主流程已判定为“本次尝试合法 + 炼制失败 + 已执行消耗”的分支调用；
+     * 2) 仅当当前产出槽可放入九转髓晶时才实际放入；
+     * 3) 若产出槽不兼容或已满，则本次不产出任何额外物品，不创建旁路掉落。
+     * </p>
+     *
+     * @param container 炼丹炉容器
+     */
+    private static void placeNineRefinementMarrowCrystalOnRefineFailure(
+        Container container,
+        @Nullable ServerPlayer refiner
+    ) {
+        if (refiner == null) {
+            return;
+        }
+        ItemStack failureOutput = new ItemStack(XianqiaoItems.JIU_ZHUAN_SUI_JING.get(), OUTPUT_COUNT_PER_SUCCESS);
+        ItemStack currentOutput = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT);
+        if (!canPlaceToOutputSlot(currentOutput, failureOutput)) {
+            return;
+        }
+        if (!consumeRefinerHunPo(refiner, NINE_REFINEMENT_MARROW_HUNPO_COST)) {
+            return;
+        }
+        placeOutput(container, failureOutput);
+    }
+
+    private static boolean consumeRefinerHunPo(ServerPlayer refiner, double amount) {
+        double safeAmount = Math.max(0.0D, amount);
+        if (safeAmount <= 0.0D) {
+            return true;
+        }
+        double currentAmount = readRefinerHunPo(refiner);
+        if (currentAmount < safeAmount) {
+            return false;
+        }
+        if (TEST_REFINER_HUNPO_OVERRIDE.containsKey(refiner.getUUID())) {
+            TEST_REFINER_HUNPO_OVERRIDE.put(refiner.getUUID(), Math.max(0.0D, currentAmount - safeAmount));
+        }
+        try {
+            HunPoHelper.modify(refiner, -safeAmount);
+        } catch (Throwable ignored) {
+        }
+        return true;
+    }
+
+    private static double readRefinerHunPo(ServerPlayer refiner) {
+        if (TEST_REFINER_HUNPO_OVERRIDE.containsKey(refiner.getUUID())) {
+            return TEST_REFINER_HUNPO_OVERRIDE.get(refiner.getUUID());
+        }
+        return HunPoHelper.getAmount(refiner);
+    }
+
+    public static void seedHunPoAmountForTest(ServerPlayer refiner, double amount) {
+        double safeAmount = Math.max(0.0D, amount);
+        TEST_REFINER_HUNPO_OVERRIDE.put(refiner.getUUID(), safeAmount);
+        try {
+            double currentAmount = HunPoHelper.getAmount(refiner);
+            HunPoHelper.modify(refiner, safeAmount - currentAmount);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    public static double readHunPoAmountForTest(ServerPlayer refiner) {
+        return readRefinerHunPo(refiner);
     }
 
     private static void placeOutput(Container container, ItemStack recipeOutput) {

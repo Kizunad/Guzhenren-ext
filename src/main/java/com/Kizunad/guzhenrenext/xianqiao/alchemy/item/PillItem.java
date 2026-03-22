@@ -70,6 +70,8 @@ public class PillItem extends Item {
 
     private static final String YIN_XI_DAN_ITEM_PATH = "yin_xi_dan";
 
+    private static final String NING_SHEN_DAN_ITEM_PATH = "ning_shen_dan";
+
     private static final String JI_FENG_DAN_ITEM_PATH = "ji_feng_dan";
 
     private static final String TIE_GU_DAN_ITEM_PATH = "tie_gu_dan";
@@ -126,6 +128,8 @@ public class PillItem extends Item {
 
     private static final int YIN_XI_CONSUME_COUNT = 1;
 
+    private static final int NING_SHEN_CONSUME_COUNT = 1;
+
     private static final int JI_FENG_CONSUME_COUNT = 1;
 
     private static final int TIE_GU_CONSUME_COUNT = 1;
@@ -164,6 +168,8 @@ public class PillItem extends Item {
     private static final int BI_HUO_DURATION_MINUTES = 5;
 
     private static final int YIN_XI_DURATION_MINUTES = 5;
+
+    private static final int NING_SHEN_DURATION_MINUTES = 5;
 
     private static final int JI_FENG_DURATION_MINUTES = 5;
 
@@ -214,6 +220,9 @@ public class PillItem extends Item {
 
     private static final long YIN_XI_DURATION_TICKS =
         (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * YIN_XI_DURATION_MINUTES;
+
+    private static final long NING_SHEN_DURATION_TICKS =
+        (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * NING_SHEN_DURATION_MINUTES;
 
     private static final long JI_FENG_BASE_DURATION_TICKS =
         (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * JI_FENG_DURATION_MINUTES;
@@ -320,6 +329,9 @@ public class PillItem extends Item {
         }
         if (isYinXiDan(stack)) {
             return useYinXiDan(player, stack);
+        }
+        if (isNingShenDan(stack)) {
+            return useNingShenDan(player, stack);
         }
         if (isJiFengDan(stack)) {
             return useJiFengDan(player, stack);
@@ -514,6 +526,22 @@ public class PillItem extends Item {
         );
         player.addEffect(invisibility);
         stack.shrink(YIN_XI_CONSUME_COUNT);
+        return InteractionResultHolder.success(stack);
+    }
+
+    private static InteractionResultHolder<ItemStack> useNingShenDan(Player player, ItemStack stack) {
+        PillQuality currentQuality = readQuality(stack);
+        long durationTicks = (long) (NING_SHEN_DURATION_TICKS * currentQuality.getEffectMultiplier());
+        // 以原版幸运作为“凝神”最小可观测代理，避免在浅度切片引入新系统。
+        MobEffectInstance luck = new MobEffectInstance(
+            MobEffects.LUCK,
+            (int) durationTicks,
+            0,
+            false,
+            true
+        );
+        player.addEffect(luck);
+        stack.shrink(NING_SHEN_CONSUME_COUNT);
         return InteractionResultHolder.success(stack);
     }
 
@@ -761,6 +789,10 @@ public class PillItem extends Item {
         return isPillItemPath(stack, YIN_XI_DAN_ITEM_PATH);
     }
 
+    private static boolean isNingShenDan(ItemStack stack) {
+        return isPillItemPath(stack, NING_SHEN_DAN_ITEM_PATH);
+    }
+
     private static boolean isJiFengDan(ItemStack stack) {
         return isPillItemPath(stack, JI_FENG_DAN_ITEM_PATH);
     }
@@ -809,6 +841,7 @@ public class PillItem extends Item {
             || isBiHuoDan(stack)
             || isBiDuDan(stack)
             || isYinXiDan(stack)
+            || isNingShenDan(stack)
             || isJiFengDan(stack)
             || isTieGuDan(stack)
             || isKuangBaoDan(stack)
@@ -923,6 +956,13 @@ public class PillItem extends Item {
             double minutes = duration / (double) TICKS_PER_SECOND / SECONDS_PER_MINUTE;
             return Component.literal(
                 "效果: 隐身（持续" + formatNumber(minutes) + "分钟）"
+            ).withStyle(ChatFormatting.DARK_GRAY);
+        }
+        if (isNingShenDan(stack)) {
+            long duration = (long) (NING_SHEN_DURATION_TICKS * safeQuality.getEffectMultiplier());
+            double minutes = duration / (double) TICKS_PER_SECOND / SECONDS_PER_MINUTE;
+            return Component.literal(
+                "效果: 幸运（持续" + formatNumber(minutes) + "分钟）"
             ).withStyle(ChatFormatting.DARK_GRAY);
         }
         if (isJiFengDan(stack)) {

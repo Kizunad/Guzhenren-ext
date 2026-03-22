@@ -9,6 +9,7 @@ import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkApi;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkDiffusionService;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
+import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.Kizunad.guzhenrenext.xianqiao.tribulation.TribulationState;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,14 +27,22 @@ public final class DeepPillEffectState {
 
     private static final String PLAYER_VARIABLES_TAG = "guzhenren:player_variables";
     private static final String VAR_ZUO_DA_ZHEN_YUAN = "zuida_zhenyuan";
+    private static final String VAR_ZUI_DA_HUN_PO = "zuida_hunpo";
     private static final String VAR_ZHEN_YUAN = "zhenyuan";
     private static final String VAR_JIE_DUAN = "jieduan";
     private static final String VAR_ZHONG_ZU = "zhongzu";
 
     public static final String KEY_FORCE_BREAKTHROUGH_USED = "GuzhenrenExtForceBreakthroughUsed";
     public static final String KEY_NEAR_DEATH_TOKEN = "GuzhenrenExtNearDeathToken";
+    public static final String KEY_NEAR_DEATH_CONSUME_COUNT = "GuzhenrenExtNearDeathConsumeCount";
+    public static final String KEY_RESIDUAL_SOUL_LAST_CONSUME_COUNT = "GuzhenrenExtResidualSoulLastConsumeCount";
+    public static final String KEY_RESIDUAL_SOUL_CRYSTAL_COUNT = "GuzhenrenExtResidualSoulCrystalCount";
+    public static final String KEY_RESIDUAL_SOUL_PENALTY_COUNT = "GuzhenrenExtResidualSoulPenaltyCount";
+    public static final String KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_BEFORE = "GuzhenrenExtResidualSoulMaxHunpoBefore";
+    public static final String KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_AFTER = "GuzhenrenExtResidualSoulMaxHunpoAfter";
     public static final String KEY_REVERSAL_END = "GuzhenrenExtReversalTimeEnd";
     public static final String KEY_REVERSAL_WEAK_END = "GuzhenrenExtReversalWeakEnd";
+    public static final String KEY_REVERSAL_REFORGE_END = "GuzhenrenExtReversalReforgeEnd";
     public static final String KEY_TRIBULATION_DAMP_END = "GuzhenrenExtTribulationDampEnd";
     public static final String KEY_BEAST_DOMINATION_END = "GuzhenrenExtBeastDominationEnd";
     public static final String KEY_WORLD_SUPPRESSION_END = "GuzhenrenExtWorldSuppressionEnd";
@@ -44,6 +53,8 @@ public final class DeepPillEffectState {
 
     public static final String USAGE_FORCE_BREAKTHROUGH_PENALTY =
         "guzhenrenext:deep_pill_force_breakthrough_penalty";
+    public static final String USAGE_NEAR_DEATH_SOUL_CAP_PENALTY =
+        "guzhenrenext:deep_pill_near_death_soul_cap_penalty";
     public static final String USAGE_ENLIGHTENMENT_CAPACITY =
         "guzhenrenext:deep_pill_enlightenment_capacity";
 
@@ -51,6 +62,7 @@ public final class DeepPillEffectState {
     private static final int SECONDS_PER_MINUTE = 60;
     private static final long REVERSAL_DURATION_TICKS = (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * 10;
     private static final long REVERSAL_WEAK_DURATION_TICKS = (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * 60;
+    private static final long REVERSAL_REFORGE_DEBT_TICKS = (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE;
     private static final long TRIBULATION_DAMP_DURATION_TICKS = (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * 3;
     private static final long BEAST_DOMINATION_DURATION_TICKS = (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * 5;
     private static final long WORLD_SUPPRESSION_DURATION_TICKS = (long) TICKS_PER_SECOND * SECONDS_PER_MINUTE * 3;
@@ -72,6 +84,10 @@ public final class DeepPillEffectState {
     private static final float NORMAL_TIME_SPEED = 1.0F;
     private static final float FLOAT_COMPARE_EPSILON = 0.001F;
     private static final int FULL_PERCENTAGE = 100;
+    private static final int RESIDUAL_SOUL_CRYSTAL_OUTPUT_COUNT = 1;
+    private static final double RESIDUAL_SOUL_CAP_PENALTY = 1.0D;
+    private static final double RESIDUAL_SOUL_CAP_PENALTY_COUNT_BASE = 1.0D;
+    private static final double DOUBLE_COMPARE_EPSILON = 0.0001D;
 
     private DeepPillEffectState() {
     }
@@ -86,6 +102,36 @@ public final class DeepPillEffectState {
             return false;
         }
         data.remove(KEY_NEAR_DEATH_TOKEN);
+        data.putInt(KEY_NEAR_DEATH_CONSUME_COUNT, data.getInt(KEY_NEAR_DEATH_CONSUME_COUNT) + 1);
+        return true;
+    }
+
+    public static boolean consumeNearDeathTokenOnLethalDamage(ServerPlayer player, float incomingDamage) {
+        if (incomingDamage <= 0.0F) {
+            return false;
+        }
+        float effectiveHealth = player.getHealth() + player.getAbsorptionAmount();
+        if (effectiveHealth - incomingDamage > 0.0F) {
+            return false;
+        }
+        return consumeNearDeathToken(player);
+    }
+
+    public static boolean settleNearDeathResidualSoul(ServerPlayer player) {
+        CompoundTag data = player.getPersistentData();
+        int consumeCount = data.getInt(KEY_NEAR_DEATH_CONSUME_COUNT);
+        if (consumeCount <= 0) {
+            return false;
+        }
+        if (data.getInt(KEY_RESIDUAL_SOUL_LAST_CONSUME_COUNT) >= consumeCount) {
+            return false;
+        }
+        data.putInt(KEY_RESIDUAL_SOUL_LAST_CONSUME_COUNT, consumeCount);
+        player.spawnAtLocation(
+            new ItemStack(XianqiaoItems.YOU_HUN_NING_PO_SHI.get(), RESIDUAL_SOUL_CRYSTAL_OUTPUT_COUNT)
+        );
+        data.putInt(KEY_RESIDUAL_SOUL_CRYSTAL_COUNT, data.getInt(KEY_RESIDUAL_SOUL_CRYSTAL_COUNT) + 1);
+        applyNearDeathSoulCapPenalty(player, data);
         return true;
     }
 
@@ -138,6 +184,7 @@ public final class DeepPillEffectState {
         long gameTime = context.get().level.getGameTime();
         player.getPersistentData().putLong(KEY_REVERSAL_END, gameTime + REVERSAL_DURATION_TICKS);
         player.getPersistentData().putLong(KEY_REVERSAL_WEAK_END, gameTime + REVERSAL_WEAK_DURATION_TICKS);
+        player.getPersistentData().remove(KEY_REVERSAL_REFORGE_END);
         return true;
     }
 
@@ -265,12 +312,25 @@ public final class DeepPillEffectState {
         CompoundTag source = player.getPersistentData();
         CompoundTag result = new CompoundTag();
         result.putBoolean(KEY_NEAR_DEATH_TOKEN, source.getBoolean(KEY_NEAR_DEATH_TOKEN));
+        result.putInt(KEY_NEAR_DEATH_CONSUME_COUNT, source.getInt(KEY_NEAR_DEATH_CONSUME_COUNT));
+        result.putInt(KEY_RESIDUAL_SOUL_LAST_CONSUME_COUNT, source.getInt(KEY_RESIDUAL_SOUL_LAST_CONSUME_COUNT));
+        result.putInt(KEY_RESIDUAL_SOUL_CRYSTAL_COUNT, source.getInt(KEY_RESIDUAL_SOUL_CRYSTAL_COUNT));
+        result.putInt(KEY_RESIDUAL_SOUL_PENALTY_COUNT, source.getInt(KEY_RESIDUAL_SOUL_PENALTY_COUNT));
+        result.putDouble(
+            KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_BEFORE,
+            source.getDouble(KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_BEFORE)
+        );
+        result.putDouble(
+            KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_AFTER,
+            source.getDouble(KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_AFTER)
+        );
         result.putBoolean(KEY_FORCE_BREAKTHROUGH_USED, source.getBoolean(KEY_FORCE_BREAKTHROUGH_USED));
         result.putBoolean(KEY_BODY_RESHAPE_USED, source.getBoolean(KEY_BODY_RESHAPE_USED));
         result.putInt(KEY_DAO_RESET_COUNT, source.getInt(KEY_DAO_RESET_COUNT));
         result.putInt(KEY_POWER_DISPERSE_COUNT, source.getInt(KEY_POWER_DISPERSE_COUNT));
         result.putLong(KEY_REVERSAL_END, source.getLong(KEY_REVERSAL_END));
         result.putLong(KEY_REVERSAL_WEAK_END, source.getLong(KEY_REVERSAL_WEAK_END));
+        result.putLong(KEY_REVERSAL_REFORGE_END, source.getLong(KEY_REVERSAL_REFORGE_END));
         result.putLong(KEY_TRIBULATION_DAMP_END, source.getLong(KEY_TRIBULATION_DAMP_END));
         result.putLong(KEY_BEAST_DOMINATION_END, source.getLong(KEY_BEAST_DOMINATION_END));
         result.putLong(KEY_WORLD_SUPPRESSION_END, source.getLong(KEY_WORLD_SUPPRESSION_END));
@@ -284,15 +344,41 @@ public final class DeepPillEffectState {
             return;
         }
         ApertureInfo info = context.get().apertureInfo;
-        if (data.getLong(KEY_REVERSAL_END) > gameTime) {
+        long reversalEnd = data.getLong(KEY_REVERSAL_END);
+        if (reversalEnd > gameTime) {
             context.get().worldData.updateTimeSpeed(player.getUUID(), REVERSAL_TIME_SPEED_BOOST);
             return;
         }
-        if (data.getLong(KEY_REVERSAL_WEAK_END) > gameTime) {
+        long weakEnd = data.getLong(KEY_REVERSAL_WEAK_END);
+        finalizeReversalReforge(player, data, gameTime, info.timeSpeed(), reversalEnd, weakEnd);
+        long activeWeakEnd = data.getLong(KEY_REVERSAL_WEAK_END);
+        if (activeWeakEnd > gameTime) {
             context.get().worldData.updateTimeSpeed(player.getUUID(), REVERSAL_TIME_SPEED_WEAK);
         } else if (Math.abs(info.timeSpeed() - NORMAL_TIME_SPEED) > FLOAT_COMPARE_EPSILON) {
             context.get().worldData.updateTimeSpeed(player.getUUID(), NORMAL_TIME_SPEED);
         }
+    }
+
+    private static void finalizeReversalReforge(
+        ServerPlayer player,
+        CompoundTag data,
+        long gameTime,
+        float timeSpeed,
+        long reversalEnd,
+        long weakEnd
+    ) {
+        if (reversalEnd <= 0L || weakEnd <= reversalEnd || weakEnd <= gameTime) {
+            return;
+        }
+        if (data.getLong(KEY_REVERSAL_REFORGE_END) == reversalEnd) {
+            return;
+        }
+        if (Math.abs(timeSpeed - REVERSAL_TIME_SPEED_BOOST) > FLOAT_COMPARE_EPSILON) {
+            return;
+        }
+        player.spawnAtLocation(new ItemStack(XianqiaoItems.SHI_SHA_LIU_LI.get()));
+        data.putLong(KEY_REVERSAL_WEAK_END, weakEnd + REVERSAL_REFORGE_DEBT_TICKS);
+        data.putLong(KEY_REVERSAL_REFORGE_END, reversalEnd);
     }
 
     private static void processTribulationDamp(ApertureWorldData worldData, ServerPlayer player, long gameTime) {
@@ -366,6 +452,41 @@ public final class DeepPillEffectState {
         } catch (LinkageError ignored) {
             return;
         }
+    }
+
+    private static void applyNearDeathSoulCapPenalty(ServerPlayer player, CompoundTag data) {
+        double before = readCurrentMaxHunPo(player);
+        int nextPenaltyCount = data.getInt(KEY_RESIDUAL_SOUL_PENALTY_COUNT) + 1;
+        double totalPenalty = RESIDUAL_SOUL_CAP_PENALTY
+            * (nextPenaltyCount - RESIDUAL_SOUL_CAP_PENALTY_COUNT_BASE + RESIDUAL_SOUL_CAP_PENALTY_COUNT_BASE);
+        try {
+            GuzhenrenVariableModifierService.setAdditiveModifier(
+                player,
+                GuzhenrenVariableModifierService.VAR_MAX_HUNPO,
+                USAGE_NEAR_DEATH_SOUL_CAP_PENALTY,
+                -totalPenalty
+            );
+        } catch (LinkageError ignored) {
+            applyNearDeathSoulCapPenaltyFallback(player, before);
+        }
+        double after = readCurrentMaxHunPo(player);
+        if (after + DOUBLE_COMPARE_EPSILON >= before) {
+            applyNearDeathSoulCapPenaltyFallback(player, before);
+            after = readCurrentMaxHunPo(player);
+        }
+        data.putInt(KEY_RESIDUAL_SOUL_PENALTY_COUNT, nextPenaltyCount);
+        data.putDouble(KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_BEFORE, before);
+        data.putDouble(KEY_RESIDUAL_SOUL_LAST_MAX_HUNPO_AFTER, after);
+    }
+
+    private static void applyNearDeathSoulCapPenaltyFallback(ServerPlayer player, double before) {
+        CompoundTag variables = getOrCreatePlayerVariablesTag(player);
+        double nextMax = Math.max(0.0D, before - RESIDUAL_SOUL_CAP_PENALTY);
+        variables.putDouble(VAR_ZUI_DA_HUN_PO, nextMax);
+    }
+
+    private static double readCurrentMaxHunPo(ServerPlayer player) {
+        return Math.max(0.0D, getOrCreatePlayerVariablesTag(player).getDouble(VAR_ZUI_DA_HUN_PO));
     }
 
     private static Optional<ApertureInfoContext> resolveApertureContext(ServerPlayer player) {
