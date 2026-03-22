@@ -265,6 +265,81 @@ public final class XianqiaoItems {
             new Item.Properties().stacksTo(64)
         );
 
+    /** 镇窍玄铁核注册项。 */
+    public static final DeferredItem<Item> ZHEN_QIAO_XUAN_TIE_HE =
+        ITEMS.registerItem(
+            "zhen_qiao_xuan_tie_he",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 逆脉星陨核注册项。 */
+    public static final DeferredItem<Item> NI_MAI_XING_YUN_HE =
+        ITEMS.registerItem(
+            "ni_mai_xing_yun_he",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 天雷磁母注册项。 */
+    public static final DeferredItem<Item> TIAN_LEI_CI_MU =
+        ITEMS.registerItem(
+            "tian_lei_ci_mu",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 空蚀黑晶注册项。 */
+    public static final DeferredItem<Item> KONG_SHI_HEI_JING =
+        ITEMS.registerItem(
+            "kong_shi_hei_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 九转髓晶注册项。 */
+    public static final DeferredItem<Item> JIU_ZHUAN_SUI_JING =
+        ITEMS.registerItem(
+            "jiu_zhuan_sui_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> DI_MAI_LONG_JING =
+        ITEMS.registerItem(
+            "di_mai_long_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> WAN_XIANG_JIN_SHA =
+        ITEMS.registerItem(
+            "wan_xiang_jin_sha",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> SHI_SHA_LIU_LI =
+        ITEMS.registerItem(
+            "shi_sha_liu_li",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> YOU_HUN_NING_PO_SHI =
+        ITEMS.registerItem(
+            "you_hun_ning_po_shi",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> DAO_YUAN_MU_KUANG =
+        ITEMS.registerItem(
+            "dao_yuan_mu_kuang",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
     /**
      * 注册物品。
      *
