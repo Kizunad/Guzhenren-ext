@@ -141,6 +141,11 @@ public final class FarmingItems {
         () -> new BlockItem(FarmingBlocks.MAN_EATING_SPORE_BLOSSOM.get(), new Item.Properties())
     );
 
+    public static final DeferredItem<BlockItem> SPIRIT_GATHERING_TREE_ITEM = ITEMS.register(
+        "spirit_tree_spruce_sapling",
+        () -> new BlockItem(FarmingBlocks.SPIRIT_GATHERING_TREE.get(), new Item.Properties())
+    );
+
     public static final DeferredItem<BlockItem> CAVE_VINES_ITEM = ITEMS.register(
         "cave_vines",
         () -> new BlockItem(FarmingBlocks.CAVE_VINES.get(), new Item.Properties())

@@ -15,6 +15,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.SaplingBlock;
@@ -38,6 +39,7 @@ public class SpiritGatheringTreeBlock extends SaplingBlock {
     private static final int APERTURE_BOUNDARY_BUFFER = 16;
     private static final int CROP_SCAN_RADIUS = 3;
     private static final double FIXED_NIAN_TOU_COST = 1.0D;
+
     private static final TreeGrower VANILLA_SPRUCE_GROWER =
         new TreeGrower("spruce", Optional.empty(), null, null);
     private static final Map<UUID, Double> TEST_NIAN_TOU_OVERRIDE = new ConcurrentHashMap<>();
@@ -49,6 +51,15 @@ public class SpiritGatheringTreeBlock extends SaplingBlock {
     @Override
     public MapCodec<? extends SaplingBlock> codec() {
         return CODEC;
+    }
+
+    @Override
+    public void advanceTree(ServerLevel level, BlockPos pos, BlockState state, net.minecraft.util.RandomSource random) {
+    }
+
+    @Override
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
+        return false;
     }
 
     /**

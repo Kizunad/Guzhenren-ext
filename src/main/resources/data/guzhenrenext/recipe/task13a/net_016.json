@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "guzhenrenext:ling_tie_xie"
+    },
+    {
+      "item": "minecraft:gunpowder"
+    }
+  ],
+  "result": {
+    "id": "minecraft:phantom_membrane",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "advanced",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_006",
+      "guzhenrenext:task13a/net_015"
+    ],
+    "manifest_index": 16
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:phantom_membrane"
+    },
+    {
+      "item": "guzhenrenext:ling_tie_xie"
+    }
+  ],
+  "result": {
+    "id": "minecraft:slime_ball",
+    "count": 1
+  },
+  "xq_layering": {
+    "tier": "advanced",
+    "prerequisite_recipe_ids": [
+      "guzhenrenext:task13a/net_005",
+      "guzhenrenext:task13a/net_014"
+    ],
+    "manifest_index": 15
+  }
+}
