@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:cocoa_beans"
+      "item": "guzhenrenext:huan_du_mushroom"
     },
     {
       "item": "minecraft:amethyst_shard"

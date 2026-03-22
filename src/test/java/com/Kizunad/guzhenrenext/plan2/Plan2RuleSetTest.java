@@ -36,6 +36,54 @@ final class Plan2RuleSetTest {
         assertContainsIllegalId(exception, illegalId);
     }
 
+    @Test
+    void namingRuleFailurePathReportsIdCategoryMismatch() throws IOException {
+        final JsonArray matrix = Plan2ContentMatrixTestSupport.readMatrixArray();
+        final JsonArray mutated = matrix.deepCopy();
+        final String brokenId = "P-S01";
+        final JsonObject entry = findById(mutated, brokenId);
+        entry.addProperty("category", "creature");
+
+        final IllegalStateException exception = assertThrows(
+            IllegalStateException.class,
+            () -> validateNamingRules(mutated)
+        );
+        assertMessageContains(exception, "id/category mismatch");
+        assertMessageContains(exception, brokenId);
+    }
+
+    @Test
+    void namingRuleFailurePathReportsIdDepthMismatch() throws IOException {
+        final JsonArray matrix = Plan2ContentMatrixTestSupport.readMatrixArray();
+        final JsonArray mutated = matrix.deepCopy();
+        final String brokenId = "P-S01";
+        final JsonObject entry = findById(mutated, brokenId);
+        entry.addProperty("depth", "deep");
+
+        final IllegalStateException exception = assertThrows(
+            IllegalStateException.class,
+            () -> validateNamingRules(mutated)
+        );
+        assertMessageContains(exception, "id/depth mismatch");
+        assertMessageContains(exception, brokenId);
+    }
+
+    @Test
+    void namingRuleFailurePathReportsDuplicateId() throws IOException {
+        final JsonArray matrix = Plan2ContentMatrixTestSupport.readMatrixArray();
+        final JsonArray mutated = matrix.deepCopy();
+        final String duplicatedId = "P-S01";
+        final JsonObject duplicatedEntry = findById(mutated, "P-S02");
+        duplicatedEntry.addProperty("id", duplicatedId);
+
+        final IllegalStateException exception = assertThrows(
+            IllegalStateException.class,
+            () -> validateNamingRules(mutated)
+        );
+        assertMessageContains(exception, "duplicate id");
+        assertMessageContains(exception, duplicatedId);
+    }
+
     private static void validateNamingRules(JsonArray matrix) {
         final Set<String> seen = new HashSet<>();
         for (JsonElement element : matrix) {
@@ -92,10 +140,27 @@ final class Plan2RuleSetTest {
         return entry.get("id").getAsString();
     }
 
+    private static JsonObject findById(JsonArray matrix, String id) {
+        for (JsonElement element : matrix) {
+            final JsonObject entry = element.getAsJsonObject();
+            if (id.equals(idOf(entry))) {
+                return entry;
+            }
+        }
+        throw new IllegalStateException("找不到测试条目: " + id);
+    }
+
     private static void assertContainsIllegalId(IllegalStateException exception, String illegalId) {
         final String message = exception.getMessage();
         if (message == null || !message.contains(illegalId)) {
             throw new IllegalStateException("error message must contain illegal id: " + illegalId);
+        }
+    }
+
+    private static void assertMessageContains(IllegalStateException exception, String expectedFragment) {
+        final String message = exception.getMessage();
+        if (message == null || !message.contains(expectedFragment)) {
+            throw new IllegalStateException("error message must contain fragment: " + expectedFragment);
         }
     }
 }

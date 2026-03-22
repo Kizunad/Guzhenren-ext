@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:sweet_berries"
+      "item": "guzhenrenext:bing_xin_grass"
     },
     {
       "item": "minecraft:cocoa_beans"

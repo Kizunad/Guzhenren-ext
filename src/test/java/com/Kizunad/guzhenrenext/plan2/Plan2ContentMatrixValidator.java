@@ -51,6 +51,23 @@ final class Plan2ContentMatrixValidator {
 
     private static final List<String> CATEGORY_ORDER = List.of("creature", "plant", "pill", "material");
     private static final List<String> DEPTH_ORDER = List.of("shallow", "deep");
+    private static final Set<String> CREATURE_CROSS_CATEGORY_REQUIRED = Set.of("plant", "pill", "material");
+    private static final Set<String> PLANT_CROSS_CATEGORY_REQUIRED = Set.of("creature", "pill", "material");
+    private static final Set<String> PILL_CROSS_CATEGORY_REQUIRED = Set.of("creature", "plant", "material");
+    private static final Set<String> MATERIAL_CROSS_CATEGORY_REQUIRED = Set.of("creature", "plant", "pill");
+    private static final Set<String> PLANT_BOTTLENECK_CONSUMER_CATEGORIES = Set.of("pill", "material");
+    private static final int STRUCTURED_LOOKAHEAD_LINES = 8;
+    private static final String ITEM_REFERENCE_PREFIX = "item:";
+
+    private static final Pattern ENTRY_ID_PATTERN = Pattern.compile("^(?:C|P|D|M)-(?:S|D)\\d{2}$");
+    private static final int ENTRY_ID_MIN_LENGTH = 5;
+    private static final int DEPTH_ID_MULTIPLIER = 100;
+    private static final int ENTRY_ID_NUMBER_START_INDEX = 3;
+    private static final int PRECONDITION_MERGE_LIMIT = 4;
+    private static final int PRECONDITION_MERGE_TARGET_INDEX = 3;
+    private static final String SHALLOW_DEPTH = "shallow";
+    private static final String MATERIAL_CATEGORY = "material";
+    private static final String MATERIAL_DEEP_ITEM_REFERENCE_PREFIX = ITEM_REFERENCE_PREFIX + "M-D";
 
     private static final Set<String> LINK_POINTS = Set.of(
         "alchemy",
@@ -129,6 +146,7 @@ final class Plan2ContentMatrixValidator {
         "mutation",
         "sealing"
     );
+    private static final Set<String> LOW_MEDIUM_SEVERITIES = Set.of("low", "medium");
 
     private static final Map<String, Integer> ANCHOR_ORDER = Map.of(
         "code", 0,
@@ -154,12 +172,20 @@ final class Plan2ContentMatrixValidator {
 
     static List<String> validate(String matrixText, JsonArray matrixArray) throws IOException {
         List<String> errors = new ArrayList<>();
-        List<String> planLines = Files.readAllLines(Path.of(Plan2ContentMatrixTestSupport.PLAN_FILE), StandardCharsets.UTF_8);
+        List<String> planLines = Files.readAllLines(
+            Path.of(Plan2ContentMatrixTestSupport.PLAN_FILE),
+            StandardCharsets.UTF_8
+        );
         PlanSnapshot plan = parsePlanSnapshot(planLines, errors);
 
         validateCoverage(plan, matrixArray, errors);
         validateOrderingAndFormat(matrixText, matrixArray, errors);
         validateEachEntry(plan, matrixArray, errors);
+        validateCreatureCrossSystemLinks(matrixArray, errors);
+        validatePlantCrossSystemLinks(matrixArray, errors);
+        validatePillCrossSystemLinks(matrixArray, errors);
+        validateMaterialCrossSystemLinks(matrixArray, errors);
+        validateGlobalBudgetConvergence(matrixArray, errors);
 
         return errors;
     }
@@ -181,7 +207,7 @@ final class Plan2ContentMatrixValidator {
                 errors.add("mechanic/cost extraction mismatch: " + id + " | " + ex.getMessage());
             }
 
-            String structuredLine = findStructuredLine(lines, i + 1, 8);
+            String structuredLine = findStructuredLine(lines, i + 1, STRUCTURED_LOOKAHEAD_LINES);
             if (structuredLine != null) {
                 structured.put(id, parseStructuredExpect(id, structuredLine, errors));
             }
@@ -208,7 +234,12 @@ final class Plan2ContentMatrixValidator {
         int useIndex = line.indexOf("；主要用途：");
         int riskIndex = line.indexOf("；风险：");
 
-        if (dashIndex < 0 || sourceIndex < 0 || backupIndex < 0 || preconditionIndex < 0 || useIndex < 0 || riskIndex < 0) {
+        if (dashIndex < 0
+            || sourceIndex < 0
+            || backupIndex < 0
+            || preconditionIndex < 0
+            || useIndex < 0
+            || riskIndex < 0) {
             throw new IllegalArgumentException("正文子句缺失");
         }
 
@@ -555,7 +586,9 @@ final class Plan2ContentMatrixValidator {
             errors.add("invalid source enum combination: " + id + " creature 浅度条目不允许 endgame_core");
         }
 
-        if ("material".equals(category) && "deep".equals(depth) && ("natural_spawn".equals(mainType) || "breed".equals(mainType))) {
+        if ("material".equals(category)
+            && "deep".equals(depth)
+            && ("natural_spawn".equals(mainType) || "breed".equals(mainType))) {
             errors.add("invalid source enum combination: " + id + " material 深度条目不允许 natural_spawn/breed");
         }
 
@@ -568,7 +601,12 @@ final class Plan2ContentMatrixValidator {
         }
     }
 
-    private static void validateAnchorTargetSeverityContract(String id, String depth, JsonObject entry, List<String> errors) {
+    private static void validateAnchorTargetSeverityContract(
+        String id,
+        String depth,
+        JsonObject entry,
+        List<String> errors
+    ) {
         JsonObject risk = getObject(entry, "risk");
         String riskType = getString(risk, "type");
         String severity = getString(risk, "severity");
@@ -579,6 +617,60 @@ final class Plan2ContentMatrixValidator {
         if ("deep".equals(depth) && !("high".equals(severity) || "critical".equals(severity))) {
             errors.add("invalid severity/anchor-target contract: " + id + " deep 仅允许 high|critical");
         }
+    }
+
+    private static void validateGlobalBudgetConvergence(JsonArray matrixArray, List<String> errors) {
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            String id = getString(entry, "id");
+            String depth = getString(entry, "depth");
+            String primaryUseType = getString(getObject(entry, "primaryUse"), "type");
+            String severity = getString(getObject(entry, "risk"), "severity");
+
+            if ("endgame_core".equals(primaryUseType)) {
+                if (!"deep".equals(depth)) {
+                    errors.add(
+                        "global budget mismatch: "
+                            + id
+                            + " primaryUse.type=endgame_core 要求 depth=deep，实际 depth="
+                            + depth
+                    );
+                }
+                if (LOW_MEDIUM_SEVERITIES.contains(severity)) {
+                    errors.add(
+                        "global budget mismatch: "
+                            + id
+                            + " primaryUse.type=endgame_core 风险等级过低，actualSeverity="
+                            + severity
+                    );
+                }
+            }
+
+            if ("deep".equals(depth)) {
+                Set<String> heavyLinks = collectHeavyLinkPoints(getArray(entry, "linkPoints"));
+                if (!heavyLinks.isEmpty() && LOW_MEDIUM_SEVERITIES.contains(severity)) {
+                    errors.add(
+                        "global budget mismatch: "
+                            + id
+                            + " deep 重影响联动风险等级过低，heavyLinks="
+                            + heavyLinks
+                            + ", actualSeverity="
+                            + severity
+                    );
+                }
+            }
+        }
+    }
+
+    private static Set<String> collectHeavyLinkPoints(JsonArray linkPoints) {
+        Set<String> heavyLinks = new LinkedHashSet<>();
+        for (JsonElement linkPointElement : linkPoints) {
+            String linkPoint = linkPointElement.getAsString();
+            if (HEAVY_LINK_POINTS.contains(linkPoint)) {
+                heavyLinks.add(linkPoint);
+            }
+        }
+        return heavyLinks;
     }
 
     private static void validateClauseExtraction(
@@ -624,7 +716,12 @@ final class Plan2ContentMatrixValidator {
 
     }
 
-    private static void validateStructuredConsistency(String id, JsonObject entry, StructuredExpect expected, List<String> errors) {
+    private static void validateStructuredConsistency(
+        String id,
+        JsonObject entry,
+        StructuredExpect expected,
+        List<String> errors
+    ) {
         JsonArray linkPoints = getArray(entry, "linkPoints");
         List<String> actualLinkPoints = toStringList(linkPoints);
         if (!actualLinkPoints.equals(expected.linkPoints)) {
@@ -656,6 +753,801 @@ final class Plan2ContentMatrixValidator {
         List<String> keys = new ArrayList<>(object.keySet());
         if (!expected.equals(keys)) {
             errors.add("json ordering mismatch: " + id + " " + path + " 字段顺序不合法 -> " + keys);
+        }
+    }
+
+    private static void validateCreatureCrossSystemLinks(JsonArray matrixArray, List<String> errors) {
+        Map<String, String> categoryById = new LinkedHashMap<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            categoryById.put(getString(entry, "id"), getString(entry, "category"));
+        }
+
+        Set<String> discoveredCrossCategories = new HashSet<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            String id = getString(entry, "id");
+            String category = getString(entry, "category");
+            if ("creature".equals(category)) {
+                validateCreatureDeclaredItemReferences(
+                    id,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validateCreatureDeclaredItemReferences(
+                    id,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validateCreatureDeclaredItemReferences(
+                    id,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+            } else {
+                validateReverseCreatureItemReferences(
+                    id,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    errors
+                );
+                validateReverseCreatureItemReferences(
+                    id,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    errors
+                );
+                validateReverseCreatureItemReferences(
+                    id,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    errors
+                );
+            }
+        }
+
+        Set<String> missingCrossCategories = new LinkedHashSet<>(CREATURE_CROSS_CATEGORY_REQUIRED);
+        missingCrossCategories.removeAll(discoveredCrossCategories);
+        if (!missingCrossCategories.isEmpty()) {
+            errors.add("creature crosslink mismatch: creature->item 跨类别覆盖缺失 " + missingCrossCategories);
+        }
+    }
+
+    private static void validateCreatureDeclaredItemReferences(
+        String sourceId,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        Set<String> discoveredCrossCategories,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX)) {
+                continue;
+            }
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "creature crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 item 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "creature crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!"creature".equals(targetCategory)) {
+                discoveredCrossCategories.add(targetCategory);
+            }
+        }
+    }
+
+    private static void validateReverseCreatureItemReferences(
+        String sourceId,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX + "C-")) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "creature crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 creature 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "creature crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在 creature 条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!"creature".equals(targetCategory)) {
+                errors.add(
+                    "creature crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非 creature 条目引用 "
+                        + value
+                );
+            }
+        }
+    }
+
+    private static void validatePlantCrossSystemLinks(JsonArray matrixArray, List<String> errors) {
+        Map<String, String> categoryById = new LinkedHashMap<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            categoryById.put(getString(entry, "id"), getString(entry, "category"));
+        }
+
+        Set<String> discoveredCrossCategories = new HashSet<>();
+        Map<String, Set<String>> consumerPlantTargetsByCategory = new LinkedHashMap<>();
+        for (String category : PLANT_BOTTLENECK_CONSUMER_CATEGORIES) {
+            consumerPlantTargetsByCategory.put(category, new LinkedHashSet<>());
+        }
+
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            String id = getString(entry, "id");
+            String category = getString(entry, "category");
+            if ("plant".equals(category)) {
+                validatePlantDeclaredItemReferences(
+                    id,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validatePlantDeclaredItemReferences(
+                    id,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validatePlantDeclaredItemReferences(
+                    id,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+            } else {
+                validateReversePlantItemReferences(
+                    id,
+                    category,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    consumerPlantTargetsByCategory,
+                    errors
+                );
+                validateReversePlantItemReferences(
+                    id,
+                    category,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    consumerPlantTargetsByCategory,
+                    errors
+                );
+                validateReversePlantItemReferences(
+                    id,
+                    category,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    consumerPlantTargetsByCategory,
+                    errors
+                );
+            }
+        }
+
+        Set<String> missingCrossCategories = new LinkedHashSet<>(PLANT_CROSS_CATEGORY_REQUIRED);
+        missingCrossCategories.removeAll(discoveredCrossCategories);
+        if (!missingCrossCategories.isEmpty()) {
+            errors.add("plant crosslink mismatch: plant->item 跨类别覆盖缺失 " + missingCrossCategories);
+        }
+
+        for (String category : PLANT_BOTTLENECK_CONSUMER_CATEGORIES) {
+            Set<String> referencedPlants = consumerPlantTargetsByCategory.getOrDefault(
+                category,
+                Collections.emptySet()
+            );
+            if (referencedPlants.size() <= 1) {
+                errors.add(
+                    "plant crosslink mismatch: "
+                        + category
+                        + " 消费链路植物候选不足，存在单点硬门槛风险 -> "
+                        + referencedPlants
+                );
+            }
+        }
+    }
+
+    private static void validatePillCrossSystemLinks(JsonArray matrixArray, List<String> errors) {
+        Map<String, String> categoryById = new LinkedHashMap<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            categoryById.put(getString(entry, "id"), getString(entry, "category"));
+        }
+
+        Set<String> discoveredCrossCategories = new LinkedHashSet<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            String id = getString(entry, "id");
+            String category = getString(entry, "category");
+            if ("pill".equals(category)) {
+                validatePillDeclaredItemReferences(
+                    id,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validatePillDeclaredItemReferences(
+                    id,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validatePillDeclaredItemReferences(
+                    id,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+            } else {
+                validateReversePillItemReferences(
+                    id,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    errors
+                );
+                validateReversePillItemReferences(
+                    id,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    errors
+                );
+                validateReversePillItemReferences(
+                    id,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    errors
+                );
+            }
+        }
+
+        Set<String> missingCrossCategories = new LinkedHashSet<>(PILL_CROSS_CATEGORY_REQUIRED);
+        missingCrossCategories.removeAll(discoveredCrossCategories);
+        if (!missingCrossCategories.isEmpty()) {
+            errors.add("pill crosslink mismatch: pill->item 跨类别覆盖缺失 " + missingCrossCategories);
+        }
+    }
+
+    private static void validatePillDeclaredItemReferences(
+        String sourceId,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        Set<String> discoveredCrossCategories,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX)) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "pill crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 item 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "pill crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!"pill".equals(targetCategory)) {
+                discoveredCrossCategories.add(targetCategory);
+            }
+        }
+    }
+
+    private static void validateReversePillItemReferences(
+        String sourceId,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX + "D-")) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "pill crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 pill 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "pill crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在 pill 条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!"pill".equals(targetCategory)) {
+                errors.add(
+                    "pill crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非 pill 条目引用 "
+                        + value
+                );
+            }
+        }
+    }
+
+    private static void validateMaterialCrossSystemLinks(JsonArray matrixArray, List<String> errors) {
+        Map<String, String> categoryById = new LinkedHashMap<>();
+        Map<String, String> depthById = new LinkedHashMap<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            String id = getString(entry, "id");
+            categoryById.put(id, getString(entry, "category"));
+            depthById.put(id, getString(entry, "depth"));
+        }
+
+        Set<String> discoveredCrossCategories = new LinkedHashSet<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            String id = getString(entry, "id");
+            String category = getString(entry, "category");
+            String depth = getString(entry, "depth");
+            validateShallowMaterialTierBreak(
+                id,
+                depth,
+                "primaryUse.targets",
+                getArray(getObject(entry, "primaryUse"), "targets"),
+                categoryById,
+                depthById,
+                errors
+            );
+            if (MATERIAL_CATEGORY.equals(category)) {
+                validateMaterialDeclaredItemReferences(
+                    id,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validateMaterialDeclaredItemReferences(
+                    id,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+                validateMaterialDeclaredItemReferences(
+                    id,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    discoveredCrossCategories,
+                    errors
+                );
+            } else {
+                validateReverseMaterialItemReferences(
+                    id,
+                    "mainSource.anchors",
+                    getArray(getObject(entry, "mainSource"), "anchors"),
+                    categoryById,
+                    errors
+                );
+                validateReverseMaterialItemReferences(
+                    id,
+                    "backupSource.anchors",
+                    getArray(getObject(entry, "backupSource"), "anchors"),
+                    categoryById,
+                    errors
+                );
+                validateReverseMaterialItemReferences(
+                    id,
+                    "primaryUse.targets",
+                    getArray(getObject(entry, "primaryUse"), "targets"),
+                    categoryById,
+                    errors
+                );
+            }
+        }
+
+        Set<String> missingCrossCategories = new LinkedHashSet<>(MATERIAL_CROSS_CATEGORY_REQUIRED);
+        missingCrossCategories.removeAll(discoveredCrossCategories);
+        if (!missingCrossCategories.isEmpty()) {
+            errors.add("material crosslink mismatch: material->item 跨类别覆盖缺失 " + missingCrossCategories);
+        }
+    }
+
+    private static void validateMaterialDeclaredItemReferences(
+        String sourceId,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        Set<String> discoveredCrossCategories,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX)) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "material crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 item 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "material crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!MATERIAL_CATEGORY.equals(targetCategory)) {
+                discoveredCrossCategories.add(targetCategory);
+            }
+        }
+    }
+
+    private static void validateReverseMaterialItemReferences(
+        String sourceId,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX + "M-")) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "material crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 material 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "material crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在 material 条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!MATERIAL_CATEGORY.equals(targetCategory)) {
+                errors.add(
+                    "material crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非 material 条目引用 "
+                        + value
+                );
+            }
+        }
+    }
+
+    private static void validateShallowMaterialTierBreak(
+        String sourceId,
+        String sourceDepth,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        Map<String, String> depthById,
+        List<String> errors
+    ) {
+        if (!SHALLOW_DEPTH.equals(sourceDepth)) {
+            return;
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(MATERIAL_DEEP_ITEM_REFERENCE_PREFIX)) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            String targetDepth = depthById.get(targetId);
+            if (MATERIAL_CATEGORY.equals(targetCategory) && "deep".equals(targetDepth)) {
+                errors.add(
+                    "material crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] shallow 条目禁止产出 deep material "
+                        + value
+                );
+            }
+        }
+    }
+
+    private static void validatePlantDeclaredItemReferences(
+        String sourceId,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        Set<String> discoveredCrossCategories,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX)) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "plant crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 item 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "plant crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!"plant".equals(targetCategory)) {
+                discoveredCrossCategories.add(targetCategory);
+            }
+        }
+    }
+
+    private static void validateReversePlantItemReferences(
+        String sourceId,
+        String sourceCategory,
+        String fieldPath,
+        JsonArray values,
+        Map<String, String> categoryById,
+        Map<String, Set<String>> consumerPlantTargetsByCategory,
+        List<String> errors
+    ) {
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i).getAsString();
+            if (!value.startsWith(ITEM_REFERENCE_PREFIX + "P-")) {
+                continue;
+            }
+
+            String targetId = value.substring(ITEM_REFERENCE_PREFIX.length());
+            if (!ENTRY_ID_PATTERN.matcher(targetId).matches()) {
+                errors.add(
+                    "plant crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非法 plant 引用 "
+                        + value
+                );
+                continue;
+            }
+
+            String targetCategory = categoryById.get(targetId);
+            if (targetCategory == null) {
+                errors.add(
+                    "plant crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 指向不存在 plant 条目 "
+                        + value
+                );
+                continue;
+            }
+
+            if (!"plant".equals(targetCategory)) {
+                errors.add(
+                    "plant crosslink mismatch: "
+                        + sourceId
+                        + " "
+                        + fieldPath
+                        + "["
+                        + i
+                        + "] 非 plant 条目引用 "
+                        + value
+                );
+                continue;
+            }
+
+            Set<String> targets = consumerPlantTargetsByCategory.get(sourceCategory);
+            if (targets != null) {
+                targets.add(targetId);
+            }
         }
     }
 
@@ -723,13 +1615,13 @@ final class Plan2ContentMatrixValidator {
     }
 
     private static int naturalIdOrder(String id) {
-        if (id == null || id.length() < 5) {
+        if (id == null || id.length() < ENTRY_ID_MIN_LENGTH) {
             return Integer.MAX_VALUE;
         }
         char depthFlag = id.charAt(2);
         int depthRank = depthFlag == 'S' ? 0 : 1;
-        int number = Integer.parseInt(id.substring(3));
-        return depthRank * 100 + number;
+        int number = Integer.parseInt(id.substring(ENTRY_ID_NUMBER_START_INDEX));
+        return depthRank * DEPTH_ID_MULTIPLIER + number;
     }
 
     private static String inferCategoryById(String id) {
@@ -784,13 +1676,16 @@ final class Plan2ContentMatrixValidator {
             }
         }
 
-        if (secondPass.size() <= 4) {
+        if (secondPass.size() <= PRECONDITION_MERGE_LIMIT) {
             return secondPass;
         }
 
-        List<String> merged = new ArrayList<>(secondPass.subList(0, 4));
-        for (int i = 4; i < secondPass.size(); i++) {
-            merged.set(3, merged.get(3) + "、" + secondPass.get(i));
+        List<String> merged = new ArrayList<>(secondPass.subList(0, PRECONDITION_MERGE_LIMIT));
+        for (int i = PRECONDITION_MERGE_LIMIT; i < secondPass.size(); i++) {
+            merged.set(
+                PRECONDITION_MERGE_TARGET_INDEX,
+                merged.get(PRECONDITION_MERGE_TARGET_INDEX) + "、" + secondPass.get(i)
+            );
         }
         return merged;
     }

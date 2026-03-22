@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:sugar_cane"
+      "item": "guzhenrenext:di_long_berry_bush"
     },
     {
       "item": "minecraft:slime_ball"

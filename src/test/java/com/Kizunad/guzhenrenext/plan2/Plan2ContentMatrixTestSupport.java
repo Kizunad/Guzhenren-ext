@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 final class Plan2ContentMatrixTestSupport {
 
     static final String PLAN_FILE =
-        "/home/kiz/Code/java/Guzhenren-ext/.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md";
+        ".sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md";
 
     static final String MATRIX_FILE =
         "src/main/resources/data/guzhenrenext/plan2/content_matrix.json";

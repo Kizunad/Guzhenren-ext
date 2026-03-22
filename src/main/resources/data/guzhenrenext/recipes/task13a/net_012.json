@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:lily_pad"
+      "item": "guzhenrenext:chen_shui_lily_pad"
     },
     {
       "item": "minecraft:sugar_cane"
