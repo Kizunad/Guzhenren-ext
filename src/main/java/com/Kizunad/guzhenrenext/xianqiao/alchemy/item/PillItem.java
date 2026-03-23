@@ -152,6 +152,8 @@ public class PillItem extends Item {
 
     private static final double JU_QI_SAN_BASE_RECOVER_AMOUNT = 5.0D;
 
+    private static final double JU_QI_SAN_RECOVERY_APPLIED_EPSILON = 0.0001D;
+
     private static final double QU_SHOU_SAN_RADIUS = 4.0D;
 
     private static final double QU_SHOU_SAN_PUSH_DISTANCE = 1.2D;
@@ -584,16 +586,21 @@ public class PillItem extends Item {
     private static InteractionResultHolder<ItemStack> useJuQiSan(Player player, ItemStack stack) {
         PillQuality currentQuality = readQuality(stack);
         double recoverAmount = JU_QI_SAN_BASE_RECOVER_AMOUNT * currentQuality.getEffectMultiplier();
-        applyJuQiSanRecovery(player, recoverAmount);
+        if (!applyJuQiSanRecovery(player, recoverAmount)) {
+            return InteractionResultHolder.fail(stack);
+        }
         stack.shrink(JU_QI_SAN_CONSUME_COUNT);
         return InteractionResultHolder.success(stack);
     }
 
-    private static void applyJuQiSanRecovery(Player player, double recoverAmount) {
+    private static boolean applyJuQiSanRecovery(Player player, double recoverAmount) {
         try {
+            double zhenYuanBeforeRecover = ZhenYuanHelper.getAmount(player);
             ZhenYuanHelper.modify(player, recoverAmount);
+            double zhenYuanAfterRecover = ZhenYuanHelper.getAmount(player);
+            return zhenYuanAfterRecover > zhenYuanBeforeRecover + JU_QI_SAN_RECOVERY_APPLIED_EPSILON;
         } catch (NoClassDefFoundError error) {
-            return;
+            return false;
         }
     }
 

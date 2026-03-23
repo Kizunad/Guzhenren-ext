@@ -22,7 +22,8 @@ public class Task13AJuQiSanGameTests {
     private static final String TASK13_JU_QI_SAN_BATCH = "task13_ju_qi_san";
     private static final int TEST_TIMEOUT_TICKS = 200;
     private static final int JU_QI_SAN_INITIAL_COUNT = 3;
-    private static final int JU_QI_SAN_EXPECTED_COUNT_AFTER_USE = 2;
+    private static final int JU_QI_SAN_EXPECTED_COUNT_AFTER_SUCCESSFUL_USE = 2;
+    private static final int JU_QI_SAN_EXPECTED_COUNT_AFTER_SKIPPED_USE = 3;
     private static final double INITIAL_ZHEN_YUAN = 10.0D;
     private static final double MAX_ZHEN_YUAN = 100.0D;
     private static final double ZHEN_YUAN_COMPARE_EPSILON = 0.0001D;
@@ -54,11 +55,20 @@ public class Task13AJuQiSanGameTests {
                 zhenYuanAfterUse > zhenYuanBeforeUse,
                 "happy path: 聚气散应使真元立即增加"
             );
+            helper.assertTrue(
+                juQiSan.getCount() == JU_QI_SAN_EXPECTED_COUNT_AFTER_SUCCESSFUL_USE,
+                "happy path: 聚气散在恢复生效时应仅消耗1个"
+            );
+        } else {
+            helper.assertTrue(
+                Math.abs(zhenYuanAfterUse - zhenYuanBeforeUse) < ZHEN_YUAN_COMPARE_EPSILON,
+                "guard path: 聚气散在桥接不可用时不应伪造真元恢复"
+            );
+            helper.assertTrue(
+                juQiSan.getCount() == JU_QI_SAN_EXPECTED_COUNT_AFTER_SKIPPED_USE,
+                "guard path: 聚气散在恢复无法应用时不应被消耗"
+            );
         }
-        helper.assertTrue(
-            juQiSan.getCount() == JU_QI_SAN_EXPECTED_COUNT_AFTER_USE,
-            "happy path: 聚气散应仅消耗1个"
-        );
         helper.succeed();
     }
 
