@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:porkchop"
+      "item": "guzhenrenext:yan_shou_cocoa"
     },
     {
       "item": "minecraft:string"

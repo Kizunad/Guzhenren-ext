@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:feather"
+      "item": "guzhenrenext:huo_ling_zhi_mushroom"
     },
     {
       "item": "minecraft:sweet_berries"

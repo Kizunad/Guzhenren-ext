@@ -20,13 +20,24 @@ public class Task13BDeepPillsGameTests {
 
     private static final String TASK13B_BATCH = "task13b_deep_pills";
     private static final int TEST_TIMEOUT_TICKS = 220;
-    private static final UUID TEST_PLAYER_UUID = UUID.fromString("8d8f7b2d-b3b7-4e4f-8ae5-8f58da53cf57");
-    private static final String TEST_PLAYER_NAME = "task13b_test_player";
+    private static final UUID MECHANISMS_TEST_PLAYER_UUID = UUID.fromString("8d8f7b2d-b3b7-4e4f-8ae5-8f58da53cf57");
+    private static final String MECHANISMS_TEST_PLAYER_NAME = "task13b_deep_mechanisms_player";
+    private static final UUID SHALLOW_GUARD_TEST_PLAYER_UUID = UUID.fromString("c0e87080-c757-4e40-b88f-8a7f9ebcd98a");
+    private static final String SHALLOW_GUARD_TEST_PLAYER_NAME = "task13b_shallow_guard_player";
+    private static final UUID BODY_RESHAPE_GUARD_PLAYER_UUID = UUID.fromString(
+        "f4b5c68f-a09e-4c0f-9cf1-cf47eb4f97a6"
+    );
+    private static final String BODY_RESHAPE_GUARD_PLAYER_NAME = "task13b_body_reshape_guard";
+    private static final String PLAYER_VARIABLES_TAG = "guzhenren:player_variables";
+    private static final String VAR_ZHONG_ZU = "zhongzu";
+    private static final double EXPECTED_INITIAL_RACE_VALUE = 0.0D;
+    private static final double EXPECTED_FIRST_BODY_RESHAPE_RACE_VALUE = 1.0D;
+    private static final double DOUBLE_COMPARE_EPSILON = 0.0001D;
 
     @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK13B_BATCH)
     public void testTask13BDeepPillsShouldTriggerAllMechanisms(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = createTestPlayer(level);
+        ServerPlayer player = createTestPlayer(level, MECHANISMS_TEST_PLAYER_UUID, MECHANISMS_TEST_PLAYER_NAME);
         prepareApertureContext(level, player);
 
         ItemStack lifeDeath = new ItemStack(FarmingItems.SHENG_SI_ZAO_HUA_DAN.get());
@@ -104,7 +115,7 @@ public class Task13BDeepPillsGameTests {
     @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK13B_BATCH)
     public void testTask13BDeepPillGuardShouldNotAffectShallowItem(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = createTestPlayer(level);
+        ServerPlayer player = createTestPlayer(level, SHALLOW_GUARD_TEST_PLAYER_UUID, SHALLOW_GUARD_TEST_PLAYER_NAME);
         prepareApertureContext(level, player);
 
         long beforeSuppression = DeepPillEffectState.dumpDebugState(player)
@@ -120,8 +131,48 @@ public class Task13BDeepPillsGameTests {
         helper.succeed();
     }
 
-    private static ServerPlayer createTestPlayer(ServerLevel level) {
-        return FakePlayerFactory.get(level, new GameProfile(TEST_PLAYER_UUID, TEST_PLAYER_NAME));
+    @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK13B_BATCH)
+    public void testTask13BBodyReshapeShouldNotGrantPermanentBonusTwice(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ServerPlayer player = createTestPlayer(level, BODY_RESHAPE_GUARD_PLAYER_UUID, BODY_RESHAPE_GUARD_PLAYER_NAME);
+        prepareApertureContext(level, player);
+
+        double raceBeforeUse = readRaceValue(player);
+        ItemStack firstReshape = new ItemStack(FarmingItems.SU_TI_NI.get());
+        firstReshape.getItem().finishUsingItem(firstReshape, level, player);
+        double raceAfterFirstUse = readRaceValue(player);
+        boolean firstUseMarked = DeepPillEffectState.dumpDebugState(player)
+            .getBoolean(DeepPillEffectState.KEY_BODY_RESHAPE_USED);
+
+        ItemStack secondReshape = new ItemStack(FarmingItems.SU_TI_NI.get());
+        secondReshape.getItem().finishUsingItem(secondReshape, level, player);
+        double raceAfterSecondUse = readRaceValue(player);
+
+        helper.assertTrue(
+            Math.abs(raceBeforeUse - EXPECTED_INITIAL_RACE_VALUE) <= DOUBLE_COMPARE_EPSILON,
+            "夹具基线: 首次服用前种族倍率必须为 0，避免历史状态污染"
+        );
+        helper.assertTrue(
+            firstUseMarked,
+            "happy path: 首次服用塑体泥后必须写入永久单次使用标记"
+        );
+        helper.assertTrue(
+            Math.abs(raceAfterFirstUse - EXPECTED_FIRST_BODY_RESHAPE_RACE_VALUE) <= DOUBLE_COMPARE_EPSILON,
+            "happy path: 首次服用塑体泥后种族倍率应提升到 1.0"
+        );
+        helper.assertTrue(
+            Math.abs(raceAfterSecondUse - raceAfterFirstUse) <= DOUBLE_COMPARE_EPSILON,
+            "guard path: 二次服用不得再次提升种族倍率，避免无成本永久叠加"
+        );
+        helper.succeed();
+    }
+
+    private static ServerPlayer createTestPlayer(ServerLevel level, UUID playerUuid, String playerName) {
+        return FakePlayerFactory.get(level, new GameProfile(playerUuid, playerName));
+    }
+
+    private static double readRaceValue(ServerPlayer player) {
+        return player.getPersistentData().getCompound(PLAYER_VARIABLES_TAG).getDouble(VAR_ZHONG_ZU);
     }
 
     private static void prepareApertureContext(ServerLevel level, ServerPlayer player) {

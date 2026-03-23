@@ -31,6 +31,15 @@ public class Task13AShallowRecipesGameTests {
     private static final int EXPECTED_MIN_RECIPE_COUNT = 100;
     private static final int EXPECTED_PILL_RECIPE_COUNT = 20;
     private static final double CONNECTIVITY_RATIO_THRESHOLD = 0.80D;
+    private static final String LING_TIE_XIE_ID = "guzhenrenext:ling_tie_xie";
+    private static final double LING_TIE_XIE_BUDGET_RATIO_MIN = 1.0D;
+    private static final double LING_TIE_XIE_BUDGET_RATIO_MAX = 2.0D;
+    private static final List<String> LING_TIE_XIE_FRONTIER_SUBSET = List.of(
+        "guzhenrenext:task13a/net_015",
+        "guzhenrenext:task13a/net_016",
+        "guzhenrenext:task13a/net_017",
+        "guzhenrenext:task13a/net_077"
+    );
 
     @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK13A_BATCH)
     public void testTask13ARecipeNetworkShouldBeConnected(GameTestHelper helper) {
@@ -86,6 +95,80 @@ public class Task13AShallowRecipesGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK13A_BATCH)
+    public void testTask13ARealRecipeNetworkShouldNotContainNonDecreasingItemFlowError(GameTestHelper helper) {
+        ResourceManager resourceManager = helper.getLevel().getServer().getResourceManager();
+        Map<String, JsonObject> recipeJsonById = loadTask13ARecipes(resourceManager);
+
+        ValidationResult validationResult = validateConnectivity(recipeJsonById);
+        helper.assertTrue(
+            !containsError(validationResult.errors(), "non_decreasing_item_flow"),
+            "真实 Task13A 配方网络不应命中 non_decreasing_item_flow，实际错误="
+                + String.join(" | ", validationResult.errors())
+        );
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK13A_BATCH)
+    public void testTask13ARecipeNetworkValidatorShouldRejectNonDecreasingItemFlow(GameTestHelper helper) {
+        Map<String, JsonObject> broken = new HashMap<>();
+        broken.put("guzhenrenext:task13a/copy_arbitrage", createCopyArbitrageRecipe());
+
+        ValidationResult result = validateConnectivity(broken);
+        helper.assertTrue(!result.errors().isEmpty(), "复制套利坏配方应触发校验失败");
+        helper.assertTrue(
+            containsError(result.errors(), "non_decreasing_item_flow"),
+            "复制套利坏配方应命中 non_decreasing_item_flow，实际=" + result.errors()
+        );
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK13A_BATCH)
+    public void testTask13ALingTieXieBudgetRatioShouldStayInJsonOnlyWindow(GameTestHelper helper) {
+        ResourceManager resourceManager = helper.getLevel().getServer().getResourceManager();
+        Map<String, JsonObject> recipeJsonById = loadTask13ARecipes(resourceManager);
+
+        int consume = 0;
+        int produce = 0;
+        for (String recipeId : LING_TIE_XIE_FRONTIER_SUBSET) {
+            JsonObject recipeJson = recipeJsonById.get(recipeId);
+            helper.assertTrue(recipeJson != null, "缺少前沿子集配方: " + recipeId);
+
+            consume += countIngredientItemOccurrences(recipeJson, LING_TIE_XIE_ID);
+            produce += readResultCountIfMatches(recipeJson, LING_TIE_XIE_ID);
+        }
+
+        helper.assertTrue(
+            consume > 0,
+            "JSON-only 保守预算比近似要求 consume>0，当前前沿子集 consume=" + consume
+        );
+        helper.assertTrue(
+            produce > 0,
+            "JSON-only 保守预算比近似要求 produce>0，当前前沿子集 produce=" + produce
+        );
+
+        // 说明：这里故意只使用 ingredients[].item 与 result.id/result.count，
+        // 只做“字段可见层”的保守预算比近似，不代表完整价值模型或全网络经济闭包。
+        double ratio = (double) consume / produce;
+        helper.assertTrue(
+            ratio >= LING_TIE_XIE_BUDGET_RATIO_MIN && ratio <= LING_TIE_XIE_BUDGET_RATIO_MAX,
+            "JSON-only 保守预算比窗口越界: subset="
+                + LING_TIE_XIE_FRONTIER_SUBSET
+                + ", consume="
+                + consume
+                + ", produce="
+                + produce
+                + ", ratio="
+                + ratio
+                + ", expectedWindow=["
+                + LING_TIE_XIE_BUDGET_RATIO_MIN
+                + ", "
+                + LING_TIE_XIE_BUDGET_RATIO_MAX
+                + "]"
+        );
+        helper.succeed();
+    }
+
     private static boolean containsError(Collection<String> errors, String token) {
         for (String error : errors) {
             if (error.contains(token)) {
@@ -127,6 +210,8 @@ public class Task13AShallowRecipesGameTests {
             JsonObject root = entry.getValue();
             List<String> prerequisites = readPrerequisiteIds(root);
             String tier = readTier(root);
+
+            validateCopyArbitrage(recipeId, root, errors);
 
             edges.put(recipeId, prerequisites);
             indegree.putIfAbsent(recipeId, 0);
@@ -208,6 +293,66 @@ public class Task13AShallowRecipesGameTests {
         return visited;
     }
 
+    private static void validateCopyArbitrage(String recipeId, JsonObject recipeJson, List<String> errors) {
+        if (!recipeJson.has("ingredients") || !recipeJson.get("ingredients").isJsonArray()) {
+            errors.add("unsupported_ingredient_form:" + recipeId + ":missing_ingredients_array");
+            return;
+        }
+        JsonArray ingredients = recipeJson.getAsJsonArray("ingredients");
+        int totalIngredientItemCount = 0;
+        for (int i = 0; i < ingredients.size(); i++) {
+            JsonElement ingredientElement = ingredients.get(i);
+            if (!ingredientElement.isJsonObject()) {
+                errors.add("unsupported_ingredient_form:" + recipeId + ":index=" + i + ":not_object");
+                return;
+            }
+            JsonObject ingredientObject = ingredientElement.getAsJsonObject();
+            if (!ingredientObject.has("item") || !ingredientObject.get("item").isJsonPrimitive()) {
+                errors.add("unsupported_ingredient_form:" + recipeId + ":index=" + i + ":missing_item");
+                return;
+            }
+            totalIngredientItemCount++;
+        }
+
+        if (!recipeJson.has("result") || !recipeJson.get("result").isJsonObject()) {
+            errors.add("unsupported_result_form:" + recipeId + ":missing_result_object");
+            return;
+        }
+        JsonObject result = recipeJson.getAsJsonObject("result");
+        if (!result.has("id") || !result.get("id").isJsonPrimitive()) {
+            errors.add("unsupported_result_form:" + recipeId + ":missing_result_id");
+            return;
+        }
+        if (!result.has("count") || !result.get("count").isJsonPrimitive()) {
+            errors.add("unsupported_result_form:" + recipeId + ":missing_result_count");
+            return;
+        }
+
+        int resultCount;
+        try {
+            resultCount = result.get("count").getAsInt();
+        } catch (Exception ex) {
+            errors.add("unsupported_result_form:" + recipeId + ":invalid_result_count");
+            return;
+        }
+
+        if (resultCount <= 0) {
+            errors.add("unsupported_result_form:" + recipeId + ":non_positive_result_count=" + resultCount);
+            return;
+        }
+
+        if (totalIngredientItemCount <= resultCount) {
+            errors.add(
+                "non_decreasing_item_flow:"
+                    + recipeId
+                    + ":ingredient_count="
+                    + totalIngredientItemCount
+                    + ":result_count="
+                    + resultCount
+            );
+        }
+    }
+
     private static List<String> readPrerequisiteIds(JsonObject recipeJson) {
         JsonObject layering = recipeJson.has("xq_layering") ? recipeJson.getAsJsonObject("xq_layering") : null;
         if (layering == null || !layering.has("prerequisite_recipe_ids")) {
@@ -219,6 +364,48 @@ public class Task13AShallowRecipesGameTests {
             result.add(element.getAsString());
         }
         return result;
+    }
+
+    private static int countIngredientItemOccurrences(JsonObject recipeJson, String itemId) {
+        if (!recipeJson.has("ingredients") || !recipeJson.get("ingredients").isJsonArray()) {
+            return 0;
+        }
+        JsonArray ingredients = recipeJson.getAsJsonArray("ingredients");
+        int count = 0;
+        for (JsonElement ingredientElement : ingredients) {
+            if (!ingredientElement.isJsonObject()) {
+                continue;
+            }
+            JsonObject ingredientObject = ingredientElement.getAsJsonObject();
+            if (!ingredientObject.has("item") || !ingredientObject.get("item").isJsonPrimitive()) {
+                continue;
+            }
+            if (itemId.equals(ingredientObject.get("item").getAsString())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static int readResultCountIfMatches(JsonObject recipeJson, String itemId) {
+        if (!recipeJson.has("result") || !recipeJson.get("result").isJsonObject()) {
+            return 0;
+        }
+        JsonObject result = recipeJson.getAsJsonObject("result");
+        if (!result.has("id") || !result.get("id").isJsonPrimitive()) {
+            return 0;
+        }
+        if (!itemId.equals(result.get("id").getAsString())) {
+            return 0;
+        }
+        if (!result.has("count") || !result.get("count").isJsonPrimitive()) {
+            return 0;
+        }
+        try {
+            return result.get("count").getAsInt();
+        } catch (Exception ex) {
+            return 0;
+        }
     }
 
     private static String readTier(JsonObject recipeJson) {
@@ -250,6 +437,27 @@ public class Task13AShallowRecipesGameTests {
             ids.add(prerequisite);
         }
         layering.add("prerequisite_recipe_ids", ids);
+        root.add("xq_layering", layering);
+        return root;
+    }
+
+    private static JsonObject createCopyArbitrageRecipe() {
+        JsonObject root = new JsonObject();
+        root.addProperty("type", "minecraft:crafting_shapeless");
+        JsonArray ingredients = new JsonArray();
+        JsonObject ingredient = new JsonObject();
+        ingredient.addProperty("item", "minecraft:wheat");
+        ingredients.add(ingredient);
+        root.add("ingredients", ingredients);
+
+        JsonObject result = new JsonObject();
+        result.addProperty("id", "minecraft:wheat");
+        result.addProperty("count", 1);
+        root.add("result", result);
+
+        JsonObject layering = new JsonObject();
+        layering.addProperty("tier", "basic");
+        layering.add("prerequisite_recipe_ids", new JsonArray());
         root.add("xq_layering", layering);
         return root;
     }

@@ -29,14 +29,20 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 public class Task11BDeepCreaturesGameTests {
 
     private static final String TASK11B_BATCH = "task11b_deep_creatures";
+    private static final String TASK17_CREATURE_DEEP_BATCH1_MAIN = "plan2.creature.deep.batch1.main";
+    private static final String TASK17_CREATURE_DEEP_BATCH1_COST = "plan2.creature.deep.batch1.cost";
     private static final int TEST_TIMEOUT_TICKS = 260;
     private static final int CENTER_X = 4;
     private static final int CENTER_Y = 2;
     private static final int CENTER_Z = 4;
     private static final int ENTITY_SETTLE_TICKS = 80;
     private static final int FAILURE_ASSERT_DELAY_TICKS = 2;
+    private static final int TASK17_MAIN_MINK_SECURE_ASSERT_DELAY_TICKS = 140;
+    private static final int TASK17_MAIN_ASSERT_DELAY_TICKS = 220;
+    private static final int TASK17_COST_ASSERT_DELAY_TICKS = 260;
     private static final float HALF_HEALTH_RATIO = 0.5F;
     private static final int OFFSET_TREASURE_MINK_X = -3;
+    private static final int TASK17_MAIN_TREASURE_MINK_OFFSET_Z = -3;
     private static final int OFFSET_MUTATED_FOX_X = -1;
     private static final int OFFSET_SHEEP_X = 2;
     private static final int OFFSET_MITE_X = 4;
@@ -65,6 +71,187 @@ public class Task11BDeepCreaturesGameTests {
     private static final int FAILURE_AURA_CLEAR_RADIUS = 1;
     private static final double FAILURE_SPLIT_TARGET_OFFSET = 0.4D;
     private static final double FAILURE_SPLIT_TARGET_HALF_EXTENT = 0.35D;
+    private static final String TASK17_MAIN_PLAYER_NAME = "task17_main_player";
+    private static final String TASK17_COST_PLAYER_NAME = "task17_cost_player";
+    private static final int TASK17_COST_EXPECTED_GUARDIAN_LOCAL_PRESSURE = 64;
+    private static final int TASK17_COST_EXPECTED_MITE_AURA_DRAIN = 80;
+    private static final int TASK17_COST_FAILURE_MITE_Z_OFFSET = 2;
+    private static final float TASK17_COST_EXPECTED_STARVATION_DAMAGE = 2.0F;
+
+    @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK17_CREATURE_DEEP_BATCH1_MAIN)
+    public void testTask17CreatureDeepBatch1MainHappyPathShouldExposeExecutableFeedback(GameTestHelper helper) {
+        BlockPos center = helper.absolutePos(new BlockPos(CENTER_X, CENTER_Y, CENTER_Z));
+
+        TreasureMinkEntity treasureMink =
+            (TreasureMinkEntity) spawn(
+                helper,
+                center.offset(OFFSET_TREASURE_MINK_X, 0, TASK17_MAIN_TREASURE_MINK_OFFSET_Z),
+                XianqiaoEntities.TREASURE_MINK.get()
+            );
+        prepareTask17MainTreasureMinkPen(helper, treasureMink.blockPosition());
+        ItemEntity treasureDrop = new ItemEntity(
+            helper.getLevel(),
+            treasureMink.getX(),
+            treasureMink.getY(),
+            treasureMink.getZ(),
+            new ItemStack(Items.DIAMOND)
+        );
+        treasureDrop.setNoGravity(true);
+        treasureDrop.setDeltaMovement(0.0D, 0.0D, 0.0D);
+        treasureDrop.setNoPickUpDelay();
+        helper.getLevel().addFreshEntity(treasureDrop);
+        ServerPlayer testPlayer = createIsolatedFakePlayer(helper, TASK17_MAIN_PLAYER_NAME);
+
+        MutatedSpiritFoxEntity mutatedFox =
+            (MutatedSpiritFoxEntity) spawn(
+                helper,
+                center.offset(OFFSET_MUTATED_FOX_X, 0, 0),
+                XianqiaoEntities.MUTATED_SPIRIT_FOX.get()
+            );
+        testPlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Blocks.FERN));
+        mutatedFox.mobInteract(testPlayer, net.minecraft.world.InteractionHand.MAIN_HAND);
+
+        ApertureGuardianEntity guardian =
+            (ApertureGuardianEntity) spawn(helper, center, XianqiaoEntities.APERTURE_GUARDIAN.get());
+        guardian.setHealth(guardian.getMaxHealth() * HALF_HEALTH_RATIO - 1.0F);
+        guardian.aiStep();
+        guardian.setNoAi(true);
+
+        SacrificialSheepEntity sacrificialSheep =
+            (SacrificialSheepEntity) spawn(
+                helper,
+                center.offset(OFFSET_SHEEP_X, 0, 0),
+                XianqiaoEntities.SACRIFICIAL_SHEEP.get()
+            );
+        testPlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.NETHER_STAR));
+        sacrificialSheep.mobInteract(testPlayer, net.minecraft.world.InteractionHand.MAIN_HAND);
+
+        DaoDevouringMiteEntity mite =
+            (DaoDevouringMiteEntity) spawn(
+                helper,
+                center.offset(OFFSET_MITE_X, 0, 0),
+                XianqiaoEntities.DAO_DEVOURING_MITE.get()
+            );
+        mite.setNoAi(true);
+        DaoMarkApi.addAura(helper.getLevel(), mite.blockPosition(), DaoType.DARK, DARK_AURA_INJECTION);
+        boolean splitTriggered = mite.runAuraCycleForTest();
+
+        helper.runAfterDelay(TASK17_MAIN_MINK_SECURE_ASSERT_DELAY_TICKS, () ->
+            assertTask17MainTreasureMinkSecurePhase(helper, treasureMink)
+        );
+        helper.runAfterDelay(TASK17_MAIN_ASSERT_DELAY_TICKS, () -> {
+            assertTask17MainTreasureMinkBurrowFeedback(helper, treasureMink);
+            assertTask17MainFeedbackForMutatedFox(helper, mutatedFox);
+            assertTask17MainFeedbackForGuardian(helper, guardian);
+            assertTask17MainFeedbackForSheep(helper, sacrificialSheep);
+            assertTask17MainFeedbackForMite(helper, mite, splitTriggered);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK17_CREATURE_DEEP_BATCH1_COST)
+    public void testTask17CreatureDeepBatch1CostShouldExposeExecutableCostSignals(GameTestHelper helper) {
+        BlockPos center = helper.absolutePos(new BlockPos(CENTER_X, CENTER_Y, CENTER_Z));
+
+        TreasureMinkEntity treasureMink =
+            (TreasureMinkEntity) spawn(
+                helper,
+                center.offset(OFFSET_TREASURE_MINK_X, 0, TASK17_MAIN_TREASURE_MINK_OFFSET_Z),
+                XianqiaoEntities.TREASURE_MINK.get()
+            );
+        prepareTask17MainTreasureMinkPen(helper, treasureMink.blockPosition());
+        ItemEntity treasureDrop = new ItemEntity(
+            helper.getLevel(),
+            treasureMink.getX(),
+            treasureMink.getY(),
+            treasureMink.getZ(),
+            new ItemStack(Items.DIAMOND)
+        );
+        treasureDrop.setNoGravity(true);
+        treasureDrop.setDeltaMovement(0.0D, 0.0D, 0.0D);
+        treasureDrop.setNoPickUpDelay();
+        helper.getLevel().addFreshEntity(treasureDrop);
+
+        ServerPlayer testPlayer = createIsolatedFakePlayer(helper, TASK17_COST_PLAYER_NAME);
+
+        MutatedSpiritFoxEntity mutatedFox =
+            (MutatedSpiritFoxEntity) spawn(
+                helper,
+                center.offset(OFFSET_MUTATED_FOX_X, 0, 0),
+                XianqiaoEntities.MUTATED_SPIRIT_FOX.get()
+            );
+        testPlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.LIGHTNING_ROD));
+        mutatedFox.mobInteract(testPlayer, net.minecraft.world.InteractionHand.MAIN_HAND);
+        mutatedFox.setNoAi(true);
+
+        ApertureGuardianEntity guardian =
+            (ApertureGuardianEntity) spawn(helper, center, XianqiaoEntities.APERTURE_GUARDIAN.get());
+        guardian.setHealth(guardian.getMaxHealth() * HALF_HEALTH_RATIO - 1.0F);
+        guardian.aiStep();
+        guardian.setNoAi(true);
+
+        SacrificialSheepEntity sacrificialSheep =
+            (SacrificialSheepEntity) spawn(
+                helper,
+                center.offset(OFFSET_SHEEP_X, 0, 0),
+                XianqiaoEntities.SACRIFICIAL_SHEEP.get()
+            );
+        testPlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.NETHER_STAR));
+        sacrificialSheep.mobInteract(testPlayer, net.minecraft.world.InteractionHand.MAIN_HAND);
+
+        DaoDevouringMiteEntity splitMite =
+            (DaoDevouringMiteEntity) spawn(
+                helper,
+                center.offset(OFFSET_MITE_X, 0, 0),
+                XianqiaoEntities.DAO_DEVOURING_MITE.get()
+            );
+        splitMite.setNoAi(true);
+        DaoMarkApi.addAura(helper.getLevel(), splitMite.blockPosition(), DaoType.DARK, DARK_AURA_INJECTION);
+        int preSplitDarkAura = DaoMarkApi.getAura(helper.getLevel(), splitMite.blockPosition(), DaoType.DARK);
+        boolean splitTriggered = splitMite.runAuraCycleForTest();
+        int postSplitDarkAura = DaoMarkApi.getAura(helper.getLevel(), splitMite.blockPosition(), DaoType.DARK);
+
+        DaoDevouringMiteEntity starvingMite =
+            (DaoDevouringMiteEntity) spawn(
+                helper,
+                center.offset(OFFSET_FAILURE_MITE_X, 0, TASK17_COST_FAILURE_MITE_Z_OFFSET),
+                XianqiaoEntities.DAO_DEVOURING_MITE.get()
+            );
+        starvingMite.setNoAi(true);
+        drainDarkAuraAroundForTest(helper, starvingMite.blockPosition(), FAILURE_AURA_CLEAR_RADIUS);
+        int preStarvationDarkAura = DaoMarkApi.getAura(helper.getLevel(), starvingMite.blockPosition(), DaoType.DARK);
+        float starvationHealthBefore = starvingMite.getHealth();
+        java.util.Set<java.util.UUID> baselineStarvationMiteIds = collectMiteIdsNearExpectedSplitChild(
+            helper,
+            starvingMite
+        );
+        boolean starvationSplitTriggered = starvingMite.runAuraCycleForTest();
+        int postStarvationDarkAura = DaoMarkApi.getAura(helper.getLevel(), starvingMite.blockPosition(), DaoType.DARK);
+
+        helper.runAfterDelay(TASK17_COST_ASSERT_DELAY_TICKS, () -> {
+            java.util.Set<java.util.UUID> currentStarvationMiteIds = collectMiteIdsNearExpectedSplitChild(
+                helper,
+                starvingMite
+            );
+            java.util.Set<java.util.UUID> newStarvationMiteIds = new java.util.HashSet<>(currentStarvationMiteIds);
+            newStarvationMiteIds.removeAll(baselineStarvationMiteIds);
+            assertTask17CostForTreasureMink(helper, treasureMink);
+            assertTask17CostForMutatedFox(helper, mutatedFox);
+            assertTask17CostForGuardian(helper, guardian);
+            assertTask17CostForSheep(helper, sacrificialSheep);
+            assertTask17CostForMiteSplit(helper, splitMite, splitTriggered, preSplitDarkAura, postSplitDarkAura);
+            assertTask17CostForMiteStarvation(
+                helper,
+                starvingMite,
+                starvationSplitTriggered,
+                preStarvationDarkAura,
+                postStarvationDarkAura,
+                starvationHealthBefore,
+                newStarvationMiteIds
+            );
+            helper.succeed();
+        });
+    }
 
     @GameTest(template = "empty", timeoutTicks = TEST_TIMEOUT_TICKS, batch = TASK11B_BATCH)
     public void testTask11BDeepCreaturesHappyPathShouldApplyMechanics(GameTestHelper helper) {
@@ -101,6 +288,7 @@ public class Task11BDeepCreaturesGameTests {
             (ApertureGuardianEntity) spawn(helper, center, XianqiaoEntities.APERTURE_GUARDIAN.get());
         guardian.setHealth(guardian.getMaxHealth() * HALF_HEALTH_RATIO - 1.0F);
         guardian.aiStep();
+        guardian.setNoAi(true);
 
         SacrificialSheepEntity sacrificialSheep =
             (SacrificialSheepEntity) spawn(
@@ -283,6 +471,244 @@ public class Task11BDeepCreaturesGameTests {
                 drainDarkAuraForTest(helper, center.offset(offsetX, 0, offsetZ));
             }
         }
+    }
+
+    private static ServerPlayer createIsolatedFakePlayer(GameTestHelper helper, String token) {
+        java.util.UUID playerId = java.util.UUID.nameUUIDFromBytes(
+            token.getBytes(java.nio.charset.StandardCharsets.UTF_8)
+        );
+        return FakePlayerFactory.get(
+            helper.getLevel(),
+            new com.mojang.authlib.GameProfile(playerId, token)
+        );
+    }
+
+    private static void prepareTask17MainTreasureMinkPen(GameTestHelper helper, BlockPos minkPos) {
+        helper.getLevel().setBlockAndUpdate(minkPos.below(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.north().below(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.south().below(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.east().below(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.west().below(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.north(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.south(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.east(), Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(minkPos.west(), Blocks.STONE.defaultBlockState());
+    }
+
+    private static void assertTask17MainTreasureMinkSecurePhase(
+        GameTestHelper helper,
+        TreasureMinkEntity treasureMink
+    ) {
+        helper.assertTrue(treasureMink.hasValuableLootSecured(), "Task17 main C-D01: 盗宝鼬应完成真实夺宝");
+        helper.assertTrue(
+            treasureMink.getSecureSuccessCountForTest() == 1,
+            "Task17 main C-D01: 盗宝鼬夺宝成功计数应为 1"
+        );
+        helper.assertTrue(
+            treasureMink.wasSecureNameTagVisibleForTest(),
+            "Task17 main C-D01: 盗宝鼬应记录成功 NameTag 可见"
+        );
+    }
+
+    private static void assertTask17MainTreasureMinkBurrowFeedback(
+        GameTestHelper helper,
+        TreasureMinkEntity treasureMink
+    ) {
+        helper.assertTrue(
+            treasureMink.getBurrowParticleTriggerCountForTest() == 1,
+            "Task17 main C-D01: 盗宝鼬埋洞粒子触发计数应为 1"
+        );
+        helper.assertTrue(
+            treasureMink.getBurrowSoundTriggerCountForTest() == 1,
+            "Task17 main C-D01: 盗宝鼬原版音效触发计数应为 1"
+        );
+    }
+
+    private static void assertTask17MainFeedbackForMutatedFox(
+        GameTestHelper helper,
+        MutatedSpiritFoxEntity mutatedFox
+    ) {
+        helper.assertTrue(mutatedFox.isThunderForm(), "Task17 main C-D02: 变异灵狐应进入雷霆形态");
+        helper.assertTrue(
+            mutatedFox.getThunderFormTransformCountForTest() == 1,
+            "Task17 main C-D02: 变异灵狐转化成功计数应为 1"
+        );
+        helper.assertTrue(
+            mutatedFox.wasThunderFormNameTagVisibleForTest(),
+            "Task17 main C-D02: 变异灵狐应记录成功 NameTag 可见"
+        );
+        helper.assertTrue(
+            mutatedFox.getThunderFormParticleTriggerCountForTest() == 1,
+            "Task17 main C-D02: 变异灵狐粒子触发计数应为 1"
+        );
+        helper.assertTrue(
+            mutatedFox.getThunderFormSoundTriggerCountForTest() == 1,
+            "Task17 main C-D02: 变异灵狐原版音效触发计数应为 1"
+        );
+    }
+
+    private static void assertTask17MainFeedbackForGuardian(GameTestHelper helper, ApertureGuardianEntity guardian) {
+        helper.assertTrue(guardian.isPhaseTwoActive(), "Task17 main C-D03: 仙窍镇灵应进入二阶段");
+        helper.assertTrue(
+            guardian.getPhaseTwoActivationPulseCountForTest() == 1,
+            "Task17 main C-D03: 仙窍镇灵二阶段激活计数应为 1"
+        );
+        helper.assertTrue(
+            guardian.wasPhaseTwoNameTagVisibleForTest(),
+            "Task17 main C-D03: 仙窍镇灵应记录二阶段 NameTag 可见"
+        );
+        helper.assertTrue(
+            guardian.getPhaseTwoParticleTriggerCountForTest() == 1,
+            "Task17 main C-D03: 仙窍镇灵粒子触发计数应为 1"
+        );
+        helper.assertTrue(
+            guardian.getPhaseTwoSoundTriggerCountForTest() == 1,
+            "Task17 main C-D03: 仙窍镇灵原版音效触发计数应为 1"
+        );
+    }
+
+    private static void assertTask17MainFeedbackForSheep(
+        GameTestHelper helper,
+        SacrificialSheepEntity sacrificialSheep
+    ) {
+        helper.assertTrue(sacrificialSheep.getSpiritReserve() > 0, "Task17 main C-D04: 献祭羊应累积灵蕴");
+        helper.assertTrue(
+            sacrificialSheep.getSuccessfulFeedCountForTest() == 1,
+            "Task17 main C-D04: 献祭羊成功喂食计数应为 1"
+        );
+        helper.assertTrue(
+            sacrificialSheep.wasSuccessfulFeedNameTagVisibleForTest(),
+            "Task17 main C-D04: 献祭羊应记录成功 NameTag 可见"
+        );
+        helper.assertTrue(
+            sacrificialSheep.getSuccessfulFeedParticleTriggerCountForTest() == 1,
+            "Task17 main C-D04: 献祭羊粒子触发计数应为 1"
+        );
+        helper.assertTrue(
+            sacrificialSheep.getSuccessfulFeedSoundTriggerCountForTest() == 1,
+            "Task17 main C-D04: 献祭羊原版音效触发计数应为 1"
+        );
+    }
+
+    private static void assertTask17MainFeedbackForMite(
+        GameTestHelper helper,
+        DaoDevouringMiteEntity mite,
+        boolean splitTriggered
+    ) {
+        helper.assertTrue(splitTriggered, "Task17 main C-D05: 噬道蛊虫应命中分裂分支");
+        helper.assertTrue(
+            mite.getSplitSuccessCountForTest() == 1,
+            "Task17 main C-D05: 噬道蛊虫分裂成功计数应为 1"
+        );
+        helper.assertTrue(
+            mite.wasSplitSuccessNameTagVisibleForTest(),
+            "Task17 main C-D05: 噬道蛊虫应记录成功 NameTag 可见"
+        );
+        helper.assertTrue(
+            mite.getSplitParticleTriggerCountForTest() == 1,
+            "Task17 main C-D05: 噬道蛊虫粒子触发计数应为 1"
+        );
+        helper.assertTrue(
+            mite.getSplitSoundTriggerCountForTest() == 1,
+            "Task17 main C-D05: 噬道蛊虫原版音效触发计数应为 1"
+        );
+    }
+
+    private static void assertTask17CostForTreasureMink(GameTestHelper helper, TreasureMinkEntity treasureMink) {
+        helper.assertTrue(
+            treasureMink.hasLocalMaterialLossCostSnapshotForTest(),
+            "Task17 cost C-D01: 盗宝鼬应记录局部材料损失快照"
+        );
+        helper.assertTrue(
+            treasureMink.getLastSecuredLootSnapshotForTest().is(Items.DIAMOND),
+            "Task17 cost C-D01: 盗宝鼬应记录被卷走的钻石快照"
+        );
+        helper.assertTrue(
+            treasureMink.hasBurrowedAwayWithLootForTest(),
+            "Task17 cost C-D01: 盗宝鼬应带着赃物埋洞离场"
+        );
+    }
+
+    private static void assertTask17CostForMutatedFox(GameTestHelper helper, MutatedSpiritFoxEntity mutatedFox) {
+        helper.assertTrue(
+            mutatedFox.isHostileMutationStateForTest(),
+            "Task17 cost C-D02: 变异灵狐失败诱变后应进入敌对态"
+        );
+        helper.assertTrue(
+            !mutatedFox.isThunderForm(),
+            "Task17 cost C-D02: 失败诱变后不应仍然进入雷霆形态"
+        );
+        helper.assertTrue(
+            mutatedFox.getHostileMutationTriggerCountForTest() == 1,
+            "Task17 cost C-D02: 变异灵狐敌对态触发计数应为 1"
+        );
+        helper.assertTrue(
+            mutatedFox.wasHostileTargetAssignedForTest(),
+            "Task17 cost C-D02: 变异灵狐失败诱变后应锁定仇恨目标"
+        );
+        helper.assertTrue(
+            mutatedFox.wasHostileMutationNameTagVisibleForTest(),
+            "Task17 cost C-D02: 变异灵狐失败诱变后应记录敌对 NameTag 可见"
+        );
+    }
+
+    private static void assertTask17CostForGuardian(GameTestHelper helper, ApertureGuardianEntity guardian) {
+        helper.assertTrue(
+            guardian.hasLocalPressureCostSnapshotForTest(),
+            "Task17 cost C-D03: 仙窍镇灵应记录本地压力代价快照"
+        );
+        helper.assertTrue(
+            guardian.getLastLocalPressureCostSnapshotForTest() == TASK17_COST_EXPECTED_GUARDIAN_LOCAL_PRESSURE,
+            "Task17 cost C-D03: 仙窍镇灵本地压力代价快照应为 64"
+        );
+    }
+
+    private static void assertTask17CostForSheep(GameTestHelper helper, SacrificialSheepEntity sacrificialSheep) {
+        helper.assertTrue(sacrificialSheep.getSpiritReserve() > 0, "Task17 cost C-D04: 献祭羊应真实完成供奉");
+        helper.assertTrue(
+            sacrificialSheep.getMoralityOffsetFromSacrificeForTest() == -1,
+            "Task17 cost C-D04: 献祭羊应累计一次局部道德代价"
+        );
+    }
+
+    private static void assertTask17CostForMiteSplit(
+        GameTestHelper helper,
+        DaoDevouringMiteEntity splitMite,
+        boolean splitTriggered,
+        int preSplitDarkAura,
+        int postSplitDarkAura
+    ) {
+        helper.assertTrue(splitTriggered, "Task17 cost C-D05: 噬道蛊虫应命中消耗道痕的分裂分支");
+        helper.assertTrue(
+            preSplitDarkAura - postSplitDarkAura == TASK17_COST_EXPECTED_MITE_AURA_DRAIN,
+            "Task17 cost C-D05: 噬道蛊虫成功分裂应精确抽干 80 点暗道痕"
+        );
+        helper.assertTrue(
+            splitMite.getSplitSuccessCountForTest() == 1,
+            "Task17 cost C-D05: 噬道蛊虫成功分裂计数应为 1"
+        );
+    }
+
+    private static void assertTask17CostForMiteStarvation(
+        GameTestHelper helper,
+        DaoDevouringMiteEntity starvingMite,
+        boolean starvationSplitTriggered,
+        int preStarvationDarkAura,
+        int postStarvationDarkAura,
+        float starvationHealthBefore,
+        java.util.Set<java.util.UUID> newStarvationMiteIds
+    ) {
+        helper.assertTrue(preStarvationDarkAura == 0, "Task17 cost C-D05: 饥饿路径前置校验异常，暗道痕未清空");
+        helper.assertTrue(!starvationSplitTriggered, "Task17 cost C-D05: 暗道痕不足时不应进入分裂分支");
+        helper.assertTrue(
+            postStarvationDarkAura == preStarvationDarkAura,
+            "Task17 cost C-D05: 饥饿路径不应额外抽干暗道痕"
+        );
+        helper.assertTrue(
+            starvingMite.getHealth() < starvationHealthBefore,
+            "Task17 cost C-D05: 饥饿路径应触发真实饥饿伤害"
+        );
+        helper.assertTrue(newStarvationMiteIds.isEmpty(), "Task17 cost C-D05: 饥饿路径应 fail-closed，不得生成新个体");
     }
 
     private static java.util.Set<java.util.UUID> collectMiteIdsNearExpectedSplitChild(

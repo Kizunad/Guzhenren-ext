@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:slime_ball"
+      "item": "guzhenrenext:feng_xin_zi"
     },
     {
       "item": "minecraft:phantom_membrane"

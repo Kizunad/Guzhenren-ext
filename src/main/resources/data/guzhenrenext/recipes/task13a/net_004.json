@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:blaze_powder"
+      "item": "guzhenrenext:xi_sui_vine"
     },
     {
       "item": "minecraft:glowstone_dust"

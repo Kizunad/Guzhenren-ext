@@ -103,6 +103,22 @@ tasks.register('tinyUiTest', Test) {
     shouldRunAfter(test)
 }
 
+tasks.register('plan2RuleTest', Test) {
+    description = 'Run aggregated plan2 rule tests (quota, naming, asset whitelist, depth validator).'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching 'com.Kizunad.guzhenrenext.plan2.Plan2ContentMatrixCountTest'
+        includeTestsMatching 'com.Kizunad.guzhenrenext.plan2.Plan2RuleSetTest'
+        includeTestsMatching 'com.Kizunad.guzhenrenext.plan2.Plan2AssetWhitelistValidatorTest'
+        includeTestsMatching 'com.Kizunad.guzhenrenext.plan2.Plan2ValidatorHappyPathTest'
+        includeTestsMatching 'com.Kizunad.guzhenrenext.plan2.Plan2ValidatorFailurePathTest'
+    }
+    shouldRunAfter(test)
+}
+
 tasks.register('tinyUiJar', Jar) {
     description = 'Package tinyUI classes into a standalone jar.'
     group = 'build'
@@ -200,6 +216,7 @@ tasks.register('customNpcsJar', Jar) {
 dependencies {
     compileOnly name: 'guzhenren'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 }
 

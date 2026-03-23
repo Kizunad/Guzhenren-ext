@@ -6,6 +6,7 @@ import com.Kizunad.guzhenrenext.config.CommonConfig;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
+import com.Kizunad.guzhenrenext.plan2.Plan2RegistrationBootstrap;
 import com.Kizunad.guzhenrenext.xianqiao.command.ApertureCommand;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -47,8 +48,8 @@ public class GuzhenrenExt {
         // Worldgen
         com.Kizunad.guzhenrenext.worldgen.GuzhenrenExtWorldGen.register(modEventBus);
 
-        // 仙窍系统
-        com.Kizunad.guzhenrenext.xianqiao.XianqiaoRegistries.register(modEventBus);
+        // Plan2 统一注册入口（包含仙窍注册链）
+        Plan2RegistrationBootstrap.register(modEventBus);
 
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onAddReloadListeners);
@@ -85,6 +86,9 @@ public class GuzhenrenExt {
     }
 
     private void onAddReloadListeners(net.neoforged.neoforge.event.AddReloadListenerEvent event) {
+        Plan2RegistrationBootstrap.registerReloadListeners(event);
+        Plan2RegistrationBootstrap.validateStartupChainOrThrow();
+
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataLoader());
         event.addListener(new com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataLoader());
         // Bastion 系统已移除，待重写

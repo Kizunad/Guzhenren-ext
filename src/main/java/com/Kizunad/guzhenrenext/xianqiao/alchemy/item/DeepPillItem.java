@@ -177,17 +177,10 @@ public class DeepPillItem extends Item {
             if (!(event.getEntity() instanceof ServerPlayer player)) {
                 return;
             }
-            float incoming = event.getNewDamage();
-            if (incoming <= 0.0F) {
+            if (!DeepPillEffectState.consumeNearDeathTokenOnLethalDamage(player, event.getNewDamage())) {
                 return;
             }
-            float effectiveHealth = player.getHealth() + player.getAbsorptionAmount();
-            if (effectiveHealth - incoming > 0.0F) {
-                return;
-            }
-            if (!DeepPillEffectState.consumeNearDeathToken(player)) {
-                return;
-            }
+            DeepPillEffectState.settleNearDeathResidualSoul(player);
             event.setNewDamage(0.0F);
             player.setHealth(player.getMaxHealth() * FULL_HEALTH_PERCENT);
             player.removeAllEffects();

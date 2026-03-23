@@ -129,6 +129,217 @@ public final class XianqiaoItems {
                 )
         );
 
+    /** 灵铁屑注册项。 */
+    public static final DeferredItem<Item> LING_TIE_XIE =
+        ITEMS.registerItem(
+            "ling_tie_xie",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 赤铜砂注册项。 */
+    public static final DeferredItem<Item> CHI_TONG_SHA =
+        ITEMS.registerItem(
+            "chi_tong_sha",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 玄煤晶注册项。 */
+    public static final DeferredItem<Item> XUAN_MEI_JING =
+        ITEMS.registerItem(
+            "xuan_mei_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 赤硝粉注册项。 */
+    public static final DeferredItem<Item> CHI_XIAO_FEN =
+        ITEMS.registerItem(
+            "chi_xiao_fen",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 月银片注册项。 */
+    public static final DeferredItem<Item> YUE_YIN_PIAN =
+        ITEMS.registerItem(
+            "yue_yin_pian",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 寒霜盐注册项。 */
+    public static final DeferredItem<Item> HAN_SHUANG_YAN =
+        ITEMS.registerItem(
+            "han_shuang_yan",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 炎髓渣注册项。 */
+    public static final DeferredItem<Item> YAN_SUI_ZHA =
+        ITEMS.registerItem(
+            "yan_sui_zha",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 风纹羽片注册项。 */
+    public static final DeferredItem<Item> FENG_WEN_YU_PIAN =
+        ITEMS.registerItem(
+            "feng_wen_yu_pian",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 地脉砂注册项。 */
+    public static final DeferredItem<Item> DI_MAI_SHA =
+        ITEMS.registerItem(
+            "di_mai_sha",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 云母片注册项。 */
+    public static final DeferredItem<Item> YUN_MU_PIAN =
+        ITEMS.registerItem(
+            "yun_mu_pian",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 青木芯注册项。 */
+    public static final DeferredItem<Item> QING_MU_XIN =
+        ITEMS.registerItem(
+            "qing_mu_xin",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 幽影墨注册项。 */
+    public static final DeferredItem<Item> YOU_YING_MO =
+        ITEMS.registerItem(
+            "you_ying_mo",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 星辉尘注册项。 */
+    public static final DeferredItem<Item> XING_HUI_CHEN =
+        ITEMS.registerItem(
+            "xing_hui_chen",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 玉髓团注册项。 */
+    public static final DeferredItem<Item> YU_SUI_TUAN =
+        ITEMS.registerItem(
+            "yu_sui_tuan",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 灵硫块注册项。 */
+    public static final DeferredItem<Item> LING_LIU_KUAI =
+        ITEMS.registerItem(
+            "ling_liu_kuai",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 玄冰晶注册项。 */
+    public static final DeferredItem<Item> XUAN_BING_JING =
+        ITEMS.registerItem(
+            "xuan_bing_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 归元砾注册项。 */
+    public static final DeferredItem<Item> GUI_YUAN_LI =
+        ITEMS.registerItem(
+            "gui_yuan_li",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 镇窍玄铁核注册项。 */
+    public static final DeferredItem<Item> ZHEN_QIAO_XUAN_TIE_HE =
+        ITEMS.registerItem(
+            "zhen_qiao_xuan_tie_he",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 逆脉星陨核注册项。 */
+    public static final DeferredItem<Item> NI_MAI_XING_YUN_HE =
+        ITEMS.registerItem(
+            "ni_mai_xing_yun_he",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 天雷磁母注册项。 */
+    public static final DeferredItem<Item> TIAN_LEI_CI_MU =
+        ITEMS.registerItem(
+            "tian_lei_ci_mu",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 空蚀黑晶注册项。 */
+    public static final DeferredItem<Item> KONG_SHI_HEI_JING =
+        ITEMS.registerItem(
+            "kong_shi_hei_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    /** 九转髓晶注册项。 */
+    public static final DeferredItem<Item> JIU_ZHUAN_SUI_JING =
+        ITEMS.registerItem(
+            "jiu_zhuan_sui_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> DI_MAI_LONG_JING =
+        ITEMS.registerItem(
+            "di_mai_long_jing",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> WAN_XIANG_JIN_SHA =
+        ITEMS.registerItem(
+            "wan_xiang_jin_sha",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> SHI_SHA_LIU_LI =
+        ITEMS.registerItem(
+            "shi_sha_liu_li",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> YOU_HUN_NING_PO_SHI =
+        ITEMS.registerItem(
+            "you_hun_ning_po_shi",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
+    public static final DeferredItem<Item> DAO_YUAN_MU_KUANG =
+        ITEMS.registerItem(
+            "dao_yuan_mu_kuang",
+            Item::new,
+            new Item.Properties().stacksTo(64)
+        );
+
     /**
      * 注册物品。
      *

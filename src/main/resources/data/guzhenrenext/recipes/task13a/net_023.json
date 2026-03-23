@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:turtle_scute"
+      "item": "guzhenrenext:she_yan_melon_stem"
     },
     {
       "item": "minecraft:blaze_powder"

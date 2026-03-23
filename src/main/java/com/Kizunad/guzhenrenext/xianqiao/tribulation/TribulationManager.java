@@ -1,24 +1,31 @@
 package com.Kizunad.guzhenrenext.xianqiao.tribulation;
 
+import com.Kizunad.guzhenrenext.guzhenrenBridge.QiyunHelper;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkApi;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 /**
  * 单个仙窍的灾劫状态机管理器。
@@ -50,6 +57,22 @@ public class TribulationManager {
 
     /** 雷劫阶段每次落雷的评分伤害。 */
     private static final float STRIKE_DAMAGE_PER_HIT = 1.0F;
+
+    private static final long DAY_TICKS = 24000L;
+
+    private static final long NIGHT_START_TICK = 13000L;
+
+    private static final long NIGHT_END_TICK = 23000L;
+
+    private static final int STRIKE_CORE_CHARGE_THRESHOLD = 3;
+
+    private static final int STRIKE_CORE_OUTPUT_COUNT = 1;
+
+    private static final double STRIKE_CORE_OUTPUT_X_OFFSET = 4.0D;
+
+    private static final int METEOR_OUTPUT_COUNT = 1;
+
+    private static final double METEOR_QIYUN_COST = 3.0D;
 
     /** 入侵阶段首次生成的灾兽数量。 */
     private static final int INVASION_SPAWN_COUNT = 6;
@@ -124,6 +147,14 @@ public class TribulationManager {
     /** 该管理器是否已经完成整轮灾劫。 */
     private boolean finished;
 
+    private int strikeCoreCharge;
+
+    private boolean strikeCoreOutputProduced;
+
+    private boolean strikeMeteorOutputProduced;
+
+    private static final Map<UUID, Double> TEST_QIYUN_OVERRIDE = new HashMap<>();
+
     public TribulationManager(UUID owner) {
         this.owner = owner;
     }
@@ -175,6 +206,9 @@ public class TribulationManager {
         invasionEntities.clear();
         invasionEntityLastPos.clear();
         finished = false;
+        strikeCoreCharge = 0;
+        strikeCoreOutputProduced = false;
+        strikeMeteorOutputProduced = false;
     }
 
     /**
@@ -218,15 +252,119 @@ public class TribulationManager {
         if (ticksInState % STRIKE_INTERVAL != 0) {
             return;
         }
+
         RandomSource random = level.getRandom();
         BlockPos target = randomPosInAperture(random, apertureInfo);
+        BlockPos apertureCorePos = apertureInfo.center();
+        BlockPos conductorPos = apertureCorePos.above();
+
+        if (!strikeCoreOutputProduced && level.getBlockState(conductorPos).is(Blocks.LIGHTNING_ROD)) {
+            target = conductorPos;
+            strikeCoreCharge++;
+        } else {
+            strikeCoreCharge = 0;
+        }
+
         LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level);
         if (lightning != null) {
             lightning.moveTo(target.getX() + BLOCK_CENTER_OFFSET, target.getY(), target.getZ() + BLOCK_CENTER_OFFSET);
             lightning.setVisualOnly(false);
             level.addFreshEntity(lightning);
         }
+
+        if (!strikeCoreOutputProduced && strikeCoreCharge >= STRIKE_CORE_CHARGE_THRESHOLD) {
+            ItemEntity output = new ItemEntity(
+                level,
+                apertureCorePos.getX() + STRIKE_CORE_OUTPUT_X_OFFSET + BLOCK_CENTER_OFFSET,
+                apertureCorePos.getY() + 2 + BLOCK_CENTER_OFFSET,
+                apertureCorePos.getZ() + BLOCK_CENTER_OFFSET,
+                new ItemStack(XianqiaoItems.TIAN_LEI_CI_MU.get(), STRIKE_CORE_OUTPUT_COUNT)
+            );
+            level.addFreshEntity(output);
+            strikeCoreOutputProduced = true;
+            strikeCoreCharge = 0;
+        }
+
+        if (!strikeMeteorOutputProduced
+            && isNightSky(level)
+            && consumeOwnerQiyun(level, owner, METEOR_QIYUN_COST)) {
+            ItemEntity meteorOutput = new ItemEntity(
+                level,
+                apertureCorePos.getX() + BLOCK_CENTER_OFFSET,
+                apertureCorePos.getY() + 1 + BLOCK_CENTER_OFFSET,
+                apertureCorePos.getZ() + BLOCK_CENTER_OFFSET,
+                new ItemStack(XianqiaoItems.NI_MAI_XING_YUN_HE.get(), METEOR_OUTPUT_COUNT)
+            );
+            level.addFreshEntity(meteorOutput);
+            strikeMeteorOutputProduced = true;
+        }
+
         damageAccumulated += STRIKE_DAMAGE_PER_HIT;
+    }
+
+    private static boolean isNightSky(ServerLevel level) {
+        long dayTime = Math.floorMod(level.getDayTime(), DAY_TICKS);
+        return dayTime >= NIGHT_START_TICK && dayTime < NIGHT_END_TICK;
+    }
+
+    private static boolean consumeOwnerQiyun(ServerLevel level, UUID ownerUUID, double cost) {
+        double safeCost = Math.max(0.0D, cost);
+        if (safeCost <= 0.0D) {
+            return true;
+        }
+        double currentAmount = readOwnerQiyun(level, ownerUUID);
+        if (currentAmount < safeCost) {
+            return false;
+        }
+
+        if (TEST_QIYUN_OVERRIDE.containsKey(ownerUUID)) {
+            TEST_QIYUN_OVERRIDE.put(ownerUUID, Math.max(0.0D, currentAmount - safeCost));
+        }
+
+        @Nullable ServerPlayer ownerPlayer = findOwnerPlayer(level, ownerUUID);
+        if (ownerPlayer != null) {
+            QiyunHelper.modify(ownerPlayer, -safeCost);
+        }
+        return true;
+    }
+
+    private static double readOwnerQiyun(ServerLevel level, UUID ownerUUID) {
+        if (TEST_QIYUN_OVERRIDE.containsKey(ownerUUID)) {
+            return TEST_QIYUN_OVERRIDE.get(ownerUUID);
+        }
+        @Nullable ServerPlayer ownerPlayer = findOwnerPlayer(level, ownerUUID);
+        if (ownerPlayer == null) {
+            return 0.0D;
+        }
+        return QiyunHelper.getAmount(ownerPlayer);
+    }
+
+    @Nullable
+    private static ServerPlayer findOwnerPlayer(ServerLevel level, UUID ownerUUID) {
+        @Nullable ServerPlayer listedOwner = level.getServer().getPlayerList().getPlayer(ownerUUID);
+        if (listedOwner != null) {
+            return listedOwner;
+        }
+        for (ServerPlayer player : level.players()) {
+            if (player.getUUID().equals(ownerUUID)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    public static void seedQiyunAmountForTest(ServerPlayer owner, double amount) {
+        double safeAmount = Math.max(0.0D, amount);
+        TEST_QIYUN_OVERRIDE.put(owner.getUUID(), safeAmount);
+        try {
+            double currentAmount = QiyunHelper.getAmount(owner);
+            QiyunHelper.modify(owner, safeAmount - currentAmount);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    public static double readQiyunAmountForTest(ServerLevel level, UUID ownerUUID) {
+        return readOwnerQiyun(level, ownerUUID);
     }
 
     /**
@@ -410,6 +548,14 @@ public class TribulationManager {
      */
     public float getDamageAccumulated() {
         return damageAccumulated;
+    }
+
+    public boolean isStrikeCoreOutputProducedForTest() {
+        return strikeCoreOutputProduced;
+    }
+
+    public int getStrikeCoreChargeForTest() {
+        return strikeCoreCharge;
     }
 
     /**

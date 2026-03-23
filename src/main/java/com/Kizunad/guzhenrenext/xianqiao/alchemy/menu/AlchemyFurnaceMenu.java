@@ -7,6 +7,7 @@ import com.Kizunad.guzhenrenext.xianqiao.alchemy.service.AlchemyService;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -211,18 +212,24 @@ public class AlchemyFurnaceMenu extends AbstractContainerMenu {
             if (player.level().isClientSide) {
                 return true;
             }
+            ServerPlayer serverPlayer = player instanceof ServerPlayer casted ? casted : null;
             int successfulCount = 0;
             boolean refined = false;
             if (container instanceof AlchemyFurnaceBlockEntity blockEntity && blockEntity.isBulkMode()) {
-                int mainCountBefore = container.getItem(AlchemyFurnaceBlockEntity.SLOT_MAIN).getCount();
-                successfulCount = AlchemyService.tryRefineBatch(container, blockEntity.getBatchSize());
-                int mainCountAfter = container.getItem(AlchemyFurnaceBlockEntity.SLOT_MAIN).getCount();
-                refined = successfulCount > 0 || mainCountAfter < mainCountBefore;
+                AlchemyService.BatchRefineSummary summary = AlchemyService.tryRefineBatchWithSummary(
+                    container,
+                    blockEntity.getBatchSize(),
+                    serverPlayer
+                );
+                successfulCount = summary.successfulPillOutputCount();
+                refined = summary.attemptedAny();
             } else {
-                int outputCountBefore = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT).getCount();
-                refined = AlchemyService.tryRefine(container);
-                int outputCountAfter = container.getItem(AlchemyFurnaceBlockEntity.SLOT_OUTPUT).getCount();
-                if (outputCountAfter > outputCountBefore) {
+                AlchemyService.RefineAttemptOutcome outcome = AlchemyService.tryRefineWithOutcome(
+                    container,
+                    serverPlayer
+                );
+                refined = outcome.attempted();
+                if (outcome.producedSuccessfulPillOutput()) {
                     successfulCount = 1;
                 }
             }

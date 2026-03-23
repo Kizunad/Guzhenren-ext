@@ -1,0 +1,6292 @@
+[
+  {
+    "id": "C-S01",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "pig",
+    "mechanic": "轻量产出肥料；模型/材质复用：minecraft:pig",
+    "cost": "过量放养会降低田地肥力",
+    "linkPoints": [
+      "spirit",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "灵田边草地区自然刷新并驯留",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S01"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "使用 D-S16 兽粮丸 在兽栏繁育",
+      "anchors": [
+        "item:D-S16"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "完成生灵解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "具备围栏"
+      },
+      {
+        "type": "system_state",
+        "summary": "水槽"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供肥料、肉材并支撑 P-S01 增产链",
+      "targets": [
+        "item:P-S01",
+        "system:farming"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "过量放养会降低田地肥力",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S02",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "rabbit",
+    "mechanic": "小概率产出煤屑/燧石；复用 minecraft:rabbit",
+    "cost": "打洞破坏田埂与灌溉沟",
+    "linkPoints": [
+      "spirit",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "石坡与土层交界自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S02"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "喂食 P-S13 地龙果 后在洞舍繁育",
+      "anchors": [
+        "item:P-S13",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "石地栖区"
+      },
+      {
+        "type": "system_state",
+        "summary": "可钻掘地表"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "补充 M-S01/M-S03 早期矿辅材",
+      "targets": [
+        "item:M-S01",
+        "item:M-S03"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "打洞破坏田埂与灌溉沟",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S03",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "wolf",
+    "mechanic": "核心周边巡逻；复用 minecraft:wolf",
+    "cost": "饥饿时会误伤小型养殖生物",
+    "linkPoints": [
+      "spirit",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "仙窍边界林地自然刷新后驯化",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S03"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "由已驯个体配对繁育",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "完成边界安全解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "准备肉食饲料"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "低阶守卫与压制侵扰生物",
+      "targets": [
+        "system:aperture_environment",
+        "system:spirit"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "饥饿时会误伤小型养殖生物",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S04",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "spider",
+    "mechanic": "产丝类材料；复用 minecraft:spider",
+    "cost": "脱栏后会铺网拖慢作业区",
+    "linkPoints": [
+      "spirit",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "阴湿蛛棚自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S04"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "投放 P-S08 幻毒菇 孢子后诱生成巢",
+      "anchors": [
+        "item:P-S08",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "低光棚架"
+      },
+      {
+        "type": "system_state",
+        "summary": "封闭栏区"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "提供丝、网与防护结构材料",
+      "targets": [
+        "item:M-S13",
+        "system:infrastructure"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "脱栏后会铺网拖慢作业区",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S05",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "cow",
+    "mechanic": "稳定产灵奶；复用 minecraft:cow",
+    "cost": "饲料消耗高，会挤占浅度植物库存",
+    "linkPoints": [
+      "spirit",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "草场自然刷新并圈养",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianCowEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S05"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "喂食 P-S01 青芽草 与 D-S16 兽粮丸 繁育",
+      "anchors": [
+        "item:D-S16",
+        "item:P-S01"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "稳定草场"
+      },
+      {
+        "type": "system_state",
+        "summary": "饮水"
+      },
+      {
+        "type": "system_state",
+        "summary": "牛栏"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "产灵奶、丹药基底与后勤运输",
+      "targets": [
+        "item:D-S01",
+        "item:D-S11"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "饲料消耗高，会挤占浅度植物库存",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S06",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "horse",
+    "mechanic": "产风系皮料；复用 minecraft:horse",
+    "cost": "雷雨时易受惊逃逸",
+    "linkPoints": [
+      "spirit",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "开阔风场自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S06"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "以 P-S14 风信子 饲喂后繁育",
+      "anchors": [
+        "item:P-S14",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "宽阔跑道"
+      },
+      {
+        "type": "system_state",
+        "summary": "围栏"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供风系皮料并支撑机动玩法",
+      "targets": [
+        "item:D-S04",
+        "item:M-S08"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "雷雨时易受惊逃逸",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S07",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "sheep",
+    "mechanic": "产火绒羊毛；复用 minecraft:sheep",
+    "cost": "过密时会点燃邻近干草",
+    "linkPoints": [
+      "spirit",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "热源旁牧场自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianSheepEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S07"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "普通羊在高温栏舍内驯育转化",
+      "anchors": [
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "温热环境"
+      },
+      {
+        "type": "system_state",
+        "summary": "防火围栏"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供火绒、火系纺材与 D-S09 原料",
+      "targets": [
+        "item:D-S09",
+        "item:M-S07"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "过密时会点燃邻近干草",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S08",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "fox",
+    "mechanic": "产寒霜毛；复用 minecraft:fox",
+    "cost": "会偷取禽类与小型掉落物",
+    "linkPoints": [
+      "spirit",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "寒区林地自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S08"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "用 P-S07 冰心草 长期喂养后繁育",
+      "anchors": [
+        "item:P-S07",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "低温环境"
+      },
+      {
+        "type": "system_state",
+        "summary": "隐蔽巢穴"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供寒毛、冰系配方材料",
+      "targets": [
+        "item:D-S08",
+        "item:M-S19"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "会偷取禽类与小型掉落物",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S09",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "parrot",
+    "mechanic": "幻音羽素材；复用 minecraft:parrot",
+    "cost": "群聚时会扰乱附近驯兽判定",
+    "linkPoints": [
+      "spirit",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "高枝栖木自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S09"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "孵化灵羽蛋",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "高位栖架"
+      },
+      {
+        "type": "system_state",
+        "summary": "低噪音驯养区"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供幻羽、幻音辅材与 D-S12 风轻系辅料",
+      "targets": [
+        "item:D-S07",
+        "item:D-S12"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "群聚时会扰乱附近驯兽判定",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S10",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "turtle",
+    "mechanic": "产甲壳碎片；复用 minecraft:turtle",
+    "cost": "繁育周期长且占用水域",
+    "linkPoints": [
+      "spirit",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "池塘岸边自然产卵孵化",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S10"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "收集龟蛋在人工水池育成",
+      "anchors": [
+        "system:farming",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "水塘"
+      },
+      {
+        "type": "system_state",
+        "summary": "沙岸"
+      },
+      {
+        "type": "system_state",
+        "summary": "低干扰环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供龟甲、护具与 D-S08 原料",
+      "targets": [
+        "item:D-S05",
+        "item:D-S08"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "繁育周期长且占用水域",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S11",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "polar_bear",
+    "mechanic": "高仇恨守卫；复用 minecraft:polar_bear",
+    "cost": "驯化不足时会主动攻击人员",
+    "linkPoints": [
+      "spirit",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "极寒边界事件刷新后驯留",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S11"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "收养幼崽长期驯育",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "寒区生态"
+      },
+      {
+        "type": "environment",
+        "summary": "高耐久围场"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "重型守卫与力量系材料来源",
+      "targets": [
+        "item:D-S03",
+        "system:spirit"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "驯化不足时会主动攻击人员",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S12",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "frog",
+    "mechanic": "产毒腺；复用 minecraft:frog",
+    "cost": "扩散后会污染相邻水池",
+    "linkPoints": [
+      "spirit",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "湿地浅水区自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S12"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "收集卵团在毒沼池孵化",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "泥地"
+      },
+      {
+        "type": "system_state",
+        "summary": "水域"
+      },
+      {
+        "type": "system_state",
+        "summary": "低等级毒环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供毒腺并支撑 D-S06/D-S07 配方",
+      "targets": [
+        "item:D-S06",
+        "item:D-S07"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "扩散后会污染相邻水池",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S13",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "bat",
+    "mechanic": "产雾粉；复用 minecraft:bat",
+    "cost": "会降低附近能见度并影响采集效率",
+    "linkPoints": [
+      "spirit",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "洞窟顶棚自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S13"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "暗室群栖诱引",
+      "anchors": [
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "高空阴暗巢室"
+      },
+      {
+        "type": "system_state",
+        "summary": "悬挂点"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供雾粉、隐匿与幻系辅材",
+      "targets": [
+        "item:D-S13",
+        "item:P-S08"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "会降低附近能见度并影响采集效率",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S14",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "chicken",
+    "mechanic": "产阳蛋；复用 minecraft:chicken",
+    "cost": "易吸引狐类与豹猫类捕食者",
+    "linkPoints": [
+      "spirit",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "高日照鸡舍自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianChickenEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S14"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "以 P-S17 纯阳花 饲喂繁育",
+      "anchors": [
+        "item:P-S17",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "全日照鸡舍"
+      },
+      {
+        "type": "system_state",
+        "summary": "种子饲料"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供阳蛋、光系丹材与孵化链",
+      "targets": [
+        "item:D-S18",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "易吸引狐类与豹猫类捕食者",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S15",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "rabbit",
+    "mechanic": "低强度矿脉提示；复用 minecraft:rabbit",
+    "cost": "会啃食幼苗与浅层根茎",
+    "linkPoints": [
+      "spirit",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "矿脉边坡自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S15"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "投喂 M-S09 地脉砂 后繁育",
+      "anchors": [
+        "item:M-S09",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "靠近矿层的土石混合栖地"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供矿脉提示、寻矿胡须与 D-S20 辅料",
+      "targets": [
+        "item:D-S20",
+        "system:material_flow"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "会啃食幼苗与浅层根茎",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-S16",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "bee",
+    "mechanic": "产灵蜜；复用 minecraft:bee",
+    "cost": "蜜源不足时停工并发生群体攻击",
+    "linkPoints": [
+      "spirit",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "花田蜂巢自然生成",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S16"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "成熟蜂箱分群",
+      "anchors": [
+        "system:farming",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "稳定花源"
+      },
+      {
+        "type": "system_state",
+        "summary": "安全蜂箱"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供灵蜜并支撑多种丹药甜基底",
+      "targets": [
+        "item:D-S02",
+        "item:D-S15"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "蜜源不足时停工并发生群体攻击",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S17",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "glow_squid",
+    "mechanic": "产荧光墨；复用 minecraft:glow_squid",
+    "cost": "墨水扩散会污染清水供应",
+    "linkPoints": [
+      "spirit",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "深水灵池自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S17"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "在发光水池中增殖",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "深水"
+      },
+      {
+        "type": "system_state",
+        "summary": "低干扰水体"
+      },
+      {
+        "type": "system_state",
+        "summary": "暗环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供荧光墨、阵法照明与 D-S10 辅材",
+      "targets": [
+        "item:D-S10",
+        "item:P-S09"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "墨水扩散会污染清水供应",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S18",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "ocelot",
+    "mechanic": "抑制害兽；复用 minecraft:ocelot",
+    "cost": "会捕食鸡类与小型灵兽",
+    "linkPoints": [
+      "spirit",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "林缘巡猎事件刷新后驯化",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S18"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "持续投喂肉食形成定居群",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "林地栖架"
+      },
+      {
+        "type": "system_state",
+        "summary": "肉食储备"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "驱赶鼠兔害兽、稳定养殖区",
+      "targets": [
+        "system:farming",
+        "system:spirit"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "会捕食鸡类与小型灵兽",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S19",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "camel",
+    "mechanic": "稳定供水；复用 minecraft:camel",
+    "cost": "体型大，堵塞窄通道并消耗大量饲草",
+    "linkPoints": [
+      "spirit",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "干燥区商旅事件引入",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S19"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "在温热栏区繁育",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "宽阔围栏"
+      },
+      {
+        "type": "system_state",
+        "summary": "补水槽"
+      },
+      {
+        "type": "structure",
+        "summary": "干燥路线"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "提供移动储水与远程运输",
+      "targets": [
+        "system:farming",
+        "system:infrastructure"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "体型大，堵塞窄通道并消耗大量饲草",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "C-S20",
+    "category": "creature",
+    "depth": "shallow",
+    "assetReuse": "armadillo",
+    "mechanic": "产硬甲片；复用 minecraft:armadillo",
+    "cost": "钻掘会松动浅层地基",
+    "linkPoints": [
+      "spirit",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "natural_spawn",
+      "summary": "砂石地表自然刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/XianqiaoEntities.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-S20"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "以蛛眼与根茎混合饲料繁育",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "干燥砂石栖区"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供硬甲片、护具辅材与 D-S05 辅料",
+      "targets": [
+        "item:D-S05",
+        "item:M-S01"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "钻掘会松动浅层地基",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "C-D01",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "fox",
+    "mechanic": "联动掉落与地面拾取",
+    "cost": "失窃后增加局部污染",
+    "linkPoints": [
+      "spirit",
+      "material_flow",
+      "mutation"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "在高价值掉落物堆附近夜间诱发稀有刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/TreasureMinkEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D01"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "使用 M-S14 星辉尘 与 P-S19 忘忧草 设置诱饵巢穴",
+      "anchors": [
+        "item:M-S14",
+        "item:P-S19",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "完成深度生灵解锁"
+      },
+      {
+        "type": "environment",
+        "summary": "维持高价值掉落暴露"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "产出窃宝囊、稀有催化物与盗宝支线素材",
+      "targets": [
+        "item:D-D07",
+        "item:D-S15",
+        "system:material_flow"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "未及时击杀会卷走材料并提升污染值",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D02",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "fox",
+    "mechanic": "联动喂养与进化分支",
+    "cost": "进化失败会进入敌对态",
+    "linkPoints": [
+      "spirit",
+      "mutation",
+      "tribulation"
+    ],
+    "mainSource": {
+      "type": "ritual",
+      "summary": "对 C-S08 冰心狐 喂食 P-D02 引雷草 触发异变",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/MutatedSpiritFoxEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D02"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "用 M-D03 天雷磁母 在雷雨夜强制诱变",
+      "anchors": [
+        "item:M-D03",
+        "item:P-D02",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "深度植物链已解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "具备避雷场"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "产出雷系灵核并开启雷霆灵狐分支",
+      "targets": [
+        "item:M-D03",
+        "system:mutation"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "诱变失败会生成敌对雷狐并破坏栏舍",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D03",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "iron_golem",
+    "mechanic": "联动灾劫阶段与 Boss 行为",
+    "cost": "召唤期提高灾劫威胁",
+    "linkPoints": [
+      "spirit",
+      "tribulation",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "灾劫威胁达到阈值时在核心区刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/ApertureGuardianEntity.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/tribulation/TribulationManager.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D03"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "以 M-D01 镇窍玄铁核 配合祭坛强制唤醒",
+      "anchors": [
+        "item:M-D01",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "灾劫系统解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "核心区未封印"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "掉落镇物核心并支撑终局镇压链",
+      "targets": [
+        "item:M-D01",
+        "system:tribulation"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "召唤窗口内会抬升怪潮与区域压力",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D04",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "sheep",
+    "mechanic": "联动供奉与灾劫抵消",
+    "cost": "献祭降低道德值",
+    "linkPoints": [
+      "spirit",
+      "tribulation",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "breed",
+      "summary": "将 C-S07 炽焰羊 长期投喂高价值供品后进化",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/SacrificialSheepEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D04"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "在供奉祭栏中以普通羊进行仪式转化",
+      "anchors": [
+        "item:C-S07",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "完成供奉系统解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "持续喂养"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "在灾劫来临时抵消灾强并换取血祭材料",
+      "targets": [
+        "item:P-D01",
+        "system:tribulation"
+      ]
+    },
+    "risk": {
+      "type": "irreversible",
+      "summary": "过度献祭会降低道德值并诱发阴性事件",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D05",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "endermite",
+    "mechanic": "联动道痕浓度与繁殖",
+    "cost": "持续抽干区域道痕",
+    "linkPoints": [
+      "spirit",
+      "daomark",
+      "mutation"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "高道痕热点自发生成",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/daomark/DaoMarkDiffusionService.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/DaoDevouringMiteEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D05"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "投放 P-D10 道蕴果 残渣诱发虫巢",
+      "anchors": [
+        "item:P-D10",
+        "system:daomark"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "区域道痕浓度超过阈值"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "产出道痕碎屑并为 D-D03 提供重分配材料",
+      "targets": [
+        "item:D-D03",
+        "system:daomark"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "若不控量会让目标区域长期贫瘠",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D06",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "snow_golem",
+    "mechanic": "联动巡逻与矿化",
+    "cost": "触发地脉塌陷事件",
+    "linkPoints": [
+      "spirit",
+      "material_flow",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "地脉活跃区巡逻事件刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/StoneVeinSentinelEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D06"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "以 M-S09 地脉砂 与 M-D06 地脉龙晶 激活石像",
+      "anchors": [
+        "item:M-D06",
+        "item:M-S09"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "存在稳定巡逻路线"
+      },
+      {
+        "type": "system_state",
+        "summary": "矿带"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "低概率矿化地表并产出高级矿胚",
+      "targets": [
+        "item:M-D06",
+        "system:material_flow"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "过度巡逻会引发地脉塌陷",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D07",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "slime",
+    "mechanic": "联动地表材质与元素掉落",
+    "cost": "过载时范围爆裂",
+    "linkPoints": [
+      "spirit",
+      "material_flow",
+      "mutation"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "元素地面上由黏液核变异刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/MimicSlimeEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D07"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "向 C-S12 毒沫蛙 产物中注入元素粉制成诱变池",
+      "anchors": [
+        "item:C-S12",
+        "system:mutation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "元素地板"
+      },
+      {
+        "type": "system_state",
+        "summary": "封闭试验区"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "产出对应属性黏液并补足元素链",
+      "targets": [
+        "item:M-S07",
+        "item:M-S19"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "过载会爆裂并污染周边地块",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D08",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "enderman",
+    "mechanic": "联动穿墙与封禁阵法",
+    "cost": "会窃取高价值催化物",
+    "linkPoints": [
+      "spirit",
+      "sealing",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "虚空裂隙事件生成",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/VoidWalkerEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D08"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "使用 M-D04 空蚀黑晶 在封禁阵中引渡",
+      "anchors": [
+        "item:M-D04",
+        "system:sealing"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "深度阵法"
+      },
+      {
+        "type": "structure",
+        "summary": "封禁结构"
+      },
+      {
+        "type": "environment",
+        "summary": "高阶诱饵"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "提供虚空组织、位移素材与深度捕捉链",
+      "targets": [
+        "item:M-D04",
+        "item:P-D08",
+        "system:sealing"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "封禁失败会偷走催化物并逃逸",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "C-D09",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "ravager",
+    "mechanic": "联动灾劫终止与高价值掉落",
+    "cost": "失控会放大灾劫",
+    "linkPoints": [
+      "spirit",
+      "tribulation",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "大型灾劫副产物刷新",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/CalamityBeastEntity.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/tribulation/TribulationManager.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D09"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "食用 D-D05 引灾丹 强制提前召来",
+      "anchors": [
+        "item:D-D05",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "灾劫链已开启且战力达标"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "击杀后终止当前灾劫并掉落终局资源",
+      "targets": [
+        "item:M-D10",
+        "system:tribulation"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "若未及时处理会进一步放大灾劫强度",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "C-D10",
+    "category": "creature",
+    "depth": "deep",
+    "assetReuse": "bee",
+    "mechanic": "联动深度植物冷却重置",
+    "cost": "高频运作消耗蜜源库存",
+    "linkPoints": [
+      "spirit",
+      "farming",
+      "mutation"
+    ],
+    "mainSource": {
+      "type": "breed",
+      "summary": "由 C-S16 酿灵蜂 在 P-D05 聚灵树 与 P-D07 并蒂莲 环境中进化",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/SymbioticSpiritBeeEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#C-D10"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "深花巢箱低概率孵出蜂王幼体",
+      "anchors": [
+        "item:P-D05",
+        "item:P-D07",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "深度花源网络"
+      },
+      {
+        "type": "system_state",
+        "summary": "蜂巢容量"
+      },
+      {
+        "type": "material",
+        "summary": "蜜库存充足"
+      }
+    ],
+    "primaryUse": {
+      "type": "growth_accelerator",
+      "summary": "重置深度植物冷却并提高稀有果实产量",
+      "targets": [
+        "item:P-D05",
+        "item:P-D07",
+        "system:farming"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "蜜源不足时会蜂群暴走并停摆授粉链",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-S01",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "wheat",
+    "mechanic": "基础灵植",
+    "cost": "连续单一种植会降低地力",
+    "linkPoints": [
+      "farming"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "仙窍开垦后的初始野生草丛采集得种",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S01"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟收获时自留种回收",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "灵田"
+      },
+      {
+        "type": "system_state",
+        "summary": "基础灌溉"
+      },
+      {
+        "type": "environment",
+        "summary": "日照"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "早期饲料、基础灵气产物与 D-S16 原料",
+      "targets": [
+        "item:D-S16",
+        "system:farming"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "连续单一种植会降低地力",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S02",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "nether_wart",
+    "mechanic": "血系丹材",
+    "cost": "吸引阴性生物并污染普通土壤",
+    "linkPoints": [
+      "farming",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "阴湿灵土或魂沙地块采得根段",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S02"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟植株分根移栽",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "低光"
+      },
+      {
+        "type": "environment",
+        "summary": "魂土或阴性土壤"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "治疗类丹药与血系配方主材",
+      "targets": [
+        "item:D-S01",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "吸引阴性生物并污染普通土壤",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S03",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "poppy",
+    "mechanic": "真元系辅材",
+    "cost": "过度采收会短暂抽空周围灵气",
+    "linkPoints": [
+      "farming",
+      "zhenyuan"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "灵田花圃自然播种",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S03"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "以 P-S01 秸秆堆肥后扩种",
+      "anchors": [
+        "item:P-S01",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "中等光照"
+      },
+      {
+        "type": "system_state",
+        "summary": "稳定灵气"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "真元恢复丹、聚灵液与基础配方",
+      "targets": [
+        "item:D-S02",
+        "item:D-S17"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "过度采收会短暂抽空周围灵气",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S04",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "twisting_vines",
+    "mechanic": "体魄系辅材",
+    "cost": "失控蔓延会缠绕设备与通道",
+    "linkPoints": [
+      "farming",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "岩壁藤架扦插",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S04"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "以 D-S17 灵植液 促生侧芽扩种",
+      "anchors": [
+        "item:D-S17",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "垂直支架"
+      },
+      {
+        "type": "environment",
+        "summary": "湿热环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "体魄类丹药与淬体辅材",
+      "targets": [
+        "item:D-D10",
+        "item:D-S03"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "失控蔓延会缠绕设备与通道",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S05",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "bamboo",
+    "mechanic": "基建与丹炉辅材",
+    "cost": "过密会遮光并挤占农地",
+    "linkPoints": [
+      "farming",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "湿石地自然竹笋采集",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S05"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟竹节分株",
+      "anchors": [
+        "system:infrastructure"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "浅水"
+      },
+      {
+        "type": "system_state",
+        "summary": "石地"
+      },
+      {
+        "type": "system_state",
+        "summary": "纵向空间"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "建材、丹炉框架与风火控温辅材",
+      "targets": [
+        "item:M-S12",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "过密会遮光并挤占农地",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S06",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "red_mushroom",
+    "mechanic": "火系丹材",
+    "cost": "温控失衡会点燃周边可燃物",
+    "linkPoints": [
+      "farming",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "热源边孢子床培育",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S06"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "熔炉区残渣孢子再培",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "高温"
+      },
+      {
+        "type": "system_state",
+        "summary": "低风"
+      },
+      {
+        "type": "system_state",
+        "summary": "菌床"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "火系丹药、爆发配方与 D-S09/D-S14 主材",
+      "targets": [
+        "item:D-S09",
+        "item:D-S14"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "温控失衡会点燃周边可燃物",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S07",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "blue_orchid",
+    "mechanic": "冰系丹材",
+    "cost": "离开冷区会迅速凋萎",
+    "linkPoints": [
+      "farming",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "冷泉边移栽野株",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S07"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "以 M-S19 玄冰晶 低温育苗",
+      "anchors": [
+        "item:M-S19",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "低温"
+      },
+      {
+        "type": "system_state",
+        "summary": "水汽"
+      },
+      {
+        "type": "structure",
+        "summary": "冷区地块"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "冰系丹药、冷却辅材与寒性饲料",
+      "targets": [
+        "item:C-S08",
+        "item:D-S08"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "离开冷区会迅速凋萎",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S08",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "brown_mushroom",
+    "mechanic": "幻毒复合辅材",
+    "cost": "孢子扩散会施加短时异常状态",
+    "linkPoints": [
+      "farming",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "暗洞菌床自发生长",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S08"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "由 C-S12 毒沫蛙 毒液与腐殖堆培育",
+      "anchors": [
+        "item:C-S12",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "低光"
+      },
+      {
+        "type": "system_state",
+        "summary": "潮湿"
+      },
+      {
+        "type": "system_state",
+        "summary": "封闭环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "毒系/幻系丹药与陷阱配方",
+      "targets": [
+        "item:D-S07",
+        "item:D-S19"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "孢子扩散会施加短时异常状态",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S09",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "glow_lichen",
+    "mechanic": "阵法照明材",
+    "cost": "过度铺设会吸引暗系生物",
+    "linkPoints": [
+      "farming",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "洞壁刮取并贴壁扩繁",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S09"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "以 C-S17 灵光鱿 荧光墨进行墙面播附",
+      "anchors": [
+        "item:C-S17",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "潮湿石壁"
+      },
+      {
+        "type": "environment",
+        "summary": "低干扰环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "阵法照明、夜视链与引路标识",
+      "targets": [
+        "item:D-S10",
+        "system:infrastructure"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "过度铺设会吸引暗系生物",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S10",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "weeping_vines",
+    "mechanic": "防护素材",
+    "cost": "收割不慎会造成持续流血",
+    "linkPoints": [
+      "farming",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "悬挂藤棚扦插",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S10"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "收割藤尖后再次生根",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "高处支点"
+      },
+      {
+        "type": "system_state",
+        "summary": "阴湿棚区"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "围栏、防护网与障碍结构材料",
+      "targets": [
+        "item:C-S04",
+        "system:infrastructure"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "收割不慎会造成持续流血",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S11",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "tall_grass",
+    "mechanic": "金系辅材",
+    "cost": "采割时会对玩家造成轻伤",
+    "linkPoints": [
+      "farming",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "风化旱地自然播种",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S11"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟后散播草籽回收",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "干燥土壤"
+      },
+      {
+        "type": "system_state",
+        "summary": "通风环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "金系丹药、锋锐配方与武具辅材",
+      "targets": [
+        "item:D-S05",
+        "item:M-S16"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "采割时会对玩家造成轻伤",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S12",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "lily_pad",
+    "mechanic": "水系辅材",
+    "cost": "过量种植会阻塞水道与影响鱼类刷新",
+    "linkPoints": [
+      "farming",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "水面自然分株",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S12"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "藕节切分再植",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "静水水面"
+      },
+      {
+        "type": "system_state",
+        "summary": "充足水深"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "水系丹药、呼吸链与净化链",
+      "targets": [
+        "item:D-S08",
+        "item:P-D07"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "过量种植会阻塞水道与影响鱼类刷新",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S13",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "sweet_berry_bush",
+    "mechanic": "土系辅材",
+    "cost": "成熟刺枝会伤害采收者",
+    "linkPoints": [
+      "farming",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "粗砾土壤栽植浆果苗",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S13"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟果实取籽再培",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "粗糙土层"
+      },
+      {
+        "type": "system_state",
+        "summary": "适度干燥"
+      },
+      {
+        "type": "system_state",
+        "summary": "围栏"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "土系丹药、鼹鼠饲料与地脉链基础果材",
+      "targets": [
+        "item:C-S02",
+        "item:D-S16"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "成熟刺枝会伤害采收者",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S14",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "azure_bluet",
+    "mechanic": "风系辅材",
+    "cost": "强风天气会造成减产",
+    "linkPoints": [
+      "farming",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "开阔草地花圃播种",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S14"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "由 C-S16 酿灵蜂 授粉扩繁",
+      "anchors": [
+        "item:C-S16",
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "良好通风"
+      },
+      {
+        "type": "system_state",
+        "summary": "充足日照"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "风系丹药、轻身链与疾风马饲料",
+      "targets": [
+        "item:C-S06",
+        "item:D-S04"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "强风天气会造成减产",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S15",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "dead_bush",
+    "mechanic": "雷系低阶引材",
+    "cost": "导雷性高，易引发误击",
+    "linkPoints": [
+      "farming",
+      "tribulation"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "雷击过的枯灌木地块采得幼苗",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S15"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "使用 M-S11 雷萤砂 催化干木育苗",
+      "anchors": [
+        "item:M-S11",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "干燥土壤"
+      },
+      {
+        "type": "environment",
+        "summary": "偶发雷暴环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "雷系低阶引材、P-D02 前置苗链与 D-S20 辅料",
+      "targets": [
+        "item:D-S20",
+        "item:P-D02"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "导雷性高，易引发误击",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S16",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "wither_rose",
+    "mechanic": "阴系辅材",
+    "cost": "会压制周边阳性植物生长",
+    "linkPoints": [
+      "farming",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "极低光区域野株移栽",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S16"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "阴性堆肥催生根段",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "低光"
+      },
+      {
+        "type": "system_state",
+        "summary": "阴性土壤"
+      },
+      {
+        "type": "system_state",
+        "summary": "隔离区"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "阴系丹药、驱兽散与幽魂链前置",
+      "targets": [
+        "item:D-S13",
+        "item:D-S19"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "会压制周边阳性植物生长",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S17",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "sunflower",
+    "mechanic": "阳系辅材",
+    "cost": "会灼伤相邻阴性作物",
+    "linkPoints": [
+      "farming",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "高日照花圃播种",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S17"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟花盘留籽扩种",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "全天直射阳光"
+      },
+      {
+        "type": "system_state",
+        "summary": "开阔地"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "阳系丹药、辟谷链与光性配方",
+      "targets": [
+        "item:C-S14",
+        "item:D-S18"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "会灼伤相邻阴性作物",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S18",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "cocoa",
+    "mechanic": "延寿丹材",
+    "cost": "成熟慢，且被害兽啃食损失大",
+    "linkPoints": [
+      "farming",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "挂木果荚自然成熟",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S18"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟果荚取种复挂",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "木桩支撑"
+      },
+      {
+        "type": "environment",
+        "summary": "温湿环境"
+      },
+      {
+        "type": "system_state",
+        "summary": "长期养护"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "延寿系丹药、恢复链与后期调和材",
+      "targets": [
+        "item:D-S11",
+        "item:D-S18"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "成熟慢，且被害兽啃食损失大",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-S19",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "cornflower",
+    "mechanic": "念头系辅材",
+    "cost": "过度采收会施加短时神识恍惚",
+    "linkPoints": [
+      "farming",
+      "nianTou"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "静心花圃播种",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/guzhenrenBridge/NianTouHelper.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S19"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "冥想事件后低概率自播",
+      "anchors": [
+        "system:nianTou"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "低敌意环境"
+      },
+      {
+        "type": "unlock",
+        "summary": "念头系统解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "念头增长、聚气类丹药与 D-D09 辅材",
+      "targets": [
+        "item:D-D09",
+        "item:D-S15"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "过度采收会施加短时神识恍惚",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "P-S20",
+    "category": "plant",
+    "depth": "shallow",
+    "assetReuse": "melon_stem",
+    "mechanic": "解毒丹材",
+    "cost": "生长极慢且持续消耗地力",
+    "linkPoints": [
+      "farming",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "热岩土壤缓慢育苗",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-S20"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟瓜籽留种复种",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "温热岩地"
+      },
+      {
+        "type": "system_state",
+        "summary": "长生长周期"
+      },
+      {
+        "type": "system_state",
+        "summary": "灌溉"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "解毒丹、避毒链与蛙类饲料",
+      "targets": [
+        "item:C-S12",
+        "item:D-S06"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "生长极慢且持续消耗地力",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "P-D01",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "spore_blossom",
+    "mechanic": "联动吸血成长",
+    "cost": "近身持续伤害",
+    "linkPoints": [
+      "farming",
+      "soul",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "ritual",
+      "summary": "将 P-S08 幻毒菇 在血祭花坛中诱变",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D01"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "由 C-D04 献祭羊 的祭血残渣催生种胚",
+      "anchors": [
+        "item:C-D04",
+        "item:P-S08"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "隔离花坛"
+      },
+      {
+        "type": "system_state",
+        "summary": "供血机制"
+      },
+      {
+        "type": "system_state",
+        "summary": "安全围栏"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "产出血晶并支撑血系深丹与深矿互换",
+      "targets": [
+        "item:D-D01",
+        "item:M-S15"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "靠近者会持续受伤并中断作业",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D02",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "fern",
+    "mechanic": "联动天气雷击",
+    "cost": "误触引雷伤己",
+    "linkPoints": [
+      "farming",
+      "tribulation",
+      "mutation"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "P-S15 雷骨木苗 在雷雨中突变",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D02"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "使用 M-D03 天雷磁母 人工引雷培育",
+      "anchors": [
+        "item:M-D03",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "避雷区"
+      },
+      {
+        "type": "unlock",
+        "summary": "开放天空"
+      },
+      {
+        "type": "environment",
+        "summary": "雷暴天气"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "提供劫雷木、雷系深材并触发 C-D02 进化",
+      "targets": [
+        "item:C-D02",
+        "item:D-D05"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "雷击会波及附近作物与玩家",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D03",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "oak_sapling",
+    "mechanic": "联动结构蓝图成长",
+    "cost": "占地与长冷却",
+    "linkPoints": [
+      "farming",
+      "infrastructure",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "synthesis",
+      "summary": "P-S05 铁皮竹 与 M-S12 青木芯 合成稀有树胚",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/service/FragmentPlacementService.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D03"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "大型生灵事件宝箱低概率掉落",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "完成聚灵结构蓝图"
+      },
+      {
+        "type": "system_state",
+        "summary": "大面积空地"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "产出极品木材并作为深度建筑核心",
+      "targets": [
+        "item:D-D08",
+        "system:infrastructure"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "长期占地且失败会冻结地块冷却",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D04",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "cave_vines",
+    "mechanic": "联动矿块吞噬转化",
+    "cost": "可能吞噬稀有矿",
+    "linkPoints": [
+      "farming",
+      "material_flow",
+      "mutation"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "在矿石正上/下方种植变异藤株",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D04"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "由 M-S02/M-S16 炼成矿液后催芽",
+      "anchors": [
+        "item:M-S02",
+        "item:M-S16"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "矿脉贴邻"
+      },
+      {
+        "type": "structure",
+        "summary": "封闭矿室"
+      },
+      {
+        "type": "system_state",
+        "summary": "可接受损耗"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "产出矿物精华并支撑深度灵材链",
+      "targets": [
+        "item:M-D07",
+        "system:material_flow"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "误配矿层会吞掉稀有矿块",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D05",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "spruce_sapling",
+    "mechanic": "联动周边作物加速",
+    "cost": "每次触发消耗念头",
+    "linkPoints": [
+      "farming",
+      "nianTou",
+      "spirit"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "在灵气富集地将云杉苗长期灌注 D-S17 灵植液 觉醒",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/guzhenrenBridge/NianTouHelper.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D05"
+      ]
+    },
+    "backupSource": {
+      "type": "breed",
+      "summary": "由 C-D10 共生灵蜂王 深授粉催熟树胚",
+      "anchors": [
+        "item:C-D10",
+        "item:D-S17"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "中心树位"
+      },
+      {
+        "type": "system_state",
+        "summary": "念头系统"
+      },
+      {
+        "type": "system_state",
+        "summary": "半径留空"
+      }
+    ],
+    "primaryUse": {
+      "type": "growth_accelerator",
+      "summary": "加速浅度植物、稳定蜂群与提供聚灵果",
+      "targets": [
+        "item:C-D10",
+        "system:farming"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "频繁启用会抽空念头库存",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D06",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "wither_rose",
+    "mechanic": "联动高道痕环境",
+    "cost": "施加负面状态",
+    "linkPoints": [
+      "farming",
+      "daomark",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "在高道痕阴地由 P-S16 噬阴草 变异而成",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/daomark/DaoMarkDiffusionService.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D06"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "使用 M-D08 幽魂凝魄石 在魂土上催开",
+      "anchors": [
+        "item:M-D08",
+        "system:soul"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "高道痕浓度"
+      },
+      {
+        "type": "environment",
+        "summary": "低光"
+      },
+      {
+        "type": "structure",
+        "summary": "隔离警戒"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供魂系花粉并支撑 M-D08/D-D01 链",
+      "targets": [
+        "item:D-D01",
+        "item:M-D08"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "靠近会获得失明、缓慢等负面状态",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D07",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "peony",
+    "mechanic": "联动双株协同",
+    "cost": "单株即枯萎",
+    "linkPoints": [
+      "farming",
+      "mutation",
+      "spirit"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "P-S12 沉水莲 在双生水床中变异",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D07"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "成熟并蒂莲拆分子株后成对重植",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "双格相邻水床"
+      },
+      {
+        "type": "system_state",
+        "summary": "稳定水源"
+      },
+      {
+        "type": "system_state",
+        "summary": "人工配对"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "双生配方、蜂王授粉与恢复链高阶辅材",
+      "targets": [
+        "item:C-D10",
+        "item:D-S11"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "任一株丢失都会导致整对枯萎",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D08",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "chorus_flower",
+    "mechanic": "联动采收工具判定",
+    "cost": "错误采收爆裂",
+    "linkPoints": [
+      "farming",
+      "sealing",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "在虚空粉尘地中种植变异果簇",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D08"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "由 C-D08 虚行者 掉落的虚化粉催熟",
+      "anchors": [
+        "item:C-D08",
+        "system:sealing"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "隔离采收区"
+      },
+      {
+        "type": "structure",
+        "summary": "指定工具链"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供爆裂果肉、瞬发催化物与风险收益配方",
+      "targets": [
+        "item:M-S18",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "错误工具采收会炸毁掉落物",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D09",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "bamboo",
+    "mechanic": "联动时间流速豁免",
+    "cost": "基础生长显著更慢",
+    "linkPoints": [
+      "farming",
+      "timeflow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "时间异常事件中的老竹节扦插",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/effect/DeepPillEffectTickHandler.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D09"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "使用 D-D04 逆时丹 余波在竹林中反向催成",
+      "anchors": [
+        "item:D-D04",
+        "system:timeflow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "时间场组件"
+      },
+      {
+        "type": "system_state",
+        "summary": "长周期维护"
+      },
+      {
+        "type": "system_state",
+        "summary": "独立竹圃"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "提供保值竹节、时间类材料与 M-D09 辅助件",
+      "targets": [
+        "item:M-D09",
+        "system:timeflow"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "常规加速手段失效，极占维护周期",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "P-D10",
+    "category": "plant",
+    "depth": "deep",
+    "assetReuse": "torchflower",
+    "mechanic": "联动道痕吸收产果",
+    "cost": "过吸导致区域减产",
+    "linkPoints": [
+      "farming",
+      "daomark",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "plant",
+      "summary": "在高道痕核心田种植火把花异株",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/daomark/DaoMarkDiffusionService.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/farming/FarmingBlocks.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#P-D10"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "使用 D-D09 悟道茶 催化成熟道蕴花株",
+      "anchors": [
+        "item:D-D09",
+        "system:daomark"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "道痕系统解锁"
+      },
+      {
+        "type": "environment",
+        "summary": "高浓度环境"
+      },
+      {
+        "type": "structure",
+        "summary": "配套监控"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "按道痕属性产出高阶果实并支撑 D-D03/C-D05",
+      "targets": [
+        "item:C-D05",
+        "item:D-D03",
+        "system:daomark"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "吸收过量会让整片区域短期贫瘠",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "D-S01",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/apple",
+    "mechanic": "即时回血",
+    "cost": "连续服用会触发短时药抗，降低后续治疗效率",
+    "linkPoints": [
+      "alchemy",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "基础丹炉使用 P-S02 凝血根、C-S05 驮灵牛 灵奶与 M-S17 玉髓团 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_01_xiao_huan_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S01"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "新手炼丹任务奖励",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "解锁基础炼丹"
+      },
+      {
+        "type": "system_state",
+        "summary": "拥有浅度火候控制"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "前期急救与低阶战斗续航",
+      "targets": [
+        "system:alchemy",
+        "system:zhenyuan"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "连续服用会触发短时药抗，降低后续治疗效率",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S02",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/sugar",
+    "mechanic": "缓回真元",
+    "cost": "过量服用会造成短时气机紊乱",
+    "linkPoints": [
+      "alchemy",
+      "zhenyuan"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S03 聚元花、C-S16 酿灵蜂 灵蜜与 M-S04 赤硝粉 调和炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_02_ju_qi_san.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S02"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "聚灵液蒸馏副产",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "真元系统已开启"
+      },
+      {
+        "type": "structure",
+        "summary": "具备基础丹炉"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "恢复真元并支撑日常施法",
+      "targets": [
+        "item:D-D06",
+        "system:zhenyuan"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "过量服用会造成短时气机紊乱",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S03",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/magma_cream",
+    "mechanic": "力量增益",
+    "cost": "药效结束后出现短暂疲劳",
+    "linkPoints": [
+      "alchemy",
+      "breakthrough"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S04 洗髓藤、M-S16 金髓屑 与兽骨精华炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_03_cui_ti_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S03"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "武练试炼宝箱掉落",
+      "anchors": [
+        "system:breakthrough"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "体魄配方解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "二级丹火"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "短时提升力量并支撑近战战斗",
+      "targets": [
+        "item:D-D10",
+        "system:breakthrough"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "药效结束后出现短暂疲劳",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S04",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/phantom_membrane",
+    "mechanic": "速度增益",
+    "cost": "高速状态下更易受击退与跌落失误",
+    "linkPoints": [
+      "alchemy",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S14 风信子、M-S08 风纹羽片 与 C-S06 疾风马 皮料炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_04_ji_feng_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S04"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "风场事件商贩售卖",
+      "anchors": [
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "风系配方解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "具备轻质辅材"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "移动加速、跑图与追击",
+      "targets": [
+        "item:C-S06",
+        "system:aperture_environment"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "高速状态下更易受击退与跌落失误",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S05",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/iron_nugget",
+    "mechanic": "抗性增益",
+    "cost": "服用后短时移速下降",
+    "linkPoints": [
+      "alchemy",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "M-S01 灵铁屑、C-S20 遁甲犰狳 甲片与 P-S11 剑叶草 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_05_tie_gu_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S05"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "矿守任务奖励",
+      "anchors": [
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "金属丹方"
+      },
+      {
+        "type": "unlock",
+        "summary": "基础锻材解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "提升抗性并支撑守点战",
+      "targets": [
+        "item:C-S20",
+        "item:M-S01"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "服用后短时移速下降",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S06",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/slime_ball",
+    "mechanic": "解毒+短免疫",
+    "cost": "会造成短暂恶心与食欲下降",
+    "linkPoints": [
+      "alchemy",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S20 蛇岩瓜藤、C-S12 毒沫蛙 毒腺与净化辅料中和炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_06_bi_du_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S06"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "毒沼采样任务奖励",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "解毒配方解锁"
+      },
+      {
+        "type": "material",
+        "summary": "拥有净化容器"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "解除中毒并短时免疫低阶毒性",
+      "targets": [
+        "item:C-S12",
+        "item:P-S20"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "会造成短暂恶心与食欲下降",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S07",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/glowstone_dust",
+    "mechanic": "解幻觉",
+    "cost": "短时间内会降低隐匿效果",
+    "linkPoints": [
+      "alchemy",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S08 幻毒菇 低毒样本、P-S09 荧苔 与 C-S09 幻羽鹦鹉 幻羽炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_07_po_huan_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S07"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "幻境副本补给箱",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "幻系配方解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "净光辅材"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "清除失明/幻觉并稳定神识",
+      "targets": [
+        "item:P-S08",
+        "system:soul"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "短时间内会降低隐匿效果",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S08",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/turtle_scute",
+    "mechanic": "水下呼吸",
+    "cost": "陆地上服用会短时减速",
+    "linkPoints": [
+      "alchemy",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "C-S10 坚甲龟 甲壳、P-S12 沉水莲 与冷凝水精炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_08_gui_xi_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S08"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "深水灵池探索奖励",
+      "anchors": [
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "水系配方解锁"
+      },
+      {
+        "type": "structure",
+        "summary": "水池环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "水下采集、深池作业与湿地探索",
+      "targets": [
+        "item:C-S10",
+        "item:P-S12"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "陆地上服用会短时减速",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S09",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/blaze_powder",
+    "mechanic": "防火",
+    "cost": "药效期内口渴值上升、持续消耗水源",
+    "linkPoints": [
+      "alchemy",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S06 火灵芝、C-S07 炽焰羊 火绒与 M-S07 炎髓渣 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_09_bi_huo_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S09"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "高温炉渣二次精炼",
+      "anchors": [
+        "item:M-S07",
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "火系配方解锁"
+      },
+      {
+        "type": "structure",
+        "summary": "耐热丹炉"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "防火、熔炉区作业与火灾抗性",
+      "targets": [
+        "item:C-S07",
+        "item:P-S06"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "药效期内口渴值上升、持续消耗水源",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S10",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/golden_carrot",
+    "mechanic": "夜视",
+    "cost": "强光环境下会出现短时眩目",
+    "linkPoints": [
+      "alchemy",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S09 荧苔、C-S17 灵光鱿 荧光墨与 M-S14 星辉尘 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_10_ye_shi_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S10"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "夜矿勘探补给",
+      "anchors": [
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "照明链解锁"
+      },
+      {
+        "type": "environment",
+        "summary": "低光采样能力"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "洞窟作业、夜间巡查与阵法维护",
+      "targets": [
+        "item:C-S17",
+        "item:P-S09"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "强光环境下会出现短时眩目",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S11",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/baked_potato",
+    "mechanic": "饱食恢复",
+    "cost": "连续服用会降低普通食物收益",
+    "linkPoints": [
+      "alchemy",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S01 青芽草、P-S18 延寿果藤 果浆与 C-S05 驮灵牛 灵奶炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_11_bao_shi_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S11"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "厨房后勤批量制作",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "基础粮食链稳定"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "快速恢复饱食并减少后勤压力",
+      "targets": [
+        "item:P-S18",
+        "system:farming"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "连续服用会降低普通食物收益",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S12",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/feather",
+    "mechanic": "缓降",
+    "cost": "受到强风时会被额外吹偏",
+    "linkPoints": [
+      "alchemy",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S14 风信子、C-S09 幻羽鹦鹉 羽片与 M-S08 风纹羽片 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_12_qing_shen_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S12"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "风谷滑翔试炼奖励",
+      "anchors": [
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "风系药方"
+      },
+      {
+        "type": "material",
+        "summary": "轻羽材料解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "高处施工、滑翔与坠落保护",
+      "targets": [
+        "item:C-S09",
+        "item:M-S08"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "受到强风时会被额外吹偏",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S13",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/fermented_spider_eye",
+    "mechanic": "隐身",
+    "cost": "己方驯兽也会短暂失去追踪目标",
+    "linkPoints": [
+      "alchemy",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S16 噬阴草、P-S08 幻毒菇 与 M-S13 幽影墨 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_13_yin_xi_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S13"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "夜行者事件补给",
+      "anchors": [
+        "system:soul"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "暗系配方解锁"
+      },
+      {
+        "type": "environment",
+        "summary": "低光制药环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "潜行采集、躲避敌对生灵与偷渡危险区",
+      "targets": [
+        "item:M-S13",
+        "system:sealing"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "己方驯兽也会短暂失去追踪目标",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S14",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/red_dye",
+    "mechanic": "增伤但附带虚弱",
+    "cost": "药效结束后附带虚弱与防御下降",
+    "linkPoints": [
+      "alchemy",
+      "breakthrough"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S06 火灵芝、M-S15 血珀粒 与力量系精华炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_14_kuang_bao_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S14"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "战场残渣再炼",
+      "anchors": [
+        "item:M-S15",
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "狂暴配方解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "承压战斗需求"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "短时间爆发输出与速杀目标",
+      "targets": [
+        "item:P-S06",
+        "system:breakthrough"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "药效结束后附带虚弱与防御下降",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S15",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/nether_star",
+    "mechanic": "高阶配方催化",
+    "cost": "服用或触媒使用后短时降低念头自然恢复",
+    "linkPoints": [
+      "alchemy",
+      "nianTou"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S19 忘忧草、C-S16 酿灵蜂 灵蜜与 M-S14 星辉尘 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_15_ning_shen_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S15"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "冥想事件低概率奖励",
+      "anchors": [
+        "system:nianTou"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "神识/念头链解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "精炼丹火"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "提升高阶配方稳定性并作为深丹催化材",
+      "targets": [
+        "item:D-D02",
+        "item:D-D09"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "服用或触媒使用后短时降低念头自然恢复",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S16",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/wheat",
+    "mechanic": "生灵繁育加成",
+    "cost": "滥用会导致过度繁殖、饲料缺口扩大",
+    "linkPoints": [
+      "alchemy",
+      "spirit"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S01 青芽草、P-S13 地龙果 与乳脂混合炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_16_shou_liang_wan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S16"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "畜牧工坊批量压丸",
+      "anchors": [
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "养殖链"
+      },
+      {
+        "type": "system_state",
+        "summary": "兽栏已建成"
+      }
+    ],
+    "primaryUse": {
+      "type": "growth_accelerator",
+      "summary": "提高浅度生灵繁育效率并稳定畜群",
+      "targets": [
+        "item:C-S01",
+        "item:C-S05",
+        "system:spirit"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "滥用会导致过度繁殖、饲料缺口扩大",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S17",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/potion",
+    "mechanic": "植物促生",
+    "cost": "过量使用会降低土壤肥力",
+    "linkPoints": [
+      "alchemy",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S03 聚元花、P-S09 荧苔 与灵泉水调和",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_17_ling_zhi_ye.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S17"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "失败丹液回收再提纯",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "园艺链解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "液体调配装置"
+      }
+    ],
+    "primaryUse": {
+      "type": "growth_accelerator",
+      "summary": "加速浅度植物生长并支撑树胚培养",
+      "targets": [
+        "item:P-D05",
+        "item:P-S04",
+        "system:farming"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "过量使用会降低土壤肥力",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S18",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/bread",
+    "mechanic": "长时饱食锁定",
+    "cost": "药效期内普通进食回复效果下降",
+    "linkPoints": [
+      "alchemy",
+      "farming"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S17 纯阳花、P-S18 延寿果藤 与谷物精炼",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_18_bi_gu_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S18"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "后勤高阶炊事产出",
+      "anchors": [
+        "system:farming"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "阳系"
+      },
+      {
+        "type": "system_state",
+        "summary": "延寿链均已稳定"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "长时外出、连续探索与减少补给频次",
+      "targets": [
+        "item:P-S17",
+        "item:P-S18"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "药效期内普通进食回复效果下降",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "D-S19",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/gunpowder",
+    "mechanic": "区域驱散",
+    "cost": "会同时驱离己方未驯化浅度生灵",
+    "linkPoints": [
+      "alchemy",
+      "spirit"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S16 噬阴草、P-S08 幻毒菇 与 M-S18 灵硫块 制粉",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_19_qu_shou_san.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S19"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "陷阱工坊副产",
+      "anchors": [
+        "item:M-S18",
+        "system:spirit"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "粉剂调制"
+      },
+      {
+        "type": "unlock",
+        "summary": "投撒器具解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "驱散浅档敌对生灵并开辟安全采集窗口",
+      "targets": [
+        "item:P-S16",
+        "system:spirit"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "会同时驱离己方未驯化浅度生灵",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-S20",
+    "category": "pill",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/amethyst_shard",
+    "mechanic": "矿脉提示",
+    "cost": "频繁服用会出现假脉冲与短时头晕",
+    "linkPoints": [
+      "alchemy",
+      "material_flow"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "C-S15 探脉兔 胡须、M-S14 星辉尘 与 P-S15 雷骨木苗 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "data:src/main/resources/data/guzhenrenext/recipes/task13a/pill_20_xun_mai_dan.json",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-S20"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "勘探营地任务奖励",
+      "anchors": [
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "寻矿链解锁"
+      },
+      {
+        "type": "environment",
+        "summary": "低阶矿脉数据库建立"
+      }
+    ],
+    "primaryUse": {
+      "type": "combat_consumable",
+      "summary": "提示附近矿脉、辅助浅度灵材获取",
+      "targets": [
+        "item:M-S01",
+        "item:M-S14"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "频繁服用会出现假脉冲与短时头晕",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "D-D01",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "totem_of_undying",
+    "mechanic": "联动致死保命",
+    "cost": "一次性令牌清空",
+    "linkPoints": [
+      "alchemy",
+      "soul",
+      "zhenyuan"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "使用 P-D06 幽魂花、M-D08 幽魂凝魄石 与血祭精华在高阶丹炉炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/effect/DeepPillEffectTickHandler.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D01"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "大型灾劫终止后的稀有结算奖励",
+      "anchors": [
+        "item:M-D08",
+        "item:P-D06",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "保命机制研究"
+      },
+      {
+        "type": "structure",
+        "summary": "高阶丹炉"
+      },
+      {
+        "type": "unlock",
+        "summary": "魂魄链解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "写入一次性保命标记、用于终局容错",
+      "targets": [
+        "item:M-D08",
+        "system:soul"
+      ]
+    },
+    "risk": {
+      "type": "irreversible",
+      "summary": "触发后清空保命令牌且会引发魂压震荡",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "D-D02",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "enchanted_golden_apple",
+    "mechanic": "联动破境",
+    "cost": "永久最大真元衰减",
+    "linkPoints": [
+      "alchemy",
+      "breakthrough",
+      "zhenyuan"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-D10 道蕴果、M-D10 道源母矿 粉末与 D-S15 凝神丹 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/guzhenrenBridge/ZhenYuanHelper.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D02"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "破境试炼通关后开放一次保底炼制",
+      "anchors": [
+        "system:breakthrough"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "境界突破链解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "真元校验"
+      },
+      {
+        "type": "structure",
+        "summary": "高阶丹炉"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "强制推进境界并突破卡关",
+      "targets": [
+        "item:M-D10",
+        "system:breakthrough"
+      ]
+    },
+    "risk": {
+      "type": "irreversible",
+      "summary": "永久扣减最大真元上限",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "D-D03",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "dragon_breath",
+    "mechanic": "联动道痕重分配",
+    "cost": "短期战力波动",
+    "linkPoints": [
+      "alchemy",
+      "daomark",
+      "breakthrough"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "C-D05 噬道螨 道痕碎屑、P-D05 聚灵树 果核与 M-D05 九转髓晶 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/daomark/DaoMarkDiffusionService.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D03"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "深度洗髓试炼的稀有掉落",
+      "anchors": [
+        "item:C-D05",
+        "item:M-D05"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "道痕系统可读写"
+      },
+      {
+        "type": "system_state",
+        "summary": "重分配逻辑已验证"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "重置并重分配道痕结构",
+      "targets": [
+        "item:C-D05",
+        "item:P-D10",
+        "system:daomark"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "药效期内战力大幅波动且可能失衡",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "D-D04",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "clock",
+    "mechanic": "联动时间场加速",
+    "cost": "结束后时停债务",
+    "linkPoints": [
+      "alchemy",
+      "timeflow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-D09 岁月竹 节、M-D09 时砂琉璃 与时间场结晶炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/effect/DeepPillEffectTickHandler.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D04"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "时间异常事件宝匣",
+      "anchors": [
+        "item:M-D09",
+        "item:P-D09"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "时间流速系统解锁"
+      },
+      {
+        "type": "structure",
+        "summary": "高阶时场组件"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "短时拉满仙窍时间流速、冲刺生产",
+      "targets": [
+        "item:M-D09",
+        "system:timeflow"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "药后触发长时间停滞债务",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "D-D05",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "fire_charge",
+    "mechanic": "联动灾劫提前触发",
+    "cost": "即刻战斗压力上升",
+    "linkPoints": [
+      "alchemy",
+      "tribulation",
+      "qiyun"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-D02 引雷草、M-D02 逆脉星陨核 与 M-D03 天雷磁母 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/guzhenrenBridge/QiyunHelper.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D05"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "灾仪祭坛完成高风险仪式后获得",
+      "anchors": [
+        "item:M-D02",
+        "item:M-D03",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "灾劫链已开启"
+      },
+      {
+        "type": "combat_power",
+        "summary": "战力"
+      },
+      {
+        "type": "system_state",
+        "summary": "避险资源充足"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "主动控时触发灾劫以换取可控收益",
+      "targets": [
+        "item:C-D09",
+        "item:M-D02",
+        "system:tribulation"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "立刻提升战斗压力并吸引强敌",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "D-D06",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "poisonous_potato",
+    "mechanic": "联动散功返材",
+    "cost": "境界与真元清空",
+    "linkPoints": [
+      "alchemy",
+      "breakthrough",
+      "zhenyuan"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "D-S02 聚气散 精粹、P-D10 道蕴果 残核与 M-D05 九转髓晶 炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/guzhenrenBridge/ZhenYuanHelper.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D06"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "重修任务线最终奖励",
+      "anchors": [
+        "system:breakthrough"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "重修权限解锁"
+      },
+      {
+        "type": "material",
+        "summary": "返材容器准备完毕"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "重置修为并返还高阶道蕴碎片",
+      "targets": [
+        "item:D-S02",
+        "item:M-D05",
+        "system:zhenyuan"
+      ]
+    },
+    "risk": {
+      "type": "irreversible",
+      "summary": "服用后境界与真元即时清空",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "D-D07",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "snowball",
+    "mechanic": "联动深度生灵强制驯化",
+    "cost": "高魂魄消耗",
+    "linkPoints": [
+      "alchemy",
+      "spirit",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "C-D01 盗宝鼬 窃宝囊、C-D10 共生灵蜂王 蜡与 M-D08 幽魂凝魄石 压印",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/SymbioticSpiritBeeEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D07"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "驯兽试炼终点奖励",
+      "anchors": [
+        "item:C-D01",
+        "item:C-D10",
+        "item:M-D08"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "投掷印契系统"
+      },
+      {
+        "type": "material",
+        "summary": "魂魄库存充足"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "强制驯化深度生灵并跳过常规养成",
+      "targets": [
+        "item:C-D01",
+        "item:C-D10",
+        "system:spirit"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "高魂魄消耗，失败时印契反噬",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "D-D08",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "ender_pearl",
+    "mechanic": "联动仙窍活动冻结",
+    "cost": "冻结期生产停摆",
+    "linkPoints": [
+      "alchemy",
+      "sealing",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "M-D04 空蚀黑晶、P-D03 建木幼株 灵核与镇压药引炼制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/service/ApertureBoundaryService.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D08"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "虚空镇压任务完成后获取一次性丹胚",
+      "anchors": [
+        "item:M-D04",
+        "item:P-D03",
+        "system:sealing"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "环境镇压逻辑已解锁"
+      },
+      {
+        "type": "system_state",
+        "summary": "可承受停工"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "灾劫失控时暂停实体、作物和配方进度救急",
+      "targets": [
+        "item:P-D03",
+        "system:aperture_environment"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "冻结期内全部生产链停摆",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "D-D09",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "honey_bottle",
+    "mechanic": "联动念头加速与配方强化",
+    "cost": "药效后疲劳惩罚",
+    "linkPoints": [
+      "alchemy",
+      "nianTou",
+      "daomark"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "P-S19 忘忧草、P-D10 道蕴果、C-S16 酿灵蜂 灵蜜与星辉辅料煎制",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/guzhenrenBridge/NianTouHelper.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D09"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "悟道事件任务奖励",
+      "anchors": [
+        "item:P-D10",
+        "item:P-S19",
+        "system:nianTou"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "念头系统"
+      },
+      {
+        "type": "unlock",
+        "summary": "高阶配方链均已解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "progression_gate",
+      "summary": "短时提升念头产出并强保高阶配方成功",
+      "targets": [
+        "item:P-D10",
+        "system:alchemy",
+        "system:nianTou"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "药后进入疲劳期，念头恢复下降",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "D-D10",
+    "category": "pill",
+    "depth": "deep",
+    "assetReuse": "clay_ball",
+    "mechanic": "联动种族倍率重置",
+    "cost": "不可逆且附带冷却",
+    "linkPoints": [
+      "alchemy",
+      "mutation",
+      "breakthrough"
+    ],
+    "mainSource": {
+      "type": "craft",
+      "summary": "M-S17 玉髓团、P-S04 洗髓藤 精髓、D-D03 副产与血肉调和",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#D-D10"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "极稀有化形任务奖励",
+      "anchors": [
+        "item:M-S17",
+        "item:P-S04",
+        "system:mutation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "material",
+        "summary": "种族倍率系统"
+      },
+      {
+        "type": "structure",
+        "summary": "重塑界面"
+      },
+      {
+        "type": "unlock",
+        "summary": "安全确认流程解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "永久重塑种族倍率标签并改变乘区",
+      "targets": [
+        "item:M-D10",
+        "system:breakthrough",
+        "system:mutation"
+      ]
+    },
+    "risk": {
+      "type": "irreversible",
+      "summary": "不可逆且存在长冷却，错误选择代价极高",
+      "severity": "critical"
+    }
+  },
+  {
+    "id": "M-S01",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/iron_nugget",
+    "mechanic": "基础金属辅材",
+    "cost": "过度开采会降低浅层矿脉刷新效率",
+    "linkPoints": [
+      "material_flow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "浅层铁脉采矿与低阶矿石粉碎",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S01"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "废旧装备回炉回收",
+      "anchors": [
+        "system:infrastructure"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "采矿链"
+      },
+      {
+        "type": "unlock",
+        "summary": "熔炉已解锁"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "基础金属丹材、护具辅料与 D-S05 材料",
+      "targets": [
+        "item:D-S05",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "过度开采会降低浅层矿脉刷新效率",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S02",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/raw_copper",
+    "mechanic": "导灵辅材",
+    "cost": "大量堆放时易在雷雨中导电",
+    "linkPoints": [
+      "material_flow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "铜脉开采与铜砂筛洗",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S02"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "风化铜构件回收",
+      "anchors": [
+        "system:infrastructure"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "基础采矿"
+      },
+      {
+        "type": "structure",
+        "summary": "筛洗工位"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "导灵线路、矿液与 P-D04 催芽液",
+      "targets": [
+        "item:P-D04",
+        "system:infrastructure"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "大量堆放时易在雷雨中导电",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S03",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/coal",
+    "mechanic": "炉温辅材",
+    "cost": "烟尘积累会提升污染值",
+    "linkPoints": [
+      "material_flow",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "煤脉采集与焦化提纯",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S03"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "P-S05 铁皮竹 炭化副产",
+      "anchors": [
+        "item:P-S05",
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "燃料工坊"
+      },
+      {
+        "type": "system_state",
+        "summary": "热源控制"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "丹炉燃料、火系配方与熔炼链",
+      "targets": [
+        "item:D-S09",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "烟尘积累会提升污染值",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S04",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/redstone",
+    "mechanic": "导流辅材",
+    "cost": "误触会启动周边装置",
+    "linkPoints": [
+      "material_flow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "红石矿脉采集",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S04"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "炼丹失败残渣提纯",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "矿石识别"
+      },
+      {
+        "type": "system_state",
+        "summary": "研磨工具"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "灵力导流、阵法布线与 D-S02 调和",
+      "targets": [
+        "item:D-S02",
+        "system:infrastructure"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "误触会启动周边装置",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S05",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/quartz",
+    "mechanic": "稳定辅材",
+    "cost": "脆性高，运输中易损耗",
+    "linkPoints": [
+      "material_flow",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "石英矿层采样",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S05"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "白砂与月光熔洗提纯",
+      "anchors": [
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "净化工位"
+      },
+      {
+        "type": "system_state",
+        "summary": "稳定冷却"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "稳定高阶配方、净化器件与防爆中和",
+      "targets": [
+        "item:D-S15",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "脆性高，运输中易损耗",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S06",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/snowball",
+    "mechanic": "冰系辅材",
+    "cost": "持续收集会降低区域温湿平衡",
+    "linkPoints": [
+      "material_flow",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "冷池蒸发结晶",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S06"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "P-S07 冰心草 温差培盐",
+      "anchors": [
+        "item:P-S07",
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "低温环境"
+      },
+      {
+        "type": "system_state",
+        "summary": "蒸发槽"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "冰系丹材、保鲜与冷凝处理",
+      "targets": [
+        "item:D-S08",
+        "item:P-S07"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "持续收集会降低区域温湿平衡",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S07",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/blaze_powder",
+    "mechanic": "火系辅材",
+    "cost": "粉尘可燃，误火会引发爆燃",
+    "linkPoints": [
+      "material_flow",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "火炉残渣与热脉采样",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S07"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "C-S07 炽焰羊 火绒灰烬提炼",
+      "anchors": [
+        "item:C-S07",
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "高温工位"
+      },
+      {
+        "type": "system_state",
+        "summary": "耐火器具"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "火系丹药、爆发配方与耐火链",
+      "targets": [
+        "item:D-S09",
+        "item:D-S14"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "粉尘可燃，误火会引发爆燃",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S08",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/feather",
+    "mechanic": "风系辅材",
+    "cost": "极轻，储存不当会被吹散",
+    "linkPoints": [
+      "material_flow",
+      "spirit"
+    ],
+    "mainSource": {
+      "type": "recycle",
+      "summary": "C-S06 疾风马 与 C-S09 幻羽鹦鹉 产物回收",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S08"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "风谷巢材采集",
+      "anchors": [
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "风场生态或飞羽养殖链"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "轻身、疾风与滑翔配方",
+      "targets": [
+        "item:D-S04",
+        "item:D-S12"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "极轻，储存不当会被吹散",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S09",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/sand",
+    "mechanic": "土系辅材",
+    "cost": "过量挖取会松动地基",
+    "linkPoints": [
+      "material_flow",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "矿脉表层砂化带采集",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S09"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "C-D06 灵脉石人 巡逻残屑回收",
+      "anchors": [
+        "item:C-D06",
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "地脉区域开放"
+      },
+      {
+        "type": "system_state",
+        "summary": "采砂工具"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "地脉链、土系丹药与寻矿饲料",
+      "targets": [
+        "item:C-S15",
+        "system:material_flow"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "过量挖取会松动地基",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S10",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/paper",
+    "mechanic": "轻质辅材",
+    "cost": "受潮后品质迅速下降",
+    "linkPoints": [
+      "material_flow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "层状岩剥片与纤维复压",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S10"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "竹纤纸化后再灵化",
+      "anchors": [
+        "system:infrastructure"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "薄片切割"
+      },
+      {
+        "type": "structure",
+        "summary": "干燥工位"
+      }
+    ],
+    "primaryUse": {
+      "type": "infrastructure",
+      "summary": "轻质符基、记录载体与封装材料",
+      "targets": [
+        "system:infrastructure",
+        "system:sealing"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "受潮后品质迅速下降",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S11",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/glowstone_dust",
+    "mechanic": "雷系辅材",
+    "cost": "潮湿状态下会放电伤人",
+    "linkPoints": [
+      "material_flow",
+      "tribulation"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "雷击石面刮取带电砂",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S11"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "P-S15 雷骨木苗 烘磨成粉",
+      "anchors": [
+        "item:P-S15",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "雷暴环境"
+      },
+      {
+        "type": "system_state",
+        "summary": "绝缘防护"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "雷系催化、引雷结构与 P-D02 育成",
+      "targets": [
+        "item:P-D02",
+        "system:tribulation"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "潮湿状态下会放电伤人",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S12",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/stick",
+    "mechanic": "木系辅材",
+    "cost": "过度取芯会降低林木再生速度",
+    "linkPoints": [
+      "material_flow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "recycle",
+      "summary": "P-S05 铁皮竹 与灵木切芯",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S12"
+      ]
+    },
+    "backupSource": {
+      "type": "refine",
+      "summary": "修枝与木构回收",
+      "anchors": [
+        "item:P-S05",
+        "system:infrastructure"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "木工工位"
+      },
+      {
+        "type": "system_state",
+        "summary": "成熟木材来源"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "树胚、丹炉支架与木系稳定件",
+      "targets": [
+        "item:P-D03",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "过度取芯会降低林木再生速度",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S13",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/ink_sac",
+    "mechanic": "暗系辅材",
+    "cost": "会残留阴影气息并吸引幽系生物",
+    "linkPoints": [
+      "material_flow",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "夜池采墨与暗系生灵墨囊提炼",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S13"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "C-S17 灵光鱿 荧墨脱色处理",
+      "anchors": [
+        "item:C-S17",
+        "system:soul"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "暗池环境"
+      },
+      {
+        "type": "system_state",
+        "summary": "墨液提纯"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "隐匿、暗系丹药与封印书写",
+      "targets": [
+        "item:D-S13",
+        "system:sealing"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "会残留阴影气息并吸引幽系生物",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S14",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/amethyst_shard",
+    "mechanic": "星系辅材",
+    "cost": "夜间持有会提高稀有生灵接近概率",
+    "linkPoints": [
+      "material_flow",
+      "qiyun"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "紫晶簇采屑与夜间星落粉尘收集",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S14"
+      ]
+    },
+    "backupSource": {
+      "type": "event",
+      "summary": "D-S20 寻脉丹 指向的晶洞精采",
+      "anchors": [
+        "item:D-S20",
+        "system:qiyun"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "夜矿勘探"
+      },
+      {
+        "type": "system_state",
+        "summary": "晶洞稳定开采"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "高阶催化、夜视链与盗宝诱饵",
+      "targets": [
+        "item:D-S10",
+        "item:D-S15"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "夜间持有会提高稀有生灵接近概率",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S15",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/red_dye",
+    "mechanic": "血系辅材",
+    "cost": "会提高附近敌意生物仇恨",
+    "linkPoints": [
+      "material_flow",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "凝血矿浆冷凝与血花残渣提炼",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S15"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "P-D01 食人花 血晶边角粉碎",
+      "anchors": [
+        "item:P-D01",
+        "system:soul"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "血系配方"
+      },
+      {
+        "type": "structure",
+        "summary": "净血工位"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "血系丹药、狂暴链与祭血媒介",
+      "targets": [
+        "item:D-S14",
+        "item:P-D01"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "会提高附近敌意生物仇恨",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S16",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/gold_nugget",
+    "mechanic": "金系辅材",
+    "cost": "高价值堆存易吸引盗宝类事件",
+    "linkPoints": [
+      "material_flow",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "浅层金脉与淘金残砂提炼",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S16"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "旧金构件回炉",
+      "anchors": [
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "金属熔炼"
+      },
+      {
+        "type": "structure",
+        "summary": "分离工位"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "淬体、金系配方与矿液转化",
+      "targets": [
+        "item:D-S03",
+        "item:P-D04"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "高价值堆存易吸引盗宝类事件",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S17",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/clay_ball",
+    "mechanic": "塑形辅材",
+    "cost": "受水浸泡后会软化变质",
+    "linkPoints": [
+      "material_flow",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "黏土灵化与石髓调和",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S17"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "炼丹废泥净化回收",
+      "anchors": [
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "塑形池"
+      },
+      {
+        "type": "system_state",
+        "summary": "净化工序"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "药丸成型、塑体链与容器包覆",
+      "targets": [
+        "item:D-D10",
+        "item:D-S01"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "受水浸泡后会软化变质",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-S18",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/gunpowder",
+    "mechanic": "爆发辅材",
+    "cost": "储量过高时存在连锁爆炸风险",
+    "linkPoints": [
+      "material_flow",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "硫泉结块与爆裂残渣回收",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S18"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "M-S07 与 M-S04 混烧副产",
+      "anchors": [
+        "item:M-S04",
+        "item:M-S07"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "耐爆收集器"
+      },
+      {
+        "type": "system_state",
+        "summary": "干燥环境"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "驱兽散、爆发丹与陷阱装置",
+      "targets": [
+        "item:D-S19",
+        "item:P-D08"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "储量过高时存在连锁爆炸风险",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S19",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/prismarine_crystals",
+    "mechanic": "冰水系辅材",
+    "cost": "会持续降低周边温度、拖慢作物生长",
+    "linkPoints": [
+      "material_flow",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "mine",
+      "summary": "寒池结晶与冰层深处剥采",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S19"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "C-S08 冰心狐 巢穴低概率收集",
+      "anchors": [
+        "item:C-S08",
+        "system:aperture_environment"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "寒区水体"
+      },
+      {
+        "type": "structure",
+        "summary": "保冷容器"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "冰系丹药、低温育苗与水系稳定件",
+      "targets": [
+        "item:D-S08",
+        "item:P-S07"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "会持续降低周边温度、拖慢作物生长",
+      "severity": "medium"
+    }
+  },
+  {
+    "id": "M-S20",
+    "category": "material",
+    "depth": "shallow",
+    "assetReuse": "minecraft:item/gravel",
+    "mechanic": "回收辅材",
+    "cost": "杂质残留会污染后续配方",
+    "linkPoints": [
+      "material_flow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "recycle",
+      "summary": "配方废渣筛洗与边界砾层采集",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-S20"
+      ]
+    },
+    "backupSource": {
+      "type": "mine",
+      "summary": "拆解旧阵法结构回收",
+      "anchors": [
+        "system:infrastructure"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "回收工坊"
+      },
+      {
+        "type": "system_state",
+        "summary": "杂质筛分"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "资源回收、低阶复炼与废料再利用",
+      "targets": [
+        "item:M-S17",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "production_stall",
+      "summary": "杂质残留会污染后续配方",
+      "severity": "low"
+    }
+  },
+  {
+    "id": "M-D01",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/netherite_scrap",
+    "mechanic": "联动镇灵掉落",
+    "cost": "提高怪潮概率",
+    "linkPoints": [
+      "material_flow",
+      "tribulation",
+      "spirit"
+    ],
+    "mainSource": {
+      "type": "loot",
+      "summary": "击杀 C-D03 仙窍镇灵 掉落",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/ApertureGuardianEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D01"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "用 M-S01 玄铁胚与灾心在祭坛再锻",
+      "anchors": [
+        "item:C-D03",
+        "item:M-S01",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "combat_power",
+        "summary": "镇灵战可被稳定击败"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "核心镇压构件与终局链基础材料",
+      "targets": [
+        "item:C-D03",
+        "system:tribulation"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "携带/装备时会抬升怪潮概率",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D02",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/nether_star",
+    "mechanic": "联动天象事件",
+    "cost": "消耗气运",
+    "linkPoints": [
+      "material_flow",
+      "tribulation",
+      "qiyun"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "夜间星陨天象事件坠落采集",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/guzhenrenBridge/QiyunHelper.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/tribulation/TribulationManager.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D02"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "以 D-D05 引灾丹 强制开启天象后额外掉落",
+      "anchors": [
+        "item:D-D05",
+        "system:qiyun"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "开放天空"
+      },
+      {
+        "type": "unlock",
+        "summary": "天象链解锁"
+      },
+      {
+        "type": "environment",
+        "summary": "高阶采集工具"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "逆脉、星系高阶配方与灾仪材料",
+      "targets": [
+        "item:D-D05",
+        "system:qiyun"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "采集与使用都会消耗气运",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D03",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:block/lightning_rod",
+    "mechanic": "联动引雷草链",
+    "cost": "采集自损",
+    "linkPoints": [
+      "material_flow",
+      "tribulation",
+      "mutation"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "多次雷击导体后在核心节点凝成",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/tribulation/TribulationTickHandler.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D03"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "P-D02 引雷草 成熟后剥取磁核",
+      "anchors": [
+        "item:P-D02",
+        "system:tribulation"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "雷暴环境"
+      },
+      {
+        "type": "structure",
+        "summary": "绝缘装备"
+      },
+      {
+        "type": "structure",
+        "summary": "引雷阵"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "引雷链核心、雷狐诱变与灾雷仪式",
+      "targets": [
+        "item:C-D02",
+        "item:D-D05"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "采集时对玩家造成自损与麻痹",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D04",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:block/obsidian",
+    "mechanic": "联动虚行者事件",
+    "cost": "侵蚀值上升",
+    "linkPoints": [
+      "material_flow",
+      "sealing",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "虚空裂隙边缘剥采",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/service/ApertureBoundaryService.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/VoidWalkerEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D04"
+      ]
+    },
+    "backupSource": {
+      "type": "ritual",
+      "summary": "在封禁阵中压缩黑曜残片与虚化粉生成",
+      "anchors": [
+        "item:C-D08",
+        "system:material_flow",
+        "system:sealing"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "C-D08 虚行者 链已开启"
+      },
+      {
+        "type": "structure",
+        "summary": "封禁阵稳定"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "虚空构件、冻结丹材与位移封印",
+      "targets": [
+        "item:D-D08",
+        "system:aperture_environment",
+        "system:sealing"
+      ]
+    },
+    "risk": {
+      "type": "status_penalty",
+      "summary": "持有和加工都会提高侵蚀值",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D05",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/experience_bottle",
+    "mechanic": "联动深丹转化",
+    "cost": "魂魄持续流失",
+    "linkPoints": [
+      "material_flow",
+      "alchemy",
+      "soul"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "深度丹药重炼失败残髓经九转提纯",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/item/DeepPillItem.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D05"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "D-D03 与 D-D06 副产精华压晶",
+      "anchors": [
+        "item:D-D03",
+        "item:D-D06",
+        "system:alchemy"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "高阶炼丹"
+      },
+      {
+        "type": "material",
+        "summary": "失败残渣回收链"
+      },
+      {
+        "type": "system_state",
+        "summary": "安全魂仓"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "洗髓、散功与高阶转化核心",
+      "targets": [
+        "item:D-D03",
+        "item:D-D06",
+        "system:alchemy"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "加工与持有期间持续流失魂魄",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D06",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/emerald",
+    "mechanic": "联动石人矿化链",
+    "cost": "地脉塌陷风险",
+    "linkPoints": [
+      "material_flow",
+      "spirit",
+      "aperture_environment"
+    ],
+    "mainSource": {
+      "type": "loot",
+      "summary": "C-D06 灵脉石人 巡逻矿化终点产出",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/spirit/deep/StoneVeinSentinelEntity.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D06",
+        "item:C-D06"
+      ]
+    },
+    "backupSource": {
+      "type": "mine",
+      "summary": "控制塌陷后在深层龙脉节点采得",
+      "anchors": [
+        "system:aperture_environment",
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "structure",
+        "summary": "地脉监测"
+      },
+      {
+        "type": "system_state",
+        "summary": "石人链"
+      },
+      {
+        "type": "structure",
+        "summary": "高阶采矿装备"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "地脉稳定/转化、石像激活与土系终局配方",
+      "targets": [
+        "item:C-D06",
+        "system:aperture_environment",
+        "system:material_flow"
+      ]
+    },
+    "risk": {
+      "type": "environment_damage",
+      "summary": "获取过程伴随塌陷风险",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D07",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/gold_ingot",
+    "mechanic": "联动多矿转化",
+    "cost": "失败降级损耗",
+    "linkPoints": [
+      "material_flow",
+      "farming",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "refine",
+      "summary": "P-D04 噬金藤 吞矿后的多矿精炼副产",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/item/XianqiaoItems.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D07",
+        "item:P-D04"
+      ]
+    },
+    "backupSource": {
+      "type": "synthesis",
+      "summary": "多矿熔池中三种以上矿料共炼",
+      "anchors": [
+        "item:M-S02",
+        "item:M-S16",
+        "system:material_flow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "多矿转化链"
+      },
+      {
+        "type": "structure",
+        "summary": "高温精炼池"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "跨矿系转化、复合高阶配方与财富链调节",
+      "targets": [
+        "item:M-D10",
+        "system:alchemy",
+        "system:material_flow"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "转化失败会把高阶材料降级损耗",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D08",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/echo_shard",
+    "mechanic": "联动幽魂花与魂魄系统",
+    "cost": "上限衰减",
+    "linkPoints": [
+      "material_flow",
+      "soul",
+      "alchemy"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "P-D06 幽魂花 在高魂压夜晚结石",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/daomark/DaoMarkDiffusionService.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D08",
+        "item:P-D06"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "D-D01 保命触发后的残魂凝结",
+      "anchors": [
+        "item:D-D01",
+        "system:soul"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "environment",
+        "summary": "高魂魄浓度"
+      },
+      {
+        "type": "system_state",
+        "summary": "幽魂花链"
+      },
+      {
+        "type": "structure",
+        "summary": "魂压收束器"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "魂系深丹、保命链与封魂器件",
+      "targets": [
+        "item:D-D01",
+        "system:sealing",
+        "system:soul"
+      ]
+    },
+    "risk": {
+      "type": "irreversible",
+      "summary": "频繁使用会导致魂魄上限衰减",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D09",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/clock",
+    "mechanic": "联动时间场组件",
+    "cost": "时间债务叠加",
+    "linkPoints": [
+      "material_flow",
+      "timeflow",
+      "infrastructure"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "P-D09 岁月竹 时间节点上的砂化结晶",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/effect/DeepPillEffectTickHandler.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D09",
+        "item:P-D09"
+      ]
+    },
+    "backupSource": {
+      "type": "recycle",
+      "summary": "D-D04 逆时丹 药效结束后回收时停残片重铸",
+      "anchors": [
+        "item:D-D04",
+        "system:timeflow"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "unlock",
+        "summary": "时间场已开启"
+      },
+      {
+        "type": "system_state",
+        "summary": "具备长周期维护能力"
+      }
+    ],
+    "primaryUse": {
+      "type": "recipe_input",
+      "summary": "时间组件、逆时丹核心材料与保值链",
+      "targets": [
+        "item:D-D04",
+        "system:infrastructure",
+        "system:timeflow"
+      ]
+    },
+    "risk": {
+      "type": "resource_drain",
+      "summary": "每次采集或使用都会叠加时间债务",
+      "severity": "high"
+    }
+  },
+  {
+    "id": "M-D10",
+    "category": "material",
+    "depth": "deep",
+    "assetReuse": "minecraft:item/diamond",
+    "mechanic": "联动四类终局链",
+    "cost": "必触发高压灾劫",
+    "linkPoints": [
+      "material_flow",
+      "tribulation",
+      "breakthrough",
+      "daomark"
+    ],
+    "mainSource": {
+      "type": "event",
+      "summary": "四类别终局链汇合后在核心矿脉生成",
+      "anchors": [
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/alchemy/service/AlchemyService.java",
+        "code:src/main/java/com/Kizunad/guzhenrenext/xianqiao/tribulation/TribulationManager.java",
+        "plan:.sisyphus/plans/xianqiao-plan2-four-category-120-expansion.md#M-D10"
+      ]
+    },
+    "backupSource": {
+      "type": "loot",
+      "summary": "击杀 C-D09 灾厄兽 且保持 P-D10/M-D08/D-D02 链同步时低概率掉落",
+      "anchors": [
+        "item:C-D09",
+        "item:D-D02",
+        "item:M-D08",
+        "item:P-D10"
+      ]
+    },
+    "preconditions": [
+      {
+        "type": "system_state",
+        "summary": "四类深度链全部成熟"
+      },
+      {
+        "type": "unlock",
+        "summary": "终局仪式已完成"
+      }
+    ],
+    "primaryUse": {
+      "type": "endgame_core",
+      "summary": "最高阶配方、终局重塑与母矿级设施",
+      "targets": [
+        "item:D-D02",
+        "item:D-D10",
+        "system:tribulation"
+      ]
+    },
+    "risk": {
+      "type": "disaster_escalation",
+      "summary": "一旦获取或启用必然触发高压灾劫",
+      "severity": "critical"
+    }
+  }
+]

@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:turtle_scute"
+      "item": "guzhenrenext:ju_yuan_flower"
     },
     {
       "item": "minecraft:blaze_powder"

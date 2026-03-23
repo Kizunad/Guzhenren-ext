@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:amethyst_shard"
+      "item": "guzhenrenext:ying_tai_lichen"
     },
     {
       "item": "minecraft:red_mushroom"

@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:string"
+      "item": "guzhenrenext:ning_xue_gen"
     },
     {
       "item": "minecraft:turtle_scute"

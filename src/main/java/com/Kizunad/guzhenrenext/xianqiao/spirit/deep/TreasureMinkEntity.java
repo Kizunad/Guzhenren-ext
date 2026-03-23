@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.xianqiao.spirit.deep;
 
 import java.util.List;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -31,10 +32,17 @@ public class TreasureMinkEntity extends Fox {
     private static final double BURROW_PARTICLE_SPEED = 0.01D;
     private static final float BURROW_SOUND_VOLUME = 0.8F;
     private static final float BURROW_SOUND_PITCH = 0.8F;
+    private static final String SECURED_NAME_TAG_TEXT = "盗宝鼬·已得手";
 
     private int searchTicker;
     private int burrowTicks;
     private boolean valuableLootSecured;
+    private int secureSuccessCountForTest;
+    private int burrowTriggerCountForTest;
+    private int burrowParticleTriggerCountForTest;
+    private int burrowSoundTriggerCountForTest;
+    private boolean secureNameTagVisibleForTest;
+    private ItemStack lastSecuredLootSnapshotForTest = ItemStack.EMPTY;
 
     public TreasureMinkEntity(EntityType<? extends Fox> entityType, Level level) {
         super(entityType, level);
@@ -58,6 +66,10 @@ public class TreasureMinkEntity extends Fox {
             return;
         }
         searchTicker = 0;
+        recognizeHeldValuableLootIfNeeded();
+        if (valuableLootSecured) {
+            return;
+        }
         trySecureValuableLoot();
     }
 
@@ -70,6 +82,38 @@ public class TreasureMinkEntity extends Fox {
         burrowTicks = BURROW_DELAY_TICKS;
     }
 
+    public int getSecureSuccessCountForTest() {
+        return secureSuccessCountForTest;
+    }
+
+    public int getBurrowTriggerCountForTest() {
+        return burrowTriggerCountForTest;
+    }
+
+    public boolean wasSecureNameTagVisibleForTest() {
+        return secureNameTagVisibleForTest;
+    }
+
+    public int getBurrowParticleTriggerCountForTest() {
+        return burrowParticleTriggerCountForTest;
+    }
+
+    public int getBurrowSoundTriggerCountForTest() {
+        return burrowSoundTriggerCountForTest;
+    }
+
+    public ItemStack getLastSecuredLootSnapshotForTest() {
+        return lastSecuredLootSnapshotForTest.copy();
+    }
+
+    public boolean hasLocalMaterialLossCostSnapshotForTest() {
+        return !lastSecuredLootSnapshotForTest.isEmpty();
+    }
+
+    public boolean hasBurrowedAwayWithLootForTest() {
+        return burrowTriggerCountForTest > 0 && hasLocalMaterialLossCostSnapshotForTest();
+    }
+
     private void trySecureValuableLoot() {
         List<ItemEntity> nearbyItems = level().getEntitiesOfClass(
             ItemEntity.class,
@@ -79,13 +123,29 @@ public class TreasureMinkEntity extends Fox {
         if (nearbyItems.isEmpty()) {
             return;
         }
-        ItemEntity target = nearbyItems.get(0);
+        ItemEntity target = nearbyItems.stream()
+            .min((left, right) -> Double.compare(distanceToSqr(left), distanceToSqr(right)))
+            .orElse(null);
+        if (target == null) {
+            return;
+        }
         getNavigation().moveTo(target, MOVE_TO_LOOT_SPEED);
         if (distanceToSqr(target) <= PICKUP_DISTANCE_SQR) {
+            ItemStack securedLootSnapshot = target.getItem().copy();
             target.discard();
-            valuableLootSecured = true;
-            burrowTicks = BURROW_DELAY_TICKS;
+            handleRealSecureSuccess(securedLootSnapshot);
         }
+    }
+
+    private void recognizeHeldValuableLootIfNeeded() {
+        if (valuableLootSecured) {
+            return;
+        }
+        ItemStack heldStack = getMainHandItem();
+        if (heldStack.isEmpty() || !isValuable(heldStack)) {
+            return;
+        }
+        handleRealSecureSuccess(heldStack.copy());
     }
 
     private boolean isValuable(ItemStack stack) {
@@ -98,7 +158,9 @@ public class TreasureMinkEntity extends Fox {
     }
 
     private void triggerBurrowAndDisappear() {
+        burrowTriggerCountForTest++;
         if (level() instanceof ServerLevel serverLevel) {
+            burrowParticleTriggerCountForTest++;
             serverLevel.sendParticles(
                 ParticleTypes.POOF,
                 getX(),
@@ -110,6 +172,7 @@ public class TreasureMinkEntity extends Fox {
                 BURROW_PARTICLE_XZ_SPREAD,
                 BURROW_PARTICLE_SPEED
             );
+            burrowSoundTriggerCountForTest++;
             serverLevel.playSound(
                 null,
                 blockPosition(),
@@ -120,5 +183,17 @@ public class TreasureMinkEntity extends Fox {
             );
         }
         discard();
+    }
+
+    private void handleRealSecureSuccess(ItemStack securedLootSnapshot) {
+        valuableLootSecured = true;
+        burrowTicks = BURROW_DELAY_TICKS;
+        secureSuccessCountForTest++;
+        lastSecuredLootSnapshotForTest = securedLootSnapshot.isEmpty()
+            ? ItemStack.EMPTY
+            : securedLootSnapshot.copy();
+        setCustomName(Component.literal(SECURED_NAME_TAG_TEXT));
+        setCustomNameVisible(true);
+        secureNameTagVisibleForTest = isCustomNameVisible();
     }
 }
