@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.flyingsword.client;
 
+import com.Kizunad.guzhenrenext.client.GuKeyBindings;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoI18n;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
@@ -33,6 +34,7 @@ import com.Kizunad.tinyUI.neoforge.TinyUIScreen;
 import com.Kizunad.guzhenrenext.network.ServerboundKongqiaoActionPayload;
 import com.Kizunad.guzhenrenext.network.ServerboundOpenClusterGuiPayload;
 import com.Kizunad.guzhenrenext.network.ServerboundOpenTrainingGuiPayload;
+import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -48,11 +50,6 @@ import org.lwjgl.glfw.GLFW;
 public final class FlyingSwordHubScreen extends TinyUIScreen {
 
     private static final Component HUB_TITLE = KongqiaoI18n.text(KongqiaoI18n.FLYING_SWORD_HUB_TITLE);
-    private static final List<String> TOP_LEVEL_TABS = List.of(
-        localizedText(KongqiaoI18n.FLYING_SWORD_HUB_TAB_OVERVIEW),
-        localizedText(KongqiaoI18n.FLYING_SWORD_HUB_TAB_CULTIVATION),
-        localizedText(KongqiaoI18n.FLYING_SWORD_HUB_TAB_HELP)
-    );
     private static final List<String> CULTIVATION_SUBTABS =
         FlyingSwordHubCultivationModel.subTabTitles();
     private static final List<HelpRouteSpec> HELP_ROUTE_SPECS = List.of(
@@ -182,7 +179,7 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
     }
 
     static List<String> topLevelTabTitlesForTesting() {
-        return TOP_LEVEL_TABS;
+        return topLevelTabs();
     }
 
     static List<String> helpRouteTitlesForTesting() {
@@ -239,9 +236,17 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
     }
 
     static boolean isCloseKey(final int keyCode) {
-        return keyCode == GLFW.GLFW_KEY_H
+        return keyCode == resolveHubToggleKeyCode()
             || keyCode == GLFW.GLFW_KEY_ESCAPE
             || keyCode == GLFW.GLFW_KEY_TAB;
+    }
+
+    private static int resolveHubToggleKeyCode() {
+        final InputConstants.Key boundKey = GuKeyBindings.FLYING_SWORD_TOGGLE_HUB.getKey();
+        if (boundKey.getType() != InputConstants.Type.KEYSYM) {
+            return GLFW.GLFW_KEY_UNKNOWN;
+        }
+        return boundKey.getValue();
     }
 
     int currentTabForTesting() {
@@ -346,6 +351,7 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
     }
 
     private void buildUi(final UIRoot root) {
+        final List<String> topLevelTabs = topLevelTabs();
         final int rootX = (root.getWidth() - WINDOW_WIDTH) / 2;
         final int rootY = (root.getHeight() - WINDOW_HEIGHT) / 2;
         final UIElement window = new UIElement() { };
@@ -383,12 +389,12 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
 
         final int availableWidth = WINDOW_WIDTH - WINDOW_PADDING * 2;
         final int buttonWidth =
-            (availableWidth - TAB_GAP * (TOP_LEVEL_TABS.size() - 1)) / TOP_LEVEL_TABS.size();
-        for (int tabIndex = 0; tabIndex < TOP_LEVEL_TABS.size(); tabIndex++) {
+            (availableWidth - TAB_GAP * (topLevelTabs.size() - 1)) / topLevelTabs.size();
+        for (int tabIndex = 0; tabIndex < topLevelTabs.size(); tabIndex++) {
             createTabButton(
                 window,
                 tabIndex,
-                TOP_LEVEL_TABS.get(tabIndex),
+                topLevelTabs.get(tabIndex),
                 WINDOW_PADDING + (buttonWidth + TAB_GAP) * tabIndex,
                 TAB_BAR_Y,
                 buttonWidth
@@ -2764,6 +2770,14 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
 
     private static String localizedText(final String key, final Object... args) {
         return KongqiaoI18n.localizedText(key, args);
+    }
+
+    private static List<String> topLevelTabs() {
+        return List.of(
+            localizedText(KongqiaoI18n.FLYING_SWORD_HUB_TAB_OVERVIEW),
+            localizedText(KongqiaoI18n.FLYING_SWORD_HUB_TAB_CULTIVATION),
+            localizedText(KongqiaoI18n.FLYING_SWORD_HUB_TAB_HELP)
+        );
     }
 
     private static int resolveMultilineHeight(final String text, final int lineHeight) {
