@@ -71,7 +71,8 @@ public final class HunPoHelper {
             return 0.0;
         }
         final double original = readDoubleField(variables, FIELD_HUNPO, 0.0);
-        final double max = readDoubleField(variables, FIELD_MAX_HUNPO, 0.0);
+        final double reflectedMax = readDoubleField(variables, FIELD_MAX_HUNPO, 0.0);
+        final double max = reflectedMax > 0.0 ? reflectedMax : Double.MAX_VALUE;
 
         final double newValue = Math.max(0, Math.min(max, original + amount));
         if (Double.compare(original, newValue) == 0) {
