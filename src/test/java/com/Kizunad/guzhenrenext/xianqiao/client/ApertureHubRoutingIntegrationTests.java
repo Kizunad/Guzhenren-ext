@@ -84,6 +84,11 @@ final class ApertureHubRoutingIntegrationTests {
         assertTrue(currentSource.contains("currentGameMode().useItem(player, hand)"));
         assertTrue(currentSource.contains("currentGameMode().useItemOn(player, hand, blockHitResult)"));
         assertTrue(currentSource.contains("currentGameMode().interact(player, entity, hand)"));
+        assertTrue(currentSource.contains("final int previousSelectedSlot = player.getInventory().selected;"));
+        assertTrue(currentSource.contains("player.getInventory().selected = hotbarSlot;"));
+        assertTrue(currentSource.contains("try {"));
+        assertTrue(currentSource.contains("} finally {"));
+        assertTrue(currentSource.contains("player.getInventory().selected = previousSelectedSlot;"));
         assertFalse(currentSource.contains("DIRECT_ROUTE_MESSAGE_PREFIX"));
         assertFalse(currentSource.contains("DIRECT_ROUTE_MESSAGE_SUFFIX"));
     }

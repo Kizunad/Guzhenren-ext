@@ -487,11 +487,14 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
 
         final int previousSelectedSlot = player.getInventory().selected;
         player.getInventory().selected = hotbarSlot;
-        if (tryUseHeldStorageGu(player, InteractionHand.MAIN_HAND)) {
-            return null;
+        try {
+            if (tryUseHeldStorageGu(player, InteractionHand.MAIN_HAND)) {
+                return null;
+            }
+            return "已发现快捷栏储物蛊，但当前无法触发使用交互";
+        } finally {
+            player.getInventory().selected = previousSelectedSlot;
         }
-        player.getInventory().selected = previousSelectedSlot;
-        return "已发现快捷栏储物蛊，但当前无法触发使用交互";
     }
 
     private String tryOpenLandSpiritRoute(final LocalPlayer player) {
