@@ -129,14 +129,8 @@ public final class GuKeyBindings {
         KEY_CATEGORY
     );
 
-    /**
-     * 切换飞剑状态 HUD 显示。
-     * <p>
-     * 默认绑定到 'H' 键（HUD）。
-     * </p>
-     */
-    public static final KeyMapping FLYING_SWORD_TOGGLE_HUD = new KeyMapping(
-        "key.guzhenrenext.flyingsword.toggle_hud",
+    public static final KeyMapping FLYING_SWORD_TOGGLE_HUB = new KeyMapping(
+        "key.guzhenrenext.flyingsword.toggle_hub",
         KeyConflictContext.IN_GAME,
         InputConstants.Type.KEYSYM,
         GLFW.GLFW_KEY_H,
@@ -165,7 +159,7 @@ public final class GuKeyBindings {
         event.register(FLYING_SWORD_RESTORE_ONE);
         event.register(FLYING_SWORD_RECALL_ALL);
         event.register(FLYING_SWORD_RESTORE_ALL);
-        event.register(FLYING_SWORD_TOGGLE_HUD);
+        event.register(FLYING_SWORD_TOGGLE_HUB);
         event.register(FLYING_SWORD_BENMING_ACTION);
     }
 }
