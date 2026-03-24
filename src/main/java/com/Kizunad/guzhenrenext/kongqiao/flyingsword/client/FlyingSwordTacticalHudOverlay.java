@@ -83,33 +83,6 @@ public final class FlyingSwordTacticalHudOverlay {
     private static final float DURABILITY_WARNING_RATIO = 0.60F;
     private static final float DURABILITY_DANGER_RATIO = 0.30F;
     private static final String META_SEPARATOR = " · ";
-    private static final String BENMING_DORMANT_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_BENMING_DORMANT);
-    private static final String RESONANCE_DORMANT_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_RESONANCE_DORMANT);
-    private static final String OVERLOAD_STABLE_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_OVERLOAD_STABLE);
-    private static final String LABEL_DURABILITY =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_DURABILITY);
-    private static final String LABEL_EXPERIENCE =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_EXPERIENCE);
-    private static final String LABEL_OVERLOAD_TITLE =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_OVERLOAD_TITLE);
-    private static final String LABEL_OVERLOAD =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_OVERLOAD);
-    private static final String ACTION_SELECT_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_SELECT);
-    private static final String ACTION_MODE_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_MODE);
-    private static final String ACTION_RECALL_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_RECALL);
-    private static final String ACTION_RESTORE_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_RESTORE);
-    private static final String ACTION_BENMING_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_BENMING);
-    private static final String ACTION_HUB_TEXT =
-        localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_HUB);
-
     private FlyingSwordTacticalHudOverlay() {}
 
     @SubscribeEvent
@@ -233,12 +206,13 @@ public final class FlyingSwordTacticalHudOverlay {
         @Nullable final BenmingSummary benmingSummary
     ) {
         if (benmingSummary == null) {
+            final String dormantText = benmingDormantText();
             return new OverloadCluster(
-                BENMING_DORMANT_TEXT,
+                dormantText,
                 TacticalTone.MUTED,
                 "--",
                 0.0F,
-                List.of(new BadgePlan(BENMING_DORMANT_TEXT, TacticalTone.MUTED))
+                List.of(new BadgePlan(dormantText, TacticalTone.MUTED))
             );
         }
         return new OverloadCluster(
@@ -251,6 +225,8 @@ public final class FlyingSwordTacticalHudOverlay {
     }
 
     private static ResourceBars buildResourceBars(final FlyingSwordViewModel focusView) {
+        final String durabilityLabel = durabilityLabel();
+        final String experienceLabel = experienceLabel();
         final String durabilityValue =
             Math.round(Math.max(0.0F, focusView.health()))
                 + "/"
@@ -263,13 +239,13 @@ public final class FlyingSwordTacticalHudOverlay {
             );
         return new ResourceBars(
             new BarPlan(
-                LABEL_DURABILITY,
+                durabilityLabel,
                 durabilityValue,
                 normalizeRatio(focusView.healthPercent()),
                 resolveDurabilityTone(focusView.healthPercent())
             ),
             new BarPlan(
-                LABEL_EXPERIENCE,
+                experienceLabel,
                 experienceValue,
                 normalizeRatio(focusView.expProgress()),
                 TacticalTone.INFO
@@ -279,15 +255,21 @@ public final class FlyingSwordTacticalHudOverlay {
 
     private static ActionHintRow buildActionHintRow(final HelpSignals helpSignals) {
         final TacticalTone cautionTone = resolveHintTone(helpSignals);
+        final String actionSelectText = actionSelectText();
+        final String actionModeText = actionModeText();
+        final String actionRecallText = actionRecallText();
+        final String actionRestoreText = actionRestoreText();
+        final String actionBenmingText = actionBenmingText();
+        final String actionHubText = actionHubText();
         return new ActionHintRow(
             List.of(
-                new ActionHint("Z", ACTION_SELECT_TEXT, ACTION_SELECT_TEXT, TacticalTone.INFO),
-                new ActionHint("X", ACTION_MODE_TEXT, ACTION_MODE_TEXT, TacticalTone.INFO),
-                new ActionHint("C", ACTION_RECALL_TEXT, ACTION_RECALL_TEXT, TacticalTone.WARNING),
-                new ActionHint("V", ACTION_RESTORE_TEXT, ACTION_RESTORE_TEXT, TacticalTone.INFO),
-                new ActionHint("G", ACTION_BENMING_TEXT, ACTION_BENMING_TEXT, cautionTone)
+                new ActionHint("Z", actionSelectText, actionSelectText, TacticalTone.INFO),
+                new ActionHint("X", actionModeText, actionModeText, TacticalTone.INFO),
+                new ActionHint("C", actionRecallText, actionRecallText, TacticalTone.WARNING),
+                new ActionHint("V", actionRestoreText, actionRestoreText, TacticalTone.INFO),
+                new ActionHint("G", actionBenmingText, actionBenmingText, cautionTone)
             ),
-            new ActionHint("H", ACTION_HUB_TEXT, ACTION_HUB_TEXT, cautionTone)
+            new ActionHint("H", actionHubText, actionHubText, cautionTone)
         );
     }
 
@@ -351,7 +333,7 @@ public final class FlyingSwordTacticalHudOverlay {
             );
         }
         if (alerts.isEmpty()) {
-            alerts.add(new BadgePlan(OVERLOAD_STABLE_TEXT, TacticalTone.INFO));
+            alerts.add(new BadgePlan(overloadStableText(), TacticalTone.INFO));
         }
         if (alerts.size() <= MAX_PRIORITY_ALERTS) {
             return List.copyOf(alerts);
@@ -489,7 +471,14 @@ public final class FlyingSwordTacticalHudOverlay {
         final int innerRight = rightX - THEME.panelPadding();
         int cursorY = y + THEME.panelPadding();
 
-        graphics.drawString(font, LABEL_OVERLOAD_TITLE, innerLeft, cursorY, THEME.textDimColor(), false);
+        graphics.drawString(
+            font,
+            overloadTitleLabel(),
+            innerLeft,
+            cursorY,
+            THEME.textDimColor(),
+            false
+        );
         graphics.drawString(
             font,
             clipText(
@@ -521,7 +510,7 @@ public final class FlyingSwordTacticalHudOverlay {
             innerRight,
             cursorY,
             new BarPlan(
-                LABEL_OVERLOAD,
+                overloadLabel(),
                 overloadCluster.overloadText(),
                 overloadCluster.fillRatio(),
                 overloadCluster.tone()
@@ -906,7 +895,7 @@ public final class FlyingSwordTacticalHudOverlay {
         @Nullable final FlyingSwordResonanceType resonanceType
     ) {
         final String resonanceLabel = resolveResonanceLabel(resonanceType);
-        return resonanceLabel.isBlank() ? RESONANCE_DORMANT_TEXT : resonanceLabel;
+        return resonanceLabel.isBlank() ? resonanceDormantText() : resonanceLabel;
     }
 
     private static String resolveResonanceLabel(
@@ -1000,6 +989,58 @@ public final class FlyingSwordTacticalHudOverlay {
 
     private static String localizedHudText(final String key, final Object... args) {
         return KongqiaoI18n.localizedText(key, args);
+    }
+
+    private static String benmingDormantText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_BENMING_DORMANT);
+    }
+
+    private static String resonanceDormantText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_RESONANCE_DORMANT);
+    }
+
+    private static String overloadStableText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_OVERLOAD_STABLE);
+    }
+
+    private static String durabilityLabel() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_DURABILITY);
+    }
+
+    private static String experienceLabel() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_EXPERIENCE);
+    }
+
+    private static String overloadTitleLabel() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_OVERLOAD_TITLE);
+    }
+
+    private static String overloadLabel() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_LABEL_OVERLOAD);
+    }
+
+    private static String actionSelectText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_SELECT);
+    }
+
+    private static String actionModeText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_MODE);
+    }
+
+    private static String actionRecallText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_RECALL);
+    }
+
+    private static String actionRestoreText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_RESTORE);
+    }
+
+    private static String actionBenmingText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_BENMING);
+    }
+
+    private static String actionHubText() {
+        return localizedHudText(KongqiaoI18n.FLYING_SWORD_TACTICAL_HUD_ACTION_HUB);
     }
 
     private record CompactHudRenderPlan(

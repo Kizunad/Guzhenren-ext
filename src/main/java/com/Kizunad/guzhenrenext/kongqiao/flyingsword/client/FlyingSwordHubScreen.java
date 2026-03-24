@@ -130,9 +130,9 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
     private static final int CULTIVATION_SCOPE_CARD_Y = 318;
     private static final int CULTIVATION_SCOPE_CARD_HEIGHT = 72;
     private static final int CULTIVATION_RESOURCE_LIMIT = 3;
-    private static final int HELP_ROUTE_TOP = 90;
-    private static final int HELP_ROUTE_CARD_HEIGHT = 58;
-    private static final int HELP_ROUTE_GAP = 8;
+    private static final int HELP_ROUTE_TOP = 82;
+    private static final int HELP_ROUTE_CARD_HEIGHT = 50;
+    private static final int HELP_ROUTE_GAP = 6;
     private static final int CLOSE_KEY_COUNT = 2;
     private static final int MULTILINE_SECOND_BREAK_THRESHOLD = 48;
 
@@ -632,7 +632,7 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
         );
         addBodyLabel(
             panel,
-            SUMMARY_BODY_Y + tacticalTheme.bodyLineHeight() + tacticalTheme.regularGap(),
+            SUMMARY_BODY_Y + tacticalTheme.bodyLineHeight() * 2 + tacticalTheme.tightGap(),
             width,
             localizedText(KongqiaoI18n.FLYING_SWORD_HUB_HELP_SUMMARY_BODY_SECONDARY)
         );
