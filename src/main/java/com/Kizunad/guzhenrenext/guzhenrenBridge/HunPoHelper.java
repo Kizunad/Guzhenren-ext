@@ -71,8 +71,8 @@ public final class HunPoHelper {
             return 0.0;
         }
         final double original = readDoubleField(variables, FIELD_HUNPO, 0.0);
-        final double reflectedMax = readDoubleField(variables, FIELD_MAX_HUNPO, 0.0);
-        final double max = reflectedMax > 0.0 ? reflectedMax : Double.MAX_VALUE;
+        final Double reflectedMax = readOptionalDoubleField(variables, FIELD_MAX_HUNPO);
+        final double max = reflectedMax == null ? Double.MAX_VALUE : reflectedMax;
 
         final double newValue = Math.max(0, Math.min(max, original + amount));
         if (Double.compare(original, newValue) == 0) {
@@ -164,8 +164,10 @@ public final class HunPoHelper {
             return 0.0;
         }
         final double original = readDoubleField(variables, FIELD_RESISTANCE, 0.0);
-        final double maxResistance = readDoubleField(variables, FIELD_MAX_RESISTANCE, 0.0);
-        final double max = maxResistance > 0 ? maxResistance : Double.MAX_VALUE;
+        final Double maxResistance = readOptionalDoubleField(variables, FIELD_MAX_RESISTANCE);
+        final double max = maxResistance == null
+            ? Double.MAX_VALUE
+            : (maxResistance > 0.0 ? maxResistance : 0.0);
 
         final double newValue = Math.max(0, Math.min(max, original + amount));
         if (Double.compare(original, newValue) == 0) {

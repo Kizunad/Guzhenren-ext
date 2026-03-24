@@ -68,8 +68,8 @@ public final class ZhenYuanHelper {
             return 0.0;
         }
         final double original = readDoubleField(variables, FIELD_ZHENYUAN, 0.0);
-        final double reflectedMax = readDoubleField(variables, FIELD_MAX_ZHENYUAN, 0.0);
-        final double max = reflectedMax > 0.0 ? reflectedMax : Double.MAX_VALUE;
+        final Double reflectedMax = readOptionalDoubleField(variables, FIELD_MAX_ZHENYUAN);
+        final double max = reflectedMax == null ? Double.MAX_VALUE : reflectedMax;
 
         // 确保真元在 0 到 最大值 之间
         final double newValue = Math.max(0, Math.min(max, original + amount));
@@ -173,15 +173,20 @@ public final class ZhenYuanHelper {
         final String fieldName,
         final double fallback
     ) {
+        final Double value = readOptionalDoubleField(variables, fieldName);
+        return value != null ? value : fallback;
+    }
+
+    private static Double readOptionalDoubleField(final Object variables, final String fieldName) {
         if (variables == null) {
-            return fallback;
+            return null;
         }
         try {
             final Field field = variables.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             return field.getDouble(variables);
         } catch (ReflectiveOperationException | RuntimeException exception) {
-            return fallback;
+            return null;
         }
     }
 
