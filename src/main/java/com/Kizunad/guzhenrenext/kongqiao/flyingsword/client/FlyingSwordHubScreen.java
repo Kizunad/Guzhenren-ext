@@ -239,7 +239,9 @@ public final class FlyingSwordHubScreen extends TinyUIScreen {
     }
 
     static boolean isCloseKey(final int keyCode) {
-        return keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_TAB;
+        return keyCode == GLFW.GLFW_KEY_H
+            || keyCode == GLFW.GLFW_KEY_ESCAPE
+            || keyCode == GLFW.GLFW_KEY_TAB;
     }
 
     int currentTabForTesting() {

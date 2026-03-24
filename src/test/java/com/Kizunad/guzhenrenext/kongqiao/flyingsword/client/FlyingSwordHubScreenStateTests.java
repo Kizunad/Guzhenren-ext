@@ -32,6 +32,7 @@ final class FlyingSwordHubScreenStateTests {
         Path.of("build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties");
 
     private static final int KEY_ESCAPE = 256;
+    private static final int KEY_H = 72;
     private static final int KEY_TAB = 258;
     private static final int SCREEN_WIDTH_LARGE = 1920;
     private static final int SCREEN_HEIGHT_LARGE = 1080;
@@ -72,8 +73,12 @@ final class FlyingSwordHubScreenStateTests {
     }
 
     @Test
-    void escapeAndTabBothRequestClose() throws Exception {
+    void hEscapeAndTabAllRequestClose() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
+
+        final Object hScreen = api.newHubScreen();
+        assertTrue(api.keyPressed(hScreen, KEY_H));
+        assertTrue(api.closeRequested(hScreen));
 
         final Object escScreen = api.newHubScreen();
         assertTrue(api.keyPressed(escScreen, KEY_ESCAPE));
