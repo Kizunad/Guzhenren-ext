@@ -74,9 +74,13 @@ public final class ZhenYuanHelper {
         // 确保真元在 0 到 最大值 之间
         final double newValue = Math.max(0, Math.min(max, original + amount));
 
-        if (Double.compare(original, newValue) != 0 && writeDoubleField(variables, FIELD_ZHENYUAN, newValue)) {
-            markSyncDirty(variables);
+        if (Double.compare(original, newValue) == 0) {
+            return newValue;
         }
+        if (!writeDoubleField(variables, FIELD_ZHENYUAN, newValue)) {
+            return original;
+        }
+        markSyncDirty(variables);
         return newValue;
     }
 
