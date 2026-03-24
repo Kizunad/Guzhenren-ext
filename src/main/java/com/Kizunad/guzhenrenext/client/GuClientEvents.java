@@ -4,7 +4,7 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.client.effect.BackPngTimedEffects;
 import com.Kizunad.guzhenrenext.client.gui.SkillWheelScreen;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.TweakScreen;
-import com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHudState;
+import com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHubScreen;
 import com.Kizunad.guzhenrenext.network.PacketOpenNianTouGui;
 import com.Kizunad.guzhenrenext.network.ServerboundBenmingSwordActionPayload;
 import com.Kizunad.guzhenrenext.network.ServerboundFlyingSwordActionPayload;
@@ -130,9 +130,10 @@ public final class GuClientEvents {
             }
         }
 
-        // 切换飞剑 HUD 显示
-        while (GuKeyBindings.FLYING_SWORD_TOGGLE_HUD.consumeClick()) {
-            FlyingSwordHudState.toggleHud();
+        while (GuKeyBindings.FLYING_SWORD_TOGGLE_HUB.consumeClick()) {
+            if (minecraft.screen == null || FlyingSwordHubScreen.isHubScreen(minecraft.screen)) {
+                minecraft.setScreen(FlyingSwordHubScreen.toggleHubScreen(minecraft.screen));
+            }
         }
     }
 

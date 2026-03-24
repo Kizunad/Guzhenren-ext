@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.guzhenrenBridge;
 
-import net.guzhenren.network.GuzhenrenModVariables;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -9,6 +11,13 @@ import net.minecraft.world.entity.LivingEntity;
  * 负责处理实体的身份识别、境界判断、空窍状态检查等只读操作。
  */
 public final class EntityHelper {
+
+    private static final String GUZHENREN_MOD_VARIABLES_CLASS_NAME =
+        "net.guzhenren.network.GuzhenrenModVariables";
+    private static final String PLAYER_VARIABLES_FIELD_NAME = "PLAYER_VARIABLES";
+    private static final String ENTITY_GET_DATA_METHOD_NAME = "getData";
+    private static final String FIELD_JIEDUAN = "jieduan";
+    private static final String FIELD_KONGQIAO = "kongqiao";
 
     private EntityHelper() {}
 
@@ -22,13 +31,12 @@ public final class EntityHelper {
         if (entity == null) {
             return false;
         }
-        try {
-            var vars = getVariables(entity);
-            // 根据源码，jieduan (阶段/转数) >= 1 或 kongqiao (空窍完整度) > 0 视为已开窍
-            return vars.jieduan >= 1.0 || vars.kongqiao > 0;
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return false;
         }
+        return readDoubleField(variables, FIELD_JIEDUAN, 0.0) >= 1.0
+            || readDoubleField(variables, FIELD_KONGQIAO, 0.0) > 0.0;
     }
 
     /**
@@ -41,12 +49,11 @@ public final class EntityHelper {
         if (entity == null) {
             return 0;
         }
-        try {
-            // 向下取整，jieduan 可能是 1.5 (一转中阶)
-            return (int) getVariables(entity).jieduan;
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return 0;
         }
+        return (int) readDoubleField(variables, FIELD_JIEDUAN, 0.0);
     }
 
     /**
@@ -59,19 +66,41 @@ public final class EntityHelper {
         if (entity == null) {
             return 0.0;
         }
+        return readDoubleField(getVariables(entity), FIELD_KONGQIAO, 0.0);
+    }
+
+    private static Object getVariables(final LivingEntity entity) {
+        if (entity == null) {
+            return null;
+        }
         try {
-            return getVariables(entity).kongqiao;
-        } catch (Exception e) {
-            return 0.0;
+            final Class<?> variablesHolderClass = Class.forName(GUZHENREN_MOD_VARIABLES_CLASS_NAME);
+            final Field accessorField = variablesHolderClass.getField(PLAYER_VARIABLES_FIELD_NAME);
+            final Object accessor = accessorField.get(null);
+            final Method getDataMethod = entity.getClass().getMethod(
+                ENTITY_GET_DATA_METHOD_NAME,
+                EntityDataAccessor.class
+            );
+            return getDataMethod.invoke(entity, accessor);
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException exception) {
+            return null;
         }
     }
 
-    /**
-     * 安全获取变量的内部辅助方法
-     */
-    private static GuzhenrenModVariables.PlayerVariables getVariables(
-        LivingEntity entity
+    private static double readDoubleField(
+        final Object variables,
+        final String fieldName,
+        final double fallback
     ) {
-        return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
+        if (variables == null) {
+            return fallback;
+        }
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.getDouble(variables);
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return fallback;
+        }
     }
 }

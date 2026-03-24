@@ -17,9 +17,10 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -94,6 +95,7 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
 
     private final Theme theme = Theme.vanilla();
     private final int initialTab;
+    private final Integer returnHubTabOnClose;
 
     private int currentTab = TAB_INDEX_OVERVIEW;
 
@@ -102,16 +104,24 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
     private final Button[] tabButtons = new Button[TAB_COUNT];
 
     public FlyingSwordHelpScreen() {
-        this(TAB_INDEX_OVERVIEW);
+        this(TAB_INDEX_OVERVIEW, null);
     }
 
     public FlyingSwordHelpScreen(final int initialTab) {
+        this(initialTab, null);
+    }
+
+    private FlyingSwordHelpScreen(
+        final int initialTab,
+        final Integer returnHubTabOnClose
+    ) {
         super(
             KongqiaoI18n.text(KongqiaoI18n.HELP_TITLE),
             createRoot()
         );
         this.initialTab = sanitizeTabIndex(initialTab);
         this.currentTab = this.initialTab;
+        this.returnHubTabOnClose = returnHubTabOnClose;
     }
 
     private static UIRoot createRoot() {
@@ -122,8 +132,27 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
         return new FlyingSwordHelpScreen(TAB_INDEX_BENMING);
     }
 
+    public static FlyingSwordHelpScreen openFromHub(final int initialTab) {
+        return new FlyingSwordHelpScreen(
+            initialTab,
+            FlyingSwordHubScreen.helpTabIndex()
+        );
+    }
+
     static List<String> helpTabKeys() {
         return List.copyOf(Arrays.asList(TAB_KEYS));
+    }
+
+    static int overviewTabIndex() {
+        return TAB_INDEX_OVERVIEW;
+    }
+
+    static int combatTabIndex() {
+        return TAB_INDEX_COMBAT;
+    }
+
+    static int growthTabIndex() {
+        return TAB_INDEX_GROWTH;
     }
 
     static int benmingTabIndex() {
@@ -132,6 +161,14 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
 
     int currentTabForTesting() {
         return currentTab;
+    }
+
+    boolean returnsToHubOnCloseForTesting() {
+        return returnHubTabOnClose != null;
+    }
+
+    Screen resolveCloseTargetForTesting() {
+        return buildCloseTargetScreen();
     }
 
     public static BenmingHelpRoute routeForBenmingGuide(final String topicKey) {
@@ -231,6 +268,13 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
         switchTab(initialTab);
     }
 
+    @Override
+    public void onClose() {
+        if (minecraft != null) {
+            minecraft.setScreen(buildCloseTargetScreen());
+        }
+    }
+
     private void applyUiScale(final UIRoot root) {
         final double uiScale = sanitizeScaleFactor(
             ClientConfig.INSTANCE.kongQiaoUiScale.get()
@@ -291,7 +335,7 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
             CLOSE_BUTTON_SIZE,
             CLOSE_BUTTON_SIZE
         );
-        closeButton.setOnClick(() -> Minecraft.getInstance().setScreen(null));
+        closeButton.setOnClick(this::onClose);
         window.addChild(closeButton);
 
         int tabX = WINDOW_PADDING;
@@ -362,7 +406,7 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
         y = addLabel(width, y, KongqiaoI18n.HELP_OVERVIEW_KEY_MODE);
         y = addLabel(width, y, KongqiaoI18n.HELP_OVERVIEW_KEY_RECALL);
         y = addLabel(width, y, KongqiaoI18n.HELP_OVERVIEW_KEY_RESTORE);
-        y = addLabel(width, y, KongqiaoI18n.HELP_OVERVIEW_KEY_HUD);
+        y = addLabel(width, y, KongqiaoI18n.HELP_OVERVIEW_KEY_HUB);
         y = addLabel(width, y, KongqiaoI18n.HELP_OVERVIEW_KEY_BENMING_ACTION);
 
         y += SECTION_GAP;
@@ -507,17 +551,31 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
     }
 
     private int addSectionTitle(final int width, final int y, final String key) {
-        final Label label = new Label(KongqiaoI18n.text(key), theme);
-        label.setFrame(0, y, width, LABEL_HEIGHT);
+        final Component text = KongqiaoI18n.text(key);
+        final Label label = new Label(text, theme);
+        final int lineCount = resolveLineCount(text);
+        final int height = Math.max(LABEL_HEIGHT, LABEL_HEIGHT * lineCount);
+        label.setFrame(0, y, width, height);
         contentContainer.addChild(label);
-        return y + LINE_STEP + SECTION_TITLE_PADDING;
+        return y + Math.max(LINE_STEP, LINE_STEP * lineCount) + SECTION_TITLE_PADDING;
     }
 
     private int addLabel(final int width, final int y, final String key) {
-        final Label label = new Label(KongqiaoI18n.text(key), theme);
-        label.setFrame(0, y, width, LABEL_HEIGHT * 2);
+        final Component text = KongqiaoI18n.text(key);
+        final Label label = new Label(text, theme);
+        final int lineCount = Math.max(2, resolveLineCount(text));
+        final int height = LABEL_HEIGHT * lineCount;
+        label.setFrame(0, y, width, height);
         contentContainer.addChild(label);
-        return y + LINE_STEP * 2;
+        return y + LINE_STEP * lineCount;
+    }
+
+    private static int resolveLineCount(final Component text) {
+        final String content = Objects.requireNonNullElse(text.getString(), "");
+        if (content.isEmpty()) {
+            return 1;
+        }
+        return content.split("\\n", -1).length;
     }
 
     private static int sanitizeTabIndex(final int tabIndex) {
@@ -539,5 +597,12 @@ public final class FlyingSwordHelpScreen extends TinyUIScreen {
             return DEFAULT_BENMING_HELP_ENTRY;
         }
         return helpEntryKey;
+    }
+
+    private Screen buildCloseTargetScreen() {
+        if (returnHubTabOnClose == null) {
+            return null;
+        }
+        return FlyingSwordHubScreen.openTab(returnHubTabOnClose);
     }
 }

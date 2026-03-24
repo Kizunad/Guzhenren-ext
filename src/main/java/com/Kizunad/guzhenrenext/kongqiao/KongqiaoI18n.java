@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -109,8 +110,8 @@ public final class KongqiaoI18n {
         "screen.guzhenrenext.forge.help.overview.key_recall";
     public static final String HELP_OVERVIEW_KEY_RESTORE =
         "screen.guzhenrenext.forge.help.overview.key_restore";
-    public static final String HELP_OVERVIEW_KEY_HUD =
-        "screen.guzhenrenext.forge.help.overview.key_hud";
+    public static final String HELP_OVERVIEW_KEY_HUB =
+        "screen.guzhenrenext.forge.help.overview.key_hub";
     public static final String HELP_OVERVIEW_KEY_BENMING_ACTION =
         "screen.guzhenrenext.forge.help.overview.key_benming_action";
     public static final String HELP_OVERVIEW_NOTE =
@@ -343,6 +344,440 @@ public final class KongqiaoI18n {
         "hud.guzhenrenext.flyingsword.benming.resonance.devour.short";
     public static final String BENMING_HUD_OVERLOAD_TEXT =
         "hud.guzhenrenext.flyingsword.benming.overload.text";
+    public static final String FLYING_SWORD_HUB_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.title";
+    public static final String FLYING_SWORD_HUB_TAB_OVERVIEW =
+        "screen.guzhenrenext.flyingsword.hub.tab.overview";
+    public static final String FLYING_SWORD_HUB_TAB_CULTIVATION =
+        "screen.guzhenrenext.flyingsword.hub.tab.cultivation";
+    public static final String FLYING_SWORD_HUB_TAB_HELP =
+        "screen.guzhenrenext.flyingsword.hub.tab.help";
+    public static final String FLYING_SWORD_HUB_CLOSE_HINT =
+        "screen.guzhenrenext.flyingsword.hub.close_hint";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SUMMARY_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.summary.title";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SUMMARY_BODY_PRIMARY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.summary.body.primary";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SUMMARY_BODY_SECONDARY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.summary.body.secondary";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SCOPE_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.scope.title";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SCOPE_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.scope.summary";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SCOPE_ACTION =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.scope.action";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SCOPE_BADGE_SHARED =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.scope.badge.shared";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SCOPE_BADGE_ORIGINAL =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.scope.badge.original";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_SCOPE_BADGE_NO_SLOT =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.scope.badge.no_slot";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_DETAIL_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.detail.title";
+    public static final String FLYING_SWORD_HUB_PROGRESS_LABEL =
+        "screen.guzhenrenext.flyingsword.hub.progress.label";
+    public static final String FLYING_SWORD_HUB_HELP_SUMMARY_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.help.summary.title";
+    public static final String FLYING_SWORD_HUB_HELP_SUMMARY_BODY_PRIMARY =
+        "screen.guzhenrenext.flyingsword.hub.help.summary.body.primary";
+    public static final String FLYING_SWORD_HUB_HELP_SUMMARY_BODY_SECONDARY =
+        "screen.guzhenrenext.flyingsword.hub.help.summary.body.secondary";
+    public static final String FLYING_SWORD_HUB_HELP_BADGE_HUB =
+        "screen.guzhenrenext.flyingsword.hub.help.badge.hub";
+    public static final String FLYING_SWORD_HUB_HELP_BADGE_DEEP_HELP =
+        "screen.guzhenrenext.flyingsword.hub.help.badge.deep_help";
+    public static final String FLYING_SWORD_HUB_HELP_BADGE_RETURN =
+        "screen.guzhenrenext.flyingsword.hub.help.badge.return";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_QUICK_START_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.help.route.quick_start.title";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_QUICK_START_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.help.route.quick_start.summary";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_QUICK_START_ACTION =
+        "screen.guzhenrenext.flyingsword.hub.help.route.quick_start.action";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_OPERATIONS_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.help.route.operations.title";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_OPERATIONS_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.help.route.operations.summary";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_OPERATIONS_ACTION =
+        "screen.guzhenrenext.flyingsword.hub.help.route.operations.action";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_ROUTES_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.help.route.routes.title";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_ROUTES_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.help.route.routes.summary";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_ROUTES_ACTION =
+        "screen.guzhenrenext.flyingsword.hub.help.route.routes.action";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_FAILURES_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.help.route.failures.title";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_FAILURES_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.help.route.failures.summary";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_FAILURES_ACTION =
+        "screen.guzhenrenext.flyingsword.hub.help.route.failures.action";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_COMPLETE_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.help.route.complete.title";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_COMPLETE_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.help.route.complete.summary";
+    public static final String FLYING_SWORD_HUB_HELP_ROUTE_COMPLETE_ACTION =
+        "screen.guzhenrenext.flyingsword.hub.help.route.complete.action";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_EMPTY_ROSTER_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.empty_roster.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_EMPTY_RESONANCE =
+        "screen.guzhenrenext.flyingsword.hub.overview.empty_resonance";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_FOCUS_NONE_BADGE =
+        "screen.guzhenrenext.flyingsword.hub.overview.focus.none_badge";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_WINDOW_BADGE =
+        "screen.guzhenrenext.flyingsword.hub.overview.window.badge";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_ONLINE =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.online";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_NONE =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.none";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_NOTE =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.note";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROSTER_NOTE_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.roster.note_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROSTER_EMPTY_NOTE =
+        "screen.guzhenrenext.flyingsword.hub.overview.roster.empty_note";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_ROUTE_HELP =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.route_help";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_ROUTE_DEFAULT =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.route_default";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_SQUAD_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.squad.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_ROUTE_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.route.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_STATUS_AVAILABLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.status.available";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_STATUS_RESTRICTED =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.status.restricted";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_NO_SWORD =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.no_sword";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_NO_BENMING =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.no_benming";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_NOT_BENMING =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.not_benming";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_BACKLASH =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.backlash";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_RECOVERY =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.recovery";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_AFTERSHOCK =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.aftershock";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_DANGER =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.danger";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_COOLDOWN =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.cooldown";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_BURST_READY =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.burst.ready";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_SQUAD_NO_SWORD =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.squad.no_sword";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ACTION_SQUAD_READY =
+        "screen.guzhenrenext.flyingsword.hub.overview.action.squad.ready";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_EMPTY_ROSTER =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.empty_roster";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_NO_BENMING =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.no_benming";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_DANGER =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.danger";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_BACKLASH =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.backlash";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_RECOVERY =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.recovery";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_AFTERSHOCK =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.aftershock";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_BURST_READY =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.burst_ready";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_STABLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.stable";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_CULTIVATION_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.cultivation.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_RECOMMENDATION_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.recommendation.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_GROWTH_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.growth.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_TO_CULTIVATION =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.to_cultivation";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_TO_HELP =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.to_help";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_STAY_OVERVIEW =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.stay_overview";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_COLUMN_ROSTER_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.column.roster.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_COLUMN_FOCUS_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.column.focus.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_COLUMN_ACTION_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.column.action.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_COLUMN_ROUTE_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.column.route.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_SQUAD_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.squad.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_BENMING_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.benming.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_GROWTH_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.growth.title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_SELECTED =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.selected";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_RECENT =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.recent";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_STABLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.stable";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_EMPTY =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.empty";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_HELP =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.help";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_CULTIVATION =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.cultivation";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_GROWTH =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.growth";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_BURST_READY =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.burst_ready";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_NO_PRIORITY =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.no_priority";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_SWORD_COUNT =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.sword_count";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_HIDDEN_COUNT =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.hidden_count";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_WARNING_COUNT =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.warning_count";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_DANGER_COUNT =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.danger_count";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_BENMING_IN_WINDOW =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.benming_in_window";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_BENMING_OUT_WINDOW =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.benming_out_window";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_FOCUS_BENMING =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.focus_benming";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BADGE_FOCUS_SELECTED =
+        "screen.guzhenrenext.flyingsword.hub.overview.badge.focus_selected";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_SQUAD_LINE_COUNTS =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.squad.line_counts";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_SQUAD_LINE_ALERTS =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.squad.line_alerts";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_SQUAD_LINE_EMPTY =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.squad.line_empty";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_SQUAD_LINE_VISIBLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.squad.line_visible";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_BENMING_IDLE_PHASE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.benming.idle_phase";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_BENMING_IDLE_GUIDE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.benming.idle_guide";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_GROWTH_IDLE_TITLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.growth.idle_title";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_GROWTH_IDLE_BODY =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.growth.idle_body";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SUMMARY_GROWTH_IDLE_GUIDE =
+        "screen.guzhenrenext.flyingsword.hub.overview.summary.growth.idle_guide";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROSTER_CAPTION_HIDDEN =
+        "screen.guzhenrenext.flyingsword.hub.overview.roster.caption_hidden";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROSTER_CAPTION_FULL =
+        "screen.guzhenrenext.flyingsword.hub.overview.roster.caption_full";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_FOCUS_EMPTY_BODY =
+        "screen.guzhenrenext.flyingsword.hub.overview.focus.empty_body";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_FOCUS_EMPTY_GUIDE =
+        "screen.guzhenrenext.flyingsword.hub.overview.focus.empty_guide";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_CULTIVATION_EMPTY =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.cultivation.empty";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_CULTIVATION_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.cultivation.active";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_GROWTH_EMPTY =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.growth.empty";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_GROWTH_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.growth.summary";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_GROWTH_LEVEL_CAP =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.growth.level_cap";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_GROWTH_PROGRESS =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.growth.progress";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_ROUTE_GROWTH_MAX_BADGE =
+        "screen.guzhenrenext.flyingsword.hub.overview.route.growth.max_badge";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_DURABILITY =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.durability";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_EXPERIENCE =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.experience";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_OVERLOAD =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.overload";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_BENMING_OVERLOAD =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.benming_overload";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_FOCUS_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.focus_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_DISTANCE_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.distance_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_MODE_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.mode_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_QUALITY_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.quality_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_RESONANCE_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.resonance_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_EXPERIENCE_PROGRESS_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.experience_progress_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_PHASE_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.phase_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_LABEL_LEVEL_PREFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.label.level_prefix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_SWORD_SUFFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.sword_suffix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_DISTANCE_SUFFIX =
+        "screen.guzhenrenext.flyingsword.hub.overview.distance_suffix";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_PHASE_STABLE =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.phase.stable";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_PHASE_WARNING =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.phase.warning";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_PHASE_DANGER =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.phase.danger";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_PHASE_BACKLASH =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.phase.backlash";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_PHASE_RECOVERY =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.phase.recovery";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_PHASE_AFTERSHOCK =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.phase.aftershock";
+    public static final String FLYING_SWORD_HUB_OVERVIEW_BENMING_PHASE_BURST =
+        "screen.guzhenrenext.flyingsword.hub.overview.benming.phase.burst";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TAB_FORGE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.tab.forge";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TAB_TRAINING =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.tab.training";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TAB_CLUSTER =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.tab.cluster";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TAB_GROWTH =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.tab.growth";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_SUMMARY_IDLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.summary.idle";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_SUMMARY_READY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.summary.ready";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_SUMMARY_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.summary.active";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_STATUS =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.status";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_STATUS_FALLBACK =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.status_fallback";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_PROGRESS_TEMPLATE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.progress";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_BADGE_SCORE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.badge.score";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_BADGE_TYPE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.badge.type";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_BADGE_READY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.badge.ready";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FORGE_BADGE_FEED =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.forge.badge.feed";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_ACTION_OPEN_FORGE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.action.open_forge";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TRAINING_SUMMARY_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.training.summary.active";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TRAINING_SUMMARY_IDLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.training.summary.idle";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TRAINING_STATUS =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.training.status";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TRAINING_PROGRESS =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.training.progress";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_TRAINING_BADGE_EXP =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.training.badge.exp";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_ACTION_OPEN_TRAINING =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.action.open_training";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_SUMMARY_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.summary.active";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_SUMMARY_IDLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.summary.idle";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_STATUS =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.status";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_PROGRESS =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.progress";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_BADGE_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.badge.active";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_BADGE_SELECTED =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.badge.selected";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_BADGE_BENMING_IN =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.badge.benming_in";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_CLUSTER_BADGE_BENMING_OUT =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.cluster.badge.benming_out";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_ACTION_OPEN_CLUSTER =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.action.open_cluster";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_SUMMARY_IDLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.summary.idle";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_STATUS_IDLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.status.idle";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_PROGRESS_IDLE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.progress.idle";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_SUMMARY_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.summary.active";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_STATUS_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.status.active";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_PROGRESS_ACTIVE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.progress.active";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_BADGE_BENMING =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.badge.benming";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_BADGE_NORMAL =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.badge.normal";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_GROWTH_BADGE_EXP =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.growth.badge.exp";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_ACTION_OPEN_GROWTH_HELP =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.action.open_growth_help";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_BADGE_PRESENT =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.badge.present";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_BADGE_BENMING =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.badge.benming";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_BADGE_BURST_READY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.badge.burst_ready";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_UNLOCKED =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.unlocked";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_UNKNOWN_QUALITY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.unknown_quality";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_LABEL =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.label";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_DESC =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.desc";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_SOURCE_BENMING =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.source.benming";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_SOURCE_SELECTED =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.source.selected";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_SOURCE_RECENT =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.source.recent";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FOCUS_SOURCE_NONE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.focus.source.none";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FALLBACK_SUMMARY =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.fallback.summary";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FALLBACK_STATUS =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.fallback.status";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FALLBACK_PROGRESS =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.fallback.progress";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FALLBACK_ACTION =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.fallback.action";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_FALLBACK_BADGE =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.fallback.badge";
+    public static final String FLYING_SWORD_HUB_CULTIVATION_ROUTES_REQUIRED =
+        "screen.guzhenrenext.flyingsword.hub.cultivation.routes.required";
+    public static final String FLYING_SWORD_TACTICAL_HUD_BENMING_DORMANT =
+        "hud.guzhenrenext.flyingsword.tactical.benming_dormant";
+    public static final String FLYING_SWORD_TACTICAL_HUD_RESONANCE_DORMANT =
+        "hud.guzhenrenext.flyingsword.tactical.resonance_dormant";
+    public static final String FLYING_SWORD_TACTICAL_HUD_OVERLOAD_STABLE =
+        "hud.guzhenrenext.flyingsword.tactical.overload_stable";
+    public static final String FLYING_SWORD_TACTICAL_HUD_SWORD_NAME =
+        "hud.guzhenrenext.flyingsword.tactical.sword_name";
+    public static final String FLYING_SWORD_TACTICAL_HUD_LEVEL_BADGE =
+        "hud.guzhenrenext.flyingsword.tactical.level_badge";
+    public static final String FLYING_SWORD_TACTICAL_HUD_DISTANCE =
+        "hud.guzhenrenext.flyingsword.tactical.distance";
+    public static final String FLYING_SWORD_TACTICAL_HUD_EXPERIENCE_VALUE =
+        "hud.guzhenrenext.flyingsword.tactical.experience_value";
+    public static final String FLYING_SWORD_TACTICAL_HUD_LABEL_DURABILITY =
+        "hud.guzhenrenext.flyingsword.tactical.label.durability";
+    public static final String FLYING_SWORD_TACTICAL_HUD_LABEL_EXPERIENCE =
+        "hud.guzhenrenext.flyingsword.tactical.label.experience";
+    public static final String FLYING_SWORD_TACTICAL_HUD_LABEL_OVERLOAD_TITLE =
+        "hud.guzhenrenext.flyingsword.tactical.label.overload_title";
+    public static final String FLYING_SWORD_TACTICAL_HUD_LABEL_OVERLOAD =
+        "hud.guzhenrenext.flyingsword.tactical.label.overload";
+    public static final String FLYING_SWORD_TACTICAL_HUD_ACTION_SELECT =
+        "hud.guzhenrenext.flyingsword.tactical.action.select";
+    public static final String FLYING_SWORD_TACTICAL_HUD_ACTION_MODE =
+        "hud.guzhenrenext.flyingsword.tactical.action.mode";
+    public static final String FLYING_SWORD_TACTICAL_HUD_ACTION_RECALL =
+        "hud.guzhenrenext.flyingsword.tactical.action.recall";
+    public static final String FLYING_SWORD_TACTICAL_HUD_ACTION_RESTORE =
+        "hud.guzhenrenext.flyingsword.tactical.action.restore";
+    public static final String FLYING_SWORD_TACTICAL_HUD_ACTION_BENMING =
+        "hud.guzhenrenext.flyingsword.tactical.action.benming";
+    public static final String FLYING_SWORD_TACTICAL_HUD_ACTION_HUB =
+        "hud.guzhenrenext.flyingsword.tactical.action.hub";
     public static final String RESONANCE_OFFENSE_NAME =
         "screen.guzhenrenext.forge.help.resonance.offense.name";
     public static final String RESONANCE_OFFENSE_DESC =
@@ -433,6 +868,19 @@ public final class KongqiaoI18n {
      */
     public static Component text(String key, Object... args) {
         return Component.translatable(key, args);
+    }
+
+    public static String localizedText(final String key, final Object... args) {
+        final String localized = localizedTextWithBundledFallback(key, key, args);
+        if (!Objects.equals(localized, key)) {
+            return localized;
+        }
+        return localizedTextFromBundledLang(
+            key,
+            resolveTranslationNamespace(key),
+            key,
+            args
+        );
     }
 
     /**

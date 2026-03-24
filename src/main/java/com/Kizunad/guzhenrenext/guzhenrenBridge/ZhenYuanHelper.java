@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.guzhenrenBridge;
 
-import net.guzhenren.network.GuzhenrenModVariables;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -8,11 +10,29 @@ import net.minecraft.world.entity.LivingEntity;
  */
 public final class ZhenYuanHelper {
 
+    private static final String GUZHENREN_MOD_VARIABLES_CLASS_NAME =
+        "net.guzhenren.network.GuzhenrenModVariables";
+    private static final String PLAYER_VARIABLES_FIELD_NAME = "PLAYER_VARIABLES";
+    private static final String ENTITY_GET_DATA_METHOD_NAME = "getData";
+    private static final String FIELD_ZHENYUAN = "zhenyuan";
+    private static final String FIELD_MAX_ZHENYUAN = "zuida_zhenyuan";
+    private static final String FIELD_ZHUANSHU = "zhuanshu";
+    private static final String FIELD_JIEDUAN = "jieduan";
+    private static final String METHOD_MARK_SYNC_DIRTY = "markSyncDirty";
+    private static final String[] DIRTY_FIELD_CANDIDATES = {
+        "_syncDirty",
+        "syncDirty",
+    };
+
     private ZhenYuanHelper() {}
     private static final double MIN_ZHUANSHU = 1.0;
     private static final double POWER_MULTIPLIER = 4.0;
     private static final double DENOM_MULTIPLIER = 3.0;
     private static final double DENOM_DIVISOR = 96.0;
+
+    public static boolean hasRuntimeVariables(final LivingEntity entity) {
+        return getVariables(entity) != null;
+    }
 
     /**
      * 获取当前真元。
@@ -21,11 +41,7 @@ public final class ZhenYuanHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            return getVariables(entity).zhenyuan;
-        } catch (Exception e) {
-            return 0.0;
-        }
+        return readDoubleField(getVariables(entity), FIELD_ZHENYUAN, 0.0);
     }
 
     /**
@@ -35,11 +51,7 @@ public final class ZhenYuanHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            return getVariables(entity).zuida_zhenyuan;
-        } catch (Exception e) {
-            return 0.0;
-        }
+        return readDoubleField(getVariables(entity), FIELD_MAX_ZHENYUAN, 0.0);
     }
 
     /**
@@ -51,22 +63,20 @@ public final class ZhenYuanHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            var vars = getVariables(entity);
-            double original = vars.zhenyuan;
-            double max = vars.zuida_zhenyuan;
-
-            // 确保真元在 0 到 最大值 之间
-            double newValue = Math.max(0, Math.min(max, original + amount));
-
-            if (Double.compare(original, newValue) != 0) {
-                vars.zhenyuan = newValue;
-                PlayerVariablesSyncHelper.markSyncDirty(vars);
-            }
-            return newValue;
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return 0.0;
         }
+        final double original = readDoubleField(variables, FIELD_ZHENYUAN, 0.0);
+        final double max = readDoubleField(variables, FIELD_MAX_ZHENYUAN, 0.0);
+
+        // 确保真元在 0 到 最大值 之间
+        final double newValue = Math.max(0, Math.min(max, original + amount));
+
+        if (Double.compare(original, newValue) != 0 && writeDoubleField(variables, FIELD_ZHENYUAN, newValue)) {
+            markSyncDirty(variables);
+        }
+        return newValue;
     }
 
     /**
@@ -113,32 +123,107 @@ public final class ZhenYuanHelper {
         if (entity == null) {
             return 1.0;
         }
-        try {
-            var vars = getVariables(entity);
-            double zhuanshu = vars.zhuanshu;
-            double jieduan = vars.jieduan;
-
-            // 防止除以零：如果转数小于 1，视为 1。
-            if (zhuanshu < 1.0) {
-                zhuanshu = MIN_ZHUANSHU;
-            }
-
-            double power = Math.pow(2.0, jieduan + zhuanshu * POWER_MULTIPLIER);
-            double denominator =
-                (power * zhuanshu * DENOM_MULTIPLIER) / DENOM_DIVISOR;
-
-            if (denominator <= 0.0) {
-                return 1.0;
-            }
-            return denominator;
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return 1.0;
+        }
+        double zhuanshu = readDoubleField(variables, FIELD_ZHUANSHU, MIN_ZHUANSHU);
+        final double jieduan = readDoubleField(variables, FIELD_JIEDUAN, 0.0);
+
+        // 防止除以零：如果转数小于 1，视为 1。
+        if (zhuanshu < 1.0) {
+            zhuanshu = MIN_ZHUANSHU;
+        }
+
+        final double power = Math.pow(2.0, jieduan + zhuanshu * POWER_MULTIPLIER);
+        final double denominator =
+            (power * zhuanshu * DENOM_MULTIPLIER) / DENOM_DIVISOR;
+
+        if (denominator <= 0.0) {
+            return 1.0;
+        }
+        return denominator;
+    }
+
+    private static Object getVariables(final LivingEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        try {
+            final Class<?> variablesHolderClass = Class.forName(GUZHENREN_MOD_VARIABLES_CLASS_NAME);
+            final Field accessorField = variablesHolderClass.getField(PLAYER_VARIABLES_FIELD_NAME);
+            final Object accessor = accessorField.get(null);
+            final Method getDataMethod = entity.getClass().getMethod(
+                ENTITY_GET_DATA_METHOD_NAME,
+                EntityDataAccessor.class
+            );
+            return getDataMethod.invoke(entity, accessor);
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException exception) {
+            return null;
         }
     }
 
-    private static GuzhenrenModVariables.PlayerVariables getVariables(
-        LivingEntity entity
+    private static double readDoubleField(
+        final Object variables,
+        final String fieldName,
+        final double fallback
     ) {
-        return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
+        if (variables == null) {
+            return fallback;
+        }
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.getDouble(variables);
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return fallback;
+        }
+    }
+
+    private static boolean writeDoubleField(
+        final Object variables,
+        final String fieldName,
+        final double value
+    ) {
+        if (variables == null) {
+            return false;
+        }
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.setDouble(variables, value);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return false;
+        }
+    }
+
+    private static void markSyncDirty(final Object variables) {
+        if (variables == null) {
+            return;
+        }
+        try {
+            final Method markSyncDirtyMethod = variables.getClass().getMethod(METHOD_MARK_SYNC_DIRTY);
+            markSyncDirtyMethod.invoke(variables);
+            return;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+        }
+
+        for (final String candidate : DIRTY_FIELD_CANDIDATES) {
+            if (tryMarkDirtyField(variables, candidate)) {
+                return;
+            }
+        }
+    }
+
+    private static boolean tryMarkDirtyField(final Object variables, final String fieldName) {
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.setBoolean(variables, true);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return false;
+        }
     }
 }

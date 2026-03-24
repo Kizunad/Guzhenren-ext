@@ -459,6 +459,36 @@ final class FlyingSwordHudStateContractTests {
         assertEquals(distanceOrderedRows.subList(0, TEST_MAGIC_8), orderedRows);
     }
 
+    @Test
+    void visibleDisplayWindowKeepsSelectedOrdinaryRowInOriginalDistanceOrder()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final List<Object> distanceOrderedRows = createDisplayRows(api, TEST_MAGIC_6);
+        final Object selectedRow = distanceOrderedRows.get(2);
+        api.setBooleanField(selectedRow, "isSelected", true);
+
+        final List<Object> orderedRows = api.buildVisibleDisplayWindow(distanceOrderedRows);
+
+        assertEquals(distanceOrderedRows, orderedRows);
+        assertFalse(api.getBooleanField(orderedRows.get(0), "isSelected"));
+        assertTrue(api.getBooleanField(orderedRows.get(2), "isSelected"));
+    }
+
+    @Test
+    void visibleDisplayWindowDoesNotPromoteFarSelectedOrdinaryRowPastHudLimit()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final List<Object> distanceOrderedRows = createDisplayRows(api, TEST_MAGIC_9);
+        final Object farSelectedRow = distanceOrderedRows.get(TEST_MAGIC_8);
+        api.setBooleanField(farSelectedRow, "isSelected", true);
+
+        final List<Object> orderedRows = api.buildVisibleDisplayWindow(distanceOrderedRows);
+
+        assertEquals(TEST_MAGIC_8, orderedRows.size());
+        assertEquals(distanceOrderedRows.subList(0, TEST_MAGIC_8), orderedRows);
+        assertFalse(orderedRows.contains(farSelectedRow));
+    }
+
     private static List<Object> createDisplayRows(RuntimeApi api, int count) throws Exception {
         final List<Object> rows = new ArrayList<>();
         for (int index = 0; index < count; index++) {

@@ -1,9 +1,10 @@
 package com.Kizunad.guzhenrenext.kongqiao.logic.util;
 
-import com.Kizunad.guzhenrenext.guzhenrenBridge.PlayerVariablesSyncHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.GuzhenrenVariableModifiers;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
-import net.guzhenren.network.GuzhenrenModVariables;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -17,6 +18,16 @@ import net.minecraft.world.entity.LivingEntity;
  * </p>
  */
 public final class GuzhenrenVariableModifierService {
+
+    private static final String GUZHENREN_MOD_VARIABLES_CLASS_NAME =
+        "net.guzhenren.network.GuzhenrenModVariables";
+    private static final String PLAYER_VARIABLES_FIELD_NAME = "PLAYER_VARIABLES";
+    private static final String ENTITY_GET_DATA_METHOD_NAME = "getData";
+    private static final String METHOD_MARK_SYNC_DIRTY = "markSyncDirty";
+    private static final String[] DIRTY_FIELD_CANDIDATES = {
+        "_syncDirty",
+        "syncDirty",
+    };
 
     public static final String VAR_MAX_ZHENYUAN = "zuida_zhenyuan";
     public static final String VAR_MAX_JINGLI = "zuida_jingli";
@@ -35,7 +46,7 @@ public final class GuzhenrenVariableModifierService {
         if (entity == null || variableKey == null || usageId == null) {
             return;
         }
-        final GuzhenrenModVariables.PlayerVariables vars = getVariables(entity);
+        final Object vars = getVariables(entity);
         if (vars == null) {
             return;
         }
@@ -60,7 +71,7 @@ public final class GuzhenrenVariableModifierService {
         if (entity == null || variableKey == null || usageId == null) {
             return;
         }
-        final GuzhenrenModVariables.PlayerVariables vars = getVariables(entity);
+        final Object vars = getVariables(entity);
         if (vars == null) {
             return;
         }
@@ -78,7 +89,7 @@ public final class GuzhenrenVariableModifierService {
     }
 
     private static void applyWithDerivedBaseline(
-        final GuzhenrenModVariables.PlayerVariables vars,
+        final Object vars,
         final String variableKey,
         final double oldSum,
         final double newSum
@@ -86,51 +97,119 @@ public final class GuzhenrenVariableModifierService {
         final double current = Math.max(0.0, getValue(vars, variableKey));
         final double baseline = Math.max(0.0, current - Math.max(0.0, oldSum));
         final double next = Math.max(0.0, baseline + Math.max(0.0, newSum));
-        if (Double.compare(current, next) != 0) {
-            setValue(vars, variableKey, next);
-            PlayerVariablesSyncHelper.markSyncDirty(vars);
+        if (Double.compare(current, next) != 0 && setValue(vars, variableKey, next)) {
+            markSyncDirty(vars);
         }
     }
 
     private static double getValue(
-        final GuzhenrenModVariables.PlayerVariables vars,
+        final Object vars,
         final String variableKey
     ) {
         return switch (variableKey) {
-            case VAR_MAX_ZHENYUAN -> vars.zuida_zhenyuan;
-            case VAR_MAX_JINGLI -> vars.zuida_jingli;
-            case VAR_MAX_HUNPO -> vars.zuida_hunpo;
-            case VAR_MAX_HUNPO_RESISTANCE -> vars.hunpo_kangxing_shangxian;
-            case VAR_NIANTOU_CAPACITY -> vars.niantou_rongliang;
+            case VAR_MAX_ZHENYUAN -> readDoubleField(vars, VAR_MAX_ZHENYUAN, 0.0);
+            case VAR_MAX_JINGLI -> readDoubleField(vars, VAR_MAX_JINGLI, 0.0);
+            case VAR_MAX_HUNPO -> readDoubleField(vars, VAR_MAX_HUNPO, 0.0);
+            case VAR_MAX_HUNPO_RESISTANCE -> readDoubleField(vars, VAR_MAX_HUNPO_RESISTANCE, 0.0);
+            case VAR_NIANTOU_CAPACITY -> readDoubleField(vars, VAR_NIANTOU_CAPACITY, 0.0);
             default -> 0.0;
         };
     }
 
-    private static void setValue(
-        final GuzhenrenModVariables.PlayerVariables vars,
+    private static boolean setValue(
+        final Object vars,
         final String variableKey,
         final double value
     ) {
-        switch (variableKey) {
-            case VAR_MAX_ZHENYUAN -> vars.zuida_zhenyuan = value;
-            case VAR_MAX_JINGLI -> vars.zuida_jingli = value;
-            case VAR_MAX_HUNPO -> vars.zuida_hunpo = value;
-            case VAR_MAX_HUNPO_RESISTANCE -> vars.hunpo_kangxing_shangxian = value;
-            case VAR_NIANTOU_CAPACITY -> vars.niantou_rongliang = value;
-            default -> {
-                // 未支持的字段，忽略
+        return switch (variableKey) {
+            case VAR_MAX_ZHENYUAN -> writeDoubleField(vars, VAR_MAX_ZHENYUAN, value);
+            case VAR_MAX_JINGLI -> writeDoubleField(vars, VAR_MAX_JINGLI, value);
+            case VAR_MAX_HUNPO -> writeDoubleField(vars, VAR_MAX_HUNPO, value);
+            case VAR_MAX_HUNPO_RESISTANCE -> writeDoubleField(vars, VAR_MAX_HUNPO_RESISTANCE, value);
+            case VAR_NIANTOU_CAPACITY -> writeDoubleField(vars, VAR_NIANTOU_CAPACITY, value);
+            default -> false;
+        };
+    }
+
+    private static Object getVariables(final LivingEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        try {
+            final Class<?> variablesHolderClass = Class.forName(GUZHENREN_MOD_VARIABLES_CLASS_NAME);
+            final Field accessorField = variablesHolderClass.getField(PLAYER_VARIABLES_FIELD_NAME);
+            final Object accessor = accessorField.get(null);
+            final Method getDataMethod = entity.getClass().getMethod(
+                ENTITY_GET_DATA_METHOD_NAME,
+                EntityDataAccessor.class
+            );
+            return getDataMethod.invoke(entity, accessor);
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException exception) {
+            return null;
+        }
+    }
+
+    private static double readDoubleField(
+        final Object variables,
+        final String fieldName,
+        final double fallback
+    ) {
+        if (variables == null) {
+            return fallback;
+        }
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.getDouble(variables);
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return fallback;
+        }
+    }
+
+    private static boolean writeDoubleField(
+        final Object variables,
+        final String fieldName,
+        final double value
+    ) {
+        if (variables == null) {
+            return false;
+        }
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.setDouble(variables, value);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return false;
+        }
+    }
+
+    private static void markSyncDirty(final Object variables) {
+        if (variables == null) {
+            return;
+        }
+        try {
+            final Method markSyncDirtyMethod = variables.getClass().getMethod(METHOD_MARK_SYNC_DIRTY);
+            markSyncDirtyMethod.invoke(variables);
+            return;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+        }
+
+        for (final String candidate : DIRTY_FIELD_CANDIDATES) {
+            if (tryMarkDirtyField(variables, candidate)) {
+                return;
             }
         }
     }
 
-    private static GuzhenrenModVariables.PlayerVariables getVariables(
-        final LivingEntity entity
-    ) {
+    private static boolean tryMarkDirtyField(final Object variables, final String fieldName) {
         try {
-            return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
-        } catch (Exception e) {
-            return null;
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.setBoolean(variables, true);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return false;
         }
     }
 }
-
