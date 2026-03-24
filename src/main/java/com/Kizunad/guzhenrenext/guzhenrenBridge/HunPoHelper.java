@@ -165,9 +165,9 @@ public final class HunPoHelper {
         }
         final double original = readDoubleField(variables, FIELD_RESISTANCE, 0.0);
         final Double maxResistance = readOptionalDoubleField(variables, FIELD_MAX_RESISTANCE);
-        final double max = maxResistance == null
+        final double max = maxResistance == null || maxResistance <= 0.0
             ? Double.MAX_VALUE
-            : (maxResistance > 0.0 ? maxResistance : 0.0);
+            : maxResistance;
 
         final double newValue = Math.max(0, Math.min(max, original + amount));
         if (Double.compare(original, newValue) == 0) {
