@@ -83,8 +83,35 @@ sourceSets {
         resources {
             srcDir 'src/test/resources'
         }
-        compileClasspath += sourceSets.tinyUi.output + configurations.testCompileClasspath + sourceSets.main.compileClasspath
+        compileClasspath += (
+            sourceSets.tinyUi.output
+                + configurations.testCompileClasspath
+                + sourceSets.main.compileClasspath
+        )
         runtimeClasspath += output + compileClasspath + configurations.testRuntimeClasspath
+    }
+    hubUiPrimitiveTest {
+        java {
+            srcDir 'src/test/java'
+            include 'com/Kizunad/guzhenrenext/xianqiao/client/hub/ui/**'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+        compileClasspath += (
+            sourceSets.main.output
+                + sourceSets.tinyUi.output
+                + configurations.testCompileClasspath
+                + sourceSets.main.compileClasspath
+                + sourceSets.tinyUi.compileClasspath
+        )
+        runtimeClasspath += (
+            output
+                + compileClasspath
+                + sourceSets.main.output
+                + sourceSets.tinyUi.output
+                + configurations.testRuntimeClasspath
+        )
     }
 }
 
@@ -92,6 +119,8 @@ configurations {
     tinyUiImplementation.extendsFrom implementation
     tinyUiTestImplementation.extendsFrom testImplementation, tinyUiImplementation
     tinyUiTestRuntimeOnly.extendsFrom testRuntimeOnly
+    hubUiPrimitiveTestImplementation.extendsFrom testImplementation, implementation
+    hubUiPrimitiveTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 tasks.register('tinyUiTest', Test) {
@@ -117,6 +146,19 @@ tasks.register('plan2RuleTest', Test) {
         includeTestsMatching 'com.Kizunad.guzhenrenext.plan2.Plan2ValidatorFailurePathTest'
     }
     shouldRunAfter(test)
+}
+
+tasks.register('hubUiPrimitiveTest', Test) {
+    description = 'Run hub-local UI primitive tests without compiling unrelated test sources.'
+    group = 'verification'
+    testClassesDirs = sourceSets.hubUiPrimitiveTest.output.classesDirs
+    classpath = sourceSets.hubUiPrimitiveTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter(test)
+}
+
+tasks.named('compileHubUiPrimitiveTestJava').configure {
+    dependsOn tasks.named('classes')
 }
 
 tasks.register('tinyUiJar', Jar) {
