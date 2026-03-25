@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.client;
 
+import com.Kizunad.guzhenrenext.network.ServerboundApertureEntryPayload;
 import com.Kizunad.guzhenrenext.xianqiao.block.ApertureHubMenu;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.service.SpiritUnlockService;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 仙窍中枢管理界面（Aperture Hub Screen）。
@@ -45,6 +47,11 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     private static final int LINE_HEIGHT = 14;
     private static final int TEXT_COLOR = 0xFFE0E0E0;
     private static final int FIRST_LINE_Y = 8;
+    private static final int ENTRY_HINT_ROW = 7;
+    private static final int ENTRY_DETAIL_ROW = 8;
+    private static final int ENTRY_BUTTON_ROW = 9;
+    private static final int ENTRY_BUTTON_WIDTH = 132;
+    private static final int ENTRY_BUTTON_HEIGHT = 20;
     private static final double PERCENT_BASE = 100.0D;
     private static final long TICKS_PER_SECOND = 20L;
     private static final long SECONDS_PER_HOUR = 3600L;
@@ -226,8 +233,24 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
         overviewTribulationLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_COUNT, width);
         overviewFavorabilityLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * (TAB_COUNT + 1), width);
 
+        Label entryHintLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * ENTRY_HINT_ROW, width);
+        entryHintLabel.setText(Component.literal("§e升仙入口：可直接在此发起初始化尝试"));
+
+        Label entryDetailLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * ENTRY_DETAIL_ROW, width);
+        entryDetailLabel.setText(Component.literal("服务端会统一校验五转巅峰、三气与 CONFIRMED 快照。"));
+
+        Button entryButton = new Button("发起升仙尝试", theme);
+        entryButton.setFrame(FIRST_LINE_Y, FIRST_LINE_Y + LINE_HEIGHT * ENTRY_BUTTON_ROW,
+            ENTRY_BUTTON_WIDTH, ENTRY_BUTTON_HEIGHT);
+        entryButton.setOnClick(ApertureHubScreen::sendEntryRequest);
+        panel.addChild(entryButton);
+
         panel.setFrame(MAIN_X, MAIN_Y, width, height);
         return panel;
+    }
+
+    private static void sendEntryRequest() {
+        PacketDistributor.sendToServer(new ServerboundApertureEntryPayload());
     }
 
     private UIElement createSpiritPanel(final int width, final int height) {

@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.service;
 
 import com.mojang.datafixers.util.Pair;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -93,7 +94,43 @@ public final class OverworldTerrainSampler {
     /** 固定采样总高度（含底层与顶层，闭区间）。 */
     private static final int FIXED_SAMPLE_HEIGHT = SAMPLE_Y_BELOW_SURFACE + SAMPLE_Y_ABOVE_SURFACE + 1;
 
+    /**
+     * 默认源锚点解析器。
+     * <p>
+     * 该实现保持历史 locate + 随机兜底路径，确保旧调用方默认行为不变。
+     * </p>
+     */
+    private static final SourceAnchorResolver LEGACY_SOURCE_ANCHOR_RESOLVER =
+        OverworldTerrainSampler::findBiomeLocation;
+
     private OverworldTerrainSampler() {
+    }
+
+    /**
+     * 源锚点解析器。
+     * <p>
+     * 通过该接口可将 biome 搜索策略从 materializer 中拆分出来。
+     * </p>
+     */
+    @FunctionalInterface
+    public interface SourceAnchorResolver {
+
+        /**
+         * 解析采样源锚点。
+         *
+         * @param overworldLevel 主世界
+         * @param targetBiome 目标 biome
+         * @param searchOrigin 搜索原点
+         * @param random 随机源
+         * @return 命中时返回锚点，未命中返回 null
+         */
+        @Nullable
+        BlockPos resolve(
+            ServerLevel overworldLevel,
+            Holder<Biome> targetBiome,
+            BlockPos searchOrigin,
+            RandomSource random
+        );
     }
 
     /**
@@ -126,14 +163,17 @@ public final class OverworldTerrainSampler {
         @Nullable BlockPos explicitSourceAnchor,
         RandomSource random
     ) {
-        return sampleAndPlace(
+        return resolveSourceAndMaterialize(
             overworldLevel,
             apertureLevel,
             targetAnchor,
             targetBiome,
             explicitSourceAnchor,
-            overworldLevel.getSharedSpawnPos(),
-            random
+            new SourceSearchRequest(
+                overworldLevel.getSharedSpawnPos(),
+                random,
+                LEGACY_SOURCE_ANCHOR_RESOLVER
+            )
         );
     }
 
@@ -158,20 +198,121 @@ public final class OverworldTerrainSampler {
         BlockPos searchOrigin,
         RandomSource random
     ) {
+        return sampleAndPlace(
+            overworldLevel,
+            apertureLevel,
+            targetAnchor,
+            targetBiome,
+            explicitSourceAnchor,
+            new SourceSearchRequest(searchOrigin, random, LEGACY_SOURCE_ANCHOR_RESOLVER)
+        );
+    }
+
+    /**
+     * 从主世界采样地形并放置到仙窍目标锚点（可注入搜索请求）。
+     *
+     * @param overworldLevel 主世界服务端世界
+     * @param apertureLevel 仙窍目标服务端世界
+     * @param targetAnchor 目标放置锚点（对应采样盒子最小角）
+     * @param targetBiome 目标 biome（用于 locate 搜索源点）
+     * @param explicitSourceAnchor 显式源锚点；为 null 时启用搜索请求
+     * @param searchRequest 源点搜索请求
+     * @return 成功返回 true；找不到可用源点或坐标越界时返回 false
+     */
+    public static boolean sampleAndPlace(
+        ServerLevel overworldLevel,
+        ServerLevel apertureLevel,
+        BlockPos targetAnchor,
+        Holder<Biome> targetBiome,
+        @Nullable BlockPos explicitSourceAnchor,
+        SourceSearchRequest searchRequest
+    ) {
+        return resolveSourceAndMaterialize(
+            overworldLevel,
+            apertureLevel,
+            targetAnchor,
+            targetBiome,
+            explicitSourceAnchor,
+            searchRequest
+        );
+    }
+
+    /**
+     * 解析源锚点后执行地形复制。
+     *
+     * @param overworldLevel 主世界服务端世界
+     * @param apertureLevel 仙窍目标服务端世界
+     * @param targetAnchor 目标放置锚点（对应采样盒子最小角）
+     * @param targetBiome 目标 biome（用于 locate 搜索源点）
+     * @param explicitSourceAnchor 显式源锚点；为 null 时启用搜索策略
+     * @param searchContext 搜索上下文（包含原点、随机源与解析器）
+     * @return 成功返回 true；找不到可用源点或坐标越界时返回 false
+     */
+    private static boolean resolveSourceAndMaterialize(
+        ServerLevel overworldLevel,
+        ServerLevel apertureLevel,
+        BlockPos targetAnchor,
+        Holder<Biome> targetBiome,
+        @Nullable BlockPos explicitSourceAnchor,
+        SourceSearchRequest searchRequest
+    ) {
+        Objects.requireNonNull(searchRequest, "searchRequest");
         @Nullable BlockPos sourceAnchor = explicitSourceAnchor;
         if (sourceAnchor == null) {
-            sourceAnchor = findBiomeLocation(overworldLevel, targetBiome, searchOrigin, random);
+            sourceAnchor = searchRequest.sourceAnchorResolver().resolve(
+                overworldLevel,
+                targetBiome,
+                searchRequest.searchOrigin(),
+                searchRequest.random()
+            );
         }
-
         if (sourceAnchor == null) {
             return false;
         }
+        return materializeFromSourceAnchor(
+            overworldLevel,
+            apertureLevel,
+            targetAnchor,
+            sourceAnchor,
+            explicitSourceAnchor != null
+        );
+    }
 
+    public record SourceSearchRequest(
+        BlockPos searchOrigin,
+        RandomSource random,
+        SourceAnchorResolver sourceAnchorResolver
+    ) {
+
+        public SourceSearchRequest {
+            Objects.requireNonNull(searchOrigin, "searchOrigin");
+            Objects.requireNonNull(random, "random");
+            Objects.requireNonNull(sourceAnchorResolver, "sourceAnchorResolver");
+        }
+    }
+
+    /**
+     * 仅执行地形复制与放置，不包含 biome 搜索流程。
+     *
+     * @param overworldLevel 主世界
+     * @param apertureLevel 仙窍维度
+     * @param targetAnchor 目标放置锚点
+     * @param sourceAnchor 采样源锚点
+     * @param explicitSourceMode 是否处于显式源锚点模式
+     * @return 成功返回 true，失败返回 false
+     */
+    private static boolean materializeFromSourceAnchor(
+        ServerLevel overworldLevel,
+        ServerLevel apertureLevel,
+        BlockPos targetAnchor,
+        BlockPos sourceAnchor,
+        boolean explicitSourceMode
+    ) {
         int alignedSourceMinX = alignToChunkMin(sourceAnchor.getX());
         int alignedSourceMinZ = alignToChunkMin(sourceAnchor.getZ());
         int sourceMinY;
         int sourceMaxY;
-        if (explicitSourceAnchor != null) {
+        if (explicitSourceMode) {
             // 显式源锚点模式：保持底层锚点与固定窗口高度，避免动态修正导致底层替换不稳定。
             sourceMinY = Math.max(overworldLevel.getMinBuildHeight(), sourceAnchor.getY());
             sourceMaxY = Math.min(overworldLevel.getMaxBuildHeight() - 1, sourceMinY + FIXED_SAMPLE_HEIGHT - 1);

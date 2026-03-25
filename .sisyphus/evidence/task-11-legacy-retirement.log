@@ -1,0 +1,3 @@
+src/main/java/com/Kizunad/guzhenrenext/xianqiao/command/ApertureCommand.java:58:                .then(Commands.literal("enter_aperture").executes(ApertureCommand::enterAperture))
+src/main/java/com/Kizunad/guzhenrenext/xianqiao/command/ApertureCommand.java:73:        ApertureInitializationResult result = ApertureEntryRuntime.trigger(
+src/main/java/com/Kizunad/guzhenrenext/xianqiao/command/ApertureCommand.java:160:    public static void ensureLandSpiritExistsFromSharedEntry(

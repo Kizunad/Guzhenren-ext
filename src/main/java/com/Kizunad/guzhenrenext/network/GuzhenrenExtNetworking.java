@@ -40,6 +40,11 @@ public final class GuzhenrenExtNetworking {
             ServerboundKongqiaoActionPayload::handle
         );
         registrar.playToServer(
+            ServerboundApertureEntryPayload.TYPE,
+            ServerboundApertureEntryPayload.STREAM_CODEC,
+            ServerboundApertureEntryPayload::handle
+        );
+        registrar.playToServer(
             ServerboundSkillWheelSelectPayload.TYPE,
             ServerboundSkillWheelSelectPayload.STREAM_CODEC,
             ServerboundSkillWheelSelectPayload::handle
