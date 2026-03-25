@@ -6,6 +6,7 @@ import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
+import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -98,9 +99,6 @@ public class TribulationManager {
 
     /** 将 damageAccumulated 归一化为 damageRatio 的分母。 */
     private static final float DAMAGE_NORMALIZATION = 100.0F;
-
-    /** 成功防御后的边界奖励值（每方向扩展区块数）。 */
-    private static final int REWARD_BOUNDARY_CHUNK_DELTA = 1;
 
     /** 一个区块包含的方块边长。 */
     private static final int CHUNK_SIZE_BLOCKS = 16;
@@ -394,7 +392,7 @@ public class TribulationManager {
 
         ApertureWorldData worldData = ApertureWorldData.get(level);
         if (score >= REWARD_SCORE_THRESHOLD) {
-            worldData.expandBoundaryByChunkDelta(owner, REWARD_BOUNDARY_CHUNK_DELTA);
+            FragmentExpansionPolicy.applySymmetricExpansion(worldData, owner);
             DaoMarkApi.addAura(level, apertureInfo.center(), REWARD_DAO, SUCCESS_AURA_REWARD);
         } else if (damageRatio > FAILURE_DAMAGE_RATIO) {
             DaoMarkApi.consumeAura(level, apertureInfo.center(), REWARD_DAO, FAILURE_AURA_PENALTY);

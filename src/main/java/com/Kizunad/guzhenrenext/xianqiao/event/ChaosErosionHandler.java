@@ -4,7 +4,8 @@ import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.damage.GuzhenrenExtDamageTypes;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
-import com.Kizunad.guzhenrenext.xianqiao.service.ApertureBoundaryService;
+import com.Kizunad.guzhenrenext.xianqiao.runtime.ApertureRuntimeBoundaryService;
+import com.Kizunad.guzhenrenext.xianqiao.runtime.ChaosZoneModel;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -21,7 +22,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 /**
  * 混沌侵蚀边界保护处理器。
  * <p>
- * 每秒检查一次仙窍维度内玩家位置，若超出仙窍边界（min/max chunk 闭区间）加缓冲区则施加高额混沌侵蚀伤害。
+ * 每秒检查一次仙窍维度内玩家位置，并根据统一运行时分区模型执行告警或致命侵蚀。
  * </p>
  */
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -35,11 +36,6 @@ public final class ChaosErosionHandler {
 
     /** 检查间隔（tick）。 */
     private static final int CHECK_INTERVAL_TICKS = 20;
-
-    /** 允许越界缓冲（方块）。 */
-    private static final int BOUNDARY_BUFFER = 16;
-
-    private static final int WARNING_BUFFER = 8;
 
     /** 越界伤害值。 */
     private static final float CHAOS_DAMAGE = 5000.0F;
@@ -81,21 +77,12 @@ public final class ChaosErosionHandler {
             return;
         }
 
-        long outsideDistanceSquared = ApertureBoundaryService.getOutsideDistanceSquared(
-            apertureInfo,
-            player.blockPosition()
-        );
-
-        int maxDistance = BOUNDARY_BUFFER;
-        int warningDistance = Math.max(0, maxDistance - WARNING_BUFFER);
-        int maxDistanceSquared = maxDistance * maxDistance;
-        int warningDistanceSquared = warningDistance * warningDistance;
-
-        if (outsideDistanceSquared <= warningDistanceSquared) {
+        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveZone(apertureInfo, player.blockPosition());
+        if (zoneModel.isPlayableZone() || zoneModel.isSafeZone()) {
             return;
         }
 
-        if (outsideDistanceSquared <= maxDistanceSquared) {
+        if (zoneModel.isWarningBand()) {
             player.displayClientMessage(
                 Component.translatable("warning.guzhenrenext.chaos_erosion_approaching"),
                 true
@@ -104,6 +91,8 @@ public final class ChaosErosionHandler {
             return;
         }
 
-        player.hurt(level.damageSources().source(GuzhenrenExtDamageTypes.CHAOS_EROSION), CHAOS_DAMAGE);
+        if (zoneModel.isLethalChaosBand()) {
+            player.hurt(level.damageSources().source(GuzhenrenExtDamageTypes.CHAOS_EROSION), CHAOS_DAMAGE);
+        }
     }
 }

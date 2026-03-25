@@ -84,8 +84,8 @@ public class HeavenlyFragmentItem extends Item {
             BlockPos targetPos = FragmentPlacementService.resolvePlacementTarget(apertureInfo, direction);
             player.displayClientMessage(
                 Component.literal("§6当前朝向：" + getDirectionName(direction)
-                    + " | 扩展至 (" + targetPos.getX() + ", " + targetPos.getZ()
-                    + ") | 本次边界四向各 +1 区块 | 松开Shift右键确认放置"),
+                    + " | 外缘投放点 (" + targetPos.getX() + ", " + targetPos.getZ()
+                    + ") | 实际边界仍向四周各 +1 区块 | 松开Shift右键确认放置"),
                 true
             );
             return InteractionResultHolder.success(stack);
@@ -154,7 +154,7 @@ public class HeavenlyFragmentItem extends Item {
         // 用法说明
         tooltipComponents.add(Component.empty());
         tooltipComponents.add(
-            Component.literal("右键: 沿朝向放置")
+            Component.literal("右键: 沿朝向选择外缘投放点，边界四向对称扩张")
                 .withStyle(ChatFormatting.YELLOW)
         );
     }

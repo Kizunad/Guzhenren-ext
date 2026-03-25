@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.client;
 
+import com.Kizunad.guzhenrenext.network.ServerboundApertureEntryPayload;
 import com.Kizunad.guzhenrenext.xianqiao.block.ApertureHubMenu;
 import com.Kizunad.guzhenrenext.xianqiao.alchemy.block.AlchemyFurnaceBlock;
 import com.Kizunad.guzhenrenext.xianqiao.client.hub.HubRoutePolicy;
@@ -8,6 +9,7 @@ import com.Kizunad.guzhenrenext.xianqiao.client.hub.HubStatusEvaluator;
 import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.HubPanel;
 import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.HubUiTokens;
 import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.ModuleCard;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.RouteChip;
 import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.StatePill;
 import com.Kizunad.guzhenrenext.xianqiao.item.StorageGuItem;
 import com.Kizunad.guzhenrenext.xianqiao.resource.ResourceControllerBlock;
@@ -39,6 +41,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
 
@@ -51,7 +54,8 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     private static final int HEADER_DETAIL_HEIGHT = 12;
     private static final int HEADER_DETAIL_Y = 22;
     private static final int HEADER_STATUS_WIDTH = 86;
-    private static final int HEADER_STATUS_Y = 12;
+    private static final int HEADER_STATUS_Y = 6;
+    private static final int HEADER_ENTRY_CHIP_Y = 24;
     private static final int BODY_TOP_GAP = 6;
     private static final int BODY_LAYER_GAP = 6;
     private static final int INFO_BLOCK_COUNT = 3;
@@ -94,6 +98,7 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
 
     private Label headerDetailLabel;
     private StatePill stabilityHeadlinePill;
+    private RouteChip ascensionEntryChip;
     private InfoBlock overallSummaryBlock;
     private InfoBlock riskSummaryBlock;
     private InfoBlock nextRouteBlock;
@@ -278,6 +283,7 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
         moduleCardsById.clear();
         headerDetailLabel = null;
         stabilityHeadlinePill = null;
+        ascensionEntryChip = null;
         overallSummaryBlock = null;
         riskSummaryBlock = null;
         nextRouteBlock = null;
@@ -321,6 +327,23 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
             HEADER_STATUS_HEIGHT
         );
         headerBand.addChild(stabilityHeadlinePill);
+
+        ascensionEntryChip = new RouteChip();
+        ascensionEntryChip.setFrame(
+            Math.max(SHELL_PADDING, layout.bodyWidth() - SHELL_PADDING - HEADER_STATUS_WIDTH),
+            HEADER_ENTRY_CHIP_Y,
+            HEADER_STATUS_WIDTH,
+            HEADER_STATUS_HEIGHT
+        );
+        ascensionEntryChip.setTone(HubUiTokens.HubTone.GOLD);
+        ascensionEntryChip.setText("发起升仙");
+        ascensionEntryChip.setActionable(true);
+        ascensionEntryChip.setOnClick(ApertureHubScreen::sendAscensionEntryRequest);
+        headerBand.addChild(ascensionEntryChip);
+    }
+
+    private static void sendAscensionEntryRequest() {
+        PacketDistributor.sendToServer(new ServerboundApertureEntryPayload());
     }
 
     private UIElement buildBodyContent(final ShellLayout layout) {
