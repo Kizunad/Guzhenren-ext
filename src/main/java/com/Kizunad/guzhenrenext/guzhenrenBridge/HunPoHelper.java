@@ -1,7 +1,9 @@
 package com.Kizunad.guzhenrenext.guzhenrenBridge;
 
-import net.guzhenren.network.GuzhenrenModVariables;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
@@ -15,6 +17,20 @@ import net.minecraft.world.entity.LivingEntity;
  */
 public final class HunPoHelper {
 
+    private static final String GUZHENREN_MOD_VARIABLES_CLASS_NAME =
+        "net.guzhenren.network.GuzhenrenModVariables";
+    private static final String PLAYER_VARIABLES_FIELD_NAME = "PLAYER_VARIABLES";
+    private static final String ENTITY_GET_DATA_METHOD_NAME = "getData";
+    private static final String FIELD_HUNPO = "hunpo";
+    private static final String FIELD_MAX_HUNPO = "zuida_hunpo";
+    private static final String FIELD_RESISTANCE = "hunpo_kangxing";
+    private static final String FIELD_MAX_RESISTANCE = "hunpo_kangxing_shangxian";
+    private static final String METHOD_MARK_SYNC_DIRTY = "markSyncDirty";
+    private static final String[] DIRTY_FIELD_CANDIDATES = {
+        "_syncDirty",
+        "syncDirty",
+    };
+
     private HunPoHelper() {}
 
     private static final float DAMAGE = 1f;
@@ -26,11 +42,7 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            return getVariables(entity).hunpo;
-        } catch (Exception e) {
-            return 0.0;
-        }
+        return readDoubleField(getVariables(entity), FIELD_HUNPO, 0.0);
     }
 
     /**
@@ -40,11 +52,7 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            return getVariables(entity).zuida_hunpo;
-        } catch (Exception e) {
-            return 0.0;
-        }
+        return readDoubleField(getVariables(entity), FIELD_MAX_HUNPO, 0.0);
     }
 
     /**
@@ -58,21 +66,23 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            var vars = getVariables(entity);
-            double original = vars.hunpo;
-            double max = vars.zuida_hunpo;
-
-            double newValue = Math.max(0, Math.min(max, original + amount));
-
-            if (Double.compare(original, newValue) != 0) {
-                vars.hunpo = newValue;
-                PlayerVariablesSyncHelper.markSyncDirty(vars);
-            }
-            return newValue;
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return 0.0;
         }
+        final double original = readDoubleField(variables, FIELD_HUNPO, 0.0);
+        final Double reflectedMax = readOptionalDoubleField(variables, FIELD_MAX_HUNPO);
+        final double max = reflectedMax == null ? Double.MAX_VALUE : reflectedMax;
+
+        final double newValue = Math.max(0, Math.min(max, original + amount));
+        if (Double.compare(original, newValue) == 0) {
+            return newValue;
+        }
+        if (!writeDoubleField(variables, FIELD_HUNPO, newValue)) {
+            return original;
+        }
+        markSyncDirty(variables);
+        return newValue;
     }
 
     /**
@@ -82,11 +92,7 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            return getVariables(entity).hunpo_kangxing;
-        } catch (Exception e) {
-            return 0.0;
-        }
+        return readDoubleField(getVariables(entity), FIELD_RESISTANCE, 0.0);
     }
 
     /**
@@ -96,11 +102,7 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            return getVariables(entity).hunpo_kangxing_shangxian;
-        } catch (Exception e) {
-            return 0.0;
-        }
+        return readDoubleField(getVariables(entity), FIELD_MAX_RESISTANCE, 0.0);
     }
 
     /**
@@ -116,17 +118,20 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            var vars = getVariables(entity);
-            double next = Math.max(0.0, value);
-            if (Double.compare(vars.hunpo_kangxing_shangxian, next) != 0) {
-                vars.hunpo_kangxing_shangxian = next;
-                PlayerVariablesSyncHelper.markSyncDirty(vars);
-            }
-            return next;
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return 0.0;
         }
+        final double original = readDoubleField(variables, FIELD_MAX_RESISTANCE, 0.0);
+        final double next = Math.max(0.0, value);
+        if (Double.compare(original, next) == 0) {
+            return next;
+        }
+        if (!writeDoubleField(variables, FIELD_MAX_RESISTANCE, next)) {
+            return original;
+        }
+        markSyncDirty(variables);
+        return next;
     }
 
     /**
@@ -138,12 +143,12 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            var vars = getVariables(entity);
-            return setMaxResistance(entity, vars.hunpo_kangxing_shangxian + amount);
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return 0.0;
         }
+        final double currentMax = readDoubleField(variables, FIELD_MAX_RESISTANCE, 0.0);
+        return setMaxResistance(entity, currentMax + amount);
     }
 
     /**
@@ -154,25 +159,25 @@ public final class HunPoHelper {
         if (entity == null) {
             return 0.0;
         }
-        try {
-            var vars = getVariables(entity);
-            double original = vars.hunpo_kangxing;
-            // 抗性上限似乎默认为0(未开启?)，或者根据逻辑动态变化。这里暂不强制限制上限，只保证下限>=0，除非有明确上限逻辑。
-            // 查阅原代码习惯，通常会检查 hunpo_kangxing_shangxian
-            double max = vars.hunpo_kangxing_shangxian > 0
-                ? vars.hunpo_kangxing_shangxian
-                : Double.MAX_VALUE;
-
-            double newValue = Math.max(0, Math.min(max, original + amount));
-
-            if (Double.compare(original, newValue) != 0) {
-                vars.hunpo_kangxing = newValue;
-                PlayerVariablesSyncHelper.markSyncDirty(vars);
-            }
-            return newValue;
-        } catch (Exception e) {
+        final Object variables = getVariables(entity);
+        if (variables == null) {
             return 0.0;
         }
+        final double original = readDoubleField(variables, FIELD_RESISTANCE, 0.0);
+        final Double maxResistance = readOptionalDoubleField(variables, FIELD_MAX_RESISTANCE);
+        final double max = maxResistance == null || maxResistance <= 0.0
+            ? Double.MAX_VALUE
+            : maxResistance;
+
+        final double newValue = Math.max(0, Math.min(max, original + amount));
+        if (Double.compare(original, newValue) == 0) {
+            return newValue;
+        }
+        if (!writeDoubleField(variables, FIELD_RESISTANCE, newValue)) {
+            return original;
+        }
+        markSyncDirty(variables);
+        return newValue;
     }
 
     /**
@@ -182,31 +187,117 @@ public final class HunPoHelper {
         if (entity == null) {
             return;
         }
-        if (getAmount(entity) <= 0) {
-            // 造成 1 亿点魂魄消散伤害
-            entity.hurt(
-                new DamageSource(
-                    entity
-                        .level()
-                        .registryAccess()
-                        .registryOrThrow(Registries.DAMAGE_TYPE)
-                        .getHolderOrThrow(
-                            ResourceKey.create(
-                                Registries.DAMAGE_TYPE,
-                                ResourceLocation.parse(
-                                    "guzhenren:hunpoxiaosuan"
-                                )
+        final Object variables = getVariables(entity);
+        if (variables == null) {
+            return;
+        }
+        final Double currentAmount = readOptionalDoubleField(variables, FIELD_HUNPO);
+        if (currentAmount == null || currentAmount > 0.0) {
+            return;
+        }
+        entity.hurt(
+            new DamageSource(
+                entity
+                    .level()
+                    .registryAccess()
+                    .registryOrThrow(Registries.DAMAGE_TYPE)
+                    .getHolderOrThrow(
+                        ResourceKey.create(
+                            Registries.DAMAGE_TYPE,
+                            ResourceLocation.parse(
+                                "guzhenren:hunpoxiaosuan"
                             )
                         )
-                ),
-                DAMAGE
+                    )
+            ),
+            DAMAGE
+        );
+    }
+
+    private static Object getVariables(final LivingEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        try {
+            final Class<?> variablesHolderClass = Class.forName(GUZHENREN_MOD_VARIABLES_CLASS_NAME);
+            final Field accessorField = variablesHolderClass.getField(PLAYER_VARIABLES_FIELD_NAME);
+            final Object accessor = accessorField.get(null);
+            final Method getDataMethod = entity.getClass().getMethod(
+                ENTITY_GET_DATA_METHOD_NAME,
+                EntityDataAccessor.class
             );
+            return getDataMethod.invoke(entity, accessor);
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException exception) {
+            return null;
         }
     }
 
-    private static GuzhenrenModVariables.PlayerVariables getVariables(
-        LivingEntity entity
+    private static double readDoubleField(
+        final Object variables,
+        final String fieldName,
+        final double fallback
     ) {
-        return entity.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
+        final Double value = readOptionalDoubleField(variables, fieldName);
+        return value != null ? value : fallback;
+    }
+
+    private static Double readOptionalDoubleField(final Object variables, final String fieldName) {
+        if (variables == null) {
+            return null;
+        }
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.getDouble(variables);
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return null;
+        }
+    }
+
+    private static boolean writeDoubleField(
+        final Object variables,
+        final String fieldName,
+        final double value
+    ) {
+        if (variables == null) {
+            return false;
+        }
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.setDouble(variables, value);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return false;
+        }
+    }
+
+    private static void markSyncDirty(final Object variables) {
+        if (variables == null) {
+            return;
+        }
+        try {
+            final Method markSyncDirtyMethod = variables.getClass().getMethod(METHOD_MARK_SYNC_DIRTY);
+            markSyncDirtyMethod.invoke(variables);
+            return;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+        }
+
+        for (final String candidate : DIRTY_FIELD_CANDIDATES) {
+            if (tryMarkDirtyField(variables, candidate)) {
+                return;
+            }
+        }
+    }
+
+    private static boolean tryMarkDirtyField(final Object variables, final String fieldName) {
+        try {
+            final Field field = variables.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.setBoolean(variables, true);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            return false;
+        }
     }
 }

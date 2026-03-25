@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.flyingsword.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FlyingSwordHelpScreenTest {
@@ -57,12 +59,16 @@ final class FlyingSwordHelpScreenTest {
         "screen.guzhenrenext.forge.help.resonance.spirit.hud_cues";
     private static final String HELP_RESONANCE_DEVOUR_HUD_CUES_KEY =
         "screen.guzhenrenext.forge.help.resonance.devour.hud_cues";
+    private static final String HELP_OVERVIEW_KEY_HUB =
+        "screen.guzhenrenext.forge.help.overview.key_hub";
     private static final String HUD_DEVOUR_BURST_READY_KEY =
         "hud.guzhenrenext.flyingsword.benming.badge.devour.burst_ready";
     private static final String HUD_DEVOUR_DANGER_KEY =
         "hud.guzhenrenext.flyingsword.benming.badge.devour.danger";
     private static final String HUD_DEVOUR_AFTERSHOCK_KEY =
         "hud.guzhenrenext.flyingsword.benming.badge.devour.aftershock";
+    private static final String KEY_TOGGLE_HUB =
+        "key.guzhenrenext.flyingsword.toggle_hub";
     private static final String HELP_BENMING_BOND_ENTRY_KEY =
         "screen.guzhenrenext.forge.help.benming.bond.entry";
     private static final String HELP_BENMING_BOND_AFTER_SUCCESS_KEY =
@@ -83,6 +89,10 @@ final class FlyingSwordHelpScreenTest {
         "src/main/resources/assets/guzhenrenext/lang/zh_cn.json";
     private static final String EN_LANG_PATH =
         "src/main/resources/assets/guzhenrenext/lang/en_us.json";
+    private static final String CLIENT_EVENTS_SOURCE_PATH =
+        "src/main/java/com/Kizunad/guzhenrenext/client/GuClientEvents.java";
+    private static final String KEY_BINDINGS_SOURCE_PATH =
+        "src/main/java/com/Kizunad/guzhenrenext/client/GuKeyBindings.java";
     private static final int ZH_FIRST_GUIDE_CHAR_LIMIT = 26;
     private static final int EN_FIRST_GUIDE_CHAR_LIMIT = 72;
     private static final Path MAIN_CLASSES = Path.of("build/classes/java/main");
@@ -125,6 +135,44 @@ final class FlyingSwordHelpScreenTest {
     }
 
     @Test
+    void openBenmingHelpAlwaysLandsOnBenmingTab() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object helpScreen = api.openBenmingHelp();
+
+        assertEquals(api.benmingTabIndex(), api.currentTabForTesting(helpScreen));
+    }
+
+    @Test
+    void nonHubHelpEntriesKeepLegacyCloseToGameSemantics() throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object defaultHelpScreen = api.newHelpScreen();
+        assertFalse(api.returnsToHubOnClose(defaultHelpScreen));
+        assertNull(api.resolveCloseTarget(defaultHelpScreen));
+
+        final Object benmingHelpScreen = api.openBenmingHelp();
+        assertFalse(api.returnsToHubOnClose(benmingHelpScreen));
+        assertNull(api.resolveCloseTarget(benmingHelpScreen));
+    }
+
+    @Test
+    void guideRouteNormalizesWhitespaceAndBlankTopicFallsBackToOverview()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+
+        final Object trimmedRoute = api.routeForGuide(
+            "  " + GUIDE_OVERLOAD_WARNING_KEY + "  "
+        );
+        assertEquals(api.benmingTabIndex(), api.routeTabIndex(trimmedRoute));
+        assertEquals(HELP_BENMING_OVERLOAD_KEY, api.routeHelpEntry(trimmedRoute));
+
+        final Object blankRoute = api.routeForGuide("   ");
+        assertEquals(api.benmingTabIndex(), api.routeTabIndex(blankRoute));
+        assertEquals(HELP_BENMING_OVERVIEW_KEY, api.routeHelpEntry(blankRoute));
+    }
+
+    @Test
     void onboardingSkeletonOnlyReturnsShortHintOncePerTopic() throws Exception {
         final RuntimeApi api = RuntimeApi.create();
         final Object state = api.newGuideState();
@@ -146,6 +194,37 @@ final class FlyingSwordHelpScreenTest {
         );
         assertFalse(duplicateHint.isPresent());
         assertTrue(api.hasSeen(state, GUIDE_BOND_START_KEY));
+    }
+
+    @Test
+    void onboardingSkeletonRejectsNullBlankAndTrimmedDuplicateTopics()
+        throws Exception {
+        final RuntimeApi api = RuntimeApi.create();
+        final Object state = api.newGuideState();
+
+        assertTrue(api.createFirstGuideOnce(state, null).isEmpty());
+        assertTrue(api.createFirstGuideOnce(state, "   ").isEmpty());
+
+        final Optional<?> firstHint = api.createFirstGuideOnce(
+            state,
+            "  " + GUIDE_BACKLASH_FIRST_TIME_KEY + "  "
+        );
+        final Optional<?> duplicateHint = api.createFirstGuideOnce(
+            state,
+            GUIDE_BACKLASH_FIRST_TIME_KEY
+        );
+
+        assertTrue(firstHint.isPresent());
+        assertEquals(
+            GUIDE_BACKLASH_FIRST_TIME_KEY,
+            api.hintMessageKey(firstHint.orElseThrow())
+        );
+        assertEquals(
+            HELP_BENMING_BACKLASH_KEY,
+            api.hintRouteHelpEntry(firstHint.orElseThrow())
+        );
+        assertTrue(duplicateHint.isEmpty());
+        assertTrue(api.hasSeen(state, GUIDE_BACKLASH_FIRST_TIME_KEY));
     }
 
     @Test
@@ -341,6 +420,61 @@ final class FlyingSwordHelpScreenTest {
         assertTrue(enDevourHudCues.contains("Backlash / Recovery"));
     }
 
+    @Test
+    void hubToggleKeypathAndOverviewCopyReflectFinalHubNaming()
+        throws Exception {
+        final String zhContent = Files.readString(
+            Path.of(ZH_LANG_PATH),
+            StandardCharsets.UTF_8
+        );
+        final String enContent = Files.readString(
+            Path.of(EN_LANG_PATH),
+            StandardCharsets.UTF_8
+        );
+        final String clientEventsSource = Files.readString(
+            Path.of(CLIENT_EVENTS_SOURCE_PATH),
+            StandardCharsets.UTF_8
+        );
+        final String keyBindingsSource = Files.readString(
+            Path.of(KEY_BINDINGS_SOURCE_PATH),
+            StandardCharsets.UTF_8
+        );
+
+        assertEquals(
+            "Open/Close Flying Sword Hub",
+            extractValue(enContent, KEY_TOGGLE_HUB).orElseThrow()
+        );
+        assertEquals(
+            "H - Open/Close the flying sword hub",
+            extractValue(enContent, HELP_OVERVIEW_KEY_HUB).orElseThrow()
+        );
+        assertEquals(
+            "打开/关闭飞剑战术总台",
+            extractValue(zhContent, KEY_TOGGLE_HUB).orElseThrow()
+        );
+        assertEquals(
+            "H - 打开/关闭飞剑战术总台",
+            extractValue(zhContent, HELP_OVERVIEW_KEY_HUB).orElseThrow()
+        );
+        assertTrue(keyBindingsSource.contains("FLYING_SWORD_TOGGLE_HUB"));
+        assertTrue(keyBindingsSource.contains(KEY_TOGGLE_HUB));
+        assertTrue(keyBindingsSource.contains("GLFW.GLFW_KEY_H"));
+        assertTrue(
+            clientEventsSource.contains(
+                "while (GuKeyBindings.FLYING_SWORD_TOGGLE_HUB.consumeClick())"
+            )
+        );
+        assertTrue(
+            clientEventsSource.contains(
+                "FlyingSwordHubScreen.toggleHubScreen(minecraft.screen)"
+            )
+        );
+        assertFalse(clientEventsSource.contains("toggleHud()"));
+        assertFalse(
+            keyBindingsSource.contains("FLYING_SWORD_TOGGLE_" + "HUD")
+        );
+    }
+
     private static Optional<String> extractValue(
         final String jsonContent,
         final String key
@@ -366,6 +500,11 @@ final class FlyingSwordHelpScreenTest {
         private final Method routeForGuideMethod;
         private final Method createFirstGuideMethod;
         private final Method stateHasSeenMethod;
+        private final Constructor<?> helpScreenConstructor;
+        private final Method openBenmingHelpMethod;
+        private final Method currentTabForTestingMethod;
+        private final Method returnsToHubOnCloseMethod;
+        private final Method resolveCloseTargetMethod;
 
         private RuntimeApi(
             final Class<?> helpScreenClass,
@@ -385,8 +524,22 @@ final class FlyingSwordHelpScreenTest {
                 String.class
             );
             this.stateHasSeenMethod = guideStateClass.getMethod("hasSeen", String.class);
+            this.helpScreenConstructor = helpScreenClass.getConstructor();
+            this.openBenmingHelpMethod = helpScreenClass.getMethod("openBenmingHelp");
+            this.currentTabForTestingMethod = helpScreenClass.getDeclaredMethod(
+                "currentTabForTesting"
+            );
+            this.returnsToHubOnCloseMethod = helpScreenClass.getDeclaredMethod(
+                "returnsToHubOnCloseForTesting"
+            );
+            this.resolveCloseTargetMethod = helpScreenClass.getDeclaredMethod(
+                "resolveCloseTargetForTesting"
+            );
             this.helpTabKeysMethod.setAccessible(true);
             this.benmingTabIndexMethod.setAccessible(true);
+            this.currentTabForTestingMethod.setAccessible(true);
+            this.returnsToHubOnCloseMethod.setAccessible(true);
+            this.resolveCloseTargetMethod.setAccessible(true);
         }
 
         static RuntimeApi create() throws Exception {
@@ -423,6 +576,14 @@ final class FlyingSwordHelpScreenTest {
 
         Object routeForGuide(final String topicKey) throws Exception {
             return routeForGuideMethod.invoke(null, topicKey);
+        }
+
+        Object openBenmingHelp() throws Exception {
+            return openBenmingHelpMethod.invoke(null);
+        }
+
+        Object newHelpScreen() throws Exception {
+            return helpScreenConstructor.newInstance();
         }
 
         int routeTabIndex(final Object route) throws Exception {
@@ -483,6 +644,18 @@ final class FlyingSwordHelpScreenTest {
 
         boolean hasSeen(final Object state, final String topicKey) throws Exception {
             return (boolean) stateHasSeenMethod.invoke(state, topicKey);
+        }
+
+        int currentTabForTesting(final Object screen) throws Exception {
+            return (int) currentTabForTestingMethod.invoke(screen);
+        }
+
+        boolean returnsToHubOnClose(final Object screen) throws Exception {
+            return (boolean) returnsToHubOnCloseMethod.invoke(screen);
+        }
+
+        Object resolveCloseTarget(final Object screen) throws Exception {
+            return resolveCloseTargetMethod.invoke(screen);
         }
 
         private static URLClassLoader buildRuntimeClassLoader() throws IOException {

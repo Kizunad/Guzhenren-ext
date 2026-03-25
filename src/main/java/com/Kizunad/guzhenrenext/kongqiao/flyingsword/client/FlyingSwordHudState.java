@@ -55,15 +55,15 @@ public final class FlyingSwordHudState {
     private static final List<SwordDisplayData> CACHED_SWORDS =
         new ArrayList<>();
 
+    private static final List<SwordDisplayData> CACHED_DISTANCE_ORDERED_SWORDS =
+        new ArrayList<>();
+
     /** 当前选中的飞剑 UUID（可能为 null）。 */
     @Nullable
     private static UUID selectedSwordId = null;
 
     /** 距上次刷新的 tick 数。 */
     private static int ticksSinceRefresh = 0;
-
-    /** HUD 是否启用。 */
-    private static boolean hudEnabled = true;
 
     private FlyingSwordHudState() {}
 
@@ -86,6 +86,7 @@ public final class FlyingSwordHudState {
      */
     private static void refreshCache() {
         CACHED_SWORDS.clear();
+        CACHED_DISTANCE_ORDERED_SWORDS.clear();
 
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
@@ -123,6 +124,7 @@ public final class FlyingSwordHudState {
         for (FlyingSwordEntity sword : nearbySwords) {
             preparedDisplayData.add(createDisplayData(sword, player));
         }
+        CACHED_DISTANCE_ORDERED_SWORDS.addAll(preparedDisplayData);
         CACHED_SWORDS.addAll(buildVisibleDisplayWindow(preparedDisplayData));
     }
 
@@ -332,6 +334,17 @@ public final class FlyingSwordHudState {
         return new ArrayList<>(CACHED_SWORDS);
     }
 
+    static List<SwordDisplayData> getDistanceOrderedSwordSnapshot() {
+        return new ArrayList<>(CACHED_DISTANCE_ORDERED_SWORDS);
+    }
+
+    public static FlyingSwordTacticalStateService.TacticalStateSnapshot getTacticalStateSnapshot() {
+        return FlyingSwordTacticalStateService.snapshotFromRoster(
+            getDistanceOrderedSwordSnapshot(),
+            selectedSwordId
+        );
+    }
+
     /**
      * 获取飞剑数量。
      */
@@ -371,31 +384,11 @@ public final class FlyingSwordHudState {
     }
 
     /**
-     * 设置 HUD 是否启用。
-     */
-    public static void setHudEnabled(boolean enabled) {
-        hudEnabled = enabled;
-    }
-
-    /**
-     * 检查 HUD 是否启用。
-     */
-    public static boolean isHudEnabled() {
-        return hudEnabled;
-    }
-
-    /**
-     * 切换 HUD 显示状态。
-     */
-    public static void toggleHud() {
-        hudEnabled = !hudEnabled;
-    }
-
-    /**
      * 清除所有缓存（用于断开连接等场景）。
      */
     public static void clearAll() {
         CACHED_SWORDS.clear();
+        CACHED_DISTANCE_ORDERED_SWORDS.clear();
         selectedSwordId = null;
         ticksSinceRefresh = 0;
     }
