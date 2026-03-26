@@ -1,215 +1,149 @@
 package com.Kizunad.guzhenrenext.xianqiao.opening;
 
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 final class AscensionThreeQiEvaluatorTests {
 
-    private static final int SCORE_59 = 59;
-
-    private static final int SCORE_60 = 60;
-
-    private static final int SCORE_69 = 69;
-
-    private static final int SCORE_70 = 70;
-
-    private static final int SCORE_75 = 75;
-
-    private static final int SCORE_84 = 84;
-
-    private static final int SCORE_85 = 85;
-
-    private static final int SCORE_90 = 90;
-
-    private final AscensionThreeQiEvaluator evaluator = new AscensionThreeQiEvaluator();
+    private static final double DELTA = 1.0E-6D;
+    private static final double RANK_FIVE = 5.0D;
+    private static final double STAGE_FIVE = 5.0D;
+    private static final double KONGQIAO_ACTIVE = 7.0D;
+    private static final double BENMING_ID = 1.0D;
+    private static final double DAO_MARK_TOTAL = 120.0D;
+    private static final double RESOURCE_MAX = 100.0D;
+    private static final double RESOURCE_CURRENT = 80.0D;
+    private static final double TIZHI_BASE = 90.0D;
+    private static final double TARGET_BASE = 100.0D;
 
     @Test
-    void belowReadyThresholdMustStayNotReadyEvenAtRankFivePeak() {
-        AscensionConditionSnapshot snapshot = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_59,
-            SCORE_60,
-            SCORE_60,
-            SCORE_75,
-            false,
-            false
-        );
+    void readyThresholdMetButConfirmedThresholdNotMet() {
+        AscensionThreeQiEvaluator evaluator = new AscensionThreeQiEvaluator();
+        AscensionConditionSnapshot snapshot = snapshot(24.0D, 40.0D, 60.0D, 0.0D, 60.0D, true);
 
-        AscensionThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
+        AscensionThreeQiEvaluator.ThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
 
-        assertEquals(
-            AscensionReadinessStage.NOT_READY,
-            evaluation.stage(),
-            "任一三气低于60分时必须阻断READY_TO_CONFIRM，避免把未达标状态误判成可确认"
-        );
-        assertFalse(evaluation.eachQiAtLeast60());
-        assertFalse(evaluation.eachQiAtLeast70());
+        assertTrue(evaluation.fiveTurnPeak());
+        assertTrue(evaluation.readyToConfirm());
+        assertFalse(evaluation.confirmedThresholdMet());
+        assertFalse(evaluation.canEnterConfirmed());
+        assertEquals(60.0D, evaluation.heavenScore(), DELTA);
+        assertEquals(60.0D, evaluation.humanScore(), DELTA);
+        assertEquals(60.0D, evaluation.earthScore(), DELTA);
     }
 
     @Test
-    void readyToConfirmRequiresRankFivePeakEachQiAtLeast60AndBalanceAtLeast75() {
-        AscensionConditionSnapshot snapshot = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_60,
-            SCORE_69,
-            SCORE_60,
-            SCORE_75,
-            false,
-            false
-        );
+    void confirmedRequiresPlayerInitiatedAndHigherThresholds() {
+        AscensionThreeQiEvaluator evaluator = new AscensionThreeQiEvaluator();
+        AscensionConditionSnapshot initiatedSnapshot = snapshot(32.0D, 40.0D, 80.0D, 0.0D, 82.0D, true);
+        AscensionConditionSnapshot passiveSnapshot = snapshot(32.0D, 40.0D, 80.0D, 0.0D, 82.0D, false);
 
-        AscensionThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
+        AscensionThreeQiEvaluator.ThreeQiEvaluation initiated = evaluator.evaluate(initiatedSnapshot);
+        AscensionThreeQiEvaluator.ThreeQiEvaluation passive = evaluator.evaluate(passiveSnapshot);
 
-        assertEquals(
-            AscensionReadinessStage.READY_TO_CONFIRM,
-            evaluation.stage(),
-            "READY_TO_CONFIRM 语义必须固定为五转巅峰+三气各不低于60+平衡值不低于75"
-        );
-        assertTrue(evaluation.rankFivePeak());
-        assertTrue(evaluation.eachQiAtLeast60());
-        assertFalse(
-            evaluation.eachQiAtLeast70(),
-            "当任一三气尚未达到70时仍只能停留在 READY_TO_CONFIRM，不能提前进入 CONFIRMED"
-        );
-        assertTrue(evaluation.balanceAtLeast75());
-        assertFalse(evaluation.balanceAtLeast85());
-        assertFalse(evaluation.ascensionAttemptInitiated());
+        assertTrue(initiated.confirmedThresholdMet());
+        assertTrue(initiated.canEnterConfirmed());
+        assertTrue(initiated.confirmedAttemptTrigger().canStartAscensionAttempt());
+
+        assertTrue(passive.confirmedThresholdMet());
+        assertFalse(passive.canEnterConfirmed());
+        assertFalse(passive.confirmedAttemptTrigger().canStartAscensionAttempt());
     }
 
     @Test
-    void rankAndThreeQiSatisfyButWithoutActiveAttemptMustNotBeConfirmed() {
-        AscensionConditionSnapshot snapshot = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_70,
-            SCORE_70,
-            SCORE_70,
-            SCORE_85,
-            false,
-            false
-        );
+    void humanQiCanFallbackWhenRenqiMissing() {
+        AscensionThreeQiEvaluator evaluator = new AscensionThreeQiEvaluator();
+        AscensionConditionSnapshot snapshot = snapshot(35.0D, 40.0D, 0.0D, 88.0D, 88.0D, true);
 
-        AscensionThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
+        AscensionThreeQiEvaluator.ThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
 
-        assertEquals(
-            AscensionReadinessStage.READY_TO_CONFIRM,
-            evaluation.stage(),
-            "即使三气达到CONFIRMED阈值，只要未主动发起升仙尝试，阶段也必须停留在 READY_TO_CONFIRM"
-        );
-        assertTrue(evaluation.eachQiAtLeast70());
-        assertTrue(evaluation.balanceAtLeast85());
-        assertFalse(evaluation.ascensionAttemptInitiated());
+        assertTrue(evaluation.humanQiUsesFallback());
+        assertEquals(88.0D, evaluation.humanQiValue(), DELTA);
     }
 
     @Test
-    void confirmedRequiresActiveAttemptAndFrozenInputSemantics() {
-        AscensionConditionSnapshot snapshot = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_70,
-            SCORE_70,
-            SCORE_70,
-            SCORE_85,
-            true,
-            true
-        );
+    void heavenScoreUsesClampedQiyunMaxRange() {
+        AscensionThreeQiEvaluator evaluator = new AscensionThreeQiEvaluator();
+        AscensionConditionSnapshot snapshot = snapshot(20.0D, 100.0D, 80.0D, 0.0D, 80.0D, true);
 
-        AscensionThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
+        AscensionThreeQiEvaluator.ThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
 
-        assertEquals(
-            AscensionReadinessStage.CONFIRMED,
-            evaluation.stage(),
-            "CONFIRMED 必须绑定主动发起升仙尝试语义，为后续输入快照冻结与可复算规划提供合法入口"
-        );
-        assertTrue(evaluation.rankFivePeak());
-        assertTrue(evaluation.eachQiAtLeast70());
-        assertTrue(evaluation.balanceAtLeast85());
-        assertTrue(evaluation.ascensionAttemptInitiated());
+        assertEquals(50.0D, evaluation.heavenScore(), DELTA);
     }
 
     @Test
-    void nonPeakRankMustBlockReadyAndConfirmedRegardlessOfThreeQi() {
-        AscensionConditionSnapshot snapshot = new AscensionConditionSnapshot(
-            5,
-            4,
-            SCORE_90,
-            SCORE_90,
-            SCORE_90,
-            SCORE_90,
-            true,
-            true
+    void fiveTurnPeakRequiresRankAndStageBothEqualFive() {
+        AscensionThreeQiEvaluator evaluator = new AscensionThreeQiEvaluator();
+
+        AscensionThreeQiEvaluator.ThreeQiEvaluation ok = evaluator.evaluate(
+            snapshot(32.0D, 40.0D, 80.0D, 0.0D, 82.0D, true, RANK_FIVE, STAGE_FIVE)
+        );
+        AscensionThreeQiEvaluator.ThreeQiEvaluation wrongRank = evaluator.evaluate(
+            snapshot(32.0D, 40.0D, 80.0D, 0.0D, 82.0D, true, 4.0D, STAGE_FIVE)
+        );
+        AscensionThreeQiEvaluator.ThreeQiEvaluation wrongStage = evaluator.evaluate(
+            snapshot(32.0D, 40.0D, 80.0D, 0.0D, 82.0D, true, RANK_FIVE, 4.0D)
         );
 
-        AscensionThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
-
-        assertFalse(evaluation.rankFivePeak());
-        assertEquals(
-            AscensionReadinessStage.NOT_READY,
-            evaluation.stage(),
-            "五转巅峰是硬门槛，未达峰值时不得因三气高分而越过门槛"
-        );
+        assertTrue(ok.fiveTurnPeak());
+        assertFalse(wrongRank.fiveTurnPeak());
+        assertFalse(wrongStage.fiveTurnPeak());
+        assertFalse(wrongRank.readyToConfirm());
+        assertFalse(wrongStage.canEnterConfirmed());
     }
 
-    @Test
-    void highQualityWindowRequiresAverageAndBalanceBothMeetThreshold() {
-        AscensionConditionSnapshot highQualitySnapshot = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_90,
-            SCORE_90,
-            SCORE_90,
-            SCORE_90,
-            true,
-            true
-        );
-        AscensionConditionSnapshot averageEnoughButBalanceInsufficient = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_90,
-            SCORE_90,
-            SCORE_90,
-            SCORE_84,
-            true,
-            true
-        );
-
-        AscensionThreeQiEvaluation highQuality = evaluator.evaluate(highQualitySnapshot);
-        AscensionThreeQiEvaluation notHighQuality = evaluator.evaluate(averageEnoughButBalanceInsufficient);
-
-        assertTrue(
-            highQuality.highQualityWindow(),
-            "高品质升仙窗口必须同时满足三气均分不低于85且平衡值不低于90"
-        );
-        assertFalse(
-            notHighQuality.highQualityWindow(),
-            "只满足均分但平衡值不足时，不得标记为高品质窗口，防止奖励窗口条件被放宽"
-        );
+    private static AscensionConditionSnapshot snapshot(
+        double qiyun,
+        double qiyunMax,
+        double renqi,
+        double fallbackHumanQi,
+        double earthQi,
+        boolean playerInitiated
+    ) {
+        return snapshot(qiyun, qiyunMax, renqi, fallbackHumanQi, earthQi, playerInitiated, RANK_FIVE, STAGE_FIVE);
     }
 
-    @Test
-    void confirmedMustRequireSnapshotFrozen() {
-        AscensionConditionSnapshot snapshot = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_70,
-            SCORE_70,
-            SCORE_70,
-            SCORE_85,
-            true,
-            false
-        );
-
-        AscensionThreeQiEvaluation evaluation = evaluator.evaluate(snapshot);
-
-        assertEquals(
-            AscensionReadinessStage.READY_TO_CONFIRM,
-            evaluation.stage(),
-            "当快照未冻结时，阶段必须停留在 READY_TO_CONFIRM，避免把可变输入误标记为 CONFIRMED"
+    private static AscensionConditionSnapshot snapshot(
+        double qiyun,
+        double qiyunMax,
+        double renqi,
+        double fallbackHumanQi,
+        double earthQi,
+        boolean playerInitiated,
+        double zhuanshu,
+        double jieduan
+    ) {
+        return new AscensionConditionSnapshot(
+            BENMING_ID,
+            AscensionConditionSnapshot.BenmingGuFallbackState.RESOLVED,
+            "benminggu:1",
+            Map.of("tudao", DAO_MARK_TOTAL),
+            AscensionConditionSnapshot.DaoMarkCoverageState.COMPLETE,
+            DAO_MARK_TOTAL,
+            DAO_MARK_TOTAL,
+            AscensionConditionSnapshot.AptitudeResourceState.HEALTHY,
+            RESOURCE_MAX,
+            RESOURCE_MAX,
+            RESOURCE_CURRENT,
+            RESOURCE_MAX,
+            RESOURCE_CURRENT,
+            RESOURCE_MAX,
+            TIZHI_BASE,
+            zhuanshu,
+            jieduan,
+            KONGQIAO_ACTIVE,
+            qiyun,
+            qiyunMax,
+            renqi,
+            fallbackHumanQi,
+            earthQi,
+            TARGET_BASE,
+            TARGET_BASE,
+            playerInitiated
         );
     }
 }
