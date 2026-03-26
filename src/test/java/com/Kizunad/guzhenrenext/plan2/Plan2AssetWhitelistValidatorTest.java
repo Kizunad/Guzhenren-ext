@@ -1,6 +1,5 @@
 package com.Kizunad.guzhenrenext.plan2;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
@@ -27,8 +26,16 @@ final class Plan2AssetWhitelistValidatorTest {
     void shouldReportIllegalTextureNamespaceWithFileAndField() throws IOException {
         Path tempModelsRoot = Files.createTempDirectory("task3-models-");
         try {
-            writeModel(tempModelsRoot.resolve("item/valid_base.json"), "minecraft:item/generated", mapOf("layer0", "minecraft:item/apple"));
-            writeModel(tempModelsRoot.resolve("item/bad_texture.json"), "minecraft:item/generated", mapOf("layer0", "guzhenrenext:item/not_allowed"));
+            writeModel(
+                tempModelsRoot.resolve("item/valid_base.json"),
+                "minecraft:item/generated",
+                mapOf("layer0", "minecraft:item/apple")
+            );
+            writeModel(
+                tempModelsRoot.resolve("item/bad_texture.json"),
+                "minecraft:item/generated",
+                mapOf("layer0", "guzhenrenext:item/not_allowed")
+            );
 
             List<String> errors = Plan2AssetWhitelistValidator.validate(tempModelsRoot, Map.of());
             assertContains(errors, "bad_texture.json | textures.layer0");
@@ -42,8 +49,16 @@ final class Plan2AssetWhitelistValidatorTest {
     void shouldReportIllegalParentModelReferenceWithFileAndField() throws IOException {
         Path tempModelsRoot = Files.createTempDirectory("task3-parent-");
         try {
-            writeModel(tempModelsRoot.resolve("item/valid_base.json"), "minecraft:item/generated", mapOf("layer0", "minecraft:item/apple"));
-            writeModel(tempModelsRoot.resolve("item/bad_parent.json"), "guzhenrenext:item/missing_model", mapOf("layer0", "minecraft:item/apple"));
+            writeModel(
+                tempModelsRoot.resolve("item/valid_base.json"),
+                "minecraft:item/generated",
+                mapOf("layer0", "minecraft:item/apple")
+            );
+            writeModel(
+                tempModelsRoot.resolve("item/bad_parent.json"),
+                "guzhenrenext:item/missing_model",
+                mapOf("layer0", "minecraft:item/apple")
+            );
 
             List<String> errors = Plan2AssetWhitelistValidator.validate(tempModelsRoot, Map.of());
             assertContains(errors, "bad_parent.json | parent");
@@ -70,7 +85,10 @@ final class Plan2AssetWhitelistValidatorTest {
         Map<Path, String> sources = new HashMap<>();
         sources.put(fakeJava, javaText);
 
-        List<String> errors = Plan2AssetWhitelistValidator.validate(Files.createTempDirectory("task3-empty-models-"), sources);
+        List<String> errors = Plan2AssetWhitelistValidator.validate(
+            Files.createTempDirectory("task3-empty-models-"),
+            sources
+        );
         assertContains(errors, "BadSoundFixture.java:5 | sound namespace");
         assertContains(errors, "modded:sound/boom");
     }

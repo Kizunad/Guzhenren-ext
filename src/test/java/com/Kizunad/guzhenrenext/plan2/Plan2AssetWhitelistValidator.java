@@ -98,7 +98,9 @@ final class Plan2AssetWhitelistValidator {
 
     private static void validateSingleModel(Path modelFile, Set<String> availableModels, List<String> errors)
         throws IOException {
-        JsonObject object = JsonParser.parseString(Files.readString(modelFile, StandardCharsets.UTF_8)).getAsJsonObject();
+        JsonObject object = JsonParser.parseString(
+            Files.readString(modelFile, StandardCharsets.UTF_8)
+        ).getAsJsonObject();
         String parent = getOptionalString(object, "parent");
         if (parent != null) {
             validateParent(modelFile, parent, availableModels, errors);
@@ -131,7 +133,12 @@ final class Plan2AssetWhitelistValidator {
         }
     }
 
-    private static void validateParent(Path modelFile, String parent, Set<String> availableModels, List<String> errors) {
+    private static void validateParent(
+        Path modelFile,
+        String parent,
+        Set<String> availableModels,
+        List<String> errors
+    ) {
         String normalizedParent = normalizeModelId(parent);
         if (normalizedParent.startsWith("minecraft:")) {
             return;
