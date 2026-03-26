@@ -1,366 +1,358 @@
 package com.Kizunad.guzhenrenext.xianqiao.opening;
 
-import com.Kizunad.guzhenrenext.xianqiao.data.ApertureInitPhase;
-import com.Kizunad.guzhenrenext.xianqiao.data.ApertureInitializationState;
-import com.Kizunad.guzhenrenext.xianqiao.data.ApertureOpeningSnapshot;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ApertureBootstrapResumeTests {
 
-    private static final int LAYOUT_VERSION = 4;
+    private static final int LAYOUT_VERSION = 1;
 
-    private static final long PLAN_SEED = 20260325L;
+    private static final long PLAN_SEED = 2026032607L;
 
-    private static final int SCORE_80 = 80;
-
-    private static final int SCORE_90 = 90;
-
-    private static final String BIOME_PLAINS = "minecraft:plains";
-
-    private final ApertureBootstrapExecutor executor = new ApertureBootstrapExecutor();
+    private static final TestCenter RESOLVED_CENTER = new TestCenter(160, 96, 32);
 
     @Test
-    void repeatedExecutionAfterPartialCompletionMustNotDuplicateTerrainCoreSpiritOrFinalization() {
-        UUID owner = UUID.randomUUID();
-        InMemoryStateStore stateStore = new InMemoryStateStore();
-        InMemoryPlanStore planStore = new InMemoryPlanStore();
-        RecordingWorldMutations worldMutations = new RecordingWorldMutations();
-        ApertureBootstrapExecutor.BootstrapInput bootstrapInput = bootstrapInput();
-
-        worldMutations.failAfterCellsOnce = true;
-        assertThrows(
-            IllegalStateException.class,
-            () -> executor.execute(owner, bootstrapInput, stateStore, planStore, worldMutations)
+    void retryFromExecutingMustConvergeWithoutRematerializeOrDoubleFinalize() {
+        ApertureBootstrapExecutor executor = new ApertureBootstrapExecutor();
+        AscensionConditionSnapshot frozenSnapshot = snapshot("benming:task7-retry");
+        TestContext context = TestContext.uninitialized(
+            frozenSnapshot,
+            LAYOUT_VERSION,
+            PLAN_SEED,
+            RESOLVED_CENTER
         );
+        context.failUpdateCenterOnce = true;
 
-        assertEquals(1, worldMutations.materializeCalls);
-        assertEquals(0, worldMutations.spawnCoreCalls);
-        assertEquals(0, worldMutations.spawnSpiritCalls);
-        assertEquals(0, worldMutations.finalizeCalls);
-        assertEquals(ApertureInitPhase.EXECUTING, stateStore.getInitializationState(owner).initPhase());
+        assertThrows(RuntimeException.class, () -> executor.execute(context));
+        assertEquals(ApertureBootstrapExecutor.BootstrapPhase.EXECUTING, context.state.phase());
+        assertEquals(1, context.materializeCalls);
+        assertEquals(0, context.finalizeCalls);
+        assertEquals(1, context.resolvePlanCalls);
 
-        ApertureBootstrapExecutor.ExecutionResult resumed = executor.execute(
-            owner,
-            null,
-            stateStore,
-            planStore,
-            worldMutations
-        );
+        executor.execute(context);
+        assertEquals(ApertureBootstrapExecutor.BootstrapPhase.COMPLETED, context.state.phase());
+        assertEquals(1, context.materializeCalls);
+        assertEquals(1, context.finalizeCalls);
+        assertEquals(1, context.spawnSpiritCalls);
+        assertEquals(1, context.resolvePlanCalls);
 
-        assertEquals(ApertureInitPhase.COMPLETED, resumed.finalPhase());
-        assertEquals(1, worldMutations.materializeCalls);
-        assertEquals(1, worldMutations.spawnCoreCalls);
-        assertEquals(1, worldMutations.spawnSpiritCalls);
-        assertEquals(1, worldMutations.finalizeCalls);
-        assertEquals(ApertureInitPhase.COMPLETED, stateStore.getInitializationState(owner).initPhase());
-
-        executor.execute(owner, null, stateStore, planStore, worldMutations);
-        assertEquals(1, worldMutations.materializeCalls);
-        assertEquals(1, worldMutations.spawnCoreCalls);
-        assertEquals(1, worldMutations.spawnSpiritCalls);
-        assertEquals(1, worldMutations.finalizeCalls);
+        executor.execute(context);
+        assertEquals(ApertureBootstrapExecutor.BootstrapPhase.COMPLETED, context.state.phase());
+        assertEquals(1, context.materializeCalls);
+        assertEquals(1, context.finalizeCalls);
+        assertEquals(1, context.spawnSpiritCalls);
     }
 
     @Test
-    void resumeFromMidPhaseMustReachSameFinalResultAsUninterruptedExecution() {
-        UUID owner = UUID.randomUUID();
-        ApertureBootstrapExecutor.BootstrapInput bootstrapInput = bootstrapInput();
-
-        InMemoryStateStore uninterruptedState = new InMemoryStateStore();
-        InMemoryPlanStore uninterruptedPlanStore = new InMemoryPlanStore();
-        RecordingWorldMutations uninterruptedWorld = new RecordingWorldMutations();
-        executor.execute(owner, bootstrapInput, uninterruptedState, uninterruptedPlanStore, uninterruptedWorld);
-
-        InMemoryStateStore resumedState = new InMemoryStateStore();
-        InMemoryPlanStore resumedPlanStore = new InMemoryPlanStore();
-        RecordingWorldMutations resumedWorld = new RecordingWorldMutations();
-        resumedWorld.failAfterCoreSpawnOnce = true;
-
-        assertThrows(
-            IllegalStateException.class,
-            () -> executor.execute(owner, bootstrapInput, resumedState, resumedPlanStore, resumedWorld)
+    void plannedWithFrozenStateMustResumeWithoutResolvingNewPlan() {
+        ApertureBootstrapExecutor executor = new ApertureBootstrapExecutor();
+        AscensionConditionSnapshot frozenSnapshot = snapshot("benming:task7-planned");
+        InitialTerrainPlan plannedLayout = testPlan();
+        ApertureBootstrapExecutor.PersistedState planned = new ApertureBootstrapExecutor.PersistedState(
+            ApertureBootstrapExecutor.BootstrapPhase.PLANNED,
+            frozenSnapshot,
+            Integer.valueOf(LAYOUT_VERSION),
+            Long.valueOf(PLAN_SEED)
         );
-        assertEquals(ApertureInitPhase.EXECUTING, resumedState.getInitializationState(owner).initPhase());
-
-        executor.execute(owner, null, resumedState, resumedPlanStore, resumedWorld);
-
-        assertEquals(
-            uninterruptedState.getInitializationState(owner),
-            resumedState.getInitializationState(owner),
-            "恢复执行后的 phase/snapshot/layoutVersion/planSeed 必须与不中断路径一致"
+        TestContext context = TestContext.withState(
+            planned,
+            frozenSnapshot,
+            LAYOUT_VERSION,
+            PLAN_SEED,
+            RESOLVED_CENTER,
+            plannedLayout
         );
-        assertEquals(uninterruptedWorld.materializeCalls, resumedWorld.materializeCalls);
-        assertEquals(uninterruptedWorld.spawnCoreCalls, resumedWorld.spawnCoreCalls);
-        assertEquals(uninterruptedWorld.spawnSpiritCalls, resumedWorld.spawnSpiritCalls);
-        assertEquals(uninterruptedWorld.finalizeCalls, resumedWorld.finalizeCalls);
-        assertIterableEquals(uninterruptedWorld.events, resumedWorld.events);
+
+        executor.execute(context);
+
+        assertEquals(ApertureBootstrapExecutor.BootstrapPhase.COMPLETED, context.state.phase());
+        assertEquals(0, context.resolvePlanCalls);
+        assertEquals(1, context.materializeCalls);
+        assertEquals(1, context.spawnSpiritCalls);
+        assertSame(frozenSnapshot, context.state.openingSnapshot());
+        assertEquals(plannedLayout, context.materializedPlan);
     }
 
     @Test
-    void executorMustUseTask5PhaseStateInsteadOfLegacyBooleanGate() {
-        UUID owner = UUID.randomUUID();
-        InMemoryStateStore stateStore = new InMemoryStateStore();
-        InMemoryPlanStore planStore = new InMemoryPlanStore();
-        RecordingWorldMutations worldMutations = new RecordingWorldMutations();
-        ApertureBootstrapExecutor.BootstrapInput bootstrapInput = bootstrapInput();
-
-        stateStore.setInitializationState(
-            owner,
-            new ApertureInitializationState(
-                ApertureInitPhase.PLANNED,
-                bootstrapInput.openingSnapshot(),
-                bootstrapInput.layoutVersion(),
-                bootstrapInput.planSeed()
-            )
+    void executingWithFrozenStateMustSkipMaterializeAndComplete() {
+        ApertureBootstrapExecutor executor = new ApertureBootstrapExecutor();
+        AscensionConditionSnapshot frozenSnapshot = snapshot("benming:task7-executing");
+        InitialTerrainPlan plannedLayout = testPlan();
+        ApertureBootstrapExecutor.PersistedState executing = new ApertureBootstrapExecutor.PersistedState(
+            ApertureBootstrapExecutor.BootstrapPhase.EXECUTING,
+            frozenSnapshot,
+            Integer.valueOf(LAYOUT_VERSION),
+            Long.valueOf(PLAN_SEED)
         );
-        planStore.saveResolvedPlan(owner, bootstrapInput.layoutVersion(), bootstrapInput.planSeed(), bootstrapInput.plan());
-
-        ApertureBootstrapExecutor.ExecutionResult result = executor.execute(
-            owner,
-            null,
-            stateStore,
-            planStore,
-            worldMutations
+        TestContext context = TestContext.withState(
+            executing,
+            frozenSnapshot,
+            LAYOUT_VERSION,
+            PLAN_SEED,
+            RESOLVED_CENTER,
+            plannedLayout
         );
 
-        Set<ApertureBootstrapExecutor.PhaseBoundary> expectedReached = EnumSet.of(
-            ApertureBootstrapExecutor.PhaseBoundary.CELLS_MATERIALIZED,
-            ApertureBootstrapExecutor.PhaseBoundary.CORE_PLATFORM_SPIRIT_SPAWNED,
-            ApertureBootstrapExecutor.PhaseBoundary.WORLD_DATA_FINALIZED
-        );
-        assertEquals(ApertureInitPhase.COMPLETED, result.finalPhase());
-        assertEquals(expectedReached, result.reachedBoundaries());
-        assertEquals(0, worldMutations.planResolveSideEffectCounter);
-        assertTrue(worldMutations.materializeCalls > 0);
+        executor.execute(context);
+
+        assertEquals(ApertureBootstrapExecutor.BootstrapPhase.COMPLETED, context.state.phase());
+        assertEquals(0, context.materializeCalls);
+        assertEquals(1, context.spawnSpiritCalls);
+        assertEquals(1, context.finalizeCalls);
     }
 
     @Test
-    void persistedPlanAndPhaseMustSupportResumeAcrossNewStoreViews() {
-        UUID owner = UUID.randomUUID();
-        PersistentBootstrapStorage persistentStorage = new PersistentBootstrapStorage();
-        ApertureBootstrapExecutor.BootstrapInput bootstrapInput = bootstrapInput();
-
-        InMemoryStateStore firstRunStateStore = new InMemoryStateStore(persistentStorage.states);
-        InMemoryPlanStore firstRunPlanStore = new InMemoryPlanStore(persistentStorage.plans);
-        RecordingWorldMutations firstRunWorldMutations = new RecordingWorldMutations();
-        firstRunWorldMutations.failAfterCellsOnce = true;
-
-        assertThrows(
-            IllegalStateException.class,
-            () -> executor.execute(owner, bootstrapInput, firstRunStateStore, firstRunPlanStore, firstRunWorldMutations)
-        );
-        assertEquals(ApertureInitPhase.EXECUTING, firstRunStateStore.getInitializationState(owner).initPhase());
-        assertTrue(firstRunPlanStore.loadResolvedPlan(owner, LAYOUT_VERSION, PLAN_SEED).isPresent());
-
-        InMemoryStateStore resumedStateStore = new InMemoryStateStore(persistentStorage.states);
-        InMemoryPlanStore resumedPlanStore = new InMemoryPlanStore(persistentStorage.plans);
-        RecordingWorldMutations resumedWorldMutations = new RecordingWorldMutations();
-        resumedWorldMutations.restoreCellsMaterialized();
-
-        ApertureBootstrapExecutor.ExecutionResult resumedResult = executor.execute(
-            owner,
-            null,
-            resumedStateStore,
-            resumedPlanStore,
-            resumedWorldMutations
+    void frozenPlanMayCarryDeterministicLayoutForMainMaterializePath() {
+        ApertureBootstrapExecutor executor = new ApertureBootstrapExecutor();
+        AscensionConditionSnapshot frozenSnapshot = snapshot("benming:task11-layout");
+        InitialTerrainPlan plannedLayout = testPlan();
+        TestContext context = TestContext.uninitialized(
+            frozenSnapshot,
+            LAYOUT_VERSION,
+            PLAN_SEED,
+            RESOLVED_CENTER,
+            plannedLayout
         );
 
-        assertEquals(ApertureInitPhase.COMPLETED, resumedResult.finalPhase());
-        assertEquals(ApertureInitPhase.COMPLETED, resumedStateStore.getInitializationState(owner).initPhase());
-        assertTrue(resumedPlanStore.loadResolvedPlan(owner, LAYOUT_VERSION, PLAN_SEED).isPresent());
-        assertEquals(0, resumedWorldMutations.materializeCalls);
-        assertEquals(1, resumedWorldMutations.spawnCoreCalls);
-        assertEquals(1, resumedWorldMutations.spawnSpiritCalls);
-        assertEquals(1, resumedWorldMutations.finalizeCalls);
+        executor.execute(context);
+
+        assertEquals(ApertureBootstrapExecutor.BootstrapPhase.COMPLETED, context.state.phase());
+        assertEquals(1, context.materializeCalls);
+        assertEquals(plannedLayout, context.materializedPlan);
+        assertEquals(1, context.resolvePlanCalls);
     }
 
-    private static ApertureBootstrapExecutor.BootstrapInput bootstrapInput() {
-        return new ApertureBootstrapExecutor.BootstrapInput(snapshot(), plan(), LAYOUT_VERSION, PLAN_SEED);
+    private static AscensionConditionSnapshot snapshot(String token) {
+        return new AscensionConditionSnapshot(
+            1.0D,
+            AscensionConditionSnapshot.BenmingGuFallbackState.RESOLVED,
+            token,
+            Map.of("tudao", 100.0D),
+            AscensionConditionSnapshot.DaoMarkCoverageState.COMPLETE,
+            100.0D,
+            100.0D,
+            AscensionConditionSnapshot.AptitudeResourceState.HEALTHY,
+            90.0D,
+            90.0D,
+            80.0D,
+            100.0D,
+            80.0D,
+            100.0D,
+            70.0D,
+            5.0D,
+            5.0D,
+            8.0D,
+            12.0D,
+            20.0D,
+            30.0D,
+            40.0D,
+            50.0D,
+            60.0D,
+            70.0D,
+            true
+        );
     }
 
-    private static ApertureOpeningSnapshot snapshot() {
-        return new ApertureOpeningSnapshot(5, 5, SCORE_80, SCORE_80, SCORE_80, SCORE_90, true, true);
-    }
-
-    private static InitialTerrainPlan plan() {
-        List<InitialTerrainPlan.PlannedTerrainCell> cells = List.of(
-            new InitialTerrainPlan.PlannedTerrainCell(
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                true,
-                BIOME_PLAINS,
-                List.of(BIOME_PLAINS)
-            )
+    private static InitialTerrainPlan testPlan() {
+        InitialTerrainPlan.AnchorPoint seamCenter = new InitialTerrainPlan.AnchorPoint(160, 90, 32);
+        InitialTerrainPlan.AnchorPoint layoutOrigin = new InitialTerrainPlan.AnchorPoint(144, 90, 16);
+        InitialTerrainPlan.PlannedCell first = new InitialTerrainPlan.PlannedCell(
+            1,
+            0,
+            0,
+            0,
+            layoutOrigin,
+            new InitialTerrainPlan.ChunkCoord(9, 1),
+            List.of(BiomeInferenceService.BiomeKey.minecraft("desert"))
+        );
+        InitialTerrainPlan.PlannedCell second = new InitialTerrainPlan.PlannedCell(
+            2,
+            0,
+            0,
+            1,
+            layoutOrigin.offset(16, 0, 0),
+            new InitialTerrainPlan.ChunkCoord(10, 1),
+            List.of(BiomeInferenceService.BiomeKey.minecraft("plains"))
+        );
+        InitialTerrainPlan.PlannedCell third = new InitialTerrainPlan.PlannedCell(
+            3,
+            0,
+            1,
+            0,
+            layoutOrigin.offset(0, 0, 16),
+            new InitialTerrainPlan.ChunkCoord(9, 2),
+            List.of(BiomeInferenceService.BiomeKey.minecraft("savanna"))
+        );
+        InitialTerrainPlan.PlannedCell fourth = new InitialTerrainPlan.PlannedCell(
+            4,
+            0,
+            1,
+            1,
+            layoutOrigin.offset(16, 0, 16),
+            new InitialTerrainPlan.ChunkCoord(10, 2),
+            List.of(BiomeInferenceService.BiomeKey.minecraft("badlands"))
         );
         return new InitialTerrainPlan(
-            InitialTerrainPlan.LayoutTier.ONE_BY_ONE,
-            1,
-            1,
-            new InitialTerrainPlan.CoreAnchor(0.5, 0.5, InitialTerrainPlan.CoreAnchorSemantics.ODD_CENTER_CELL),
-            new InitialTerrainPlan.TeleportAnchor(
-                0,
-                0,
-                0,
-                0,
-                0.5,
-                0.5,
-                InitialTerrainPlan.TeleportAnchorSemantics.ODD_CENTER_CELL
-            ),
-            new InitialTerrainPlan.LayoutOrigin(0, 0, InitialTerrainPlan.LayoutOriginSemantics.NORTHWEST_CORNER_CHUNK),
-            new InitialTerrainPlan.InitialChunkBoundary(0, 0, 0, 0),
-            new InitialTerrainPlan.RingParameters(16, 8, 16, 17),
-            BiomeInferenceService.BiomeFallbackPolicy.STABLE_HASH_POOL,
-            cells
+            InitialTerrainPlan.LayoutTier.TWO_BY_TWO,
+            seamCenter,
+            layoutOrigin,
+            seamCenter,
+            seamCenter.offset(0, 1, 0),
+            new InitialTerrainPlan.ChunkBoundary(9, 10, 1, 2),
+            new InitialTerrainPlan.ZoneParameters(0, 8, 16, 16),
+            List.of(first, second, third, fourth)
         );
     }
 
-    private static final class InMemoryStateStore implements ApertureBootstrapExecutor.InitializationStateStore {
+    private static final class TestContext implements ApertureBootstrapExecutor.ExecutionContext {
 
-        private final Map<UUID, ApertureInitializationState> states;
+        private final ApertureBootstrapExecutor.FrozenBootstrapPlan resolvedPlan;
 
-        private InMemoryStateStore() {
-            this(new HashMap<>());
-        }
+        private final TestCenter resolvedCenter;
 
-        private InMemoryStateStore(Map<UUID, ApertureInitializationState> states) {
-            this.states = states;
-        }
+        private ApertureBootstrapExecutor.PersistedState state;
 
-        @Override
-        public ApertureInitializationState getInitializationState(UUID owner) {
-            return states.getOrDefault(owner, new ApertureInitializationState(ApertureInitPhase.UNINITIALIZED, null,
-                null, null));
-        }
+        private int resolvePlanCalls;
 
-        @Override
-        public void setInitializationState(UUID owner, ApertureInitializationState initializationState) {
-            states.put(owner, initializationState);
-        }
-    }
-
-    private static final class InMemoryPlanStore implements ApertureBootstrapExecutor.PlanStore {
-
-        private final Map<PlanKey, InitialTerrainPlan> plans;
-
-        private InMemoryPlanStore() {
-            this(new HashMap<>());
-        }
-
-        private InMemoryPlanStore(Map<PlanKey, InitialTerrainPlan> plans) {
-            this.plans = plans;
-        }
-
-        @Override
-        public void saveResolvedPlan(UUID owner, int layoutVersion, long planSeed, InitialTerrainPlan plan) {
-            plans.put(new PlanKey(owner, layoutVersion, planSeed), plan);
-        }
-
-        @Override
-        public Optional<InitialTerrainPlan> loadResolvedPlan(UUID owner, int layoutVersion, long planSeed) {
-            return Optional.ofNullable(plans.get(new PlanKey(owner, layoutVersion, planSeed)));
-        }
-    }
-
-    private static final class RecordingWorldMutations implements ApertureBootstrapExecutor.WorldMutationOperations {
-
-        private boolean cellsMaterialized;
-        private boolean coreSpawned;
-        private boolean spiritSpawned;
-        private boolean worldDataFinalized;
         private int materializeCalls;
-        private int spawnCoreCalls;
+
+        private int updateCenterCalls;
+
+        private int createPlatformCalls;
+
         private int spawnSpiritCalls;
+
         private int finalizeCalls;
-        private int planResolveSideEffectCounter;
-        private boolean failAfterCellsOnce;
-        private boolean failAfterCoreSpawnOnce;
-        private final List<String> events = new ArrayList<>();
 
-        private void restoreCellsMaterialized() {
-            cellsMaterialized = true;
+        private InitialTerrainPlan materializedPlan;
+
+        private boolean failUpdateCenterOnce;
+
+        private TestContext(
+            ApertureBootstrapExecutor.PersistedState state,
+            AscensionConditionSnapshot snapshot,
+            int layoutVersion,
+            long planSeed,
+            TestCenter resolvedCenter,
+            InitialTerrainPlan initialTerrainPlan
+        ) {
+            this.state = state;
+            this.resolvedPlan = new ApertureBootstrapExecutor.FrozenBootstrapPlan(
+                snapshot,
+                layoutVersion,
+                planSeed,
+                initialTerrainPlan
+            );
+            this.resolvedCenter = resolvedCenter;
+        }
+
+        private static TestContext uninitialized(
+            AscensionConditionSnapshot snapshot,
+            int layoutVersion,
+            long planSeed,
+            TestCenter resolvedCenter
+        ) {
+            return uninitialized(snapshot, layoutVersion, planSeed, resolvedCenter, null);
+        }
+
+        private static TestContext uninitialized(
+            AscensionConditionSnapshot snapshot,
+            int layoutVersion,
+            long planSeed,
+            TestCenter resolvedCenter,
+            InitialTerrainPlan initialTerrainPlan
+        ) {
+            return new TestContext(
+                ApertureBootstrapExecutor.PersistedState.uninitialized(),
+                snapshot,
+                layoutVersion,
+                planSeed,
+                resolvedCenter,
+                initialTerrainPlan
+            );
+        }
+
+        private static TestContext withState(
+            ApertureBootstrapExecutor.PersistedState state,
+            AscensionConditionSnapshot snapshot,
+            int layoutVersion,
+            long planSeed,
+            TestCenter resolvedCenter,
+            InitialTerrainPlan initialTerrainPlan
+        ) {
+            return new TestContext(state, snapshot, layoutVersion, planSeed, resolvedCenter, initialTerrainPlan);
         }
 
         @Override
-        public boolean isCellsMaterialized(UUID owner, InitialTerrainPlan plan) {
-            return cellsMaterialized;
+        public ApertureBootstrapExecutor.PersistedState readState() {
+            return state;
         }
 
         @Override
-        public void materializeCells(UUID owner, InitialTerrainPlan plan) {
+        public void writeState(ApertureBootstrapExecutor.PersistedState state) {
+            this.state = state;
+        }
+
+        @Override
+        public ApertureBootstrapExecutor.FrozenBootstrapPlan resolvePlanSnapshot() {
+            resolvePlanCalls++;
+            return resolvedPlan;
+        }
+
+        @Override
+        public void materializeCells(ApertureBootstrapExecutor.FrozenBootstrapPlan frozenPlan) {
             materializeCalls++;
-            cellsMaterialized = true;
-            events.add("cells");
-            if (failAfterCellsOnce) {
-                failAfterCellsOnce = false;
-                throw new IllegalStateException("模拟 cells 落地后中断");
+            if (frozenPlan.hasInitialTerrainPlan()) {
+                materializedPlan = frozenPlan.initialTerrainPlan();
+            } else {
+                materializedPlan = resolvedPlan.initialTerrainPlan();
             }
         }
 
         @Override
-        public boolean isCorePlatformSpawned(UUID owner, InitialTerrainPlan plan) {
-            return coreSpawned;
+        public Object resolvePlatformCenterAfterSampling(ApertureBootstrapExecutor.FrozenBootstrapPlan frozenPlan) {
+            return resolvedCenter;
         }
 
         @Override
-        public void spawnCenterPlatformCore(UUID owner, InitialTerrainPlan plan) {
-            spawnCoreCalls++;
-            coreSpawned = true;
-            events.add("core");
-            if (failAfterCoreSpawnOnce) {
-                failAfterCoreSpawnOnce = false;
-                throw new IllegalStateException("模拟 core 落地后中断");
+        public void updateCenter(Object center) {
+            assertEquals(resolvedCenter, center);
+            updateCenterCalls++;
+            if (failUpdateCenterOnce) {
+                failUpdateCenterOnce = false;
+                throw new RuntimeException("fail once");
             }
         }
 
         @Override
-        public boolean isSpiritSpawned(UUID owner, InitialTerrainPlan plan) {
-            return spiritSpawned;
+        public void createInitialPlatform(Object center) {
+            assertEquals(resolvedCenter, center);
+            createPlatformCalls++;
         }
 
         @Override
-        public void spawnSpirit(UUID owner, InitialTerrainPlan plan) {
+        public void spawnLandSpirit(Object center) {
+            assertEquals(resolvedCenter, center);
             spawnSpiritCalls++;
-            spiritSpawned = true;
-            events.add("spirit");
         }
 
         @Override
-        public boolean isWorldDataFinalized(UUID owner, InitialTerrainPlan plan) {
-            return worldDataFinalized;
-        }
-
-        @Override
-        public void finalizeWorldData(UUID owner, InitialTerrainPlan plan) {
+        public void finalizeWorldData() {
             finalizeCalls++;
-            worldDataFinalized = true;
-            events.add("finalize");
+            state = new ApertureBootstrapExecutor.PersistedState(
+                ApertureBootstrapExecutor.BootstrapPhase.COMPLETED,
+                state.openingSnapshot(),
+                state.layoutVersion(),
+                state.planSeed()
+            );
         }
     }
 
-    private record PlanKey(UUID owner, int layoutVersion, long planSeed) {
-    }
-
-    private static final class PersistentBootstrapStorage {
-
-        private final Map<UUID, ApertureInitializationState> states = new HashMap<>();
-
-        private final Map<PlanKey, InitialTerrainPlan> plans = new HashMap<>();
+    private record TestCenter(int x, int y, int z) {
     }
 }
