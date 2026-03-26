@@ -1,155 +1,223 @@
 package com.Kizunad.guzhenrenext.xianqiao.runtime;
 
-import java.util.Objects;
+public final class ChaosZoneModel {
 
-/**
- * 仙窍边界运行时分区模型。
- * <p>
- * 该模型以“越界距离（方块）”作为唯一判定输入，输出当前坐标所属分区：
- * 1) playable zone：outsideDistance=0（仍在 chunk 真值边界内）；
- * 2) safezone：outsideDistance∈[1,8]；
- * 3) warning band：outsideDistance∈[9,16]；
- * 4) lethal chaos band：outsideDistance>=17。
- * </p>
- */
-public record ChaosZoneModel(int outsideDistanceBlocks, long outsideDistanceSquared, ZoneType zoneType) {
+    private static final int CHUNK_BLOCK_SIZE = 16;
 
-    private static final int ZERO = 0;
+    private static final int CHUNK_MAX_OFFSET = CHUNK_BLOCK_SIZE - 1;
 
-    private static final int SAFEZONE_MAX_OUTSIDE_DISTANCE_BLOCKS = 8;
+    public static final int DEFAULT_SAFEZONE_INSET_CHUNKS = 0;
 
-    private static final int WARNING_MAX_OUTSIDE_DISTANCE_BLOCKS = 16;
+    public static final int DEFAULT_WARNING_BUFFER_BLOCKS = 8;
 
-    private static final int LETHAL_ZONE_START_OUTSIDE_DISTANCE_BLOCKS = 17;
+    public static final int DEFAULT_LETHAL_BUFFER_BLOCKS = 16;
 
-    private static final long LONG_ONE = 1L;
+    public static final int DEFAULT_RESERVED_CHAOS_CHUNKS = 16;
 
-    public ChaosZoneModel {
-        if (outsideDistanceBlocks < ZERO) {
-            throw new IllegalArgumentException("outsideDistanceBlocks 不能小于 0");
+    private final int minChunkX;
+    private final int maxChunkX;
+    private final int minChunkZ;
+    private final int maxChunkZ;
+
+    private final int safezoneInsetChunks;
+    private final int warningBufferBlocks;
+    private final int lethalBufferBlocks;
+    private final int reservedChaosChunks;
+
+    private final int minPlayableChunkX;
+    private final int maxPlayableChunkX;
+    private final int minPlayableChunkZ;
+    private final int maxPlayableChunkZ;
+
+    private final int minTruthBlockX;
+    private final int maxTruthBlockX;
+    private final int minTruthBlockZ;
+    private final int maxTruthBlockZ;
+
+    private final int minPlayableBlockX;
+    private final int maxPlayableBlockX;
+    private final int minPlayableBlockZ;
+    private final int maxPlayableBlockZ;
+
+    private final int minReserveBlockX;
+    private final int maxReserveBlockX;
+    private final int minReserveBlockZ;
+    private final int maxReserveBlockZ;
+
+    private final long warningDistanceSquared;
+    private final long lethalDistanceSquared;
+
+    public ChaosZoneModel(
+        int minChunkX,
+        int maxChunkX,
+        int minChunkZ,
+        int maxChunkZ,
+        ZoneConfig zoneConfig
+    ) {
+        this.minChunkX = Math.min(minChunkX, maxChunkX);
+        this.maxChunkX = Math.max(minChunkX, maxChunkX);
+        this.minChunkZ = Math.min(minChunkZ, maxChunkZ);
+        this.maxChunkZ = Math.max(minChunkZ, maxChunkZ);
+
+        ZoneConfig config = zoneConfig == null ? ZoneConfig.defaults() : zoneConfig;
+        this.safezoneInsetChunks = normalizeInset(this.minChunkX, this.maxChunkX, this.minChunkZ, this.maxChunkZ,
+            config.safezoneInsetChunks());
+        this.warningBufferBlocks = Math.max(0, config.warningBufferBlocks());
+        this.lethalBufferBlocks = Math.max(this.warningBufferBlocks, config.lethalBufferBlocks());
+        this.reservedChaosChunks = Math.max(0, config.reservedChaosChunks());
+
+        this.minPlayableChunkX = this.minChunkX + this.safezoneInsetChunks;
+        this.maxPlayableChunkX = this.maxChunkX - this.safezoneInsetChunks;
+        this.minPlayableChunkZ = this.minChunkZ + this.safezoneInsetChunks;
+        this.maxPlayableChunkZ = this.maxChunkZ - this.safezoneInsetChunks;
+
+        this.minTruthBlockX = chunkToMinBlock(this.minChunkX);
+        this.maxTruthBlockX = chunkToMaxBlock(this.maxChunkX);
+        this.minTruthBlockZ = chunkToMinBlock(this.minChunkZ);
+        this.maxTruthBlockZ = chunkToMaxBlock(this.maxChunkZ);
+
+        this.minPlayableBlockX = chunkToMinBlock(this.minPlayableChunkX);
+        this.maxPlayableBlockX = chunkToMaxBlock(this.maxPlayableChunkX);
+        this.minPlayableBlockZ = chunkToMinBlock(this.minPlayableChunkZ);
+        this.maxPlayableBlockZ = chunkToMaxBlock(this.maxPlayableChunkZ);
+
+        this.minReserveBlockX = chunkToMinBlock(this.minChunkX - this.reservedChaosChunks);
+        this.maxReserveBlockX = chunkToMaxBlock(this.maxChunkX + this.reservedChaosChunks);
+        this.minReserveBlockZ = chunkToMinBlock(this.minChunkZ - this.reservedChaosChunks);
+        this.maxReserveBlockZ = chunkToMaxBlock(this.maxChunkZ + this.reservedChaosChunks);
+
+        this.warningDistanceSquared = square(this.warningBufferBlocks);
+        this.lethalDistanceSquared = square(this.lethalBufferBlocks);
+    }
+
+    public boolean isInsidePlayableZone(int blockX, int blockZ) {
+        return isInsideClosedRange(blockX, minPlayableBlockX, maxPlayableBlockX)
+            && isInsideClosedRange(blockZ, minPlayableBlockZ, maxPlayableBlockZ);
+    }
+
+    public boolean isInsideTruthBoundary(int blockX, int blockZ) {
+        return isInsideClosedRange(blockX, minTruthBlockX, maxTruthBlockX)
+            && isInsideClosedRange(blockZ, minTruthBlockZ, maxTruthBlockZ);
+    }
+
+    public boolean isInsideReserveZone(int blockX, int blockZ) {
+        return isInsideClosedRange(blockX, minReserveBlockX, maxReserveBlockX)
+            && isInsideClosedRange(blockZ, minReserveBlockZ, maxReserveBlockZ);
+    }
+
+    public boolean isInReserveChaosBand(int blockX, int blockZ) {
+        return !isInsideTruthBoundary(blockX, blockZ) && isInsideReserveZone(blockX, blockZ);
+    }
+
+    public long getOutsideDistanceSquaredToPlayable(int blockX, int blockZ) {
+        long deltaX = computeAxisOutsideDistance(blockX, minPlayableBlockX, maxPlayableBlockX);
+        long deltaZ = computeAxisOutsideDistance(blockZ, minPlayableBlockZ, maxPlayableBlockZ);
+        return deltaX * deltaX + deltaZ * deltaZ;
+    }
+
+    public long getOutsideDistanceSquaredToReserve(int blockX, int blockZ) {
+        long deltaX = computeAxisOutsideDistance(blockX, minReserveBlockX, maxReserveBlockX);
+        long deltaZ = computeAxisOutsideDistance(blockZ, minReserveBlockZ, maxReserveBlockZ);
+        return deltaX * deltaX + deltaZ * deltaZ;
+    }
+
+    public boolean isInWarningBand(int blockX, int blockZ) {
+        long outsideDistanceSquared = getOutsideDistanceSquaredToPlayable(blockX, blockZ);
+        return outsideDistanceSquared > warningDistanceSquared
+            && outsideDistanceSquared <= lethalDistanceSquared;
+    }
+
+    public boolean isInLethalChaosBand(int blockX, int blockZ) {
+        return getOutsideDistanceSquaredToPlayable(blockX, blockZ) > lethalDistanceSquared;
+    }
+
+    public ChaosBand resolveChaosBand(int blockX, int blockZ) {
+        long outsideDistanceSquared = getOutsideDistanceSquaredToPlayable(blockX, blockZ);
+        if (outsideDistanceSquared <= warningDistanceSquared) {
+            return ChaosBand.PLAYABLE_OR_SAFE;
         }
-        if (outsideDistanceSquared < 0L) {
-            throw new IllegalArgumentException("outsideDistanceSquared 不能小于 0");
+        if (outsideDistanceSquared <= lethalDistanceSquared) {
+            return ChaosBand.WARNING;
         }
-        Objects.requireNonNull(zoneType, "zoneType");
+        return ChaosBand.LETHAL;
     }
 
-    /**
-     * 由越界距离平方构建运行时分区模型。
-     * <p>
-     * 采用 ceil(sqrt(d²)) 还原“最小整数量级的越界方块数”，
-     * 以确保 0/8/16/17 阈值语义可被稳定测试。
-     * </p>
-     *
-     * @param outsideDistanceSquared 越界距离平方
-     * @return 运行时分区模型
-     */
-    public static ChaosZoneModel fromOutsideDistanceSquared(long outsideDistanceSquared) {
-        if (outsideDistanceSquared < 0L) {
-            throw new IllegalArgumentException("outsideDistanceSquared 不能小于 0");
+    public int safezoneInsetChunks() {
+        return safezoneInsetChunks;
+    }
+
+    public int warningBufferBlocks() {
+        return warningBufferBlocks;
+    }
+
+    public int lethalBufferBlocks() {
+        return lethalBufferBlocks;
+    }
+
+    public int reservedChaosChunks() {
+        return reservedChaosChunks;
+    }
+
+    public enum ChaosBand {
+        PLAYABLE_OR_SAFE,
+        WARNING,
+        LETHAL
+    }
+
+    public record ZoneConfig(
+        int safezoneInsetChunks,
+        int warningBufferBlocks,
+        int lethalBufferBlocks,
+        int reservedChaosChunks
+    ) {
+
+        public static ZoneConfig defaults() {
+            return new ZoneConfig(
+                DEFAULT_SAFEZONE_INSET_CHUNKS,
+                DEFAULT_WARNING_BUFFER_BLOCKS,
+                DEFAULT_LETHAL_BUFFER_BLOCKS,
+                DEFAULT_RESERVED_CHAOS_CHUNKS
+            );
         }
-        int outsideDistanceBlocks = toOutsideDistanceBlocks(outsideDistanceSquared);
-        return new ChaosZoneModel(
-            outsideDistanceBlocks,
-            outsideDistanceSquared,
-            resolveZoneType(outsideDistanceBlocks)
-        );
     }
 
-    /**
-     * 判定当前是否位于 playable zone（即仍在边界内）。
-     */
-    public boolean isPlayableZone() {
-        return zoneType == ZoneType.PLAYABLE_ZONE;
+    private static int chunkToMinBlock(int chunk) {
+        return chunk * CHUNK_BLOCK_SIZE;
     }
 
-    /**
-     * 判定当前是否位于 safezone（1~8 格越界）。
-     */
-    public boolean isSafeZone() {
-        return zoneType == ZoneType.SAFEZONE;
+    private static int chunkToMaxBlock(int chunk) {
+        return chunkToMinBlock(chunk) + CHUNK_MAX_OFFSET;
     }
 
-    /**
-     * 判定当前是否位于 warning band（9~16 格越界）。
-     */
-    public boolean isWarningBand() {
-        return zoneType == ZoneType.WARNING_BAND;
+    private static int normalizeInset(
+        int minChunkX,
+        int maxChunkX,
+        int minChunkZ,
+        int maxChunkZ,
+        int safezoneInsetChunks
+    ) {
+        int normalizedInset = Math.max(0, safezoneInsetChunks);
+        int maxInsetX = Math.max(0, (maxChunkX - minChunkX) / 2);
+        int maxInsetZ = Math.max(0, (maxChunkZ - minChunkZ) / 2);
+        return Math.min(normalizedInset, Math.min(maxInsetX, maxInsetZ));
     }
 
-    /**
-     * 判定当前是否位于 lethal chaos band（>=17 格越界）。
-     */
-    public boolean isLethalChaosBand() {
-        return zoneType == ZoneType.LETHAL_CHAOS_BAND;
-    }
-
-    /**
-     * 判定是否仍处于“16 格预留上限”内。
-     * <p>
-     * 语义：只对已越界位置生效，因此 outsideDistance=0 不计入预留带。
-     * </p>
-     */
-    public boolean isWithinReservedChaosBand() {
-        return outsideDistanceBlocks > ZERO
-            && outsideDistanceBlocks <= WARNING_MAX_OUTSIDE_DISTANCE_BLOCKS;
-    }
-
-    public static int safeZoneMaxOutsideDistanceBlocks() {
-        return SAFEZONE_MAX_OUTSIDE_DISTANCE_BLOCKS;
-    }
-
-    public static int warningZoneMaxOutsideDistanceBlocks() {
-        return WARNING_MAX_OUTSIDE_DISTANCE_BLOCKS;
-    }
-
-    public static int lethalZoneStartOutsideDistanceBlocks() {
-        return LETHAL_ZONE_START_OUTSIDE_DISTANCE_BLOCKS;
-    }
-
-    /**
-     * 依据越界方块数解析分区类型。
-     */
-    public static ZoneType resolveZoneType(int outsideDistanceBlocks) {
-        if (outsideDistanceBlocks <= ZERO) {
-            return ZoneType.PLAYABLE_ZONE;
+    private static long computeAxisOutsideDistance(int value, int minInclusive, int maxInclusive) {
+        if (value < minInclusive) {
+            return (long) minInclusive - value;
         }
-        if (outsideDistanceBlocks <= SAFEZONE_MAX_OUTSIDE_DISTANCE_BLOCKS) {
-            return ZoneType.SAFEZONE;
+        if (value > maxInclusive) {
+            return (long) value - maxInclusive;
         }
-        if (outsideDistanceBlocks <= WARNING_MAX_OUTSIDE_DISTANCE_BLOCKS) {
-            return ZoneType.WARNING_BAND;
-        }
-        return ZoneType.LETHAL_CHAOS_BAND;
+        return 0L;
     }
 
-    private static int toOutsideDistanceBlocks(long outsideDistanceSquared) {
-        if (outsideDistanceSquared <= 0L) {
-            return ZERO;
-        }
-        long floor = (long) Math.sqrt(outsideDistanceSquared);
-        long squared = floor * floor;
-        long ceil = squared == outsideDistanceSquared ? floor : floor + LONG_ONE;
-        if (ceil > Integer.MAX_VALUE) {
-            return Integer.MAX_VALUE;
-        }
-        return (int) ceil;
+    private static boolean isInsideClosedRange(int value, int minInclusive, int maxInclusive) {
+        return value >= minInclusive && value <= maxInclusive;
     }
 
-    /**
-     * 运行时分区类型。
-     */
-    public enum ZoneType {
-        /** 在仙窍 chunk 真值边界内（outsideDistance=0）。 */
-        PLAYABLE_ZONE,
-
-        /** 越界安全带（outsideDistance 1~8）。 */
-        SAFEZONE,
-
-        /** 越界告警带（outsideDistance 9~16）。 */
-        WARNING_BAND,
-
-        /** 致命混沌带（outsideDistance>=17）。 */
-        LETHAL_CHAOS_BAND
+    private static long square(int value) {
+        long longValue = value;
+        return longValue * longValue;
     }
 }

@@ -8,99 +8,62 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ApertureBoundaryZoneTests {
 
-    private static final int MIN_CHUNK_X = 0;
+    private static final int MIN_CHUNK = 0;
 
-    private static final int MAX_CHUNK_X = 0;
+    private static final int MAX_CHUNK = 0;
 
-    private static final int MIN_CHUNK_Z = 0;
+    private static final int MIN_BLOCK = 0;
 
-    private static final int MAX_CHUNK_Z = 0;
+    private static final int MAX_BLOCK = 15;
 
     @Test
-    void shouldClassifyPlayableZoneWhenOutsideDistanceIsZero() {
-        ChaosZoneModel atBoundary = ApertureRuntimeBoundaryService.resolveZone(
-            MIN_CHUNK_X,
-            MAX_CHUNK_X,
-            MIN_CHUNK_Z,
-            MAX_CHUNK_Z,
-            15,
-            15
-        );
+    void thresholdSemanticsAtExactZeroEightSixteenSeventeenAreStable() {
+        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveModel(MIN_CHUNK, MAX_CHUNK, MIN_CHUNK, MAX_CHUNK);
 
-        assertEquals(0, atBoundary.outsideDistanceBlocks());
-        assertEquals(0L, atBoundary.outsideDistanceSquared());
-        assertEquals(ChaosZoneModel.ZoneType.PLAYABLE_ZONE, atBoundary.zoneType());
-        assertTrue(atBoundary.isPlayableZone());
-        assertFalse(atBoundary.isWithinReservedChaosBand());
+        assertEquals(ChaosZoneModel.ChaosBand.PLAYABLE_OR_SAFE, zoneModel.resolveChaosBand(MAX_BLOCK, MAX_BLOCK));
+        assertEquals(0L, zoneModel.getOutsideDistanceSquaredToPlayable(MAX_BLOCK, MAX_BLOCK));
+
+        int distanceEightX = MAX_BLOCK + 8;
+        assertEquals(64L, zoneModel.getOutsideDistanceSquaredToPlayable(distanceEightX, MIN_BLOCK));
+        assertEquals(ChaosZoneModel.ChaosBand.PLAYABLE_OR_SAFE, zoneModel.resolveChaosBand(distanceEightX, MIN_BLOCK));
+
+        int distanceSixteenX = MAX_BLOCK + 16;
+        assertEquals(256L, zoneModel.getOutsideDistanceSquaredToPlayable(distanceSixteenX, MIN_BLOCK));
+        assertEquals(ChaosZoneModel.ChaosBand.WARNING, zoneModel.resolveChaosBand(distanceSixteenX, MIN_BLOCK));
+        assertTrue(zoneModel.isInWarningBand(distanceSixteenX, MIN_BLOCK));
+        assertFalse(zoneModel.isInLethalChaosBand(distanceSixteenX, MIN_BLOCK));
+
+        int distanceSeventeenX = MAX_BLOCK + 17;
+        assertEquals(289L, zoneModel.getOutsideDistanceSquaredToPlayable(distanceSeventeenX, MIN_BLOCK));
+        assertEquals(ChaosZoneModel.ChaosBand.LETHAL, zoneModel.resolveChaosBand(distanceSeventeenX, MIN_BLOCK));
+        assertFalse(zoneModel.isInWarningBand(distanceSeventeenX, MIN_BLOCK));
+        assertTrue(zoneModel.isInLethalChaosBand(distanceSeventeenX, MIN_BLOCK));
     }
 
     @Test
-    void shouldClassifySafeZoneWhenOutsideDistanceIsExactlyEight() {
-        ChaosZoneModel zone = ApertureRuntimeBoundaryService.resolveZone(
-            MIN_CHUNK_X,
-            MAX_CHUNK_X,
-            MIN_CHUNK_Z,
-            MAX_CHUNK_Z,
-            23,
-            15
-        );
+    void reserveSemanticsStayRuntimeOnlyAndUseSixteenChunks() {
+        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveModel(MIN_CHUNK, MAX_CHUNK, MIN_CHUNK, MAX_CHUNK);
 
-        assertEquals(8, zone.outsideDistanceBlocks());
-        assertEquals(64L, zone.outsideDistanceSquared());
-        assertEquals(ChaosZoneModel.ZoneType.SAFEZONE, zone.zoneType());
-        assertTrue(zone.isSafeZone());
-        assertTrue(zone.isWithinReservedChaosBand());
+        assertEquals(ApertureRuntimeBoundaryService.DEFAULT_RESERVED_CHAOS_CHUNKS, zoneModel.reservedChaosChunks());
+
+        int reserveInnerBlock = -256;
+        assertTrue(zoneModel.isInsideReserveZone(reserveInnerBlock, MIN_BLOCK));
+        assertTrue(zoneModel.isInReserveChaosBand(reserveInnerBlock, MIN_BLOCK));
+        assertFalse(zoneModel.isInsideTruthBoundary(reserveInnerBlock, MIN_BLOCK));
+
+        int reserveOutsideBlock = -257;
+        assertFalse(zoneModel.isInsideReserveZone(reserveOutsideBlock, MIN_BLOCK));
+        assertFalse(zoneModel.isInReserveChaosBand(reserveOutsideBlock, MIN_BLOCK));
+        assertEquals(1L, zoneModel.getOutsideDistanceSquaredToReserve(reserveOutsideBlock, MIN_BLOCK));
     }
 
     @Test
-    void shouldClassifyWarningBandWhenOutsideDistanceIsExactlySixteen() {
-        ChaosZoneModel zone = ApertureRuntimeBoundaryService.resolveZone(
-            MIN_CHUNK_X,
-            MAX_CHUNK_X,
-            MIN_CHUNK_Z,
-            MAX_CHUNK_Z,
-            31,
-            15
-        );
+    void defaultThresholdsArePinnedToOpeningPlannerContract() {
+        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveModel(MIN_CHUNK, MAX_CHUNK, MIN_CHUNK, MAX_CHUNK);
 
-        assertEquals(16, zone.outsideDistanceBlocks());
-        assertEquals(256L, zone.outsideDistanceSquared());
-        assertEquals(ChaosZoneModel.ZoneType.WARNING_BAND, zone.zoneType());
-        assertTrue(zone.isWarningBand());
-        assertTrue(zone.isWithinReservedChaosBand());
-    }
-
-    @Test
-    void shouldClassifyLethalBandWhenOutsideDistanceIsExactlySeventeen() {
-        ChaosZoneModel zone = ApertureRuntimeBoundaryService.resolveZone(
-            MIN_CHUNK_X,
-            MAX_CHUNK_X,
-            MIN_CHUNK_Z,
-            MAX_CHUNK_Z,
-            32,
-            15
-        );
-
-        assertEquals(17, zone.outsideDistanceBlocks());
-        assertEquals(289L, zone.outsideDistanceSquared());
-        assertEquals(ChaosZoneModel.ZoneType.LETHAL_CHAOS_BAND, zone.zoneType());
-        assertTrue(zone.isLethalChaosBand());
-        assertFalse(zone.isWithinReservedChaosBand());
-    }
-
-    @Test
-    void shouldUseDistanceSquaredThresholdsAsEightSixteenSeventeen() {
-        ChaosZoneModel safe = ChaosZoneModel.fromOutsideDistanceSquared(64L);
-        ChaosZoneModel warning = ChaosZoneModel.fromOutsideDistanceSquared(256L);
-        ChaosZoneModel lethal = ChaosZoneModel.fromOutsideDistanceSquared(257L);
-
-        assertEquals(8, safe.outsideDistanceBlocks());
-        assertEquals(ChaosZoneModel.ZoneType.SAFEZONE, safe.zoneType());
-
-        assertEquals(16, warning.outsideDistanceBlocks());
-        assertEquals(ChaosZoneModel.ZoneType.WARNING_BAND, warning.zoneType());
-
-        assertEquals(17, lethal.outsideDistanceBlocks());
-        assertEquals(ChaosZoneModel.ZoneType.LETHAL_CHAOS_BAND, lethal.zoneType());
+        assertEquals(0, zoneModel.safezoneInsetChunks());
+        assertEquals(8, zoneModel.warningBufferBlocks());
+        assertEquals(16, zoneModel.lethalBufferBlocks());
+        assertEquals(16, zoneModel.reservedChaosChunks());
     }
 }
