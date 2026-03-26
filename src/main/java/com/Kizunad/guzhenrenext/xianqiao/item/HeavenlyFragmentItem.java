@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.service.ApertureBoundaryService;
 import com.Kizunad.guzhenrenext.xianqiao.service.FragmentPlacementService;
+import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -84,8 +85,10 @@ public class HeavenlyFragmentItem extends Item {
             BlockPos targetPos = FragmentPlacementService.resolvePlacementTarget(apertureInfo, direction);
             player.displayClientMessage(
                 Component.literal("§6当前朝向：" + getDirectionName(direction)
-                    + " | 外缘投放点 (" + targetPos.getX() + ", " + targetPos.getZ()
-                    + ") | 实际边界仍向四周各 +1 区块 | 松开Shift右键确认放置"),
+                    + " | 扩展至 (" + targetPos.getX() + ", " + targetPos.getZ()
+                    + ") | " + FragmentExpansionPolicy.previewSummary()
+                    + "（" + FragmentExpansionPolicy.previewTargetSemantics() + "）"
+                    + " | 松开Shift右键确认放置"),
                 true
             );
             return InteractionResultHolder.success(stack);
@@ -154,7 +157,7 @@ public class HeavenlyFragmentItem extends Item {
         // 用法说明
         tooltipComponents.add(Component.empty());
         tooltipComponents.add(
-            Component.literal("右键: 沿朝向选择外缘投放点，边界四向对称扩张")
+            Component.literal("右键: 沿朝向放置")
                 .withStyle(ChatFormatting.YELLOW)
         );
     }

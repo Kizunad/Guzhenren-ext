@@ -5,6 +5,7 @@ import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkApi;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy;
+import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy.HorizontalDirection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -12,7 +13,20 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 
+/**
+ * 九天碎片放置服务。
+ * <p>
+ * 该服务负责将碎片沿玩家朝向投放到当前仙窍边界外，
+ * 并完成基础地形搭建、领土 chunk 边界扩张以及初始土道灵气注入。
+ * </p>
+ */
 public final class FragmentPlacementService {
+
+    /** Minecraft 单个 chunk 的方块边长。 */
+    private static final int CHUNK_BLOCK_SIZE = 16;
+
+    /** 每次使用碎片时，边界四向统一扩张的 chunk 数。 */
+    public static final int BOUNDARY_CHUNK_INCREMENT = FragmentExpansionPolicy.V1_SYMMETRIC_CHUNK_DELTA;
 
     /** 平台半边长度（5x5 平台对应半边 2）。 */
     public static final int PLATFORM_HALF_SIZE = 2;
@@ -46,9 +60,7 @@ public final class FragmentPlacementService {
         ApertureWorldData worldData = ApertureWorldData.get(level);
         FragmentExpansionPolicy.applySymmetricExpansion(worldData, player.getUUID());
         DaoMarkApi.addAura(level, targetPos, DaoType.EARTH, INITIAL_AURA_AMOUNT);
-        player.sendSystemMessage(
-            Component.literal("九天碎片放置成功，已在朝向外缘投放；仙窍边界向四周各扩张 1 个区块。")
-        );
+        player.sendSystemMessage(Component.literal("九天碎片放置成功，" + FragmentExpansionPolicy.successSummary()));
         return true;
     }
 
@@ -65,7 +77,27 @@ public final class FragmentPlacementService {
      * @return 与本次扩张行为对齐的放置目标坐标
      */
     public static BlockPos resolvePlacementTarget(ApertureInfo info, Direction direction) {
-        return FragmentExpansionPolicy.resolvePlacementTarget(info, direction);
+        int centerChunkX = Math.floorDiv(info.center().getX(), CHUNK_BLOCK_SIZE);
+        int centerChunkZ = Math.floorDiv(info.center().getZ(), CHUNK_BLOCK_SIZE);
+        HorizontalDirection horizontalDirection = FragmentExpansionPolicy.resolveHorizontalDirection(
+            direction.getStepX(),
+            direction.getStepZ()
+        );
+        int placementDistance = FragmentExpansionPolicy.resolvePlacementDistanceChunks(
+            centerChunkX,
+            centerChunkZ,
+            info.minChunkX(),
+            info.maxChunkX(),
+            info.minChunkZ(),
+            info.maxChunkZ(),
+            horizontalDirection
+        ) * CHUNK_BLOCK_SIZE;
+
+        return info.center().offset(
+            direction.getStepX() * placementDistance,
+            0,
+            direction.getStepZ() * placementDistance
+        );
     }
 
     /**

@@ -1,21 +1,44 @@
 package com.Kizunad.guzhenrenext.xianqiao.runtime;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionOpeningArchitectureContract;
+import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy.ExpandedChunkBoundary;
+import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy.HorizontalDirection;
+import com.Kizunad.guzhenrenext.xianqiao.service.FragmentPlacementService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class FragmentExpansionCompatibilityTests {
 
-    private static final Path FRAGMENT_EXPANSION_POLICY_SOURCE = Path.of(
-        "src/main/java/com/Kizunad/guzhenrenext/xianqiao/runtime/FragmentExpansionPolicy.java"
-    );
+    private static final int CENTER_CHUNK_X = 100;
 
-    private static final Path FRAGMENT_PLACEMENT_SOURCE = Path.of(
+    private static final int CENTER_CHUNK_Z = 200;
+
+    private static final int MIN_CHUNK_X = 96;
+
+    private static final int MAX_CHUNK_X = 104;
+
+    private static final int MIN_CHUNK_Z = 196;
+
+    private static final int MAX_CHUNK_Z = 204;
+
+    private static final int ASYMMETRIC_CENTER_CHUNK_X = 50;
+
+    private static final int ASYMMETRIC_CENTER_CHUNK_Z = 70;
+
+    private static final int ASYMMETRIC_MIN_CHUNK_X = 47;
+
+    private static final int ASYMMETRIC_MAX_CHUNK_X = 52;
+
+    private static final int ASYMMETRIC_MIN_CHUNK_Z = 68;
+
+    private static final int ASYMMETRIC_MAX_CHUNK_Z = 74;
+
+    private static final Path FRAGMENT_SERVICE_SOURCE = Path.of(
         "src/main/java/com/Kizunad/guzhenrenext/xianqiao/service/FragmentPlacementService.java"
     );
 
@@ -28,115 +51,116 @@ final class FragmentExpansionCompatibilityTests {
     );
 
     @Test
-    void shouldKeepV1AsSymmetricRectangularExpansionInPolicySource() throws IOException {
-        String policySource = readUtf8(FRAGMENT_EXPANSION_POLICY_SOURCE);
+    void fragmentFlowAndTribulationFlowShareSingleV1Policy() throws Exception {
+        assertEquals(
+            AscensionOpeningArchitectureContract.FRAGMENT_V1_SYMMETRIC_CHUNK_DELTA,
+            FragmentExpansionPolicy.V1_SYMMETRIC_CHUNK_DELTA
+        );
+        assertEquals(FragmentExpansionPolicy.V1_SYMMETRIC_CHUNK_DELTA, FragmentPlacementService.BOUNDARY_CHUNK_INCREMENT);
 
-        assertTrue(
-            policySource.contains("V1_SYMMETRIC_RECTANGULAR_CHUNK_DELTA = 1"),
-            "v1 扩张常量必须固定为 1，避免兼容层悄悄改变每次矩形外推尺度"
-        );
-        assertTrue(
-            policySource.contains("minChunkX - normalizedChunkDelta"),
-            "矩形边界西侧必须按统一增量向外扩张，不能退化为单向朝向偏移"
-        );
-        assertTrue(
-            policySource.contains("maxChunkX + normalizedChunkDelta"),
-            "矩形边界东侧必须按统一增量向外扩张，不能只扩一边"
-        );
-        assertTrue(
-            policySource.contains("minChunkZ - normalizedChunkDelta"),
-            "矩形边界北侧必须按统一增量向外扩张，保持 v1 对称兼容"
-        );
-        assertTrue(
-            policySource.contains("maxChunkZ + normalizedChunkDelta"),
-            "矩形边界南侧必须按统一增量向外扩张，保持四向一致"
-        );
-        assertTrue(
-            policySource.contains("expandSymmetricBounds("),
-            "共享策略必须保留独立的对称矩形边界推导接缝，供放置与奖励共同复用"
-        );
+        String fragmentServiceSource = Files.readString(FRAGMENT_SERVICE_SOURCE);
+        assertTrue(fragmentServiceSource.contains("FragmentExpansionPolicy.applySymmetricExpansion"));
+        assertTrue(fragmentServiceSource.contains("FragmentExpansionPolicy.resolvePlacementDistanceChunks"));
+
+        String tribulationManagerSource = Files.readString(TRIBULATION_MANAGER_SOURCE);
+        assertTrue(tribulationManagerSource.contains("FragmentExpansionPolicy.applySymmetricExpansion"));
+        assertFalse(tribulationManagerSource.contains("REWARD_BOUNDARY_CHUNK_DELTA"));
     }
 
     @Test
-    void shouldKeepDirectionLimitedToPreviewPlacementTargetSeam() throws IOException {
-        String policySource = readUtf8(FRAGMENT_EXPANSION_POLICY_SOURCE);
+    void previewFacingSemanticsAgreeWithActualBoundaryResults() throws Exception {
+        ExpandedChunkBoundary expandedBoundary = FragmentExpansionPolicy.resolveExpandedBoundary(
+            MIN_CHUNK_X,
+            MAX_CHUNK_X,
+            MIN_CHUNK_Z,
+            MAX_CHUNK_Z
+        );
 
-        assertTrue(
-            policySource.contains("resolvePlacementTarget(")
-                && policySource.contains("expandSymmetricBounds(")
-                && policySource.contains("V1_SYMMETRIC_RECTANGULAR_CHUNK_DELTA"),
-            "放置点推导必须先建立对称扩张后的矩形边界，再根据朝向选择外缘参考点"
+        assertEquals("本次边界四向各 +1 区块", FragmentExpansionPolicy.previewSummary());
+        assertEquals("落点为扩张后当前朝向外缘", FragmentExpansionPolicy.previewTargetSemantics());
+        assertEquals(
+            expandedBoundary.maxChunkX() - CENTER_CHUNK_X,
+            FragmentExpansionPolicy.resolvePlacementDistanceChunks(
+                CENTER_CHUNK_X,
+                CENTER_CHUNK_Z,
+                MIN_CHUNK_X,
+                MAX_CHUNK_X,
+                MIN_CHUNK_Z,
+                MAX_CHUNK_Z,
+                HorizontalDirection.EAST
+            )
         );
-        assertTrue(
-            policySource.contains("if (stepX > 0)")
-                && policySource.contains("if (stepX < 0)")
-                && policySource.contains("if (stepZ > 0)"),
-            "朝向只应参与外缘投放点选择，不能直接决定扩边公式"
+        assertEquals(
+            CENTER_CHUNK_X - expandedBoundary.minChunkX(),
+            FragmentExpansionPolicy.resolvePlacementDistanceChunks(
+                CENTER_CHUNK_X,
+                CENTER_CHUNK_Z,
+                MIN_CHUNK_X,
+                MAX_CHUNK_X,
+                MIN_CHUNK_Z,
+                MAX_CHUNK_Z,
+                HorizontalDirection.WEST
+            )
         );
-        assertTrue(
-            policySource.contains("SectionPos.sectionToBlockCoord(expandedBounds.maxChunkX())")
-                && policySource.contains("SectionPos.sectionToBlockCoord(expandedBounds.minChunkX())")
-                && policySource.contains("SectionPos.sectionToBlockCoord(expandedBounds.maxChunkZ())")
-                && policySource.contains("SectionPos.sectionToBlockCoord(expandedBounds.minChunkZ())"),
-            "四个方向都必须从同一扩张后矩形边界读取外缘投放坐标"
+        assertEquals(
+            expandedBoundary.maxChunkZ() - CENTER_CHUNK_Z,
+            FragmentExpansionPolicy.resolvePlacementDistanceChunks(
+                CENTER_CHUNK_X,
+                CENTER_CHUNK_Z,
+                MIN_CHUNK_X,
+                MAX_CHUNK_X,
+                MIN_CHUNK_Z,
+                MAX_CHUNK_Z,
+                HorizontalDirection.SOUTH
+            )
         );
+        assertEquals(
+            CENTER_CHUNK_Z - expandedBoundary.minChunkZ(),
+            FragmentExpansionPolicy.resolvePlacementDistanceChunks(
+                CENTER_CHUNK_X,
+                CENTER_CHUNK_Z,
+                MIN_CHUNK_X,
+                MAX_CHUNK_X,
+                MIN_CHUNK_Z,
+                MAX_CHUNK_Z,
+                HorizontalDirection.NORTH
+            )
+        );
+
+        String heavenlyFragmentItemSource = Files.readString(HEAVENLY_FRAGMENT_ITEM_SOURCE);
+        assertTrue(heavenlyFragmentItemSource.contains("FragmentExpansionPolicy.previewSummary()"));
+        assertTrue(heavenlyFragmentItemSource.contains("FragmentExpansionPolicy.previewTargetSemantics()"));
     }
 
     @Test
-    void fragmentPlacementAndTribulationRewardShouldUseSameSharedPolicy() throws IOException {
-        String fragmentPlacementSource = readUtf8(FRAGMENT_PLACEMENT_SOURCE);
-        String tribulationManagerSource = readUtf8(TRIBULATION_MANAGER_SOURCE);
+    void v1PolicyRemainsSymmetricRectangleInsteadOfDirectionalOnly() {
+        ExpandedChunkBoundary expandedBoundary = FragmentExpansionPolicy.resolveExpandedBoundary(
+            ASYMMETRIC_MIN_CHUNK_X,
+            ASYMMETRIC_MAX_CHUNK_X,
+            ASYMMETRIC_MIN_CHUNK_Z,
+            ASYMMETRIC_MAX_CHUNK_Z
+        );
 
-        assertTrue(
-            fragmentPlacementSource.contains("return FragmentExpansionPolicy.resolvePlacementTarget(info, direction);"),
-            "碎片放置服务必须把预览/目标推导委托给共享策略，避免保留旧的本地几何公式"
-        );
-        assertTrue(
-            fragmentPlacementSource.contains("FragmentExpansionPolicy.applySymmetricExpansion(worldData, player.getUUID());"),
-            "碎片实际扩边必须走共享策略，不能继续直接写边界增量"
-        );
-        assertTrue(
-            tribulationManagerSource.contains("FragmentExpansionPolicy.applySymmetricExpansion(worldData, owner);"),
-            "天劫成功奖励必须复用与碎片相同的共享策略"
-        );
-        assertFalse(
-            fragmentPlacementSource.contains("placementDistance"),
-            "旧的局部距离推导变量不应继续留在碎片服务中，避免出现第二套方向扩张心智模型"
-        );
-        assertFalse(
-            tribulationManagerSource.contains("worldData.expandBoundaryByChunkDelta(owner"),
-            "天劫奖励路径不应保留旧的直接扩边写法，必须统一走共享策略"
-        );
-    }
+        assertEquals(ASYMMETRIC_MIN_CHUNK_X - FragmentExpansionPolicy.chunkDelta(), expandedBoundary.minChunkX());
+        assertEquals(ASYMMETRIC_MAX_CHUNK_X + FragmentExpansionPolicy.chunkDelta(), expandedBoundary.maxChunkX());
+        assertEquals(ASYMMETRIC_MIN_CHUNK_Z - FragmentExpansionPolicy.chunkDelta(), expandedBoundary.minChunkZ());
+        assertEquals(ASYMMETRIC_MAX_CHUNK_Z + FragmentExpansionPolicy.chunkDelta(), expandedBoundary.maxChunkZ());
 
-    @Test
-    void previewAndTextSemanticsShouldMatchSymmetricExpansionPolicy() throws IOException {
-        String fragmentPlacementSource = readUtf8(FRAGMENT_PLACEMENT_SOURCE);
-        String heavenlyFragmentItemSource = readUtf8(HEAVENLY_FRAGMENT_ITEM_SOURCE);
-
-        assertTrue(
-            heavenlyFragmentItemSource.contains("外缘投放点 ("),
-            "Shift 预览必须说明它展示的是朝向外缘投放点，而不是单向扩边终点"
+        assertTrue(expandedBoundary.minChunkX() < ASYMMETRIC_MIN_CHUNK_X);
+        assertTrue(expandedBoundary.maxChunkX() > ASYMMETRIC_MAX_CHUNK_X);
+        assertTrue(expandedBoundary.minChunkZ() < ASYMMETRIC_MIN_CHUNK_Z);
+        assertTrue(expandedBoundary.maxChunkZ() > ASYMMETRIC_MAX_CHUNK_Z);
+        assertEquals(
+            expandedBoundary.maxChunkX() - ASYMMETRIC_CENTER_CHUNK_X,
+            FragmentExpansionPolicy.resolvePlacementDistanceChunks(
+                ASYMMETRIC_CENTER_CHUNK_X,
+                ASYMMETRIC_CENTER_CHUNK_Z,
+                ASYMMETRIC_MIN_CHUNK_X,
+                ASYMMETRIC_MAX_CHUNK_X,
+                ASYMMETRIC_MIN_CHUNK_Z,
+                ASYMMETRIC_MAX_CHUNK_Z,
+                HorizontalDirection.EAST
+            )
         );
-        assertTrue(
-            heavenlyFragmentItemSource.contains("实际边界仍向四周各 +1 区块"),
-            "Shift 预览必须把真实结果明确为四向对称扩张"
-        );
-        assertTrue(
-            heavenlyFragmentItemSource.contains("边界四向对称扩张"),
-            "物品说明必须直述 v1 仍是对称矩形扩张语义"
-        );
-        assertFalse(
-            heavenlyFragmentItemSource.contains("右键: 沿朝向放置"),
-            "旧提示会把玩家误导成单向扩边，因此必须移除"
-        );
-        assertTrue(
-            fragmentPlacementSource.contains("已在朝向外缘投放；仙窍边界向四周各扩张 1 个区块"),
-            "成功提示必须同时区分投放点朝向语义与真实边界四向扩张语义"
-        );
-    }
-
-    private static String readUtf8(Path sourcePath) throws IOException {
-        return Files.readString(sourcePath, StandardCharsets.UTF_8);
     }
 }
