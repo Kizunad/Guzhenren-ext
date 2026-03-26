@@ -1,189 +1,169 @@
 package com.Kizunad.guzhenrenext.xianqiao.opening;
 
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class OpeningLayoutPlannerTests {
 
-    private static final int APTITUDE_1X1 = 0;
+    private static final double BENMING_ID = 1.0D;
+    private static final double DAO_MARK_TOTAL = 100.0D;
+    private static final double RANK_FIVE = 5.0D;
+    private static final double STAGE_FIVE = 5.0D;
+    private static final double KONGQIAO_ACTIVE = 7.0D;
+    private static final double TARGET_BASE = 100.0D;
+    private static final double JINGLI_CURRENT = 80.0D;
+    private static final double HUNPO_CURRENT = 80.0D;
+    private static final int CHUNK_BLOCK_SIZE = 16;
 
-    private static final int APTITUDE_2X2 = 25;
-
-    private static final int APTITUDE_3X3 = 50;
-
-    private static final int APTITUDE_4X4 = 75;
-
-    private static final int SCORE_70 = 70;
-
-    private static final int SCORE_85 = 85;
-
-    private static final int EXPECTED_RESERVED_CHAOS_BLOCKS = 16;
-
-    private static final int EXPECTED_SAFEZONE_MAX_OUTSIDE_DISTANCE = 8;
-
-    private static final int EXPECTED_WARNING_MAX_OUTSIDE_DISTANCE = 16;
-
-    private static final int EXPECTED_LETHAL_START_OUTSIDE_DISTANCE = 17;
-
-    private static final String BIOME_DESERT = "minecraft:desert";
-
-    private static final String BIOME_SWAMP = "minecraft:swamp";
-
-    private static final String BIOME_PLAINS = "minecraft:plains";
-
-    private final OpeningLayoutPlanner planner = new OpeningLayoutPlanner();
+    private static final InitialTerrainPlan.AnchorPoint SEAM_CENTER = new InitialTerrainPlan.AnchorPoint(160, 96, -32);
 
     @Test
-    void shouldMapAptitudeToExactlyFourDiscreteLayoutTiers() {
-        InitialTerrainPlan plan1x1 = planner.plan(profile(APTITUDE_1X1), inference());
-        InitialTerrainPlan plan2x2 = planner.plan(profile(APTITUDE_2X2), inference());
-        InitialTerrainPlan plan3x3 = planner.plan(profile(APTITUDE_3X3), inference());
-        InitialTerrainPlan plan4x4 = planner.plan(profile(APTITUDE_4X4), inference());
+    void aptitudeMapsToExactDiscreteLayoutTiers() {
+        InitialTerrainPlan oneByOne = planByAptitude(20.0D, 20.0D, 10.0D, 10.0D, 10.0D);
+        InitialTerrainPlan twoByTwo = planByAptitude(60.0D, 54.0D, 45.0D, 45.0D, 45.0D);
+        InitialTerrainPlan threeByThree = planByAptitude(84.0D, 78.0D, 65.0D, 65.0D, 65.0D);
+        InitialTerrainPlan fourByFour = planByAptitude(120.0D, 120.0D, 100.0D, 100.0D, 100.0D);
 
-        assertEquals(InitialTerrainPlan.LayoutTier.ONE_BY_ONE, plan1x1.layoutTier());
-        assertEquals(1, plan1x1.layoutSize());
-        assertEquals(1, plan1x1.cellCount());
-
-        assertEquals(InitialTerrainPlan.LayoutTier.TWO_BY_TWO, plan2x2.layoutTier());
-        assertEquals(2, plan2x2.layoutSize());
-        assertEquals(4, plan2x2.cellCount());
-
-        assertEquals(InitialTerrainPlan.LayoutTier.THREE_BY_THREE, plan3x3.layoutTier());
-        assertEquals(3, plan3x3.layoutSize());
-        assertEquals(9, plan3x3.cellCount());
-
-        assertEquals(InitialTerrainPlan.LayoutTier.FOUR_BY_FOUR, plan4x4.layoutTier());
-        assertEquals(4, plan4x4.layoutSize());
-        assertEquals(16, plan4x4.cellCount());
+        assertEquals(InitialTerrainPlan.LayoutTier.ONE_BY_ONE, oneByOne.layoutTier());
+        assertEquals(InitialTerrainPlan.LayoutTier.TWO_BY_TWO, twoByTwo.layoutTier());
+        assertEquals(InitialTerrainPlan.LayoutTier.THREE_BY_THREE, threeByThree.layoutTier());
+        assertEquals(InitialTerrainPlan.LayoutTier.FOUR_BY_FOUR, fourByFour.layoutTier());
+        assertEquals(1, oneByOne.cellCount());
+        assertEquals(4, twoByTwo.cellCount());
+        assertEquals(9, threeByThree.cellCount());
+        assertEquals(16, fourByFour.cellCount());
     }
 
     @Test
-    void shouldUseSeamCenterForEvenLayoutsAndKeepThreeAnchorsSeparated() {
-        InitialTerrainPlan plan2x2 = planner.plan(profile(APTITUDE_2X2), inference());
-        InitialTerrainPlan plan4x4 = planner.plan(profile(APTITUDE_4X4), inference());
+    void twoByTwoUsesSeamCenterAndExplicitAnchorSeparation() {
+        InitialTerrainPlan plan = planByAptitude(60.0D, 54.0D, 45.0D, 45.0D, 45.0D);
 
-        assertEquals(InitialTerrainPlan.CoreAnchorSemantics.SEAM_CENTER, plan2x2.coreAnchor().semantics());
-        assertEquals(1.0, plan2x2.coreAnchor().seamCenterChunkX());
-        assertEquals(1.0, plan2x2.coreAnchor().seamCenterChunkZ());
-        assertEquals(
-            InitialTerrainPlan.TeleportAnchorSemantics.EVEN_SEAM_KERNEL_NORTHWEST_CELL,
-            plan2x2.teleportAnchor().semantics()
-        );
-        assertEquals(0, plan2x2.teleportAnchor().anchorCellX());
-        assertEquals(0, plan2x2.teleportAnchor().anchorCellZ());
-        assertEquals(0, plan2x2.layoutOrigin().originChunkX());
-        assertEquals(0, plan2x2.layoutOrigin().originChunkZ());
-        assertNotEquals(plan2x2.coreAnchor().seamCenterChunkX(), plan2x2.teleportAnchor().anchorChunkCenterX());
+        assertEquals(InitialTerrainPlan.LayoutTier.TWO_BY_TWO, plan.layoutTier());
+        assertEquals(SEAM_CENTER, plan.seamCenter());
+        assertEquals(SEAM_CENTER, plan.coreAnchor());
+        assertEquals(SEAM_CENTER.offset(0, 1, 0), plan.teleportAnchor());
+        assertNotEquals(plan.layoutOrigin(), plan.seamCenter());
 
-        assertEquals(InitialTerrainPlan.CoreAnchorSemantics.SEAM_CENTER, plan4x4.coreAnchor().semantics());
-        assertEquals(2.0, plan4x4.coreAnchor().seamCenterChunkX());
-        assertEquals(2.0, plan4x4.coreAnchor().seamCenterChunkZ());
-        assertEquals(
-            InitialTerrainPlan.TeleportAnchorSemantics.EVEN_SEAM_KERNEL_NORTHWEST_CELL,
-            plan4x4.teleportAnchor().semantics()
-        );
-        assertEquals(1, plan4x4.teleportAnchor().anchorCellX());
-        assertEquals(1, plan4x4.teleportAnchor().anchorCellZ());
-    }
+        InitialTerrainPlan.AnchorPoint expectedOrigin = SEAM_CENTER.offset(-CHUNK_BLOCK_SIZE, 0, -CHUNK_BLOCK_SIZE);
+        assertEquals(expectedOrigin, plan.layoutOrigin());
 
-    @Test
-    void shouldGenerateDeterministicCenterOutwardOrder() {
-        InitialTerrainPlan first = planner.plan(profile(APTITUDE_4X4), inference());
-        InitialTerrainPlan second = planner.plan(profile(APTITUDE_4X4), inference());
-
-        assertEquals(first, second);
-
-        List<InitialTerrainPlan.PlannedTerrainCell> cells = first.plannedCells();
-        assertEquals(16, cells.size());
-        for (int index = 0; index < cells.size(); index++) {
-            assertEquals(index, cells.get(index).generationOrder());
-        }
-
-        List<InitialTerrainPlan.PlannedTerrainCell> kernel = cells.stream()
-            .filter(InitialTerrainPlan.PlannedTerrainCell::centerKernel)
+        List<InitialTerrainPlan.AnchorPoint> orderedAnchors = plan.orderedCells().stream().map(InitialTerrainPlan.PlannedCell::anchor)
             .toList();
-        assertEquals(4, kernel.size());
-        assertTrue(kernel.stream().allMatch(cell -> cell.generationOrder() < 4));
-
-        int previousRing = -1;
-        for (InitialTerrainPlan.PlannedTerrainCell cell : cells) {
-            assertTrue(cell.ringIndex() >= previousRing);
-            previousRing = cell.ringIndex();
-        }
+        List<InitialTerrainPlan.AnchorPoint> expected = List.of(
+            expectedOrigin,
+            expectedOrigin.offset(CHUNK_BLOCK_SIZE, 0, 0),
+            expectedOrigin.offset(0, 0, CHUNK_BLOCK_SIZE),
+            expectedOrigin.offset(CHUNK_BLOCK_SIZE, 0, CHUNK_BLOCK_SIZE)
+        );
+        assertIterableEquals(expected, orderedAnchors);
     }
 
     @Test
-    void shouldExposeBoundaryBiomeCandidatesAndRingParameters() {
-        InitialTerrainPlan plan = planner.plan(profile(APTITUDE_3X3), inference());
+    void fourByFourKernelFirstThenOuterRingIsDeterministic() {
+        InitialTerrainPlan plan = planByAptitude(120.0D, 120.0D, 100.0D, 100.0D, 100.0D);
 
-        assertEquals(0, plan.layoutOrigin().originChunkX());
-        assertEquals(0, plan.layoutOrigin().originChunkZ());
+        assertEquals(InitialTerrainPlan.LayoutTier.FOUR_BY_FOUR, plan.layoutTier());
+        assertEquals(SEAM_CENTER.offset(-CHUNK_BLOCK_SIZE * 2, 0, -CHUNK_BLOCK_SIZE * 2), plan.layoutOrigin());
+        assertEquals(16, plan.orderedCells().size());
 
-        assertEquals(0, plan.initialChunkBoundary().minChunkX());
-        assertEquals(2, plan.initialChunkBoundary().maxChunkX());
-        assertEquals(0, plan.initialChunkBoundary().minChunkZ());
-        assertEquals(2, plan.initialChunkBoundary().maxChunkZ());
-        assertEquals(3, plan.initialChunkBoundary().spanXChunks());
-        assertEquals(3, plan.initialChunkBoundary().spanZChunks());
+        List<InitialTerrainPlan.PlannedCell> ordered = plan.orderedCells();
+        for (int index = 0; index < 4; index++) {
+            assertEquals(0, ordered.get(index).ringOrder());
+        }
+        for (int index = 4; index < ordered.size(); index++) {
+            assertEquals(1, ordered.get(index).ringOrder());
+        }
 
-        assertEquals(EXPECTED_RESERVED_CHAOS_BLOCKS, plan.ringParameters().maxReservedChaosBlocks());
-        assertEquals(EXPECTED_SAFEZONE_MAX_OUTSIDE_DISTANCE, plan.ringParameters().safeZoneMaxOutsideDistanceBlocks());
-        assertEquals(EXPECTED_WARNING_MAX_OUTSIDE_DISTANCE, plan.ringParameters().warningZoneMaxOutsideDistanceBlocks());
-        assertEquals(EXPECTED_LETHAL_START_OUTSIDE_DISTANCE, plan.ringParameters().lethalZoneStartOutsideDistanceBlocks());
+        List<InitialTerrainPlan.AnchorPoint> kernelAnchors = ordered.subList(0, 4).stream()
+            .map(InitialTerrainPlan.PlannedCell::anchor)
+            .toList();
+        List<InitialTerrainPlan.AnchorPoint> expectedKernel = List.of(
+            SEAM_CENTER.offset(-CHUNK_BLOCK_SIZE, 0, -CHUNK_BLOCK_SIZE),
+            SEAM_CENTER.offset(0, 0, -CHUNK_BLOCK_SIZE),
+            SEAM_CENTER.offset(-CHUNK_BLOCK_SIZE, 0, 0),
+            SEAM_CENTER.offset(0, 0, 0)
+        );
+        assertIterableEquals(expectedKernel, kernelAnchors);
 
-        assertEquals(BiomeInferenceService.BiomeFallbackPolicy.STABLE_HASH_POOL, plan.biomeFallbackPolicy());
-        for (InitialTerrainPlan.PlannedTerrainCell cell : plan.plannedCells()) {
-            assertEquals(BIOME_DESERT, cell.primaryBiomeId());
-            assertEquals(List.of(BIOME_DESERT, BIOME_SWAMP, BIOME_PLAINS), cell.biomeCandidates());
-            assertEquals(cell.cellX(), cell.chunkX());
-            assertEquals(cell.cellZ(), cell.chunkZ());
+        InitialTerrainPlan second = planByAptitude(120.0D, 120.0D, 100.0D, 100.0D, 100.0D);
+        assertEquals(plan, second);
+    }
+
+    @Test
+    void planContainsBoundaryZoneParametersAndBiomeReferences() {
+        InitialTerrainPlan plan = planByAptitude(84.0D, 78.0D, 65.0D, 65.0D, 65.0D);
+
+        InitialTerrainPlan.ChunkBoundary boundary = plan.initialChunkBoundary();
+        assertEquals(3, boundary.widthInChunks());
+        assertEquals(3, boundary.depthInChunks());
+
+        InitialTerrainPlan.ZoneParameters zones = plan.zoneParameters();
+        assertEquals(0, zones.safezoneInsetChunks());
+        assertEquals(8, zones.warningBufferBlocks());
+        assertEquals(16, zones.lethalBufferBlocks());
+        assertEquals(16, zones.reservedChaosChunks());
+
+        for (InitialTerrainPlan.PlannedCell cell : plan.orderedCells()) {
+            assertEquals(plan.orderedCells().getFirst().biomeCandidates().size(), cell.biomeCandidates().size());
+            assertEquals(plan.orderedCells().getFirst().biomeCandidates().getFirst(), cell.biomeCandidates().getFirst());
         }
     }
 
-    private static ResolvedOpeningProfile profile(int aptitudeScore) {
+    private static InitialTerrainPlan planByAptitude(
+        double maxZhenyuan,
+        double shouyuan,
+        double maxJingli,
+        double maxHunpo,
+        double tizhi
+    ) {
+        OpeningLayoutPlanner planner = new OpeningLayoutPlanner();
+        ResolvedOpeningProfile profile = profile(maxZhenyuan, shouyuan, maxJingli, maxHunpo, tizhi);
+        BiomeInferenceService.BiomePreferenceResult biomePreference = new BiomeInferenceService().infer(profile);
+        return planner.plan(profile, biomePreference, SEAM_CENTER);
+    }
+
+    private static ResolvedOpeningProfile profile(
+        double maxZhenyuan,
+        double shouyuan,
+        double maxJingli,
+        double maxHunpo,
+        double tizhi
+    ) {
         AscensionConditionSnapshot snapshot = new AscensionConditionSnapshot(
-            5,
-            5,
-            SCORE_70,
-            SCORE_70,
-            SCORE_70,
-            SCORE_85,
-            true,
+            BENMING_ID,
+            AscensionConditionSnapshot.BenmingGuFallbackState.RESOLVED,
+            "benminggu:1",
+            Map.of("tudao", DAO_MARK_TOTAL),
+            AscensionConditionSnapshot.DaoMarkCoverageState.COMPLETE,
+            DAO_MARK_TOTAL,
+            DAO_MARK_TOTAL,
+            AscensionConditionSnapshot.AptitudeResourceState.HEALTHY,
+            maxZhenyuan,
+            shouyuan,
+            JINGLI_CURRENT,
+            maxJingli,
+            HUNPO_CURRENT,
+            maxHunpo,
+            tizhi,
+            RANK_FIVE,
+            STAGE_FIVE,
+            KONGQIAO_ACTIVE,
+            32.0D,
+            40.0D,
+            80.0D,
+            80.0D,
+            82.0D,
+            TARGET_BASE,
+            TARGET_BASE,
             true
         );
-        AscensionThreeQiEvaluation evaluation = new AscensionThreeQiEvaluator().evaluate(snapshot);
-        return new ResolvedOpeningProfile(
-            snapshot,
-            evaluation,
-            5,
-            5,
-            1,
-            1,
-            ResolvedOpeningProfile.BenmingGuState.RESOLVED,
-            "tudao",
-            10.0,
-            10.0,
-            ResolvedOpeningProfile.DaoMarkState.RESOLVED,
-            aptitudeScore,
-            ResolvedOpeningProfile.AptitudeState.RESOLVED,
-            ResolvedOpeningProfile.HumanQiSource.REN_QI,
-            false
-        );
-    }
-
-    private static BiomeInferenceService.BiomeInferenceResult inference() {
-        return new BiomeInferenceService.BiomeInferenceResult(
-            List.of(
-                new BiomeInferenceService.BiomePreference(BIOME_DESERT, 30.0, 10.0, 10.0, 10.0),
-                new BiomeInferenceService.BiomePreference(BIOME_SWAMP, 20.0, 5.0, 10.0, 5.0)
-            ),
-            Optional.of(BIOME_PLAINS),
-            BiomeInferenceService.BiomeFallbackPolicy.STABLE_HASH_POOL
-        );
+        AscensionThreeQiEvaluator evaluator = new AscensionThreeQiEvaluator();
+        return new ResolvedOpeningProfile(snapshot, evaluator.evaluate(snapshot), AscensionAttemptStage.CONFIRMED);
     }
 }

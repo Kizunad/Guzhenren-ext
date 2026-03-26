@@ -1,9 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.entry;
 
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
-import com.Kizunad.guzhenrenext.xianqiao.opening.AscensionConditionSnapshot;
-import com.Kizunad.guzhenrenext.xianqiao.opening.AscensionReadinessStage;
-import com.Kizunad.guzhenrenext.xianqiao.opening.AscensionThreeQiEvaluation;
+import com.Kizunad.guzhenrenext.xianqiao.opening.AscensionThreeQiEvaluator;
 import com.Kizunad.guzhenrenext.xianqiao.opening.OpeningProfileResolver;
 import com.Kizunad.guzhenrenext.xianqiao.opening.ResolvedOpeningProfile;
 import java.lang.reflect.Field;
@@ -21,10 +19,6 @@ public final class ApertureInitializationRequestFactory {
         "earthQi",
     };
 
-    private static final String[] HUMAN_QI_FIELD_CANDIDATES = {
-        "humanQi",
-    };
-
     private static final String[] ASCENSION_ATTEMPT_FIELD_CANDIDATES = {
         "ascensionAttemptInitiated",
         "shiqiao",
@@ -34,6 +28,14 @@ public final class ApertureInitializationRequestFactory {
         "snapshotFrozen",
         "shiqiao",
     };
+
+    private static final int SCORE_MIN = 0;
+
+    private static final int SCORE_MAX = 100;
+
+    private static final int READY_QI_THRESHOLD = 60;
+
+    private static final int READY_BALANCE_THRESHOLD = 75;
 
     private final OpeningProfileResolver profileResolver;
 
@@ -54,36 +56,47 @@ public final class ApertureInitializationRequestFactory {
 
         GuzhenrenModVariables.PlayerVariables variables = player.getData(GuzhenrenModVariables.PLAYER_VARIABLES);
         OptionalDouble earthQi = readOptionalDoubleField(variables, EARTH_QI_FIELD_CANDIDATES);
-        OptionalDouble humanQi = readOptionalDoubleField(variables, HUMAN_QI_FIELD_CANDIDATES);
         AscensionAttemptSeam ascensionAttemptSeam = resolveAscensionAttemptSeam(variables);
-        ResolvedOpeningProfile profile = profileResolver.resolve(
-            OpeningProfileResolver.fromPlayerVariables(
-                variables,
-                earthQi,
-                humanQi,
-                ascensionAttemptSeam.ascensionAttemptInitiated(),
-                ascensionAttemptSeam.snapshotFrozen()
-            )
+        ResolvedOpeningProfile profile = resolveProfile(
+            variables,
+            earthQi.orElse(0.0D),
+            ascensionAttemptSeam.ascensionAttemptInitiated()
         );
-        AscensionConditionSnapshot snapshot = profile.ascensionConditionSnapshot();
-        AscensionThreeQiEvaluation evaluation = profile.threeQiEvaluation();
-        boolean confirmed = evaluation.stage() == AscensionReadinessStage.CONFIRMED;
+        AscensionThreeQiEvaluator.ThreeQiEvaluation evaluation = profile.threeQiEvaluation();
+        int heavenScore = toPercent(evaluation.heavenScore());
+        int earthScoreValue = toPercent(evaluation.earthScore());
+        int humanScore = toPercent(evaluation.humanScore());
+        int balanceScore = toPercent(evaluation.balanceScore());
+        boolean snapshotFrozen = ascensionAttemptSeam.snapshotFrozen() || evaluation.confirmedThresholdMet();
 
         return new ApertureInitializationRequest(
             player.getUUID(),
             entryChannel,
             ApertureEntryFlowContract.stagedFlow(),
-            snapshot.heavenScore(),
-            snapshot.earthScore(),
-            snapshot.humanScore(),
-            snapshot.balanceScore(),
-            evaluation.rankFivePeak(),
-            evaluation.eachQiAtLeast60(),
-            evaluation.balanceAtLeast75(),
-            confirmed,
-            snapshot.snapshotFrozen(),
+            heavenScore,
+            earthScoreValue,
+            humanScore,
+            balanceScore,
+            evaluation.fiveTurnPeak(),
+            heavenScore >= READY_QI_THRESHOLD
+                && earthScoreValue >= READY_QI_THRESHOLD
+                && humanScore >= READY_QI_THRESHOLD,
+            balanceScore >= READY_BALANCE_THRESHOLD,
+            evaluation.canEnterConfirmed(),
+            snapshotFrozen,
             isAlreadyInitialized(player)
         );
+    }
+
+    private ResolvedOpeningProfile resolveProfile(
+        GuzhenrenModVariables.PlayerVariables variables,
+        double earthQi,
+        boolean playerInitiated
+    ) {
+        if (variables == null) {
+            return profileResolver.resolveFromRawVariables(java.util.Map.of(), earthQi, playerInitiated);
+        }
+        return profileResolver.resolveFromPlayerVariables(variables, earthQi, playerInitiated);
     }
 
     private static boolean isAlreadyInitialized(ServerPlayer player) {
@@ -159,6 +172,14 @@ public final class ApertureInitializationRequestFactory {
         } catch (NoSuchFieldException | IllegalAccessException ignored) {
             return OptionalDouble.empty();
         }
+    }
+
+    private static int toPercent(double value) {
+        int rounded = (int) Math.round(value);
+        if (rounded < SCORE_MIN) {
+            return SCORE_MIN;
+        }
+        return Math.min(SCORE_MAX, rounded);
     }
 
     private static Optional<Boolean> readOptionalBooleanField(

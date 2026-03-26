@@ -1,23 +1,19 @@
 package com.Kizunad.guzhenrenext.xianqiao.data;
 
-import com.Kizunad.guzhenrenext.xianqiao.opening.BiomeInferenceService;
-import com.Kizunad.guzhenrenext.xianqiao.opening.InitialTerrainPlan;
-import java.util.ArrayList;
+import com.Kizunad.guzhenrenext.xianqiao.opening.AscensionConditionSnapshot;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -37,23 +33,15 @@ public class ApertureWorldData extends SavedData {
 
     private static final String KEY_NEXT_INDEX = "nextIndex";
 
+    private static final String KEY_SCHEMA_VERSION = "schemaVersion";
+
     private static final String KEY_APERTURES = "apertures";
+
+    private static final String KEY_APERTURE_INIT_STATES = "apertureInitStates";
 
     private static final String KEY_INITIALIZED_APERTURES = "initializedApertures";
 
-    private static final String KEY_LAST_LOGOUT_TIMES = "lastLogoutTimes";
-
-    private static final String KEY_RETURN_POSITIONS = "returnPositions";
-
-    private static final String KEY_OWNER = "owner";
-
-    private static final String KEY_INFO = "info";
-
-    private static final String KEY_SCHEMA_VERSION = "schemaVersion";
-
-    private static final String KEY_INITIALIZATION_STATES = "initializationStates";
-
-    private static final String KEY_RESOLVED_INITIAL_TERRAIN_PLANS = "resolvedInitialTerrainPlans";
+    private static final String KEY_INIT_STATE = "initState";
 
     private static final String KEY_INIT_PHASE = "initPhase";
 
@@ -63,103 +51,13 @@ public class ApertureWorldData extends SavedData {
 
     private static final String KEY_PLAN_SEED = "planSeed";
 
-    private static final String KEY_PLAN = "plan";
+    private static final String KEY_LAST_LOGOUT_TIMES = "lastLogoutTimes";
 
-    private static final String KEY_LAYOUT_TIER = "layoutTier";
+    private static final String KEY_RETURN_POSITIONS = "returnPositions";
 
-    private static final String KEY_LAYOUT_SIZE = "layoutSize";
+    private static final String KEY_OWNER = "owner";
 
-    private static final String KEY_CELL_COUNT = "cellCount";
-
-    private static final String KEY_CORE_ANCHOR = "coreAnchor";
-
-    private static final String KEY_SEAM_CENTER_CHUNK_X = "seamCenterChunkX";
-
-    private static final String KEY_SEAM_CENTER_CHUNK_Z = "seamCenterChunkZ";
-
-    private static final String KEY_CORE_ANCHOR_SEMANTICS = "coreAnchorSemantics";
-
-    private static final String KEY_TELEPORT_ANCHOR = "teleportAnchor";
-
-    private static final String KEY_ANCHOR_CELL_X = "anchorCellX";
-
-    private static final String KEY_ANCHOR_CELL_Z = "anchorCellZ";
-
-    private static final String KEY_ANCHOR_CHUNK_X = "anchorChunkX";
-
-    private static final String KEY_ANCHOR_CHUNK_Z = "anchorChunkZ";
-
-    private static final String KEY_ANCHOR_CHUNK_CENTER_X = "anchorChunkCenterX";
-
-    private static final String KEY_ANCHOR_CHUNK_CENTER_Z = "anchorChunkCenterZ";
-
-    private static final String KEY_TELEPORT_ANCHOR_SEMANTICS = "teleportAnchorSemantics";
-
-    private static final String KEY_LAYOUT_ORIGIN = "layoutOrigin";
-
-    private static final String KEY_ORIGIN_CHUNK_X = "originChunkX";
-
-    private static final String KEY_ORIGIN_CHUNK_Z = "originChunkZ";
-
-    private static final String KEY_LAYOUT_ORIGIN_SEMANTICS = "layoutOriginSemantics";
-
-    private static final String KEY_INITIAL_CHUNK_BOUNDARY = "initialChunkBoundary";
-
-    private static final String KEY_PLAN_MIN_CHUNK_X = "minChunkX";
-
-    private static final String KEY_PLAN_MAX_CHUNK_X = "maxChunkX";
-
-    private static final String KEY_PLAN_MIN_CHUNK_Z = "minChunkZ";
-
-    private static final String KEY_PLAN_MAX_CHUNK_Z = "maxChunkZ";
-
-    private static final String KEY_RING_PARAMETERS = "ringParameters";
-
-    private static final String KEY_MAX_RESERVED_CHAOS_BLOCKS = "maxReservedChaosBlocks";
-
-    private static final String KEY_SAFE_ZONE_MAX_OUTSIDE_DISTANCE_BLOCKS = "safeZoneMaxOutsideDistanceBlocks";
-
-    private static final String KEY_WARNING_ZONE_MAX_OUTSIDE_DISTANCE_BLOCKS = "warningZoneMaxOutsideDistanceBlocks";
-
-    private static final String KEY_LETHAL_ZONE_START_OUTSIDE_DISTANCE_BLOCKS = "lethalZoneStartOutsideDistanceBlocks";
-
-    private static final String KEY_BIOME_FALLBACK_POLICY = "biomeFallbackPolicy";
-
-    private static final String KEY_PLANNED_CELLS = "plannedCells";
-
-    private static final String KEY_CELL_X = "cellX";
-
-    private static final String KEY_CELL_Z = "cellZ";
-
-    private static final String KEY_CHUNK_X = "chunkX";
-
-    private static final String KEY_CHUNK_Z = "chunkZ";
-
-    private static final String KEY_GENERATION_ORDER = "generationOrder";
-
-    private static final String KEY_RING_INDEX = "ringIndex";
-
-    private static final String KEY_CENTER_KERNEL = "centerKernel";
-
-    private static final String KEY_PRIMARY_BIOME_ID = "primaryBiomeId";
-
-    private static final String KEY_BIOME_CANDIDATES = "biomeCandidates";
-
-    private static final String KEY_ZHUANSHU = "zhuanshu";
-
-    private static final String KEY_JIEDUAN = "jieduan";
-
-    private static final String KEY_HEAVEN_SCORE = "heavenScore";
-
-    private static final String KEY_EARTH_SCORE = "earthScore";
-
-    private static final String KEY_HUMAN_SCORE = "humanScore";
-
-    private static final String KEY_BALANCE_SCORE = "balanceScore";
-
-    private static final String KEY_ASCENSION_ATTEMPT_INITIATED = "ascensionAttemptInitiated";
-
-    private static final String KEY_SNAPSHOT_FROZEN = "snapshotFrozen";
+    private static final String KEY_INFO = "info";
 
     private static final String KEY_LAST_LOGOUT_TIME = "lastLogoutTime";
 
@@ -179,13 +77,9 @@ public class ApertureWorldData extends SavedData {
 
     private static final int TAG_LIST = Tag.TAG_LIST;
 
-    private static final int TAG_STRING = Tag.TAG_STRING;
-
     private static final int DEFAULT_NEXT_INDEX = 1;
 
-    private static final int LEGACY_SCHEMA_VERSION = ApertureWorldDataSchema.LEGACY_SCHEMA_VERSION;
-
-    private static final int CURRENT_SCHEMA_VERSION = ApertureWorldDataSchema.CURRENT_SCHEMA_VERSION;
+    private static final int CURRENT_SCHEMA_VERSION = 1;
 
     private static final int APERTURE_SPACING = 100000;
 
@@ -222,8 +116,6 @@ public class ApertureWorldData extends SavedData {
     private final Map<UUID, ApertureInfo> apertures = new HashMap<>();
 
     private final Map<UUID, ApertureInitializationState> initializationStates = new HashMap<>();
-
-    private final Map<ResolvedInitialTerrainPlanKey, InitialTerrainPlan> resolvedInitialTerrainPlans = new HashMap<>();
 
     private final Set<UUID> initializedApertures = new HashSet<>();
 
@@ -262,9 +154,13 @@ public class ApertureWorldData extends SavedData {
             DEFAULT_TIER
         );
         apertures.put(owner, created);
-        initializationStates.put(owner, ApertureInitializationState.uninitialized());
+        initializationStates.putIfAbsent(owner, ApertureInitializationState.uninitialized());
         setDirty();
         return created;
+    }
+
+    public int getSchemaVersion() {
+        return schemaVersion;
     }
 
     /**
@@ -376,50 +272,6 @@ public class ApertureWorldData extends SavedData {
 
     public void expandBoundaryByChunks(UUID owner, int chunkIncrement) {
         expandBoundaryByChunkDelta(owner, chunkIncrement);
-    }
-
-    /**
-     * 直接按世界 chunk 坐标回写仙窍边界。
-     * <p>
-     * 该方法用于初始化运行时在规划完成后，把 planner 输出的局部 chunk 边界
-     * （例如 {@code InitialTerrainPlan.initialChunkBoundary}）映射到玩家真实世界坐标，
-     * 并作为 {@link ApertureInfo} 的 min/maxChunk 真源持久化。
-     * </p>
-     * <p>
-     * 设计约束：
-     * 1) 只更新边界，不改 center；
-     * 2) 允许传入顺序无序坐标，最终由 {@link ApertureInfo} 构造器归一化；
-     * 3) 若回写结果与当前值一致，不重复标记脏。
-     * </p>
-     *
-     * @param owner 玩家 UUID
-     * @param minChunkX 世界坐标最小 chunkX
-     * @param maxChunkX 世界坐标最大 chunkX
-     * @param minChunkZ 世界坐标最小 chunkZ
-     * @param maxChunkZ 世界坐标最大 chunkZ
-     */
-    public void updateChunkBoundary(UUID owner, int minChunkX, int maxChunkX, int minChunkZ, int maxChunkZ) {
-        ApertureInfo existing = apertures.get(owner);
-        if (existing == null) {
-            return;
-        }
-        ApertureInfo updated = new ApertureInfo(
-            existing.center(),
-            minChunkX,
-            maxChunkX,
-            minChunkZ,
-            maxChunkZ,
-            existing.timeSpeed(),
-            existing.nextTribulationTick(),
-            existing.isFrozen(),
-            existing.favorability(),
-            existing.tier()
-        );
-        if (updated.equals(existing)) {
-            return;
-        }
-        apertures.put(owner, updated);
-        setDirty();
     }
 
     /**
@@ -561,78 +413,55 @@ public class ApertureWorldData extends SavedData {
         setDirty();
     }
 
-    public int getSchemaVersion() {
-        return schemaVersion;
+    public boolean isApertureInitialized(UUID owner) {
+        return getInitializationState(owner).initPhase().isInitialized();
     }
 
     public ApertureInitializationState getInitializationState(UUID owner) {
-        return resolveInitializationState(owner);
+        ApertureInitializationState storedState = initializationStates.get(owner);
+        if (storedState != null) {
+            return storedState;
+        }
+        if (initializedApertures.contains(owner)) {
+            return ApertureInitializationState.legacyCompleted();
+        }
+        return ApertureInitializationState.uninitialized();
     }
 
-    public ApertureInitPhase getInitPhase(UUID owner) {
-        return resolveInitializationState(owner).initPhase();
-    }
-
-    @Nullable
-    public ApertureOpeningSnapshot getOpeningSnapshot(UUID owner) {
-        return resolveInitializationState(owner).openingSnapshot();
-    }
-
-    @Nullable
-    public Integer getLayoutVersion(UUID owner) {
-        return resolveInitializationState(owner).layoutVersion();
-    }
-
-    @Nullable
-    public Long getPlanSeed(UUID owner) {
-        return resolveInitializationState(owner).planSeed();
-    }
-
-    public void saveResolvedInitialTerrainPlan(UUID owner, int layoutVersion, long planSeed, InitialTerrainPlan plan) {
-        Objects.requireNonNull(plan, "plan");
-        ResolvedInitialTerrainPlanKey key = resolvedInitialTerrainPlanKey(owner, layoutVersion, planSeed);
-        InitialTerrainPlan previous = resolvedInitialTerrainPlans.put(key, plan);
-        if (!plan.equals(previous)) {
+    public void setInitializationState(UUID owner, ApertureInitializationState state) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        if (state == null) {
+            throw new IllegalArgumentException("state 不能为空");
+        }
+        ApertureInitializationState previousState = initializationStates.put(owner, state);
+        boolean changed = !state.equals(previousState);
+        if (syncLegacyInitializedProjection(owner, state)) {
+            changed = true;
+        }
+        if (changed) {
             setDirty();
         }
     }
 
-    public Optional<InitialTerrainPlan> loadResolvedInitialTerrainPlan(UUID owner, int layoutVersion, long planSeed) {
-        ResolvedInitialTerrainPlanKey key = resolvedInitialTerrainPlanKey(owner, layoutVersion, planSeed);
-        return Optional.ofNullable(resolvedInitialTerrainPlans.get(key));
+    public InitPhase getInitPhase(UUID owner) {
+        return getInitializationState(owner).initPhase();
     }
 
-    public void setInitializationState(UUID owner, ApertureInitializationState initializationState) {
-        ApertureInitializationState normalizedState = ApertureWorldDataSchema.normalizeInitializationState(
-            initializationState
-        );
-        initializationStates.put(owner, normalizedState);
-        syncLegacyInitializedState(owner, normalizedState);
-        schemaVersion = CURRENT_SCHEMA_VERSION;
-        setDirty();
+    @Nullable
+    public AscensionConditionSnapshot getOpeningSnapshot(UUID owner) {
+        return getInitializationState(owner).openingSnapshot();
     }
 
-    public void setInitPhase(UUID owner, ApertureInitPhase initPhase) {
-        ApertureInitializationState existingState = resolveInitializationState(owner);
-        setInitializationState(
-            owner,
-            new ApertureInitializationState(
-                initPhase,
-                existingState.openingSnapshot(),
-                existingState.layoutVersion(),
-                existingState.planSeed()
-            )
-        );
+    @Nullable
+    public Integer getLayoutVersion(UUID owner) {
+        return getInitializationState(owner).layoutVersion();
     }
 
-    /**
-     * 判断指定玩家的仙窍是否已经执行过首次初始化。
-     *
-     * @param owner 玩家 UUID
-     * @return 已初始化返回 true，否则 false
-     */
-    public boolean isApertureInitialized(UUID owner) {
-        return resolveInitializationState(owner).isInitializedEquivalent();
+    @Nullable
+    public Long getPlanSeed(UUID owner) {
+        return getInitializationState(owner).planSeed();
     }
 
     /**
@@ -641,16 +470,8 @@ public class ApertureWorldData extends SavedData {
      * @param owner 玩家 UUID
      */
     public void markApertureInitialized(UUID owner) {
-        ApertureInitializationState existingState = resolveInitializationState(owner);
-        setInitializationState(
-            owner,
-            new ApertureInitializationState(
-                ApertureInitPhase.COMPLETED,
-                existingState.openingSnapshot(),
-                existingState.layoutVersion(),
-                existingState.planSeed()
-            )
-        );
+        ApertureInitializationState currentState = getInitializationState(owner);
+        setInitializationState(owner, currentState.withPhase(InitPhase.COMPLETED));
     }
 
     /**
@@ -785,11 +606,9 @@ public class ApertureWorldData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
-        ApertureSerializedWorldState normalizedWorldState = buildNormalizedWorldState();
-        applyNormalizedWorldState(normalizedWorldState);
-
-        tag.putInt(KEY_SCHEMA_VERSION, normalizedWorldState.schemaVersion());
-        tag.putInt(KEY_NEXT_INDEX, normalizedWorldState.nextIndex());
+        schemaVersion = CURRENT_SCHEMA_VERSION;
+        tag.putInt(KEY_SCHEMA_VERSION, schemaVersion);
+        tag.putInt(KEY_NEXT_INDEX, nextIndex);
 
         ListTag list = new ListTag();
         for (Map.Entry<UUID, ApertureInfo> entry : apertures.entrySet()) {
@@ -800,33 +619,21 @@ public class ApertureWorldData extends SavedData {
         }
         tag.put(KEY_APERTURES, list);
 
-        ListTag initializationStateList = new ListTag();
-        for (
-            Map.Entry<UUID, ApertureInitializationState> entry : normalizedWorldState.initializationStates().entrySet()
-        ) {
-            CompoundTag initializationStateTag = new CompoundTag();
-            initializationStateTag.putUUID(KEY_OWNER, entry.getKey());
-            initializationStateTag.put(KEY_INFO, saveInitializationState(entry.getValue()));
-            initializationStateList.add(initializationStateTag);
-        }
-        tag.put(KEY_INITIALIZATION_STATES, initializationStateList);
+        resyncLegacyInitializedProjection();
 
-        ListTag resolvedPlanList = new ListTag();
-        for (
-            Map.Entry<ResolvedInitialTerrainPlanKey, InitialTerrainPlan> entry
-                : resolvedInitialTerrainPlans.entrySet()
-        ) {
-            CompoundTag resolvedPlanTag = new CompoundTag();
-            resolvedPlanTag.putUUID(KEY_OWNER, entry.getKey().owner());
-            resolvedPlanTag.putInt(KEY_LAYOUT_VERSION, entry.getKey().layoutVersion());
-            resolvedPlanTag.putLong(KEY_PLAN_SEED, entry.getKey().planSeed());
-            resolvedPlanTag.put(KEY_PLAN, saveResolvedInitialTerrainPlan(entry.getValue()));
-            resolvedPlanList.add(resolvedPlanTag);
+        ListTag initStateList = new ListTag();
+        Set<UUID> persistedInitOwners = new HashSet<>(apertures.keySet());
+        persistedInitOwners.addAll(initializationStates.keySet());
+        for (UUID owner : persistedInitOwners) {
+            CompoundTag initStateTag = new CompoundTag();
+            initStateTag.putUUID(KEY_OWNER, owner);
+            initStateTag.put(KEY_INIT_STATE, getInitializationState(owner).save());
+            initStateList.add(initStateTag);
         }
-        tag.put(KEY_RESOLVED_INITIAL_TERRAIN_PLANS, resolvedPlanList);
+        tag.put(KEY_APERTURE_INIT_STATES, initStateList);
 
         ListTag initializedList = new ListTag();
-        for (UUID owner : normalizedWorldState.initializedApertures()) {
+        for (UUID owner : initializedApertures) {
             CompoundTag initializedTag = new CompoundTag();
             initializedTag.putUUID(KEY_OWNER, owner);
             initializedList.add(initializedTag);
@@ -853,11 +660,9 @@ public class ApertureWorldData extends SavedData {
         return tag;
     }
 
-    private static ApertureWorldData load(CompoundTag tag) {
+    static ApertureWorldData loadFromTag(CompoundTag tag) {
         ApertureWorldData data = new ApertureWorldData();
-        data.schemaVersion = tag.contains(KEY_SCHEMA_VERSION)
-            ? Math.max(LEGACY_SCHEMA_VERSION, tag.getInt(KEY_SCHEMA_VERSION))
-            : LEGACY_SCHEMA_VERSION;
+        data.schemaVersion = CURRENT_SCHEMA_VERSION;
         data.nextIndex = Math.max(DEFAULT_NEXT_INDEX, tag.getInt(KEY_NEXT_INDEX));
 
         if (tag.contains(KEY_APERTURES, TAG_LIST)) {
@@ -873,41 +678,21 @@ public class ApertureWorldData extends SavedData {
             }
         }
 
-        if (tag.contains(KEY_INITIALIZATION_STATES, TAG_LIST)) {
-            ListTag initializationStateList = tag.getList(KEY_INITIALIZATION_STATES, TAG_COMPOUND);
-            for (int i = 0; i < initializationStateList.size(); i++) {
-                CompoundTag initializationStateTag = initializationStateList.getCompound(i);
-                if (!initializationStateTag.hasUUID(KEY_OWNER)
-                    || !initializationStateTag.contains(KEY_INFO, TAG_COMPOUND)) {
+        if (tag.contains(KEY_APERTURE_INIT_STATES, TAG_LIST)) {
+            ListTag initStateList = tag.getList(KEY_APERTURE_INIT_STATES, TAG_COMPOUND);
+            for (int i = 0; i < initStateList.size(); i++) {
+                CompoundTag initStateEntryTag = initStateList.getCompound(i);
+                if (
+                    !initStateEntryTag.hasUUID(KEY_OWNER)
+                        || !initStateEntryTag.contains(KEY_INIT_STATE, TAG_COMPOUND)
+                ) {
                     continue;
                 }
-                data.initializationStates.put(
-                    initializationStateTag.getUUID(KEY_OWNER),
-                    loadInitializationState(initializationStateTag.getCompound(KEY_INFO))
+                UUID owner = initStateEntryTag.getUUID(KEY_OWNER);
+                ApertureInitializationState state = ApertureInitializationState.load(
+                    initStateEntryTag.getCompound(KEY_INIT_STATE)
                 );
-            }
-        }
-
-        if (tag.contains(KEY_RESOLVED_INITIAL_TERRAIN_PLANS, TAG_LIST)) {
-            ListTag resolvedPlanList = tag.getList(KEY_RESOLVED_INITIAL_TERRAIN_PLANS, TAG_COMPOUND);
-            for (int i = 0; i < resolvedPlanList.size(); i++) {
-                CompoundTag resolvedPlanTag = resolvedPlanList.getCompound(i);
-                if (!resolvedPlanTag.hasUUID(KEY_OWNER)
-                    || !resolvedPlanTag.contains(KEY_LAYOUT_VERSION)
-                    || !resolvedPlanTag.contains(KEY_PLAN_SEED)
-                    || !resolvedPlanTag.contains(KEY_PLAN, TAG_COMPOUND)) {
-                    continue;
-                }
-                UUID owner = resolvedPlanTag.getUUID(KEY_OWNER);
-                int layoutVersion = resolvedPlanTag.getInt(KEY_LAYOUT_VERSION);
-                long planSeed = resolvedPlanTag.getLong(KEY_PLAN_SEED);
-                try {
-                    ResolvedInitialTerrainPlanKey key = resolvedInitialTerrainPlanKey(owner, layoutVersion, planSeed);
-                    InitialTerrainPlan plan = loadResolvedInitialTerrainPlan(resolvedPlanTag.getCompound(KEY_PLAN));
-                    data.resolvedInitialTerrainPlans.put(key, plan);
-                } catch (IllegalArgumentException exception) {
-                    continue;
-                }
+                data.initializationStates.put(owner, state);
             }
         }
 
@@ -949,336 +734,34 @@ public class ApertureWorldData extends SavedData {
                 }
             }
         }
-
-        data.applyNormalizedWorldState(data.buildNormalizedWorldState());
+        data.migrateInitializationStates();
         return data;
     }
 
-    private ApertureInitializationState resolveInitializationState(UUID owner) {
-        ApertureInitializationState initializationState = initializationStates.get(owner);
-        if (initializationState != null) {
-            return ApertureWorldDataSchema.normalizeInitializationState(initializationState);
+    private void migrateInitializationStates() {
+        for (UUID owner : initializedApertures) {
+            initializationStates.putIfAbsent(owner, ApertureInitializationState.legacyCompleted());
         }
-        return ApertureWorldDataSchema.legacyInitializationState(initializedApertures.contains(owner));
-    }
-
-    private void syncLegacyInitializedState(UUID owner, ApertureInitializationState initializationState) {
-        if (initializationState.isInitializedEquivalent()) {
-            initializedApertures.add(owner);
-            return;
+        for (UUID owner : apertures.keySet()) {
+            initializationStates.putIfAbsent(owner, ApertureInitializationState.uninitialized());
         }
-        initializedApertures.remove(owner);
+        resyncLegacyInitializedProjection();
     }
 
-    private ApertureSerializedWorldState buildNormalizedWorldState() {
-        return ApertureWorldDataSchema.normalizeWorldState(
-            new ApertureSerializedWorldState(
-                schemaVersion,
-                nextIndex,
-                serializeApertures(),
-                new HashMap<>(initializationStates),
-                new HashSet<>(initializedApertures)
-            )
-        );
+    private boolean syncLegacyInitializedProjection(UUID owner, ApertureInitializationState state) {
+        if (state.initPhase().isInitialized()) {
+            return initializedApertures.add(owner);
+        }
+        return initializedApertures.remove(owner);
     }
 
-    private void applyNormalizedWorldState(ApertureSerializedWorldState normalizedWorldState) {
-        schemaVersion = normalizedWorldState.schemaVersion();
-        nextIndex = normalizedWorldState.nextIndex();
-        initializationStates.clear();
-        initializationStates.putAll(normalizedWorldState.initializationStates());
+    private void resyncLegacyInitializedProjection() {
         initializedApertures.clear();
-        initializedApertures.addAll(normalizedWorldState.initializedApertures());
-    }
-
-    private Map<UUID, ApertureSerializedApertureInfo> serializeApertures() {
-        Map<UUID, ApertureSerializedApertureInfo> serializedApertures = new HashMap<>();
-        for (Map.Entry<UUID, ApertureInfo> entry : apertures.entrySet()) {
-            ApertureInfo apertureInfo = entry.getValue();
-            serializedApertures.put(
-                entry.getKey(),
-                new ApertureSerializedApertureInfo(
-                    apertureInfo.center().getX(),
-                    apertureInfo.center().getY(),
-                    apertureInfo.center().getZ(),
-                    apertureInfo.minChunkX(),
-                    apertureInfo.maxChunkX(),
-                    apertureInfo.minChunkZ(),
-                    apertureInfo.maxChunkZ(),
-                    apertureInfo.timeSpeed(),
-                    apertureInfo.nextTribulationTick(),
-                    apertureInfo.isFrozen(),
-                    apertureInfo.favorability(),
-                    apertureInfo.tier()
-                )
-            );
+        for (Map.Entry<UUID, ApertureInitializationState> entry : initializationStates.entrySet()) {
+            if (entry.getValue().initPhase().isInitialized()) {
+                initializedApertures.add(entry.getKey());
+            }
         }
-        return serializedApertures;
-    }
-
-    private static CompoundTag saveInitializationState(ApertureInitializationState initializationState) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString(KEY_INIT_PHASE, initializationState.initPhase().name());
-        if (initializationState.openingSnapshot() != null) {
-            tag.put(KEY_OPENING_SNAPSHOT, saveOpeningSnapshot(initializationState.openingSnapshot()));
-        }
-        if (initializationState.layoutVersion() != null) {
-            tag.putInt(KEY_LAYOUT_VERSION, initializationState.layoutVersion());
-        }
-        if (initializationState.planSeed() != null) {
-            tag.putLong(KEY_PLAN_SEED, initializationState.planSeed());
-        }
-        return tag;
-    }
-
-    private static ApertureInitializationState loadInitializationState(CompoundTag tag) {
-        ApertureInitPhase initPhase = ApertureWorldDataSchema.parseInitPhase(tag.getString(KEY_INIT_PHASE));
-        ApertureOpeningSnapshot openingSnapshot = tag.contains(KEY_OPENING_SNAPSHOT, TAG_COMPOUND)
-            ? loadOpeningSnapshot(tag.getCompound(KEY_OPENING_SNAPSHOT))
-            : null;
-        Integer layoutVersion = tag.contains(KEY_LAYOUT_VERSION)
-            ? Integer.valueOf(tag.getInt(KEY_LAYOUT_VERSION))
-            : null;
-        Long planSeed = tag.contains(KEY_PLAN_SEED) ? Long.valueOf(tag.getLong(KEY_PLAN_SEED)) : null;
-        return ApertureWorldDataSchema.normalizeInitializationState(
-            new ApertureInitializationState(initPhase, openingSnapshot, layoutVersion, planSeed)
-        );
-    }
-
-    private static CompoundTag saveResolvedInitialTerrainPlan(InitialTerrainPlan plan) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString(KEY_LAYOUT_TIER, plan.layoutTier().name());
-        tag.putInt(KEY_LAYOUT_SIZE, plan.layoutSize());
-        tag.putInt(KEY_CELL_COUNT, plan.cellCount());
-        tag.put(KEY_CORE_ANCHOR, saveCoreAnchor(plan.coreAnchor()));
-        tag.put(KEY_TELEPORT_ANCHOR, saveTeleportAnchor(plan.teleportAnchor()));
-        tag.put(KEY_LAYOUT_ORIGIN, saveLayoutOrigin(plan.layoutOrigin()));
-        tag.put(KEY_INITIAL_CHUNK_BOUNDARY, saveInitialChunkBoundary(plan.initialChunkBoundary()));
-        tag.put(KEY_RING_PARAMETERS, saveRingParameters(plan.ringParameters()));
-        tag.putString(KEY_BIOME_FALLBACK_POLICY, plan.biomeFallbackPolicy().name());
-        ListTag plannedCells = new ListTag();
-        for (InitialTerrainPlan.PlannedTerrainCell plannedCell : plan.plannedCells()) {
-            plannedCells.add(savePlannedTerrainCell(plannedCell));
-        }
-        tag.put(KEY_PLANNED_CELLS, plannedCells);
-        return tag;
-    }
-
-    private static InitialTerrainPlan loadResolvedInitialTerrainPlan(CompoundTag tag) {
-        InitialTerrainPlan.LayoutTier layoutTier = InitialTerrainPlan.LayoutTier.valueOf(
-            tag.getString(KEY_LAYOUT_TIER)
-        );
-        int layoutSize = tag.getInt(KEY_LAYOUT_SIZE);
-        int cellCount = tag.getInt(KEY_CELL_COUNT);
-        InitialTerrainPlan.CoreAnchor coreAnchor = loadCoreAnchor(tag.getCompound(KEY_CORE_ANCHOR));
-        InitialTerrainPlan.TeleportAnchor teleportAnchor = loadTeleportAnchor(tag.getCompound(KEY_TELEPORT_ANCHOR));
-        InitialTerrainPlan.LayoutOrigin layoutOrigin = loadLayoutOrigin(tag.getCompound(KEY_LAYOUT_ORIGIN));
-        InitialTerrainPlan.InitialChunkBoundary initialChunkBoundary = loadInitialChunkBoundary(
-            tag.getCompound(KEY_INITIAL_CHUNK_BOUNDARY)
-        );
-        InitialTerrainPlan.RingParameters ringParameters = loadRingParameters(tag.getCompound(KEY_RING_PARAMETERS));
-        BiomeInferenceService.BiomeFallbackPolicy biomeFallbackPolicy =
-            BiomeInferenceService.BiomeFallbackPolicy.valueOf(tag.getString(KEY_BIOME_FALLBACK_POLICY));
-        List<InitialTerrainPlan.PlannedTerrainCell> plannedCells = loadPlannedTerrainCells(tag);
-        return new InitialTerrainPlan(
-            layoutTier,
-            layoutSize,
-            cellCount,
-            coreAnchor,
-            teleportAnchor,
-            layoutOrigin,
-            initialChunkBoundary,
-            ringParameters,
-            biomeFallbackPolicy,
-            plannedCells
-        );
-    }
-
-    private static CompoundTag saveCoreAnchor(InitialTerrainPlan.CoreAnchor coreAnchor) {
-        CompoundTag tag = new CompoundTag();
-        tag.putDouble(KEY_SEAM_CENTER_CHUNK_X, coreAnchor.seamCenterChunkX());
-        tag.putDouble(KEY_SEAM_CENTER_CHUNK_Z, coreAnchor.seamCenterChunkZ());
-        tag.putString(KEY_CORE_ANCHOR_SEMANTICS, coreAnchor.semantics().name());
-        return tag;
-    }
-
-    private static InitialTerrainPlan.CoreAnchor loadCoreAnchor(CompoundTag tag) {
-        return new InitialTerrainPlan.CoreAnchor(
-            tag.getDouble(KEY_SEAM_CENTER_CHUNK_X),
-            tag.getDouble(KEY_SEAM_CENTER_CHUNK_Z),
-            InitialTerrainPlan.CoreAnchorSemantics.valueOf(tag.getString(KEY_CORE_ANCHOR_SEMANTICS))
-        );
-    }
-
-    private static CompoundTag saveTeleportAnchor(InitialTerrainPlan.TeleportAnchor teleportAnchor) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY_ANCHOR_CELL_X, teleportAnchor.anchorCellX());
-        tag.putInt(KEY_ANCHOR_CELL_Z, teleportAnchor.anchorCellZ());
-        tag.putInt(KEY_ANCHOR_CHUNK_X, teleportAnchor.anchorChunkX());
-        tag.putInt(KEY_ANCHOR_CHUNK_Z, teleportAnchor.anchorChunkZ());
-        tag.putDouble(KEY_ANCHOR_CHUNK_CENTER_X, teleportAnchor.anchorChunkCenterX());
-        tag.putDouble(KEY_ANCHOR_CHUNK_CENTER_Z, teleportAnchor.anchorChunkCenterZ());
-        tag.putString(KEY_TELEPORT_ANCHOR_SEMANTICS, teleportAnchor.semantics().name());
-        return tag;
-    }
-
-    private static InitialTerrainPlan.TeleportAnchor loadTeleportAnchor(CompoundTag tag) {
-        return new InitialTerrainPlan.TeleportAnchor(
-            tag.getInt(KEY_ANCHOR_CELL_X),
-            tag.getInt(KEY_ANCHOR_CELL_Z),
-            tag.getInt(KEY_ANCHOR_CHUNK_X),
-            tag.getInt(KEY_ANCHOR_CHUNK_Z),
-            tag.getDouble(KEY_ANCHOR_CHUNK_CENTER_X),
-            tag.getDouble(KEY_ANCHOR_CHUNK_CENTER_Z),
-            InitialTerrainPlan.TeleportAnchorSemantics.valueOf(tag.getString(KEY_TELEPORT_ANCHOR_SEMANTICS))
-        );
-    }
-
-    private static CompoundTag saveLayoutOrigin(InitialTerrainPlan.LayoutOrigin layoutOrigin) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY_ORIGIN_CHUNK_X, layoutOrigin.originChunkX());
-        tag.putInt(KEY_ORIGIN_CHUNK_Z, layoutOrigin.originChunkZ());
-        tag.putString(KEY_LAYOUT_ORIGIN_SEMANTICS, layoutOrigin.semantics().name());
-        return tag;
-    }
-
-    private static InitialTerrainPlan.LayoutOrigin loadLayoutOrigin(CompoundTag tag) {
-        return new InitialTerrainPlan.LayoutOrigin(
-            tag.getInt(KEY_ORIGIN_CHUNK_X),
-            tag.getInt(KEY_ORIGIN_CHUNK_Z),
-            InitialTerrainPlan.LayoutOriginSemantics.valueOf(tag.getString(KEY_LAYOUT_ORIGIN_SEMANTICS))
-        );
-    }
-
-    private static CompoundTag saveInitialChunkBoundary(InitialTerrainPlan.InitialChunkBoundary initialChunkBoundary) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY_PLAN_MIN_CHUNK_X, initialChunkBoundary.minChunkX());
-        tag.putInt(KEY_PLAN_MAX_CHUNK_X, initialChunkBoundary.maxChunkX());
-        tag.putInt(KEY_PLAN_MIN_CHUNK_Z, initialChunkBoundary.minChunkZ());
-        tag.putInt(KEY_PLAN_MAX_CHUNK_Z, initialChunkBoundary.maxChunkZ());
-        return tag;
-    }
-
-    private static InitialTerrainPlan.InitialChunkBoundary loadInitialChunkBoundary(CompoundTag tag) {
-        return new InitialTerrainPlan.InitialChunkBoundary(
-            tag.getInt(KEY_PLAN_MIN_CHUNK_X),
-            tag.getInt(KEY_PLAN_MAX_CHUNK_X),
-            tag.getInt(KEY_PLAN_MIN_CHUNK_Z),
-            tag.getInt(KEY_PLAN_MAX_CHUNK_Z)
-        );
-    }
-
-    private static CompoundTag saveRingParameters(InitialTerrainPlan.RingParameters ringParameters) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY_MAX_RESERVED_CHAOS_BLOCKS, ringParameters.maxReservedChaosBlocks());
-        tag.putInt(
-            KEY_SAFE_ZONE_MAX_OUTSIDE_DISTANCE_BLOCKS,
-            ringParameters.safeZoneMaxOutsideDistanceBlocks()
-        );
-        tag.putInt(
-            KEY_WARNING_ZONE_MAX_OUTSIDE_DISTANCE_BLOCKS,
-            ringParameters.warningZoneMaxOutsideDistanceBlocks()
-        );
-        tag.putInt(
-            KEY_LETHAL_ZONE_START_OUTSIDE_DISTANCE_BLOCKS,
-            ringParameters.lethalZoneStartOutsideDistanceBlocks()
-        );
-        return tag;
-    }
-
-    private static InitialTerrainPlan.RingParameters loadRingParameters(CompoundTag tag) {
-        return new InitialTerrainPlan.RingParameters(
-            tag.getInt(KEY_MAX_RESERVED_CHAOS_BLOCKS),
-            tag.getInt(KEY_SAFE_ZONE_MAX_OUTSIDE_DISTANCE_BLOCKS),
-            tag.getInt(KEY_WARNING_ZONE_MAX_OUTSIDE_DISTANCE_BLOCKS),
-            tag.getInt(KEY_LETHAL_ZONE_START_OUTSIDE_DISTANCE_BLOCKS)
-        );
-    }
-
-    private static CompoundTag savePlannedTerrainCell(InitialTerrainPlan.PlannedTerrainCell plannedCell) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY_CELL_X, plannedCell.cellX());
-        tag.putInt(KEY_CELL_Z, plannedCell.cellZ());
-        tag.putInt(KEY_CHUNK_X, plannedCell.chunkX());
-        tag.putInt(KEY_CHUNK_Z, plannedCell.chunkZ());
-        tag.putInt(KEY_GENERATION_ORDER, plannedCell.generationOrder());
-        tag.putInt(KEY_RING_INDEX, plannedCell.ringIndex());
-        tag.putBoolean(KEY_CENTER_KERNEL, plannedCell.centerKernel());
-        tag.putString(KEY_PRIMARY_BIOME_ID, plannedCell.primaryBiomeId());
-        ListTag biomeCandidates = new ListTag();
-        for (String biomeCandidate : plannedCell.biomeCandidates()) {
-            biomeCandidates.add(StringTag.valueOf(biomeCandidate));
-        }
-        tag.put(KEY_BIOME_CANDIDATES, biomeCandidates);
-        return tag;
-    }
-
-    private static List<InitialTerrainPlan.PlannedTerrainCell> loadPlannedTerrainCells(CompoundTag tag) {
-        List<InitialTerrainPlan.PlannedTerrainCell> plannedCells = new ArrayList<>();
-        if (!tag.contains(KEY_PLANNED_CELLS, TAG_LIST)) {
-            return plannedCells;
-        }
-        ListTag cellList = tag.getList(KEY_PLANNED_CELLS, TAG_COMPOUND);
-        for (int i = 0; i < cellList.size(); i++) {
-            CompoundTag cellTag = cellList.getCompound(i);
-            plannedCells.add(
-                new InitialTerrainPlan.PlannedTerrainCell(
-                    cellTag.getInt(KEY_CELL_X),
-                    cellTag.getInt(KEY_CELL_Z),
-                    cellTag.getInt(KEY_CHUNK_X),
-                    cellTag.getInt(KEY_CHUNK_Z),
-                    cellTag.getInt(KEY_GENERATION_ORDER),
-                    cellTag.getInt(KEY_RING_INDEX),
-                    cellTag.getBoolean(KEY_CENTER_KERNEL),
-                    cellTag.getString(KEY_PRIMARY_BIOME_ID),
-                    loadBiomeCandidates(cellTag)
-                )
-            );
-        }
-        return plannedCells;
-    }
-
-    private static List<String> loadBiomeCandidates(CompoundTag cellTag) {
-        if (!cellTag.contains(KEY_BIOME_CANDIDATES, TAG_LIST)) {
-            return List.of();
-        }
-        ListTag candidateTagList = cellTag.getList(KEY_BIOME_CANDIDATES, TAG_STRING);
-        List<String> candidates = new ArrayList<>();
-        for (int i = 0; i < candidateTagList.size(); i++) {
-            candidates.add(candidateTagList.getString(i));
-        }
-        return candidates;
-    }
-
-    private static ResolvedInitialTerrainPlanKey resolvedInitialTerrainPlanKey(UUID owner, int layoutVersion,
-                                                                                long planSeed) {
-        return new ResolvedInitialTerrainPlanKey(owner, layoutVersion, planSeed);
-    }
-
-    private static CompoundTag saveOpeningSnapshot(ApertureOpeningSnapshot openingSnapshot) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY_ZHUANSHU, openingSnapshot.zhuanshu());
-        tag.putInt(KEY_JIEDUAN, openingSnapshot.jieduan());
-        tag.putInt(KEY_HEAVEN_SCORE, openingSnapshot.heavenScore());
-        tag.putInt(KEY_EARTH_SCORE, openingSnapshot.earthScore());
-        tag.putInt(KEY_HUMAN_SCORE, openingSnapshot.humanScore());
-        tag.putInt(KEY_BALANCE_SCORE, openingSnapshot.balanceScore());
-        tag.putBoolean(KEY_ASCENSION_ATTEMPT_INITIATED, openingSnapshot.ascensionAttemptInitiated());
-        tag.putBoolean(KEY_SNAPSHOT_FROZEN, openingSnapshot.snapshotFrozen());
-        return tag;
-    }
-
-    private static ApertureOpeningSnapshot loadOpeningSnapshot(CompoundTag tag) {
-        return new ApertureOpeningSnapshot(
-            tag.getInt(KEY_ZHUANSHU),
-            tag.getInt(KEY_JIEDUAN),
-            tag.getInt(KEY_HEAVEN_SCORE),
-            tag.getInt(KEY_EARTH_SCORE),
-            tag.getInt(KEY_HUMAN_SCORE),
-            tag.getInt(KEY_BALANCE_SCORE),
-            tag.getBoolean(KEY_ASCENSION_ATTEMPT_INITIATED),
-            tag.getBoolean(KEY_SNAPSHOT_FROZEN)
-        );
     }
 
     /**
@@ -1287,7 +770,7 @@ public class ApertureWorldData extends SavedData {
      * @return SavedData Factory
      */
     public static SavedData.Factory<ApertureWorldData> factory() {
-        return new SavedData.Factory<>(ApertureWorldData::new, (tag, provider) -> load(tag), null);
+        return new SavedData.Factory<>(ApertureWorldData::new, (tag, provider) -> loadFromTag(tag), null);
     }
 
     /**
@@ -1300,13 +783,229 @@ public class ApertureWorldData extends SavedData {
         return level.getDataStorage().computeIfAbsent(factory(), DATA_NAME);
     }
 
-    private record ResolvedInitialTerrainPlanKey(UUID owner, int layoutVersion, long planSeed) {
+    public enum InitPhase {
+        UNINITIALIZED,
+        PLANNED,
+        EXECUTING,
+        COMPLETED;
 
-        private ResolvedInitialTerrainPlanKey {
-            Objects.requireNonNull(owner, "owner");
-            if (layoutVersion <= 0) {
-                throw new IllegalArgumentException("layoutVersion 必须大于 0");
+        public boolean isInitialized() {
+            return this == COMPLETED;
+        }
+    }
+
+    public record ApertureInitializationState(
+        InitPhase initPhase,
+        @Nullable AscensionConditionSnapshot openingSnapshot,
+        @Nullable Integer layoutVersion,
+        @Nullable Long planSeed
+    ) {
+
+        public ApertureInitializationState {
+            initPhase = Objects.requireNonNull(initPhase, "initPhase");
+        }
+
+        public static ApertureInitializationState uninitialized() {
+            return new ApertureInitializationState(InitPhase.UNINITIALIZED, null, null, null);
+        }
+
+        public static ApertureInitializationState legacyCompleted() {
+            return new ApertureInitializationState(InitPhase.COMPLETED, null, null, null);
+        }
+
+        public ApertureInitializationState withPhase(InitPhase newPhase) {
+            return new ApertureInitializationState(newPhase, openingSnapshot, layoutVersion, planSeed);
+        }
+
+        private CompoundTag save() {
+            CompoundTag tag = new CompoundTag();
+            tag.putString(KEY_INIT_PHASE, initPhase.name());
+            if (openingSnapshot != null) {
+                tag.put(KEY_OPENING_SNAPSHOT, OpeningSnapshotTagCodec.save(openingSnapshot));
             }
+            if (layoutVersion != null) {
+                tag.putInt(KEY_LAYOUT_VERSION, layoutVersion.intValue());
+            }
+            if (planSeed != null) {
+                tag.putLong(KEY_PLAN_SEED, planSeed.longValue());
+            }
+            return tag;
+        }
+
+        private static ApertureInitializationState load(CompoundTag tag) {
+            InitPhase phase = parseEnumOrDefault(
+                tag.getString(KEY_INIT_PHASE),
+                InitPhase.class,
+                InitPhase.UNINITIALIZED
+            );
+            AscensionConditionSnapshot snapshot = null;
+            if (tag.contains(KEY_OPENING_SNAPSHOT, TAG_COMPOUND)) {
+                snapshot = OpeningSnapshotTagCodec.load(tag.getCompound(KEY_OPENING_SNAPSHOT));
+            }
+            Integer storedLayoutVersion = tag.contains(KEY_LAYOUT_VERSION)
+                ? Integer.valueOf(tag.getInt(KEY_LAYOUT_VERSION))
+                : null;
+            Long storedPlanSeed = tag.contains(KEY_PLAN_SEED)
+                ? Long.valueOf(tag.getLong(KEY_PLAN_SEED))
+                : null;
+            return new ApertureInitializationState(phase, snapshot, storedLayoutVersion, storedPlanSeed);
+        }
+    }
+
+    private static final class OpeningSnapshotTagCodec {
+
+        private static final String KEY_BENMING_GU_RAW_VALUE = "benmingGuRawValue";
+
+        private static final String KEY_BENMING_GU_FALLBACK_STATE = "benmingGuFallbackState";
+
+        private static final String KEY_BENMING_GU_TOKEN = "benmingGuToken";
+
+        private static final String KEY_DAO_MARKS = "daoMarks";
+
+        private static final String KEY_DAO_MARK_COVERAGE_STATE = "daoMarkCoverageState";
+
+        private static final String KEY_DAO_MARK_TOTAL_FROM_PLAYER = "daoMarkTotalFromPlayer";
+
+        private static final String KEY_DAO_MARK_RESOLVED_TOTAL = "daoMarkResolvedTotal";
+
+        private static final String KEY_APTITUDE_RESOURCE_STATE = "aptitudeResourceState";
+
+        private static final String KEY_MAX_ZHENYUAN = "maxZhenyuan";
+
+        private static final String KEY_SHOUYUAN = "shouyuan";
+
+        private static final String KEY_JINGLI = "jingli";
+
+        private static final String KEY_MAX_JINGLI = "maxJingli";
+
+        private static final String KEY_HUNPO = "hunpo";
+
+        private static final String KEY_MAX_HUNPO = "maxHunpo";
+
+        private static final String KEY_TIZHI = "tizhi";
+
+        private static final String KEY_ZHUANSHU = "zhuanshu";
+
+        private static final String KEY_JIEDUAN = "jieduan";
+
+        private static final String KEY_KONGQIAO = "kongqiao";
+
+        private static final String KEY_QIYUN = "qiyun";
+
+        private static final String KEY_QIYUN_MAX = "qiyunMax";
+
+        private static final String KEY_RENQI = "renqi";
+
+        private static final String KEY_FALLBACK_HUMAN_QI = "fallbackHumanQi";
+
+        private static final String KEY_EARTH_QI = "earthQi";
+
+        private static final String KEY_HUMAN_QI_TARGET = "humanQiTarget";
+
+        private static final String KEY_EARTH_QI_TARGET = "earthQiTarget";
+
+        private static final String KEY_PLAYER_INITIATED = "playerInitiated";
+
+        private OpeningSnapshotTagCodec() {
+        }
+
+        private static CompoundTag save(AscensionConditionSnapshot snapshot) {
+            CompoundTag tag = new CompoundTag();
+            tag.putDouble(KEY_BENMING_GU_RAW_VALUE, snapshot.benmingGuRawValue());
+            tag.putString(KEY_BENMING_GU_FALLBACK_STATE, snapshot.benmingGuFallbackState().name());
+            tag.putString(KEY_BENMING_GU_TOKEN, snapshot.benmingGuToken());
+            tag.put(KEY_DAO_MARKS, saveDaoMarks(snapshot.daoMarks()));
+            tag.putString(KEY_DAO_MARK_COVERAGE_STATE, snapshot.daoMarkCoverageState().name());
+            tag.putDouble(KEY_DAO_MARK_TOTAL_FROM_PLAYER, snapshot.daoMarkTotalFromPlayer());
+            tag.putDouble(KEY_DAO_MARK_RESOLVED_TOTAL, snapshot.daoMarkResolvedTotal());
+            tag.putString(KEY_APTITUDE_RESOURCE_STATE, snapshot.aptitudeResourceState().name());
+            tag.putDouble(KEY_MAX_ZHENYUAN, snapshot.maxZhenyuan());
+            tag.putDouble(KEY_SHOUYUAN, snapshot.shouyuan());
+            tag.putDouble(KEY_JINGLI, snapshot.jingli());
+            tag.putDouble(KEY_MAX_JINGLI, snapshot.maxJingli());
+            tag.putDouble(KEY_HUNPO, snapshot.hunpo());
+            tag.putDouble(KEY_MAX_HUNPO, snapshot.maxHunpo());
+            tag.putDouble(KEY_TIZHI, snapshot.tizhi());
+            tag.putDouble(KEY_ZHUANSHU, snapshot.zhuanshu());
+            tag.putDouble(KEY_JIEDUAN, snapshot.jieduan());
+            tag.putDouble(KEY_KONGQIAO, snapshot.kongqiao());
+            tag.putDouble(KEY_QIYUN, snapshot.qiyun());
+            tag.putDouble(KEY_QIYUN_MAX, snapshot.qiyunMax());
+            tag.putDouble(KEY_RENQI, snapshot.renqi());
+            tag.putDouble(KEY_FALLBACK_HUMAN_QI, snapshot.fallbackHumanQi());
+            tag.putDouble(KEY_EARTH_QI, snapshot.earthQi());
+            tag.putDouble(KEY_HUMAN_QI_TARGET, snapshot.humanQiTarget());
+            tag.putDouble(KEY_EARTH_QI_TARGET, snapshot.earthQiTarget());
+            tag.putBoolean(KEY_PLAYER_INITIATED, snapshot.playerInitiated());
+            return tag;
+        }
+
+        private static CompoundTag saveDaoMarks(Map<String, Double> daoMarks) {
+            CompoundTag daoMarksTag = new CompoundTag();
+            TreeMap<String, Double> orderedDaoMarks = new TreeMap<>(daoMarks);
+            for (Map.Entry<String, Double> entry : orderedDaoMarks.entrySet()) {
+                daoMarksTag.putDouble(entry.getKey(), entry.getValue());
+            }
+            return daoMarksTag;
+        }
+
+        private static AscensionConditionSnapshot load(CompoundTag tag) {
+            CompoundTag daoMarksTag = tag.getCompound(KEY_DAO_MARKS);
+            Map<String, Double> daoMarks = new HashMap<>();
+            for (String key : daoMarksTag.getAllKeys()) {
+                daoMarks.put(key, daoMarksTag.getDouble(key));
+            }
+            return new AscensionConditionSnapshot(
+                tag.getDouble(KEY_BENMING_GU_RAW_VALUE),
+                parseEnumOrDefault(
+                    tag.getString(KEY_BENMING_GU_FALLBACK_STATE),
+                    AscensionConditionSnapshot.BenmingGuFallbackState.class,
+                    AscensionConditionSnapshot.BenmingGuFallbackState.UNKNOWN
+                ),
+                tag.contains(KEY_BENMING_GU_TOKEN) ? tag.getString(KEY_BENMING_GU_TOKEN) : "unknown",
+                daoMarks,
+                parseEnumOrDefault(
+                    tag.getString(KEY_DAO_MARK_COVERAGE_STATE),
+                    AscensionConditionSnapshot.DaoMarkCoverageState.class,
+                    AscensionConditionSnapshot.DaoMarkCoverageState.MISSING
+                ),
+                tag.getDouble(KEY_DAO_MARK_TOTAL_FROM_PLAYER),
+                tag.getDouble(KEY_DAO_MARK_RESOLVED_TOTAL),
+                parseEnumOrDefault(
+                    tag.getString(KEY_APTITUDE_RESOURCE_STATE),
+                    AscensionConditionSnapshot.AptitudeResourceState.class,
+                    AscensionConditionSnapshot.AptitudeResourceState.ALL_ZERO_OR_MISSING
+                ),
+                tag.getDouble(KEY_MAX_ZHENYUAN),
+                tag.getDouble(KEY_SHOUYUAN),
+                tag.getDouble(KEY_JINGLI),
+                tag.getDouble(KEY_MAX_JINGLI),
+                tag.getDouble(KEY_HUNPO),
+                tag.getDouble(KEY_MAX_HUNPO),
+                tag.getDouble(KEY_TIZHI),
+                tag.getDouble(KEY_ZHUANSHU),
+                tag.getDouble(KEY_JIEDUAN),
+                tag.getDouble(KEY_KONGQIAO),
+                tag.getDouble(KEY_QIYUN),
+                tag.getDouble(KEY_QIYUN_MAX),
+                tag.getDouble(KEY_RENQI),
+                tag.getDouble(KEY_FALLBACK_HUMAN_QI),
+                tag.getDouble(KEY_EARTH_QI),
+                tag.getDouble(KEY_HUMAN_QI_TARGET),
+                tag.getDouble(KEY_EARTH_QI_TARGET),
+                tag.getBoolean(KEY_PLAYER_INITIATED)
+            );
+        }
+    }
+
+    private static <E extends Enum<E>> E parseEnumOrDefault(String storedName, Class<E> enumType, E fallback) {
+        if (storedName == null || storedName.isEmpty()) {
+            return fallback;
+        }
+        try {
+            return Enum.valueOf(enumType, storedName);
+        } catch (IllegalArgumentException exception) {
+            return fallback;
         }
     }
 

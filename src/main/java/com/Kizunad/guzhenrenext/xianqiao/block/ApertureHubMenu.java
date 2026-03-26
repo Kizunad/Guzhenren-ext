@@ -1,7 +1,14 @@
 package com.Kizunad.guzhenrenext.xianqiao.block;
 
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptEntryChannel;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
+import com.Kizunad.guzhenrenext.xianqiao.command.ApertureCommand;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.InitPhase;
+import com.Kizunad.guzhenrenext.xianqiao.entry.ApertureEntryFlowService;
+import com.Kizunad.guzhenrenext.xianqiao.entry.XianqiaoUiProjection;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoMenus;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -50,8 +57,46 @@ public class ApertureHubMenu extends AbstractContainerMenu {
     /** 字段索引：冻结状态（0/1）。 */
     private static final int DATA_FROZEN = 9;
 
+    private static final int DATA_INIT_PHASE = 10;
+
+    private static final int DATA_SUGGESTED_STAGE = 11;
+
+    private static final int DATA_HEAVEN_QI_SCORE = 12;
+
+    private static final int DATA_HUMAN_QI_SCORE = 13;
+
+    private static final int DATA_EARTH_QI_SCORE = 14;
+
+    private static final int DATA_BALANCE_SCORE = 15;
+
+    private static final int DATA_ASCENSION_FLAGS = 16;
+
     /** 容器数据总字段数。 */
-    private static final int DATA_FIELDS = 10;
+    private static final int DATA_FIELDS = 17;
+
+    public static final int BUTTON_ASCENSION_ENTRY = 0;
+
+    private static final int FLAG_SHIFT_READY_TO_CONFIRM = 1;
+
+    private static final int FLAG_SHIFT_CONFIRMED_THRESHOLD = 2;
+
+    private static final int FLAG_SHIFT_CAN_ENTER_CONFIRMED = 3;
+
+    private static final int FLAG_SHIFT_SNAPSHOT_FROZEN = 4;
+
+    private static final int FLAG_SHIFT_FROZEN_SNAPSHOT_PLAYER_INITIATED = 5;
+
+    private static final int FLAG_FIVE_TURN_PEAK = 1;
+
+    private static final int FLAG_READY_TO_CONFIRM = 1 << FLAG_SHIFT_READY_TO_CONFIRM;
+
+    private static final int FLAG_CONFIRMED_THRESHOLD = 1 << FLAG_SHIFT_CONFIRMED_THRESHOLD;
+
+    private static final int FLAG_CAN_ENTER_CONFIRMED = 1 << FLAG_SHIFT_CAN_ENTER_CONFIRMED;
+
+    private static final int FLAG_SNAPSHOT_FROZEN = 1 << FLAG_SHIFT_SNAPSHOT_FROZEN;
+
+    private static final int FLAG_FROZEN_SNAPSHOT_PLAYER_INITIATED = 1 << FLAG_SHIFT_FROZEN_SNAPSHOT_PLAYER_INITIATED;
 
     /** 远程校验：允许交互的最大距离平方（8 格 -> 64）。 */
     private static final double MAX_VALID_DISTANCE_SQR = 64.0D;
@@ -127,6 +172,27 @@ public class ApertureHubMenu extends AbstractContainerMenu {
         return ItemStack.EMPTY;
     }
 
+    @Override
+    public boolean clickMenuButton(Player player, int id) {
+        if (id == BUTTON_ASCENSION_ENTRY) {
+            if (player.level().isClientSide) {
+                return true;
+            }
+            if (!(player instanceof ServerPlayer serverPlayer)) {
+                return false;
+            }
+            ApertureEntryFlowService.EntryResult result = ApertureCommand.executeUnifiedAscensionEntry(
+                serverPlayer,
+                AscensionAttemptEntryChannel.PLAYER_INITIATED_ENTRY
+            );
+            if (!result.success() && result.failureMessage() != null) {
+                serverPlayer.sendSystemMessage(result.failureMessage());
+            }
+            return true;
+        }
+        return super.clickMenuButton(player, id);
+    }
+
     /** 获取边界最小 chunk X。 */
     public int getMinChunkX() {
         return data.get(DATA_MIN_CHUNK_X);
@@ -192,5 +258,88 @@ public class ApertureHubMenu extends AbstractContainerMenu {
      */
     public boolean isFrozen() {
         return data.get(DATA_FROZEN) != 0;
+    }
+
+    public InitPhase getInitPhase() {
+        int ordinal = data.get(DATA_INIT_PHASE);
+        InitPhase[] values = InitPhase.values();
+        if (ordinal < 0 || ordinal >= values.length) {
+            return InitPhase.UNINITIALIZED;
+        }
+        return values[ordinal];
+    }
+
+    public AscensionAttemptStage getSuggestedStage() {
+        int ordinal = data.get(DATA_SUGGESTED_STAGE);
+        AscensionAttemptStage[] values = AscensionAttemptStage.values();
+        if (ordinal < 0 || ordinal >= values.length) {
+            return AscensionAttemptStage.CULTIVATION_PROGRESS;
+        }
+        return values[ordinal];
+    }
+
+    public int getHeavenQiScorePercent() {
+        return data.get(DATA_HEAVEN_QI_SCORE);
+    }
+
+    public int getHumanQiScorePercent() {
+        return data.get(DATA_HUMAN_QI_SCORE);
+    }
+
+    public int getEarthQiScorePercent() {
+        return data.get(DATA_EARTH_QI_SCORE);
+    }
+
+    public int getBalanceScorePercent() {
+        return data.get(DATA_BALANCE_SCORE);
+    }
+
+    public boolean isFiveTurnPeak() {
+        return hasFlag(FLAG_FIVE_TURN_PEAK);
+    }
+
+    public boolean isReadyToConfirm() {
+        return hasFlag(FLAG_READY_TO_CONFIRM);
+    }
+
+    public boolean isConfirmedThresholdMet() {
+        return hasFlag(FLAG_CONFIRMED_THRESHOLD);
+    }
+
+    public boolean canEnterConfirmed() {
+        return hasFlag(FLAG_CAN_ENTER_CONFIRMED);
+    }
+
+    public boolean isSnapshotFrozen() {
+        return hasFlag(FLAG_SNAPSHOT_FROZEN);
+    }
+
+    public boolean isFrozenSnapshotPlayerInitiated() {
+        return hasFlag(FLAG_FROZEN_SNAPSHOT_PLAYER_INITIATED);
+    }
+
+    public XianqiaoUiProjection.ProjectionInput getProjectionInput() {
+        return new XianqiaoUiProjection.ProjectionInput(
+            getInitPhase(),
+            getSuggestedStage(),
+            getHeavenQiScorePercent(),
+            getHumanQiScorePercent(),
+            getEarthQiScorePercent(),
+            getBalanceScorePercent(),
+            isFiveTurnPeak(),
+            isReadyToConfirm(),
+            isConfirmedThresholdMet(),
+            canEnterConfirmed(),
+            isSnapshotFrozen(),
+            isFrozenSnapshotPlayerInitiated()
+        );
+    }
+
+    public XianqiaoUiProjection.ProjectionSnapshot getUiProjection() {
+        return XianqiaoUiProjection.project(getProjectionInput());
+    }
+
+    private boolean hasFlag(int flag) {
+        return (data.get(DATA_ASCENSION_FLAGS) & flag) != 0;
     }
 }

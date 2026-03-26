@@ -1,234 +1,172 @@
 package com.Kizunad.guzhenrenext.xianqiao.opening;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 /**
- * 开窍初始地形规划结果。
+ * 仙窍初始地形规划结果。
+ * <p>
+ * 该类型是 Task4 的“纯规划层”输出：
+ * </p>
+ * <ul>
+ *     <li>只表达布局语义与参数，不触碰世界写入；</li>
+ *     <li>显式分离 seam center、layout origin、core anchor、teleport anchor；</li>
+ *     <li>保留 cell 级别的确定性生成顺序与 biome 候选引用。</li>
+ * </ul>
  */
 public record InitialTerrainPlan(
     LayoutTier layoutTier,
-    int layoutSize,
-    int cellCount,
-    CoreAnchor coreAnchor,
-    TeleportAnchor teleportAnchor,
-    LayoutOrigin layoutOrigin,
-    InitialChunkBoundary initialChunkBoundary,
-    RingParameters ringParameters,
-    BiomeInferenceService.BiomeFallbackPolicy biomeFallbackPolicy,
-    List<PlannedTerrainCell> plannedCells
+    AnchorPoint seamCenter,
+    AnchorPoint layoutOrigin,
+    AnchorPoint coreAnchor,
+    AnchorPoint teleportAnchor,
+    ChunkBoundary initialChunkBoundary,
+    ZoneParameters zoneParameters,
+    List<PlannedCell> orderedCells
 ) {
 
-    private static final int ZERO = 0;
-
-    private static final int ONE = 1;
-
-    private static final int TWO = 2;
-
-    private static final int THREE = TWO + ONE;
-
-    private static final int FOUR = TWO * TWO;
-
-    private static final String DEFAULT_BIOME_ID = "minecraft:plains";
-
+    /**
+     * 紧凑构造器：统一做非空校验与不可变冻结。
+     */
     public InitialTerrainPlan {
-        Objects.requireNonNull(layoutTier, "layoutTier");
-        Objects.requireNonNull(coreAnchor, "coreAnchor");
-        Objects.requireNonNull(teleportAnchor, "teleportAnchor");
-        Objects.requireNonNull(layoutOrigin, "layoutOrigin");
-        Objects.requireNonNull(initialChunkBoundary, "initialChunkBoundary");
-        Objects.requireNonNull(ringParameters, "ringParameters");
-        Objects.requireNonNull(biomeFallbackPolicy, "biomeFallbackPolicy");
-        plannedCells = List.copyOf(Objects.requireNonNull(plannedCells, "plannedCells"));
-        if (layoutSize != layoutTier.size()) {
-            throw new IllegalArgumentException("layoutSize 必须与 layoutTier 对齐");
+        layoutTier = Objects.requireNonNull(layoutTier, "layoutTier");
+        seamCenter = Objects.requireNonNull(seamCenter, "seamCenter");
+        layoutOrigin = Objects.requireNonNull(layoutOrigin, "layoutOrigin");
+        coreAnchor = Objects.requireNonNull(coreAnchor, "coreAnchor");
+        teleportAnchor = Objects.requireNonNull(teleportAnchor, "teleportAnchor");
+        initialChunkBoundary = Objects.requireNonNull(initialChunkBoundary, "initialChunkBoundary");
+        zoneParameters = Objects.requireNonNull(zoneParameters, "zoneParameters");
+        orderedCells = List.copyOf(Objects.requireNonNull(orderedCells, "orderedCells"));
+        if (orderedCells.isEmpty()) {
+            throw new IllegalArgumentException("orderedCells 不能为空");
         }
-        int expectedCellCount = layoutSize * layoutSize;
-        if (cellCount != expectedCellCount) {
-            throw new IllegalArgumentException("cellCount 必须等于 layoutSize²");
-        }
-        if (plannedCells.size() != expectedCellCount) {
-            throw new IllegalArgumentException("plannedCells 数量必须等于 layoutSize²");
-        }
-        validateGenerationOrder(plannedCells, expectedCellCount);
-    }
-
-    private static void validateGenerationOrder(List<PlannedTerrainCell> cells, int expectedCellCount) {
-        Set<Integer> orders = new HashSet<>(cells.size());
-        for (PlannedTerrainCell cell : cells) {
-            if (cell.generationOrder() < ZERO || cell.generationOrder() >= expectedCellCount) {
-                throw new IllegalArgumentException("generationOrder 超出范围");
-            }
-            if (!orders.add(cell.generationOrder())) {
-                throw new IllegalArgumentException("generationOrder 必须唯一");
-            }
-        }
-        if (orders.size() != expectedCellCount) {
-            throw new IllegalArgumentException("generationOrder 必须覆盖全部单元");
+        if (orderedCells.size() != layoutTier.cellCount()) {
+            throw new IllegalArgumentException("orderedCells 数量与 layoutTier 不一致");
         }
     }
 
+    /**
+     * 当前布局边长（chunk 单元数）。
+     */
+    public int layoutSize() {
+        return layoutTier.edgeSize();
+    }
+
+    /**
+     * 当前布局总 cell 数。
+     */
+    public int cellCount() {
+        return layoutTier.cellCount();
+    }
+
+    /**
+     * 布局档位：固定四档，分别对应 1x1 / 2x2 / 3x3 / 4x4。
+     */
     public enum LayoutTier {
-        ONE_BY_ONE(ONE),
-        TWO_BY_TWO(TWO),
-        THREE_BY_THREE(THREE),
-        FOUR_BY_FOUR(FOUR);
+        ONE_BY_ONE(1),
+        TWO_BY_TWO(2),
+        THREE_BY_THREE(3),
+        FOUR_BY_FOUR(4);
 
-        private final int size;
+        private final int edgeSize;
 
-        LayoutTier(int size) {
-            this.size = size;
+        LayoutTier(int edgeSize) {
+            this.edgeSize = edgeSize;
         }
 
-        public int size() {
-            return size;
+        public int edgeSize() {
+            return edgeSize;
+        }
+
+        public int cellCount() {
+            return edgeSize * edgeSize;
         }
     }
 
-    public record CoreAnchor(
-        double seamCenterChunkX,
-        double seamCenterChunkZ,
-        CoreAnchorSemantics semantics
+    /**
+     * 规划层通用锚点，使用纯整数坐标，避免绑定运行时世界对象。
+     */
+    public record AnchorPoint(int x, int y, int z) {
+
+        public AnchorPoint offset(int offsetX, int offsetY, int offsetZ) {
+            return new AnchorPoint(x + offsetX, y + offsetY, z + offsetZ);
+        }
+    }
+
+    /**
+     * chunk 坐标锚点。
+     */
+    public record ChunkCoord(int x, int z) {
+    }
+
+    /**
+     * 初始边界：min/max chunk 闭区间，保持 chunk-boundary-truth 语义。
+     */
+    public record ChunkBoundary(int minChunkX, int maxChunkX, int minChunkZ, int maxChunkZ) {
+
+        public ChunkBoundary {
+            int normalizedMinChunkX = Math.min(minChunkX, maxChunkX);
+            int normalizedMaxChunkX = Math.max(minChunkX, maxChunkX);
+            int normalizedMinChunkZ = Math.min(minChunkZ, maxChunkZ);
+            int normalizedMaxChunkZ = Math.max(minChunkZ, maxChunkZ);
+            minChunkX = normalizedMinChunkX;
+            maxChunkX = normalizedMaxChunkX;
+            minChunkZ = normalizedMinChunkZ;
+            maxChunkZ = normalizedMaxChunkZ;
+        }
+
+        public int widthInChunks() {
+            return maxChunkX - minChunkX + 1;
+        }
+
+        public int depthInChunks() {
+            return maxChunkZ - minChunkZ + 1;
+        }
+    }
+
+    /**
+     * 运行时区域参数（仅计划数据，不做执行）。
+     */
+    public record ZoneParameters(
+        int safezoneInsetChunks,
+        int warningBufferBlocks,
+        int lethalBufferBlocks,
+        int reservedChaosChunks
     ) {
-
-        public CoreAnchor {
-            Objects.requireNonNull(semantics, "semantics");
-            if (!Double.isFinite(seamCenterChunkX) || !Double.isFinite(seamCenterChunkZ)) {
-                throw new IllegalArgumentException("核心锚点必须是有限数值");
-            }
-        }
     }
 
-    public enum CoreAnchorSemantics {
-        ODD_CENTER_CELL,
-        SEAM_CENTER
-    }
-
-    public record TeleportAnchor(
-        int anchorCellX,
-        int anchorCellZ,
-        int anchorChunkX,
-        int anchorChunkZ,
-        double anchorChunkCenterX,
-        double anchorChunkCenterZ,
-        TeleportAnchorSemantics semantics
-    ) {
-
-        public TeleportAnchor {
-            Objects.requireNonNull(semantics, "semantics");
-            if (!Double.isFinite(anchorChunkCenterX) || !Double.isFinite(anchorChunkCenterZ)) {
-                throw new IllegalArgumentException("传送锚点中心必须是有限数值");
-            }
-        }
-    }
-
-    public enum TeleportAnchorSemantics {
-        ODD_CENTER_CELL,
-        EVEN_SEAM_KERNEL_NORTHWEST_CELL
-    }
-
-    public record LayoutOrigin(int originChunkX, int originChunkZ, LayoutOriginSemantics semantics) {
-
-        public LayoutOrigin {
-            Objects.requireNonNull(semantics, "semantics");
-        }
-    }
-
-    public enum LayoutOriginSemantics {
-        NORTHWEST_CORNER_CHUNK
-    }
-
-    public record InitialChunkBoundary(int minChunkX, int maxChunkX, int minChunkZ, int maxChunkZ) {
-
-        public InitialChunkBoundary {
-            if (minChunkX > maxChunkX || minChunkZ > maxChunkZ) {
-                throw new IllegalArgumentException("chunk 边界闭区间非法");
-            }
-        }
-
-        public int spanXChunks() {
-            return maxChunkX - minChunkX + ONE;
-        }
-
-        public int spanZChunks() {
-            return maxChunkZ - minChunkZ + ONE;
-        }
-    }
-
-    public record RingParameters(
-        int maxReservedChaosBlocks,
-        int safeZoneMaxOutsideDistanceBlocks,
-        int warningZoneMaxOutsideDistanceBlocks,
-        int lethalZoneStartOutsideDistanceBlocks
-    ) {
-
-        public RingParameters {
-            if (maxReservedChaosBlocks < ZERO) {
-                throw new IllegalArgumentException("maxReservedChaosBlocks 不能小于 0");
-            }
-            if (safeZoneMaxOutsideDistanceBlocks < ZERO) {
-                throw new IllegalArgumentException("safeZoneMaxOutsideDistanceBlocks 不能小于 0");
-            }
-            if (warningZoneMaxOutsideDistanceBlocks < safeZoneMaxOutsideDistanceBlocks) {
-                throw new IllegalArgumentException("warning 阈值不能小于 safezone 阈值");
-            }
-            if (warningZoneMaxOutsideDistanceBlocks > maxReservedChaosBlocks) {
-                throw new IllegalArgumentException("warning 阈值不能超过 maxReservedChaosBlocks");
-            }
-            if (lethalZoneStartOutsideDistanceBlocks <= warningZoneMaxOutsideDistanceBlocks) {
-                throw new IllegalArgumentException("lethal 起点必须大于 warning 阈值");
-            }
-        }
-    }
-
-    public record PlannedTerrainCell(
-        int cellX,
-        int cellZ,
-        int chunkX,
-        int chunkZ,
+    /**
+     * 单个 cell 规划项。
+     * <p>
+     * generationOrder 与 ringOrder 共同定义中心 kernel -> 外环的稳定执行次序。
+     * </p>
+     */
+    public record PlannedCell(
         int generationOrder,
-        int ringIndex,
-        boolean centerKernel,
-        String primaryBiomeId,
-        List<String> biomeCandidates
+        int ringOrder,
+        int rowIndex,
+        int columnIndex,
+        AnchorPoint anchor,
+        ChunkCoord chunk,
+        List<BiomeInferenceService.BiomeKey> biomeCandidates
     ) {
 
-        public PlannedTerrainCell {
-            if (generationOrder < ZERO) {
-                throw new IllegalArgumentException("generationOrder 不能小于 0");
+        public PlannedCell {
+            anchor = Objects.requireNonNull(anchor, "anchor");
+            chunk = Objects.requireNonNull(chunk, "chunk");
+            biomeCandidates = List.copyOf(Objects.requireNonNull(biomeCandidates, "biomeCandidates"));
+            if (generationOrder <= 0) {
+                throw new IllegalArgumentException("generationOrder 必须从 1 开始");
             }
-            if (ringIndex < ZERO) {
-                throw new IllegalArgumentException("ringIndex 不能小于 0");
+            if (ringOrder < 0) {
+                throw new IllegalArgumentException("ringOrder 不能为负数");
             }
-            primaryBiomeId = normalizeBiomeId(primaryBiomeId);
-            biomeCandidates = normalizeBiomeCandidates(biomeCandidates);
-        }
-
-        private static String normalizeBiomeId(String biomeId) {
-            if (biomeId == null || biomeId.isBlank()) {
-                return DEFAULT_BIOME_ID;
+            if (rowIndex < 0 || columnIndex < 0) {
+                throw new IllegalArgumentException("rowIndex/columnIndex 不能为负数");
             }
-            return biomeId.toLowerCase(Locale.ROOT);
-        }
-
-        private static List<String> normalizeBiomeCandidates(List<String> candidates) {
-            if (candidates == null || candidates.isEmpty()) {
-                return List.of(DEFAULT_BIOME_ID);
+            if (biomeCandidates.isEmpty()) {
+                throw new IllegalArgumentException("biomeCandidates 不能为空");
             }
-            List<String> normalized = candidates.stream()
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(value -> !value.isEmpty())
-                .map(value -> value.toLowerCase(Locale.ROOT))
-                .distinct()
-                .toList();
-            if (normalized.isEmpty()) {
-                return List.of(DEFAULT_BIOME_ID);
-            }
-            return normalized;
         }
     }
 }

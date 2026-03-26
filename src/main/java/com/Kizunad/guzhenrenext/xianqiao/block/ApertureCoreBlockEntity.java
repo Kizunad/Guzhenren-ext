@@ -1,7 +1,11 @@
 package com.Kizunad.guzhenrenext.xianqiao.block;
 
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInitializationState;
+import com.Kizunad.guzhenrenext.xianqiao.opening.OpeningProfileResolver;
+import com.Kizunad.guzhenrenext.xianqiao.opening.ResolvedOpeningProfile;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoBlockEntities;
 import java.util.Map;
 import java.util.UUID;
@@ -11,6 +15,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +41,7 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
     private static final String KEY_BOUND_SPIRIT_UUID = "boundSpiritUUID";
 
     /** 菜单字段总数。 */
-    private static final int MENU_DATA_FIELDS = 10;
+    private static final int MENU_DATA_FIELDS = 17;
 
     /** 菜单字段索引：边界最小 chunk X。 */
     private static final int MENU_DATA_MIN_CHUNK_X = 0;
@@ -68,6 +73,20 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
     /** 菜单字段索引：冻结状态（0/1）。 */
     private static final int MENU_DATA_FROZEN = 9;
 
+    private static final int MENU_DATA_INIT_PHASE = 10;
+
+    private static final int MENU_DATA_SUGGESTED_STAGE = 11;
+
+    private static final int MENU_DATA_HEAVEN_QI_SCORE = 12;
+
+    private static final int MENU_DATA_HUMAN_QI_SCORE = 13;
+
+    private static final int MENU_DATA_EARTH_QI_SCORE = 14;
+
+    private static final int MENU_DATA_BALANCE_SCORE = 15;
+
+    private static final int MENU_DATA_ASCENSION_FLAGS = 16;
+
     /** 数值缩放：保留两位小数。 */
     private static final int SCALE_HUNDRED = 100;
 
@@ -76,6 +95,29 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
 
     /** 位移位数：提取高 16 位。 */
     private static final int HIGH_16_SHIFT = 16;
+
+    private static final int FLAG_FIVE_TURN_PEAK = 1;
+
+    private static final int FLAG_SHIFT_READY_TO_CONFIRM = 1;
+
+    private static final int FLAG_SHIFT_CONFIRMED_THRESHOLD = 2;
+
+    private static final int FLAG_SHIFT_CAN_ENTER_CONFIRMED = 3;
+
+    private static final int FLAG_SHIFT_SNAPSHOT_FROZEN = 4;
+
+    private static final int FLAG_SHIFT_FROZEN_SNAPSHOT_PLAYER_INITIATED = 5;
+
+    private static final int FLAG_READY_TO_CONFIRM = 1 << FLAG_SHIFT_READY_TO_CONFIRM;
+
+    private static final int FLAG_CONFIRMED_THRESHOLD = 1 << FLAG_SHIFT_CONFIRMED_THRESHOLD;
+
+    private static final int FLAG_CAN_ENTER_CONFIRMED = 1 << FLAG_SHIFT_CAN_ENTER_CONFIRMED;
+
+    private static final int FLAG_SNAPSHOT_FROZEN = 1 << FLAG_SHIFT_SNAPSHOT_FROZEN;
+
+    private static final int FLAG_FROZEN_SNAPSHOT_PLAYER_INITIATED =
+        1 << FLAG_SHIFT_FROZEN_SNAPSHOT_PLAYER_INITIATED;
 
     @Nullable
     private UUID ownerUUID;
@@ -87,21 +129,38 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
         @Override
         public int get(int index) {
             @Nullable ApertureInfo apertureInfo = getOwnedApertureInfo();
-            if (apertureInfo == null) {
+            @Nullable ProjectionState projectionState = getProjectionState();
+            if (apertureInfo == null && projectionState == null) {
                 return 0;
             }
             return switch (index) {
-                case MENU_DATA_MIN_CHUNK_X -> apertureInfo.minChunkX();
-                case MENU_DATA_MAX_CHUNK_X -> apertureInfo.maxChunkX();
-                case MENU_DATA_MIN_CHUNK_Z -> apertureInfo.minChunkZ();
-                case MENU_DATA_MAX_CHUNK_Z -> apertureInfo.maxChunkZ();
-                case MENU_DATA_TIME_SPEED -> (int) (apertureInfo.timeSpeed() * SCALE_HUNDRED);
-                case MENU_DATA_TRIBULATION_LOW -> (int) (apertureInfo.nextTribulationTick() & LOWER_16_MASK);
+                case MENU_DATA_MIN_CHUNK_X -> apertureInfo == null ? 0 : apertureInfo.minChunkX();
+                case MENU_DATA_MAX_CHUNK_X -> apertureInfo == null ? 0 : apertureInfo.maxChunkX();
+                case MENU_DATA_MIN_CHUNK_Z -> apertureInfo == null ? 0 : apertureInfo.minChunkZ();
+                case MENU_DATA_MAX_CHUNK_Z -> apertureInfo == null ? 0 : apertureInfo.maxChunkZ();
+                case MENU_DATA_TIME_SPEED ->
+                    apertureInfo == null ? 0 : (int) (apertureInfo.timeSpeed() * SCALE_HUNDRED);
+                case MENU_DATA_TRIBULATION_LOW ->
+                    apertureInfo == null ? 0 : (int) (apertureInfo.nextTribulationTick() & LOWER_16_MASK);
                 case MENU_DATA_TRIBULATION_HIGH ->
-                    (int) ((apertureInfo.nextTribulationTick() >>> HIGH_16_SHIFT) & LOWER_16_MASK);
-                case MENU_DATA_FAVORABILITY -> (int) (apertureInfo.favorability() * SCALE_HUNDRED);
-                case MENU_DATA_TIER -> apertureInfo.tier();
-                case MENU_DATA_FROZEN -> apertureInfo.isFrozen() ? 1 : 0;
+                    apertureInfo == null
+                        ? 0
+                        : (int) ((apertureInfo.nextTribulationTick() >>> HIGH_16_SHIFT) & LOWER_16_MASK);
+                case MENU_DATA_FAVORABILITY ->
+                    apertureInfo == null ? 0 : (int) (apertureInfo.favorability() * SCALE_HUNDRED);
+                case MENU_DATA_TIER -> apertureInfo == null ? 0 : apertureInfo.tier();
+                case MENU_DATA_FROZEN -> apertureInfo != null && apertureInfo.isFrozen() ? 1 : 0;
+                case MENU_DATA_INIT_PHASE -> projectionState == null ? 0 : projectionState.initPhaseOrdinal();
+                case MENU_DATA_SUGGESTED_STAGE -> projectionState == null ? 0 : projectionState.suggestedStageOrdinal();
+                case MENU_DATA_HEAVEN_QI_SCORE ->
+                    projectionState == null ? 0 : projectionState.heavenQiScorePercent();
+                case MENU_DATA_HUMAN_QI_SCORE ->
+                    projectionState == null ? 0 : projectionState.humanQiScorePercent();
+                case MENU_DATA_EARTH_QI_SCORE ->
+                    projectionState == null ? 0 : projectionState.earthQiScorePercent();
+                case MENU_DATA_BALANCE_SCORE ->
+                    projectionState == null ? 0 : projectionState.balanceScorePercent();
+                case MENU_DATA_ASCENSION_FLAGS -> projectionState == null ? 0 : projectionState.flags();
                 default -> 0;
             };
         }
@@ -182,6 +241,97 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
             return null;
         }
         return ApertureWorldData.get(serverLevel).getAperture(owner);
+    }
+
+    @Nullable
+    private ProjectionState getProjectionState() {
+        UUID owner = getOwnerUUID();
+        if (owner == null || !(level instanceof ServerLevel serverLevel)) {
+            return null;
+        }
+        ApertureWorldData worldData = ApertureWorldData.get(serverLevel);
+        ApertureInitializationState initializationState = worldData.getInitializationState(owner);
+        ResolvedOpeningProfile profile = resolveOpeningProfile(worldData, owner);
+        return toProjectionState(initializationState, profile);
+    }
+
+    @Nullable
+    private ResolvedOpeningProfile resolveOpeningProfile(ApertureWorldData worldData, UUID owner) {
+        ApertureInitializationState initializationState = worldData.getInitializationState(owner);
+        if (initializationState.openingSnapshot() != null) {
+            return new OpeningProfileResolver().resolveFromSnapshot(initializationState.openingSnapshot());
+        }
+        if (level instanceof ServerLevel serverLevel) {
+            ServerPlayer ownerPlayer = serverLevel.getServer().getPlayerList().getPlayer(owner);
+            if (ownerPlayer != null) {
+                return new OpeningProfileResolver().resolveFromPlayer(ownerPlayer, false);
+            }
+        }
+        return null;
+    }
+
+    private static ProjectionState toProjectionState(
+        ApertureInitializationState initializationState,
+        @Nullable ResolvedOpeningProfile profile
+    ) {
+        if (profile == null) {
+            return new ProjectionState(
+                initializationState.initPhase().ordinal(),
+                AscensionAttemptStage.CULTIVATION_PROGRESS.ordinal(),
+                0,
+                0,
+                0,
+                0,
+                0
+            );
+        }
+        int flags = 0;
+        if (profile.threeQiEvaluation().fiveTurnPeak()) {
+            flags |= FLAG_FIVE_TURN_PEAK;
+        }
+        if (profile.threeQiEvaluation().readyToConfirm()) {
+            flags |= FLAG_READY_TO_CONFIRM;
+        }
+        if (profile.threeQiEvaluation().confirmedThresholdMet()) {
+            flags |= FLAG_CONFIRMED_THRESHOLD;
+        }
+        if (profile.threeQiEvaluation().canEnterConfirmed()) {
+            flags |= FLAG_CAN_ENTER_CONFIRMED;
+        }
+        if (initializationState.openingSnapshot() != null) {
+            flags |= FLAG_SNAPSHOT_FROZEN;
+            if (initializationState.openingSnapshot().playerInitiated()) {
+                flags |= FLAG_FROZEN_SNAPSHOT_PLAYER_INITIATED;
+            }
+        }
+        return new ProjectionState(
+            initializationState.initPhase().ordinal(),
+            profile.suggestedStage().ordinal(),
+            clampPercent(profile.threeQiEvaluation().heavenScore()),
+            clampPercent(profile.threeQiEvaluation().humanScore()),
+            clampPercent(profile.threeQiEvaluation().earthScore()),
+            clampPercent(profile.threeQiEvaluation().balanceScore()),
+            flags
+        );
+    }
+
+    private static int clampPercent(double value) {
+        int rounded = (int) Math.round(value);
+        if (rounded < 0) {
+            return 0;
+        }
+        return Math.min(SCALE_HUNDRED, rounded);
+    }
+
+    private record ProjectionState(
+        int initPhaseOrdinal,
+        int suggestedStageOrdinal,
+        int heavenQiScorePercent,
+        int humanQiScorePercent,
+        int earthQiScorePercent,
+        int balanceScorePercent,
+        int flags
+    ) {
     }
 
     @Override

@@ -1,396 +1,217 @@
 package com.Kizunad.guzhenrenext.xianqiao.opening;
 
-import com.Kizunad.guzhenrenext.xianqiao.service.OverworldTerrainSampler;
-import com.mojang.datafixers.util.Pair;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.server.level.ServerLevel;
 
 /**
  * biome 搜索服务。
  * <p>
- * 该服务将“候选 biome 搜索 + fallback 决策”从地形 materializer 中剥离，
- * 用于在不破坏旧逻辑默认行为的前提下，为新初始化路径提供可注入、可测试的受限搜索能力。
+ * 该服务只负责“按策略挑选采样源锚点”，不参与任何方块复制/materialize 逻辑。
+ * 搜索上下文由调用方注入，以便在不依赖具体世界实现的前提下复用同一套搜索策略。
  * </p>
+ *
+ * @param <TBiome> biome 表示类型（生产侧通常为 {@code Holder<Biome>}）
  */
-public final class BiomeSearchService {
-
-    /** 任务要求：受限搜索半径固定为 r=1000。 */
-    public static final int BOUNDED_SEARCH_RADIUS_BLOCKS = 1_000;
-
-    private static final int LOCATE_HORIZONTAL_STEP = 16;
-
-    private static final int LOCATE_VERTICAL_STEP = 16;
+public final class BiomeSearchService<TBiome> {
 
     private static final int CHUNK_SIZE = 16;
+    private static final int LEGACY_LOCATE_RADIUS_BLOCKS = 4_096;
+    private static final int NEW_TASK_LOCATE_RADIUS_BLOCKS = 1_000;
+    private static final int DEFAULT_LOCATE_STEP_BLOCKS = 16;
+    private static final int DEFAULT_MAX_FALLBACK_ATTEMPTS = 20;
+    private static final double EPSILON = 1.0E-9D;
 
-    private static final String DEFAULT_FALLBACK_BIOME_ID = "minecraft:plains";
+    private final SearchPolicy searchPolicy;
 
-    private static final List<String> STABLE_FALLBACK_POOL = List.of(
-        "minecraft:plains",
-        "minecraft:forest",
-        "minecraft:savanna",
-        "minecraft:taiga",
-        "minecraft:meadow",
-        "minecraft:swamp",
-        "minecraft:desert",
-        "minecraft:badlands"
-    );
+    public BiomeSearchService(SearchPolicy searchPolicy) {
+        this.searchPolicy = Objects.requireNonNull(searchPolicy, "searchPolicy");
+    }
 
     /**
-     * locate 缝隙接口：用于把世界查询抽象为可测试端口。
+     * legacy 默认搜索策略（保留旧行为语义）。
      */
-    @FunctionalInterface
-    public interface BiomeLocatePort {
-
-        /**
-         * 执行最近 biome 查询。
-         *
-         * @param searchOrigin 搜索原点
-         * @param biomeId 目标 biome id
-         * @param radiusBlocks 搜索半径（方块）
-         * @param horizontalStep 水平步长
-         * @param verticalStep 垂直步长
-         * @return 命中坐标；未命中返回 null
-         */
-        @Nullable
-        BlockPos locate(
-            BlockPos searchOrigin,
-            String biomeId,
-            int radiusBlocks,
-            int horizontalStep,
-            int verticalStep
+    public static <TBiome> BiomeSearchService<TBiome> legacyDefault() {
+        return new BiomeSearchService<>(
+            new SearchPolicy(
+                LEGACY_LOCATE_RADIUS_BLOCKS,
+                DEFAULT_LOCATE_STEP_BLOCKS,
+                DEFAULT_LOCATE_STEP_BLOCKS,
+                DEFAULT_MAX_FALLBACK_ATTEMPTS
+            )
         );
     }
 
     /**
-     * 地表高度解析缝隙接口。
+     * Task6 新路径默认搜索策略（半径严格限制为 r=1000）。
      */
-    @FunctionalInterface
-    public interface SurfaceYPort {
-
-        /**
-         * 解析指定 X/Z 的地表顶层 Y。
-         *
-         * @param x 世界坐标 X
-         * @param z 世界坐标 Z
-         * @return 地表顶层 Y
-         */
-        int resolveSurfaceY(int x, int z);
-    }
-
-    /**
-     * 搜索结果。
-     *
-     * @param sourceAnchor 采样源锚点，未命中时为 null
-     * @param matchedBiomeId 实际命中的 biome id，未命中时为空
-     * @param fallbackUsed 是否使用了 fallback 路径
-     */
-    public record SearchResult(
-        @Nullable BlockPos sourceAnchor,
-        Optional<String> matchedBiomeId,
-        boolean fallbackUsed
-    ) {
-
-        public SearchResult {
-            matchedBiomeId = Objects.requireNonNull(matchedBiomeId, "matchedBiomeId");
-        }
-    }
-
-    /**
-     * 单次 locate 查询计划项。
-     *
-     * @param biomeId 本次要查询的 biome id
-     * @param radiusBlocks 搜索半径（方块）
-     * @param horizontalStep 水平步长
-     * @param verticalStep 垂直步长
-     * @param fallbackAttempt 是否属于 fallback 查询
-     */
-    public record LocateAttempt(
-        String biomeId,
-        int radiusBlocks,
-        int horizontalStep,
-        int verticalStep,
-        boolean fallbackAttempt
-    ) {
-    }
-
-    /**
-     * 创建可注入到 {@link OverworldTerrainSampler} 的受限搜索解析器。
-     *
-     * @param preferredBiomeIds 候选 biome 列表（按优先级）
-     * @param fallbackBiomeId 推断层给出的 related/default fallback，可为空
-     * @param deterministicSeed 稳定 fallback 的种子
-     * @return 可注入 materializer 的源锚点解析器
-     */
-    public OverworldTerrainSampler.SourceAnchorResolver createBoundedResolver(
-        List<String> preferredBiomeIds,
-        @Nullable String fallbackBiomeId,
-        long deterministicSeed
-    ) {
-        List<String> normalizedPreferred = normalizeBiomeIds(preferredBiomeIds);
-        return new OverworldTerrainSampler.SourceAnchorResolver() {
-            @Override
-            @Nullable
-            public BlockPos resolve(
-                ServerLevel overworldLevel,
-                Holder<Biome> targetBiome,
-                BlockPos searchOrigin,
-                RandomSource random
-            ) {
-                List<String> mergedCandidates = mergeTargetBiome(normalizedPreferred, targetBiomeIdOf(targetBiome));
-                SearchResult result = locateWithFallback(
-                    searchOrigin,
-                    mergedCandidates,
-                    fallbackBiomeId,
-                    deterministicSeed,
-                    (origin, biomeId, radius, horizontalStep, verticalStep) -> locateInLevel(
-                        overworldLevel,
-                        origin,
-                        biomeId,
-                        radius,
-                        horizontalStep,
-                        verticalStep
-                    ),
-                    (x, z) -> overworldLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
-                );
-                return result.sourceAnchor();
-            }
-        };
-    }
-
-    /**
-     * 按“优先候选 -> deterministic fallback”执行受限搜索。
-     *
-     * @param searchOrigin 搜索原点
-     * @param preferredBiomeIds 候选 biome 列表（按优先级）
-     * @param fallbackBiomeId 推断层 fallback（related/default），可为空
-     * @param deterministicSeed 稳定 fallback 种子
-     * @param locatePort locate 查询端口
-     * @param surfaceYPort 地表高度端口
-     * @return 搜索结果
-     */
-    public SearchResult locateWithFallback(
-        BlockPos searchOrigin,
-        List<String> preferredBiomeIds,
-        @Nullable String fallbackBiomeId,
-        long deterministicSeed,
-        BiomeLocatePort locatePort,
-        SurfaceYPort surfaceYPort
-    ) {
-        Objects.requireNonNull(searchOrigin, "searchOrigin");
-        Objects.requireNonNull(preferredBiomeIds, "preferredBiomeIds");
-        Objects.requireNonNull(locatePort, "locatePort");
-        Objects.requireNonNull(surfaceYPort, "surfaceYPort");
-
-        List<LocateAttempt> attempts = planLocateAttempts(
-            preferredBiomeIds,
-            fallbackBiomeId,
-            deterministicSeed,
-            searchOrigin.getX(),
-            searchOrigin.getZ()
-        );
-        for (LocateAttempt attempt : attempts) {
-            @Nullable BlockPos located = locatePort.locate(
-                searchOrigin,
-                attempt.biomeId(),
-                attempt.radiusBlocks(),
-                attempt.horizontalStep(),
-                attempt.verticalStep()
-            );
-            if (located != null) {
-                BlockPos sourceAnchor = normalizeLocatedAnchor(located, surfaceYPort);
-                return new SearchResult(sourceAnchor, Optional.of(attempt.biomeId()), attempt.fallbackAttempt());
-            }
-        }
-        boolean fallbackUsed = attempts.stream().anyMatch(LocateAttempt::fallbackAttempt);
-        return new SearchResult(null, Optional.empty(), fallbackUsed);
-    }
-
-    /**
-     * 生成 locate 查询计划（纯数据），用于验证半径约束与 fallback 决策。
-     *
-     * @param preferredBiomeIds 候选 biome 列表（按优先级）
-     * @param fallbackBiomeId 推断层 fallback（related/default），可为空
-     * @param deterministicSeed 稳定 fallback 种子
-     * @param originX 搜索原点 X
-     * @param originZ 搜索原点 Z
-     * @return 按执行顺序排列的 locate 查询计划
-     */
-    public List<LocateAttempt> planLocateAttempts(
-        List<String> preferredBiomeIds,
-        @Nullable String fallbackBiomeId,
-        long deterministicSeed,
-        int originX,
-        int originZ
-    ) {
-        Objects.requireNonNull(preferredBiomeIds, "preferredBiomeIds");
-        List<String> normalizedPreferred = normalizeBiomeIds(preferredBiomeIds);
-        List<LocateAttempt> attempts = new ArrayList<>();
-        for (String preferredBiomeId : normalizedPreferred) {
-            attempts.add(
-                new LocateAttempt(
-                    preferredBiomeId,
-                    BOUNDED_SEARCH_RADIUS_BLOCKS,
-                    LOCATE_HORIZONTAL_STEP,
-                    LOCATE_VERTICAL_STEP,
-                    false
-                )
-            );
-        }
-
-        String fallbackId = resolveDeterministicFallbackBiomeId(
-            normalizedPreferred,
-            fallbackBiomeId,
-            deterministicSeed,
-            originX,
-            originZ
-        );
-        if (!normalizedPreferred.contains(fallbackId)) {
-            attempts.add(
-                new LocateAttempt(
-                    fallbackId,
-                    BOUNDED_SEARCH_RADIUS_BLOCKS,
-                    LOCATE_HORIZONTAL_STEP,
-                    LOCATE_VERTICAL_STEP,
-                    true
-                )
-            );
-        }
-        return List.copyOf(attempts);
-    }
-
-    /**
-     * 计算 deterministic fallback biome id。
-     * <p>
-     * 决策顺序：
-     * </p>
-     * <ol>
-     *     <li>若推断层提供 related/default biome，则直接使用该值。</li>
-     *     <li>否则在稳定池中基于输入与 seed 做稳定哈希选择。</li>
-     * </ol>
-     *
-     * @param preferredBiomeIds 候选 biome 列表
-     * @param fallbackBiomeId 推断层 fallback biome
-     * @param deterministicSeed 稳定种子
-     * @param searchOrigin 搜索原点
-     * @return deterministic fallback biome id
-     */
-    String resolveDeterministicFallbackBiomeId(
-        List<String> preferredBiomeIds,
-        @Nullable String fallbackBiomeId,
-        long deterministicSeed,
-        BlockPos searchOrigin
-    ) {
-        return resolveDeterministicFallbackBiomeId(
-            preferredBiomeIds,
-            fallbackBiomeId,
-            deterministicSeed,
-            searchOrigin.getX(),
-            searchOrigin.getZ()
+    public static <TBiome> BiomeSearchService<TBiome> taskSixDefault() {
+        return new BiomeSearchService<>(
+            new SearchPolicy(
+                NEW_TASK_LOCATE_RADIUS_BLOCKS,
+                DEFAULT_LOCATE_STEP_BLOCKS,
+                DEFAULT_LOCATE_STEP_BLOCKS,
+                DEFAULT_MAX_FALLBACK_ATTEMPTS
+            )
         );
     }
 
-    String resolveDeterministicFallbackBiomeId(
-        List<String> preferredBiomeIds,
-        @Nullable String fallbackBiomeId,
-        long deterministicSeed,
-        int originX,
-        int originZ
-    ) {
-        String normalizedFallback = normalizeBiomeId(fallbackBiomeId);
-        if (normalizedFallback != null) {
-            return normalizedFallback;
-        }
-
-        List<String> normalizedPreferred = normalizeBiomeIds(preferredBiomeIds);
-        int poolIndex = Math.floorMod(
-            Objects.hash(normalizedPreferred, deterministicSeed, originX, originZ),
-            STABLE_FALLBACK_POOL.size()
-        );
-        String stablePoolFallback = STABLE_FALLBACK_POOL.get(poolIndex);
-        if (stablePoolFallback != null && !stablePoolFallback.isBlank()) {
-            return stablePoolFallback;
-        }
-        return DEFAULT_FALLBACK_BIOME_ID;
-    }
-
+    /**
+     * 执行一次搜索：先 locate，再随机回退；若都未严格命中，则返回质量最高候选。
+     *
+     * @param targetBiome 目标 biome
+     * @param request 搜索请求（仅包含原点）
+     * @param random 随机源抽象
+     * @param context 世界访问上下文
+     * @return 命中候选；完全无候选时返回 null
+     */
     @Nullable
-    private static BlockPos locateInLevel(
-        ServerLevel overworldLevel,
-        BlockPos searchOrigin,
-        String biomeId,
-        int radius,
-        int horizontalStep,
-        int verticalStep
+    public AnchorCandidate search(
+        TBiome targetBiome,
+        SearchRequest request,
+        IntInRangeRandom random,
+        SearchContext<TBiome> context
     ) {
-        Pair<BlockPos, Holder<Biome>> located = overworldLevel.findClosestBiome3d(
-            biomeHolder -> biomeId.equals(targetBiomeIdOf(biomeHolder)),
-            searchOrigin,
-            radius,
-            horizontalStep,
-            verticalStep
-        );
-        return located == null ? null : located.getFirst();
+        Objects.requireNonNull(targetBiome, "targetBiome");
+        Objects.requireNonNull(request, "request");
+        Objects.requireNonNull(random, "random");
+        Objects.requireNonNull(context, "context");
+
+        AnchorCandidate bestCandidate = context.locateClosest(targetBiome, request, searchPolicy);
+        if (bestCandidate != null && bestCandidate.quality().strictPass()) {
+            return bestCandidate;
+        }
+
+        int originChunkX = Math.floorDiv(request.originBlockX(), CHUNK_SIZE);
+        int originChunkZ = Math.floorDiv(request.originBlockZ(), CHUNK_SIZE);
+        int fallbackChunkRange = Math.floorDiv(searchPolicy.locateSearchRadiusBlocks(), CHUNK_SIZE);
+
+        for (int attempt = 0; attempt < searchPolicy.maxFallbackAttempts(); attempt++) {
+            int randomChunkX = originChunkX + random.nextIntBetweenInclusive(-fallbackChunkRange, fallbackChunkRange);
+            int randomChunkZ = originChunkZ + random.nextIntBetweenInclusive(-fallbackChunkRange, fallbackChunkRange);
+            int chunkMinX = randomChunkX * CHUNK_SIZE;
+            int chunkMinZ = randomChunkZ * CHUNK_SIZE;
+
+            if (!isChunkCenterInsideRadius(request, chunkMinX, chunkMinZ, searchPolicy.locateSearchRadiusBlocks())) {
+                continue;
+            }
+            if (!context.chunkCenterMatchesBiome(chunkMinX, chunkMinZ, targetBiome)) {
+                continue;
+            }
+
+            AnchorCandidate fallbackCandidate = context.evaluateChunk(chunkMinX, chunkMinZ);
+            if (fallbackCandidate == null) {
+                continue;
+            }
+            if (fallbackCandidate.quality().strictPass()) {
+                return fallbackCandidate;
+            }
+            bestCandidate = selectBetterCandidate(bestCandidate, fallbackCandidate);
+        }
+
+        return bestCandidate;
     }
 
-    private static BlockPos normalizeLocatedAnchor(BlockPos locatedPos, SurfaceYPort surfaceYPort) {
-        int chunkMinX = alignToChunkMin(locatedPos.getX());
-        int chunkMinZ = alignToChunkMin(locatedPos.getZ());
+    private static boolean isChunkCenterInsideRadius(
+        SearchRequest request,
+        int chunkMinX,
+        int chunkMinZ,
+        int radiusBlocks
+    ) {
         int centerX = chunkMinX + CHUNK_SIZE / 2;
         int centerZ = chunkMinZ + CHUNK_SIZE / 2;
-        int centerY = surfaceYPort.resolveSurfaceY(centerX, centerZ);
-        return new BlockPos(chunkMinX, centerY, chunkMinZ);
-    }
-
-    private static int alignToChunkMin(int value) {
-        return Math.floorDiv(value, CHUNK_SIZE) * CHUNK_SIZE;
-    }
-
-    private static List<String> mergeTargetBiome(List<String> preferredBiomeIds, @Nullable String targetBiomeId) {
-        LinkedHashSet<String> merged = new LinkedHashSet<>();
-        if (targetBiomeId != null && !targetBiomeId.isBlank()) {
-            merged.add(targetBiomeId);
-        }
-        merged.addAll(preferredBiomeIds);
-        return List.copyOf(merged);
-    }
-
-    private static String targetBiomeIdOf(Holder<Biome> biomeHolder) {
-        Optional<ResourceKey<Biome>> biomeKey = biomeHolder.unwrapKey();
-        if (biomeKey.isPresent()) {
-            return biomeKey.get().location().toString().toLowerCase(Locale.ROOT);
-        }
-        return DEFAULT_FALLBACK_BIOME_ID;
-    }
-
-    private static List<String> normalizeBiomeIds(List<String> biomeIds) {
-        List<String> normalized = new ArrayList<>();
-        for (String biomeId : biomeIds) {
-            String value = normalizeBiomeId(biomeId);
-            if (value != null) {
-                normalized.add(value);
-            }
-        }
-        return normalized.stream().distinct().toList();
+        long dx = (long) centerX - request.originBlockX();
+        long dz = (long) centerZ - request.originBlockZ();
+        long radiusSquared = (long) radiusBlocks * radiusBlocks;
+        return dx * dx + dz * dz <= radiusSquared;
     }
 
     @Nullable
-    private static String normalizeBiomeId(@Nullable String biomeId) {
-        if (biomeId == null || biomeId.isBlank()) {
-            return null;
+    private static AnchorCandidate selectBetterCandidate(
+        @Nullable AnchorCandidate current,
+        AnchorCandidate incoming
+    ) {
+        if (current == null) {
+            return incoming;
         }
-        return biomeId.toLowerCase(Locale.ROOT);
+
+        double scoreDelta = incoming.quality().score() - current.quality().score();
+        if (scoreDelta > EPSILON) {
+            return incoming;
+        }
+        if (Math.abs(scoreDelta) <= EPSILON) {
+            int xCompare = Integer.compare(incoming.anchor().chunkMinX(), current.anchor().chunkMinX());
+            if (xCompare < 0) {
+                return incoming;
+            }
+            if (xCompare == 0) {
+                int zCompare = Integer.compare(incoming.anchor().chunkMinZ(), current.anchor().chunkMinZ());
+                if (zCompare < 0) {
+                    return incoming;
+                }
+                if (zCompare == 0 && incoming.anchor().anchorY() < current.anchor().anchorY()) {
+                    return incoming;
+                }
+            }
+        }
+        return current;
+    }
+
+    /**
+     * 随机源抽象，便于把随机行为从 MC 运行时解耦到可测接口。
+     */
+    @FunctionalInterface
+    public interface IntInRangeRandom {
+
+        int nextIntBetweenInclusive(int minInclusive, int maxInclusive);
+    }
+
+    /**
+     * 搜索时需要的世界访问能力。
+     * <p>service 本身不持有世界对象，所有环境访问通过该上下文下沉到调用方。</p>
+     */
+    public interface SearchContext<TBiome> {
+
+        @Nullable
+        AnchorCandidate locateClosest(TBiome targetBiome, SearchRequest request, SearchPolicy policy);
+
+        boolean chunkCenterMatchesBiome(int chunkMinX, int chunkMinZ, TBiome targetBiome);
+
+        @Nullable
+        AnchorCandidate evaluateChunk(int chunkMinX, int chunkMinZ);
+    }
+
+    public record SearchRequest(int originBlockX, int originBlockZ) {
+    }
+
+    public record SearchPolicy(
+        int locateSearchRadiusBlocks,
+        int locateHorizontalStepBlocks,
+        int locateVerticalStepBlocks,
+        int maxFallbackAttempts
+    ) {
+
+        public SearchPolicy {
+            if (locateSearchRadiusBlocks < 0) {
+                throw new IllegalArgumentException("locateSearchRadiusBlocks 不能小于 0");
+            }
+            if (locateHorizontalStepBlocks <= 0) {
+                throw new IllegalArgumentException("locateHorizontalStepBlocks 必须大于 0");
+            }
+            if (locateVerticalStepBlocks <= 0) {
+                throw new IllegalArgumentException("locateVerticalStepBlocks 必须大于 0");
+            }
+            if (maxFallbackAttempts < 0) {
+                throw new IllegalArgumentException("maxFallbackAttempts 不能小于 0");
+            }
+        }
+    }
+
+    public record ChunkAnchor(int chunkMinX, int chunkMinZ, int anchorY) {
+    }
+
+    public record AnchorQuality(boolean strictPass, double score) {
+    }
+
+    public record AnchorCandidate(ChunkAnchor anchor, AnchorQuality quality) {
     }
 }
