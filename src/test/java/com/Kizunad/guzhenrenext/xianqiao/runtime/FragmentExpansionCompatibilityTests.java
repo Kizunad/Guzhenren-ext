@@ -56,7 +56,10 @@ final class FragmentExpansionCompatibilityTests {
             AscensionOpeningArchitectureContract.FRAGMENT_V1_SYMMETRIC_CHUNK_DELTA,
             FragmentExpansionPolicy.V1_SYMMETRIC_CHUNK_DELTA
         );
-        assertEquals(FragmentExpansionPolicy.V1_SYMMETRIC_CHUNK_DELTA, FragmentPlacementService.BOUNDARY_CHUNK_INCREMENT);
+        assertEquals(
+            FragmentExpansionPolicy.V1_SYMMETRIC_CHUNK_DELTA,
+            FragmentPlacementService.BOUNDARY_CHUNK_INCREMENT
+        );
 
         String fragmentServiceSource = Files.readString(FRAGMENT_SERVICE_SOURCE);
         assertTrue(fragmentServiceSource.contains("FragmentExpansionPolicy.applySymmetricExpansion"));

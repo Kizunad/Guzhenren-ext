@@ -16,9 +16,18 @@ final class ApertureBoundaryZoneTests {
 
     private static final int MAX_BLOCK = 15;
 
+    private static ChaosZoneModel createDefaultZoneModel() {
+        return ApertureRuntimeBoundaryService.resolveModel(
+            MIN_CHUNK,
+            MAX_CHUNK,
+            MIN_CHUNK,
+            MAX_CHUNK
+        );
+    }
+
     @Test
     void thresholdSemanticsAtExactZeroEightSixteenSeventeenAreStable() {
-        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveModel(MIN_CHUNK, MAX_CHUNK, MIN_CHUNK, MAX_CHUNK);
+        ChaosZoneModel zoneModel = createDefaultZoneModel();
 
         assertEquals(ChaosZoneModel.ChaosBand.PLAYABLE_OR_SAFE, zoneModel.resolveChaosBand(MAX_BLOCK, MAX_BLOCK));
         assertEquals(0L, zoneModel.getOutsideDistanceSquaredToPlayable(MAX_BLOCK, MAX_BLOCK));
@@ -42,7 +51,7 @@ final class ApertureBoundaryZoneTests {
 
     @Test
     void reserveSemanticsStayRuntimeOnlyAndUseSixteenChunks() {
-        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveModel(MIN_CHUNK, MAX_CHUNK, MIN_CHUNK, MAX_CHUNK);
+        ChaosZoneModel zoneModel = createDefaultZoneModel();
 
         assertEquals(ApertureRuntimeBoundaryService.DEFAULT_RESERVED_CHAOS_CHUNKS, zoneModel.reservedChaosChunks());
 
@@ -59,7 +68,7 @@ final class ApertureBoundaryZoneTests {
 
     @Test
     void defaultThresholdsArePinnedToOpeningPlannerContract() {
-        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveModel(MIN_CHUNK, MAX_CHUNK, MIN_CHUNK, MAX_CHUNK);
+        ChaosZoneModel zoneModel = createDefaultZoneModel();
 
         assertEquals(0, zoneModel.safezoneInsetChunks());
         assertEquals(8, zoneModel.warningBufferBlocks());

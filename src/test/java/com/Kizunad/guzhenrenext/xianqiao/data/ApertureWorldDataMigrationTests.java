@@ -558,7 +558,8 @@ final class ApertureWorldDataMigrationTests {
                     for (Path stubSource : stubSources) {
                         sourceFiles.add(stubSource.toFile());
                     }
-                    Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
+                    Iterable<? extends JavaFileObject> compilationUnits =
+                        fileManager.getJavaFileObjectsFromFiles(sourceFiles);
                     List<String> options = List.of(
                         "-classpath",
                         System.getProperty("java.class.path"),
