@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.service;
 
+import com.Kizunad.guzhenrenext.xianqiao.opening.BiomeSearchService;
 import com.mojang.datafixers.util.Pair;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,21 +44,6 @@ public final class OverworldTerrainSampler {
     /** 底层基岩上移的最大尝试次数，防止理论死循环。 */
     private static final int MAX_BEDROCK_BOTTOM_SHIFTS = 24;
 
-    /** locate 失败后的随机兜底最大尝试次数。 */
-    private static final int MAX_BIOME_ATTEMPTS = 20;
-
-    /** locate 搜索半径（方块）。 */
-    private static final int LOCATE_SEARCH_RADIUS = 4_096;
-
-    /** locate 搜索水平步长。 */
-    private static final int LOCATE_HORIZONTAL_STEP = 16;
-
-    /** locate 搜索垂直步长。 */
-    private static final int LOCATE_VERTICAL_STEP = 16;
-
-    /** 随机兜底时，以搜索原点为中心的 chunk 偏移范围。 */
-    private static final int RANDOM_FALLBACK_CHUNK_RANGE = 256;
-
     /** 顶层天空可见列最小占比（用于排除洞穴/矿井口候选）。 */
     private static final double MIN_SKY_VISIBLE_RATIO = 0.55D;
 
@@ -91,46 +77,13 @@ public final class OverworldTerrainSampler {
     /** chunk 边长常量，用于坐标对齐。 */
     private static final int CHUNK_SIZE = 16;
 
+    private static final BiomeSearchService<Holder<Biome>> LEGACY_BIOME_SEARCH_SERVICE =
+        BiomeSearchService.legacyDefault();
+
     /** 固定采样总高度（含底层与顶层，闭区间）。 */
     private static final int FIXED_SAMPLE_HEIGHT = SAMPLE_Y_BELOW_SURFACE + SAMPLE_Y_ABOVE_SURFACE + 1;
 
-    /**
-     * 默认源锚点解析器。
-     * <p>
-     * 该实现保持历史 locate + 随机兜底路径，确保旧调用方默认行为不变。
-     * </p>
-     */
-    private static final SourceAnchorResolver LEGACY_SOURCE_ANCHOR_RESOLVER =
-        OverworldTerrainSampler::findBiomeLocation;
-
     private OverworldTerrainSampler() {
-    }
-
-    /**
-     * 源锚点解析器。
-     * <p>
-     * 通过该接口可将 biome 搜索策略从 materializer 中拆分出来。
-     * </p>
-     */
-    @FunctionalInterface
-    public interface SourceAnchorResolver {
-
-        /**
-         * 解析采样源锚点。
-         *
-         * @param overworldLevel 主世界
-         * @param targetBiome 目标 biome
-         * @param searchOrigin 搜索原点
-         * @param random 随机源
-         * @return 命中时返回锚点，未命中返回 null
-         */
-        @Nullable
-        BlockPos resolve(
-            ServerLevel overworldLevel,
-            Holder<Biome> targetBiome,
-            BlockPos searchOrigin,
-            RandomSource random
-        );
     }
 
     /**
@@ -163,17 +116,14 @@ public final class OverworldTerrainSampler {
         @Nullable BlockPos explicitSourceAnchor,
         RandomSource random
     ) {
-        return resolveSourceAndMaterialize(
+        return sampleAndPlace(
             overworldLevel,
             apertureLevel,
             targetAnchor,
             targetBiome,
             explicitSourceAnchor,
-            new SourceSearchRequest(
-                overworldLevel.getSharedSpawnPos(),
-                random,
-                LEGACY_SOURCE_ANCHOR_RESOLVER
-            )
+            overworldLevel.getSharedSpawnPos(),
+            random
         );
     }
 
@@ -204,19 +154,21 @@ public final class OverworldTerrainSampler {
             targetAnchor,
             targetBiome,
             explicitSourceAnchor,
-            new SourceSearchRequest(searchOrigin, random, LEGACY_SOURCE_ANCHOR_RESOLVER)
+            new BiomeSearchAdapter(searchOrigin, random, LEGACY_BIOME_SEARCH_SERVICE)
         );
     }
 
     /**
-     * 从主世界采样地形并放置到仙窍目标锚点（可注入搜索请求）。
+     * 从主世界采样地形并放置到仙窍目标锚点（可注入 biome 搜索策略版）。
      *
      * @param overworldLevel 主世界服务端世界
      * @param apertureLevel 仙窍目标服务端世界
      * @param targetAnchor 目标放置锚点（对应采样盒子最小角）
      * @param targetBiome 目标 biome（用于 locate 搜索源点）
-     * @param explicitSourceAnchor 显式源锚点；为 null 时启用搜索请求
-     * @param searchRequest 源点搜索请求
+     * @param explicitSourceAnchor 显式源锚点；为 null 时启用 locate 搜索
+     * @param searchOrigin locate 搜索起点（主世界坐标）
+     * @param random 随机源
+     * @param biomeSearchService biome 搜索服务（仅负责“找源锚点”，不参与方块 materialize）
      * @return 成功返回 true；找不到可用源点或坐标越界时返回 false
      */
     public static boolean sampleAndPlace(
@@ -225,94 +177,22 @@ public final class OverworldTerrainSampler {
         BlockPos targetAnchor,
         Holder<Biome> targetBiome,
         @Nullable BlockPos explicitSourceAnchor,
-        SourceSearchRequest searchRequest
+        BiomeSearchAdapter biomeSearchAdapter
     ) {
-        return resolveSourceAndMaterialize(
-            overworldLevel,
-            apertureLevel,
-            targetAnchor,
-            targetBiome,
-            explicitSourceAnchor,
-            searchRequest
-        );
-    }
-
-    /**
-     * 解析源锚点后执行地形复制。
-     *
-     * @param overworldLevel 主世界服务端世界
-     * @param apertureLevel 仙窍目标服务端世界
-     * @param targetAnchor 目标放置锚点（对应采样盒子最小角）
-     * @param targetBiome 目标 biome（用于 locate 搜索源点）
-     * @param explicitSourceAnchor 显式源锚点；为 null 时启用搜索策略
-     * @param searchContext 搜索上下文（包含原点、随机源与解析器）
-     * @return 成功返回 true；找不到可用源点或坐标越界时返回 false
-     */
-    private static boolean resolveSourceAndMaterialize(
-        ServerLevel overworldLevel,
-        ServerLevel apertureLevel,
-        BlockPos targetAnchor,
-        Holder<Biome> targetBiome,
-        @Nullable BlockPos explicitSourceAnchor,
-        SourceSearchRequest searchRequest
-    ) {
-        Objects.requireNonNull(searchRequest, "searchRequest");
         @Nullable BlockPos sourceAnchor = explicitSourceAnchor;
         if (sourceAnchor == null) {
-            sourceAnchor = searchRequest.sourceAnchorResolver().resolve(
-                overworldLevel,
-                targetBiome,
-                searchRequest.searchOrigin(),
-                searchRequest.random()
-            );
+            sourceAnchor = findBiomeLocation(overworldLevel, targetBiome, biomeSearchAdapter);
         }
+
         if (sourceAnchor == null) {
             return false;
         }
-        return materializeFromSourceAnchor(
-            overworldLevel,
-            apertureLevel,
-            targetAnchor,
-            sourceAnchor,
-            explicitSourceAnchor != null
-        );
-    }
 
-    public record SourceSearchRequest(
-        BlockPos searchOrigin,
-        RandomSource random,
-        SourceAnchorResolver sourceAnchorResolver
-    ) {
-
-        public SourceSearchRequest {
-            Objects.requireNonNull(searchOrigin, "searchOrigin");
-            Objects.requireNonNull(random, "random");
-            Objects.requireNonNull(sourceAnchorResolver, "sourceAnchorResolver");
-        }
-    }
-
-    /**
-     * 仅执行地形复制与放置，不包含 biome 搜索流程。
-     *
-     * @param overworldLevel 主世界
-     * @param apertureLevel 仙窍维度
-     * @param targetAnchor 目标放置锚点
-     * @param sourceAnchor 采样源锚点
-     * @param explicitSourceMode 是否处于显式源锚点模式
-     * @return 成功返回 true，失败返回 false
-     */
-    private static boolean materializeFromSourceAnchor(
-        ServerLevel overworldLevel,
-        ServerLevel apertureLevel,
-        BlockPos targetAnchor,
-        BlockPos sourceAnchor,
-        boolean explicitSourceMode
-    ) {
         int alignedSourceMinX = alignToChunkMin(sourceAnchor.getX());
         int alignedSourceMinZ = alignToChunkMin(sourceAnchor.getZ());
         int sourceMinY;
         int sourceMaxY;
-        if (explicitSourceMode) {
+        if (explicitSourceAnchor != null) {
             // 显式源锚点模式：保持底层锚点与固定窗口高度，避免动态修正导致底层替换不稳定。
             sourceMinY = Math.max(overworldLevel.getMinBuildHeight(), sourceAnchor.getY());
             sourceMaxY = Math.min(overworldLevel.getMaxBuildHeight() - 1, sourceMinY + FIXED_SAMPLE_HEIGHT - 1);
@@ -476,58 +356,83 @@ public final class OverworldTerrainSampler {
     private static BlockPos findBiomeLocation(
         ServerLevel overworldLevel,
         Holder<Biome> targetBiome,
-        BlockPos searchOrigin,
-        RandomSource random
+        BiomeSearchAdapter biomeSearchAdapter
     ) {
-        @Nullable AnchorCandidate bestCandidate = null;
-        Pair<BlockPos, Holder<Biome>> located = overworldLevel.findClosestBiome3d(
-            biomeHolder -> isSameBiome(biomeHolder, targetBiome),
-            searchOrigin,
-            LOCATE_SEARCH_RADIUS,
-            LOCATE_HORIZONTAL_STEP,
-            LOCATE_VERTICAL_STEP
-        );
-        if (located != null) {
-            BlockPos locateAnchor = normalizeLocatedAnchor(overworldLevel, located.getFirst());
-            AnchorCandidate locateCandidate = evaluateAnchorCandidate(
-                overworldLevel,
-                locateAnchor.getX(),
-                locateAnchor.getZ()
-            );
-            if (locateCandidate.quality().strictPass()) {
-                return locateAnchor;
-            }
-            bestCandidate = locateCandidate;
-        }
-
-        int originChunkX = Math.floorDiv(searchOrigin.getX(), CHUNK_SIZE);
-        int originChunkZ = Math.floorDiv(searchOrigin.getZ(), CHUNK_SIZE);
-        for (int attempt = 0; attempt < MAX_BIOME_ATTEMPTS; attempt++) {
-            int randomChunkX = originChunkX + random.nextIntBetweenInclusive(
-                -RANDOM_FALLBACK_CHUNK_RANGE,
-                RANDOM_FALLBACK_CHUNK_RANGE
-            );
-            int randomChunkZ = originChunkZ + random.nextIntBetweenInclusive(
-                -RANDOM_FALLBACK_CHUNK_RANGE,
-                RANDOM_FALLBACK_CHUNK_RANGE
-            );
-            int chunkMinX = randomChunkX * CHUNK_SIZE;
-            int chunkMinZ = randomChunkZ * CHUNK_SIZE;
-            int centerX = chunkMinX + CHUNK_SIZE / 2;
-            int centerZ = chunkMinZ + CHUNK_SIZE / 2;
-            int centerY = overworldLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centerX, centerZ) - 1;
-            BlockPos centerPos = new BlockPos(centerX, centerY, centerZ);
-
-            Holder<Biome> centerBiome = overworldLevel.getBiome(centerPos);
-            if (isSameBiome(centerBiome, targetBiome)) {
-                AnchorCandidate fallbackCandidate = evaluateAnchorCandidate(overworldLevel, chunkMinX, chunkMinZ);
-                if (fallbackCandidate.quality().strictPass()) {
-                    return fallbackCandidate.anchor();
+        BlockPos searchOrigin = biomeSearchAdapter.searchOrigin();
+        RandomSource random = biomeSearchAdapter.random();
+        BiomeSearchService<Holder<Biome>> biomeSearchService = biomeSearchAdapter.biomeSearchService();
+        BiomeSearchService.AnchorCandidate located = biomeSearchService.search(
+            targetBiome,
+            new BiomeSearchService.SearchRequest(searchOrigin.getX(), searchOrigin.getZ()),
+            random::nextIntBetweenInclusive,
+            new BiomeSearchService.SearchContext<>() {
+                @Override
+                public BiomeSearchService.AnchorCandidate locateClosest(
+                    Holder<Biome> expectedBiome,
+                    BiomeSearchService.SearchRequest request,
+                    BiomeSearchService.SearchPolicy policy
+                ) {
+                    Pair<BlockPos, Holder<Biome>> located = overworldLevel.findClosestBiome3d(
+                        biomeHolder -> isSameBiome(biomeHolder, expectedBiome),
+                        new BlockPos(request.originBlockX(), searchOrigin.getY(), request.originBlockZ()),
+                        policy.locateSearchRadiusBlocks(),
+                        policy.locateHorizontalStepBlocks(),
+                        policy.locateVerticalStepBlocks()
+                    );
+                    if (located == null) {
+                        return null;
+                    }
+                    BlockPos locateAnchor = normalizeLocatedAnchor(overworldLevel, located.getFirst());
+                    AnchorCandidate evaluated = evaluateAnchorCandidate(
+                        overworldLevel,
+                        locateAnchor.getX(),
+                        locateAnchor.getZ()
+                    );
+                    return new BiomeSearchService.AnchorCandidate(
+                        new BiomeSearchService.ChunkAnchor(
+                            evaluated.anchor().getX(),
+                            evaluated.anchor().getZ(),
+                            evaluated.anchor().getY()
+                        ),
+                        new BiomeSearchService.AnchorQuality(
+                            evaluated.quality().strictPass(),
+                            evaluated.quality().score()
+                        )
+                    );
                 }
-                bestCandidate = selectBetterCandidate(bestCandidate, fallbackCandidate);
+
+                @Override
+                public boolean chunkCenterMatchesBiome(int chunkMinX, int chunkMinZ, Holder<Biome> expectedBiome) {
+                    int centerX = chunkMinX + CHUNK_SIZE / 2;
+                    int centerZ = chunkMinZ + CHUNK_SIZE / 2;
+                    int centerY =
+                        overworldLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centerX, centerZ) - 1;
+                    BlockPos centerPos = new BlockPos(centerX, centerY, centerZ);
+                    Holder<Biome> centerBiome = overworldLevel.getBiome(centerPos);
+                    return isSameBiome(centerBiome, expectedBiome);
+                }
+
+                @Override
+                public BiomeSearchService.AnchorCandidate evaluateChunk(int chunkMinX, int chunkMinZ) {
+                    AnchorCandidate evaluated = evaluateAnchorCandidate(overworldLevel, chunkMinX, chunkMinZ);
+                    return new BiomeSearchService.AnchorCandidate(
+                        new BiomeSearchService.ChunkAnchor(
+                            evaluated.anchor().getX(),
+                            evaluated.anchor().getZ(),
+                            evaluated.anchor().getY()
+                        ),
+                        new BiomeSearchService.AnchorQuality(
+                            evaluated.quality().strictPass(),
+                            evaluated.quality().score()
+                        )
+                    );
+                }
             }
+        );
+        if (located == null) {
+            return null;
         }
-        return bestCandidate == null ? null : bestCandidate.anchor();
+        return new BlockPos(located.anchor().chunkMinX(), located.anchor().anchorY(), located.anchor().chunkMinZ());
     }
 
     /**
@@ -590,20 +495,6 @@ public final class OverworldTerrainSampler {
         int centerZ = chunkMinZ + CHUNK_SIZE / 2;
         int centerY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centerX, centerZ) - 1;
         return new AnchorCandidate(new BlockPos(chunkMinX, centerY, chunkMinZ), quality);
-    }
-
-    /**
-     * 选出质量更高的候选锚点。
-     *
-     * @param current 当前最佳候选
-     * @param incoming 新候选
-     * @return 质量更高者
-     */
-    private static AnchorCandidate selectBetterCandidate(@Nullable AnchorCandidate current, AnchorCandidate incoming) {
-        if (current == null) {
-            return incoming;
-        }
-        return incoming.quality().score() > current.quality().score() ? incoming : current;
     }
 
     /**
@@ -736,6 +627,19 @@ public final class OverworldTerrainSampler {
             return leftKey.get().equals(rightKey.get());
         }
         return left.value().equals(right.value());
+    }
+
+    public record BiomeSearchAdapter(
+        BlockPos searchOrigin,
+        RandomSource random,
+        BiomeSearchService<Holder<Biome>> biomeSearchService
+    ) {
+
+        public BiomeSearchAdapter {
+            searchOrigin = Objects.requireNonNull(searchOrigin, "searchOrigin");
+            random = Objects.requireNonNull(random, "random");
+            biomeSearchService = Objects.requireNonNull(biomeSearchService, "biomeSearchService");
+        }
     }
 
     private record AnchorQuality(boolean strictPass, double score) {
