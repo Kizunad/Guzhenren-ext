@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 /**
  * 混沌侵蚀边界保护处理器。
  * <p>
- * 每秒检查一次仙窍维度内玩家位置，并根据统一运行时分区模型执行告警或致命侵蚀。
+ * 每秒检查一次仙窍维度内玩家位置，若超出仙窍边界（min/max chunk 闭区间）加缓冲区则施加高额混沌侵蚀伤害。
  * </p>
  */
 @EventBusSubscriber(modid = GuzhenrenExt.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -77,12 +77,19 @@ public final class ChaosErosionHandler {
             return;
         }
 
-        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveZone(apertureInfo, player.blockPosition());
-        if (zoneModel.isPlayableZone() || zoneModel.isSafeZone()) {
-            return;
-        }
+        ChaosZoneModel zoneModel = ApertureRuntimeBoundaryService.resolveModel(
+            apertureInfo.minChunkX(),
+            apertureInfo.maxChunkX(),
+            apertureInfo.minChunkZ(),
+            apertureInfo.maxChunkZ(),
+            ApertureRuntimeBoundaryService.DEFAULT_ZONE_CONFIG
+        );
+        ChaosZoneModel.ChaosBand chaosBand = zoneModel.resolveChaosBand(
+            player.blockPosition().getX(),
+            player.blockPosition().getZ()
+        );
 
-        if (zoneModel.isWarningBand()) {
+        if (chaosBand == ChaosZoneModel.ChaosBand.WARNING) {
             player.displayClientMessage(
                 Component.translatable("warning.guzhenrenext.chaos_erosion_approaching"),
                 true
@@ -91,8 +98,10 @@ public final class ChaosErosionHandler {
             return;
         }
 
-        if (zoneModel.isLethalChaosBand()) {
-            player.hurt(level.damageSources().source(GuzhenrenExtDamageTypes.CHAOS_EROSION), CHAOS_DAMAGE);
+        if (chaosBand != ChaosZoneModel.ChaosBand.LETHAL) {
+            return;
         }
+
+        player.hurt(level.damageSources().source(GuzhenrenExtDamageTypes.CHAOS_EROSION), CHAOS_DAMAGE);
     }
 }
