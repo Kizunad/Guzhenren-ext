@@ -1,11 +1,9 @@
 package com.Kizunad.guzhenrenext.xianqiao.block;
 
-import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.AscensionAttemptState;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInitializationState;
-import com.Kizunad.guzhenrenext.xianqiao.opening.OpeningProfileResolver;
-import com.Kizunad.guzhenrenext.xianqiao.opening.ResolvedOpeningProfile;
 import com.Kizunad.guzhenrenext.xianqiao.resource.XianqiaoBlockEntities;
 import java.util.Map;
 import java.util.UUID;
@@ -15,7 +13,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -75,7 +72,7 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
 
     private static final int MENU_DATA_INIT_PHASE = 10;
 
-    private static final int MENU_DATA_SUGGESTED_STAGE = 11;
+    private static final int MENU_DATA_ATTEMPT_STAGE = 11;
 
     private static final int MENU_DATA_HEAVEN_QI_SCORE = 12;
 
@@ -151,7 +148,7 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
                 case MENU_DATA_TIER -> apertureInfo == null ? 0 : apertureInfo.tier();
                 case MENU_DATA_FROZEN -> apertureInfo != null && apertureInfo.isFrozen() ? 1 : 0;
                 case MENU_DATA_INIT_PHASE -> projectionState == null ? 0 : projectionState.initPhaseOrdinal();
-                case MENU_DATA_SUGGESTED_STAGE -> projectionState == null ? 0 : projectionState.suggestedStageOrdinal();
+                case MENU_DATA_ATTEMPT_STAGE -> projectionState == null ? 0 : projectionState.attemptStageOrdinal();
                 case MENU_DATA_HEAVEN_QI_SCORE ->
                     projectionState == null ? 0 : projectionState.heavenQiScorePercent();
                 case MENU_DATA_HUMAN_QI_SCORE ->
@@ -251,81 +248,47 @@ public class ApertureCoreBlockEntity extends BlockEntity implements MenuProvider
         }
         ApertureWorldData worldData = ApertureWorldData.get(serverLevel);
         ApertureInitializationState initializationState = worldData.getInitializationState(owner);
-        ResolvedOpeningProfile profile = resolveOpeningProfile(worldData, owner);
-        return toProjectionState(initializationState, profile);
-    }
-
-    @Nullable
-    private ResolvedOpeningProfile resolveOpeningProfile(ApertureWorldData worldData, UUID owner) {
-        ApertureInitializationState initializationState = worldData.getInitializationState(owner);
-        if (initializationState.openingSnapshot() != null) {
-            return new OpeningProfileResolver().resolveFromSnapshot(initializationState.openingSnapshot());
-        }
-        if (level instanceof ServerLevel serverLevel) {
-            ServerPlayer ownerPlayer = serverLevel.getServer().getPlayerList().getPlayer(owner);
-            if (ownerPlayer != null) {
-                return new OpeningProfileResolver().resolveFromPlayer(ownerPlayer, false);
-            }
-        }
-        return null;
+        AscensionAttemptState attemptState = worldData.getAscensionAttemptState(owner);
+        return toProjectionState(initializationState, attemptState);
     }
 
     private static ProjectionState toProjectionState(
         ApertureInitializationState initializationState,
-        @Nullable ResolvedOpeningProfile profile
+        AscensionAttemptState attemptState
     ) {
-        if (profile == null) {
-            return new ProjectionState(
-                initializationState.initPhase().ordinal(),
-                AscensionAttemptStage.CULTIVATION_PROGRESS.ordinal(),
-                0,
-                0,
-                0,
-                0,
-                0
-            );
-        }
         int flags = 0;
-        if (profile.threeQiEvaluation().fiveTurnPeak()) {
+        if (attemptState.fiveTurnPeak()) {
             flags |= FLAG_FIVE_TURN_PEAK;
         }
-        if (profile.threeQiEvaluation().readyToConfirm()) {
+        if (attemptState.readyToConfirm()) {
             flags |= FLAG_READY_TO_CONFIRM;
         }
-        if (profile.threeQiEvaluation().confirmedThresholdMet()) {
+        if (attemptState.confirmedThresholdMet()) {
             flags |= FLAG_CONFIRMED_THRESHOLD;
         }
-        if (profile.threeQiEvaluation().canEnterConfirmed()) {
+        if (attemptState.canEnterConfirmed()) {
             flags |= FLAG_CAN_ENTER_CONFIRMED;
         }
-        if (initializationState.openingSnapshot() != null) {
+        if (attemptState.snapshotFrozen()) {
             flags |= FLAG_SNAPSHOT_FROZEN;
-            if (initializationState.openingSnapshot().playerInitiated()) {
+            if (attemptState.frozenSnapshotPlayerInitiated()) {
                 flags |= FLAG_FROZEN_SNAPSHOT_PLAYER_INITIATED;
             }
         }
         return new ProjectionState(
             initializationState.initPhase().ordinal(),
-            profile.suggestedStage().ordinal(),
-            clampPercent(profile.threeQiEvaluation().heavenScore()),
-            clampPercent(profile.threeQiEvaluation().humanScore()),
-            clampPercent(profile.threeQiEvaluation().earthScore()),
-            clampPercent(profile.threeQiEvaluation().balanceScore()),
+            attemptState.stage().ordinal(),
+            attemptState.heavenQiScorePercent(),
+            attemptState.humanQiScorePercent(),
+            attemptState.earthQiScorePercent(),
+            attemptState.balanceScorePercent(),
             flags
         );
     }
 
-    private static int clampPercent(double value) {
-        int rounded = (int) Math.round(value);
-        if (rounded < 0) {
-            return 0;
-        }
-        return Math.min(SCALE_HUNDRED, rounded);
-    }
-
     private record ProjectionState(
         int initPhaseOrdinal,
-        int suggestedStageOrdinal,
+        int attemptStageOrdinal,
         int heavenQiScorePercent,
         int humanQiScorePercent,
         int earthQiScorePercent,

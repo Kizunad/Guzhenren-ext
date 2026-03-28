@@ -85,6 +85,18 @@ public final class Label extends UIElement {
     }
 
     /**
+     * 设置标签文本（字符串重载，与 setText(String) 等价）。
+     * <p>
+     * 该方法用于兼容某些调用方期望的命名风格。
+     * </p>
+     *
+     * @param text 新的文本内容（如果为 null 则使用空字符串）
+     */
+    public void setBodyText(final String text) {
+        setText(text);
+    }
+
+    /**
      * 设置文本颜色。
      *
      * @param color 新的文本颜色（ARGB 格式）

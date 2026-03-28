@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ApertureWorldDataMigrationTests {
 
-    private static final int CURRENT_SCHEMA_VERSION = 1;
+    private static final int CURRENT_SCHEMA_VERSION = 2;
 
     private static final int TAG_COMPOUND = 10;
 
@@ -54,6 +54,21 @@ final class ApertureWorldDataMigrationTests {
     private static final String KEY_LAYOUT_VERSION = "layoutVersion";
 
     private static final String KEY_PLAN_SEED = "planSeed";
+
+    private static final String KEY_ATTEMPT_STATE = "attemptState";
+
+    private static final String KEY_ATTEMPT_STAGE = "attemptStage";
+
+    private static final String KEY_ATTEMPT_FAILURE_PENALTY_APPLIED = "attemptFailurePenaltyApplied";
+
+    private static final String KEY_ATTEMPT_FAILURE_PENALTY_APPLICATION_COUNT =
+        "attemptFailurePenaltyApplicationCount";
+
+    private static final String KEY_ATTEMPT_INTERNAL_RECOVERY_COMPLETED =
+        "attemptInternalRecoveryCompleted";
+
+    private static final String KEY_ATTEMPT_EXTERNAL_RISK_RECOVERY_COMPLETED =
+        "attemptExternalRiskRecoveryCompleted";
 
     private static final String KEY_CENTER_X = "centerX";
 
@@ -107,6 +122,11 @@ final class ApertureWorldDataMigrationTests {
 
         Object initStateTag = NBT.findInitStateTag(migratedRoot, owner);
         assertEquals("COMPLETED", NBT.getString(initStateTag, KEY_INIT_PHASE));
+        assertTrue(NBT.contains(initStateTag, KEY_ATTEMPT_STATE));
+        assertEquals(
+            "CULTIVATION_PROGRESS",
+            NBT.getString(NBT.getCompound(initStateTag, KEY_ATTEMPT_STATE), KEY_ATTEMPT_STAGE)
+        );
         assertFalse(NBT.contains(initStateTag, KEY_OPENING_SNAPSHOT));
         assertShapeEquals(legacyShape, NBT.findApertureInfoTag(migratedRoot, owner));
     }
@@ -133,6 +153,11 @@ final class ApertureWorldDataMigrationTests {
 
         Object initStateTag = NBT.findInitStateTag(migratedRoot, owner);
         assertEquals("UNINITIALIZED", NBT.getString(initStateTag, KEY_INIT_PHASE));
+        assertTrue(NBT.contains(initStateTag, KEY_ATTEMPT_STATE));
+        assertEquals(
+            "CULTIVATION_PROGRESS",
+            NBT.getString(NBT.getCompound(initStateTag, KEY_ATTEMPT_STATE), KEY_ATTEMPT_STAGE)
+        );
         assertFalse(NBT.contains(initStateTag, KEY_LAYOUT_VERSION));
         assertFalse(NBT.contains(initStateTag, KEY_PLAN_SEED));
         assertShapeEquals(legacyShape, NBT.findApertureInfoTag(migratedRoot, owner));
@@ -261,6 +286,90 @@ final class ApertureWorldDataMigrationTests {
         assertEquals(snapshot.daoMarkCoverageState(), restoredSnapshot.daoMarkCoverageState());
         assertEquals(snapshot.aptitudeResourceState(), restoredSnapshot.aptitudeResourceState());
         assertEquals(snapshot.playerInitiated(), restoredSnapshot.playerInitiated());
+    }
+
+    @Test
+    void migratedShapeAndPhaseRemainStableAcrossRepeatedSaveLoadCycles() throws Exception {
+        UUID initializedOwner = UUID.fromString("00000000-0000-0000-0000-000000000501");
+        UUID uninitializedOwner = UUID.fromString("00000000-0000-0000-0000-000000000502");
+
+        ApertureShape initializedShape = new ApertureShape(224, 96, 32, 13, 15, 1, 3, 1.15F, 7200L, false, 33.0F, 4);
+        ApertureShape uninitializedShape = new ApertureShape(-96, 84, -64, -8, -6, -5, -3, 0.55F, 3600L, true, 22.0F, 2);
+
+        Object legacyRoot = NBT.compound();
+        NBT.putInt(legacyRoot, KEY_NEXT_INDEX, 12);
+        NBT.put(
+            legacyRoot,
+            KEY_APERTURES,
+            NBT.listOf(
+                legacyApertureEntry(initializedOwner, initializedShape),
+                legacyApertureEntry(uninitializedOwner, uninitializedShape)
+            )
+        );
+        NBT.put(legacyRoot, KEY_INITIALIZED_APERTURES, NBT.singleEntryList(ownerEntry(initializedOwner)));
+
+        Object cycleOne = NBT.saveWorldData(NBT.loadWorldData(legacyRoot));
+        Object cycleTwo = NBT.saveWorldData(NBT.loadWorldData(cycleOne));
+
+        assertEquals(2, NBT.listSize(NBT.getList(cycleOne, KEY_APERTURE_INIT_STATES)));
+        assertEquals(2, NBT.listSize(NBT.getList(cycleTwo, KEY_APERTURE_INIT_STATES)));
+        assertEquals(
+            NBT.listSize(NBT.getList(cycleOne, KEY_INITIALIZED_APERTURES)),
+            NBT.listSize(NBT.getList(cycleTwo, KEY_INITIALIZED_APERTURES))
+        );
+
+        assertEquals("COMPLETED", NBT.getString(NBT.findInitStateTag(cycleOne, initializedOwner), KEY_INIT_PHASE));
+        assertEquals("COMPLETED", NBT.getString(NBT.findInitStateTag(cycleTwo, initializedOwner), KEY_INIT_PHASE));
+        assertEquals("UNINITIALIZED", NBT.getString(NBT.findInitStateTag(cycleOne, uninitializedOwner), KEY_INIT_PHASE));
+        assertEquals("UNINITIALIZED", NBT.getString(NBT.findInitStateTag(cycleTwo, uninitializedOwner), KEY_INIT_PHASE));
+        assertEquals(
+            NBT.getString(NBT.getCompound(NBT.findInitStateTag(cycleOne, initializedOwner), KEY_ATTEMPT_STATE), KEY_ATTEMPT_STAGE),
+            NBT.getString(NBT.getCompound(NBT.findInitStateTag(cycleTwo, initializedOwner), KEY_ATTEMPT_STATE), KEY_ATTEMPT_STAGE)
+        );
+        assertEquals(
+            NBT.getString(NBT.getCompound(NBT.findInitStateTag(cycleOne, uninitializedOwner), KEY_ATTEMPT_STATE), KEY_ATTEMPT_STAGE),
+            NBT.getString(NBT.getCompound(NBT.findInitStateTag(cycleTwo, uninitializedOwner), KEY_ATTEMPT_STATE), KEY_ATTEMPT_STAGE)
+        );
+
+        assertShapeEquals(initializedShape, NBT.findApertureInfoTag(cycleOne, initializedOwner));
+        assertShapeEquals(initializedShape, NBT.findApertureInfoTag(cycleTwo, initializedOwner));
+        assertShapeEquals(uninitializedShape, NBT.findApertureInfoTag(cycleOne, uninitializedOwner));
+        assertShapeEquals(uninitializedShape, NBT.findApertureInfoTag(cycleTwo, uninitializedOwner));
+    }
+
+    @Test
+    void failureAftermathRecoveryFieldsRoundTripAcrossSaveLoad() throws Exception {
+        UUID owner = UUID.fromString("00000000-0000-0000-0000-000000000601");
+
+        Object data = NBT.newWorldData();
+        NBT.getOrAllocate(data, owner);
+        NBT.setInitializationState(
+            owner,
+            data,
+            NBT.newInitState("COMPLETED", null, Integer.valueOf(6), Long.valueOf(6006L))
+        );
+
+        Object rootTag = NBT.saveWorldData(data);
+        Object initStateTag = NBT.findInitStateTag(rootTag, owner);
+        Object attemptStateTag = NBT.getCompound(initStateTag, KEY_ATTEMPT_STATE);
+        NBT.putString(attemptStateTag, KEY_ATTEMPT_STAGE, "FAILED_SEVERE_INJURY");
+        NBT.putBoolean(attemptStateTag, KEY_ATTEMPT_FAILURE_PENALTY_APPLIED, true);
+        NBT.putInt(attemptStateTag, KEY_ATTEMPT_FAILURE_PENALTY_APPLICATION_COUNT, 1);
+        NBT.putBoolean(attemptStateTag, KEY_ATTEMPT_INTERNAL_RECOVERY_COMPLETED, true);
+        NBT.putBoolean(attemptStateTag, KEY_ATTEMPT_EXTERNAL_RISK_RECOVERY_COMPLETED, false);
+
+        Object restored = NBT.loadWorldData(rootTag);
+        Object restoredRoot = NBT.saveWorldData(restored);
+        Object restoredAttemptStateTag = NBT.getCompound(
+            NBT.findInitStateTag(restoredRoot, owner),
+            KEY_ATTEMPT_STATE
+        );
+
+        assertEquals("FAILED_SEVERE_INJURY", NBT.getString(restoredAttemptStateTag, KEY_ATTEMPT_STAGE));
+        assertTrue(NBT.getBoolean(restoredAttemptStateTag, KEY_ATTEMPT_FAILURE_PENALTY_APPLIED));
+        assertEquals(1, NBT.getInt(restoredAttemptStateTag, KEY_ATTEMPT_FAILURE_PENALTY_APPLICATION_COUNT));
+        assertTrue(NBT.getBoolean(restoredAttemptStateTag, KEY_ATTEMPT_INTERNAL_RECOVERY_COMPLETED));
+        assertFalse(NBT.getBoolean(restoredAttemptStateTag, KEY_ATTEMPT_EXTERNAL_RISK_RECOVERY_COMPLETED));
     }
 
     private static Object legacyApertureEntry(UUID owner, ApertureShape shape) throws Exception {
@@ -917,6 +1026,10 @@ final class ApertureWorldDataMigrationTests {
             compoundPutFloatMethod.invoke(compoundTag, key, value);
         }
 
+        private void putString(Object compoundTag, String key, String value) throws Exception {
+            compoundTagClass.getMethod("putString", String.class, String.class).invoke(compoundTag, key, value);
+        }
+
         private void putBoolean(Object compoundTag, String key, boolean value) throws Exception {
             compoundPutBooleanMethod.invoke(compoundTag, key, value);
         }
@@ -928,6 +1041,14 @@ final class ApertureWorldDataMigrationTests {
         private Object singleEntryList(Object entry) throws Exception {
             Object listTag = listConstructor.newInstance();
             listAddMethod.invoke(listTag, entry);
+            return listTag;
+        }
+
+        private Object listOf(Object... entries) throws Exception {
+            Object listTag = listConstructor.newInstance();
+            for (Object entry : entries) {
+                listAddMethod.invoke(listTag, entry);
+            }
             return listTag;
         }
 

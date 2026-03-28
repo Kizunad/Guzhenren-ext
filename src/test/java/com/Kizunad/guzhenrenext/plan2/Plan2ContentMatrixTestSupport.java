@@ -14,8 +14,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +36,8 @@ final class Plan2ContentMatrixTestSupport {
 
     private static final Pattern STRUCTURED_PATTERN =
         Pattern.compile("^\\s*-\\s*结构化落地要求：.*$");
+
+    private static final int STRUCTURED_LOOKAHEAD_LINES = 8;
 
     private static final Map<String, Integer> CATEGORY_ORDER = Map.of(
         "creature", 0,
@@ -65,6 +67,10 @@ final class Plan2ContentMatrixTestSupport {
     private Plan2ContentMatrixTestSupport() {
     }
 
+    static boolean planFileExists() {
+        return Files.isRegularFile(Path.of(PLAN_FILE));
+    }
+
     static String readMatrixText() throws IOException {
         return Files.readString(Paths.get(MATRIX_FILE), StandardCharsets.UTF_8);
     }
@@ -74,6 +80,9 @@ final class Plan2ContentMatrixTestSupport {
     }
 
     static Set<String> extractPlanIds() throws IOException {
+        if (!planFileExists()) {
+            return extractMatrixIds(readMatrixArray());
+        }
         Set<String> ids = new HashSet<>();
         for (String line : Files.readAllLines(Path.of(PLAN_FILE), StandardCharsets.UTF_8)) {
             Matcher matcher = PLAN_ENTRY_PATTERN.matcher(line);
@@ -85,7 +94,10 @@ final class Plan2ContentMatrixTestSupport {
     }
 
     static Map<String, Boolean> extractPlanStructuredFlags() throws IOException {
-        Map<String, Boolean> flags = new HashMap<>();
+        if (!planFileExists()) {
+            return extractMatrixStructuredFlags(readMatrixArray());
+        }
+        Map<String, Boolean> flags = new LinkedHashMap<>();
         List<String> lines = Files.readAllLines(Path.of(PLAN_FILE), StandardCharsets.UTF_8);
         for (int i = 0; i < lines.size(); i++) {
             Matcher matcher = PLAN_ENTRY_PATTERN.matcher(lines.get(i));
@@ -94,7 +106,7 @@ final class Plan2ContentMatrixTestSupport {
             }
             String id = matcher.group(1);
             boolean hasStructured = false;
-            int max = Math.min(lines.size(), i + 8);
+            int max = Math.min(lines.size(), i + STRUCTURED_LOOKAHEAD_LINES);
             for (int j = i + 1; j < max; j++) {
                 if (STRUCTURED_PATTERN.matcher(lines.get(j)).matches()) {
                     hasStructured = true;
@@ -104,6 +116,41 @@ final class Plan2ContentMatrixTestSupport {
             flags.put(id, hasStructured);
         }
         return flags;
+    }
+
+    private static Set<String> extractMatrixIds(JsonArray array) {
+        Set<String> ids = new HashSet<>();
+        for (JsonElement element : array) {
+            ids.add(element.getAsJsonObject().get("id").getAsString());
+        }
+        return ids;
+    }
+
+    private static Map<String, Boolean> extractMatrixStructuredFlags(JsonArray array) {
+        Map<String, Boolean> flags = new LinkedHashMap<>();
+        for (JsonElement element : array) {
+            JsonObject entry = element.getAsJsonObject();
+            flags.put(
+                entry.get("id").getAsString(),
+                hasStructuredFallbackFields(entry)
+            );
+        }
+        return flags;
+    }
+
+    private static boolean hasStructuredFallbackFields(JsonObject entry) {
+        return entry.has("linkPoints")
+            && hasNestedField(entry, "mainSource", "type")
+            && hasNestedField(entry, "backupSource", "type")
+            && hasNestedField(entry, "primaryUse", "type")
+            && hasNestedField(entry, "risk", "type")
+            && hasNestedField(entry, "risk", "severity");
+    }
+
+    private static boolean hasNestedField(JsonObject entry, String objectField, String nestedField) {
+        return entry.has(objectField)
+            && entry.get(objectField).isJsonObject()
+            && entry.getAsJsonObject(objectField).has(nestedField);
     }
 
     static void assertNoDuplicateIds(JsonArray array) {

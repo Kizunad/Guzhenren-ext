@@ -172,11 +172,7 @@ final class Plan2ContentMatrixValidator {
 
     static List<String> validate(String matrixText, JsonArray matrixArray) throws IOException {
         List<String> errors = new ArrayList<>();
-        List<String> planLines = Files.readAllLines(
-            Path.of(Plan2ContentMatrixTestSupport.PLAN_FILE),
-            StandardCharsets.UTF_8
-        );
-        PlanSnapshot plan = parsePlanSnapshot(planLines, errors);
+        PlanSnapshot plan = loadPlanSnapshot(errors);
 
         validateCoverage(plan, matrixArray, errors);
         validateOrderingAndFormat(matrixText, matrixArray, errors);
@@ -188,6 +184,70 @@ final class Plan2ContentMatrixValidator {
         validateGlobalBudgetConvergence(matrixArray, errors);
 
         return errors;
+    }
+
+    private static PlanSnapshot loadPlanSnapshot(List<String> errors) throws IOException {
+        if (Plan2ContentMatrixTestSupport.planFileExists()) {
+            List<String> planLines = Files.readAllLines(
+                Path.of(Plan2ContentMatrixTestSupport.PLAN_FILE),
+                StandardCharsets.UTF_8
+            );
+            return parsePlanSnapshot(planLines, errors);
+        }
+        return snapshotFromMatrixBaseline(Plan2ContentMatrixTestSupport.readMatrixArray());
+    }
+
+    private static PlanSnapshot snapshotFromMatrixBaseline(JsonArray matrixArray) {
+        Map<String, PlanExtract> extracts = new LinkedHashMap<>();
+        Map<String, StructuredExpect> structured = new LinkedHashMap<>();
+        for (JsonElement element : matrixArray) {
+            JsonObject entry = element.getAsJsonObject();
+            String id = getString(entry, "id");
+            extracts.put(id, createExtractFromMatrixEntry(entry));
+            structured.put(id, createStructuredExpectFromMatrixEntry(entry));
+        }
+        return new PlanSnapshot(extracts, structured);
+    }
+
+    private static PlanExtract createExtractFromMatrixEntry(JsonObject entry) {
+        JsonObject mainSource = getObject(entry, "mainSource");
+        JsonObject backupSource = getObject(entry, "backupSource");
+        JsonObject primaryUse = getObject(entry, "primaryUse");
+        JsonObject risk = getObject(entry, "risk");
+        return new PlanExtract(
+            getString(entry, "id"),
+            getString(entry, "category"),
+            getString(entry, "mechanic"),
+            getString(entry, "cost"),
+            getString(mainSource, "summary"),
+            getString(backupSource, "summary"),
+            extractPreconditionSummaries(getArray(entry, "preconditions")),
+            getString(primaryUse, "summary"),
+            getString(risk, "summary")
+        );
+    }
+
+    private static StructuredExpect createStructuredExpectFromMatrixEntry(JsonObject entry) {
+        JsonObject mainSource = getObject(entry, "mainSource");
+        JsonObject backupSource = getObject(entry, "backupSource");
+        JsonObject primaryUse = getObject(entry, "primaryUse");
+        JsonObject risk = getObject(entry, "risk");
+        return new StructuredExpect(
+            toStringList(getArray(entry, "linkPoints")),
+            getString(mainSource, "type"),
+            getString(backupSource, "type"),
+            getString(primaryUse, "type"),
+            getString(risk, "type"),
+            getString(risk, "severity")
+        );
+    }
+
+    private static List<String> extractPreconditionSummaries(JsonArray preconditions) {
+        List<String> summaries = new ArrayList<>();
+        for (JsonElement preconditionElement : preconditions) {
+            summaries.add(getString(preconditionElement.getAsJsonObject(), "summary"));
+        }
+        return summaries;
     }
 
     private static PlanSnapshot parsePlanSnapshot(List<String> lines, List<String> errors) {

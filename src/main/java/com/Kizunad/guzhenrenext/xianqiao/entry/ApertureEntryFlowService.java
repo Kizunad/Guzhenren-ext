@@ -4,6 +4,7 @@ import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptEntr
 import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptServiceContract;
 import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.AscensionAttemptState;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ReturnPosition;
 import com.Kizunad.guzhenrenext.xianqiao.opening.ResolvedOpeningProfile;
@@ -31,15 +32,22 @@ public final class ApertureEntryFlowService {
         String servicePathId = AscensionAttemptServiceContract.resolveTransactionService(entryChannel);
         ServerLevel apertureLevel = player.server.getLevel(entryHooks.apertureDimension());
         if (apertureLevel == null) {
-            return EntryResult.failure(Component.literal("仙窍天地尚未显化。"), servicePathId);
-        }
-
-        ResolvedOpeningProfile attemptProfile = entryHooks.resolveAttemptProfile(player, true);
-        if (!attemptProfile.threeQiEvaluation().canEnterConfirmed()) {
-            return EntryResult.failure(resolveBlockedMessage(attemptProfile), servicePathId);
+            apertureLevel = player.server.overworld();
+            if (apertureLevel == null) {
+                return EntryResult.failure(Component.literal("仙窍天地尚未显化。"), servicePathId);
+            }
         }
 
         ApertureWorldData worldData = ApertureWorldData.get(apertureLevel);
+        ResolvedOpeningProfile attemptProfile = entryHooks.resolveAttemptProfile(player, true);
+        AscensionAttemptState attemptState = worldData.commitConfirmedAttemptTransaction(
+            player.getUUID(),
+            attemptProfile
+        );
+        if (!attemptState.hasCommittedConfirmationHandoff()) {
+            return EntryResult.failure(resolveBlockedMessage(attemptState), servicePathId);
+        }
+
         UUID owner = player.getUUID();
         ApertureInfo apertureInfo = worldData.getOrAllocate(owner);
         entryHooks.initializeApertureIfNeeded(apertureLevel, worldData, player, apertureInfo);
@@ -71,19 +79,28 @@ public final class ApertureEntryFlowService {
         return EntryResult.success(servicePathId);
     }
 
-    private static Component resolveBlockedMessage(ResolvedOpeningProfile profile) {
-        AscensionAttemptStage suggestedStage = profile.suggestedStage();
-        if (suggestedStage == AscensionAttemptStage.CULTIVATION_PROGRESS) {
+    private static Component resolveBlockedMessage(AscensionAttemptState attemptState) {
+        AscensionAttemptStage stage = attemptState.stage();
+        if (stage == AscensionAttemptStage.CULTIVATION_PROGRESS) {
             return Component.literal("未达五转巅峰，尚不可冲关。");
         }
         if (
-            suggestedStage == AscensionAttemptStage.ASCENSION_PREPARATION_UNLOCKED
-                || suggestedStage == AscensionAttemptStage.QI_OBSERVATION_AND_HARMONIZATION
+            stage == AscensionAttemptStage.ASCENSION_PREPARATION_UNLOCKED
+                || stage == AscensionAttemptStage.QI_OBSERVATION_AND_HARMONIZATION
         ) {
             return Component.literal("天地人三气尚未圆融，尚不可冲关。");
         }
-        if (suggestedStage == AscensionAttemptStage.READY_TO_CONFIRM) {
+        if (stage == AscensionAttemptStage.READY_TO_CONFIRM) {
             return Component.literal("升仙气机未定，尚不可冲关。");
+        }
+        if (stage == AscensionAttemptStage.FAILED_SEVERE_INJURY || stage == AscensionAttemptStage.FAILED_DEATH) {
+            if (!attemptState.internalRecoveryCompleted()) {
+                return Component.literal("冲关余伤未稳，需先完成内养恢复。");
+            }
+            if (!attemptState.externalRiskRecoveryCompleted()) {
+                return Component.literal("恢复仍缺外部险行一段，尚不可重启冲关。");
+            }
+            return Component.literal("失败余波尚未收尽，请待恢复结算完成。");
         }
         return Component.literal("当前火候未足，尚不可冲关。");
     }

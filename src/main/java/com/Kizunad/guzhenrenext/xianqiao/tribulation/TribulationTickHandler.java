@@ -1,9 +1,13 @@
 package com.Kizunad.guzhenrenext.xianqiao.tribulation;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptServiceContract;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkDiffusionService;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.AscensionAttemptState;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.TribulationRuntimeState;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,7 +43,10 @@ public final class TribulationTickHandler {
     public static void onServerTickPost(ServerTickEvent.Post event) {
         ServerLevel level = event.getServer().getLevel(DaoMarkDiffusionService.APERTURE_DIMENSION);
         if (level == null) {
-            return;
+            level = event.getServer().overworld();
+            if (level == null) {
+                return;
+            }
         }
 
         ApertureWorldData worldData = ApertureWorldData.get(level);
@@ -52,12 +59,29 @@ public final class TribulationTickHandler {
                 continue;
             }
 
+            AscensionAttemptState attemptState = worldData.getAscensionAttemptState(owner);
+            if (!AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(attemptState.stage())) {
+                ACTIVE_MANAGERS.remove(owner);
+                worldData.clearTribulationRuntimeState(owner);
+                continue;
+            }
+
             TribulationManager manager = ACTIVE_MANAGERS.get(owner);
-            if (manager == null && info.nextTribulationTick() <= currentGameTime) {
-                TribulationManager created = new TribulationManager(owner);
-                created.startTribulation();
-                ACTIVE_MANAGERS.put(owner, created);
-                manager = created;
+            if (manager == null) {
+                TribulationRuntimeState runtimeState = worldData.getTribulationRuntimeState(owner);
+                if (runtimeState != null) {
+                    manager = TribulationManager.restoreFromRuntimeState(owner, runtimeState);
+                    ACTIVE_MANAGERS.put(owner, manager);
+                } else if (
+                    attemptState.stage() == AscensionAttemptStage.CONFIRMED
+                        && info.nextTribulationTick() <= currentGameTime
+                ) {
+                    TribulationManager created = new TribulationManager(owner);
+                    created.startTribulation();
+                    ACTIVE_MANAGERS.put(owner, created);
+                    manager = created;
+                    worldData.setTribulationRuntimeState(owner, created.snapshotRuntimeState());
+                }
             }
 
             if (manager == null) {
@@ -67,6 +91,9 @@ public final class TribulationTickHandler {
             manager.tick(level, info);
             if (manager.isFinished()) {
                 ACTIVE_MANAGERS.remove(owner);
+                worldData.clearTribulationRuntimeState(owner);
+            } else {
+                worldData.setTribulationRuntimeState(owner, manager.snapshotRuntimeState());
             }
         }
     }
