@@ -102,10 +102,18 @@ final class FlyingSwordCompactHudLayoutTest {
         final Object experienceBar = api.accessor(resourceBars, "experienceBar");
         assertEquals("耐久", api.stringAccessor(durabilityBar, "label"));
         assertEquals("72/100", api.stringAccessor(durabilityBar, "valueText"));
-        assertEquals(TEST_MAGIC_72_0F / TEST_MAGIC_100, api.floatAccessor(durabilityBar, "fillRatio"), TEST_MAGIC_0_0001F);
+        assertEquals(
+            TEST_MAGIC_72_0F / TEST_MAGIC_100,
+            api.floatAccessor(durabilityBar, "fillRatio"),
+            TEST_MAGIC_0_0001F
+        );
         assertEquals("经验", api.stringAccessor(experienceBar, "label"));
         assertEquals("Lv.42/650", api.stringAccessor(experienceBar, "valueText"));
-        assertEquals(TEST_MAGIC_88_0F / TEST_MAGIC_100, api.floatAccessor(experienceBar, "fillRatio"), TEST_MAGIC_0_0001F);
+        assertEquals(
+            TEST_MAGIC_88_0F / TEST_MAGIC_100,
+            api.floatAccessor(experienceBar, "fillRatio"),
+            TEST_MAGIC_0_0001F
+        );
 
         assertEquals(
             List.of("Z", "X", "C", "V", "G"),

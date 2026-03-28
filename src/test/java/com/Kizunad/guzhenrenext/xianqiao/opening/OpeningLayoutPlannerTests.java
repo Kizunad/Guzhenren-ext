@@ -53,7 +53,8 @@ final class OpeningLayoutPlannerTests {
         InitialTerrainPlan.AnchorPoint expectedOrigin = SEAM_CENTER.offset(-CHUNK_BLOCK_SIZE, 0, -CHUNK_BLOCK_SIZE);
         assertEquals(expectedOrigin, plan.layoutOrigin());
 
-        List<InitialTerrainPlan.AnchorPoint> orderedAnchors = plan.orderedCells().stream().map(InitialTerrainPlan.PlannedCell::anchor)
+        List<InitialTerrainPlan.AnchorPoint> orderedAnchors = plan.orderedCells().stream()
+            .map(InitialTerrainPlan.PlannedCell::anchor)
             .toList();
         List<InitialTerrainPlan.AnchorPoint> expected = List.of(
             expectedOrigin,
@@ -111,7 +112,10 @@ final class OpeningLayoutPlannerTests {
 
         for (InitialTerrainPlan.PlannedCell cell : plan.orderedCells()) {
             assertEquals(plan.orderedCells().getFirst().biomeCandidates().size(), cell.biomeCandidates().size());
-            assertEquals(plan.orderedCells().getFirst().biomeCandidates().getFirst(), cell.biomeCandidates().getFirst());
+            assertEquals(
+                plan.orderedCells().getFirst().biomeCandidates().getFirst(),
+                cell.biomeCandidates().getFirst()
+            );
         }
     }
 

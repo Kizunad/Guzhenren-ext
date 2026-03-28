@@ -8,6 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class GzrMechanismNoteTemplateValidatorTest {
 
+    private static final String SOURCE_PATH_LINE =
+        "        source_path: \"LibSourceCodes/guzhenren/src/main/java/net/guzhenren/procedures/KE1Procedure.java\"\n";
+
+    private static final String SOURCE_LINE_RANGE_LINE = "        source_line_range: \"217-258\"\n";
+
     @Test
     void shouldPassWhenTemplateFieldsAreComplete() throws IOException {
         List<String> errors = GzrMechanismNoteTemplateValidator.validateCurrentTemplate();
@@ -21,8 +26,8 @@ final class GzrMechanismNoteTemplateValidatorTest {
             java.nio.charset.StandardCharsets.UTF_8
         );
         String invalidText = validText
-            .replace("        source_path: \"LibSourceCodes/guzhenren/src/main/java/net/guzhenren/procedures/KE1Procedure.java\"\n", "")
-            .replace("        source_line_range: \"217-258\"\n", "");
+            .replace(SOURCE_PATH_LINE, "")
+            .replace(SOURCE_LINE_RANGE_LINE, "");
 
         List<String> errors = GzrMechanismNoteTemplateValidator.validateTemplateText(invalidText);
         assertContains(errors, "缺少源码引用字段: source_path");

@@ -64,7 +64,12 @@ final class BenmingClientInputWiringTests {
         assertTrue(source.contains("PacketDistributor.sendToServer("));
         assertTrue(source.contains("BenmingClientActionResolver.createPayload(actionRoute)"));
         assertTrue(source.contains("ServerboundBenmingSwordActionPayload"));
-        assertTrue(source.contains("BenmingClientActionResolver.createPayload(\n            BenmingClientActionResolver.resolveActionRoute("));
+        assertTrue(
+            source.contains(
+                "BenmingClientActionResolver.createPayload(\n"
+                    + "            BenmingClientActionResolver.resolveActionRoute("
+            )
+        );
         assertTrue(source.contains("BenmingActionRoute.RITUAL_BIND"));
         assertTrue(source.contains("BenmingActionRoute.SWITCH_RESONANCE"));
         assertTrue(source.contains("BenmingActionRoute.BURST_ATTEMPT"));
