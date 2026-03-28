@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,10 +33,9 @@ final class ApertureWorldDataSchema {
         if (state == null) {
             return ApertureInitializationState.uninitialized();
         }
-        ApertureInitPhase normalizedPhase = Objects.requireNonNullElse(
-            state.initPhase(),
-            ApertureInitPhase.UNINITIALIZED
-        );
+        ApertureInitPhase normalizedPhase = state.initPhase() == null
+            ? ApertureInitPhase.UNINITIALIZED
+            : state.initPhase();
         ApertureOpeningSnapshot normalizedSnapshot = state.openingSnapshot();
         Integer normalizedLayoutVersion = state.layoutVersion();
         Long normalizedPlanSeed = state.planSeed();

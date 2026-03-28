@@ -44,6 +44,7 @@ public final class XianqiaoUiProjection {
     private static final String RISK_QI_HARMONIZING = "三气仍在调和";
     private static final String RISK_WAITING_CONFIRM = "心念尚待一决";
     private static final String RISK_CONFIRMED = "冲关契机已成";
+    private static final String RISK_FAILED_AFTERMATH = "冲关余波未平";
 
     private static final String BLOCKER_INIT_IN_PROGRESS = "仙窍尚在开辟";
     private static final String BLOCKER_FIVE_TURN = "五转巅峰未满足";
@@ -51,6 +52,7 @@ public final class XianqiaoUiProjection {
     private static final String BLOCKER_BALANCE = "三气尚未平衡";
     private static final String BLOCKER_FROZEN_SNAPSHOT = "升仙气机未定";
     private static final String BLOCKER_WAITING_CONFIRM = "尚待心念一定";
+    private static final String BLOCKER_FAILED_RECOVERY = "失败后恢复未完成";
     private static final String BLOCKER_NONE = "无显式阻塞";
 
     private static final String BUTTON_KEEP_CULTIVATING = "继续修炼";
@@ -151,39 +153,47 @@ public final class XianqiaoUiProjection {
     private static StageSemantics resolveStageSemantics(ProjectionInput input) {
         if (input.initPhase() == InitPhase.PLANNED || input.initPhase() == InitPhase.EXECUTING) {
             return new StageSemantics(
-                resolveStageLabel(input.suggestedStage()),
+                resolveStageLabel(input.attemptStage()),
                 RISK_INIT_IN_PROGRESS,
                 BLOCKER_INIT_IN_PROGRESS
             );
         }
+        if (input.attemptStage() == AscensionAttemptStage.FAILED_SEVERE_INJURY
+            || input.attemptStage() == AscensionAttemptStage.FAILED_DEATH) {
+            return new StageSemantics(
+                resolveStageLabel(input.attemptStage()),
+                RISK_FAILED_AFTERMATH,
+                BLOCKER_FAILED_RECOVERY
+            );
+        }
         if (input.canEnterConfirmed()) {
-            return new StageSemantics(resolveStageLabel(input.suggestedStage()), RISK_CONFIRMED, BLOCKER_NONE);
+            return new StageSemantics(resolveStageLabel(input.attemptStage()), RISK_CONFIRMED, BLOCKER_NONE);
         }
         if (input.readyToConfirm()) {
             return new StageSemantics(
-                resolveStageLabel(input.suggestedStage()),
+                resolveStageLabel(input.attemptStage()),
                 RISK_WAITING_CONFIRM,
                 BLOCKER_WAITING_CONFIRM
             );
         }
         if (!input.fiveTurnPeak()) {
-            return new StageSemantics(resolveStageLabel(input.suggestedStage()), RISK_NOT_UNLOCKED, BLOCKER_FIVE_TURN);
+            return new StageSemantics(resolveStageLabel(input.attemptStage()), RISK_NOT_UNLOCKED, BLOCKER_FIVE_TURN);
         }
         if (minimumQiScore(input) < READY_QI_THRESHOLD) {
-            return new StageSemantics(resolveStageLabel(input.suggestedStage()), RISK_QI_HARMONIZING, BLOCKER_THREE_QI);
+            return new StageSemantics(resolveStageLabel(input.attemptStage()), RISK_QI_HARMONIZING, BLOCKER_THREE_QI);
         }
         if (input.balanceScorePercent() < READY_BALANCE_THRESHOLD) {
-            return new StageSemantics(resolveStageLabel(input.suggestedStage()), RISK_QI_HARMONIZING, BLOCKER_BALANCE);
+            return new StageSemantics(resolveStageLabel(input.attemptStage()), RISK_QI_HARMONIZING, BLOCKER_BALANCE);
         }
         if (!input.snapshotFrozen()) {
             return new StageSemantics(
-                resolveStageLabel(input.suggestedStage()),
+                resolveStageLabel(input.attemptStage()),
                 RISK_PREPARATION_OPEN,
                 BLOCKER_FROZEN_SNAPSHOT
             );
         }
         return new StageSemantics(
-            resolveStageLabel(input.suggestedStage()),
+            resolveStageLabel(input.attemptStage()),
             RISK_PREPARATION_OPEN,
             BLOCKER_WAITING_CONFIRM
         );
@@ -234,12 +244,14 @@ public final class XianqiaoUiProjection {
     }
 
     private static boolean isGameplayEntryAvailable(ProjectionInput input) {
-        return input.suggestedStage() != AscensionAttemptStage.CULTIVATION_PROGRESS;
+        return input.attemptStage() != AscensionAttemptStage.CULTIVATION_PROGRESS
+            && input.attemptStage() != AscensionAttemptStage.FAILED_SEVERE_INJURY
+            && input.attemptStage() != AscensionAttemptStage.FAILED_DEATH;
     }
 
     public record ProjectionInput(
         InitPhase initPhase,
-        AscensionAttemptStage suggestedStage,
+        AscensionAttemptStage attemptStage,
         int heavenQiScorePercent,
         int humanQiScorePercent,
         int earthQiScorePercent,
@@ -254,7 +266,7 @@ public final class XianqiaoUiProjection {
 
         public ProjectionInput {
             initPhase = Objects.requireNonNull(initPhase, "initPhase");
-            suggestedStage = Objects.requireNonNull(suggestedStage, "suggestedStage");
+            attemptStage = Objects.requireNonNull(attemptStage, "attemptStage");
             heavenQiScorePercent = clampPercent(heavenQiScorePercent);
             humanQiScorePercent = clampPercent(humanQiScorePercent);
             earthQiScorePercent = clampPercent(earthQiScorePercent);

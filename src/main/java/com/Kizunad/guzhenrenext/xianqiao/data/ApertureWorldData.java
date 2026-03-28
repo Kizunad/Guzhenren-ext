@@ -1,6 +1,12 @@
 package com.Kizunad.guzhenrenext.xianqiao.data;
 
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptServiceContract;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStateContract;
+import com.Kizunad.guzhenrenext.xianqiao.tribulation.TribulationState;
 import com.Kizunad.guzhenrenext.xianqiao.opening.AscensionConditionSnapshot;
+import com.Kizunad.guzhenrenext.xianqiao.opening.OpeningProfileResolver;
+import com.Kizunad.guzhenrenext.xianqiao.opening.ResolvedOpeningProfile;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -51,6 +58,61 @@ public class ApertureWorldData extends SavedData {
 
     private static final String KEY_PLAN_SEED = "planSeed";
 
+    private static final String KEY_ATTEMPT_STATE = "attemptState";
+
+    private static final String KEY_ATTEMPT_STAGE = "attemptStage";
+
+    private static final String KEY_ATTEMPT_HEAVEN_QI_SCORE = "attemptHeavenQiScorePercent";
+
+    private static final String KEY_ATTEMPT_HUMAN_QI_SCORE = "attemptHumanQiScorePercent";
+
+    private static final String KEY_ATTEMPT_EARTH_QI_SCORE = "attemptEarthQiScorePercent";
+
+    private static final String KEY_ATTEMPT_BALANCE_SCORE = "attemptBalanceScorePercent";
+
+    private static final String KEY_ATTEMPT_FIVE_TURN_PEAK = "attemptFiveTurnPeak";
+
+    private static final String KEY_ATTEMPT_READY_TO_CONFIRM = "attemptReadyToConfirm";
+
+    private static final String KEY_ATTEMPT_CONFIRMED_THRESHOLD = "attemptConfirmedThresholdMet";
+
+    private static final String KEY_ATTEMPT_CAN_ENTER_CONFIRMED = "attemptCanEnterConfirmed";
+
+    private static final String KEY_ATTEMPT_SNAPSHOT_FROZEN = "attemptSnapshotFrozen";
+
+    private static final String KEY_ATTEMPT_FROZEN_PLAYER_INITIATED = "attemptFrozenSnapshotPlayerInitiated";
+
+    private static final String KEY_ATTEMPT_FAILURE_PENALTY_APPLIED = "attemptFailurePenaltyApplied";
+
+    private static final String KEY_ATTEMPT_FAILURE_PENALTY_APPLICATION_COUNT =
+        "attemptFailurePenaltyApplicationCount";
+
+    private static final String KEY_ATTEMPT_INTERNAL_RECOVERY_COMPLETED =
+        "attemptInternalRecoveryCompleted";
+
+    private static final String KEY_ATTEMPT_EXTERNAL_RISK_RECOVERY_COMPLETED =
+        "attemptExternalRiskRecoveryCompleted";
+
+    private static final String KEY_TRIBULATION_RUNTIME_STATE = "tribulationRuntimeState";
+
+    private static final String KEY_TRIBULATION_RUNTIME_PHASE = "tribulationRuntimePhase";
+
+    private static final String KEY_TRIBULATION_RUNTIME_TICKS_IN_STATE = "tribulationRuntimeTicksInState";
+
+    private static final String KEY_TRIBULATION_RUNTIME_DAMAGE_ACCUMULATED = "tribulationRuntimeDamageAccumulated";
+
+    private static final String KEY_TRIBULATION_RUNTIME_ENEMIES_SPAWNED = "tribulationRuntimeEnemiesSpawned";
+
+    private static final String KEY_TRIBULATION_RUNTIME_ENEMIES_KILLED = "tribulationRuntimeEnemiesKilled";
+
+    private static final String KEY_TRIBULATION_RUNTIME_STRIKE_CORE_CHARGE = "tribulationRuntimeStrikeCoreCharge";
+
+    private static final String KEY_TRIBULATION_RUNTIME_STRIKE_CORE_OUTPUT_PRODUCED =
+        "tribulationRuntimeStrikeCoreOutputProduced";
+
+    private static final String KEY_TRIBULATION_RUNTIME_STRIKE_METEOR_OUTPUT_PRODUCED =
+        "tribulationRuntimeStrikeMeteorOutputProduced";
+
     private static final String KEY_LAST_LOGOUT_TIMES = "lastLogoutTimes";
 
     private static final String KEY_RETURN_POSITIONS = "returnPositions";
@@ -79,7 +141,7 @@ public class ApertureWorldData extends SavedData {
 
     private static final int DEFAULT_NEXT_INDEX = 1;
 
-    private static final int CURRENT_SCHEMA_VERSION = 1;
+    private static final int CURRENT_SCHEMA_VERSION = 2;
 
     private static final int APERTURE_SPACING = 100000;
 
@@ -109,6 +171,10 @@ public class ApertureWorldData extends SavedData {
 
     private static final long UNRECORDED_LOGOUT_TIME = -1L;
 
+    private static final int ATTEMPT_SCORE_MIN = 0;
+
+    private static final int ATTEMPT_SCORE_MAX = 100;
+
     private int schemaVersion = CURRENT_SCHEMA_VERSION;
 
     private int nextIndex = DEFAULT_NEXT_INDEX;
@@ -123,6 +189,9 @@ public class ApertureWorldData extends SavedData {
 
     private final Map<UUID, ReturnPosition> returnPositions = new HashMap<>();
 
+    /**
+     * 持久化的灾劫活跃真源：表示 owner 已进入灾劫生命周期。
+     */
     /**
      * 分配一个新的仙窍信息；若已有记录，则直接返回既有信息。
      *
@@ -422,9 +491,6 @@ public class ApertureWorldData extends SavedData {
         if (storedState != null) {
             return storedState;
         }
-        if (initializedApertures.contains(owner)) {
-            return ApertureInitializationState.legacyCompleted();
-        }
         return ApertureInitializationState.uninitialized();
     }
 
@@ -435,9 +501,10 @@ public class ApertureWorldData extends SavedData {
         if (state == null) {
             throw new IllegalArgumentException("state 不能为空");
         }
-        ApertureInitializationState previousState = initializationStates.put(owner, state);
-        boolean changed = !state.equals(previousState);
-        if (syncLegacyInitializedProjection(owner, state)) {
+        ApertureInitializationState normalizedState = ApertureInitializationState.normalize(state);
+        ApertureInitializationState previousState = initializationStates.put(owner, normalizedState);
+        boolean changed = !normalizedState.equals(previousState);
+        if (syncLegacyInitializedProjection(owner, normalizedState)) {
             changed = true;
         }
         if (changed) {
@@ -462,6 +529,174 @@ public class ApertureWorldData extends SavedData {
     @Nullable
     public Long getPlanSeed(UUID owner) {
         return getInitializationState(owner).planSeed();
+    }
+
+    public AscensionAttemptState getAscensionAttemptState(UUID owner) {
+        return getInitializationState(owner).attemptState();
+    }
+
+    @Nullable
+    public TribulationRuntimeState getTribulationRuntimeState(UUID owner) {
+        return getInitializationState(owner).tribulationRuntimeState();
+    }
+
+    public void setTribulationRuntimeState(UUID owner, TribulationRuntimeState runtimeState) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        if (runtimeState == null) {
+            throw new IllegalArgumentException("runtimeState 不能为空");
+        }
+        ApertureInitializationState currentState = getInitializationState(owner);
+        AscensionAttemptState attemptState = currentState.attemptState();
+        AscensionAttemptState activeAttemptState = attemptState.stage()
+            == AscensionAttemptStage.WORLD_TRIBULATION_IN_PLACE
+                ? attemptState
+                : attemptState.withStage(AscensionAttemptStage.WORLD_TRIBULATION_IN_PLACE);
+        setInitializationState(
+            owner,
+            currentState
+                .withAttemptState(activeAttemptState)
+                .withTribulationRuntimeState(runtimeState)
+        );
+    }
+
+    public void clearTribulationRuntimeState(UUID owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        ApertureInitializationState currentState = getInitializationState(owner);
+        if (currentState.tribulationRuntimeState() == null) {
+            return;
+        }
+        setInitializationState(owner, currentState.withTribulationRuntimeState(null));
+    }
+
+    public boolean hasActiveTribulationRuntimeState(UUID owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        ApertureInitializationState currentState = getInitializationState(owner);
+        return currentState.tribulationRuntimeState() != null;
+    }
+
+    public AscensionAttemptState markAttemptStage(UUID owner, AscensionAttemptStage stage) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        if (stage == null) {
+            throw new IllegalArgumentException("stage 不能为空");
+        }
+        return updateAttemptState(owner, attemptState -> attemptState.withStage(stage));
+    }
+
+    public AscensionAttemptState recordFailureAftermath(UUID owner, AscensionAttemptStage failureStage) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        if (!AscensionAttemptState.isFailureStage(failureStage)) {
+            throw new IllegalArgumentException("failureStage 必须是失败阶段");
+        }
+        return updateAttemptState(owner, attemptState -> attemptState.recordFailureAftermath(failureStage));
+    }
+
+    public AscensionAttemptState markInternalRecoveryComplete(UUID owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        return updateAttemptState(owner, AscensionAttemptState::markInternalRecoveryComplete);
+    }
+
+    public AscensionAttemptState markFailurePenaltyApplied(UUID owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        return updateAttemptState(owner, AscensionAttemptState::markFailurePenaltyApplied);
+    }
+
+    public AscensionAttemptState markExternalRiskRecoveryComplete(UUID owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        return updateAttemptState(owner, AscensionAttemptState::markExternalRiskRecoveryComplete);
+    }
+
+    public AscensionAttemptState completeRecoveryIfEligible(UUID owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        return updateAttemptState(owner, AscensionAttemptState::completeRecoveryIfEligible);
+    }
+
+    private AscensionAttemptState updateAttemptState(UUID owner, UnaryOperator<AscensionAttemptState> updater) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        if (updater == null) {
+            throw new IllegalArgumentException("updater 不能为空");
+        }
+        ApertureInitializationState currentState = getInitializationState(owner);
+        AscensionAttemptState attemptState = currentState.attemptState();
+        AscensionAttemptState nextAttemptState = Objects.requireNonNull(
+            updater.apply(attemptState),
+            "nextAttemptState"
+        );
+        if (attemptState.equals(nextAttemptState)) {
+            return attemptState;
+        }
+        setInitializationState(owner, currentState.withAttemptState(nextAttemptState));
+        return nextAttemptState;
+    }
+
+    public AscensionAttemptState refreshAscensionAttemptStateFromProfile(UUID owner, ResolvedOpeningProfile profile) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        if (profile == null) {
+            throw new IllegalArgumentException("profile 不能为空");
+        }
+        ApertureInitializationState currentState = getInitializationState(owner);
+        AscensionAttemptState persistedAttemptState = currentState.attemptState();
+        if (persistedAttemptState.isLifecycleFrozen()) {
+            return persistedAttemptState;
+        }
+        AscensionAttemptState refreshedState = AscensionAttemptState.fromResolvedProfile(
+            profile,
+            currentState.openingSnapshot() != null
+        );
+        setInitializationState(owner, currentState.withAttemptState(refreshedState));
+        return refreshedState;
+    }
+
+    public AscensionAttemptState commitConfirmedAttemptTransaction(UUID owner, ResolvedOpeningProfile profile) {
+        if (owner == null) {
+            throw new IllegalArgumentException("owner 不能为空");
+        }
+        if (profile == null) {
+            throw new IllegalArgumentException("profile 不能为空");
+        }
+        ApertureInitializationState currentState = getInitializationState(owner);
+        AscensionAttemptState persistedAttemptState = currentState.attemptState();
+        if (persistedAttemptState.hasCommittedConfirmationHandoff()) {
+            return persistedAttemptState;
+        }
+
+        AscensionAttemptState candidateState = persistedAttemptState.isLifecycleFrozen()
+            ? persistedAttemptState
+            : AscensionAttemptState.fromResolvedProfile(
+                profile,
+                currentState.openingSnapshot() != null
+            );
+        if (!candidateState.canEnterConfirmed()) {
+            if (!candidateState.equals(persistedAttemptState)) {
+                setInitializationState(owner, currentState.withAttemptState(candidateState));
+            }
+            return candidateState;
+        }
+
+        AscensionAttemptState committedState = candidateState.toCommittedConfirmationState();
+        setInitializationState(owner, currentState.withAttemptState(committedState));
+        return committedState;
     }
 
     /**
@@ -507,6 +742,20 @@ public class ApertureWorldData extends SavedData {
     @Nullable
     public ReturnPosition getReturnPosition(UUID owner) {
         return returnPositions.get(owner);
+    }
+
+    public boolean isTribulationActive(UUID owner) {
+        return hasActiveTribulationRuntimeState(owner);
+    }
+
+    public Set<UUID> getTribulationActiveOwners() {
+        Set<UUID> activeOwners = new HashSet<>();
+        for (Map.Entry<UUID, ApertureInitializationState> entry : initializationStates.entrySet()) {
+            if (entry.getValue().tribulationRuntimeState() != null) {
+                activeOwners.add(entry.getKey());
+            }
+        }
+        return Collections.unmodifiableSet(activeOwners);
     }
 
     /**
@@ -657,6 +906,7 @@ public class ApertureWorldData extends SavedData {
             returnPositionList.add(returnTag);
         }
         tag.put(KEY_RETURN_POSITIONS, returnPositionList);
+
         return tag;
     }
 
@@ -734,17 +984,28 @@ public class ApertureWorldData extends SavedData {
                 }
             }
         }
+
         data.migrateInitializationStates();
         return data;
     }
 
     private void migrateInitializationStates() {
-        for (UUID owner : initializedApertures) {
-            initializationStates.putIfAbsent(owner, ApertureInitializationState.legacyCompleted());
+        Set<UUID> knownOwners = new HashSet<>(apertures.keySet());
+        knownOwners.addAll(initializationStates.keySet());
+        knownOwners.addAll(initializedApertures);
+        Map<UUID, ApertureInitializationState> migratedStates = new HashMap<>();
+        for (UUID owner : knownOwners) {
+            ApertureInitializationState rawState = initializationStates.get(owner);
+            if (rawState == null) {
+                rawState = initializedApertures.contains(owner)
+                    ? ApertureInitializationState.legacyCompleted()
+                    : ApertureInitializationState.uninitialized();
+            }
+            ApertureInitializationState normalizedState = ApertureInitializationState.normalize(rawState);
+            migratedStates.put(owner, normalizedState);
         }
-        for (UUID owner : apertures.keySet()) {
-            initializationStates.putIfAbsent(owner, ApertureInitializationState.uninitialized());
-        }
+        initializationStates.clear();
+        initializationStates.putAll(migratedStates);
         resyncLegacyInitializedProjection();
     }
 
@@ -794,27 +1055,200 @@ public class ApertureWorldData extends SavedData {
         }
     }
 
+    public record TribulationRuntimeState(
+        TribulationState state,
+        int ticksInState,
+        float damageAccumulated,
+        int enemiesSpawned,
+        int enemiesKilled,
+        int strikeCoreCharge,
+        boolean strikeCoreOutputProduced,
+        boolean strikeMeteorOutputProduced
+    ) {
+
+        public TribulationRuntimeState {
+            state = Objects.requireNonNull(state, "state");
+            ticksInState = Math.max(0, ticksInState);
+            damageAccumulated = Math.max(0.0F, damageAccumulated);
+            enemiesSpawned = Math.max(0, enemiesSpawned);
+            enemiesKilled = Math.max(0, enemiesKilled);
+            strikeCoreCharge = Math.max(0, strikeCoreCharge);
+        }
+
+        @Nullable
+        public static TribulationRuntimeState normalize(@Nullable TribulationRuntimeState state) {
+            if (state == null) {
+                return null;
+            }
+            if (state.state() == TribulationState.IDLE || state.state() == TribulationState.SETTLEMENT) {
+                return null;
+            }
+            return new TribulationRuntimeState(
+                state.state(),
+                state.ticksInState(),
+                state.damageAccumulated(),
+                state.enemiesSpawned(),
+                state.enemiesKilled(),
+                state.strikeCoreCharge(),
+                state.strikeCoreOutputProduced(),
+                state.strikeMeteorOutputProduced()
+            );
+        }
+
+        private CompoundTag save() {
+            CompoundTag tag = new CompoundTag();
+            tag.putString(KEY_TRIBULATION_RUNTIME_PHASE, state.name());
+            tag.putInt(KEY_TRIBULATION_RUNTIME_TICKS_IN_STATE, ticksInState);
+            tag.putFloat(KEY_TRIBULATION_RUNTIME_DAMAGE_ACCUMULATED, damageAccumulated);
+            tag.putInt(KEY_TRIBULATION_RUNTIME_ENEMIES_SPAWNED, enemiesSpawned);
+            tag.putInt(KEY_TRIBULATION_RUNTIME_ENEMIES_KILLED, enemiesKilled);
+            tag.putInt(KEY_TRIBULATION_RUNTIME_STRIKE_CORE_CHARGE, strikeCoreCharge);
+            tag.putBoolean(KEY_TRIBULATION_RUNTIME_STRIKE_CORE_OUTPUT_PRODUCED, strikeCoreOutputProduced);
+            tag.putBoolean(KEY_TRIBULATION_RUNTIME_STRIKE_METEOR_OUTPUT_PRODUCED, strikeMeteorOutputProduced);
+            return tag;
+        }
+
+        @Nullable
+        private static TribulationRuntimeState load(CompoundTag tag) {
+            TribulationState storedState = parseEnumOrDefault(
+                tag.getString(KEY_TRIBULATION_RUNTIME_PHASE),
+                TribulationState.class,
+                TribulationState.IDLE
+            );
+            if (storedState == TribulationState.IDLE || storedState == TribulationState.SETTLEMENT) {
+                return null;
+            }
+            return new TribulationRuntimeState(
+                storedState,
+                tag.getInt(KEY_TRIBULATION_RUNTIME_TICKS_IN_STATE),
+                tag.getFloat(KEY_TRIBULATION_RUNTIME_DAMAGE_ACCUMULATED),
+                tag.getInt(KEY_TRIBULATION_RUNTIME_ENEMIES_SPAWNED),
+                tag.getInt(KEY_TRIBULATION_RUNTIME_ENEMIES_KILLED),
+                tag.getInt(KEY_TRIBULATION_RUNTIME_STRIKE_CORE_CHARGE),
+                tag.getBoolean(KEY_TRIBULATION_RUNTIME_STRIKE_CORE_OUTPUT_PRODUCED),
+                tag.getBoolean(KEY_TRIBULATION_RUNTIME_STRIKE_METEOR_OUTPUT_PRODUCED)
+            );
+        }
+    }
+
     public record ApertureInitializationState(
         InitPhase initPhase,
         @Nullable AscensionConditionSnapshot openingSnapshot,
         @Nullable Integer layoutVersion,
-        @Nullable Long planSeed
+        @Nullable Long planSeed,
+        AscensionAttemptState attemptState,
+        @Nullable TribulationRuntimeState tribulationRuntimeState
     ) {
 
         public ApertureInitializationState {
             initPhase = Objects.requireNonNull(initPhase, "initPhase");
+            attemptState = Objects.requireNonNull(attemptState, "attemptState");
+        }
+
+        public ApertureInitializationState(
+            InitPhase initPhase,
+            @Nullable AscensionConditionSnapshot openingSnapshot,
+            @Nullable Integer layoutVersion,
+            @Nullable Long planSeed
+        ) {
+            this(
+                initPhase,
+                openingSnapshot,
+                layoutVersion,
+                planSeed,
+                AscensionAttemptState.deriveLegacy(initPhase, openingSnapshot),
+                null
+            );
         }
 
         public static ApertureInitializationState uninitialized() {
-            return new ApertureInitializationState(InitPhase.UNINITIALIZED, null, null, null);
+            return new ApertureInitializationState(
+                InitPhase.UNINITIALIZED,
+                null,
+                null,
+                null,
+                AscensionAttemptState.uninitialized(),
+                null
+            );
         }
 
         public static ApertureInitializationState legacyCompleted() {
-            return new ApertureInitializationState(InitPhase.COMPLETED, null, null, null);
+            return new ApertureInitializationState(
+                InitPhase.COMPLETED,
+                null,
+                null,
+                null,
+                AscensionAttemptState.defaultForPhase(InitPhase.COMPLETED),
+                null
+            );
         }
 
         public ApertureInitializationState withPhase(InitPhase newPhase) {
-            return new ApertureInitializationState(newPhase, openingSnapshot, layoutVersion, planSeed);
+            ApertureInitializationState nextState = new ApertureInitializationState(
+                newPhase,
+                openingSnapshot,
+                layoutVersion,
+                planSeed,
+                attemptState,
+                tribulationRuntimeState
+            );
+            return normalize(nextState);
+        }
+
+        public ApertureInitializationState withAttemptState(AscensionAttemptState newAttemptState) {
+            ApertureInitializationState nextState = new ApertureInitializationState(
+                initPhase,
+                openingSnapshot,
+                layoutVersion,
+                planSeed,
+                newAttemptState,
+                tribulationRuntimeState
+            );
+            return normalize(nextState);
+        }
+
+        public ApertureInitializationState withTribulationRuntimeState(
+            @Nullable TribulationRuntimeState newTribulationRuntimeState
+        ) {
+            ApertureInitializationState nextState = new ApertureInitializationState(
+                initPhase,
+                openingSnapshot,
+                layoutVersion,
+                planSeed,
+                attemptState,
+                newTribulationRuntimeState
+            );
+            return normalize(nextState);
+        }
+
+        static ApertureInitializationState normalize(ApertureInitializationState state) {
+            InitPhase normalizedPhase = Objects.requireNonNullElse(state.initPhase(), InitPhase.UNINITIALIZED);
+            AscensionConditionSnapshot normalizedSnapshot = state.openingSnapshot();
+            Integer normalizedLayoutVersion = state.layoutVersion();
+            Long normalizedPlanSeed = state.planSeed();
+            if (normalizedLayoutVersion != null && normalizedLayoutVersion.intValue() <= 0) {
+                normalizedLayoutVersion = null;
+            }
+            if (normalizedPhase == InitPhase.UNINITIALIZED) {
+                normalizedSnapshot = null;
+                normalizedLayoutVersion = null;
+                normalizedPlanSeed = null;
+            }
+            AscensionAttemptState normalizedAttemptState = AscensionAttemptState.normalize(
+                state.attemptState(),
+                normalizedPhase,
+                normalizedSnapshot
+            );
+            TribulationRuntimeState normalizedTribulationRuntimeState =
+                TribulationRuntimeState.normalize(state.tribulationRuntimeState());
+            return new ApertureInitializationState(
+                normalizedPhase,
+                normalizedSnapshot,
+                normalizedLayoutVersion,
+                normalizedPlanSeed,
+                normalizedAttemptState,
+                normalizedTribulationRuntimeState
+            );
         }
 
         private CompoundTag save() {
@@ -828,6 +1262,10 @@ public class ApertureWorldData extends SavedData {
             }
             if (planSeed != null) {
                 tag.putLong(KEY_PLAN_SEED, planSeed.longValue());
+            }
+            tag.put(KEY_ATTEMPT_STATE, attemptState.save());
+            if (tribulationRuntimeState != null) {
+                tag.put(KEY_TRIBULATION_RUNTIME_STATE, tribulationRuntimeState.save());
             }
             return tag;
         }
@@ -848,7 +1286,406 @@ public class ApertureWorldData extends SavedData {
             Long storedPlanSeed = tag.contains(KEY_PLAN_SEED)
                 ? Long.valueOf(tag.getLong(KEY_PLAN_SEED))
                 : null;
-            return new ApertureInitializationState(phase, snapshot, storedLayoutVersion, storedPlanSeed);
+            AscensionAttemptState storedAttemptState = tag.contains(KEY_ATTEMPT_STATE, TAG_COMPOUND)
+                ? AscensionAttemptState.load(tag.getCompound(KEY_ATTEMPT_STATE))
+                : AscensionAttemptState.deriveLegacy(phase, snapshot);
+            TribulationRuntimeState storedTribulationRuntimeState = tag.contains(
+                KEY_TRIBULATION_RUNTIME_STATE,
+                TAG_COMPOUND
+            ) ? TribulationRuntimeState.load(tag.getCompound(KEY_TRIBULATION_RUNTIME_STATE)) : null;
+            ApertureInitializationState loadedState = new ApertureInitializationState(
+                phase,
+                snapshot,
+                storedLayoutVersion,
+                storedPlanSeed,
+                storedAttemptState,
+                storedTribulationRuntimeState
+            );
+            return normalize(loadedState);
+        }
+    }
+
+    public record AscensionAttemptState(
+        AscensionAttemptStage stage,
+        int heavenQiScorePercent,
+        int humanQiScorePercent,
+        int earthQiScorePercent,
+        int balanceScorePercent,
+        boolean fiveTurnPeak,
+        boolean readyToConfirm,
+        boolean confirmedThresholdMet,
+        boolean canEnterConfirmed,
+        boolean snapshotFrozen,
+        boolean frozenSnapshotPlayerInitiated,
+        boolean failurePenaltyApplied,
+        int failurePenaltyApplicationCount,
+        boolean internalRecoveryCompleted,
+        boolean externalRiskRecoveryCompleted
+    ) {
+
+        public AscensionAttemptState {
+            stage = Objects.requireNonNull(stage, "stage");
+            heavenQiScorePercent = clampScorePercent(heavenQiScorePercent);
+            humanQiScorePercent = clampScorePercent(humanQiScorePercent);
+            earthQiScorePercent = clampScorePercent(earthQiScorePercent);
+            balanceScorePercent = clampScorePercent(balanceScorePercent);
+            failurePenaltyApplicationCount = Math.max(0, failurePenaltyApplicationCount);
+        }
+
+        public static AscensionAttemptState uninitialized() {
+            return new AscensionAttemptState(
+                AscensionAttemptStage.CULTIVATION_PROGRESS,
+                0,
+                0,
+                0,
+                0,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                0,
+                false,
+                false
+            );
+        }
+
+        public static AscensionAttemptState defaultForPhase(InitPhase phase) {
+            return new AscensionAttemptState(
+                AscensionAttemptStage.CULTIVATION_PROGRESS,
+                0,
+                0,
+                0,
+                0,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                0,
+                false,
+                false
+            );
+        }
+
+        public static AscensionAttemptState deriveLegacy(
+            InitPhase phase,
+            @Nullable AscensionConditionSnapshot openingSnapshot
+        ) {
+            if (openingSnapshot == null) {
+                return defaultForPhase(phase);
+            }
+            ResolvedOpeningProfile resolved = new OpeningProfileResolver().resolveFromSnapshot(openingSnapshot);
+            return fromResolvedProfile(resolved, true);
+        }
+
+        public static AscensionAttemptState fromResolvedProfile(
+            ResolvedOpeningProfile profile,
+            boolean snapshotFrozen
+        ) {
+            return new AscensionAttemptState(
+                profile.suggestedStage(),
+                clampScorePercent(profile.threeQiEvaluation().heavenScore()),
+                clampScorePercent(profile.threeQiEvaluation().humanScore()),
+                clampScorePercent(profile.threeQiEvaluation().earthScore()),
+                clampScorePercent(profile.threeQiEvaluation().balanceScore()),
+                profile.threeQiEvaluation().fiveTurnPeak(),
+                profile.threeQiEvaluation().readyToConfirm(),
+                profile.threeQiEvaluation().confirmedThresholdMet(),
+                profile.threeQiEvaluation().canEnterConfirmed(),
+                snapshotFrozen,
+                snapshotFrozen && profile.conditionSnapshot().playerInitiated(),
+                false,
+                0,
+                false,
+                false
+            );
+        }
+
+        public static boolean isFailureStage(@Nullable AscensionAttemptStage stage) {
+            return stage == AscensionAttemptStage.FAILED_SEVERE_INJURY
+                || stage == AscensionAttemptStage.FAILED_DEATH;
+        }
+
+        public boolean isFailureStage() {
+            return isFailureStage(stage);
+        }
+
+        public boolean isLifecycleFrozen() {
+            return snapshotFrozen || AscensionAttemptStateContract.isInputFrozen(stage);
+        }
+
+        public boolean hasCommittedConfirmationHandoff() {
+            return AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(stage);
+        }
+
+        public AscensionAttemptState toCommittedConfirmationState() {
+            if (hasCommittedConfirmationHandoff()) {
+                return this;
+            }
+            return new AscensionAttemptState(
+                AscensionAttemptStage.CONFIRMED,
+                heavenQiScorePercent,
+                humanQiScorePercent,
+                earthQiScorePercent,
+                balanceScorePercent,
+                fiveTurnPeak,
+                true,
+                true,
+                true,
+                true,
+                true,
+                false,
+                0,
+                false,
+                false
+            );
+        }
+
+        public AscensionAttemptState withStage(AscensionAttemptStage newStage) {
+            if (newStage == null) {
+                throw new IllegalArgumentException("newStage 不能为空");
+            }
+            if (stage == newStage) {
+                return this;
+            }
+            return new AscensionAttemptState(
+                newStage,
+                heavenQiScorePercent,
+                humanQiScorePercent,
+                earthQiScorePercent,
+                balanceScorePercent,
+                fiveTurnPeak,
+                readyToConfirm,
+                confirmedThresholdMet,
+                canEnterConfirmed,
+                snapshotFrozen,
+                frozenSnapshotPlayerInitiated,
+                failurePenaltyApplied,
+                failurePenaltyApplicationCount,
+                internalRecoveryCompleted,
+                externalRiskRecoveryCompleted
+            );
+        }
+
+        public AscensionAttemptState recordFailureAftermath(AscensionAttemptStage failureStage) {
+            if (!isFailureStage(failureStage)) {
+                throw new IllegalArgumentException("failureStage 必须是失败阶段");
+            }
+            boolean sameFailurePath = stage == failureStage;
+            return new AscensionAttemptState(
+                failureStage,
+                heavenQiScorePercent,
+                humanQiScorePercent,
+                earthQiScorePercent,
+                balanceScorePercent,
+                fiveTurnPeak,
+                readyToConfirm,
+                confirmedThresholdMet,
+                canEnterConfirmed,
+                snapshotFrozen,
+                frozenSnapshotPlayerInitiated,
+                sameFailurePath && failurePenaltyApplied,
+                sameFailurePath ? Math.max(0, failurePenaltyApplicationCount) : 0,
+                sameFailurePath ? internalRecoveryCompleted : false,
+                sameFailurePath ? externalRiskRecoveryCompleted : false
+            );
+        }
+
+        public AscensionAttemptState markFailurePenaltyApplied() {
+            if (!isFailureStage()) {
+                return this;
+            }
+            if (failurePenaltyApplied) {
+                return new AscensionAttemptState(
+                    stage,
+                    heavenQiScorePercent,
+                    humanQiScorePercent,
+                    earthQiScorePercent,
+                    balanceScorePercent,
+                    fiveTurnPeak,
+                    readyToConfirm,
+                    confirmedThresholdMet,
+                    canEnterConfirmed,
+                    snapshotFrozen,
+                    frozenSnapshotPlayerInitiated,
+                    true,
+                    Math.max(1, failurePenaltyApplicationCount),
+                    internalRecoveryCompleted,
+                    externalRiskRecoveryCompleted
+                );
+            }
+            return new AscensionAttemptState(
+                stage,
+                heavenQiScorePercent,
+                humanQiScorePercent,
+                earthQiScorePercent,
+                balanceScorePercent,
+                fiveTurnPeak,
+                readyToConfirm,
+                confirmedThresholdMet,
+                canEnterConfirmed,
+                snapshotFrozen,
+                frozenSnapshotPlayerInitiated,
+                true,
+                1,
+                internalRecoveryCompleted,
+                externalRiskRecoveryCompleted
+            );
+        }
+
+        public AscensionAttemptState markInternalRecoveryComplete() {
+            if (!isFailureStage() || internalRecoveryCompleted) {
+                return this;
+            }
+            return new AscensionAttemptState(
+                stage,
+                heavenQiScorePercent,
+                humanQiScorePercent,
+                earthQiScorePercent,
+                balanceScorePercent,
+                fiveTurnPeak,
+                readyToConfirm,
+                confirmedThresholdMet,
+                canEnterConfirmed,
+                snapshotFrozen,
+                frozenSnapshotPlayerInitiated,
+                failurePenaltyApplied,
+                failurePenaltyApplicationCount,
+                true,
+                externalRiskRecoveryCompleted
+            );
+        }
+
+        public AscensionAttemptState markExternalRiskRecoveryComplete() {
+            if (!isFailureStage() || externalRiskRecoveryCompleted) {
+                return this;
+            }
+            return new AscensionAttemptState(
+                stage,
+                heavenQiScorePercent,
+                humanQiScorePercent,
+                earthQiScorePercent,
+                balanceScorePercent,
+                fiveTurnPeak,
+                readyToConfirm,
+                confirmedThresholdMet,
+                canEnterConfirmed,
+                snapshotFrozen,
+                frozenSnapshotPlayerInitiated,
+                failurePenaltyApplied,
+                failurePenaltyApplicationCount,
+                internalRecoveryCompleted,
+                true
+            );
+        }
+
+        public boolean canCompleteRecovery() {
+            return isFailureStage() && internalRecoveryCompleted && externalRiskRecoveryCompleted;
+        }
+
+        public AscensionAttemptState completeRecoveryIfEligible() {
+            if (!canCompleteRecovery()) {
+                return this;
+            }
+            return withStage(AscensionAttemptStage.APERTURE_FORMING);
+        }
+
+        private static AscensionAttemptState normalize(
+            AscensionAttemptState state,
+            InitPhase phase,
+            @Nullable AscensionConditionSnapshot openingSnapshot
+        ) {
+            if (phase == InitPhase.UNINITIALIZED) {
+                return uninitialized();
+            }
+            boolean frozenBySnapshot = openingSnapshot != null;
+            boolean normalizedFrozen = state.snapshotFrozen() || frozenBySnapshot;
+            boolean normalizedFrozenPlayerInitiated = normalizedFrozen
+                && (
+                    openingSnapshot != null
+                        ? openingSnapshot.playerInitiated()
+                        : state.frozenSnapshotPlayerInitiated()
+                );
+            boolean normalizedFailurePenaltyApplied = state.failurePenaltyApplied();
+            int normalizedFailurePenaltyApplicationCount = normalizedFailurePenaltyApplied
+                ? Math.max(1, state.failurePenaltyApplicationCount())
+                : 0;
+            boolean normalizedInternalRecoveryCompleted = normalizedFailurePenaltyApplied
+                && state.internalRecoveryCompleted();
+            boolean normalizedExternalRiskRecoveryCompleted = normalizedFailurePenaltyApplied
+                && state.externalRiskRecoveryCompleted();
+            return new AscensionAttemptState(
+                state.stage(),
+                state.heavenQiScorePercent(),
+                state.humanQiScorePercent(),
+                state.earthQiScorePercent(),
+                state.balanceScorePercent(),
+                state.fiveTurnPeak(),
+                state.readyToConfirm(),
+                state.confirmedThresholdMet(),
+                state.canEnterConfirmed(),
+                normalizedFrozen,
+                normalizedFrozenPlayerInitiated,
+                normalizedFailurePenaltyApplied,
+                normalizedFailurePenaltyApplicationCount,
+                normalizedInternalRecoveryCompleted,
+                normalizedExternalRiskRecoveryCompleted
+            );
+        }
+
+        private CompoundTag save() {
+            CompoundTag tag = new CompoundTag();
+            tag.putString(KEY_ATTEMPT_STAGE, stage.name());
+            tag.putInt(KEY_ATTEMPT_HEAVEN_QI_SCORE, heavenQiScorePercent);
+            tag.putInt(KEY_ATTEMPT_HUMAN_QI_SCORE, humanQiScorePercent);
+            tag.putInt(KEY_ATTEMPT_EARTH_QI_SCORE, earthQiScorePercent);
+            tag.putInt(KEY_ATTEMPT_BALANCE_SCORE, balanceScorePercent);
+            tag.putBoolean(KEY_ATTEMPT_FIVE_TURN_PEAK, fiveTurnPeak);
+            tag.putBoolean(KEY_ATTEMPT_READY_TO_CONFIRM, readyToConfirm);
+            tag.putBoolean(KEY_ATTEMPT_CONFIRMED_THRESHOLD, confirmedThresholdMet);
+            tag.putBoolean(KEY_ATTEMPT_CAN_ENTER_CONFIRMED, canEnterConfirmed);
+            tag.putBoolean(KEY_ATTEMPT_SNAPSHOT_FROZEN, snapshotFrozen);
+            tag.putBoolean(KEY_ATTEMPT_FROZEN_PLAYER_INITIATED, frozenSnapshotPlayerInitiated);
+            tag.putBoolean(KEY_ATTEMPT_FAILURE_PENALTY_APPLIED, failurePenaltyApplied);
+            tag.putInt(KEY_ATTEMPT_FAILURE_PENALTY_APPLICATION_COUNT, failurePenaltyApplicationCount);
+            tag.putBoolean(KEY_ATTEMPT_INTERNAL_RECOVERY_COMPLETED, internalRecoveryCompleted);
+            tag.putBoolean(KEY_ATTEMPT_EXTERNAL_RISK_RECOVERY_COMPLETED, externalRiskRecoveryCompleted);
+            return tag;
+        }
+
+        private static AscensionAttemptState load(CompoundTag tag) {
+            AscensionAttemptStage storedStage = parseEnumOrDefault(
+                tag.getString(KEY_ATTEMPT_STAGE),
+                AscensionAttemptStage.class,
+                AscensionAttemptStage.CULTIVATION_PROGRESS
+            );
+            return new AscensionAttemptState(
+                storedStage,
+                tag.getInt(KEY_ATTEMPT_HEAVEN_QI_SCORE),
+                tag.getInt(KEY_ATTEMPT_HUMAN_QI_SCORE),
+                tag.getInt(KEY_ATTEMPT_EARTH_QI_SCORE),
+                tag.getInt(KEY_ATTEMPT_BALANCE_SCORE),
+                tag.getBoolean(KEY_ATTEMPT_FIVE_TURN_PEAK),
+                tag.getBoolean(KEY_ATTEMPT_READY_TO_CONFIRM),
+                tag.getBoolean(KEY_ATTEMPT_CONFIRMED_THRESHOLD),
+                tag.getBoolean(KEY_ATTEMPT_CAN_ENTER_CONFIRMED),
+                tag.getBoolean(KEY_ATTEMPT_SNAPSHOT_FROZEN),
+                tag.getBoolean(KEY_ATTEMPT_FROZEN_PLAYER_INITIATED),
+                tag.getBoolean(KEY_ATTEMPT_FAILURE_PENALTY_APPLIED),
+                tag.getInt(KEY_ATTEMPT_FAILURE_PENALTY_APPLICATION_COUNT),
+                tag.getBoolean(KEY_ATTEMPT_INTERNAL_RECOVERY_COMPLETED),
+                tag.getBoolean(KEY_ATTEMPT_EXTERNAL_RISK_RECOVERY_COMPLETED)
+            );
+        }
+
+        private static int clampScorePercent(double value) {
+            int rounded = (int) Math.round(value);
+            return Math.max(ATTEMPT_SCORE_MIN, Math.min(ATTEMPT_SCORE_MAX, rounded));
         }
     }
 

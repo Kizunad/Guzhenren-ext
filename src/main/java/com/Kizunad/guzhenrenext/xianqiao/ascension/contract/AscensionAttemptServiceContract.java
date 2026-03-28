@@ -32,4 +32,13 @@ public final class AscensionAttemptServiceContract {
         }
         return SINGLE_ATTEMPT_TRANSACTION_SERVICE;
     }
+
+    public static boolean isCommittedConfirmationHandoffStage(AscensionAttemptStage stage) {
+        if (stage == null) {
+            throw new IllegalArgumentException("stage 不能为空");
+        }
+        return stage == AscensionAttemptStage.CONFIRMED
+            || stage == AscensionAttemptStage.WORLD_TRIBULATION_IN_PLACE
+            || stage == AscensionAttemptStage.APERTURE_FORMING;
+    }
 }

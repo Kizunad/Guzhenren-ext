@@ -1,9 +1,12 @@
 package com.Kizunad.guzhenrenext.xianqiao.tribulation;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.QiyunHelper;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuzhenrenVariableModifierService;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkApi;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
+import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.AscensionAttemptState;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy;
@@ -25,8 +28,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * 单个仙窍的灾劫状态机管理器。
@@ -105,6 +112,22 @@ public class TribulationManager {
 
     /** 失败后核心灵气惩罚值。 */
     private static final int FAILURE_AURA_PENALTY = 120;
+
+    private static final String FAILURE_ZHENYUAN_PENALTY_USAGE_ID =
+        "guzhenrenext:ascension_failure_max_zhenyuan_penalty";
+
+    private static final ResourceLocation FAILURE_MAX_HEALTH_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(
+        "guzhenrenext",
+        "ascension_failure_max_health_penalty"
+    );
+
+    private static final double DEATH_MAX_ZHENYUAN_PENALTY_RATIO = 0.80D;
+
+    private static final double SEVERE_INJURY_MAX_ZHENYUAN_PENALTY_RATIO = 0.35D;
+
+    private static final double DEATH_MAX_HEALTH_PENALTY_RATIO = 0.20D;
+
+    private static final double SEVERE_INJURY_MAX_HEALTH_PENALTY_RATIO = 0.10D;
 
     /** 成功后核心灵气奖励值。 */
     private static final int SUCCESS_AURA_REWARD = 160;
@@ -207,6 +230,45 @@ public class TribulationManager {
         strikeCoreCharge = 0;
         strikeCoreOutputProduced = false;
         strikeMeteorOutputProduced = false;
+    }
+
+    public ApertureWorldData.TribulationRuntimeState snapshotRuntimeState() {
+        return new ApertureWorldData.TribulationRuntimeState(
+            state,
+            ticksInState,
+            damageAccumulated,
+            enemiesSpawned,
+            enemiesKilled,
+            strikeCoreCharge,
+            strikeCoreOutputProduced,
+            strikeMeteorOutputProduced
+        );
+    }
+
+    public static TribulationManager restoreFromRuntimeState(
+        UUID owner,
+        ApertureWorldData.TribulationRuntimeState runtimeState
+    ) {
+        TribulationManager manager = new TribulationManager(owner);
+        manager.state = runtimeState.state();
+        manager.ticksInState = Math.max(0, runtimeState.ticksInState());
+        manager.damageAccumulated = Math.max(0.0F, runtimeState.damageAccumulated());
+        manager.enemiesSpawned = Math.max(0, runtimeState.enemiesSpawned());
+        manager.enemiesKilled = Math.max(0, runtimeState.enemiesKilled());
+        manager.strikeCoreCharge = Math.max(0, runtimeState.strikeCoreCharge());
+        manager.strikeCoreOutputProduced = runtimeState.strikeCoreOutputProduced();
+        manager.strikeMeteorOutputProduced = runtimeState.strikeMeteorOutputProduced();
+        manager.finished = false;
+
+        if (manager.state == TribulationState.INVASION) {
+            manager.invasionEntities.clear();
+            manager.invasionEntityLastPos.clear();
+            manager.enemiesSpawned = 0;
+            manager.enemiesKilled = 0;
+            manager.ticksInState = 0;
+        }
+
+        return manager;
     }
 
     /**
@@ -396,13 +458,70 @@ public class TribulationManager {
             DaoMarkApi.addAura(level, apertureInfo.center(), REWARD_DAO, SUCCESS_AURA_REWARD);
         } else if (damageRatio > FAILURE_DAMAGE_RATIO) {
             DaoMarkApi.consumeAura(level, apertureInfo.center(), REWARD_DAO, FAILURE_AURA_PENALTY);
+            AscensionAttemptStage failureStage = resolveFailureStage(damageRatio);
+            AscensionAttemptState aftermathState = worldData.recordFailureAftermath(owner, failureStage);
+            if (!aftermathState.failurePenaltyApplied()) {
+                applyFailurePenaltyIfNeeded(level, failureStage);
+                worldData.markFailurePenaltyApplied(owner);
+            }
         }
 
         long nextTick = level.getGameTime() + BASE_INTERVAL_TICKS;
         worldData.updateTribulationTick(owner, nextTick);
+        if (damageRatio <= FAILURE_DAMAGE_RATIO) {
+            worldData.markAttemptStage(owner, AscensionAttemptStage.APERTURE_FORMING);
+        }
+        worldData.clearTribulationRuntimeState(owner);
 
         advanceState();
         finished = true;
+    }
+
+    private static AscensionAttemptStage resolveFailureStage(float damageRatio) {
+        return damageRatio >= 1.0F ? AscensionAttemptStage.FAILED_DEATH : AscensionAttemptStage.FAILED_SEVERE_INJURY;
+    }
+
+    private void applyFailurePenaltyIfNeeded(ServerLevel level, AscensionAttemptStage failureStage) {
+        @Nullable ServerPlayer ownerPlayer = findOwnerPlayer(level, owner);
+        if (ownerPlayer == null || !AscensionAttemptState.isFailureStage(failureStage)) {
+            return;
+        }
+        double maxZhenyuanPenaltyRatio = failureStage == AscensionAttemptStage.FAILED_DEATH
+            ? DEATH_MAX_ZHENYUAN_PENALTY_RATIO
+            : SEVERE_INJURY_MAX_ZHENYUAN_PENALTY_RATIO;
+        double currentMaxHealth = ownerPlayer.getMaxHealth();
+        double maxHealthPenaltyRatio = failureStage == AscensionAttemptStage.FAILED_DEATH
+            ? DEATH_MAX_HEALTH_PENALTY_RATIO
+            : SEVERE_INJURY_MAX_HEALTH_PENALTY_RATIO;
+        double healthPenaltyAmount = Math.max(0.0D, currentMaxHealth * maxHealthPenaltyRatio);
+
+        try {
+            GuzhenrenVariableModifierService.setAdditiveModifier(
+                ownerPlayer,
+                GuzhenrenVariableModifierService.VAR_MAX_ZHENYUAN,
+                FAILURE_ZHENYUAN_PENALTY_USAGE_ID,
+                -Math.max(0.0D, maxZhenyuanPenaltyRatio)
+            );
+        } catch (LinkageError ignored) {
+        }
+
+        AttributeInstance maxHealthAttribute = ownerPlayer.getAttribute(Attributes.MAX_HEALTH);
+        if (maxHealthAttribute != null) {
+            AttributeModifier existingModifier = maxHealthAttribute.getModifier(FAILURE_MAX_HEALTH_MODIFIER_ID);
+            if (existingModifier != null) {
+                maxHealthAttribute.removeModifier(FAILURE_MAX_HEALTH_MODIFIER_ID);
+            }
+            if (healthPenaltyAmount > 0.0D) {
+                maxHealthAttribute.addTransientModifier(
+                    new AttributeModifier(
+                        FAILURE_MAX_HEALTH_MODIFIER_ID,
+                        -healthPenaltyAmount,
+                        AttributeModifier.Operation.ADD_VALUE
+                    )
+                );
+                ownerPlayer.setHealth(Math.min(ownerPlayer.getHealth(), ownerPlayer.getMaxHealth()));
+            }
+        }
     }
 
     /**

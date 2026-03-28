@@ -59,7 +59,7 @@ public class ApertureHubMenu extends AbstractContainerMenu {
 
     private static final int DATA_INIT_PHASE = 10;
 
-    private static final int DATA_SUGGESTED_STAGE = 11;
+    private static final int DATA_ATTEMPT_STAGE = 11;
 
     private static final int DATA_HEAVEN_QI_SCORE = 12;
 
@@ -269,8 +269,8 @@ public class ApertureHubMenu extends AbstractContainerMenu {
         return values[ordinal];
     }
 
-    public AscensionAttemptStage getSuggestedStage() {
-        int ordinal = data.get(DATA_SUGGESTED_STAGE);
+    public AscensionAttemptStage getAttemptStage() {
+        int ordinal = data.get(DATA_ATTEMPT_STAGE);
         AscensionAttemptStage[] values = AscensionAttemptStage.values();
         if (ordinal < 0 || ordinal >= values.length) {
             return AscensionAttemptStage.CULTIVATION_PROGRESS;
@@ -321,7 +321,7 @@ public class ApertureHubMenu extends AbstractContainerMenu {
     public XianqiaoUiProjection.ProjectionInput getProjectionInput() {
         return new XianqiaoUiProjection.ProjectionInput(
             getInitPhase(),
-            getSuggestedStage(),
+            getAttemptStage(),
             getHeavenQiScorePercent(),
             getHumanQiScorePercent(),
             getEarthQiScorePercent(),

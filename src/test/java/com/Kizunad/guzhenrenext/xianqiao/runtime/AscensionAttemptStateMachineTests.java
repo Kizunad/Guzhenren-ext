@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.runtime;
 
 import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStage;
+import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptServiceContract;
 import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionAttemptStateContract;
 import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionInterruptionDecision;
 import com.Kizunad.guzhenrenext.xianqiao.ascension.contract.AscensionInterruptionPolicy;
@@ -67,6 +68,40 @@ final class AscensionAttemptStateMachineTests {
     }
 
     @Test
+    void committedConfirmationHandoffUsesSingleServiceContractStages() {
+        assertFalse(
+            AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(
+                AscensionAttemptStage.READY_TO_CONFIRM
+            )
+        );
+        assertFalse(
+            AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(
+                AscensionAttemptStage.FAILED_SEVERE_INJURY
+            )
+        );
+        assertFalse(
+            AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(
+                AscensionAttemptStage.FAILED_DEATH
+            )
+        );
+        assertTrue(
+            AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(
+                AscensionAttemptStage.CONFIRMED
+            )
+        );
+        assertTrue(
+            AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(
+                AscensionAttemptStage.WORLD_TRIBULATION_IN_PLACE
+            )
+        );
+        assertTrue(
+            AscensionAttemptServiceContract.isCommittedConfirmationHandoffStage(
+                AscensionAttemptStage.APERTURE_FORMING
+            )
+        );
+    }
+
+    @Test
     void openingArchitecturePinsChunkBoundaryTruthSeamCenterAndSymmetricFragmentExpansion() throws Exception {
         assertEquals("MIN_MAX_CHUNK_CLOSED_RANGE", AscensionOpeningArchitectureContract.BOUNDARY_TRUTH_SOURCE);
         assertEquals(
@@ -93,5 +128,32 @@ final class AscensionAttemptStateMachineTests {
         assertTrue(openingContractSource.contains("center.offset(CHUNK_SIZE, 0, CHUNK_SIZE)"));
         assertTrue(openingContractSource.contains("center.offset(0, 0, 0)"));
         assertTrue(openingContractSource.contains("return List.of("));
+    }
+
+    @Test
+    void authoritativeAttemptTruthIsPersistedAtWorldDataBoundary() throws Exception {
+        String worldDataSource = Files.readString(
+            Path.of("src/main/java/com/Kizunad/guzhenrenext/xianqiao/data/ApertureWorldData.java")
+        );
+
+        assertTrue(worldDataSource.contains("KEY_ATTEMPT_STATE"));
+        assertTrue(worldDataSource.contains("record AscensionAttemptState("));
+        assertTrue(worldDataSource.contains("getAscensionAttemptState(UUID owner)"));
+        assertTrue(worldDataSource.contains("refreshAscensionAttemptStateFromProfile"));
+        assertTrue(worldDataSource.contains("commitConfirmedAttemptTransaction(UUID owner, ResolvedOpeningProfile profile)"));
+        assertTrue(worldDataSource.contains("if (persistedAttemptState.hasCommittedConfirmationHandoff())"));
+        assertTrue(worldDataSource.contains("AscensionAttemptState committedState = candidateState.toCommittedConfirmationState();"));
+        assertTrue(worldDataSource.contains("public boolean hasCommittedConfirmationHandoff()"));
+        assertTrue(worldDataSource.contains("public AscensionAttemptState toCommittedConfirmationState()"));
+        assertTrue(worldDataSource.contains("KEY_ATTEMPT_FAILURE_PENALTY_APPLIED"));
+        assertTrue(worldDataSource.contains("KEY_ATTEMPT_FAILURE_PENALTY_APPLICATION_COUNT"));
+        assertTrue(worldDataSource.contains("KEY_ATTEMPT_INTERNAL_RECOVERY_COMPLETED"));
+        assertTrue(worldDataSource.contains("KEY_ATTEMPT_EXTERNAL_RISK_RECOVERY_COMPLETED"));
+        assertTrue(worldDataSource.contains("public AscensionAttemptState recordFailureAftermath(AscensionAttemptStage failureStage)"));
+        assertTrue(worldDataSource.contains("public AscensionAttemptState markFailurePenaltyApplied()"));
+        assertTrue(worldDataSource.contains("public boolean canCompleteRecovery()"));
+        assertTrue(worldDataSource.contains("public AscensionAttemptState completeRecoveryIfEligible()"));
+        assertTrue(worldDataSource.contains("AscensionAttemptStage.CONFIRMED,"));
+        assertFalse(worldDataSource.contains("if (initializedApertures.contains(owner))"));
     }
 }
