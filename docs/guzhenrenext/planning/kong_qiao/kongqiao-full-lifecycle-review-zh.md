@@ -363,7 +363,7 @@
 1. `kongqiao-full-lifecycle-review-zh.md`（本文件）
 2. `pressure.md`
 3. `limit.md`
-4. `.sisyphus/plans/kongqiao-full-lifecycle-implementation.md`
+4. `kongqiao-full-lifecycle-implementation.md`
 
 这样可以保证：
 
