@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext.kongqiao.handler;
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.logic.impl.passive.daos.zhidao.tierOne.XiaoHuiGuFrugalIdentifyEffect;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
@@ -13,8 +14,27 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.function.DoubleConsumer;
+
 @EventBusSubscriber(modid = GuzhenrenExt.MODID)
 public class NianTouTickHandler {
+
+    private static final double IDENTIFY_PROGRESS_FATIGUE_DEBT = 4.0D;
+
+    record UnlockTickResult(
+        double consumedNianTou,
+        boolean progressed,
+        boolean completed,
+        double fatigueDebtApplied
+    ) {
+
+        private static final UnlockTickResult NO_PROGRESS = new UnlockTickResult(
+            0.0D,
+            false,
+            false,
+            0.0D
+        );
+    }
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -43,33 +63,84 @@ public class NianTouTickHandler {
 
         // 2. 检查念头是否足够
         double currentNianTou = NianTouHelper.getAmount(player);
-        
-        if (currentNianTou >= costPerTick) {
-            // 足够：扣除并推进
-            NianTouHelper.modify(player, -costPerTick);
-            process.remainingTicks--;
 
+        final KongqiaoData kongqiaoData = KongqiaoAttachments.getData(player);
+        final KongqiaoData.StabilityState stabilityState = kongqiaoData == null
+            ? null
+            : kongqiaoData.getStabilityState();
+        final UnlockTickResult tickResult = advanceProcessIfAffordable(
+            unlocks,
+            stabilityState,
+            currentNianTou,
+            costPerTick,
+            amount -> NianTouHelper.modify(player, -amount)
+        );
+        if (tickResult.progressed()) {
             // 3. 检查完成
-            if (process.remainingTicks <= 0) {
+            if (tickResult.completed()) {
                 // 完成！
                 unlocks.unlock(process.itemId, process.usageId);
                 // 额外惊喜：满足条件时尝试推演杀招
                 ShazhaoUnlockService.tryUnlockRandom(player.getRandom(), unlocks);
                 unlocks.clearProcess();
-                
+
                 // 播放音效或提示 (可选)
                 // player.sendSystemMessage(Component.literal("鉴定完成！"));
             }
-            
+
             // 4. 同步状态 (为了 UI 进度条平滑，可能需要每 Tick 同步，或者每 N Ticks 同步)
             // 考虑到网络负载，可以每 5-10 ticks 同步一次，或者仅在完成时同步。
             // 但如果 UI 需要实时进度条，最好还是同步。在此扩展模组规模下，每 tick 同步给单个玩家问题不大。
             // 优化：只在整秒或者完成时同步？不，UI 需要平滑。
             PacketDistributor.sendToPlayer(player, new PacketSyncNianTouUnlocks(unlocks));
-            
         } else {
             // 不足：暂停进度，不消耗，也不推进。
             // 可以在这里给玩家发一次提示“念头不足，鉴定暂停”，但要避免刷屏。
         }
+    }
+
+    static UnlockTickResult advanceProcessIfAffordable(
+        final NianTouUnlocks unlocks,
+        final KongqiaoData.StabilityState stabilityState,
+        final double currentNianTou,
+        final double costPerTick,
+        final DoubleConsumer nianTouConsumer
+    ) {
+        if (unlocks == null || !unlocks.isProcessing()) {
+            return UnlockTickResult.NO_PROGRESS;
+        }
+        final NianTouUnlocks.UnlockProcess process = unlocks.getCurrentProcess();
+        if (process == null) {
+            return UnlockTickResult.NO_PROGRESS;
+        }
+        final double normalizedCostPerTick = Math.max(0.0D, costPerTick);
+        if (currentNianTou < normalizedCostPerTick) {
+            return UnlockTickResult.NO_PROGRESS;
+        }
+        if (nianTouConsumer != null && normalizedCostPerTick > 0.0D) {
+            nianTouConsumer.accept(normalizedCostPerTick);
+        }
+        process.remainingTicks--;
+        final double fatigueDebtApplied = appendFatigueDebt(
+            stabilityState,
+            IDENTIFY_PROGRESS_FATIGUE_DEBT
+        );
+        return new UnlockTickResult(
+            normalizedCostPerTick,
+            true,
+            process.remainingTicks <= 0,
+            fatigueDebtApplied
+        );
+    }
+
+    private static double appendFatigueDebt(
+        final KongqiaoData.StabilityState stabilityState,
+        final double fatigueDebt
+    ) {
+        if (stabilityState == null || fatigueDebt <= 0.0D) {
+            return 0.0D;
+        }
+        stabilityState.setFatigueDebt(stabilityState.getFatigueDebt() + fatigueDebt);
+        return fatigueDebt;
     }
 }

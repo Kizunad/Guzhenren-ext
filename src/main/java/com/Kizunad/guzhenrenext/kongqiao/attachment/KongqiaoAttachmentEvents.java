@@ -1,6 +1,8 @@
 package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.EntityHelper;
+import com.Kizunad.guzhenrenext.kongqiao.KongqiaoLifecycleStateContract;
 import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoCapacityService;
 import com.Kizunad.guzhenrenext.kongqiao.parasite.ParasiteUpgradeAttachment;
 import net.minecraft.world.entity.Entity;
@@ -13,6 +15,11 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
  * 负责在实体进入世界时初始化空窍附件，并处理玩家克隆同步。
+ * <p>
+ * 这里处理的只是
+ * {@link KongqiaoLifecycleStateContract.StateCategory#ATTACHMENT_EXISTENCE}
+ * 所需的技术初始化，不代表玩家玩法已经激活。
+ * </p>
  */
 @EventBusSubscriber(modid = GuzhenrenExt.MODID)
 public final class KongqiaoAttachmentEvents {
@@ -52,6 +59,7 @@ public final class KongqiaoAttachmentEvents {
                 !entity.level().isClientSide() &&
                 entity instanceof LivingEntity living
             ) {
+                bridgeGameplayActivation(living, data);
                 KongqiaoCapacityService.syncCapacity(living, data);
                 if (living instanceof Player) {
                     // 玩家初次进入世界时依旧强制一次同步，保证客户端创建附件。
@@ -81,6 +89,18 @@ public final class KongqiaoAttachmentEvents {
             KongqiaoAttachments.getFlyingSwordPreferences(entity);
             KongqiaoAttachments.getFlyingSwordRuntime(entity);
             KongqiaoAttachments.getFlyingSwordState(entity);
+        }
+    }
+
+    private static void bridgeGameplayActivation(
+        final LivingEntity living,
+        final KongqiaoData data
+    ) {
+        if (living == null || data == null || data.isGameplayActivated()) {
+            return;
+        }
+        if (EntityHelper.isGuMaster(living)) {
+            data.setGameplayActivated(true);
         }
     }
 

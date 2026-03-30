@@ -1,5 +1,7 @@
 package com.Kizunad.guzhenrenext.kongqiao.service;
 
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoOwner;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoInventory;
 import com.Kizunad.guzhenrenext.kongqiao.inventory.KongqiaoSettings;
@@ -36,6 +38,12 @@ public final class KongqiaoService {
     private static final Component FEED_TITLE = Component.translatable(
         "menu.guzhenrenext.guchong_feed"
     );
+    private static final Component GAMEPLAY_NOT_ACTIVATED_MESSAGE = Component.literal(
+        "你尚未开窍，无法使用空窍相关功能。"
+    );
+    private static final Component DATA_NOT_READY_MESSAGE = Component.literal(
+        "空窍数据尚未初始化，请稍后重试。"
+    );
 
     private KongqiaoService() {}
 
@@ -61,6 +69,24 @@ public final class KongqiaoService {
             LOGGER.debug("[Kongqiao] {} 解锁新的空窍行数", owner.getKongqiaoId());
         }
         return changed;
+    }
+
+    public static KongqiaoData requireGameplayActivatedData(
+        final ServerPlayer player
+    ) {
+        if (player == null || player.level().isClientSide()) {
+            return null;
+        }
+        final KongqiaoData data = KongqiaoAttachments.getData(player);
+        if (data == null) {
+            player.sendSystemMessage(DATA_NOT_READY_MESSAGE);
+            return null;
+        }
+        if (!data.isGameplayActivated()) {
+            player.sendSystemMessage(GAMEPLAY_NOT_ACTIVATED_MESSAGE);
+            return null;
+        }
+        return data;
     }
 
     /**

@@ -141,6 +141,11 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
                     "技能轮盘：该杀招尚未实现，无法触发 [" + title + "]"
                 )
             );
+            case PRESSURE_LIMIT -> serverPlayer.sendSystemMessage(
+                Component.literal(
+                    "技能轮盘：当前空窍压力过高，无法触发 [" + title + "]"
+                )
+            );
             case CONDITION_NOT_MET -> serverPlayer.sendSystemMessage(
                 Component.literal(
                     "技能轮盘：条件不满足，触发失败 [" + title + "]"
@@ -252,6 +257,14 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
             );
             return;
         }
+        if (summary.matchedPressureLimit()) {
+            serverPlayer.sendSystemMessage(
+                Component.literal(
+                    "技能轮盘：当前空窍压力过高，无法触发 [" + title + "]"
+                )
+            );
+            return;
+        }
         if (summary.matchedConditionNotMet()) {
             serverPlayer.sendSystemMessage(
                 Component.literal(
@@ -277,6 +290,7 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
         boolean matchedUsage = false;
         boolean matchedNotUnlocked = false;
         boolean matchedNotImplemented = false;
+        boolean matchedPressureLimit = false;
         boolean matchedConditionNotMet = false;
         int unlockedSlots = inventory.getSettings().getUnlockedSlots();
         for (int i = 0; i < unlockedSlots; i++) {
@@ -309,6 +323,10 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
             ) {
                 matchedNotImplemented = true;
             } else if (
+                result.failureReason() == ActivationFailureReason.PRESSURE_LIMIT
+            ) {
+                matchedPressureLimit = true;
+            } else if (
                 result.failureReason() == ActivationFailureReason.CONDITION_NOT_MET
             ) {
                 matchedConditionNotMet = true;
@@ -320,6 +338,7 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
             matchedUsage,
             matchedNotUnlocked,
             matchedNotImplemented,
+            matchedPressureLimit,
             matchedConditionNotMet
         );
     }
@@ -329,6 +348,7 @@ public record ServerboundSkillWheelSelectPayload(String selectedUsageId)
         boolean matchedUsage,
         boolean matchedNotUnlocked,
         boolean matchedNotImplemented,
+        boolean matchedPressureLimit,
         boolean matchedConditionNotMet
     ) {}
 }

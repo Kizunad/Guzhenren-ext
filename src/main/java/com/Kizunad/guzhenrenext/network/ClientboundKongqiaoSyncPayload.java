@@ -10,11 +10,13 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-/**
- * 客户端同步空窍状态。
- */
-public record ClientboundKongqiaoSyncPayload(CompoundTag data)
+public record ClientboundKongqiaoSyncPayload(CompoundTag data, CompoundTag projection)
     implements CustomPacketPayload {
+
+    public ClientboundKongqiaoSyncPayload {
+        data = data == null ? new CompoundTag() : data;
+        projection = projection == null ? new CompoundTag() : projection;
+    }
 
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(
         GuzhenrenExt.MODID,
@@ -27,11 +29,8 @@ public record ClientboundKongqiaoSyncPayload(CompoundTag data)
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundKongqiaoSyncPayload> STREAM_CODEC =
         StreamCodec.of(
             (buf, payload) ->
-                ByteBufCodecs.COMPOUND_TAG.encode(buf, payload.data),
-            buf ->
-                new ClientboundKongqiaoSyncPayload(
-                    ByteBufCodecs.COMPOUND_TAG.decode(buf)
-                )
+                encode(buf, payload),
+            ClientboundKongqiaoSyncPayload::decode
         );
 
     @Override
@@ -42,6 +41,23 @@ public record ClientboundKongqiaoSyncPayload(CompoundTag data)
     public void handle(IPayloadContext context) {
         context.enqueueWork(() ->
             KongqiaoSyncClientHandler.applySync(this, context.flow())
+        );
+    }
+
+    private static void encode(
+        final RegistryFriendlyByteBuf buf,
+        final ClientboundKongqiaoSyncPayload payload
+    ) {
+        ByteBufCodecs.COMPOUND_TAG.encode(buf, payload.data);
+        ByteBufCodecs.COMPOUND_TAG.encode(buf, payload.projection);
+    }
+
+    private static ClientboundKongqiaoSyncPayload decode(
+        final RegistryFriendlyByteBuf buf
+    ) {
+        return new ClientboundKongqiaoSyncPayload(
+            ByteBufCodecs.COMPOUND_TAG.decode(buf),
+            ByteBufCodecs.COMPOUND_TAG.decode(buf)
         );
     }
 }

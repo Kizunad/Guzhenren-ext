@@ -18,6 +18,9 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public final class ShazhaoActiveService {
 
+    private static final double SHAZHAO_WHEEL_PRELOAD_PRESSURE = 2.0D;
+    private static final double SHAZHAO_SUCCESS_BURST_PRESSURE = 4.0D;
+
     private ShazhaoActiveService() {}
 
     public static ActivationResult activate(
@@ -70,13 +73,83 @@ public final class ShazhaoActiveService {
             );
         }
 
-        final boolean success = activeEffect.onActivate(player, data);
-        if (success) {
-            return new ActivationResult(true, ActivationFailureReason.NONE);
+        final KongqiaoData.StabilityState stabilityState = kongqiaoData == null
+            ? null
+            : kongqiaoData.getStabilityState();
+        final double currentEffectivePressure;
+        final double pressureCap;
+        if (kongqiaoData != null) {
+            final KongqiaoPressureProjection projection =
+                KongqiaoPressureProjectionService.assemblePressureProjection(
+                    kongqiaoData,
+                    player
+                );
+            currentEffectivePressure = projection.effectivePressure();
+            pressureCap = projection.pressureCap();
+        } else {
+            currentEffectivePressure = 0.0D;
+            pressureCap = Double.POSITIVE_INFINITY;
         }
-        return new ActivationResult(
-            false,
-            ActivationFailureReason.CONDITION_NOT_MET
+        return activateResolvedEffect(
+            player,
+            data,
+            activeEffect,
+            stabilityState,
+            currentEffectivePressure,
+            pressureCap
+        );
+    }
+
+    static ActivationResult activateResolvedEffect(
+        final ServerPlayer player,
+        final ShazhaoData data,
+        final IShazhaoActiveEffect activeEffect,
+        final KongqiaoData.StabilityState stabilityState,
+        final double currentEffectivePressure,
+        final double pressureCap
+    ) {
+        if (activeEffect == null) {
+            return new ActivationResult(false, ActivationFailureReason.NOT_IMPLEMENTED);
+        }
+        if (
+            KongqiaoPressureProjectionService.wouldProjectedPressureReachOverload(
+                currentEffectivePressure,
+                pressureCap,
+                SHAZHAO_WHEEL_PRELOAD_PRESSURE + SHAZHAO_SUCCESS_BURST_PRESSURE
+            )
+        ) {
+            return new ActivationResult(false, ActivationFailureReason.PRESSURE_LIMIT);
+        }
+
+        final boolean success = activeEffect.onActivate(player, data);
+        if (!success) {
+            return new ActivationResult(
+                false,
+                ActivationFailureReason.CONDITION_NOT_MET
+            );
+        }
+        if (stabilityState != null) {
+            stabilityState.setBurstPressure(
+                stabilityState.getBurstPressure() + SHAZHAO_SUCCESS_BURST_PRESSURE
+            );
+        }
+        return new ActivationResult(true, ActivationFailureReason.NONE);
+    }
+
+    static ActivationResult activateResolvedEffectForTests(
+        final ShazhaoData data,
+        final IShazhaoActiveEffect activeEffect,
+        final KongqiaoData.StabilityState stabilityState,
+        final double currentEffectivePressure,
+        final double pressureCap
+    ) {
+        return activateResolvedEffect(
+            null,
+            data,
+            activeEffect,
+            stabilityState,
+            currentEffectivePressure,
+            pressureCap
         );
     }
 
@@ -86,6 +159,7 @@ public final class ShazhaoActiveService {
         NOT_UNLOCKED,
         NO_DATA,
         NOT_IMPLEMENTED,
+        PRESSURE_LIMIT,
         CONDITION_NOT_MET,
     }
 
