@@ -2,11 +2,14 @@ package com.Kizunad.guzhenrenext.client.gui;
 
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
+import com.Kizunad.guzhenrenext.kongqiao.client.KongqiaoClientProjectionCache;
+import com.Kizunad.guzhenrenext.kongqiao.client.ui.KongqiaoTask8UiText;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager.UsageLookup;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
+import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoPressureProjection;
 import com.Kizunad.guzhenrenext.network.ServerboundSkillWheelSelectPayload;
 import com.Kizunad.tinyUI.component.RadialMenu;
 import com.Kizunad.tinyUI.core.ScaleConfig;
@@ -48,6 +51,11 @@ public final class SkillWheelScreen extends TinyUIScreen {
     private static final int CENTER_LABEL_COLOR = 0xFFFFFFFF;
     private static final int EMPTY_HINT_COLOR = 0xFFAAAAAA;
     private static final int EMPTY_HINT_Y_OFFSET = 30;
+    private static final int PRESSURE_HINT_COLOR = 0xFFFFD36B;
+    private static final int PRESSURE_WARN_COLOR = 0xFFFF8A65;
+    private static final int PRESSURE_BLOCK_COLOR = 0xFFFF5C5C;
+    private static final int PRESSURE_HINT_Y_OFFSET = 52;
+    private static final int PRESSURE_DETAIL_Y_OFFSET = 66;
 
     private final KeyMapping holdKey;
     private RadialMenu radialMenu;
@@ -134,23 +142,23 @@ public final class SkillWheelScreen extends TinyUIScreen {
                 EMPTY_HINT_COLOR,
                 false
             );
+            drawProjectionWarnings(graphics, centerX, centerY);
             return;
         }
 
         final RadialMenu.Option hovered = radialMenu.getHoveredOption();
-        if (hovered == null || hovered.label().getString().isBlank()) {
-            return;
+        if (hovered != null && !hovered.label().getString().isBlank()) {
+            final int labelWidth = font.width(hovered.label());
+            graphics.drawString(
+                font,
+                hovered.label(),
+                centerX - labelWidth / 2,
+                centerY - font.lineHeight / 2,
+                CENTER_LABEL_COLOR,
+                false
+            );
         }
-
-        final int labelWidth = font.width(hovered.label());
-        graphics.drawString(
-            font,
-            hovered.label(),
-            centerX - labelWidth / 2,
-            centerY - font.lineHeight / 2,
-            CENTER_LABEL_COLOR,
-            false
-        );
+        drawProjectionWarnings(graphics, centerX, centerY);
     }
 
     @Override
@@ -231,6 +239,55 @@ public final class SkillWheelScreen extends TinyUIScreen {
             );
         }
         return holdKey.isDown();
+    }
+
+    private void drawProjectionWarnings(
+        final GuiGraphics graphics,
+        final int centerX,
+        final int centerY
+    ) {
+        final ProjectionWarning warning = buildProjectionWarning(
+            KongqiaoClientProjectionCache.getCurrentProjection()
+        );
+        if (warning.summary() == null || warning.summary().isBlank()) {
+            return;
+        }
+        final Component summary = Component.literal(warning.summary());
+        final int summaryWidth = font.width(summary);
+        graphics.drawString(
+            font,
+            summary,
+            centerX - summaryWidth / 2,
+            centerY - font.lineHeight / 2 + PRESSURE_HINT_Y_OFFSET,
+            warning.color(),
+            false
+        );
+        if (warning.detail() == null || warning.detail().isBlank()) {
+            return;
+        }
+        final Component detail = Component.literal(warning.detail());
+        final int detailWidth = font.width(detail);
+        graphics.drawString(
+            font,
+            detail,
+            centerX - detailWidth / 2,
+            centerY - font.lineHeight / 2 + PRESSURE_DETAIL_Y_OFFSET,
+            warning.color(),
+            false
+        );
+    }
+
+    static ProjectionWarning buildProjectionWarning(
+        final KongqiaoPressureProjection projection
+    ) {
+        final KongqiaoTask8UiText.SkillWheelWarning warning =
+            KongqiaoTask8UiText.buildSkillWheelWarning(projection);
+        final int color = projection != null && projection.overloadTier() >= 2
+            ? PRESSURE_BLOCK_COLOR
+            : projection != null && projection.overloadTier() == 1
+                ? PRESSURE_WARN_COLOR
+                : PRESSURE_HINT_COLOR;
+        return new ProjectionWarning(warning.summary(), warning.detail(), color);
     }
 
     private static WheelOptions buildWheelOptions(final Player player) {
@@ -329,4 +386,6 @@ public final class SkillWheelScreen extends TinyUIScreen {
         List<RadialMenu.Option> options,
         List<String> usageIds
     ) {}
+
+    static record ProjectionWarning(String summary, String detail, int color) {}
 }

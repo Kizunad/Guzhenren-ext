@@ -36,10 +36,14 @@ public final class KongqiaoSyncService {
         if (!data.isDirty()) {
             return;
         }
+        final var provider = player.level().registryAccess();
+        final var projection = KongqiaoPressureProjectionService
+            .assembleProjection(data, player);
         PacketDistributor.sendToPlayer(
             player,
             new ClientboundKongqiaoSyncPayload(
-                data.serializeNBT(player.level().registryAccess())
+                data.serializeNBT(provider),
+                projection.toTag()
             )
         );
         data.clearDirty();

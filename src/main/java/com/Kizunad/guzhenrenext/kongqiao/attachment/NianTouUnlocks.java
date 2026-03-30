@@ -1,7 +1,13 @@
 package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
+import com.Kizunad.guzhenrenext.kongqiao.KongqiaoLifecycleStateContract;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -10,15 +16,22 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * 玩家念头鉴定解锁记录。
- * 存储玩家已经鉴定过的物品 ID、杀招解锁情况，以及当前正在进行的鉴定进程。
+ * 玩家念头/杀招的解锁与鉴定进程附件。
+ * <p>
+ * 该类是
+ * {@link KongqiaoLifecycleStateContract.StateCategory#UNLOCK_STATE}
+ * 的唯一真相来源，负责：
+ * <ul>
+ *   <li>已解锁的念头用途；</li>
+ *   <li>已解锁的杀招；</li>
+ *   <li>当前鉴定进程；</li>
+ *   <li>与解锁过程直接相关的提示消息。</li>
+ * </ul>
+ * </p>
+ * <p>
+ * 它不负责玩法激活、玩家偏好、运行时激活态或压力/失稳等稳定态真相。
+ * </p>
  */
 public class NianTouUnlocks implements INBTSerializable<CompoundTag> {
 

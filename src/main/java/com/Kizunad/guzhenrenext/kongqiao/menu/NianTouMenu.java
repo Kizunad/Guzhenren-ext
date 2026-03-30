@@ -2,6 +2,7 @@ package com.Kizunad.guzhenrenext.kongqiao.menu;
 
 import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.network.PacketSyncNianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
@@ -252,10 +253,9 @@ public class NianTouMenu extends AbstractContainerMenu {
 
         final ShazhaoUnlockService.UnlockCandidate candidate =
             candidates.get(serverPlayer.getRandom().nextInt(candidates.size()));
+        final double roll = serverPlayer.getRandom().nextDouble();
         final ShazhaoData data = candidate.data();
         final double chance = candidate.chance();
-        final double roll = serverPlayer.getRandom().nextDouble();
-        final boolean success = roll <= chance;
         LOGGER.info(
             "推演杀招判定 | player={} shazhaoID={} chance={} roll={}",
             serverPlayer.getGameProfile().getName(),
@@ -263,31 +263,19 @@ public class NianTouMenu extends AbstractContainerMenu {
             chance,
             roll
         );
-        if (success) {
-            unlocks.unlockShazhao(ResourceLocation.parse(data.shazhaoID()));
-            final String info = data.getFormattedInfo();
-            final StringBuilder message = new StringBuilder("推演成功：")
-                .append(data.title());
-            if (info != null && !info.isBlank()) {
-                message.append(" | ").append(info);
-            }
-            unlocks.setShazhaoMessage(message.toString());
-        } else {
-            final int cost = Math.max(0, data.costTotalNiantou());
-            final double currentNianTou = NianTouHelper.getAmount(serverPlayer);
-            if (cost > 0 && currentNianTou < cost) {
-                unlocks.setShazhaoMessage("念头不足，无法推演杀招");
-                PacketDistributor.sendToPlayer(
-                    serverPlayer,
-                    new PacketSyncNianTouUnlocks(unlocks)
-                );
-                return true;
-            }
-            if (cost > 0) {
-                NianTouHelper.modify(serverPlayer, -cost);
-            }
-            unlocks.setShazhaoMessage("推演失败，消耗 " + cost + " 念头");
-        }
+        final KongqiaoData kongqiaoData = KongqiaoAttachments.getData(serverPlayer);
+        final KongqiaoData.StabilityState stabilityState = kongqiaoData == null
+            ? null
+            : kongqiaoData.getStabilityState();
+        final ShazhaoUnlockService.DeriveAttemptResult deriveResult =
+            ShazhaoUnlockService.resolveDeriveAttempt(
+                unlocks,
+                stabilityState,
+                candidate,
+                roll,
+                NianTouHelper.getAmount(serverPlayer),
+                cost -> NianTouHelper.modify(serverPlayer, -cost)
+            );
 
         PacketDistributor.sendToPlayer(
             serverPlayer,

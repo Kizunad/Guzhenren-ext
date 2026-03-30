@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.attachment;
 
+import com.Kizunad.guzhenrenext.kongqiao.KongqiaoLifecycleStateContract;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,11 +14,17 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 /**
  * 玩家空窍 UI 调整面板配置。
  * <p>
+ * 该类是
+ * {@link KongqiaoLifecycleStateContract.StateCategory#PREFERENCE_STATE}
+ * 的唯一真相来源。
+ * </p>
+ * <p>
  * 该配置用于“玩家偏好”，不等同于被动效果的实时激活状态：
  * <ul>
  *   <li>被动开关：决定某个被动用途是否允许生效（关闭时应强制失活）。</li>
  *   <li>轮盘技能：决定哪些主动技能会出现在轮盘菜单中（仅保存列表与顺序）。</li>
  * </ul>
+ * 它不负责证明某个效果当前是否真的在跑，也不负责证明玩家是否养得起该效果。
  * </p>
  */
 public class TweakConfig implements INBTSerializable<CompoundTag> {
@@ -211,4 +218,3 @@ public class TweakConfig implements INBTSerializable<CompoundTag> {
         }
     }
 }
-

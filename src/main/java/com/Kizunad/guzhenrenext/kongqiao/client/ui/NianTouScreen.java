@@ -2,10 +2,12 @@ package com.Kizunad.guzhenrenext.kongqiao.client.ui;
 
 import com.Kizunad.guzhenrenext.kongqiao.KongqiaoI18n;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.client.KongqiaoClientProjectionCache;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.menu.NianTouMenu;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
+import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoPressureProjection;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.InventoryUI;
 import com.Kizunad.tinyUI.controls.Label;
@@ -60,14 +62,21 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 	private static final int HISTORY_ITEM_HEIGHT = 12;
 	private static final int HISTORY_ITEM_STEP = 14;
 	private static final int HISTORY_BUTTON_PADDING = 4;
-	private static final int PROGRESS_BAR_EXTRA_Y = 10;
-	private static final int PERCENT_MULTIPLIER = 100;
-	private static final String FALLBACK_NO_DATA = "未找到该物品的念头配置。";
+    private static final int PROGRESS_BAR_EXTRA_Y = 10;
+    private static final int PERCENT_MULTIPLIER = 100;
+    private static final int STABILITY_SNAPSHOT_HEIGHT = LABEL_HEIGHT * 2 + SMALL_PADDING;
+    private static final int STABILITY_IMPACT_ROW_INDEX = 2;
+    private static final int STABILITY_SNAPSHOT_ROW_INDEX = 3;
+    private static final String FALLBACK_NO_DATA = "未找到该物品的念头配置。";
+    private static final int IDENTIFY_PROGRESS_FATIGUE_DEBT = 4;
+    private static final int DERIVE_SHAZHAO_FATIGUE_DEBT = 8;
 
     private final Theme theme = Theme.vanilla();
     private Label resultLabel;
     private Label timeLabel;
     private Label costLabel;
+    private Label stabilityImpactLabel;
+    private Label stabilitySnapshotLabel;
     private Label progressBarLabel; // 暂时用文本模拟进度条
     private Label shazhaoMessageLabel;
     private Button identifyButton;
@@ -91,6 +100,8 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
             resultLabel == null ||
             timeLabel == null ||
             costLabel == null ||
+            stabilityImpactLabel == null ||
+            stabilitySnapshotLabel == null ||
             shazhaoMessageLabel == null ||
             deriveShazhaoButton == null) {
             return;
@@ -277,8 +288,29 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 	        );
 	        panel.addChild(costLabel);
 
-        int shazhaoMessageY =
-            SMALL_PADDING + (LABEL_HEIGHT + SMALL_PADDING) * 2;
+	        stabilityImpactLabel = new Label(Component.literal(""), theme);
+	        stabilityImpactLabel.setFrame(
+	            SMALL_PADDING,
+	            SMALL_PADDING +
+	                (LABEL_HEIGHT + SMALL_PADDING) * STABILITY_IMPACT_ROW_INDEX,
+	            w - DOUBLE_PADDING,
+	            LABEL_HEIGHT
+	        );
+	        panel.addChild(stabilityImpactLabel);
+
+	        int stabilitySnapshotY =
+	            SMALL_PADDING +
+	                (LABEL_HEIGHT + SMALL_PADDING) * STABILITY_SNAPSHOT_ROW_INDEX;
+	        stabilitySnapshotLabel = new Label(Component.literal(""), theme);
+	        stabilitySnapshotLabel.setFrame(
+	            SMALL_PADDING,
+	            stabilitySnapshotY,
+	            w - DOUBLE_PADDING,
+	            STABILITY_SNAPSHOT_HEIGHT
+	        );
+	        panel.addChild(stabilitySnapshotLabel);
+	
+	        int shazhaoMessageY = stabilitySnapshotY + STABILITY_SNAPSHOT_HEIGHT + SMALL_PADDING;
         shazhaoMessageLabel = new Label(Component.literal(""), theme);
         shazhaoMessageLabel.setFrame(
             SMALL_PADDING,
@@ -303,18 +335,11 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 	        if (this.minecraft == null || this.minecraft.player == null) {
 	            return;
 	        }
-
+	        final KongqiaoPressureProjection projection =
+	            KongqiaoClientProjectionCache.getCurrentProjection();
+	
 	        NianTouUnlocks unlocks = KongqiaoAttachments.getUnlocks(this.minecraft.player);
-            if (unlocks != null) {
-                String message = unlocks.getShazhaoMessage();
-                if (message == null || message.isBlank()) {
-                    shazhaoMessageLabel.setText(Component.literal(""));
-                } else {
-                    shazhaoMessageLabel.setText(Component.literal(message));
-                }
-            } else {
-                shazhaoMessageLabel.setText(Component.literal(""));
-            }
+	        updateShazhaoMessage(unlocks);
 	        boolean isProcessing = unlocks != null && unlocks.isProcessing();
 	        if (lastProcessing && !isProcessing) {
 	            rebuildHistoryContent();
@@ -370,18 +395,19 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
             previewItemId = null;
         }
 
-        if (isProcessing && process != null) {
-            String usageName = processUsage != null ? processUsage.usageTitle() : "未知用途";
-            timeLabel.setText(
-                Component.literal("用途: " + usageName + " 剩余 " + process.remainingTicks + " ticks")
+	        if (isProcessing && process != null) {
+	            String usageName = processUsage != null ? processUsage.usageTitle() : "未知用途";
+	            timeLabel.setText(
+	                Component.literal("用途: " + usageName + " 剩余 " + process.remainingTicks + " ticks")
             );
-            costLabel.setText(
-                Component.translatable(KongqiaoI18n.NIANTOU_COST_LABEL)
-                    .append(": 总 " + process.totalCost)
-            );
-        } else if (slotData != null && slotData.usages() != null && !slotData.usages().isEmpty()) {
-            LockedUsageSummary summary = summarizeLockedUsages(unlocks, slotItemId, slotData);
-            if (summary.lockedCount > 0) {
+	            costLabel.setText(
+	                Component.translatable(KongqiaoI18n.NIANTOU_COST_LABEL)
+	                    .append(": 总 " + process.totalCost)
+	            );
+	            stabilityImpactLabel.setText(buildProcessingStabilityImpactText());
+	        } else if (slotData != null && slotData.usages() != null && !slotData.usages().isEmpty()) {
+	            LockedUsageSummary summary = summarizeLockedUsages(unlocks, slotItemId, slotData);
+	            if (summary.lockedCount > 0) {
                 timeLabel.setText(
                     Component.literal(
                         "耗时: 随机 (" +
@@ -391,30 +417,34 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
                         " ticks"
                     )
                 );
-                costLabel.setText(
-                    Component.literal(
-                        "消耗: 随机 (" +
-                        summary.lockedCount +
-                        " 项) " +
-                        formatRange(summary.minCost, summary.maxCost)
-                    )
-                );
-            } else {
-                timeLabel.setText(Component.literal("耗时: 全部用途已解锁"));
-                costLabel.setText(Component.literal("消耗: --"));
-            }
-        } else {
-            timeLabel.setText(
-                Component.translatable(KongqiaoI18n.NIANTOU_TIME_LABEL)
+	                costLabel.setText(
+	                    Component.literal(
+	                        "消耗: 随机 (" +
+	                        summary.lockedCount +
+	                        " 项) " +
+	                        formatRange(summary.minCost, summary.maxCost)
+	                    )
+	                );
+	                stabilityImpactLabel.setText(buildIdentifyPreviewStabilityImpactText());
+	            } else {
+	                timeLabel.setText(Component.literal("耗时: 全部用途已解锁"));
+	                costLabel.setText(Component.literal("消耗: --"));
+	                stabilityImpactLabel.setText(buildDeriveOnlyStabilityImpactText());
+	            }
+	        } else {
+	            timeLabel.setText(
+	                Component.translatable(KongqiaoI18n.NIANTOU_TIME_LABEL)
                     .append(": --")
             );
-            costLabel.setText(
-                Component.translatable(KongqiaoI18n.NIANTOU_COST_LABEL)
-                    .append(": --")
-            );
-        }
-
-        boolean hasItemInSlot = slotItemId != null;
+	            costLabel.setText(
+	                Component.translatable(KongqiaoI18n.NIANTOU_COST_LABEL)
+	                    .append(": --")
+	            );
+	            stabilityImpactLabel.setText(buildDefaultStabilityImpactText());
+	        }
+	        stabilitySnapshotLabel.setText(buildStabilitySnapshotText(projection));
+	
+	        boolean hasItemInSlot = slotItemId != null;
         if (isProcessing) {
             if (slotItemId != null && process != null && !slotItemId.equals(process.itemId)) {
                 identifyButton.setText(Component.literal("其他鉴定中"));
@@ -441,10 +471,65 @@ public class NianTouScreen extends TinyUIContainerScreen<NianTouMenu> {
 
         if (slotData != null) {
             showResult(slotData, slotItemId, unlocks, process, false);
-        } else {
-            resultLabel.setText(Component.literal(FALLBACK_NO_DATA));
-        }
-    }
+	        } else {
+	            resultLabel.setText(Component.literal(FALLBACK_NO_DATA));
+	        }
+	    }
+
+	    private void updateShazhaoMessage(final NianTouUnlocks unlocks) {
+	        if (unlocks == null) {
+	            shazhaoMessageLabel.setText(Component.literal(""));
+	            return;
+	        }
+	        final String message = unlocks.getShazhaoMessage();
+	        if (message == null || message.isBlank()) {
+	            shazhaoMessageLabel.setText(Component.literal(""));
+	            return;
+	        }
+	        shazhaoMessageLabel.setText(Component.literal(message));
+	    }
+
+	    private static Component buildProcessingStabilityImpactText() {
+	        return Component.literal(
+	            "稳定影响: 每次推进 +" +
+	            IDENTIFY_PROGRESS_FATIGUE_DEBT +
+	            " 疲劳债务；推演尝试 +" +
+	            DERIVE_SHAZHAO_FATIGUE_DEBT
+	        );
+	    }
+
+	    private static Component buildIdentifyPreviewStabilityImpactText() {
+	        return Component.literal(
+	            "稳定影响: 鉴定推进每次 +" +
+	            IDENTIFY_PROGRESS_FATIGUE_DEBT +
+	            " 疲劳债务"
+	        );
+	    }
+
+	    private static Component buildDeriveOnlyStabilityImpactText() {
+	        return Component.literal(
+	            "稳定影响: 推演杀招每次尝试 +" +
+	            DERIVE_SHAZHAO_FATIGUE_DEBT +
+	            " 疲劳债务"
+	        );
+	    }
+
+	    static Component buildDefaultStabilityImpactText() {
+	        return Component.literal(
+	            KongqiaoTask8UiText.buildNianTouDefaultImpactText(
+	                IDENTIFY_PROGRESS_FATIGUE_DEBT,
+	                DERIVE_SHAZHAO_FATIGUE_DEBT
+	            )
+	        );
+	    }
+
+	    static Component buildStabilitySnapshotText(
+	        final KongqiaoPressureProjection projection
+	    ) {
+	        return Component.literal(
+	            KongqiaoTask8UiText.buildNianTouStabilitySnapshotText(projection)
+	        );
+	    }
 
     private void showResult(
         NianTouData data,

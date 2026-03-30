@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.kongqiao.shazhao;
 
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
@@ -7,6 +8,7 @@ import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.IntConsumer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -22,10 +24,17 @@ public final class ShazhaoUnlockService {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final double MIN_CHANCE = 0.1D;
     private static final double MAX_CHANCE = 0.9D;
+    private static final double DERIVE_SHAZHAO_FATIGUE_DEBT = 8.0D;
 
     private ShazhaoUnlockService() {}
 
     public record UnlockCandidate(ShazhaoData data, double chance) {}
+
+    public record DeriveAttemptResult(
+        boolean success,
+        int nianTouCostConsumed,
+        double fatigueDebtApplied
+    ) {}
 
     /**
      * 根据当前念头解锁情况，筛选出可尝试推演的杀招。
@@ -108,6 +117,39 @@ public final class ShazhaoUnlockService {
             return true;
         }
         return false;
+    }
+
+    public static DeriveAttemptResult resolveDeriveAttempt(
+        final NianTouUnlocks unlocks,
+        final KongqiaoData.StabilityState stabilityState,
+        final UnlockCandidate candidate,
+        final double roll,
+        final double currentNianTou,
+        final IntConsumer nianTouConsumer
+    ) {
+        if (unlocks == null || candidate == null || candidate.data() == null) {
+            return new DeriveAttemptResult(false, 0, 0.0D);
+        }
+        final ShazhaoData data = candidate.data();
+        final double fatigueDebtApplied = appendFatigueDebt(
+            stabilityState,
+            DERIVE_SHAZHAO_FATIGUE_DEBT
+        );
+        if (roll <= candidate.chance()) {
+            unlocks.unlockShazhao(ResourceLocation.parse(data.shazhaoID()));
+            unlocks.setShazhaoMessage(buildDeriveSuccessMessage(data));
+            return new DeriveAttemptResult(true, 0, fatigueDebtApplied);
+        }
+        final int cost = Math.max(0, data.costTotalNiantou());
+        if (cost > 0 && currentNianTou < cost) {
+            unlocks.setShazhaoMessage("念头不足，无法推演杀招");
+            return new DeriveAttemptResult(false, 0, fatigueDebtApplied);
+        }
+        if (nianTouConsumer != null && cost > 0) {
+            nianTouConsumer.accept(cost);
+        }
+        unlocks.setShazhaoMessage("推演失败，消耗 " + cost + " 念头");
+        return new DeriveAttemptResult(false, cost, fatigueDebtApplied);
     }
 
     /**
@@ -209,5 +251,26 @@ public final class ShazhaoUnlockService {
         double ratio = (double) unlockedUsages / (double) totalUsages;
         double chance = MIN_CHANCE + ratio * (MAX_CHANCE - MIN_CHANCE);
         return Math.min(MAX_CHANCE, chance);
+    }
+
+    private static String buildDeriveSuccessMessage(final ShazhaoData data) {
+        final String info = data.getFormattedInfo();
+        final StringBuilder message = new StringBuilder("推演成功：")
+            .append(data.title());
+        if (info != null && !info.isBlank()) {
+            message.append(" | ").append(info);
+        }
+        return message.toString();
+    }
+
+    private static double appendFatigueDebt(
+        final KongqiaoData.StabilityState stabilityState,
+        final double fatigueDebt
+    ) {
+        if (stabilityState == null || fatigueDebt <= 0.0D) {
+            return 0.0D;
+        }
+        stabilityState.setFatigueDebt(stabilityState.getFatigueDebt() + fatigueDebt);
+        return fatigueDebt;
     }
 }

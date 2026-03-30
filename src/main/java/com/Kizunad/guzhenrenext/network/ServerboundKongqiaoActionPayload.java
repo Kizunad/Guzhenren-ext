@@ -1,7 +1,6 @@
 package com.Kizunad.guzhenrenext.network;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
-import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoService;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -43,28 +42,47 @@ public record ServerboundKongqiaoActionPayload(Action action)
             if (!(context.player() instanceof ServerPlayer serverPlayer)) {
                 return;
             }
-            var owner = KongqiaoAttachments.getData(serverPlayer);
-            if (owner == null) {
-                return;
-            }
             switch (action) {
-                case OPEN_KONGQIAO -> KongqiaoService.openKongqiaoMenu(
-                        serverPlayer,
-                        owner
+                case OPEN_KONGQIAO -> {
+                    final var owner = KongqiaoService.requireGameplayActivatedData(
+                        serverPlayer
                     );
-                case OPEN_ATTACK -> KongqiaoService.openAttackInventoryMenu(
-                        serverPlayer,
-                        owner
+                    if (owner != null) {
+                        KongqiaoService.openKongqiaoMenu(serverPlayer, owner);
+                    }
+                }
+                case OPEN_ATTACK -> {
+                    final var owner = KongqiaoService.requireGameplayActivatedData(
+                        serverPlayer
                     );
-                case OPEN_FEED -> KongqiaoService.openGuchongFeedMenu(
-                        serverPlayer,
-                        owner
+                    if (owner != null) {
+                        KongqiaoService.openAttackInventoryMenu(serverPlayer, owner);
+                    }
+                }
+                case OPEN_FEED -> {
+                    final var owner = KongqiaoService.requireGameplayActivatedData(
+                        serverPlayer
                     );
-                case EXPAND -> KongqiaoService.expand(owner);
-                case SWAP_ATTACK -> KongqiaoService.swapAttackInventory(
-                        serverPlayer,
-                        owner
+                    if (owner != null) {
+                        KongqiaoService.openGuchongFeedMenu(serverPlayer, owner);
+                    }
+                }
+                case EXPAND -> {
+                    final var owner = KongqiaoService.requireGameplayActivatedData(
+                        serverPlayer
                     );
+                    if (owner != null) {
+                        KongqiaoService.expand(owner);
+                    }
+                }
+                case SWAP_ATTACK -> {
+                    final var owner = KongqiaoService.requireGameplayActivatedData(
+                        serverPlayer
+                    );
+                    if (owner != null) {
+                        KongqiaoService.swapAttackInventory(serverPlayer, owner);
+                    }
+                }
                 case OPEN_FORGE -> KongqiaoService.openFlyingSwordForgeMenu(
                         serverPlayer
                     );

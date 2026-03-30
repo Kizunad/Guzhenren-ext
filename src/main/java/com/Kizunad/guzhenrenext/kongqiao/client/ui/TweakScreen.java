@@ -1,8 +1,11 @@
 package com.Kizunad.guzhenrenext.kongqiao.client.ui;
 
+import com.Kizunad.guzhenrenext.kongqiao.attachment.ActivePassives;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
+import com.Kizunad.guzhenrenext.kongqiao.client.KongqiaoClientProjectionCache;
 import com.Kizunad.guzhenrenext.kongqiao.network.ServerboundTweakConfigUpdatePayload;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouData;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
@@ -10,6 +13,7 @@ import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUsageId;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
+import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoPressureProjection;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
 import com.Kizunad.tinyUI.controls.ScrollContainer;
@@ -69,22 +73,30 @@ public final class TweakScreen extends TinyUIScreen {
     // 右侧卡片布局（严格按 drawio 相对坐标映射）
     private static final int RIGHT_SCROLL_PADDING = 10;
     private static final int CARD_WIDTH = 400;
+    private static final int SUMMARY_CARD_HEIGHT = 46;
     private static final int PASSIVE_CARD_HEIGHT = 100;
     private static final int SKILL_CARD_HEIGHT = 90;
 
     private static final int CARD_TITLE_HEIGHT = 16;
     private static final int CARD_TITLE_Y = 0;
+    private static final int SUMMARY_TEXT_X = 10;
+    private static final int SUMMARY_TEXT_Y = 6;
+    private static final int SUMMARY_TEXT_HEIGHT = 28;
     private static final int CARD_DESC_X = 18;
     private static final int CARD_DESC_Y_PASSIVE = 50;
     private static final int CARD_DESC_Y_SKILL = 42;
     private static final int CARD_DESC_WIDTH = 292;
     private static final int CARD_DESC_HEIGHT = 36;
+    private static final int PREFERENCE_LABEL_Y = 22;
+    private static final int RUNTIME_LABEL_Y = 36;
+    private static final int ACTIVE_GATE_Y = 22;
+    private static final int ACTIVE_GATE_HEIGHT = 12;
 
     private static final int STATUS_LABEL_X = 280;
-    private static final int STATUS_LABEL_Y = 35;
     private static final int STATUS_LABEL_WIDTH = 60;
     private static final int STATUS_LABEL_HEIGHT = 12;
     private static final int STATUS_VALUE_X = 335;
+    private static final int STATUS_VALUE_WIDTH = 60;
 
     private static final int ACTION_BUTTON_X = 340;
     private static final int TOGGLE_BUTTON_Y = 70;
@@ -272,6 +284,17 @@ public final class TweakScreen extends TinyUIScreen {
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(
             minecraft.player
         );
+        final KongqiaoData kongqiaoData = KongqiaoAttachments.getData(
+            minecraft.player
+        );
+        final KongqiaoData.StabilityState stabilityState = kongqiaoData == null
+            ? null
+            : kongqiaoData.getStabilityState();
+        final ActivePassives activePassives = KongqiaoAttachments.getActivePassives(
+            minecraft.player
+        );
+        final KongqiaoPressureProjection projection =
+            KongqiaoClientProjectionCache.getCurrentProjection();
         int hash = HASH_SEED;
         hash =
             HASH_MULTIPLIER * hash +
@@ -291,6 +314,16 @@ public final class TweakScreen extends TinyUIScreen {
         hash =
             HASH_MULTIPLIER * hash +
             (config == null ? 0 : config.getWheelSkills().hashCode());
+        hash = HASH_MULTIPLIER * hash + (projection == null ? 0 : projection.hashCode());
+        hash = HASH_MULTIPLIER * hash + (
+            stabilityState == null
+                ? 0
+                : stabilityState.getForcedDisabledUsageIds().hashCode()
+        );
+        hash = HASH_MULTIPLIER * hash + (
+            stabilityState == null ? 0 : stabilityState.getOverloadTier()
+        );
+        hash = HASH_MULTIPLIER * hash + activePassivesHash(activePassives);
         return hash;
     }
 
@@ -457,6 +490,10 @@ public final class TweakScreen extends TinyUIScreen {
         final TweakConfig config = KongqiaoAttachments.getTweakConfig(
             minecraft.player
         );
+        final KongqiaoPressureProjection projection =
+            KongqiaoClientProjectionCache.getCurrentProjection();
+        final PassiveRuntimeContext runtimeContext =
+            resolvePassiveRuntimeContext(minecraft.player, projection);
 
         if (selectedShazhaoId != null) {
             final ShazhaoData data = ShazhaoDataManager.get(selectedShazhaoId);
@@ -468,12 +505,12 @@ public final class TweakScreen extends TinyUIScreen {
                 return;
             }
 
-            int y = 0;
+            int y = addProjectionSummaryCard(projection, 0);
             if (ShazhaoId.isPassive(data.shazhaoID())) {
-                addShazhaoPassiveCard(config, data, y);
+                addShazhaoPassiveCard(config, data, runtimeContext, y);
                 y += PASSIVE_CARD_HEIGHT;
             } else if (ShazhaoId.isActive(data.shazhaoID())) {
-                addShazhaoActiveCard(config, data, y);
+                addShazhaoActiveCard(config, data, projection, y);
                 y += SKILL_CARD_HEIGHT;
             } else {
                 rightContent.setFrame(0, 0, CARD_WIDTH, PASSIVE_CARD_HEIGHT);
@@ -541,13 +578,13 @@ public final class TweakScreen extends TinyUIScreen {
             }
         }
 
-        int y = 0;
+        int y = addProjectionSummaryCard(projection, 0);
         for (NianTouData.Usage usage : passives) {
-            addPassiveCard(config, usage, y);
+            addPassiveCard(config, usage, runtimeContext, y);
             y += PASSIVE_CARD_HEIGHT;
         }
         for (NianTouData.Usage usage : skills) {
-            addSkillCard(config, usage, y);
+            addSkillCard(config, usage, projection, y);
             y += SKILL_CARD_HEIGHT;
         }
 
@@ -562,6 +599,7 @@ public final class TweakScreen extends TinyUIScreen {
     private void addPassiveCard(
         final TweakConfig config,
         final NianTouData.Usage usage,
+        final PassiveRuntimeContext runtimeContext,
         final int y
     ) {
         final SolidPanel card = new SolidPanel(theme);
@@ -584,27 +622,51 @@ public final class TweakScreen extends TinyUIScreen {
         descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         card.addChild(descLabel);
 
-        final Label statusLabel = new Label("当前状态:", theme);
-        statusLabel.setFrame(
-            STATUS_LABEL_X,
-            STATUS_LABEL_Y,
-            STATUS_LABEL_WIDTH,
-            STATUS_LABEL_HEIGHT
+        final PassiveRuntimeView runtimeView = buildPassiveRuntimeView(
+            config,
+            usage.usageID(),
+            runtimeContext
         );
-        statusLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
-        card.addChild(statusLabel);
 
-        final boolean enabled =
-            config == null || config.isPassiveEnabled(usage.usageID());
-        final Label statusValue = new Label(enabled ? "开启" : "关闭", theme);
-        statusValue.setFrame(
-            STATUS_VALUE_X,
-            STATUS_LABEL_Y,
+        final Label preferenceLabel = new Label("偏好:", theme);
+        preferenceLabel.setFrame(
+            STATUS_LABEL_X,
+            PREFERENCE_LABEL_Y,
             STATUS_LABEL_WIDTH,
             STATUS_LABEL_HEIGHT
         );
-        statusValue.setHorizontalAlign(Label.HorizontalAlign.CENTER);
-        card.addChild(statusValue);
+        preferenceLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(preferenceLabel);
+
+        final Label preferenceValue = new Label(runtimeView.preferenceText(), theme);
+        preferenceValue.setFrame(
+            STATUS_VALUE_X,
+            PREFERENCE_LABEL_Y,
+            STATUS_VALUE_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        preferenceValue.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(preferenceValue);
+
+        final Label runtimeLabel = new Label("运行:", theme);
+        runtimeLabel.setFrame(
+            STATUS_LABEL_X,
+            RUNTIME_LABEL_Y,
+            STATUS_LABEL_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        runtimeLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(runtimeLabel);
+
+        final Label runtimeValue = new Label(runtimeView.runtimeText(), theme);
+        runtimeValue.setFrame(
+            STATUS_VALUE_X,
+            RUNTIME_LABEL_Y,
+            STATUS_VALUE_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        runtimeValue.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(runtimeValue);
 
         final Button toggle = new Button("开启/关闭", theme);
         toggle.setFrame(
@@ -631,6 +693,7 @@ public final class TweakScreen extends TinyUIScreen {
     private void addSkillCard(
         final TweakConfig config,
         final NianTouData.Usage usage,
+        final KongqiaoPressureProjection projection,
         final int y
     ) {
         final SolidPanel card = new SolidPanel(theme);
@@ -652,6 +715,15 @@ public final class TweakScreen extends TinyUIScreen {
         );
         descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         card.addChild(descLabel);
+
+        final Label gateLabel = new Label(buildWheelGateText(projection), theme);
+        gateLabel.setFrame(
+            CARD_DESC_X,
+            ACTIVE_GATE_Y,
+            CARD_DESC_WIDTH,
+            ACTIVE_GATE_HEIGHT
+        );
+        card.addChild(gateLabel);
 
         final boolean inWheel =
             config != null && config.isInWheel(usage.usageID());
@@ -721,6 +793,7 @@ public final class TweakScreen extends TinyUIScreen {
     private void addShazhaoPassiveCard(
         final TweakConfig config,
         final ShazhaoData data,
+        final PassiveRuntimeContext runtimeContext,
         final int y
     ) {
         final SolidPanel card = new SolidPanel(theme);
@@ -743,27 +816,51 @@ public final class TweakScreen extends TinyUIScreen {
         descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         card.addChild(descLabel);
 
-        final Label statusLabel = new Label("当前状态:", theme);
-        statusLabel.setFrame(
-            STATUS_LABEL_X,
-            STATUS_LABEL_Y,
-            STATUS_LABEL_WIDTH,
-            STATUS_LABEL_HEIGHT
+        final PassiveRuntimeView runtimeView = buildPassiveRuntimeView(
+            config,
+            data.shazhaoID(),
+            runtimeContext
         );
-        statusLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
-        card.addChild(statusLabel);
 
-        final boolean enabled =
-            config == null || config.isPassiveEnabled(data.shazhaoID());
-        final Label statusValue = new Label(enabled ? "开启" : "关闭", theme);
-        statusValue.setFrame(
-            STATUS_VALUE_X,
-            STATUS_LABEL_Y,
+        final Label preferenceLabel = new Label("偏好:", theme);
+        preferenceLabel.setFrame(
+            STATUS_LABEL_X,
+            PREFERENCE_LABEL_Y,
             STATUS_LABEL_WIDTH,
             STATUS_LABEL_HEIGHT
         );
-        statusValue.setHorizontalAlign(Label.HorizontalAlign.CENTER);
-        card.addChild(statusValue);
+        preferenceLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(preferenceLabel);
+
+        final Label preferenceValue = new Label(runtimeView.preferenceText(), theme);
+        preferenceValue.setFrame(
+            STATUS_VALUE_X,
+            PREFERENCE_LABEL_Y,
+            STATUS_VALUE_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        preferenceValue.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(preferenceValue);
+
+        final Label runtimeLabel = new Label("运行:", theme);
+        runtimeLabel.setFrame(
+            STATUS_LABEL_X,
+            RUNTIME_LABEL_Y,
+            STATUS_LABEL_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        runtimeLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(runtimeLabel);
+
+        final Label runtimeValue = new Label(runtimeView.runtimeText(), theme);
+        runtimeValue.setFrame(
+            STATUS_VALUE_X,
+            RUNTIME_LABEL_Y,
+            STATUS_VALUE_WIDTH,
+            STATUS_LABEL_HEIGHT
+        );
+        runtimeValue.setHorizontalAlign(Label.HorizontalAlign.CENTER);
+        card.addChild(runtimeValue);
 
         final Button toggle = new Button("开启/关闭", theme);
         toggle.setFrame(
@@ -790,6 +887,7 @@ public final class TweakScreen extends TinyUIScreen {
     private void addShazhaoActiveCard(
         final TweakConfig config,
         final ShazhaoData data,
+        final KongqiaoPressureProjection projection,
         final int y
     ) {
         final SolidPanel card = new SolidPanel(theme);
@@ -811,6 +909,15 @@ public final class TweakScreen extends TinyUIScreen {
         );
         descLabel.setHorizontalAlign(Label.HorizontalAlign.CENTER);
         card.addChild(descLabel);
+
+        final Label gateLabel = new Label(buildWheelGateText(projection), theme);
+        gateLabel.setFrame(
+            CARD_DESC_X,
+            ACTIVE_GATE_Y,
+            CARD_DESC_WIDTH,
+            ACTIVE_GATE_HEIGHT
+        );
+        card.addChild(gateLabel);
 
         final boolean inWheel =
             config != null && config.isInWheel(data.shazhaoID());
@@ -988,4 +1095,122 @@ public final class TweakScreen extends TinyUIScreen {
         }
         return lines;
     }
+
+    private int addProjectionSummaryCard(
+        final KongqiaoPressureProjection projection,
+        final int y
+    ) {
+        final SolidPanel summaryCard = new SolidPanel(theme);
+        summaryCard.setFrame(0, y, CARD_WIDTH, SUMMARY_CARD_HEIGHT);
+        rightContent.addChild(summaryCard);
+        final Label summaryLabel = new Label(
+            buildProjectionSummaryText(projection),
+            theme
+        );
+        summaryLabel.setFrame(
+            SUMMARY_TEXT_X,
+            SUMMARY_TEXT_Y,
+            CARD_WIDTH - SUMMARY_TEXT_X * 2,
+            SUMMARY_TEXT_HEIGHT
+        );
+        summaryCard.addChild(summaryLabel);
+        return y + SUMMARY_CARD_HEIGHT;
+    }
+
+    static String buildProjectionSummaryText(
+        final KongqiaoPressureProjection projection
+    ) {
+        return KongqiaoTask8UiText.buildTweakProjectionSummaryText(projection);
+    }
+
+    static String buildWheelGateText(final KongqiaoPressureProjection projection) {
+        return KongqiaoTask8UiText.buildTweakWheelGateText(projection);
+    }
+
+    private static PassiveRuntimeContext resolvePassiveRuntimeContext(
+        final net.minecraft.world.entity.player.Player player,
+        final KongqiaoPressureProjection projection
+    ) {
+        if (player == null) {
+            return new PassiveRuntimeContext(Set.of(), null, projection);
+        }
+        final KongqiaoData kongqiaoData = KongqiaoAttachments.getData(player);
+        final Set<String> forcedDisabledUsageIds = kongqiaoData == null
+            || kongqiaoData.getStabilityState() == null
+            ? Set.of()
+            : kongqiaoData.getStabilityState().getForcedDisabledUsageIds();
+        return new PassiveRuntimeContext(
+            forcedDisabledUsageIds,
+            KongqiaoAttachments.getActivePassives(player),
+            projection
+        );
+    }
+
+    private static PassiveRuntimeView buildPassiveRuntimeView(
+        final TweakConfig config,
+        final String usageId,
+        final PassiveRuntimeContext runtimeContext
+    ) {
+        final boolean preferredEnabled = config == null
+            || config.isPassiveEnabled(usageId);
+        final String preferenceText = preferredEnabled ? "开启" : "关闭";
+        if (!preferredEnabled) {
+            return new PassiveRuntimeView(preferenceText, "按偏好关闭");
+        }
+        final PassiveRuntimeContext safeContext = runtimeContext == null
+            ? new PassiveRuntimeContext(Set.of(), null, KongqiaoPressureProjection.empty())
+            : runtimeContext;
+        if (safeContext.forcedDisabledUsageIds().contains(usageId)) {
+            return new PassiveRuntimeView(
+                preferenceText,
+                "超压强停"
+            );
+        }
+        if (
+            safeContext.activePassives() != null
+                && safeContext.activePassives().isActive(usageId)
+        ) {
+            return new PassiveRuntimeView(preferenceText, "运行中");
+        }
+        if (safeContext.projection() != null && safeContext.projection().overloadTier() >= 2) {
+            return new PassiveRuntimeView(preferenceText, "高压待机");
+        }
+        return new PassiveRuntimeView(preferenceText, "未在运行");
+    }
+
+    static PassiveRuntimeView buildPassiveRuntimeView(
+        final boolean preferredEnabled,
+        final boolean runtimeActive,
+        final Set<String> forcedDisabledUsageIds,
+        final String usageId,
+        final KongqiaoPressureProjection projection
+    ) {
+        final KongqiaoTask8UiText.PassiveRuntimeView runtimeView =
+            KongqiaoTask8UiText.buildPassiveRuntimeView(
+                preferredEnabled,
+                runtimeActive,
+                forcedDisabledUsageIds,
+                usageId,
+                projection
+            );
+        return new PassiveRuntimeView(
+            runtimeView.preferenceText(),
+            runtimeView.runtimeText()
+        );
+    }
+
+    private static int activePassivesHash(final ActivePassives activePassives) {
+        if (activePassives == null) {
+            return 0;
+        }
+        return activePassives.serializeNBT(null).toString().hashCode();
+    }
+
+    private record PassiveRuntimeContext(
+        Set<String> forcedDisabledUsageIds,
+        ActivePassives activePassives,
+        KongqiaoPressureProjection projection
+    ) {}
+
+    static record PassiveRuntimeView(String preferenceText, String runtimeText) {}
 }

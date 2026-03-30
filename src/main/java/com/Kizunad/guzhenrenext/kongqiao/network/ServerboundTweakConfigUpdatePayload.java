@@ -2,10 +2,12 @@ package com.Kizunad.guzhenrenext.kongqiao.network;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
+import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoData;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.NianTouUnlocks;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.TweakConfig;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.niantou.NianTouUsageId;
+import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoPressureProjectionService;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoData;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoDataManager;
 import com.Kizunad.guzhenrenext.kongqiao.shazhao.ShazhaoId;
@@ -203,8 +205,19 @@ public record ServerboundTweakConfigUpdatePayload(
                     // 忽略：数据异常时不阻断玩家配置，但可能在触发时表现为无效
                 }
             }
-            final boolean added = config.addWheelSkill(
+            final int overloadTier = resolveCurrentOverloadTier(serverPlayer);
+            if (isWheelAdditionBlockedByOverload(overloadTier)) {
+                serverPlayer.displayClientMessage(
+                    Component.literal("当前空窍已超压，无法继续加入轮盘。"),
+                    true
+                );
+                syncToClient(serverPlayer, config);
+                return false;
+            }
+            final boolean added = tryAddWheelSkillWithOverloadGate(
+                config,
                 idString,
+                overloadTier,
                 TweakConfig.DEFAULT_MAX_WHEEL_SKILLS
             );
             if (!added) {
@@ -242,8 +255,19 @@ public record ServerboundTweakConfigUpdatePayload(
                 );
                 return false;
             }
-            final boolean added = config.addWheelSkill(
+            final int overloadTier = resolveCurrentOverloadTier(serverPlayer);
+            if (isWheelAdditionBlockedByOverload(overloadTier)) {
+                serverPlayer.displayClientMessage(
+                    Component.literal("当前空窍已超压，无法继续加入轮盘。"),
+                    true
+                );
+                syncToClient(serverPlayer, config);
+                return false;
+            }
+            final boolean added = tryAddWheelSkillWithOverloadGate(
+                config,
                 idString,
+                overloadTier,
                 TweakConfig.DEFAULT_MAX_WHEEL_SKILLS
             );
             if (!added) {
@@ -266,6 +290,30 @@ public record ServerboundTweakConfigUpdatePayload(
             return true;
         }
         return false;
+    }
+
+    private static int resolveCurrentOverloadTier(final ServerPlayer serverPlayer) {
+        final KongqiaoData kongqiaoData = KongqiaoAttachments.getData(serverPlayer);
+        if (kongqiaoData == null || kongqiaoData.getStabilityState() == null) {
+            return 0;
+        }
+        return kongqiaoData.getStabilityState().getOverloadTier();
+    }
+
+    static boolean isWheelAdditionBlockedByOverload(final int overloadTier) {
+        return KongqiaoPressureProjectionService.isOverloadedOrWorse(overloadTier);
+    }
+
+    static boolean tryAddWheelSkillWithOverloadGate(
+        final TweakConfig config,
+        final String usageId,
+        final int overloadTier,
+        final int maxSize
+    ) {
+        if (config == null || isWheelAdditionBlockedByOverload(overloadTier)) {
+            return false;
+        }
+        return config.addWheelSkill(usageId, maxSize);
     }
 
     private static boolean handleRemoveWheelSkill(

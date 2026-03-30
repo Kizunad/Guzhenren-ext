@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.network;
 
+import com.Kizunad.guzhenrenext.kongqiao.service.KongqiaoService;
 import com.Kizunad.guzhenrenext.kongqiao.menu.NianTouMenu;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -29,6 +30,9 @@ public static final StreamCodec<ByteBuf, PacketOpenNianTouGui> STREAM_CODEC = St
     public static void handle(PacketOpenNianTouGui payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
+                if (KongqiaoService.requireGameplayActivatedData(player) == null) {
+                    return;
+                }
                 MenuProvider container = new SimpleMenuProvider(
                     (id, inventory, p) -> new NianTouMenu(id, inventory),
                     net.minecraft.network.chat.Component.translatable("gui.guzhenrenext.niantou.title")
