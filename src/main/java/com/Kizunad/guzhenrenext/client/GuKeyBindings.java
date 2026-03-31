@@ -58,6 +58,14 @@ public final class GuKeyBindings {
         KEY_CATEGORY
     );
 
+    public static final KeyMapping OPEN_FACTION_INFO = new KeyMapping(
+        "key.guzhenrenext.open_faction_info",
+        KeyConflictContext.IN_GAME,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_J,
+        KEY_CATEGORY
+    );
+
     // ===== 飞剑（Phase 2 最小输入） =====
 
     /**
@@ -152,6 +160,7 @@ public final class GuKeyBindings {
         event.register(OPEN_NIANTOU_GUI);
         event.register(OPEN_SKILL_WHEEL);
         event.register(OPEN_TWEAK_UI);
+        event.register(OPEN_FACTION_INFO);
 
         event.register(FLYING_SWORD_SELECT_NEAREST);
         event.register(FLYING_SWORD_CYCLE_MODE);

@@ -3,6 +3,7 @@ package com.Kizunad.guzhenrenext;
 import com.Kizunad.guzhenrenext.commands.GuzhenrenDebugCommand;
 import com.Kizunad.guzhenrenext.config.ClientConfig;
 import com.Kizunad.guzhenrenext.config.CommonConfig;
+import com.Kizunad.guzhenrenext.entity.ModEntities;
 import com.Kizunad.guzhenrenext.kongqiao.attachment.KongqiaoAttachments;
 import com.Kizunad.guzhenrenext.kongqiao.menu.KongqiaoMenus;
 import com.Kizunad.guzhenrenext.network.GuzhenrenExtNetworking;
@@ -30,15 +31,11 @@ public class GuzhenrenExt {
 
     public GuzhenrenExt(IEventBus modEventBus, ModContainer modContainer) {
         // CustomNPCs 初始化已移除
-        // Registery.registerAll();
-        // NpcSpawnInitializer.register();
-        // NpcSecondTicker.register();
-        // NpcResourceRegeneration.register();
-        // NpcKongqiaoInventoryBridge.register();
 
         KongqiaoMenus.register(modEventBus);
         // Bastion 系统已移除，待重写
         KongqiaoAttachments.register(modEventBus);
+        ModEntities.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.flyingsword.FlyingSwordEntities.register(modEventBus);
         GuzhenrenExtNetworking.register(modEventBus);
         com.Kizunad.guzhenrenext.kongqiao.logic.GuModEffects.registerAll();

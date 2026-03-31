@@ -2,11 +2,13 @@ package com.Kizunad.guzhenrenext.client;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
 import com.Kizunad.guzhenrenext.client.effect.BackPngTimedEffects;
+import com.Kizunad.guzhenrenext.faction.client.FactionInfoClientState;
 import com.Kizunad.guzhenrenext.client.gui.SkillWheelScreen;
 import com.Kizunad.guzhenrenext.kongqiao.client.ui.TweakScreen;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.client.FlyingSwordHubScreen;
 import com.Kizunad.guzhenrenext.network.PacketOpenNianTouGui;
 import com.Kizunad.guzhenrenext.network.ServerboundBenmingSwordActionPayload;
+import com.Kizunad.guzhenrenext.network.ServerboundFactionInfoRequestPayload;
 import com.Kizunad.guzhenrenext.network.ServerboundFlyingSwordActionPayload;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -63,6 +65,13 @@ public final class GuClientEvents {
         while (GuKeyBindings.OPEN_TWEAK_UI.consumeClick()) {
             if (minecraft.screen == null) {
                 minecraft.setScreen(new TweakScreen());
+            }
+        }
+
+        while (GuKeyBindings.OPEN_FACTION_INFO.consumeClick()) {
+            if (minecraft.screen == null) {
+                FactionInfoClientState.markSyncPending();
+                PacketDistributor.sendToServer(new ServerboundFactionInfoRequestPayload());
             }
         }
 

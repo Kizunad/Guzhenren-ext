@@ -55,6 +55,16 @@ public final class GuzhenrenExtNetworking {
             ServerboundTweakConfigUpdatePayload::handle
         );
         registrar.playToServer(
+            ServerboundFactionInfoRequestPayload.TYPE,
+            ServerboundFactionInfoRequestPayload.STREAM_CODEC,
+            ServerboundFactionInfoRequestPayload::handle
+        );
+        registrar.playToServer(
+            ServerboundFactionRelationGraphRequestPayload.TYPE,
+            ServerboundFactionRelationGraphRequestPayload.STREAM_CODEC,
+            ServerboundFactionRelationGraphRequestPayload::handle
+        );
+        registrar.playToServer(
             ServerboundLingHunGuDoubleJumpPayload.TYPE,
             ServerboundLingHunGuDoubleJumpPayload.STREAM_CODEC,
             ServerboundLingHunGuDoubleJumpPayload::handle
@@ -113,6 +123,16 @@ public final class GuzhenrenExtNetworking {
             PacketSyncTweakConfig.TYPE,
             PacketSyncTweakConfig.STREAM_CODEC,
             PacketSyncTweakConfig::handle
+        );
+        registrar.playToClient(
+            ClientboundFactionInfoSyncPayload.TYPE,
+            ClientboundFactionInfoSyncPayload.STREAM_CODEC,
+            ClientboundFactionInfoSyncPayload::handle
+        );
+        registrar.playToClient(
+            ClientboundFactionRelationGraphSyncPayload.TYPE,
+            ClientboundFactionRelationGraphSyncPayload.STREAM_CODEC,
+            ClientboundFactionRelationGraphSyncPayload::handle
         );
 
         registrar.playToClient(
