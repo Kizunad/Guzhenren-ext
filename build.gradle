@@ -45,10 +45,8 @@ tasks.withType(Checkstyle).configureEach {
 sourceSets {
     main {
         java {
-            // 从主编译中排除 CustomNPCs 与其测试，避免 customnpcs 入口触发 dangling entrypoint
             exclude 'com/Kizunad/customNPCs/**'
             exclude 'com/Kizunad/customNPCs_test/**'
-            exclude 'com/Kizunad/guzhenrenext/customNPCImpl/**'
         }
         resources {
             // 从主资源中排除 CustomNPCs 相关资源
@@ -61,7 +59,6 @@ sourceSets {
             exclude 'com/Kizunad/tinyUI/**'
             exclude 'com/Kizunad/customNPCs/**'
             exclude 'com/Kizunad/customNPCs_test/**'
-            exclude 'com/Kizunad/guzhenrenext/customNPCImpl/**'
         }
     }
     tinyUi {
@@ -113,14 +110,37 @@ sourceSets {
                 + configurations.testRuntimeClasspath
         )
     }
+    factionUiTest {
+        java {
+            srcDir 'src/test/java'
+            include 'com/Kizunad/guzhenrenext/faction/client/**'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+        compileClasspath += (
+            sourceSets.main.output
+                + configurations.testCompileClasspath
+                + sourceSets.main.compileClasspath
+        )
+        runtimeClasspath += (
+            output
+                + compileClasspath
+                + sourceSets.main.output
+                + configurations.testRuntimeClasspath
+        )
+    }
 }
 
 configurations {
+    runtimeClasspath.extendsFrom localRuntime
     tinyUiImplementation.extendsFrom implementation
     tinyUiTestImplementation.extendsFrom testImplementation, tinyUiImplementation
     tinyUiTestRuntimeOnly.extendsFrom testRuntimeOnly
     hubUiPrimitiveTestImplementation.extendsFrom testImplementation, implementation
     hubUiPrimitiveTestRuntimeOnly.extendsFrom testRuntimeOnly
+    factionUiTestImplementation.extendsFrom testImplementation, implementation
+    factionUiTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 tasks.register('tinyUiTest', Test) {
@@ -157,7 +177,20 @@ tasks.register('hubUiPrimitiveTest', Test) {
     shouldRunAfter(test)
 }
 
+tasks.register('factionUiTest', Test) {
+    description = 'Run faction client UI tests without compiling unrelated test sources.'
+    group = 'verification'
+    testClassesDirs = sourceSets.factionUiTest.output.classesDirs
+    classpath = sourceSets.factionUiTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter(test)
+}
+
 tasks.named('compileHubUiPrimitiveTestJava').configure {
+    dependsOn tasks.named('classes')
+}
+
+tasks.named('compileFactionUiTestJava').configure {
     dependsOn tasks.named('classes')
 }
 

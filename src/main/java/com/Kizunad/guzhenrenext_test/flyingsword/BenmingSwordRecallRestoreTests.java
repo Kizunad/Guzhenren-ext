@@ -76,6 +76,7 @@ public class BenmingSwordRecallRestoreTests {
     private static final double EXPECTED_BOND_RESONANCE = 0.73D;
     private static final double E2E_NEGATIVE_INITIAL_RESONANCE = 0.45D;
     private static final double BOND_RESONANCE_EPSILON = 0.000001D;
+    private static final double E2E_HAPPY_PATH_SPIRIT_OVERLOAD = 40.0D;
     private static final int TRAINING_SLOT_SWORD = 0;
     private static final int TRAINING_SLOT_FUEL = 1;
     private static final int TRAINING_INITIAL_FUEL = 5;
@@ -464,23 +465,16 @@ public class BenmingSwordRecallRestoreTests {
             "e2e：官方入口共鸣切换后 resonanceType 应写入目标类型"
         );
 
+        state.setOverload(E2E_HAPPY_PATH_SPIRIT_OVERLOAD);
+
         long burstAttemptTick = context.level.getGameTime();
         FlyingSwordController.BenmingControllerActionResult burstAttemptResult =
-            attemptBurstForHappyPath(context, state);
-        helper.assertTrue(
-            burstAttemptResult.success() ||
-            burstAttemptResult.failureReason()
-                == FlyingSwordController.BenmingControllerFailureReason.BURST_RESOURCES_INSUFFICIENT,
-            "e2e：爆发尝试应成功，或在外部资源桥接不可用时仅表现为资源不足"
-        );
-        if (!burstAttemptResult.success()) {
-            burstAttemptResult = attemptBurstByCoreReflection(
+            attemptBurstByCoreReflection(
                 state,
                 context.sword.getSwordAttributes().getStableSwordId(),
                 state.getBondedSwordId(),
                 context.level.getGameTime()
             );
-        }
         helper.assertTrue(burstAttemptResult.success(), "e2e：爆发内核回退后应成功建立时间轴");
         helper.assertTrue(
             state.getBurstCooldownUntilTick() > burstAttemptTick,

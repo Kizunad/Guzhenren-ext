@@ -7,6 +7,7 @@ import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
 import com.Kizunad.guzhenrenext.xianqiao.item.XianqiaoItems;
 import com.Kizunad.guzhenrenext.xianqiao.runtime.FragmentExpansionPolicy;
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -84,6 +85,14 @@ public class TribulationManager {
     /** 入侵阶段每只存活灾兽每 tick 造成的抽象损坏。 */
     private static final float INVASION_DAMAGE_PER_MOB_PER_TICK = 0.01F;
 
+    private static final double MIN_INTENSITY_MULTIPLIER = 0.25D;
+
+    private static final double MAX_INTENSITY_MULTIPLIER = 4.0D;
+
+    private static final double MIN_INVASION_SPAWN_MULTIPLIER = 0.50D;
+
+    private static final double MAX_INVASION_SPAWN_MULTIPLIER = 4.0D;
+
     private static final double BLOCK_CENTER_OFFSET = 0.5D;
 
     private static final float FULL_CIRCLE_DEGREES = 360.0F;
@@ -121,6 +130,8 @@ public class TribulationManager {
     /** 持有者 UUID（与一个仙窍绑定）。 */
     private final UUID owner;
 
+    private final ExternalTribulationModifier externalModifier;
+
     /** 当前状态。 */
     private TribulationState state = TribulationState.IDLE;
 
@@ -154,7 +165,12 @@ public class TribulationManager {
     private static final Map<UUID, Double> TEST_QIYUN_OVERRIDE = new HashMap<>();
 
     public TribulationManager(UUID owner) {
+        this(owner, ExternalTribulationModifier.neutral());
+    }
+
+    public TribulationManager(UUID owner, ExternalTribulationModifier externalModifier) {
         this.owner = owner;
+        this.externalModifier = Objects.requireNonNull(externalModifier, "externalModifier");
     }
 
     /**
@@ -297,7 +313,7 @@ public class TribulationManager {
             strikeMeteorOutputProduced = true;
         }
 
-        damageAccumulated += STRIKE_DAMAGE_PER_HIT;
+        damageAccumulated += (float) (STRIKE_DAMAGE_PER_HIT * externalModifier.intensityMultiplier());
     }
 
     private static boolean isNightSky(ServerLevel level) {
@@ -375,7 +391,11 @@ public class TribulationManager {
 
         reconcileInvasionEntities(level);
         if (!invasionEntities.isEmpty()) {
-            damageAccumulated += invasionEntities.size() * INVASION_DAMAGE_PER_MOB_PER_TICK;
+            damageAccumulated += (float) (
+                invasionEntities.size()
+                    * INVASION_DAMAGE_PER_MOB_PER_TICK
+                    * externalModifier.intensityMultiplier()
+            );
         }
 
         if (enemiesSpawned > 0 && invasionEntities.isEmpty()) {
@@ -410,7 +430,11 @@ public class TribulationManager {
      */
     private void spawnInvasionEnemies(ServerLevel level, ApertureInfo apertureInfo) {
         RandomSource random = level.getRandom();
-        for (int i = 0; i < INVASION_SPAWN_COUNT; i++) {
+        int spawnCount = Math.max(
+            1,
+            (int) Math.round(INVASION_SPAWN_COUNT * externalModifier.invasionSpawnMultiplier())
+        );
+        for (int i = 0; i < spawnCount; i++) {
             BlockPos spawnPos = randomEdgePosInAperture(random, apertureInfo, INVASION_EDGE_CHUNK_OFFSET);
 
             EntityType<? extends Mob> type = random.nextBoolean() ? EntityType.ZOMBIE : EntityType.SKELETON;
@@ -575,5 +599,35 @@ public class TribulationManager {
      */
     public boolean isFinished() {
         return finished;
+    }
+
+    public ExternalTribulationModifier getExternalModifierForTest() {
+        return externalModifier;
+    }
+
+    public record ExternalTribulationModifier(
+        double intensityMultiplier,
+        double invasionSpawnMultiplier
+    ) {
+
+        public ExternalTribulationModifier {
+            intensityMultiplier = clampDouble(intensityMultiplier, MIN_INTENSITY_MULTIPLIER, MAX_INTENSITY_MULTIPLIER);
+            invasionSpawnMultiplier = clampDouble(
+                invasionSpawnMultiplier,
+                MIN_INVASION_SPAWN_MULTIPLIER,
+                MAX_INVASION_SPAWN_MULTIPLIER
+            );
+        }
+
+        public static ExternalTribulationModifier neutral() {
+            return new ExternalTribulationModifier(1.0D, 1.0D);
+        }
+    }
+
+    private static double clampDouble(double value, double min, double max) {
+        if (value < min) {
+            return min;
+        }
+        return Math.min(value, max);
     }
 }

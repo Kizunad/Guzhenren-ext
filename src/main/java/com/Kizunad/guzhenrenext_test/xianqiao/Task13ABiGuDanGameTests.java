@@ -34,7 +34,7 @@ public class Task13ABiGuDanGameTests {
     public void testTask13ABiGuDanHappyPathShouldRestoreFoodAndConsumeOneItem(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         ServerPlayer player = createTestPlayer(level, HAPPY_PLAYER_UUID, HAPPY_PLAYER_NAME);
-        player.getFoodData().setFoodLevel(REDUCED_FOOD_LEVEL);
+        resetFoodBaseline(player, REDUCED_FOOD_LEVEL);
 
         ItemStack biGuDan = new ItemStack(FarmingItems.BI_GU_DAN.get());
         player.setItemInHand(InteractionHand.MAIN_HAND, biGuDan);
@@ -66,7 +66,7 @@ public class Task13ABiGuDanGameTests {
     public void testTask13ABiGuDanGuardPathNonPillShouldNotRestoreFoodOrSaturation(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         ServerPlayer player = createTestPlayer(level, GUARD_PLAYER_UUID, GUARD_PLAYER_NAME);
-        player.getFoodData().setFoodLevel(REDUCED_FOOD_LEVEL);
+        resetFoodBaseline(player, REDUCED_FOOD_LEVEL);
 
         Item nonPillShallowItem = FarmingItems.QING_YA_GRASS_ITEM.get();
         ItemStack nonPillStack = new ItemStack(nonPillShallowItem);
@@ -88,5 +88,11 @@ public class Task13ABiGuDanGameTests {
 
     private static ServerPlayer createTestPlayer(ServerLevel level, UUID playerUuid, String playerName) {
         return FakePlayerFactory.get(level, new GameProfile(playerUuid, playerName));
+    }
+
+    private static void resetFoodBaseline(ServerPlayer player, int foodLevel) {
+        player.getFoodData().setFoodLevel(foodLevel);
+        player.getFoodData().setSaturation(0.0F);
+        player.getFoodData().setExhaustion(0.0F);
     }
 }

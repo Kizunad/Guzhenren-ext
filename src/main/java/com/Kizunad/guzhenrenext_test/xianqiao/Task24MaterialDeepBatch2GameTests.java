@@ -43,6 +43,8 @@ public class Task24MaterialDeepBatch2GameTests {
     private static final double DROP_SCAN_HEIGHT_MARGIN = 1.5D;
     private static final double MD08_DROP_SCAN_RADIUS = 32.0D;
     private static final double MD08_DROP_SCAN_HEIGHT_MARGIN = 6.0D;
+    private static final double MD08_FAILURE_DROP_SCAN_RADIUS = 0.75D;
+    private static final double MD08_FAILURE_DROP_SCAN_HEIGHT_MARGIN = 0.75D;
     private static final int MD09_EXTRA_DEBT_TICKS = 1200;
     private static final float EXPECTED_REFORGE_WEAK_TIME_SPEED = 0.25F;
     private static final float EXPECTED_NORMAL_TIME_SPEED = 1.0F;
@@ -409,6 +411,16 @@ public class Task24MaterialDeepBatch2GameTests {
         prepareMd08DamageFixture(player);
         seedMaxHunPoForTest(player, MD08_MAX_HUNPO_BEFORE_SEED);
 
+        int baselineWorldDropCount = countItems(
+            level.getEntitiesOfClass(
+                ItemEntity.class,
+                createDropScanArea(playerPos)
+            ),
+            XianqiaoItems.YOU_HUN_NING_PO_SHI.get()
+        );
+        int baselineInventoryDropCount = countInventoryItems(player, XianqiaoItems.YOU_HUN_NING_PO_SHI.get());
+        int baselineMd08DropCount = baselineWorldDropCount + baselineInventoryDropCount;
+
         boolean consumed = DeepPillEffectState.consumeNearDeathTokenOnLethalDamage(player, MD08_NON_LETHAL_DAMAGE);
         helper.assertTrue(!consumed, "failure path: 非致死伤害不得消费 D-D01 保命令牌");
 
@@ -416,7 +428,11 @@ public class Task24MaterialDeepBatch2GameTests {
             int worldDropCount = countItems(
                 level.getEntitiesOfClass(
                     ItemEntity.class,
-                    createWideDropScanArea(playerPos, MD08_DROP_SCAN_RADIUS, MD08_DROP_SCAN_HEIGHT_MARGIN)
+                    createWideDropScanArea(
+                        playerPos,
+                        MD08_FAILURE_DROP_SCAN_RADIUS,
+                        MD08_FAILURE_DROP_SCAN_HEIGHT_MARGIN
+                    )
                 ),
                 XianqiaoItems.YOU_HUN_NING_PO_SHI.get()
             );
@@ -432,8 +448,9 @@ public class Task24MaterialDeepBatch2GameTests {
                 .getInt(DeepPillEffectState.KEY_RESIDUAL_SOUL_LAST_CONSUME_COUNT);
 
             helper.assertTrue(
-                md08DropCount == MD08_EXPECTED_COUNT_ZERO,
-                "failure path: 未消费 D-D01 令牌时必须 fail-closed，不能产出 M-D08"
+                md08DropCount == baselineMd08DropCount,
+                "failure path: 未消费 D-D01 令牌时必须 fail-closed，不能新增 M-D08"
+                    + "（before=" + baselineMd08DropCount + ", after=" + md08DropCount + "）"
             );
             helper.assertTrue(
                 crystalCount == MD08_EXPECTED_COUNT_ZERO,

@@ -1,5 +1,6 @@
 package com.Kizunad.guzhenrenext.xianqiao.entry;
 
+import com.Kizunad.guzhenrenext.faction.integration.FactionAscensionModifier;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.opening.AscensionThreeQiEvaluator;
 import com.Kizunad.guzhenrenext.xianqiao.opening.OpeningProfileResolver;
@@ -39,12 +40,25 @@ public final class ApertureInitializationRequestFactory {
 
     private final OpeningProfileResolver profileResolver;
 
+    private final FactionAscensionModifier factionAscensionModifier;
+
     public ApertureInitializationRequestFactory() {
-        this(new OpeningProfileResolver());
+        this(new OpeningProfileResolver(), new FactionAscensionModifier());
     }
 
     public ApertureInitializationRequestFactory(OpeningProfileResolver profileResolver) {
+        this(profileResolver, new FactionAscensionModifier());
+    }
+
+    public ApertureInitializationRequestFactory(
+        OpeningProfileResolver profileResolver,
+        FactionAscensionModifier factionAscensionModifier
+    ) {
         this.profileResolver = Objects.requireNonNull(profileResolver, "profileResolver");
+        this.factionAscensionModifier = Objects.requireNonNull(
+            factionAscensionModifier,
+            "factionAscensionModifier"
+        );
     }
 
     public ApertureInitializationRequest createFromPlayer(
@@ -63,10 +77,20 @@ public final class ApertureInitializationRequestFactory {
             ascensionAttemptSeam.ascensionAttemptInitiated()
         );
         AscensionThreeQiEvaluator.ThreeQiEvaluation evaluation = profile.threeQiEvaluation();
-        int heavenScore = toPercent(evaluation.heavenScore());
-        int earthScoreValue = toPercent(evaluation.earthScore());
-        int humanScore = toPercent(evaluation.humanScore());
-        int balanceScore = toPercent(evaluation.balanceScore());
+        FactionAscensionModifier.ReadinessModifier readinessModifier =
+            factionAscensionModifier.resolveReadinessModifier(player.serverLevel(), player.getUUID());
+        int heavenScore = applyScoreBonus(toPercent(evaluation.heavenScore()), readinessModifier);
+        int earthScoreValue = applyScoreBonus(toPercent(evaluation.earthScore()), readinessModifier);
+        int humanScore = applyScoreBonus(toPercent(evaluation.humanScore()), readinessModifier);
+        int balanceScore = applyScoreBonus(toPercent(evaluation.balanceScore()), readinessModifier);
+        int readyThreshold = Math.max(
+            SCORE_MIN,
+            READY_QI_THRESHOLD - readinessModifier.readyThresholdReduction()
+        );
+        int balanceThreshold = Math.max(
+            SCORE_MIN,
+            READY_BALANCE_THRESHOLD - readinessModifier.balanceThresholdReduction()
+        );
         boolean snapshotFrozen = ascensionAttemptSeam.snapshotFrozen() || evaluation.confirmedThresholdMet();
 
         return new ApertureInitializationRequest(
@@ -78,10 +102,10 @@ public final class ApertureInitializationRequestFactory {
             humanScore,
             balanceScore,
             evaluation.fiveTurnPeak(),
-            heavenScore >= READY_QI_THRESHOLD
-                && earthScoreValue >= READY_QI_THRESHOLD
-                && humanScore >= READY_QI_THRESHOLD,
-            balanceScore >= READY_BALANCE_THRESHOLD,
+            heavenScore >= readyThreshold
+                && earthScoreValue >= readyThreshold
+                && humanScore >= readyThreshold,
+            balanceScore >= balanceThreshold,
             evaluation.canEnterConfirmed(),
             snapshotFrozen,
             isAlreadyInitialized(player)
@@ -180,6 +204,16 @@ public final class ApertureInitializationRequestFactory {
             return SCORE_MIN;
         }
         return Math.min(SCORE_MAX, rounded);
+    }
+
+    private static int applyScoreBonus(
+        int baseScore,
+        FactionAscensionModifier.ReadinessModifier readinessModifier
+    ) {
+        return Math.min(
+            SCORE_MAX,
+            Math.max(SCORE_MIN, baseScore + readinessModifier.scoreBonus())
+        );
     }
 
     private static Optional<Boolean> readOptionalBooleanField(

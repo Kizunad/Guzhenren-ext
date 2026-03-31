@@ -67,8 +67,9 @@ public class Task15LoopBGameTests {
 
         // Given: 生灵已进入 farming 且挂载储物蛊；When: 等待稳定步进窗口；Then: 产出与反馈都应可观测。
         helper.runAfterDelay(SPIRIT_WAIT_TICKS, () -> {
+            ItemStack storedStorageGuStack = clusterNpc.getInventory().getItem(STORAGE_SLOT_INDEX);
             long fragmentCount = StorageGuData
-                .fromItemStack(storageGuStack)
+                .fromItemStack(storedStorageGuStack)
                 .getCount(XianqiaoItems.HEAVENLY_FRAGMENT.getId());
             helper.assertTrue(fragmentCount > 0L, "happy path: ClusterNpc 应向储物蛊推送至少 1 份生灵产出");
 

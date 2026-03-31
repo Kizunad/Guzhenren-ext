@@ -2,7 +2,6 @@ package com.Kizunad.guzhenrenext_test.xianqiao;
 
 import com.Kizunad.guzhenrenext.xianqiao.farming.FarmingItems;
 import com.mojang.authlib.GameProfile;
-import java.util.UUID;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -21,9 +20,7 @@ public class Task13AJiFengDanGameTests {
 
     private static final String TASK13_JI_FENG_DAN_BATCH = "task13_ji_feng_dan";
     private static final int TEST_TIMEOUT_TICKS = 120;
-    private static final UUID HAPPY_PLAYER_UUID = UUID.fromString("d0e4e3a5-cf3f-4f95-9889-c244c503f293");
     private static final String HAPPY_PLAYER_NAME = "task13a_ji_feng_dan_happy_player";
-    private static final UUID GUARD_PLAYER_UUID = UUID.fromString("7e3ac430-c95f-46a3-bf46-fe6c2f4f496d");
     private static final String GUARD_PLAYER_NAME = "task13a_ji_feng_dan_guard_player";
 
     @GameTest(
@@ -33,7 +30,7 @@ public class Task13AJiFengDanGameTests {
     )
     public void testTask13AJiFengDanShouldApplyMovementSpeed(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = createTestPlayer(level, HAPPY_PLAYER_UUID, HAPPY_PLAYER_NAME);
+        ServerPlayer player = createTestPlayer(level, HAPPY_PLAYER_NAME);
         player.removeEffect(MobEffects.MOVEMENT_SPEED);
 
         ItemStack jiFengDan = new ItemStack(FarmingItems.JI_FENG_DAN.get());
@@ -54,7 +51,7 @@ public class Task13AJiFengDanGameTests {
     )
     public void testTask13AJiFengDanGuardShouldNotApplySpeedForQingYaGrass(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = createTestPlayer(level, GUARD_PLAYER_UUID, GUARD_PLAYER_NAME);
+        ServerPlayer player = createTestPlayer(level, GUARD_PLAYER_NAME);
         player.removeEffect(MobEffects.MOVEMENT_SPEED);
 
         Item nonPillShallowItem = FarmingItems.QING_YA_GRASS_ITEM.get();
@@ -69,7 +66,7 @@ public class Task13AJiFengDanGameTests {
         helper.succeed();
     }
 
-    private static ServerPlayer createTestPlayer(ServerLevel level, UUID playerUuid, String playerName) {
-        return FakePlayerFactory.get(level, new GameProfile(playerUuid, playerName));
+    private static ServerPlayer createTestPlayer(ServerLevel level, String playerName) {
+        return FakePlayerFactory.get(level, new GameProfile(java.util.UUID.randomUUID(), playerName));
     }
 }

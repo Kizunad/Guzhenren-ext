@@ -38,8 +38,8 @@ public class Task11BDeepCreaturesGameTests {
     private static final int ENTITY_SETTLE_TICKS = 80;
     private static final int FAILURE_ASSERT_DELAY_TICKS = 2;
     private static final int TASK17_MAIN_MINK_SECURE_ASSERT_DELAY_TICKS = 140;
-    private static final int TASK17_MAIN_ASSERT_DELAY_TICKS = 220;
-    private static final int TASK17_COST_ASSERT_DELAY_TICKS = 260;
+    private static final int TASK17_MAIN_ASSERT_DELAY_TICKS = 180;
+    private static final int TASK17_COST_ASSERT_DELAY_TICKS = 240;
     private static final float HALF_HEALTH_RATIO = 0.5F;
     private static final int OFFSET_TREASURE_MINK_X = -3;
     private static final int TASK17_MAIN_TREASURE_MINK_OFFSET_Z = -3;
@@ -101,6 +101,11 @@ public class Task11BDeepCreaturesGameTests {
         treasureDrop.setNoPickUpDelay();
         helper.getLevel().addFreshEntity(treasureDrop);
         ServerPlayer testPlayer = createIsolatedFakePlayer(helper, TASK17_MAIN_PLAYER_NAME);
+        boolean[] treasureMinkSecureSnapshot = new boolean[1];
+        int[] treasureMinkSecureSuccessCountSnapshot = new int[1];
+        boolean[] treasureMinkSecureNameTagVisibleSnapshot = new boolean[1];
+        int[] treasureMinkBurrowParticleTriggerCountSnapshot = new int[1];
+        int[] treasureMinkBurrowSoundTriggerCountSnapshot = new int[1];
 
         MutatedSpiritFoxEntity mutatedFox =
             (MutatedSpiritFoxEntity) spawn(
@@ -135,16 +140,46 @@ public class Task11BDeepCreaturesGameTests {
         mite.setNoAi(true);
         DaoMarkApi.addAura(helper.getLevel(), mite.blockPosition(), DaoType.DARK, DARK_AURA_INJECTION);
         boolean splitTriggered = mite.runAuraCycleForTest();
+        // 这里必须在分裂刚发生时立刻冻结测试观测值：后续延迟 tick 仍可能再次触发同一只蛊虫的
+        // 反馈统计累加，导致主批次在“延迟验收”阶段读到被污染的总计数，而不是本次真实事件。
+        int splitSuccessCountSnapshot = mite.getSplitSuccessCountForTest();
+        boolean splitNameTagVisibleSnapshot = mite.wasSplitSuccessNameTagVisibleForTest();
+        int splitParticleTriggerCountSnapshot = mite.getSplitParticleTriggerCountForTest();
+        int splitSoundTriggerCountSnapshot = mite.getSplitSoundTriggerCountForTest();
 
         helper.runAfterDelay(TASK17_MAIN_MINK_SECURE_ASSERT_DELAY_TICKS, () ->
-            assertTask17MainTreasureMinkSecurePhase(helper, treasureMink)
+            snapshotTask17MainTreasureMinkFeedback(
+                treasureMink,
+                treasureMinkSecureSnapshot,
+                treasureMinkSecureSuccessCountSnapshot,
+                treasureMinkSecureNameTagVisibleSnapshot,
+                treasureMinkBurrowParticleTriggerCountSnapshot,
+                treasureMinkBurrowSoundTriggerCountSnapshot
+            )
         );
         helper.runAfterDelay(TASK17_MAIN_ASSERT_DELAY_TICKS, () -> {
-            assertTask17MainTreasureMinkBurrowFeedback(helper, treasureMink);
+            assertTask17MainTreasureMinkSecurePhase(
+                helper,
+                treasureMinkSecureSnapshot[0],
+                treasureMinkSecureSuccessCountSnapshot[0],
+                treasureMinkSecureNameTagVisibleSnapshot[0]
+            );
+            assertTask17MainTreasureMinkBurrowFeedback(
+                helper,
+                treasureMinkBurrowParticleTriggerCountSnapshot[0],
+                treasureMinkBurrowSoundTriggerCountSnapshot[0]
+            );
             assertTask17MainFeedbackForMutatedFox(helper, mutatedFox);
             assertTask17MainFeedbackForGuardian(helper, guardian);
             assertTask17MainFeedbackForSheep(helper, sacrificialSheep);
-            assertTask17MainFeedbackForMite(helper, mite, splitTriggered);
+            assertTask17MainFeedbackForMite(
+                helper,
+                splitTriggered,
+                splitSuccessCountSnapshot,
+                splitNameTagVisibleSnapshot,
+                splitParticleTriggerCountSnapshot,
+                splitSoundTriggerCountSnapshot
+            );
             helper.succeed();
         });
     }
@@ -483,6 +518,21 @@ public class Task11BDeepCreaturesGameTests {
         );
     }
 
+    private static void snapshotTask17MainTreasureMinkFeedback(
+        TreasureMinkEntity treasureMink,
+        boolean[] treasureMinkSecureSnapshot,
+        int[] treasureMinkSecureSuccessCountSnapshot,
+        boolean[] treasureMinkSecureNameTagVisibleSnapshot,
+        int[] treasureMinkBurrowParticleTriggerCountSnapshot,
+        int[] treasureMinkBurrowSoundTriggerCountSnapshot
+    ) {
+        treasureMinkSecureSnapshot[0] = treasureMink.hasValuableLootSecured();
+        treasureMinkSecureSuccessCountSnapshot[0] = treasureMink.getSecureSuccessCountForTest();
+        treasureMinkSecureNameTagVisibleSnapshot[0] = treasureMink.wasSecureNameTagVisibleForTest();
+        treasureMinkBurrowParticleTriggerCountSnapshot[0] = treasureMink.getBurrowParticleTriggerCountForTest();
+        treasureMinkBurrowSoundTriggerCountSnapshot[0] = treasureMink.getBurrowSoundTriggerCountForTest();
+    }
+
     private static void prepareTask17MainTreasureMinkPen(GameTestHelper helper, BlockPos minkPos) {
         helper.getLevel().setBlockAndUpdate(minkPos.below(), Blocks.STONE.defaultBlockState());
         helper.getLevel().setBlockAndUpdate(minkPos.north().below(), Blocks.STONE.defaultBlockState());
@@ -497,29 +547,32 @@ public class Task11BDeepCreaturesGameTests {
 
     private static void assertTask17MainTreasureMinkSecurePhase(
         GameTestHelper helper,
-        TreasureMinkEntity treasureMink
+        boolean treasureMinkSecureSnapshot,
+        int treasureMinkSecureSuccessCountSnapshot,
+        boolean treasureMinkSecureNameTagVisibleSnapshot
     ) {
-        helper.assertTrue(treasureMink.hasValuableLootSecured(), "Task17 main C-D01: 盗宝鼬应完成真实夺宝");
+        helper.assertTrue(treasureMinkSecureSnapshot, "Task17 main C-D01: 盗宝鼬应完成真实夺宝");
         helper.assertTrue(
-            treasureMink.getSecureSuccessCountForTest() == 1,
+            treasureMinkSecureSuccessCountSnapshot == 1,
             "Task17 main C-D01: 盗宝鼬夺宝成功计数应为 1"
         );
         helper.assertTrue(
-            treasureMink.wasSecureNameTagVisibleForTest(),
+            treasureMinkSecureNameTagVisibleSnapshot,
             "Task17 main C-D01: 盗宝鼬应记录成功 NameTag 可见"
         );
     }
 
     private static void assertTask17MainTreasureMinkBurrowFeedback(
         GameTestHelper helper,
-        TreasureMinkEntity treasureMink
+        int treasureMinkBurrowParticleTriggerCountSnapshot,
+        int treasureMinkBurrowSoundTriggerCountSnapshot
     ) {
         helper.assertTrue(
-            treasureMink.getBurrowParticleTriggerCountForTest() == 1,
+            treasureMinkBurrowParticleTriggerCountSnapshot == 1,
             "Task17 main C-D01: 盗宝鼬埋洞粒子触发计数应为 1"
         );
         helper.assertTrue(
-            treasureMink.getBurrowSoundTriggerCountForTest() == 1,
+            treasureMinkBurrowSoundTriggerCountSnapshot == 1,
             "Task17 main C-D01: 盗宝鼬原版音效触发计数应为 1"
         );
     }
@@ -592,24 +645,27 @@ public class Task11BDeepCreaturesGameTests {
 
     private static void assertTask17MainFeedbackForMite(
         GameTestHelper helper,
-        DaoDevouringMiteEntity mite,
-        boolean splitTriggered
+        boolean splitTriggered,
+        int splitSuccessCountSnapshot,
+        boolean splitNameTagVisibleSnapshot,
+        int splitParticleTriggerCountSnapshot,
+        int splitSoundTriggerCountSnapshot
     ) {
         helper.assertTrue(splitTriggered, "Task17 main C-D05: 噬道蛊虫应命中分裂分支");
         helper.assertTrue(
-            mite.getSplitSuccessCountForTest() == 1,
+            splitSuccessCountSnapshot == 1,
             "Task17 main C-D05: 噬道蛊虫分裂成功计数应为 1"
         );
         helper.assertTrue(
-            mite.wasSplitSuccessNameTagVisibleForTest(),
+            splitNameTagVisibleSnapshot,
             "Task17 main C-D05: 噬道蛊虫应记录成功 NameTag 可见"
         );
         helper.assertTrue(
-            mite.getSplitParticleTriggerCountForTest() == 1,
+            splitParticleTriggerCountSnapshot == 1,
             "Task17 main C-D05: 噬道蛊虫粒子触发计数应为 1"
         );
         helper.assertTrue(
-            mite.getSplitSoundTriggerCountForTest() == 1,
+            splitSoundTriggerCountSnapshot == 1,
             "Task17 main C-D05: 噬道蛊虫原版音效触发计数应为 1"
         );
     }

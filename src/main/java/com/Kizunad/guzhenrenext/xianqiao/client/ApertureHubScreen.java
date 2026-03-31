@@ -1,548 +1,837 @@
 package com.Kizunad.guzhenrenext.xianqiao.client;
 
+import com.Kizunad.guzhenrenext.xianqiao.alchemy.block.AlchemyFurnaceBlock;
 import com.Kizunad.guzhenrenext.xianqiao.block.ApertureHubMenu;
-import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoType;
-import com.Kizunad.guzhenrenext.xianqiao.entry.XianqiaoUiProjection;
-import com.Kizunad.guzhenrenext.xianqiao.service.SpiritUnlockService;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.HubCardRegistry;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.HubRoutePolicy;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.HubSnapshot;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.HubStatusEvaluator;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.HubStatusEvaluator.HubStatus;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.HubPanel;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.ModuleCard;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.PriorityStrip;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.StateBadge;
+import com.Kizunad.guzhenrenext.xianqiao.client.hub.ui.StatePill;
+import com.Kizunad.guzhenrenext.xianqiao.item.StorageGuItem;
+import com.Kizunad.guzhenrenext.xianqiao.resource.ResourceControllerBlock;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.ClusterNpcEntity;
+import com.Kizunad.guzhenrenext.xianqiao.spirit.LandSpiritEntity;
 import com.Kizunad.tinyUI.controls.Button;
 import com.Kizunad.tinyUI.controls.Label;
+import com.Kizunad.tinyUI.controls.ScrollContainer;
 import com.Kizunad.tinyUI.core.UIElement;
 import com.Kizunad.tinyUI.core.UIRoot;
 import com.Kizunad.tinyUI.neoforge.TinyUIContainerScreen;
 import com.Kizunad.tinyUI.theme.Theme;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
-/**
- * 仙窍中枢管理界面（Aperture Hub Screen）。
- * <p>
- * 基于 TinyUI 的多 Tab 容器界面，整合仙窍核心的全部信息展示：
- * 1) 总览 Tab：仙窍 chunk 边界、跨度、时间倍率、层级、冻结状态、灾劫倒计时、好感度；
- * 2) 地灵 Tab：好感度、转数、当前阶段；
- * 3) 资源 Tab：引导玩家查看资源控制器方块；
- * 4) 灾劫 Tab：灾劫倒计时和状态；
- * 5) 道痕 Tab：道痕系统概述和命令提示。
- * </p>
- * <p>
- * 所有数据通过 {@link ApertureHubMenu} 的 ContainerData 从服务端同步，
- * 界面每 tick 刷新一次展示数据。
- * </p>
- */
-public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
+public final class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
 
-    private static final int WINDOW_WIDTH = 280;
-    private static final int WINDOW_HEIGHT = 200;
-    private static final int MAIN_X = 0;
-    private static final int MAIN_Y = 0;
-    private static final int MAIN_PADDING = 8;
-    private static final int TAB_BAR_Y = 8;
-    private static final int TAB_BUTTON_HEIGHT = 20;
-    private static final int TAB_BUTTON_GAP = 4;
-    private static final int CONTENT_Y = 34;
-    private static final int CONTENT_PADDING = 8;
-    private static final int LINE_HEIGHT = 14;
-    private static final int TEXT_COLOR = 0xFFE0E0E0;
-    private static final int FIRST_LINE_Y = 8;
+    private static final int WINDOW_WIDTH = 336;
+    private static final int WINDOW_HEIGHT = 264;
+    private static final int WINDOW_PADDING = 10;
+    private static final int BODY_SECTION_GAP = 8;
+    private static final int HEADER_BAND_HEIGHT = 60;
+    private static final int TOP_SITUATION_ROW_HEIGHT = 82;
+    private static final int BOTTOM_UTILITY_ROW_HEIGHT = 92;
+    private static final int SECTION_STRIP_X = 6;
+    private static final int SECTION_STRIP_Y = 6;
+    private static final int SECTION_STRIP_WIDTH = 112;
+    private static final int SECTION_STRIP_HEIGHT = 14;
+    private static final int SECTION_CONTENT_TOP = 24;
+    private static final int HEADER_TITLE_X = 12;
+    private static final int HEADER_TITLE_Y = 18;
+    private static final int HEADER_TITLE_WIDTH = 150;
+    private static final int HEADER_TITLE_HEIGHT = 14;
+    private static final int HEADER_DETAIL_Y = 36;
+    private static final int HEADER_DETAIL_WIDTH_MARGIN = 120;
+    private static final int HEADER_DETAIL_HEIGHT = 14;
+    private static final int HEADER_BADGE_WIDTH = 74;
+    private static final int HEADER_BADGE_HEIGHT = 16;
+    private static final int HEADER_BADGE_Y = 8;
+    private static final int HEADER_BADGE_RIGHT_MARGIN = 12;
+    private static final int HEADER_PILL_WIDTH = 94;
+    private static final int HEADER_PILL_HEIGHT = 18;
+    private static final int HEADER_PILL_Y = 32;
+    private static final int ROW_BLOCK_COUNT = 3;
+    private static final int ROW_BLOCK_GAP = 6;
+    private static final int MODULE_CARD_COLUMNS = 2;
+    private static final int MODULE_CARD_ROWS = 4;
+    private static final int MODULE_CARD_GAP = 8;
+    private static final int MODULE_CARD_HEIGHT = 82;
+    private static final int DIRECT_ROUTE_HORIZONTAL_RADIUS = 6;
+    private static final int DIRECT_ROUTE_VERTICAL_RADIUS = 3;
+    private static final int HOTBAR_SLOT_COUNT = 9;
+    private static final int CENTER_DIVISOR = 2;
+    private static final int TEXT_COLOR = 0xFFE4E4E4;
+    private static final int MUTED_TEXT_COLOR = 0xFFC1C1C1;
     private static final double PERCENT_BASE = 100.0D;
     private static final long TICKS_PER_SECOND = 20L;
     private static final long SECONDS_PER_HOUR = 3600L;
     private static final long HOURS_PER_DAY = 24L;
-    private static final int TAB_OVERVIEW = 0;
-    private static final int TAB_SPIRIT = 1;
-    private static final int TAB_RESOURCE = 2;
-    private static final int TAB_TRIBULATION = 3;
-    private static final int TAB_DAOMARK = 4;
-    private static final int TAB_ASCENSION = 5;
-    private static final int TAB_COUNT = 6;
-    private static final int DAOMARK_TYPE_COUNT = DaoType.values().length;
-    private static final int ASCENSION_ENTRY_BUTTON_WIDTH = 96;
-    private static final int ASCENSION_ENTRY_BUTTON_HEIGHT = 18;
-    private static final int ASCENSION_SUMMARY_MAX_LINES = 5;
-    private static final int BUTTON_DISABLED_COLOR = 0xFF9E9E9E;
-    private static final int ASCENSION_RISK_LINE_MULTIPLIER = 4;
-    private static final int ASCENSION_BLOCKER_LINE_MULTIPLIER = 5;
-    private static final int ASCENSION_QI_LINE_MULTIPLIER = 6;
-    private static final int ASCENSION_PLACEHOLDER_LINE_MULTIPLIER = 7;
-    private static final int ASCENSION_BUTTON_LINE_MULTIPLIER = 10;
-    private static final int ASCENSION_PLACEHOLDER_LINE_COUNT = 3;
+    private static final long TRIBULATION_WARNING_TICKS = 24000L;
+    private static final String LAYER_HEADER_BAND = "LAYER_HEADER_BAND";
+    private static final String LAYER_TOP_SITUATION_ROW = "LAYER_TOP_SITUATION_ROW";
+    private static final String LAYER_MAIN_MODULE_GRID = "LAYER_MAIN_MODULE_GRID";
+    private static final String LAYER_BOTTOM_UTILITY_ROW = "LAYER_BOTTOM_UTILITY_ROW";
+    private static final String TAB_ASCENSION = "飞升桥接";
+    private static final int ASCENSION_PANEL_WIDTH = 98;
+    private static final int ASCENSION_PANEL_HEIGHT = 44;
+    private static final int ASCENSION_PANEL_INSET = 4;
+    private static final int ASCENSION_BUTTON_HEIGHT = 18;
 
-    private final Theme theme;
-    private final List<UIElement> tabPanels;
-    private final List<Button> tabButtons;
+    private final Theme theme = Theme.vanilla();
+    private final HubStatusEvaluator statusEvaluator = new HubStatusEvaluator();
+    private final Map<String, ModuleCard> moduleCardsById = new LinkedHashMap<>();
 
-    private Label overviewBoundaryLabel;
-    private Label overviewChunkSpanLabel;
-    private Label overviewTimeSpeedLabel;
-    private Label overviewTierLabel;
-    private Label overviewFrozenLabel;
-    private Label overviewTribulationLabel;
-    private Label overviewFavorabilityLabel;
-
-    private Label spiritFavorabilityLabel;
-    private Label spiritTierLabel;
-    private Label spiritStageLabel;
-
-    private Label tribulationCountdownLabel;
-    private Label tribulationStatusLabel;
-
-    private Label ascensionBannerLabel;
-    private Label ascensionRiskLabel;
-    private Label ascensionBlockerLabel;
-    private Label ascensionQiLabel;
-    private Label ascensionPlaceholderLabel;
-    private Button ascensionEntryButton;
+    private Label headerTitleLabel;
+    private Label headerDetailLabel;
+    private StateBadge headerStatusBadge;
+    private StatePill headerStatusPill;
+    private PriorityStrip headerLayerStrip;
+    private RowBlock overallSummaryBlock;
+    private RowBlock riskSummaryBlock;
+    private RowBlock nextRouteBlock;
+    private RowBlock utilityRoutesBlock;
+    private RowBlock summaryFootnoteBlock;
+    private RowBlock fallbackExplainerBlock;
 
     public ApertureHubScreen(
-        ApertureHubMenu menu,
-        Inventory playerInventory,
-        Component title
+        final ApertureHubMenu menu,
+        final Inventory playerInventory,
+        final Component title
     ) {
         super(menu, playerInventory, title);
-        this.theme = Theme.vanilla();
-        this.tabPanels = new ArrayList<>();
-        this.tabButtons = new ArrayList<>();
     }
 
     @Override
     protected void initUI(final UIRoot root) {
-        // 清理旧的组件引用，防止 resize 时列表无限增长导致 switchTab 逻辑错误
-        this.tabPanels.clear();
-        this.tabButtons.clear();
+        moduleCardsById.clear();
+        resetUiReferences();
 
-        // 动态计算居中坐标，确保在窗口大小改变时界面始终居中
-        int rootX = (this.width - WINDOW_WIDTH) / 2;
-        int rootY = (this.height - WINDOW_HEIGHT) / 2;
-        // 更新视口大小以匹配当前屏幕
-        root.setViewport(this.width, this.height);
+        final BandLayout layout = BandLayout.create(this.width, this.height);
+        final HubPanel windowShell = new HubPanel();
+        windowShell.setFrame(layout.rootX(), layout.rootY(), WINDOW_WIDTH, WINDOW_HEIGHT);
+        root.addChild(windowShell);
 
-        UIElement main = new UIElement() { };
-        main.setFrame(rootX, rootY, WINDOW_WIDTH, WINDOW_HEIGHT);
-        root.addChild(main);
+        buildHeaderBand(windowShell, layout);
 
-        int availableWidth = WINDOW_WIDTH - MAIN_PADDING * 2;
-        int buttonWidth = (availableWidth - TAB_BUTTON_GAP * (TAB_COUNT - 1)) / TAB_COUNT;
+        final UIElement bodyContent = new UIElement() { };
+        bodyContent.setFrame(0, 0, layout.bodyWidth(), layout.bodyContentHeight());
+        buildTopSituationRow(bodyContent, layout);
+        buildMainModuleGrid(bodyContent, layout);
+        buildBottomUtilityRow(bodyContent, layout);
 
-        createTabButton(main, TAB_OVERVIEW, "总览", MAIN_PADDING, TAB_BAR_Y, buttonWidth);
-        createTabButton(
-            main,
-            TAB_SPIRIT,
-            "地灵",
-            MAIN_PADDING + (buttonWidth + TAB_BUTTON_GAP),
-            TAB_BAR_Y,
-            buttonWidth
-        );
-        createTabButton(
-            main,
-            TAB_RESOURCE,
-            "资源",
-            MAIN_PADDING + (buttonWidth + TAB_BUTTON_GAP) * TAB_RESOURCE,
-            TAB_BAR_Y,
-            buttonWidth
-        );
-        createTabButton(
-            main,
-            TAB_TRIBULATION,
-            "灾劫",
-            MAIN_PADDING + (buttonWidth + TAB_BUTTON_GAP) * TAB_TRIBULATION,
-            TAB_BAR_Y,
-            buttonWidth
-        );
-        createTabButton(
-            main,
-            TAB_DAOMARK,
-            "道痕",
-            MAIN_PADDING + (buttonWidth + TAB_BUTTON_GAP) * TAB_DAOMARK,
-            TAB_BAR_Y,
-            buttonWidth
-        );
-        createTabButton(
-            main,
-            TAB_ASCENSION,
-            "升仙",
-            MAIN_PADDING + (buttonWidth + TAB_BUTTON_GAP) * TAB_ASCENSION,
-            TAB_BAR_Y,
-            buttonWidth
-        );
+        if (layout.useBodyScrollFallback()) {
+            final ScrollContainer scrollContainer = new ScrollContainer(theme);
+            scrollContainer.setFrame(
+                layout.bodyX(),
+                layout.bodyY(),
+                layout.bodyWidth(),
+                layout.bodyViewportHeight()
+            );
+            scrollContainer.setContent(bodyContent);
+            windowShell.addChild(scrollContainer);
+        } else {
+            bodyContent.setFrame(
+                layout.bodyX(),
+                layout.bodyY(),
+                layout.bodyWidth(),
+                layout.bodyContentHeight()
+            );
+            windowShell.addChild(bodyContent);
+        }
+        windowShell.addChild(createAscensionPanel());
 
-        int contentWidth = WINDOW_WIDTH - CONTENT_PADDING * 2;
-        int contentHeight = WINDOW_HEIGHT - CONTENT_Y - CONTENT_PADDING;
-
-        UIElement overviewPanel = createOverviewPanel(contentWidth, contentHeight);
-        overviewPanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
-        main.addChild(overviewPanel);
-        tabPanels.add(overviewPanel);
-
-        UIElement spiritPanel = createSpiritPanel(contentWidth, contentHeight);
-        spiritPanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
-        main.addChild(spiritPanel);
-        tabPanels.add(spiritPanel);
-
-        UIElement resourcePanel = createResourcePanel(contentWidth, contentHeight);
-        resourcePanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
-        main.addChild(resourcePanel);
-        tabPanels.add(resourcePanel);
-
-        UIElement tribulationPanel = createTribulationPanel(contentWidth, contentHeight);
-        tribulationPanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
-        main.addChild(tribulationPanel);
-        tabPanels.add(tribulationPanel);
-
-        UIElement daomarkPanel = createDaomarkPanel(contentWidth, contentHeight);
-        daomarkPanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
-        main.addChild(daomarkPanel);
-        tabPanels.add(daomarkPanel);
-
-        UIElement ascensionPanel = createAscensionPanel(contentWidth, contentHeight);
-        ascensionPanel.setFrame(CONTENT_PADDING, CONTENT_Y, contentWidth, contentHeight);
-        main.addChild(ascensionPanel);
-        tabPanels.add(ascensionPanel);
-
-        // 切换到总览页并刷新数据
-        switchTab(TAB_OVERVIEW);
-        updateOverviewTabData();
-        updateSpiritTabData();
-        updateTribulationTabData();
-        updateAscensionProjectionData();
+        refreshHubContents();
     }
 
     @Override
     protected void containerTick() {
         super.containerTick();
-        if (
-            overviewBoundaryLabel == null
-                || spiritStageLabel == null
-                || tribulationStatusLabel == null
-                || ascensionBannerLabel == null
-        ) {
-            return;
-        }
-        updateOverviewTabData();
-        updateSpiritTabData();
-        updateTribulationTabData();
-        updateAscensionProjectionData();
+        refreshHubContents();
     }
 
     @Override
     protected double getUiScale() {
-        return 1.0;
+        return 1.0D;
     }
 
-    private void switchTab(final int tabIndex) {
-        for (int index = 0; index < tabPanels.size(); index++) {
-            tabPanels.get(index).setVisible(index == tabIndex);
+    private void resetUiReferences() {
+        headerTitleLabel = null;
+        headerDetailLabel = null;
+        headerStatusBadge = null;
+        headerStatusPill = null;
+        headerLayerStrip = null;
+        overallSummaryBlock = null;
+        riskSummaryBlock = null;
+        nextRouteBlock = null;
+        utilityRoutesBlock = null;
+        summaryFootnoteBlock = null;
+        fallbackExplainerBlock = null;
+    }
+
+    private void buildHeaderBand(final UIElement parent, final BandLayout layout) {
+        final HubPanel headerBand = new HubPanel();
+        headerBand.setFrame(layout.bodyX(), WINDOW_PADDING, layout.bodyWidth(), HEADER_BAND_HEIGHT);
+        parent.addChild(headerBand);
+
+        headerLayerStrip = createLayerStrip(LAYER_HEADER_BAND);
+        headerBand.addChild(headerLayerStrip);
+
+        headerTitleLabel = new Label(Component.literal("仙窍中枢 · v2"), theme);
+        headerTitleLabel.setColor(TEXT_COLOR);
+        headerTitleLabel.setFrame(
+            HEADER_TITLE_X,
+            HEADER_TITLE_Y,
+            HEADER_TITLE_WIDTH,
+            HEADER_TITLE_HEIGHT
+        );
+        headerBand.addChild(headerTitleLabel);
+
+        headerDetailLabel = new Label(Component.empty(), theme);
+        headerDetailLabel.setColor(MUTED_TEXT_COLOR);
+        headerDetailLabel.setFrame(
+            HEADER_TITLE_X,
+            HEADER_DETAIL_Y,
+            layout.bodyWidth() - HEADER_DETAIL_WIDTH_MARGIN,
+            HEADER_DETAIL_HEIGHT
+        );
+        headerBand.addChild(headerDetailLabel);
+
+        headerStatusBadge = new StateBadge();
+        headerStatusBadge.setFrame(
+            layout.bodyWidth() - HEADER_BADGE_WIDTH - HEADER_BADGE_RIGHT_MARGIN,
+            HEADER_BADGE_Y,
+            HEADER_BADGE_WIDTH,
+            HEADER_BADGE_HEIGHT
+        );
+        headerBand.addChild(headerStatusBadge);
+
+        headerStatusPill = new StatePill();
+        headerStatusPill.setFrame(
+            layout.bodyWidth() - HEADER_PILL_WIDTH - HEADER_BADGE_RIGHT_MARGIN,
+            HEADER_PILL_Y,
+            HEADER_PILL_WIDTH,
+            HEADER_PILL_HEIGHT
+        );
+        headerBand.addChild(headerStatusPill);
+    }
+
+    private void buildTopSituationRow(final UIElement parent, final BandLayout layout) {
+        final HubPanel topSituationRow = new HubPanel();
+        topSituationRow.setFrame(
+            0,
+            layout.topSituationRowY(),
+            layout.bodyWidth(),
+            TOP_SITUATION_ROW_HEIGHT
+        );
+        parent.addChild(topSituationRow);
+        topSituationRow.addChild(createLayerStrip(LAYER_TOP_SITUATION_ROW));
+
+        overallSummaryBlock = createRowBlock(topSituationRow, 0, "总览摘要");
+        riskSummaryBlock = createRowBlock(topSituationRow, 1, "灾劫风险");
+        nextRouteBlock = createRowBlock(topSituationRow, 2, "下一路由");
+    }
+
+    private void buildMainModuleGrid(final UIElement parent, final BandLayout layout) {
+        final HubPanel mainModuleGrid = new HubPanel();
+        mainModuleGrid.setFrame(
+            0,
+            layout.mainModuleGridY(),
+            layout.bodyWidth(),
+            layout.mainModuleGridHeight()
+        );
+        parent.addChild(mainModuleGrid);
+        mainModuleGrid.addChild(createLayerStrip(LAYER_MAIN_MODULE_GRID));
+
+        final int cardWidth = (layout.bodyWidth() - MODULE_CARD_GAP) / MODULE_CARD_COLUMNS;
+        int cardIndex = 0;
+        for (final HubCardRegistry.CardDefinition cardDefinition : HubCardRegistry.cards()) {
+            final int row = cardIndex / MODULE_CARD_COLUMNS;
+            final int column = cardIndex % MODULE_CARD_COLUMNS;
+            final int cardX = column * (cardWidth + MODULE_CARD_GAP);
+            final int cardY = SECTION_CONTENT_TOP + row * (MODULE_CARD_HEIGHT + MODULE_CARD_GAP);
+            final ModuleCard card = new ModuleCard(cardDefinition.cardId(), cardDefinition.cardTitle());
+            final HubRoutePolicy.CardRoutePolicy policy = HubRoutePolicy.routeForCard(cardDefinition.cardId());
+            card.setFrame(cardX, cardY, cardWidth, MODULE_CARD_HEIGHT);
+            card.applyRoutePolicy(policy);
+            bindRouteCallbacks(card, policy);
+            mainModuleGrid.addChild(card);
+            moduleCardsById.put(cardDefinition.cardId(), card);
+            cardIndex++;
         }
-        for (int index = 0; index < tabButtons.size(); index++) {
-            tabButtons.get(index).setEnabled(index != tabIndex);
-        }
     }
 
-    private void createTabButton(
-        final UIElement parent,
-        final int tabIndex,
-        final String text,
-        final int x,
-        final int y,
-        final int width
-    ) {
-        Button button = new Button(text, theme);
-        button.setFrame(x, y, width, TAB_BUTTON_HEIGHT);
-        button.setOnClick(() -> switchTab(tabIndex));
-        parent.addChild(button);
-        tabButtons.add(button);
-    }
-
-    private UIElement createOverviewPanel(final int width, final int height) {
-        UIElement panel = new UIElement() { };
-
-        overviewBoundaryLabel = createDataLabel(panel, FIRST_LINE_Y, width);
-        overviewChunkSpanLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
-        overviewTimeSpeedLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
-        overviewTierLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
-        overviewFrozenLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_DAOMARK, width);
-        overviewTribulationLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_COUNT, width);
-        overviewFavorabilityLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * (TAB_COUNT + 1), width);
-
-        panel.setFrame(MAIN_X, MAIN_Y, width, height);
-        return panel;
-    }
-
-    private UIElement createSpiritPanel(final int width, final int height) {
-        UIElement panel = new UIElement() { };
-        spiritFavorabilityLabel = createDataLabel(panel, FIRST_LINE_Y, width);
-        spiritTierLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
-        spiritStageLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
-        panel.setFrame(MAIN_X, MAIN_Y, width, height);
-        return panel;
-    }
-
-    private UIElement createResourcePanel(final int width, final int height) {
-        UIElement panel = new UIElement() { };
-
-        Label titleLabel = createDataLabel(panel, FIRST_LINE_Y, width);
-        titleLabel.setText(Component.literal("§e资源控制器状态"));
-
-        Label statusLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
-        statusLabel.setText(Component.literal("资源系统状态：请查看资源控制器方块"));
-
-        Label hintLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
-        hintLabel.setText(Component.literal("请在仙窍范围内放置资源控制器方块"));
-
-        Label detailLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
-        detailLabel.setText(Component.literal("右键资源控制器查看详细产出与效率信息"));
-
-        Label auraHintLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_DAOMARK, width);
-        auraHintLabel.setText(Component.literal("时道灵气会直接影响资源产出效率"));
-
-        panel.setFrame(MAIN_X, MAIN_Y, width, height);
-        return panel;
-    }
-
-    private UIElement createTribulationPanel(final int width, final int height) {
-        UIElement panel = new UIElement() { };
-
-        Label titleLabel = createDataLabel(panel, FIRST_LINE_Y, width);
-        titleLabel.setText(Component.literal("§e灾劫信息"));
-
-        tribulationCountdownLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
-        tribulationStatusLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
-
-        Label tipLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
-        tipLabel.setText(Component.literal("提示：灾劫详情可通过灾劫管理器日志查看"));
-
-        panel.setFrame(MAIN_X, MAIN_Y, width, height);
-        return panel;
-    }
-
-    private UIElement createDaomarkPanel(final int width, final int height) {
-        UIElement panel = new UIElement() { };
-
-        Label titleLabel = createDataLabel(panel, FIRST_LINE_Y, width);
-        titleLabel.setText(Component.literal("§e道痕灵气信息"));
-
-        Label typeLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT, width);
-        typeLabel.setText(Component.literal("道痕灵气系统目前包含 " + DAOMARK_TYPE_COUNT + " 种道类型"));
-
-        Label commandLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_RESOURCE, width);
-        commandLabel.setText(Component.literal("详细灵气分布请使用 §b/xianqiao daomark§r 命令查看"));
-
-        Label detectorLabel = createDataLabel(panel, FIRST_LINE_Y + LINE_HEIGHT * TAB_TRIBULATION, width);
-        detectorLabel.setText(Component.literal("或使用道痕检测器在仙窍范围内进行现场检测"));
-
-        panel.setFrame(MAIN_X, MAIN_Y, width, height);
-        return panel;
-    }
-
-    private UIElement createAscensionPanel(final int width, final int height) {
-        UIElement panel = new UIElement() { };
-
-        Label titleLabel = createDataLabel(panel, FIRST_LINE_Y, width);
-        titleLabel.setText(Component.literal("§e升仙准备入口"));
-
-        ascensionBannerLabel = createMultilineLabel(
-            panel,
-            FIRST_LINE_Y + LINE_HEIGHT,
-            width,
-            ASCENSION_SUMMARY_MAX_LINES
+    private void buildBottomUtilityRow(final UIElement parent, final BandLayout layout) {
+        final HubPanel bottomUtilityRow = new HubPanel();
+        bottomUtilityRow.setFrame(
+            0,
+            layout.bottomUtilityRowY(),
+            layout.bodyWidth(),
+            BOTTOM_UTILITY_ROW_HEIGHT
         );
-        ascensionRiskLabel = createDataLabel(
-            panel,
-            FIRST_LINE_Y + LINE_HEIGHT * ASCENSION_RISK_LINE_MULTIPLIER,
-            width
-        );
-        ascensionBlockerLabel = createDataLabel(
-            panel,
-            FIRST_LINE_Y + LINE_HEIGHT * ASCENSION_BLOCKER_LINE_MULTIPLIER,
-            width
-        );
-        ascensionQiLabel = createDataLabel(
-            panel,
-            FIRST_LINE_Y + LINE_HEIGHT * ASCENSION_QI_LINE_MULTIPLIER,
-            width
-        );
-        ascensionPlaceholderLabel = createMultilineLabel(
-            panel,
-            FIRST_LINE_Y + LINE_HEIGHT * ASCENSION_PLACEHOLDER_LINE_MULTIPLIER,
-            width,
-            ASCENSION_PLACEHOLDER_LINE_COUNT
+        parent.addChild(bottomUtilityRow);
+        bottomUtilityRow.addChild(createLayerStrip(LAYER_BOTTOM_UTILITY_ROW));
+
+        utilityRoutesBlock = createRowBlock(bottomUtilityRow, 0, "快捷路由");
+        summaryFootnoteBlock = createRowBlock(bottomUtilityRow, 1, "近况摘要");
+        fallbackExplainerBlock = createRowBlock(bottomUtilityRow, 2, "中枢说明");
+    }
+
+    private HubPanel createAscensionPanel() {
+        final HubPanel ascensionPanel = new HubPanel();
+        ascensionPanel.setFrame(
+            WINDOW_WIDTH - ASCENSION_PANEL_WIDTH - WINDOW_PADDING,
+            WINDOW_HEIGHT - ASCENSION_PANEL_HEIGHT - WINDOW_PADDING,
+            ASCENSION_PANEL_WIDTH,
+            ASCENSION_PANEL_HEIGHT
         );
 
-        ascensionEntryButton = new Button(Component.literal("发起升仙冲关"), theme);
+        final PriorityStrip ascensionStrip = new PriorityStrip();
+        ascensionStrip.setText(TAB_ASCENSION);
+        ascensionStrip.setFrame(
+            ASCENSION_PANEL_INSET,
+            ASCENSION_PANEL_INSET,
+            ASCENSION_PANEL_WIDTH - ASCENSION_PANEL_INSET * CENTER_DIVISOR,
+            SECTION_STRIP_HEIGHT
+        );
+        ascensionPanel.addChild(ascensionStrip);
+
+        final Button ascensionEntryButton = new Button("进入飞升", theme);
         ascensionEntryButton.setFrame(
-            FIRST_LINE_Y,
-            FIRST_LINE_Y + LINE_HEIGHT * ASCENSION_BUTTON_LINE_MULTIPLIER,
-            ASCENSION_ENTRY_BUTTON_WIDTH,
-            ASCENSION_ENTRY_BUTTON_HEIGHT
+            ASCENSION_PANEL_INSET,
+            ASCENSION_PANEL_HEIGHT - ASCENSION_BUTTON_HEIGHT - ASCENSION_PANEL_INSET,
+            ASCENSION_PANEL_WIDTH - ASCENSION_PANEL_INSET * CENTER_DIVISOR,
+            ASCENSION_BUTTON_HEIGHT
         );
-        ascensionEntryButton.setOnClick(() -> {
-            if (this.minecraft != null && this.minecraft.gameMode != null) {
-                this.minecraft.gameMode.handleInventoryButtonClick(
-                    this.menu.containerId,
-                    ApertureHubMenu.BUTTON_ASCENSION_ENTRY
-                );
-            }
-        });
-        panel.addChild(ascensionEntryButton);
-
-        panel.setFrame(MAIN_X, MAIN_Y, width, height);
-        return panel;
+        ascensionEntryButton.setOnClick(this::triggerLegacyAscensionEntry);
+        ascensionPanel.addChild(ascensionEntryButton);
+        return ascensionPanel;
     }
 
-    private Label createDataLabel(final UIElement panel, final int y, final int width) {
-        Label label = new Label(Component.empty(), theme);
-        label.setFrame(FIRST_LINE_Y, y, width - FIRST_LINE_Y * 2, LINE_HEIGHT);
-        label.setColor(TEXT_COLOR);
-        panel.addChild(label);
-        return label;
+    private RowBlock createRowBlock(final UIElement parent, final int rowIndex, final String title) {
+        final int blockWidth =
+            (parent.getWidth() - ROW_BLOCK_GAP * (ROW_BLOCK_COUNT - 1)) / ROW_BLOCK_COUNT;
+        final int blockX = rowIndex * (blockWidth + ROW_BLOCK_GAP);
+        final int blockHeight = parent.getHeight() - SECTION_CONTENT_TOP;
+        final RowBlock rowBlock = new RowBlock(title, theme);
+        rowBlock.setFrame(blockX, SECTION_CONTENT_TOP, blockWidth, blockHeight);
+        parent.addChild(rowBlock);
+        return rowBlock;
     }
 
-    private Label createMultilineLabel(final UIElement panel, final int y, final int width, final int lines) {
-        Label label = new Label(Component.empty(), theme);
-        label.setFrame(FIRST_LINE_Y, y, width - FIRST_LINE_Y * 2, LINE_HEIGHT * lines);
-        label.setColor(TEXT_COLOR);
-        panel.addChild(label);
-        return label;
+    private PriorityStrip createLayerStrip(final String layerName) {
+        final PriorityStrip structureStrip = new PriorityStrip();
+        structureStrip.setText(layerName);
+        structureStrip.setFrame(
+            SECTION_STRIP_X,
+            SECTION_STRIP_Y,
+            SECTION_STRIP_WIDTH,
+            SECTION_STRIP_HEIGHT
+        );
+        return structureStrip;
     }
 
-    private void updateOverviewTabData() {
-        overviewBoundaryLabel.setText(
-            Component.literal(
-                "仙窍 chunk 边界：X["
-                    + menu.getMinChunkX()
-                    + ", "
-                    + menu.getMaxChunkX()
-                    + "] Z["
-                    + menu.getMinChunkZ()
-                    + ", "
-                    + menu.getMaxChunkZ()
-                    + "]"
-            )
-        );
-        overviewChunkSpanLabel.setText(
-            Component.literal("chunk 跨度：X " + menu.getChunkSpanX() + "，Z " + menu.getChunkSpanZ())
-        );
-        overviewTimeSpeedLabel.setText(
-            Component.literal("时间倍率：" + formatTimeSpeed(menu.getTimeSpeedPercent()) + "x")
-        );
-        overviewTierLabel.setText(Component.literal("层级（转数）：" + menu.getTier()));
-        overviewFrozenLabel.setText(
-            Component.literal("状态：" + (menu.isFrozen() ? "冻结" : "运行中"))
-        );
-        overviewTribulationLabel.setText(
-            Component.literal("灾劫倒计时：" + formatTribulationTime(menu.getTribulationTick()))
-        );
-        overviewFavorabilityLabel.setText(
-            Component.literal("好感度：" + formatFavorability(menu.getFavorabilityPercent()))
-        );
-        XianqiaoUiProjection.ProjectionSnapshot projection = menu.getUiProjection();
-        overviewTribulationLabel.setText(
-            Component.literal(
-                "灾劫倒计时："
-                    + formatTribulationTime(menu.getTribulationTick())
-                    + "；升仙阶段："
-                    + projection.homeBanner().stageLabel()
-            )
-        );
-        overviewFavorabilityLabel.setText(
-            Component.literal(
-                "好感度："
-                    + formatFavorability(menu.getFavorabilityPercent())
-                    + "；主阻塞："
-                    + projection.homeBanner().primaryBlocker()
-            )
-        );
-    }
-
-    private void updateSpiritTabData() {
-        int tier = menu.getTier();
-        int stageIndex = SpiritUnlockService.computeStage(
-            tier,
-            (float) (menu.getFavorabilityPercent() / PERCENT_BASE)
-        );
-        spiritFavorabilityLabel.setText(
-            Component.literal("好感度：" + formatFavorability(menu.getFavorabilityPercent()))
-        );
-        spiritTierLabel.setText(Component.literal("转数：" + tier));
-        spiritStageLabel.setText(
-            Component.literal(
-                "当前阶段："
-                    + stageIndex
-                    + " - "
-                    + SpiritUnlockService.getStageDisplayName(stageIndex)
-                    + "；升仙："
-                    + menu.getUiProjection().spiritIncubation().stageLabel()
-            )
-        );
-    }
-
-    private void updateTribulationTabData() {
-        long ticks = menu.getTribulationTick();
-        boolean isPeacePeriod = ticks > 0;
-        tribulationCountdownLabel.setText(Component.literal("距离下次灾劫：" + formatTribulationTime(ticks)));
-        tribulationStatusLabel.setText(
-            Component.literal(
-                "灾劫状态："
-                    + (isPeacePeriod ? "平静期" : "灾劫进行中")
-                    + "；险兆："
-                    + menu.getUiProjection().tribulationRisk().riskLabel()
-            )
-        );
-    }
-
-    private void updateAscensionProjectionData() {
-        XianqiaoUiProjection.ProjectionSnapshot projection = menu.getUiProjection();
-        ascensionBannerLabel.setText(
-            Component.literal(
-                "阶段："
-                    + projection.ascensionPreparation().stageLabel()
-                    + "\n下一步："
-                    + projection.entryButtonLabel()
-                    + "\n气机："
-                    + projection.ascensionPreparation().riskLabel()
-            )
-        );
-        ascensionRiskLabel.setText(Component.literal("风险摘要：" + projection.ascensionPreparation().riskLabel()));
-        ascensionBlockerLabel.setText(
-            Component.literal("主阻塞：" + projection.ascensionPreparation().primaryBlocker())
-        );
-        ascensionQiLabel.setText(
-            Component.literal(
-                "三气/平衡：天"
-                    + menu.getHeavenQiScorePercent()
-                    + "% 地"
-                    + menu.getEarthQiScorePercent()
-                    + "% 人"
-                    + menu.getHumanQiScorePercent()
-                    + "% 平衡"
-                    + menu.getBalanceScorePercent()
-                    + "%"
-            )
-        );
-        ascensionPlaceholderLabel.setText(
-            Component.literal(
-                "道痕检测器："
-                    + projection.detectorRoute().displayState()
-                    + "（"
-                    + projection.detectorRoute().displayTargetPath()
-                    + "）"
-                    + "\n详细分布："
-                    + projection.daomarkDistributionRoute().displayState()
-                    + "（"
-                    + projection.daomarkDistributionRoute().displayTargetPath()
-                    + "）"
-                    + "\n目标："
-                    + projection.detectorRoute().displayTargetPath()
-            )
-        );
-        ascensionEntryButton.setText(Component.literal(projection.entryButtonLabel()));
-        ascensionEntryButton.setEnabled(projection.gameplayEntryAvailable());
-        if (!projection.gameplayEntryAvailable()) {
-            ascensionPlaceholderLabel.setColor(BUTTON_DISABLED_COLOR);
-        } else {
-            ascensionPlaceholderLabel.setColor(TEXT_COLOR);
+    private void triggerLegacyAscensionEntry() {
+        if (this.minecraft == null || this.minecraft.gameMode == null) {
+            return;
         }
+        this.minecraft.gameMode.handleInventoryButtonClick(
+            this.menu.containerId,
+            ApertureHubMenu.BUTTON_ASCENSION_ENTRY
+        );
+    }
+
+    private void refreshHubContents() {
+        if (headerDetailLabel == null || overallSummaryBlock == null || fallbackExplainerBlock == null) {
+            return;
+        }
+
+        final HubSnapshot snapshot = HubSnapshot.fromApertureMenu(menu);
+        final HubStatus status = statusEvaluator.evaluate(snapshot);
+
+        headerTitleLabel.setText(Component.literal("仙窍中枢 · 洞天总览"));
+        headerDetailLabel.setText(buildHeaderDetailText(snapshot.core()));
+        headerStatusBadge.applyRisk(status.overallRisk());
+        headerStatusPill.applyRisk(status.overallRisk());
+        headerLayerStrip.setText(LAYER_HEADER_BAND);
+
+        overallSummaryBlock.setRiskLevel(status.overallRisk());
+        overallSummaryBlock.setBodyText(buildTopOverallSummary(snapshot, status));
+        riskSummaryBlock.setRiskLevel(resolveTribulationRisk(snapshot.core().tribulationTick()));
+        riskSummaryBlock.setBodyText(buildTopTribulationSummary(snapshot.core().tribulationTick(), status));
+        nextRouteBlock.setRiskLevel(status.overallRisk());
+        nextRouteBlock.setBodyText(buildNextRouteSummary(status));
+
+        utilityRoutesBlock.setRiskLevel(HubStatusEvaluator.RiskLevel.STABLE);
+        utilityRoutesBlock.setBodyText(buildUtilityRoutesSummary());
+        summaryFootnoteBlock.setRiskLevel(status.overallRisk());
+        summaryFootnoteBlock.setBodyText(buildRecentStatusSummary(status));
+        fallbackExplainerBlock.setRiskLevel(HubStatusEvaluator.RiskLevel.UNKNOWN);
+        fallbackExplainerBlock.setBodyText(buildHubGuideText());
+
+        for (final HubCardRegistry.CardDefinition cardDefinition : HubCardRegistry.cards()) {
+            final ModuleCard card = moduleCardsById.get(cardDefinition.cardId());
+            if (card == null) {
+                continue;
+            }
+            final HubRoutePolicy.CardRoutePolicy policy = HubRoutePolicy.routeForCard(cardDefinition.cardId());
+            card.setTitle(cardDefinition.cardTitle());
+            card.applyDataClass(resolveCardDataClass(policy));
+            card.applyRisk(resolveCardRisk(policy, snapshot));
+            card.applyRoutePolicy(policy);
+            card.setSummary(resolveCardSummary(snapshot, status, policy));
+            card.setFootnote(resolveCardFootnote(snapshot, status, policy));
+        }
+    }
+
+    private HubSnapshot.DataClass resolveCardDataClass(final HubRoutePolicy.CardRoutePolicy policy) {
+        return switch (policy.cardId()) {
+            case HubRoutePolicy.CARD_APERTURE_OVERVIEW,
+                HubRoutePolicy.CARD_TRIBULATION -> HubSnapshot.DataClass.REAL_CORE;
+            case HubRoutePolicy.CARD_LAND_SPIRIT -> HubSnapshot.DataClass.REAL_SUMMARY;
+            case HubRoutePolicy.CARD_RESOURCE, HubRoutePolicy.CARD_ALCHEMY, HubRoutePolicy.CARD_STORAGE,
+                HubRoutePolicy.CARD_CLUSTER, HubRoutePolicy.CARD_DAO_MARK -> HubSnapshot.DataClass.SUMMARY_ROUTE;
+            default -> HubSnapshot.DataClass.SUMMARY_ROUTE;
+        };
+    }
+
+    private HubStatusEvaluator.RiskLevel resolveCardRisk(
+        final HubRoutePolicy.CardRoutePolicy policy,
+        final HubSnapshot snapshot
+    ) {
+        return switch (policy.cardId()) {
+            case HubRoutePolicy.CARD_APERTURE_OVERVIEW -> snapshot.core().hasValidBoundary()
+                ? HubStatusEvaluator.RiskLevel.STABLE
+                : HubStatusEvaluator.RiskLevel.DANGER;
+            case HubRoutePolicy.CARD_LAND_SPIRIT -> snapshot.landSpirit().isAvailable()
+                ? HubStatusEvaluator.RiskLevel.STABLE
+                : HubStatusEvaluator.RiskLevel.UNKNOWN;
+            case HubRoutePolicy.CARD_TRIBULATION -> resolveTribulationRisk(snapshot.core().tribulationTick());
+            case HubRoutePolicy.CARD_RESOURCE -> snapshot.resource().isRouteFallback()
+                ? HubStatusEvaluator.RiskLevel.CAUTION
+                : HubStatusEvaluator.RiskLevel.STABLE;
+            case HubRoutePolicy.CARD_ALCHEMY, HubRoutePolicy.CARD_STORAGE, HubRoutePolicy.CARD_CLUSTER,
+                HubRoutePolicy.CARD_DAO_MARK -> HubStatusEvaluator.RiskLevel.UNKNOWN;
+            default -> HubStatusEvaluator.RiskLevel.UNKNOWN;
+        };
+    }
+
+    private String resolveCardSummary(
+        final HubSnapshot snapshot,
+        final HubStatus status,
+        final HubRoutePolicy.CardRoutePolicy policy
+    ) {
+        if (policy.isRouteOnly()) {
+            return buildLightCardSummary(policy);
+        }
+        return buildStrongCardSummary(snapshot, status, policy);
+    }
+
+    private String resolveCardFootnote(
+        final HubSnapshot snapshot,
+        final HubStatus status,
+        final HubRoutePolicy.CardRoutePolicy policy
+    ) {
+        if (policy.isRouteOnly()) {
+            return buildLightCardFootnote(policy);
+        }
+        return buildStrongCardFootnote(snapshot, status, policy);
+    }
+
+    private String buildStrongCardSummary(
+        final HubSnapshot snapshot,
+        final HubStatus status,
+        final HubRoutePolicy.CardRoutePolicy policy
+    ) {
+        return switch (policy.cardId()) {
+            case HubRoutePolicy.CARD_APERTURE_OVERVIEW -> formatCoreSummary(snapshot.core());
+            case HubRoutePolicy.CARD_LAND_SPIRIT -> snapshot.landSpirit().isAvailable()
+                ? formatLandSpiritSummary(snapshot)
+                : snapshot.landSpirit().fallbackText();
+            case HubRoutePolicy.CARD_TRIBULATION -> formatTribulationSummary(snapshot.core().tribulationTick(), status);
+            case HubRoutePolicy.CARD_RESOURCE -> snapshot.resource().isRouteFallback()
+                ? snapshot.resource().fallbackText()
+                : formatResourceSummary(snapshot);
+            default -> status.fallbackText();
+        };
+    }
+
+    private String buildStrongCardFootnote(
+        final HubSnapshot snapshot,
+        final HubStatus status,
+        final HubRoutePolicy.CardRoutePolicy policy
+    ) {
+        return switch (policy.cardId()) {
+            case HubRoutePolicy.CARD_APERTURE_OVERVIEW -> buildCoreFootnote(snapshot.core());
+            case HubRoutePolicy.CARD_LAND_SPIRIT -> snapshot.landSpirit().isAvailable()
+                ? buildLandSpiritFootnote(snapshot)
+                : snapshot.landSpirit().fallbackText();
+            case HubRoutePolicy.CARD_TRIBULATION ->
+                buildTribulationFootnote(snapshot.core().tribulationTick(), status);
+            case HubRoutePolicy.CARD_RESOURCE -> snapshot.resource().fallbackText();
+            default -> status.fallbackText();
+        };
+    }
+
+    private String buildLightCardSummary(final HubRoutePolicy.CardRoutePolicy policy) {
+        return switch (policy.cardId()) {
+            case HubRoutePolicy.CARD_ALCHEMY -> "独立工作台，待前往查看";
+            case HubRoutePolicy.CARD_STORAGE -> "物品域最小视图，待前往查看";
+            case HubRoutePolicy.CARD_CLUSTER -> "本地产出待提取，需前往查看";
+            case HubRoutePolicy.CARD_DAO_MARK -> "占位子页入口，待前往查看";
+            default -> buildDefaultLightCardSummary(policy);
+        };
+    }
+
+    private String buildDefaultLightCardSummary(final HubRoutePolicy.CardRoutePolicy policy) {
+        return "仅保留入口，需前往" + policy.target().displayName() + "核验";
+    }
+
+    private String buildLightCardFootnote(final HubRoutePolicy.CardRoutePolicy policy) {
+        if (policy.noticeText().isBlank()) {
+            return policy.target().displayName() + "分台尚未接入主殿稳定聚合源";
+        }
+        return policy.noticeText() + "；主殿不展示全局实况";
+    }
+
+    private String buildHeaderDetailText(final HubSnapshot.CoreSnapshot coreSnapshot) {
+        return formatTimeSpeed(coreSnapshot.timeSpeedPercent())
+            + "x · 好感 "
+            + formatFavorability(coreSnapshot.favorabilityPercent())
+            + "% · "
+            + formatTier(coreSnapshot.tier())
+            + " · "
+            + formatFrozenState(coreSnapshot.frozen());
+    }
+
+    private String buildTopOverallSummary(final HubSnapshot snapshot, final HubStatus status) {
+        return status.overallSummary() + "\n" + formatCoreSummary(snapshot.core());
+    }
+
+    private String buildTopTribulationSummary(final long tribulationTick, final HubStatus status) {
+        if (status.tribulationRiskSummary().isBlank()) {
+            return "倒计时 " + formatTribulationTime(tribulationTick);
+        }
+        return "倒计时 " + formatTribulationTime(tribulationTick)
+            + "\n"
+            + status.tribulationRiskSummary();
+    }
+
+    private String buildNextRouteSummary(final HubStatus status) {
+        return "建议：" + status.recommendation();
+    }
+
+    private String buildUtilityRoutesSummary() {
+        final StringBuilder builder = new StringBuilder();
+        for (final HubRoutePolicy.CardRoutePolicy policy : HubRoutePolicy.orderedPolicies()) {
+            if (!policy.launchesScreen()) {
+                continue;
+            }
+            if (!builder.isEmpty()) {
+                builder.append('、');
+            }
+            builder.append(policy.target().displayName());
+        }
+        return "已接直达：" + builder;
+    }
+
+    private String buildRecentStatusSummary(final HubStatus status) {
+        return "非权威运营占位：轻卡未接入稳定聚合源，请以前往分台核验为准；当前建议："
+            + status.recommendation();
+    }
+
+    private String buildHubGuideText() {
+        return "主殿只保留总览与入口；炼丹、储物、集群、道痕仅显示摘要入口或占位入口，"
+            + "不展示看似精准的全局运行数值；需要细节时请直接前往对应分台。";
+    }
+
+    private String formatCoreSummary(final HubSnapshot.CoreSnapshot coreSnapshot) {
+        return "边界 X["
+            + coreSnapshot.minChunkX()
+            + ", "
+            + coreSnapshot.maxChunkX()
+            + "] Z["
+            + coreSnapshot.minChunkZ()
+            + ", "
+            + coreSnapshot.maxChunkZ()
+            + "] · "
+            + formatTier(coreSnapshot.tier())
+            + " · "
+            + formatFrozenState(coreSnapshot.frozen());
+    }
+
+    private String formatLandSpiritSummary(final HubSnapshot snapshot) {
+        return "阶段 "
+            + snapshot.landSpirit().stage()
+            + " · 转数 "
+            + snapshot.landSpirit().tier()
+            + " · 好感 "
+            + snapshot.landSpirit().favorabilityPermille()
+            + "‰";
+    }
+
+    private String formatResourceSummary(final HubSnapshot snapshot) {
+        return "效率 "
+            + snapshot.resource().efficiencyPercent()
+            + "% · 灵气 "
+            + snapshot.resource().auraValue()
+            + " · 剩余 "
+            + formatTribulationTime(snapshot.resource().remainingTicks());
+    }
+
+    private String formatTribulationSummary(final long tribulationTick, final HubStatus status) {
+        if (status == null) {
+            return "倒计时 " + formatTribulationTime(tribulationTick);
+        }
+        return "倒计时 " + formatTribulationTime(tribulationTick)
+            + " · "
+            + status.tribulationRiskSummary();
+    }
+
+    private String buildCoreFootnote(final HubSnapshot.CoreSnapshot coreSnapshot) {
+        return "跨度 "
+            + coreSnapshot.chunkSpanX()
+            + "×"
+            + coreSnapshot.chunkSpanZ()
+            + " · 转速 "
+            + formatTimeSpeed(coreSnapshot.timeSpeedPercent())
+            + "x";
+    }
+
+    private String buildLandSpiritFootnote(final HubSnapshot snapshot) {
+        return "下一阶段需求：转数 "
+            + snapshot.landSpirit().nextStageMinTier()
+            + " · 好感 "
+            + snapshot.landSpirit().nextStageMinFavorabilityPermille()
+            + "‰";
+    }
+
+    private String buildTribulationFootnote(final long tribulationTick, final HubStatus status) {
+        return status.tribulationRiskSummary()
+            + " · 倒计时 "
+            + formatTribulationTime(tribulationTick);
+    }
+
+    private String formatTier(final int tier) {
+        return "转数 " + tier;
+    }
+
+    private String formatFrozenState(final boolean frozen) {
+        return frozen ? "冻结态" : "运行态";
+    }
+
+    private void bindRouteCallbacks(final ModuleCard card, final HubRoutePolicy.CardRoutePolicy policy) {
+        if (!policy.launchesScreen()) {
+            card.setOnClick(null);
+            card.getRouteChip().setOnClick(null);
+            return;
+        }
+        final Runnable directRouteCallback = () -> openApprovedDirectRoute(policy);
+        card.setOnClick(directRouteCallback);
+        card.getRouteChip().setOnClick(directRouteCallback);
+    }
+
+    private void openApprovedDirectRoute(final HubRoutePolicy.CardRoutePolicy policy) {
+        if (this.minecraft == null || this.minecraft.player == null || this.minecraft.gameMode == null) {
+            announceRouteResolutionFailure(policy.target().displayName(), "客户端上下文未就绪");
+            return;
+        }
+        final LocalPlayer player = this.minecraft.player;
+        final String routeFailureReason = switch (policy.target()) {
+            case LAND_SPIRIT_SCREEN -> tryOpenLandSpiritRoute(player);
+            case RESOURCE_CONTROLLER_SCREEN -> tryOpenResourceControllerRoute(player);
+            case ALCHEMY_FURNACE_SCREEN -> tryOpenAlchemyFurnaceRoute(player);
+            case STORAGE_GU_SCREEN -> tryOpenStorageGuRoute(player);
+            case CLUSTER_NPC_SCREEN -> tryOpenClusterRoute(player);
+            case CURRENT_HUB_OVERVIEW,
+                TRIBULATION_SUB_VIEW,
+                DAOMARK_SUB_VIEW -> "当前策略不允许主殿直达";
+        };
+        if (routeFailureReason != null) {
+            announceRouteResolutionFailure(policy.target().displayName(), routeFailureReason);
+        }
+    }
+
+    private String tryOpenLandSpiritRoute(final LocalPlayer player) {
+        final LandSpiritEntity entity = findNearestLoadedEntity(player, LandSpiritEntity.class);
+        if (entity == null) {
+            return "附近未找到已加载地灵";
+        }
+        final InteractionHand hand = InteractionHand.MAIN_HAND;
+        currentGameMode().interact(player, entity, hand);
+        return null;
+    }
+
+    private String tryOpenResourceControllerRoute(final LocalPlayer player) {
+        final BlockPos blockPos = findNearestLoadedBlock(
+            player,
+            ResourceControllerBlock.class,
+            DIRECT_ROUTE_HORIZONTAL_RADIUS
+        );
+        if (blockPos == null) {
+            return "附近未找到资源控制器";
+        }
+        final InteractionHand hand = InteractionHand.MAIN_HAND;
+        final BlockHitResult blockHitResult = createCenterBlockHitResult(blockPos);
+        currentGameMode().useItemOn(player, hand, blockHitResult);
+        return null;
+    }
+
+    private String tryOpenAlchemyFurnaceRoute(final LocalPlayer player) {
+        final BlockPos blockPos = findNearestLoadedBlock(
+            player,
+            AlchemyFurnaceBlock.class,
+            DIRECT_ROUTE_HORIZONTAL_RADIUS
+        );
+        if (blockPos == null) {
+            return "附近未找到炼丹炉";
+        }
+        final InteractionHand hand = InteractionHand.MAIN_HAND;
+        final BlockHitResult blockHitResult = createCenterBlockHitResult(blockPos);
+        currentGameMode().useItemOn(player, hand, blockHitResult);
+        return null;
+    }
+
+    private String tryOpenStorageGuRoute(final LocalPlayer player) {
+        final int hotbarSlot = findStorageGuHotbarSlot(player);
+        if (hotbarSlot < 0) {
+            return "热键栏未找到储物蛊";
+        }
+        final int previousSelectedSlot = player.getInventory().selected;
+        player.getInventory().selected = hotbarSlot;
+        try {
+            final InteractionHand hand = InteractionHand.MAIN_HAND;
+            currentGameMode().useItem(player, hand);
+            return null;
+        } finally {
+            player.getInventory().selected = previousSelectedSlot;
+        }
+    }
+
+    private String tryOpenClusterRoute(final LocalPlayer player) {
+        final ClusterNpcEntity entity = findNearestLoadedEntity(player, ClusterNpcEntity.class);
+        if (entity == null) {
+            return "附近未找到集群劳作体";
+        }
+        final InteractionHand hand = InteractionHand.MAIN_HAND;
+        currentGameMode().interact(player, entity, hand);
+        return null;
+    }
+
+    private void announceRouteResolutionFailure(final String routeName, final String routeFailureReason) {
+        if (this.minecraft == null || this.minecraft.player == null) {
+            return;
+        }
+        this.minecraft.player.displayClientMessage(
+            Component.literal(routeName + "打开失败：" + routeFailureReason),
+            true
+        );
+    }
+
+    private <T extends Entity> T findNearestLoadedEntity(final LocalPlayer player, final Class<T> entityClass) {
+        final AABB searchBox = new AABB(player.blockPosition()).inflate(
+            DIRECT_ROUTE_HORIZONTAL_RADIUS,
+            DIRECT_ROUTE_VERTICAL_RADIUS,
+            DIRECT_ROUTE_HORIZONTAL_RADIUS
+        );
+        T nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (final T entity : player.level().getEntitiesOfClass(entityClass, searchBox)) {
+            final double distance = player.distanceToSqr(entity);
+            if (distance < nearestDistance) {
+                nearest = entity;
+                nearestDistance = distance;
+            }
+        }
+        return nearest;
+    }
+
+    private BlockPos findNearestLoadedBlock(
+        final LocalPlayer player,
+        final Class<? extends Block> blockClass,
+        final int horizontalRadius
+    ) {
+        final BlockPos playerPos = player.blockPosition();
+        final BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        BlockPos nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (int yOffset = -DIRECT_ROUTE_VERTICAL_RADIUS; yOffset <= DIRECT_ROUTE_VERTICAL_RADIUS; yOffset++) {
+            for (
+                int xOffset = -horizontalRadius;
+                xOffset <= horizontalRadius;
+                xOffset++
+            ) {
+                for (
+                    int zOffset = -horizontalRadius;
+                    zOffset <= horizontalRadius;
+                    zOffset++
+                ) {
+                    cursor.set(
+                        playerPos.getX() + xOffset,
+                        playerPos.getY() + yOffset,
+                        playerPos.getZ() + zOffset
+                    );
+                    if (!player.level().hasChunkAt(cursor)) {
+                        continue;
+                    }
+                    if (!blockClass.isInstance(player.level().getBlockState(cursor).getBlock())) {
+                        continue;
+                    }
+                    final double distance = cursor.distSqr(playerPos);
+                    if (distance < nearestDistance) {
+                        nearest = cursor.immutable();
+                        nearestDistance = distance;
+                    }
+                }
+            }
+        }
+        return nearest;
+    }
+
+    private int findStorageGuHotbarSlot(final LocalPlayer player) {
+        for (int hotbarSlot = 0; hotbarSlot < HOTBAR_SLOT_COUNT; hotbarSlot++) {
+            final ItemStack stack = player.getInventory().getItem(hotbarSlot);
+            if (!stack.isEmpty() && stack.getItem() instanceof StorageGuItem) {
+                return hotbarSlot;
+            }
+        }
+        return -1;
+    }
+
+    private BlockHitResult createCenterBlockHitResult(final BlockPos blockPos) {
+        return new BlockHitResult(Vec3.atCenterOf(blockPos), Direction.UP, blockPos, false);
+    }
+
+    private MultiPlayerGameMode currentGameMode() {
+        return Objects.requireNonNull(this.minecraft.gameMode, "gameMode");
+    }
+
+    private HubStatusEvaluator.RiskLevel resolveTribulationRisk(final long tribulationTick) {
+        if (tribulationTick <= 0L) {
+            return HubStatusEvaluator.RiskLevel.DANGER;
+        }
+        if (tribulationTick <= TRIBULATION_WARNING_TICKS) {
+            return HubStatusEvaluator.RiskLevel.CAUTION;
+        }
+        return HubStatusEvaluator.RiskLevel.STABLE;
     }
 
     private static String formatTimeSpeed(final int percent) {
@@ -554,10 +843,137 @@ public class ApertureHubScreen extends TinyUIContainerScreen<ApertureHubMenu> {
     }
 
     private static String formatTribulationTime(final long ticks) {
-        long totalSeconds = ticks / TICKS_PER_SECOND;
-        long hours = totalSeconds / SECONDS_PER_HOUR;
-        long days = hours / HOURS_PER_DAY;
-        long remainHours = hours % HOURS_PER_DAY;
+        final long totalSeconds = ticks / TICKS_PER_SECOND;
+        final long hours = totalSeconds / SECONDS_PER_HOUR;
+        final long days = hours / HOURS_PER_DAY;
+        final long remainHours = hours % HOURS_PER_DAY;
         return days + "天 " + remainHours + "时";
+    }
+
+    private record BandLayout(
+        int rootX,
+        int rootY,
+        int bodyX,
+        int bodyY,
+        int bodyWidth,
+        int bodyViewportHeight,
+        int topSituationRowY,
+        int mainModuleGridY,
+        int mainModuleGridHeight,
+        int bottomUtilityRowY,
+        int bodyContentHeight,
+        boolean useBodyScrollFallback
+    ) {
+
+        private static BandLayout create(final int screenWidth, final int screenHeight) {
+            final int rootX = Math.max(0, (screenWidth - WINDOW_WIDTH) / CENTER_DIVISOR);
+            final int rootY = Math.max(0, (screenHeight - WINDOW_HEIGHT) / CENTER_DIVISOR);
+            final int bodyX = WINDOW_PADDING;
+            final int bodyY = WINDOW_PADDING + HEADER_BAND_HEIGHT + BODY_SECTION_GAP;
+            final int bodyWidth = WINDOW_WIDTH - WINDOW_PADDING * CENTER_DIVISOR;
+            final int bodyViewportHeight = WINDOW_HEIGHT - WINDOW_PADDING - bodyY;
+            final int mainModuleGridHeight = SECTION_CONTENT_TOP
+                + MODULE_CARD_ROWS * MODULE_CARD_HEIGHT
+                + MODULE_CARD_GAP * (MODULE_CARD_ROWS - 1);
+            final int topSituationRowY = 0;
+            final int mainModuleGridY = TOP_SITUATION_ROW_HEIGHT + BODY_SECTION_GAP;
+            final int bottomUtilityRowY = mainModuleGridY + mainModuleGridHeight + BODY_SECTION_GAP;
+            final int bodyContentHeight = TOP_SITUATION_ROW_HEIGHT
+                + BODY_SECTION_GAP
+                + mainModuleGridHeight
+                + BODY_SECTION_GAP
+                + BOTTOM_UTILITY_ROW_HEIGHT;
+            final boolean useBodyScrollFallback = bodyContentHeight > bodyViewportHeight;
+            return new BandLayout(
+                rootX,
+                rootY,
+                bodyX,
+                bodyY,
+                bodyWidth,
+                bodyViewportHeight,
+                topSituationRowY,
+                mainModuleGridY,
+                mainModuleGridHeight,
+                bottomUtilityRowY,
+                bodyContentHeight,
+                useBodyScrollFallback
+            );
+        }
+    }
+
+    private static final class RowBlock extends HubPanel {
+
+        private static final int STRIP_WIDTH = 68;
+        private static final int STRIP_HEIGHT = 14;
+        private static final int BADGE_WIDTH = 58;
+        private static final int BADGE_HEIGHT = 16;
+        private static final int PILL_WIDTH = 76;
+        private static final int PILL_HEIGHT = 18;
+        private static final int PANEL_PADDING = 6;
+        private static final int TITLE_Y = 24;
+        private static final int TITLE_HEIGHT = 14;
+        private static final int BODY_Y = 42;
+
+        private final PriorityStrip structureStrip;
+        private final StateBadge statusBadge;
+        private final StatePill statusPill;
+        private final Label titleLabel;
+        private final Label bodyLabel;
+
+        private RowBlock(final String title, final Theme theme) {
+            this.structureStrip = new PriorityStrip();
+            this.statusBadge = new StateBadge();
+            this.statusPill = new StatePill();
+            this.titleLabel = new Label(Component.literal(title), theme);
+            this.bodyLabel = new Label(Component.empty(), theme);
+            this.titleLabel.setColor(TEXT_COLOR);
+            this.bodyLabel.setColor(MUTED_TEXT_COLOR);
+            this.structureStrip.setText("冻结槽位");
+            addChild(structureStrip);
+            addChild(statusBadge);
+            addChild(statusPill);
+            addChild(titleLabel);
+            addChild(bodyLabel);
+        }
+
+        private void setBodyText(final String text) {
+            bodyLabel.setText(text);
+        }
+
+        private void setRiskLevel(final HubStatusEvaluator.RiskLevel riskLevel) {
+            statusBadge.applyRisk(riskLevel);
+            statusPill.applyRisk(riskLevel);
+        }
+
+        @Override
+        protected void onRender(
+            final com.Kizunad.tinyUI.core.UIRenderContext context,
+            final double mouseX,
+            final double mouseY,
+            final float partialTicks
+        ) {
+            drawPanelChrome(context, false);
+            layoutChildren();
+        }
+
+        private void layoutChildren() {
+            final int badgeX = getWidth() - BADGE_WIDTH - PANEL_PADDING;
+            final int pillY = getHeight() - PILL_HEIGHT - PANEL_PADDING;
+            structureStrip.setFrame(PANEL_PADDING, PANEL_PADDING, STRIP_WIDTH, STRIP_HEIGHT);
+            statusBadge.setFrame(badgeX, PANEL_PADDING, BADGE_WIDTH, BADGE_HEIGHT);
+            statusPill.setFrame(PANEL_PADDING, pillY, PILL_WIDTH, PILL_HEIGHT);
+            titleLabel.setFrame(
+                PANEL_PADDING,
+                TITLE_Y,
+                getWidth() - PANEL_PADDING * CENTER_DIVISOR,
+                TITLE_HEIGHT
+            );
+            bodyLabel.setFrame(
+                PANEL_PADDING,
+                BODY_Y,
+                getWidth() - PANEL_PADDING * CENTER_DIVISOR,
+                Math.max(0, pillY - BODY_Y - PANEL_PADDING)
+            );
+        }
     }
 }

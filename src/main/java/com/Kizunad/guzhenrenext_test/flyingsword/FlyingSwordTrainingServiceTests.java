@@ -210,7 +210,7 @@ public class FlyingSwordTrainingServiceTests {
         FlyingSwordTrainingAttachment training = new FlyingSwordTrainingAttachment();
         ItemStack swordStack = new ItemStack(Items.IRON_SWORD);
 
-        ServerPlayer player = createDeterministicPlayer(helper.getLevel(), "bonus");
+        ServerPlayer player = createDeterministicPlayer(helper.getLevel(), "bonus_reward");
         FlyingSwordTrainingService.installBonusResourceGateForTest(p -> true);
         FlyingSwordTrainingService.installReadonlyRewardModifierProviderForTest(
             p -> BenmingSwordReadonlyModifierHelper.ReadonlyModifier.identity()

@@ -1,6 +1,7 @@
 package com.Kizunad.guzhenrenext.xianqiao.tribulation;
 
 import com.Kizunad.guzhenrenext.GuzhenrenExt;
+import com.Kizunad.guzhenrenext.faction.integration.FactionAscensionModifier;
 import com.Kizunad.guzhenrenext.xianqiao.daomark.DaoMarkDiffusionService;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData;
 import com.Kizunad.guzhenrenext.xianqiao.data.ApertureWorldData.ApertureInfo;
@@ -26,6 +27,8 @@ public final class TribulationTickHandler {
 
     /** 活跃灾劫管理器：每个 owner UUID 一份瞬态状态机。 */
     private static final Map<UUID, TribulationManager> ACTIVE_MANAGERS = new HashMap<>();
+
+    private static final FactionAscensionModifier FACTION_ASCENSION_MODIFIER = new FactionAscensionModifier();
 
     private TribulationTickHandler() {
     }
@@ -54,7 +57,9 @@ public final class TribulationTickHandler {
 
             TribulationManager manager = ACTIVE_MANAGERS.get(owner);
             if (manager == null && info.nextTribulationTick() <= currentGameTime) {
-                TribulationManager created = new TribulationManager(owner);
+                TribulationManager.ExternalTribulationModifier externalModifier =
+                    FACTION_ASCENSION_MODIFIER.resolveTribulationModifier(level, owner);
+                TribulationManager created = new TribulationManager(owner, externalModifier);
                 created.startTribulation();
                 ACTIVE_MANAGERS.put(owner, created);
                 manager = created;

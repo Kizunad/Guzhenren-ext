@@ -10,6 +10,10 @@ import com.Kizunad.guzhenrenext.kongqiao.flyingsword.attachment.FlyingSwordState
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordBondService;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.BenmingSwordResourceTransaction;
 import com.Kizunad.guzhenrenext.kongqiao.flyingsword.ops.CultivationSnapshot;
+import com.Kizunad.guzhenrenext.kongqiao.logic.util.GuzhenrenVariableModifierService;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.HunPoHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.NianTouHelper;
+import com.Kizunad.guzhenrenext.guzhenrenBridge.ZhenYuanHelper;
 import com.mojang.authlib.GameProfile;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -41,7 +45,6 @@ public class BenmingSwordBindServiceTests {
     private static final double EXPECTED_LIGHT_BACKLASH_NIANTOU_LOSS = 8.0D;
     private static final double EXPECTED_LIGHT_BACKLASH_HUNPO_LOSS = 5.0D;
     private static final int EXPECTED_LIGHT_BACKLASH_OPERATION_COUNT = 3;
-
     @GameTest(
         template = "empty",
         timeoutTicks = TEST_TIMEOUT_TICKS,
@@ -51,6 +54,16 @@ public class BenmingSwordBindServiceTests {
         ServerLevel level = helper.getLevel();
         ServerPlayer player = createDeterministicPlayer(level, "bind_happy_path");
         relocatePlayer(helper, player);
+        boolean runtimeRitualResourcesAvailable = hasRuntimeRitualResources(player);
+        boolean warmedResourcesVisible = warmupRitualResourcesIfAvailable(player);
+        CultivationSnapshot warmedSnapshot = CultivationSnapshot.capture(player);
+        assertBindWarmupExpectation(
+            helper,
+            player,
+            runtimeRitualResourcesAvailable,
+            warmedResourcesVisible,
+            warmedSnapshot
+        );
 
         FlyingSwordEntity sword = FlyingSwordSpawner.spawnBasic(level, player);
         helper.assertTrue(sword != null, "前置失败：happy 场景飞剑生成失败");
@@ -59,35 +72,118 @@ public class BenmingSwordBindServiceTests {
         sword.getSwordAttributes().getBond().resetToUnbound();
         sword.syncAttributesToEntityData();
 
+        FlyingSwordSelectionAttachment selection = KongqiaoAttachments.getFlyingSwordSelection(player);
+        helper.assertTrue(selection != null, "happy：选择附件不应为空");
+        selection.setSelectedSword(sword.getUUID());
+
         BenmingSwordBondService.Result bindResult =
             FlyingSwordController.bindSelectedOrNearestSwordAsBenming(level, player);
-        helper.assertTrue(bindResult.success(), "happy：绑定应成功");
+        FlyingSwordStateAttachment state = KongqiaoAttachments.getFlyingSwordState(player);
+        helper.assertTrue(state != null, "happy：玩家状态附件不应为空");
+        BindHappyPathAssertionContext assertionContext = new BindHappyPathAssertionContext(
+            level,
+            player,
+            sword,
+            state,
+            bindResult,
+            warmedResourcesVisible,
+            warmedSnapshot
+        );
+        if (runtimeRitualResourcesAvailable) {
+            assertBindHappyOutcome(helper, assertionContext);
+        } else {
+            assertBindGuardOutcome(helper, assertionContext);
+        }
+
+        helper.succeed();
+    }
+
+    private static void assertBindWarmupExpectation(
+        GameTestHelper helper,
+        ServerPlayer player,
+        boolean runtimeRitualResourcesAvailable,
+        boolean warmedResourcesVisible,
+        CultivationSnapshot warmedSnapshot
+    ) {
+        if (runtimeRitualResourcesAvailable) {
+            helper.assertTrue(
+                warmedResourcesVisible,
+                "happy：绑定前资源注入未生效，已阻断进入绑定流程，warmedResourcesVisible="
+                    + warmedResourcesVisible
+                    + ", liveState=" + describeLivePlayerVariables(player)
+            );
+            helper.assertTrue(
+                warmedSnapshot.zhenyuan() >= TEST_RESOURCE_INITIAL - DOUBLE_EPSILON
+                    && warmedSnapshot.niantou() >= TEST_RESOURCE_INITIAL - DOUBLE_EPSILON
+                    && warmedSnapshot.hunpo() >= TEST_RESOURCE_INITIAL - DOUBLE_EPSILON,
+                "happy：绑定前资源快照应可见，zhenyuan=" + warmedSnapshot.zhenyuan()
+                    + ", niantou=" + warmedSnapshot.niantou()
+                    + ", hunpo=" + warmedSnapshot.hunpo()
+                    + ", liveState=" + describeLivePlayerVariables(player)
+            );
+            return;
+        }
         helper.assertTrue(
-            bindResult.branch() == BenmingSwordBondService.ResultBranch.BIND,
-            "happy：绑定结果分支应为 BIND"
+            !warmedResourcesVisible,
+            "guard：运行时桥接不可用时，资源预热不应伪造成功，warmedResourcesVisible="
+                + warmedResourcesVisible
+                + ", liveState=" + describeLivePlayerVariables(player)
         );
         helper.assertTrue(
-            HAPPY_STABLE_ID.equals(bindResult.stableSwordId()),
+            warmedSnapshot.zhenyuan() < TEST_RESOURCE_INITIAL - DOUBLE_EPSILON
+                && warmedSnapshot.niantou() < TEST_RESOURCE_INITIAL - DOUBLE_EPSILON
+                && warmedSnapshot.hunpo() < TEST_RESOURCE_INITIAL - DOUBLE_EPSILON,
+            "guard：运行时桥接不可用时，绑定前资源快照不应伪造为可用满值，zhenyuan="
+                + warmedSnapshot.zhenyuan()
+                + ", niantou=" + warmedSnapshot.niantou()
+                + ", hunpo=" + warmedSnapshot.hunpo()
+                + ", liveState=" + describeLivePlayerVariables(player)
+        );
+    }
+
+    private static void assertBindHappyOutcome(
+        GameTestHelper helper,
+        BindHappyPathAssertionContext context
+    ) {
+        helper.assertTrue(
+            context.bindResult().success(),
+            "happy：绑定应成功，success=" + context.bindResult().success()
+                + ", branch=" + context.bindResult().branch()
+                + ", failureReason=" + context.bindResult().failureReason()
+                + ", resourceFailureReason=" + context.bindResult().resourceFailureReason()
+                + ", stableSwordId=" + context.bindResult().stableSwordId()
+                + ", warmedResourcesVisible=" + context.warmedResourcesVisible()
+                + ", warmedZhenyuan=" + context.warmedSnapshot().zhenyuan()
+                + ", warmedNiantou=" + context.warmedSnapshot().niantou()
+                + ", warmedHunpo=" + context.warmedSnapshot().hunpo()
+                + ", liveState=" + describeLivePlayerVariables(context.player())
+        );
+        helper.assertTrue(
+            context.bindResult().branch() == BenmingSwordBondService.ResultBranch.RITUAL_BIND,
+            "happy：绑定结果分支应为 RITUAL_BIND"
+        );
+        helper.assertTrue(
+            HAPPY_STABLE_ID.equals(context.bindResult().stableSwordId()),
             "happy：绑定返回的 stableSwordId 应与目标飞剑一致"
         );
         helper.assertTrue(
-            player.getUUID().toString().equals(sword.getSwordAttributes().getBond().getOwnerUuid()),
+            context.player()
+                .getUUID()
+                .toString()
+                .equals(context.sword().getSwordAttributes().getBond().getOwnerUuid()),
             "happy：绑定后 sword.bond.ownerUuid 应写为玩家 UUID"
         );
-
-        FlyingSwordStateAttachment state = KongqiaoAttachments.getFlyingSwordState(player);
-        helper.assertTrue(state != null, "happy：玩家状态附件不应为空");
         helper.assertTrue(
-            HAPPY_STABLE_ID.equals(state.getBondedSwordId()),
+            HAPPY_STABLE_ID.equals(context.state().getBondedSwordId()),
             "happy：绑定后缓存中的 bondedSwordId 应为目标 stableSwordId"
         );
         helper.assertTrue(
-            !state.isBondCacheDirty(),
+            !context.state().isBondCacheDirty(),
             "happy：绑定成功后缓存应为 clean 状态"
         );
 
         BenmingSwordBondService.Result queryResult =
-            FlyingSwordController.queryBenmingSword(level, player);
+            FlyingSwordController.queryBenmingSword(context.level(), context.player());
         helper.assertTrue(queryResult.success(), "happy：查询本命应成功");
         helper.assertTrue(
             queryResult.branch() == BenmingSwordBondService.ResultBranch.QUERY,
@@ -97,9 +193,63 @@ public class BenmingSwordBindServiceTests {
             HAPPY_STABLE_ID.equals(queryResult.stableSwordId()),
             "happy：查询返回的 stableSwordId 应稳定等于已绑定飞剑"
         );
-
-        helper.succeed();
     }
+
+    private static void assertBindGuardOutcome(
+        GameTestHelper helper,
+        BindHappyPathAssertionContext context
+    ) {
+        helper.assertTrue(
+            !context.bindResult().success(),
+            "guard：运行时桥接不可用时，绑定不应伪造成功，success="
+                + context.bindResult().success()
+                + ", branch=" + context.bindResult().branch()
+                + ", failureReason=" + context.bindResult().failureReason()
+                + ", resourceFailureReason=" + context.bindResult().resourceFailureReason()
+                + ", stableSwordId=" + context.bindResult().stableSwordId()
+                + ", warmedResourcesVisible=" + context.warmedResourcesVisible()
+                + ", warmedZhenyuan=" + context.warmedSnapshot().zhenyuan()
+                + ", warmedNiantou=" + context.warmedSnapshot().niantou()
+                + ", warmedHunpo=" + context.warmedSnapshot().hunpo()
+                + ", liveState=" + describeLivePlayerVariables(context.player())
+        );
+        helper.assertTrue(
+            context.bindResult().branch() == BenmingSwordBondService.ResultBranch.RITUAL_BIND,
+            "guard：运行时桥接不可用时，绑定失败结果分支应为 RITUAL_BIND"
+        );
+        helper.assertTrue(
+            context.bindResult().failureReason()
+                == BenmingSwordBondService.FailureReason.RITUAL_RESOURCES_INSUFFICIENT,
+            "guard：运行时桥接不可用时，绑定失败原因应为 RITUAL_RESOURCES_INSUFFICIENT"
+        );
+        helper.assertTrue(
+            context.bindResult().resourceFailureReason()
+                == BenmingSwordResourceTransaction.FailureReason.INSUFFICIENT_ZHENYUAN,
+            "guard：运行时桥接不可用时，资源失败原因应稳定为 INSUFFICIENT_ZHENYUAN"
+        );
+        helper.assertTrue(
+            HAPPY_STABLE_ID.equals(context.bindResult().stableSwordId()),
+            "guard：绑定失败结果仍应指向目标 stableSwordId，便于诊断目标一致性"
+        );
+        helper.assertTrue(
+            context.sword().getSwordAttributes().getBond().getOwnerUuid().isBlank(),
+            "guard：绑定失败后飞剑 ownerUuid 仍应保持未绑定"
+        );
+        helper.assertTrue(
+            context.state().getBondedSwordId().isBlank() && context.state().isBondCacheDirty(),
+            "guard：绑定失败后玩家缓存应保持空且 dirty 的安全态"
+        );
+    }
+
+    private record BindHappyPathAssertionContext(
+        ServerLevel level,
+        ServerPlayer player,
+        FlyingSwordEntity sword,
+        FlyingSwordStateAttachment state,
+        BenmingSwordBondService.Result bindResult,
+        boolean warmedResourcesVisible,
+        CultivationSnapshot warmedSnapshot
+    ) {}
 
     @GameTest(
         template = "empty",
@@ -117,20 +267,19 @@ public class BenmingSwordBindServiceTests {
         helper.assertTrue(secondSword != null, "guard：第二把飞剑生成失败");
 
         firstSword.getSwordAttributes().setStableSwordId(DUPLICATE_FIRST_STABLE_ID);
-        firstSword.getSwordAttributes().getBond().resetToUnbound();
+        firstSword.getSwordAttributes().getBond().setOwnerUuid(player.getUUID().toString());
         firstSword.syncAttributesToEntityData();
         secondSword.getSwordAttributes().setStableSwordId(DUPLICATE_SECOND_STABLE_ID);
         secondSword.getSwordAttributes().getBond().resetToUnbound();
         secondSword.syncAttributesToEntityData();
 
+        FlyingSwordStateAttachment state = KongqiaoAttachments.getFlyingSwordState(player);
+        helper.assertTrue(state != null, "guard：状态附件不应为空");
+        state.updateBondCache(DUPLICATE_FIRST_STABLE_ID, level.getGameTime());
+
         FlyingSwordSelectionAttachment selection =
             KongqiaoAttachments.getFlyingSwordSelection(player);
         helper.assertTrue(selection != null, "guard：选择附件不应为空");
-
-        selection.setSelectedSword(firstSword.getUUID());
-        BenmingSwordBondService.Result firstBindResult =
-            FlyingSwordController.bindSelectedOrNearestSwordAsBenming(level, player);
-        helper.assertTrue(firstBindResult.success(), "guard：首次绑定应成功");
 
         selection.setSelectedSword(secondSword.getUUID());
         BenmingSwordBondService.Result duplicateBindResult =
@@ -559,5 +708,59 @@ public class BenmingSwordBindServiceTests {
             new BlockPos(PLAYER_RELATIVE_X, PLAYER_RELATIVE_Y, PLAYER_RELATIVE_Z)
         );
         player.setPos(playerPos.getX(), playerPos.getY(), playerPos.getZ());
+    }
+
+    private static boolean warmupRitualResourcesIfAvailable(ServerPlayer player) {
+        if (player == null || !hasRuntimeRitualResources(player)) {
+            return false;
+        }
+        try {
+            GuzhenrenVariableModifierService.setAdditiveModifier(
+                player,
+                GuzhenrenVariableModifierService.VAR_MAX_ZHENYUAN,
+                HAPPY_STABLE_ID + "-zhenyuan-max",
+                TEST_RESOURCE_INITIAL
+            );
+            GuzhenrenVariableModifierService.setAdditiveModifier(
+                player,
+                GuzhenrenVariableModifierService.VAR_MAX_HUNPO,
+                HAPPY_STABLE_ID + "-hunpo-max",
+                TEST_RESOURCE_INITIAL
+            );
+            ZhenYuanHelper.modify(player, TEST_RESOURCE_INITIAL - ZhenYuanHelper.getAmount(player));
+            NianTouHelper.modify(player, TEST_RESOURCE_INITIAL - NianTouHelper.getAmount(player));
+            HunPoHelper.modify(player, TEST_RESOURCE_INITIAL - HunPoHelper.getAmount(player));
+            CultivationSnapshot warmedSnapshot = CultivationSnapshot.capture(player);
+            return warmedSnapshot.zhenyuan() >= TEST_RESOURCE_INITIAL - DOUBLE_EPSILON
+                && warmedSnapshot.niantou() >= TEST_RESOURCE_INITIAL - DOUBLE_EPSILON
+                && warmedSnapshot.hunpo() >= TEST_RESOURCE_INITIAL - DOUBLE_EPSILON;
+        } catch (NoClassDefFoundError error) {
+            return false;
+        }
+    }
+
+    private static boolean hasRuntimeRitualResources(ServerPlayer player) {
+        if (player == null) {
+            return false;
+        }
+        try {
+            return ZhenYuanHelper.hasRuntimeVariables(player);
+        } catch (NoClassDefFoundError error) {
+            return false;
+        }
+    }
+
+    private static String describeLivePlayerVariables(ServerPlayer player) {
+        if (player == null) {
+            return "null-player";
+        }
+        try {
+            return "runtimeVariables=" + ZhenYuanHelper.hasRuntimeVariables(player)
+                + ", zhenyuan=" + ZhenYuanHelper.getAmount(player)
+                + ", niantou=" + NianTouHelper.getAmount(player)
+                + ", hunpo=" + HunPoHelper.getAmount(player);
+        } catch (NoClassDefFoundError error) {
+            return "no-runtime-bridge:" + error.getClass().getSimpleName();
+        }
     }
 }

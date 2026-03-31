@@ -28,9 +28,7 @@ public class Task13AJuQiSanGameTests {
     private static final double MAX_ZHEN_YUAN = 100.0D;
     private static final double ZHEN_YUAN_COMPARE_EPSILON = 0.0001D;
     private static final String MAX_ZHEN_YUAN_USAGE_ID = "task13_ju_qi_san_test";
-    private static final UUID HAPPY_PLAYER_UUID = UUID.fromString("26d86586-ce8f-46d8-b2ee-8dc390284614");
     private static final String HAPPY_PLAYER_NAME = "task13a_ju_qi_san_happy_player";
-    private static final UUID GUARD_PLAYER_UUID = UUID.fromString("5ae73f3b-0f95-47a0-b7f1-cf2c507af87d");
     private static final String GUARD_PLAYER_NAME = "task13a_ju_qi_san_guard_player";
 
     @GameTest(
@@ -40,8 +38,8 @@ public class Task13AJuQiSanGameTests {
     )
     public void testTask13AJuQiSanShouldRestoreZhenYuanAndConsumeOne(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = createTestPlayer(level, HAPPY_PLAYER_UUID, HAPPY_PLAYER_NAME);
-        boolean zhenYuanBridgeAvailable = isZhenYuanBridgeAvailable(player);
+        ServerPlayer player = createTestPlayer(level, HAPPY_PLAYER_NAME);
+        boolean zhenYuanBridgeAvailable = hasRuntimeZhenYuanVariables(player);
         prepareZhenYuanForTest(player);
         double zhenYuanBeforeUse = safeGetZhenYuan(player);
 
@@ -79,8 +77,8 @@ public class Task13AJuQiSanGameTests {
     )
     public void testTask13AJuQiSanGuardNonPillShouldNotRestoreZhenYuan(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = createTestPlayer(level, GUARD_PLAYER_UUID, GUARD_PLAYER_NAME);
-        boolean zhenYuanBridgeAvailable = isZhenYuanBridgeAvailable(player);
+        ServerPlayer player = createTestPlayer(level, GUARD_PLAYER_NAME);
+        boolean zhenYuanBridgeAvailable = hasRuntimeZhenYuanVariables(player);
         prepareZhenYuanForTest(player);
         double zhenYuanBeforeUse = safeGetZhenYuan(player);
 
@@ -99,13 +97,22 @@ public class Task13AJuQiSanGameTests {
         helper.succeed();
     }
 
-    private static ServerPlayer createTestPlayer(ServerLevel level, UUID playerUuid, String playerName) {
-        return FakePlayerFactory.get(level, new GameProfile(playerUuid, playerName));
+    private static ServerPlayer createTestPlayer(ServerLevel level, String playerName) {
+        return FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), playerName));
     }
 
     private static void prepareZhenYuanForTest(ServerPlayer player) {
-        if (!isZhenYuanBridgeAvailable(player)) {
+        if (!hasRuntimeZhenYuanVariables(player)) {
             return;
+        }
+        GuzhenrenVariableModifierService.removeModifier(
+            player,
+            GuzhenrenVariableModifierService.VAR_MAX_ZHENYUAN,
+            MAX_ZHEN_YUAN_USAGE_ID
+        );
+        double currentAmount = safeGetZhenYuan(player);
+        if (currentAmount > 0.0D) {
+            safeModifyZhenYuan(player, -currentAmount);
         }
         GuzhenrenVariableModifierService.setAdditiveModifier(
             player,
@@ -113,17 +120,12 @@ public class Task13AJuQiSanGameTests {
             MAX_ZHEN_YUAN_USAGE_ID,
             MAX_ZHEN_YUAN
         );
-        double currentAmount = safeGetZhenYuan(player);
-        if (currentAmount > 0.0D) {
-            safeModifyZhenYuan(player, -currentAmount);
-        }
         safeModifyZhenYuan(player, INITIAL_ZHEN_YUAN);
     }
 
-    private static boolean isZhenYuanBridgeAvailable(ServerPlayer player) {
+    private static boolean hasRuntimeZhenYuanVariables(ServerPlayer player) {
         try {
-            ZhenYuanHelper.getAmount(player);
-            return true;
+            return ZhenYuanHelper.hasRuntimeVariables(player);
         } catch (NoClassDefFoundError error) {
             return false;
         }
